@@ -1,0 +1,32 @@
+# Start of the program
+
+# Read an integer input from the user, ensuring it is non-negative
+number = abs(int(input()))
+
+# Initialize a counter variable
+counter = 0
+
+# Infinite loop to calculate and check certain conditions
+while True:
+    # Calculate the sum of the first 'counter' natural numbers
+    summation = (counter * (counter + 1)) // 2  # Using integer division since summation should be an integer
+
+    # Determine the difference between the calculated sum and the input number
+    difference = summation - number
+
+    # Check if the calculated sum equals the input number
+    if summation == number:
+        # Print the current counter value as the result
+        print(counter)
+        break  # Exit the loop
+    
+    # Check if the calculated sum exceeds the input number
+    elif summation > number:
+        # Check if the difference is an even number
+        if difference % 2 == 0:
+            # Print the current counter value as the result
+            print(counter)
+            break  # Exit the loop
+
+    # Increment the counter for the next iteration
+    counter += 1

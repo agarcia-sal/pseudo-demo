@@ -1,0 +1,28 @@
+def convertSymbolsToNumbers():
+    # Step 1: Read input from the user
+    sequenceOfCharacters = input()
+    
+    # Step 2: Initialize an index and an empty result string
+    currentIndex = 0
+    resultString = ""
+    
+    # Step 3: Process the input sequence until the end
+    while currentIndex < len(sequenceOfCharacters):
+        # Step 4: Check the current character
+        if sequenceOfCharacters[currentIndex] == '.':
+            # If it's a dot, convert to '0'
+            resultString += '0'  # Append '0' to resultString
+            currentIndex += 1  # Increment currentIndex by 1
+        elif currentIndex + 1 < len(sequenceOfCharacters) and sequenceOfCharacters[currentIndex + 1] == '.':
+            # If the next character is a dot, convert to '1'
+            resultString += '1'  # Append '1' to resultString
+            currentIndex += 2  # Increment currentIndex by 2
+        else:
+            # If neither is a dot, convert to '2'
+            resultString += '2'  # Append '2' to resultString
+            currentIndex += 2  # Increment currentIndex by 2
+            
+    # Step 5: Output the result
+    print(resultString)
+
+# To test the function, you can call convertSymbolsToNumbers() and provide input.

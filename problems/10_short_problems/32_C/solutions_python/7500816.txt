@@ -1,0 +1,9 @@
+n,m,s=list(map(int,input().split()))
+
+x=(n-1)/s
+xr=(n-1)%s
+y=(m-1)/s
+yr=(m-1)%s
+
+print((x+1)*(y+1)*(xr+1)*(yr+1))
+ 	  				 	  			     			   	

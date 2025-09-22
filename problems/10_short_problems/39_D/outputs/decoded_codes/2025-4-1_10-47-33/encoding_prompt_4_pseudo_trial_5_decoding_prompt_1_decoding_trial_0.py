@@ -1,0 +1,29 @@
+def main():
+    # Read two lines of input representing two sets of numbers
+    firstSet = input()
+    secondSet = input()
+    
+    # Split the input strings into lists of numbers
+    list1 = firstSet.split()
+    list2 = secondSet.split()
+    
+    # Initialize a counter for differences
+    differenceCount = 0
+    
+    # Compare corresponding elements from both lists
+    for index in range(3):  # Assuming the lists have at least 3 elements
+        number1 = int(list1[index])  # Convert to integer
+        number2 = int(list2[index])  # Convert to integer
+        
+        # Check if the numbers are different
+        if number1 != number2:
+            differenceCount += 1  # Increment the counter
+            
+    # Determine if the difference count is less than 3
+    if differenceCount < 3:
+        print("YES")
+    else:
+        print("NO")
+
+# Execute the main function
+main()

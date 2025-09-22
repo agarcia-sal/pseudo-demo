@@ -1,0 +1,17 @@
+n = abs(int(input()))
+i = 0
+
+while True:
+    s = i * (i + 1) // 2
+    m = s - n
+    
+    if s == n:
+        print(i)
+        break
+        
+    if s > n:
+        if m % 2 == 0:
+            print(i)
+            break
+            
+    i += 1

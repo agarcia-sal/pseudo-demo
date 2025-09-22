@@ -1,0 +1,35 @@
+def main():
+    # Get two input strings from the user
+    first_string = input()
+    second_string = input()
+    
+    # Remove all spaces from the input strings
+    first_string_without_spaces = remove_spaces(first_string)
+    second_string_without_spaces = remove_spaces(second_string)
+    
+    # Initialize a list to hold frequency differences
+    frequency_differences = []
+    
+    # Calculate frequency differences for each character from 'A' to 'z'
+    for char_code in range(ord('A'), ord('z') + 1):
+        count_in_first_string = count_occurrences(first_string_without_spaces, char_code)
+        count_in_second_string = count_occurrences(second_string_without_spaces, char_code)
+        difference = count_in_first_string - count_in_second_string
+        frequency_differences.append(difference)
+    
+    # Check if there are any negative frequency differences
+    if all(diff >= 0 for diff in frequency_differences):
+        print("YES")  # Indicates first string can be made to match second string
+    else:
+        print("NO")   # Indicates first string cannot be made to match second string
+
+def remove_spaces(input_string):
+    return input_string.replace(" ", "")  # Remove all spaces from the input string
+
+def count_occurrences(input_string, character_code):
+    character = chr(character_code)  # Convert character code to corresponding character
+    return input_string.count(character)  # Count occurrences of the character in the string
+
+# Call the main function to execute the program
+if __name__ == "__main__":
+    main()

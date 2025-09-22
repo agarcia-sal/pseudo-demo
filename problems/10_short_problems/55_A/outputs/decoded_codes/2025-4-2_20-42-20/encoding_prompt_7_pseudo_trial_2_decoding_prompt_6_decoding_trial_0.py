@@ -1,0 +1,30 @@
+def check_numbers_up_to(n):
+    # Initialize a list to keep track of boolean values, all set to True 
+    boolean_list = [True] * n
+    
+    # Initialize indices for tracking
+    current_index = 0
+    iteration_counter = 1
+    
+    # Start iterating up to a maximum of 500,000
+    while iteration_counter <= 500000:
+        # If the current index is marked as True, mark it as False
+        if boolean_list[current_index]:
+            boolean_list[current_index] = False
+            
+        # Move to the next index
+        iteration_counter += 1
+        current_index = (current_index + iteration_counter) % n
+
+    # Filter the list to find all still True values
+    remaining_true_values = [value for value in boolean_list if value]
+
+    # Check if there are any True values left
+    if len(remaining_true_values) == 0:
+        print('YES')
+    else:
+        print('NO')
+
+# Read an integer input for n
+n = int(input())
+check_numbers_up_to(n)

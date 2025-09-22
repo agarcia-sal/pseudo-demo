@@ -1,0 +1,32 @@
+def find_triangle_number_position():
+    # Step 1: Convert input to absolute integer
+    absolute_value = abs(int(input()))
+    
+    # Step 2: Initialize index variable
+    index = 0
+    
+    # Step 3: Loop indefinitely
+    while True:
+        # Step 4: Calculate the triangular number for the current index
+        triangular_number = (index * (index + 1)) // 2  # Using integer division
+        
+        # Step 5: Calculate the difference between the triangular number and the input number
+        difference = triangular_number - absolute_value
+        
+        # Step 6: Check if the triangular number matches the input number
+        if triangular_number == absolute_value:
+            print(index)
+            break  # Exit the loop if a match is found
+            
+        # Step 7: Check if the triangular number exceeds the input number
+        elif triangular_number > absolute_value:
+            # Step 8: Check if the difference is even
+            if difference % 2 == 0:
+                print(index)
+                break  # Exit the loop if the conditions are satisfied
+        
+        # Step 9: Increment index for the next iteration
+        index += 1
+
+# Invoke the function (the input will be provided during execution)
+find_triangle_number_position()

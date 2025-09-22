@@ -1,0 +1,48 @@
+def main():
+    # Step 1: Receive two input strings from the user, removing any spaces.
+    first_input_string = remove_spaces(input())
+    second_input_string = remove_spaces(input())
+    
+    # Step 2: Create two variables to hold the character counts for the input strings.
+    first_string_character_counts = count_characters(first_input_string)
+    second_string_character_counts = count_characters(second_input_string)
+    
+    # Step 3: Compare the character counts between the two strings.
+    frequency_differences = calculate_frequency_differences(first_string_character_counts, second_string_character_counts)
+    
+    # Step 4: Check if all frequency differences are zero or positive.
+    if all_counts_are_non_negative(frequency_differences):
+        print("YES")  # The first string has equal or more characters than the second.
+    else:
+        print("NO")   # The first string does not have enough of some characters.
+
+# Helper function to remove spaces from a string.
+def remove_spaces(input_string):
+    return input_string.replace(" ", "")  # Remove each space from the input string.
+
+# Helper function to count the occurrences of each character in the string.
+def count_characters(string):
+    # Create an array to hold character counts for 256 possible ASCII characters.
+    character_count_array = [0] * 256  
+    for character in string:
+        character_count_array[ord(character)] += 1  # Count the occurrences using the ASCII value.
+    return character_count_array
+
+# Helper function to calculate the frequency differences for all characters.
+def calculate_frequency_differences(counts1, counts2):
+    differences_array = []  # Initialize the list to hold the differences.
+    for character_code in range(256):
+        difference = counts1[character_code] - counts2[character_code]
+        differences_array.append(difference)  # Add the difference to the list.
+    return differences_array
+
+# Helper function to check if all counts in the differences array are non-negative.
+def all_counts_are_non_negative(differences_array):
+    for count in differences_array:
+        if count < 0:
+            return False  # Found a count that is negative.
+    return True  # All counts are non-negative.
+
+# Execute the main function
+if __name__ == "__main__":
+    main()

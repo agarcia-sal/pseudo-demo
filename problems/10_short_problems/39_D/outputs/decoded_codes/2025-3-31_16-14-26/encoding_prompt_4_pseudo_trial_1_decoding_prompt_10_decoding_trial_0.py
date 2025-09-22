@@ -1,0 +1,31 @@
+def main():
+    # Read input values
+    t1 = input()
+    t2 = input()
+    
+    # Split input strings into lists of strings
+    tt1 = t1.split()
+    tt2 = t2.split()
+    
+    # Initialize a count of differences
+    difference_count = 0 
+    
+    # Compare corresponding elements of the two lists
+    for i in range(3):
+        # Convert string elements to integers
+        a = int(tt1[i])
+        b = int(tt2[i])
+        
+        if a != b:
+            # Increment difference count if elements are not equal
+            difference_count += 1 
+    
+    # Determine if the differences are fewer than 3
+    if difference_count < 3:
+        print("YES")
+    else:
+        print("NO")
+
+# Execute the main function
+if __name__ == "__main__":
+    main()

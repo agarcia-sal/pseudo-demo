@@ -1,0 +1,23 @@
+# Read two input strings
+input_string1 = input()
+input_string2 = input()
+
+# Remove spaces from both input strings
+cleaned_string1 = input_string1.replace(" ", "")
+cleaned_string2 = input_string2.replace(" ", "")
+
+# Initialize a frequency list to track the count difference of each character 
+# (ASCII range from 0 to 127)
+frequency_difference = [0] * 128
+
+# Calculate frequency difference for each character from A to z (ASCII range)
+for character_code in range(ord('A'), ord('z') + 1):
+    count_in_string1 = cleaned_string1.count(chr(character_code))
+    count_in_string2 = cleaned_string2.count(chr(character_code))
+    frequency_difference[character_code] = count_in_string1 - count_in_string2
+
+# Check if all frequency differences are non-negative
+if all(count >= 0 for count in frequency_difference):
+    print("YES")
+else:
+    print("NO")

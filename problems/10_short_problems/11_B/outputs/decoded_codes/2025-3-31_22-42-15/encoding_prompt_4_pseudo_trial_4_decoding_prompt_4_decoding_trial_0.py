@@ -1,0 +1,32 @@
+def find_integer():
+    # Prompt user for input and store the absolute value of the integer
+    number = abs(int(input()))
+    
+    # Initialize a counter variable
+    index = 0
+    
+    # Infinite loop to find the solution
+    while True:
+        # Calculate the sum of the first 'index' integers
+        sum_of_integers = (index * (index + 1)) // 2
+        
+        # Calculate the difference between the sum and the input number
+        difference = sum_of_integers - number
+        
+        # Check if the sum equals the input number
+        if sum_of_integers == number:
+            print(index)  # Output the index
+            break  # Exit the loop
+            
+        # Check if the sum exceeds the input number
+        elif sum_of_integers > number:
+            # Check if the difference is even
+            if difference % 2 == 0:
+                print(index)  # Output the index
+                break  # Exit the loop
+                
+        # Increment the counter variable
+        index += 1
+
+# Execute the function
+find_integer()

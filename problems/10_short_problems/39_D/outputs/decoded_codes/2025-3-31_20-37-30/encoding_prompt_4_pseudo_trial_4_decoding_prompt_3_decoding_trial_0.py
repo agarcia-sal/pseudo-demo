@@ -1,0 +1,31 @@
+def do_main():
+    # Read two lines of input
+    t1 = input()
+    t2 = input()
+    
+    # Split the input strings into lists
+    tt1 = t1.split()
+    tt2 = t2.split()
+    
+    # Initialize a result counter
+    discrepancy_count = 0
+    
+    # Compare corresponding elements in the two lists
+    for index in range(3):  # Assuming the lists always have at least 3 elements
+        # Convert the current element to an integer
+        a = int(tt1[index])
+        b = int(tt2[index])
+        
+        # Check if the elements are different
+        if a != b:
+            discrepancy_count += 1
+    
+    # Determine if discrepancies are less than 3
+    if discrepancy_count < 3:
+        print("YES")
+    else:
+        print("NO")
+
+# Execute the main function
+if __name__ == "__main__":
+    do_main()
