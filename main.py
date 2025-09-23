@@ -314,6 +314,7 @@ def main(cfg):
 
     store_pseudocode = True
     if store_pseudocode:
+        print('in store pseudocode')
         stage = 'encoder'
         # timestamp = '2025-06-16_14-15-27'
         first_timestamp = '' # <- passing rate + natural language + conciseness
@@ -436,7 +437,7 @@ def main(cfg):
     generated_prompts_path = Path(f"{ROOT_DIR}/outputs/prompts/{timestamp}")
     generated_prompts_path.mkdir(parents=True, exist_ok=True)
 
-    version = 2
+    version = 3
     train_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-train.jsonl" )
     dev_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl")
     classifier_dataset_name = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes")

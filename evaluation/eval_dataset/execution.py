@@ -226,7 +226,7 @@ def safe_execute_leet_code(problem: Dict, completion: str, timeout: float):
             # )
             check_program = (
                 base_program
-                + f'print({problem['entry_point']}({inputs}))'
+                + f"print({problem['entry_point']}({inputs}))"
             )
         # Write code to a temporary file
             code_path = os.path.join(temp_dir, f"solution_{idx}.py")
@@ -279,7 +279,7 @@ def safe_execute_leet_code(problem: Dict, completion: str, timeout: float):
                 all_passed = False
                 
         if all_passed:
-            print(f"outputs match!! for all test cases in problem {problem["task_id"]}\n")
+            print(f"outputs match!! for all test cases in problem {problem['task_id']}\n")
             # result_list.append({"status": "passed", "num_test_cases": num_test_cases, "num_correct": num_correct, "test_results": test_results})
             result = [{"status": "passed", "num_test_cases": num_test_cases, "num_correct": num_correct, "test_results": test_results}]
         else:

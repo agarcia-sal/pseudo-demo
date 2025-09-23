@@ -15,7 +15,7 @@ import subprocess
 import multiprocessing as mp
 import json
 import pandas
-import psutil
+# import psutil
 import signal
 import subprocess
 import os
@@ -30,10 +30,10 @@ import random
 from pathlib import Path
 from openai import OpenAI
 from typing import Dict, Optional
-import nltk
-from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+# import nltk
+# from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 
-import cloudpickle
+# import cloudpickle
 from multiprocessing.reduction import ForkingPickler
 from utils.llm_client.base import BaseClient
 from evaluation.eval_dataset.evaluate import evaluate_functional_correctness
@@ -41,9 +41,9 @@ from evaluation.eval_dataset.data import read_jsonl, write_jsonl
 
 
 # Use cloudpickle to support pickling dynamic functions.
-ForkingPickler.dumps = cloudpickle.dumps
+# ForkingPickler.dumps = cloudpickle.dumps
 
-nltk.download('punkt')
+# nltk.download('punkt')
 
 
 
@@ -293,43 +293,44 @@ class ParallelRun:
         # Create a cgroup for CPU and memory (adjust as needed for your system, and note this works for cgroup v1)
         # subprocess.run(["cgcreate", "-g", f"cpu,memory:/{cgroup_name}"],
         #                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        unit_test_idx = idx + 1 # add 1 because inputs and outputs for unit tests are not 0-indexed
-        queue = mp.Queue()
-        p = mp.Process(target=self.evaluate_instance_in_subprocess,
-                       args=(unit_test_idx, code_solution_path, problem_file_path, config_path, queue))
-        p.start()
+        return []
+        # unit_test_idx = idx + 1 # add 1 because inputs and outputs for unit tests are not 0-indexed
+        # queue = mp.Queue()
+        # p = mp.Process(target=self.evaluate_instance_in_subprocess,
+        #                args=(unit_test_idx, code_solution_path, problem_file_path, config_path, queue))
+        # p.start()
 
         # Add the process to the cgroup
         # subprocess.run(["cgclassify", "-g", f"cpu,memory:/{cgroup_name}", str(p.pid)],
         #                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-        p.join(timeout + 1)  # 1 extra second
-        if p.is_alive():
-            p.terminate()
-            try:
-                parent = psutil.Process(p.pid)
-                it = 1
-                for child in parent.children(recursive=True):
-                    if it > 100:
-                        break
-                    child.kill()
-                    it += 1
-                parent.kill()
-            except psutil.NoSuchProcess:
-                pass
-            p.join(1)
-            # Kill all processes in the cgroup (including detached pulp solvers)
-            # subprocess.run(["cgdelete", "-g", f"cpu,memory:/{cgroup_name}"],
-            #                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            return f"Timeout ({timeout}s)"
-        else:
-            try:
-                result = queue.get_nowait()
-            except Exception:
-                result = "No result"
-            # subprocess.run(["cgdelete", "-g", f"cpu,memory:/{cgroup_name}"],
-            #                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            return result
+        # p.join(timeout + 1)  # 1 extra second
+        # if p.is_alive():
+        #     p.terminate()
+        #     try:
+        #         parent = psutil.Process(p.pid)
+        #         it = 1
+        #         for child in parent.children(recursive=True):
+        #             if it > 100:
+        #                 break
+        #             child.kill()
+        #             it += 1
+        #         parent.kill()
+        #     except psutil.NoSuchProcess:
+        #         pass
+        #     p.join(1)
+        #     # Kill all processes in the cgroup (including detached pulp solvers)
+        #     # subprocess.run(["cgdelete", "-g", f"cpu,memory:/{cgroup_name}"],
+        #     #                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        #     return f"Timeout ({timeout}s)"
+        # else:
+        #     try:
+        #         result = queue.get_nowait()
+        #     except Exception:
+        #         result = "No result"
+        #     # subprocess.run(["cgdelete", "-g", f"cpu,memory:/{cgroup_name}"],
+        #     #                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        #     return result
         
     def get_code_solution(self, problem_file_path, prompt, prev_stage_prompt, timeout, stage, timestamp, it, round, client):
         # client = OpenAI(
