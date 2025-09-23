@@ -62,23 +62,26 @@ class Evaluator:
         #         prev_score.append(f"{case} -> Scores: {_scores}")
         # # prev_score = sorted(prev_score, key=lambda x: -1 if isinstance(x[0], str) else 1)
         # prev_score = '\n'.join(prev_score[:self.feedback_length])
-        indices = list(range(len(errors)))
-        errors_length = len(errors)
+        errors_length = len(errors.keys())
+        indices = list(range(errors_length))
+        
         # print('lenght of pseudocode_list:', len(pseudocode_list))
         # print('length of code_list: ', len(code_list))
-        random_indices = random.sample(indices, min(self.example_count, errors_length))
+        # random_indices = random.sample(indices, min(self.example_count, errors_length))
+        random_task_ids = random.sample(sorted(errors.keys()), min(self.example_count, errors_length))
         # print('random_indices: ')
         # print(random_indices)
 
         # [TO DO]: make sure the order is preserved throughout so that pseudocode, code, and errors match
-        error_tuples = [errors[index] for index in random_indices]
+        # error_tuples = [errors[index] for index in random_indices]
         pseudocode_list = []
         code_list = []
         error_strings = []
         error_task_ids = set()
-        for task_id in error_entries:
+        # for task_id in error_entries:
+        for task_id in random_task_ids:
             # task_id = error["task_id"]
-            error_list = error_entries[task_id]
+            error_list = errors[task_id]
             error_task_ids.add(task_id)
             pseudocode_list.append(pseudocodes[task_id])
             code_list.append(codes[task_id])
