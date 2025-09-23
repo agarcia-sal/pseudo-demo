@@ -6,7 +6,6 @@ import hydra
 from openai import OpenAI
 from dotenv import load_dotenv
 from pathlib import Path
-from python_minifier import minify
 
 
 load_dotenv()

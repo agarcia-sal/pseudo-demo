@@ -84,7 +84,7 @@ def evaluate_functional_correctness(
             for test in test_results:
                 if not test["passed"]:
                     test_errors.append(test["error"])
-            errors[task_id].append(test_errors)
+            errors[task_id] = test_errors
         # else:
         #     errors.append(None)
         # future = executor.submit(check_correctness, *args)

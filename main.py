@@ -10,7 +10,7 @@ import numpy as np
 import cProfile
 import pstats
 from utils.utils import init_client, file_to_string, setup_dataset, minify_code
-from evaluation.utils import save_metrics, save_prompt, get_pseudocode_dataset, evaluate_classifier_prompt, save_classifier_score, record_previous_best_solution, get_avg_test_case_length, get_num_difficulty, copy_difficulty_problems, get_positive_labels, write_dataset_to_file
+from evaluation.utils import save_metrics, save_prompt, get_pseudocode_dataset, evaluate_classifier_prompt, save_classifier_score, record_previous_best_solution, get_avg_test_case_length, get_num_difficulty, copy_difficulty_problems, get_positive_labels, write_dataset_to_file, write_error_strings_to_file
 # from agents import GreedyRefine
 from evaluation import Evaluator, get_data
 from openai import OpenAI
@@ -110,7 +110,7 @@ def main(cfg):
     evolving_encoding = False # depends on whether we are continuing in the encoding or decoding
     evolving_decoding = False # This should start off as False always
     evolving_cosmetic = False
-    evolving_classifier = True
+    evolving_classifier = False
 
     if (evolving_encoding or evolving_decoding or evolving_cosmetic or evolving_classifier) and not load_previous: 
         setup_dataset(timestamp, f"{ROOT_DIR}/data/{problems_dir_name}", iterations + 2) # plus 2 because of the final encoder and decoder verification at the end
@@ -312,7 +312,7 @@ def main(cfg):
     new_filename = f'LeetCodeDataset-v0.3.0-hard-train.jsonl'
     # copy_difficulty_problems(os.path.join(problems_dir, problems_filename), os.path.join(problems_dir, new_filename), difficulty_map, limit)
 
-    store_pseudocode = False
+    store_pseudocode = True
     if store_pseudocode:
         stage = 'encoder'
         # timestamp = '2025-06-16_14-15-27'
@@ -347,19 +347,30 @@ def main(cfg):
         
         # GET PSEUDOCODE DATASET FOR THE CLASSIFIER:
         limit = 150
-        problem_results, dev_set_results = get_pseudocode_dataset(first_pipeline_json_path_name, second_pipeline_json_path_name, first_dir, second_dir, first_problems_filename, second_problems_filename, first_timestamp, second_timestamp, iterations, limit)
+        # problem_results, dev_set_results = get_pseudocode_dataset(first_pipeline_json_path_name, second_pipeline_json_path_name, first_dir, second_dir, first_problems_filename, second_problems_filename, first_timestamp, second_timestamp, iterations, limit)
         # print('problem_results: ')
         # print(problem_results)
         # print('dev_set_results:')
         # print(dev_set_results)
         # true_positive_examples, true_negative_examples, near_miss_examples, near_pass_examples = results
         version = 2
-        train_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-train.jsonl" )
-        dev_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl")
-        write_dataset_to_file(problem_results, train_set_filename)
-        write_dataset_to_file(dev_set_results, dev_set_filename)
+        # train_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-train.jsonl" )
+        # dev_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl")
+        # write_dataset_to_file(problem_results, train_set_filename)
+        # write_dataset_to_file(dev_set_results, dev_set_filename)
         # write_dataset_to_file(positive_examples, positive_examples_file_name)
         # [TO DO]: add near-misses, and near-passes as something i get from the pseudocode dataset
+        # For train:
+        previous_timestamp = '2025-09-18_04-55-13'
+        final_iter = 34
+        decoder_prompt = file_to_string(f"{ROOT_DIR}/outputs/prompts/{previous_timestamp}/prompt_iter_{final_iter}_decoder.txt")
+        version = 2
+        file_name = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl")
+        # file_name = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-train.jsonl" )
+        version = 3
+        new_file_name = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl")
+        # new_file_name = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-train.jsonl" )
+        write_error_strings_to_file(file_name, new_file_name, decoder_prompt, client)
 
     ######################## Create cosmetic changes for the positive labels: ################################
 
@@ -464,9 +475,11 @@ def main(cfg):
                 save_prompt(str(generated_prompts_path), prompt, it, stage)
                 # print('right before calling evaluate() within the round')
                 # feedback = evaluator_classifier.evaluate_classifier(prompt, decoder_prompt, stage, timestamp, it, client)
-                mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, it)
+                # mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, it)
+                mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, it)
                 # print('step:', 1)
-                feedback = evaluator_classifier.get_feedback_classifier(mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
+                # feedback = evaluator_classifier.get_feedback_classifier(mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
+                feedback = evaluator_classifier.get_feedback_classifier(mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
                 # print('step:', 2)
                 score = feedback.dev_score
                 # save_metrics(avg_metrics, metrics_path, timestamp, stage, it, round, rounds)

@@ -2213,9 +2213,9 @@ def gen_multi_chat_decodings(dataset_name, problem_cases, decoding_prompt, pseud
 
         new_task_id = problem.replace("/", "-")
         # code_file_path = os.path.join(problem_file_path, "outputs", timestamp, f"iter_{it}", "decoded_codes", f"generated_code_{stage}.py")
-        code_file_path = os.path.join(dataset_name, "outputs", timestamp, f"iter_{it}", "decoded_codes", f"{new_task_id}_decoded_code_{stage}.py")
-        with open(code_file_path, 'w') as file:
-            file.write(code)
+        # code_file_path = os.path.join(dataset_name, "outputs", timestamp, f"iter_{it}", "decoded_codes", f"{new_task_id}_decoded_code_{stage}.py")
+        # with open(code_file_path, 'w') as file:
+        #     file.write(code)
         # code_file_path_list.append(code_file_path)
         task_pseudocodes_codes[problem] = {"pseudocode": pseudocode, "decoded_code": code}
 
@@ -2232,6 +2232,8 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
     near_misses = []
     cosmetic = []
     num_problems = 0
+    true_negative_errors = {}
+    near_miss_errors = {}
 
     metrics = {}
 
@@ -2246,21 +2248,23 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
         pseudocode_dataset = problem["pseudocode_dataset"]
         for entry in pseudocode_dataset:
             if entry["label"] == "true_positive":
-                new_entry = entry
-                new_entry["task_id"] = task_id
-                true_positives.append(new_entry)
+                entry["task_id"] = task_id
+                true_positives.append(entry)
             elif entry["label"] == "true_negative":
-                new_entry = entry
-                new_entry["task_id"] = task_id
-                true_negatives.append(new_entry)
+                entry["task_id"] = task_id
+                true_negatives.append(entry)
+
+                error_string = entry["error_string"]
+                true_negative_errors[task_id] = error_string
             elif entry["label"] == "near_miss":
-                new_entry = entry
-                new_entry["task_id"] = task_id
-                near_misses.append(new_entry)
+                entry["task_id"] = task_id
+                near_misses.append(entry)
+
+                error_string = entry["error_string"]
+                near_miss_errors[task_id] = error_string
             elif entry["label"] == "cosmetic":
-                new_entry = entry
-                new_entry["task_id"] = task_id
-                cosmetic.append(new_entry)
+                entry["task_id"] = task_id
+                cosmetic.append(entry)
 
     train_pseudocodes_dataset = true_positives + cosmetic + true_negatives + near_misses
     # print('train_pseudocodes_dataset:', train_pseudocodes_dataset)
@@ -2274,16 +2278,16 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
     for entry in train_pseudocodes_dataset:
         pseudocodes.append(entry['pseudocode'])
 
-    true_negative_pseudocodes = pseudocodes[2*num_problems:3*num_problems]
-    near_miss_pseudocodes = pseudocodes[3*num_problems:]
+    # true_negative_pseudocodes = pseudocodes[2*num_problems:3*num_problems]
+    # near_miss_pseudocodes = pseudocodes[3*num_problems:]
 
     # pseudocode_encoding_list = true_negative_pseudocodes + near_miss_pseudocodes
 
-    _, true_negative_task_pseudocodes_codes = gen_multi_chat_decodings(dataset_name, task_ids, decoder_prompt, true_negative_pseudocodes, "classifier", timestamp, it, client)
-    results, true_negative_errors = evaluate_functional_correctness(train_set_filename, true_negative_task_pseudocodes_codes)
+    # _, true_negative_task_pseudocodes_codes = gen_multi_chat_decodings(dataset_name, task_ids, decoder_prompt, true_negative_pseudocodes, "classifier", timestamp, it, client)
+    # results, true_negative_errors = evaluate_functional_correctness(train_set_filename, true_negative_task_pseudocodes_codes)
 
-    _, near_miss_task_pseudocodes_codes = gen_multi_chat_decodings(dataset_name, task_ids, decoder_prompt, near_miss_pseudocodes, "classifier", timestamp, it, client)
-    results, near_miss_errors = evaluate_functional_correctness(train_set_filename, near_miss_task_pseudocodes_codes)
+    # _, near_miss_task_pseudocodes_codes = gen_multi_chat_decodings(dataset_name, task_ids, decoder_prompt, near_miss_pseudocodes, "classifier", timestamp, it, client)
+    # results, near_miss_errors = evaluate_functional_correctness(train_set_filename, near_miss_task_pseudocodes_codes)
 
 
     # print('len of pseudocodes: ', len(pseudocodes))
@@ -2308,6 +2312,11 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
     mislabeled_cosmetic =[]
     mislabeled_negatives = []
     mislabeled_near_misses = []
+
+    mislabeled_positives_task_ids = set()
+    mislabeled_cosmetic_task_ids = set()
+    mislabeled_negatives_task_ids = set()
+    mislabeled_near_misses_task_ids = set()
     # print('metrics:')
     # print(metrics)
     # print('true positives:')
@@ -2318,13 +2327,15 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
         label = entry["score"]
         task_id = entry["task_id"]
         output = positives_outputs[i]
+        
 
         if label == output:
             score += 1
             metrics[task_id]["accuracy_score"] += 1
             metrics[task_id]["true_positive"] += 1
         else:
-            mislabeled_positives.append(entry)
+            # mislabeled_positives.append(entry)
+            mislabeled_positives_task_ids.add(task_id)
 
     print('len of positive mislabeled:', len(mislabeled_positives))
 
@@ -2339,7 +2350,8 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
             metrics[task_id]["accuracy_score"] += 1
             metrics[task_id]["cosmetic"] += 1
         else:
-            mislabeled_cosmetic.append(entry)
+            # mislabeled_cosmetic.append(entry)
+            mislabeled_cosmetic_task_ids.add(task_id)
 
     print('len of cosmetic mislabeled: ', len(mislabeled_cosmetic))
 
@@ -2354,7 +2366,8 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
             metrics[task_id]["accuracy_score"] += 1
             metrics[task_id]["true_negative"] += 1
         else:
-            mislabeled_negatives.append(entry)
+            # mislabeled_negatives.append(entry)
+            mislabeled_negatives_task_ids.add(task_id)
 
     print('len of negative mislabeled: ', len(mislabeled_negatives))
 
@@ -2369,7 +2382,8 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
             metrics[task_id]["accuracy_score"] += 1
             metrics[task_id]["near_miss"] += 1
         else:
-            mislabeled_near_misses.append(entry)
+            # mislabeled_near_misses.append(entry)
+            mislabeled_near_misses_task_ids.add(task_id)
 
     print('len of near miss mislabeled: ', len(mislabeled_near_misses))
 
@@ -2387,14 +2401,47 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
         metrics[task_id]["accuracy_score"] /= 4
 
     # final_metrics = {task : {"accuracy_score" : metrics[task]["accuracy_score"] / 4 } for task in task_ids}
+    mislabeled_intersection = mislabeled_positives_task_ids.intersection(mislabeled_cosmetic_task_ids, mislabeled_negatives_task_ids, mislabeled_near_misses_task_ids)
+    mislabeled_problems = {problem: [] for problem in mislabeled_intersection}
+    print('len of mislabeled intersection: ', len(mislabeled_intersection))
+
+    for i in range(len(true_positives)):
+        entry = true_positives[i]
+        task_id = entry["task_id"]        
+
+        if task_id in mislabeled_intersection:
+            mislabeled_problems[task_id].append(entry)
+            # mislabeled_positives.append(entry)
+
+    for i in range(len(cosmetic)):
+        entry = cosmetic[i]
+        task_id = entry["task_id"]
+
+        if task_id in mislabeled_intersection:
+            mislabeled_problems[task_id].append(entry)
+
+    for i in range(len(true_negatives)):
+        entry = true_negatives[i]
+        task_id = entry["task_id"]
+
+       if task_id in mislabeled_intersection:
+            mislabeled_problems[task_id].append(entry)
+
+    for i in range(len(near_misses)):
+        entry = near_misses[i]
+        task_id = entry["task_id"]
+
+        if task_id in mislabeled_intersection:
+            mislabeled_problems[task_id].append(entry)
 
     final_score = score / (len(train_pseudocodes_dataset)) if train_pseudocodes_dataset else 0
 
     print("final score: ", final_score)
     # print('final_metrics:')
     # print(final_metrics)
+    return mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics
 
-    return mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics
+    # return mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics
 
 def evaluate_classifier_prompt_v2(positive_examples, negative_examples, prompt, client):
     # Decide whcih problems to feed to the prompt, first half of the positive examples and first half of the negative examples
@@ -2454,3 +2501,84 @@ def save_classifier_score(score, metrics_path, timestamp, stage, iteration, roun
     # Save updated results
     with open(metrics_file_path, "w") as f:
         json.dump(results, f, indent=2)  # `indent` for readability
+
+def write_error_strings_to_file(file_name, new_file_name, decoder_prompt, client):
+    true_positives = []
+    true_negatives = []
+    near_misses = []
+    cosmetic = []
+    task_ids = set()
+    
+    for problem in read_jsonl(file_name):
+        task_id = problem["task_id"]
+        task_ids.add(task_id)
+
+        pseudocode_dataset = problem["pseudocode_dataset"]
+        for entry in pseudocode_dataset:
+            # if entry["label"] == "true_positive":
+            #     new_entry = entry
+            #     new_entry["task_id"] = task_id
+            #     true_positives.append(new_entry)
+            if entry["label"] == "true_negative":
+                new_entry = entry
+                new_entry["task_id"] = task_id
+                true_negatives.append(new_entry)
+            elif entry["label"] == "near_miss":
+                new_entry = entry
+                new_entry["task_id"] = task_id
+                near_misses.append(new_entry)
+            # elif entry["label"] == "cosmetic":
+            #     new_entry = entry
+            #     new_entry["task_id"] = task_id
+            #     cosmetic.append(new_entry)
+
+    # train_pseudocodes_dataset = true_positives + cosmetic + true_negatives + near_misses
+    # print('train_pseudocodes_dataset:', train_pseudocodes_dataset)
+
+    # print('len of train_pseudocodes_dataset: ', len(train_pseudocodes_dataset))
+    
+    pseudocodes = []
+
+    true_negative_pseudocodes = []
+    near_miss_pseudocodes = []
+
+    for entry in true_negatives:
+        true_negative_pseudocodes.append(entry['pseudocode'])
+
+    for entry in near_misses:
+        near_miss_pseudocodes.append(entry['pseudocode'])
+
+    # pseudocode_encoding_list = true_negative_pseudocodes + near_miss_pseudocodes
+    dataset_name = "classifier_pseudocodes"
+    _, true_negative_task_pseudocodes_codes = gen_multi_chat_decodings(dataset_name, task_ids, decoder_prompt, true_negative_pseudocodes, "classifier", "00-00-00_00-00-00", 0, client)
+    results, true_negative_errors = evaluate_functional_correctness(file_name, true_negative_task_pseudocodes_codes)
+
+    _, near_miss_task_pseudocodes_codes = gen_multi_chat_decodings(dataset_name, task_ids, decoder_prompt, near_miss_pseudocodes, "classifier", "00-00-00_00-00-00", 0, client)
+    results, near_miss_errors = evaluate_functional_correctness(file_name, near_miss_task_pseudocodes_codes)
+
+    results = []
+    num_errors_shown = 5
+    for problem in read_jsonl(file_name):
+        task_id = problem["task_id"]
+
+        pseudocode_dataset = problem["pseudocode_dataset"]
+        for entry in pseudocode_dataset:
+            if entry["label"] == "true_negative":
+                test_errors = true_negative_errors[task_id]
+                if test_errors:
+                    error_string = str(test_errors[:num_errors_shown])
+                    entry["error_string"] = error_string
+                else:
+                    entry["error_string"] = ''
+                
+            elif entry["label"] == "near_miss":
+                test_errors = near_miss_errors[task_id]
+                if test_errors:
+                    error_string = str(test_errors[:num_errors_shown])
+                    entry["error_string"] = error_string
+                else:
+                    entry["error_string"] = ''
+        results.append(problem)
+
+    write_jsonl(new_file_name, results)
+
