@@ -39,12 +39,13 @@ def estimate_pass_at_k(
 
 def evaluate_functional_correctness(
     # sample_file: str,
+    dataset_name: str,
     problem_file: str,
     task_pseudocodes_codes: Dict, 
     # k: List[int],
     version: str = 'v0.3.0',
     split: str = 'test',
-    n_workers: int = 2, # was 4
+    n_workers: int = 4, # was 4
     timeout: float = 3.0,
 ):
     """
@@ -63,14 +64,14 @@ def evaluate_functional_correctness(
     completion_id = Counter()
     n_samples = 0
     results = defaultdict(list)
-    errors = defaultdict(list)
+    errors = {}
 
     print("Reading samples...")
     for problem in tqdm.tqdm(read_jsonl(problem_file)):
         task_id = problem["task_id"]
         # completion = problem["completion"]
         decoded_code = task_pseudocodes_codes[task_id]["decoded_code"]
-        args = (problem, decoded_code, timeout, completion_id[task_id]) # [TO DO]: change completion to decoded code i believe
+        args = (dataset_name, problem, decoded_code, timeout, completion_id[task_id]) # [TO DO]: change completion to decoded code i believe
         # print('args in evaluate_function_correctness:')
         # print(args)
         result = check_correctness(*args)
@@ -84,7 +85,8 @@ def evaluate_functional_correctness(
             for test in test_results:
                 if not test["passed"]:
                     test_errors.append(test["error"])
-            errors[task_id] = test_errors
+            if test_errors:
+                errors[task_id] = test_errors
         # else:
         #     errors.append(None)
         # future = executor.submit(check_correctness, *args)

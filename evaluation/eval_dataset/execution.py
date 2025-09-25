@@ -8,7 +8,8 @@ import platform
 import signal
 import tempfile
 import subprocess
-from typing import Dict, Optional
+import re
+from typing import Dict, List, Any, Optional, Union
 
 
 # Remove surrounding quotes if present
@@ -287,21 +288,80 @@ def safe_execute_leet_code(problem: Dict, completion: str, timeout: float):
             result = [{"status": "failed", "num_test_cases": num_test_cases, "num_correct": num_correct, "test_results": test_results}]
 
         return result
+
+def extract_import_statements(prompt):
+    """Extract only import statements from a code prompt"""
+    # Pattern to match various import styles
+    import_pattern = r'^(from\s+\w+(?:\s+import\s+\w+(?:\s*,\s*\w+)*)?|import\s+\w+(?:\s*,\s*\w+)*)$'
+    
+    lines = prompt.split('\n')
+    imports = []
+    
+    for line in lines:
+        stripped_line = line.strip()
+        # Skip empty lines and function definitions
+        if not stripped_line or stripped_line.startswith('def ') or stripped_line.startswith('class '):
+            continue
+        # Check if it's an import statement
+        if re.match(import_pattern, stripped_line):
+            imports.append(stripped_line)
+    
+    return imports
+
     
 def safe_execute(problem: Dict, completion: str, timeout: float):
     """Secure code execution using subprocess isolation"""
     # TO DO: fix, this 
 
     test_cases = []
-    test_code = problem["test"].strip()
-    if test_code:
-        # Split test cases while preserving assertion lines
-        test_lines = test_code.split('\n')
-        for line in test_lines:
-            if line.strip().startswith('assert '):
-                test_cases.append(line.strip())
+    test_code = problem["test"]
 
-    base_program = problem["prompt"] + "\n" + completion + "\n"
+    # assert_pattern = r'assert candidate\((.*)\) == (.*)'
+    assert_pattern_equals = r'assert (.*?) == (.*?)(?:,\s*("[^"]*"|\'[^\']*\'))?(?=\s*assert|$)'
+    # this part handles potential error messages like: "This prints if this":
+    # (?:,\s*("[^"]*"|\'[^\']*\'))?
+    assert_pattern_tolerance = r'assert (.*?) < (.*?)(?:,\s*("[^"]*"|\'[^\']*\'))?(?=\s*assert|$)'
+
+    containers_equals = re.finditer(assert_pattern_equals, test_code, re.DOTALL)
+
+    for match in containers_equals:
+        assert_statement = match.group()
+        if "assert fails" not in assert_statement:
+            if ", \"This prints if this" in assert_statement: #[TO DO]: fix to be more robust and general
+                assert_statement = assert_statement[:assert_statement.find(", \"This prints if this")]
+            if ", \"Test " in assert_statement:
+                assert_statement = assert_statement[:assert_statement.find(", \"Test ")] #[TO DO]: fix to be more robust and general
+            test_cases.append(assert_statement)
+
+    containers_tolerance = re.finditer(assert_pattern_tolerance, test_code, re.DOTALL)
+    for match in containers_tolerance:
+        assert_statement = match.group()
+        if "assert fails" not in assert_statement and ", \"This prints if this" not in assert_statement: #[TO DO]: fix to be more robust
+            if ", \"This prints if this" in assert_statement: #[TO DO]: fix to be more robust and general
+                assert_statement = assert_statement[:assert_statement.find(", \"This prints if this")]
+            if ", \"Test " in assert_statement:
+                assert_statement = assert_statement[:assert_statement.find(", \"Test ")] #[TO DO]: fix to be more robust and general
+            test_cases.append(assert_statement)
+
+
+
+    
+    # test_code = problem["test"].strip()
+    # if test_code:
+    #     # Split test cases while preserving assertion lines
+    #     test_lines = test_code.split('\n')
+    #     for line in test_lines:
+    #         if line.strip().startswith('assert '):
+    #             test_cases.append(line.strip())
+
+    # test_cases = parse_humaneval_test_cases(test_code=problem["test"])
+
+    # base_program = problem["prompt"] + "\n" + completion + "\n"
+    base_program = ''
+    import_statements = extract_import_statements(problem['prompt'])
+    for import_stmnt in import_statements:
+        base_program += import_stmnt 
+    base_program += "\n" + completion + "\n"
 
     test_results = []
     all_passed = True
@@ -338,8 +398,15 @@ def safe_execute(problem: Dict, completion: str, timeout: float):
                     # Additional security measures:
                     # preexec_fn=lambda: os.setrlimit(...)  # Set resource limits
                 )
-                if "AssertionError" in result.stderr:
+                # print('\n\nresults.stdout:', result.stdout)
+                # print('assertion: ', test_case)
+                # print('error:', result.stderr)
+
+                if result.stderr:
+                    print('error:')
+                    print(result.stderr)
                     test_results.append({"test_case_id": idx, "test_case": test_case, "passed": False, "error": result.stderr})
+                    all_passed = False
                 else:
                     test_results.append({"test_case_id": idx, "test_case": test_case, "passed": True, "error": None})
                     num_correct += 1 
@@ -363,7 +430,7 @@ def safe_execute(problem: Dict, completion: str, timeout: float):
         return result
 
 def check_correctness(
-    problem: Dict, completion: str, timeout: float, completion_id: Optional[int] = None
+    dataset_name: str, problem: Dict, completion: str, timeout: float, completion_id: Optional[int] = None
 ) -> Dict:
     """
     Evaluates the functional correctness of a completion by running the test
@@ -383,7 +450,12 @@ def check_correctness(
     # if p.is_alive():
     #     p.kill()
     try:
-        result = safe_execute_leet_code(problem, completion, timeout + 1)
+        if "human_eval" in dataset_name:
+            result = safe_execute(problem, completion, timeout + 1)
+        elif "leet_code" in dataset_name:
+            result = safe_execute_leet_code(problem, completion, timeout + 1)
+        else:
+            result = safe_execute(problem, completion, timeout + 1)
         # result = safe_execute(problem, completion, timeout + 1)
         # print('result from unsafe_execute:')
         # print(result)

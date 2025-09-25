@@ -144,7 +144,7 @@ class Evaluator:
         if stage == 'encoder':
             # prev_score += f'\nAvg Passing Rate Minus Line Count: {avg_score}'
             # prev_score += f'\nScore of Average word length for ALL the problems: {avg_score}'
-            prev_score += f'\nScore of (4*(Average syllables per word) + passing rate) for ALL the problems: {avg_score}'
+            prev_score += f'\nScore of (4*(Average word length) + passing rate) for ALL the problems: {avg_score}'
             # prev_score += f'\nScore of (Average word length - average words per line) for ALL the problems: {avg_score}'
         elif stage == 'decoder':
             prev_score += f'\nAvg Passing Rate for ALL the problems: {avg_score}'
@@ -158,21 +158,21 @@ class Evaluator:
 
     # def get_feedback_cosmetic(self, results, final_score, stage, pseudocodes, codes, errors):
     
-    # def get_feedback_classifier(self, mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics):
-    def get_feedback_classifier(self, mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics):
+    def get_feedback_classifier(self, mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics):
+    # def get_feedback_classifier(self, mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics):
         metrics = check_if_no_metrics(metrics)
         avg_metrics = average_metrics(metrics) # averaged across all problems
         
-        # positives = mislabeled_positives[:self.classifier_count]
-        # cosmetic = mislabeled_cosmetic[:self.classifier_count]
-        # negatives = mislabeled_negatives[:self.classifier_count]
-        # near_misses = mislabeled_near_misses[:self.classifier_count]
+        positives = mislabeled_positives[:self.classifier_count]
+        cosmetic = mislabeled_cosmetic[:self.classifier_count]
+        negatives = mislabeled_negatives[:self.classifier_count]
+        near_misses = mislabeled_near_misses[:self.classifier_count+2]
 
         negative_error_task_ids = set(true_negative_errors.keys())
         near_miss_error_task_ids = set(near_miss_errors.keys())
 
         feedback = 'We have a 4 way split for the pseudocodes: true positives, which are pseudocodes that correspond to code that passes all test cases.\n'
-        feedback += 'We have true negatives, which are pseudocodes that correspond to code that do not pass all test cases.\n'
+        feedback += 'We also have true negatives, which are pseudocodes that correspond to code that do not pass all test cases.\n'
         feedback += 'We have cosmetic, which are pseudocodes that are variations of the positive pseudocodes and also pass all test cases.\n'
         feedback += 'We have near-misses, which are pseudocodes that correspond to code that almost passes all test cases but do not. They pass at least 80% of test cases\n'
         feedback += f'Here is the score for this prompt on positive-labeled pseudocodes: {avg_metrics["true_positive"]}\n'
@@ -182,60 +182,65 @@ class Evaluator:
         
         num_problems_shown = 2
         num_problems = 0
-        for task_id, mislabeled_list in mislabeled_problems.items():
-            if num_problems == num_problems_shown:
-                break
-            num_problems += 1
-            feedback += f"The following is a true positive pseudocode for problem {task_id} that was mislabeled as not reproducible:\n"
-            feedback += mislabeled_list[0]["pseudocode"]+"\n"
-            feedback += f"The following is a cosmetic change to the true positive pseudocode for problem {task_id} that was mislabeled as not reproducible:\n"
-            feedback += mislabeled_list[1]["pseudocode"]+"\n"
-            feedback += f"The following is a true negative pseudocode for problem {task_id} that was mislabeled as reproducible:\n"
-            feedback += mislabeled_list[1]["pseudocode"]+"\n"
-            if true_negative_errors[task_id]:
-                error_string = true_negative_errors[task_id]
-                feedback += "Here are the errors for this pseudocode:\n"
-                # feedback += str(error_list[:self.num_errors_shown]) + "\n"
-                feedback += error_string + "\n"
-            feedback += f"The following is a near miss pseudocode for problem {task_id} that was mislabeled as reproducible:\n"
-            feedback += mislabeled_list[1]["pseudocode"]+"\n"
-            if near_miss_errors[task_id]:
-                error_string = near_miss_errors[task_id]
-                feedback += "Here are the errors for this pseudocode:\n"
-                # feedback += str(error_list[:self.num_errors_shown]) + "\n"
-                feedback += error_string + "\n"
-        # if positives:
-        #     feedback += "The following are pseudocodes that are reproducible but were labeled as not:\n"
-        #     for entry in positives:
-        #         feedback += entry["pseudocode"]+"\n"
-        # if cosmetic:
-        #     feedback += "\nThe following are modified pseudocodes of other reproducible versions of pseudocode that are reproducible but were labeled as not:\n"
-        #     for entry in cosmetic:
-        #         feedback += "original version of the pseudocode for this problem that is reproducible:\n" 
-        #         feedback += entry["true_positive"] + "\n"
-        #         feedback += "modified version of the pseudocode for this problem that is also reproducible:\n"
-        #         feedback += entry["pseudocode"]+"\n"
-        # if negatives:
-        #     feedback += "\nThe following are pseudocodes that are not reproducible but were labeled as reproducible:\n"
-        #     for entry in negatives:
-        #         feedback += entry["pseudocode"]+"\n"
-        #         task_id = entry["task_id"]
-        #         if true_negative_errors[task_id]:
-        #             error_string = true_negative_errors[task_id]
-        #             feedback += "Here are the errors for this pseudocode:\n"
-        #             # feedback += str(error_list[:self.num_errors_shown]) + "\n"
-        #             feedback += error_string + "\n"
-        # if near_misses:
-        #     feedback += "\nThe following are pseudocodes that are almost reproducible but were labeled as reproducible:\n"
-        #     for entry in near_misses:
-        #         feedback += entry["pseudocode"]+"\n"
-        #         feedback += f"Passing rate for this pseudocode: {entry["score"]}, but was given a label of 1\n"
-        #         task_id = entry["task_id"]
-        #         if near_miss_errors[task_id]:
-        #             error_string = near_miss_errors[task_id]
-        #             feedback += "Here are the errors for this pseudocode:\n"
-        #             # feedback += str(error_list[:self.num_errors_shown]) + "\n"
-        #             feedback += error_string + "\n"
+        # for task_id, mislabeled_list in mislabeled_problems.items():
+            # if num_problems == num_problems_shown:
+            #     break
+            # num_problems += 1
+            # feedback += f"The following is a true positive pseudocode for problem {task_id} that was mislabeled as not reproducible:\n"
+            # feedback += mislabeled_list[0]["pseudocode"]+"\n"
+            # # feedback += f"The following is a cosmetic change to the true positive pseudocode for problem {task_id} that was mislabeled as not reproducible:\n"
+            # # feedback += mislabeled_list[1]["pseudocode"]+"\n"
+            # feedback += f"The following is a true negative pseudocode for problem {task_id} that was mislabeled as reproducible:\n"
+            # feedback += mislabeled_list[1]["pseudocode"]+"\n"
+            # if true_negative_errors[task_id]:
+            #     error_string = true_negative_errors[task_id]
+            #     feedback += "Here are the errors for this pseudocode:\n"
+            #     # feedback += str(error_list[:self.num_errors_shown]) + "\n"
+            #     feedback += error_string + "\n"
+            # feedback += f"The following is a near miss pseudocode for problem {task_id} that was mislabeled as reproducible:\n"
+            # feedback += mislabeled_list[1]["pseudocode"]+"\n"
+            # if near_miss_errors[task_id]:
+            #     error_string = near_miss_errors[task_id]
+            #     feedback += "Here are the errors for this pseudocode:\n"
+            #     # feedback += str(error_list[:self.num_errors_shown]) + "\n"
+            #     feedback += error_string + "\n"
+
+        if positives:
+            feedback += "The following are pseudocodes that are reproducible but were labeled as not:\n"
+            for entry in positives:
+                feedback += entry["pseudocode"]+"\n"
+        if cosmetic:
+            feedback += "\nThe following are modified pseudocodes of other reproducible versions of pseudocode that are reproducible but were labeled as not:\n"
+            for entry in cosmetic:
+                feedback += "original version of the pseudocode for this problem that is reproducible:\n" 
+                feedback += entry["true_positive"] + "\n"
+                feedback += "modified version of the pseudocode for this problem that is also reproducible:\n"
+                feedback += entry["pseudocode"]+"\n"
+        if negatives:
+            feedback += "\nThe following are pseudocodes that are not reproducible but were labeled as reproducible:\n"
+            for entry in negatives:
+                feedback += entry["pseudocode"]+"\n"
+                task_id = entry["task_id"]
+                if true_negative_errors[task_id]:
+                    error_string = true_negative_errors[task_id]
+                    feedback += "Here are the errors for this pseudocode:\n"
+                    # feedback += str(error_list[:self.num_errors_shown]) + "\n"
+                    feedback += error_string + "\n"
+                feedback += "Here is a version of the pseudocode that IS reproducible:\n"
+                feedback += entry["true_positive"] + "\n"
+        if near_misses:
+            feedback += "\nThe following are near-miss pseudocodes - they are almost reproducible but were labeled as reproducible:\n"
+            for entry in near_misses:
+                feedback += entry["pseudocode"]+"\n"
+                feedback += f"Passing rate for this pseudocode: {entry['score']}, but was given a label of 1\n"
+                task_id = entry["task_id"]
+                if near_miss_errors[task_id]:
+                    error_string = near_miss_errors[task_id]
+                    feedback += "Here are the errors for this pseudocode:\n"
+                    # feedback += str(error_list[:self.num_errors_shown]) + "\n"
+                    feedback += error_string + "\n"
+                feedback += "Here is a version of the pseudocode that IS reproducible:\n"
+                feedback += entry["true_positive"] + "\n"
         
         feedback += f'\nAvg Score for all pseudocodes: {final_score}'
 
@@ -369,9 +374,9 @@ class Evaluator:
         metrics = check_if_no_metrics(metrics)
         normalized_metrics = normalize_metrics(metrics)
         # print('normalized_metrics in evaluate():', normalize_metrics)
-        # problem_readability_scores = get_problem_readability_scores(metrics, "avg_word_length")
+        problem_readability_scores = get_problem_readability_scores(metrics, "avg_word_length")
         # problem_readability_scores = get_problem_readability_scores(metrics, "readability")
-        problem_readability_scores = get_problem_readability_scores(metrics, "avg_syllables_per_word")
+        # problem_readability_scores = get_problem_readability_scores(metrics, "avg_syllables_per_word")
         # problem_conciseness_scores = get_problem_readability_scores(metrics, "avg_words_per_line")
         avg_metrics = average_metrics(normalized_metrics)
         # avg_metrics = average_metrics(metrics)
@@ -382,8 +387,8 @@ class Evaluator:
             # final_score = avg_metrics['line_length']
             # final_score = 0.5*passing_rate + 4*avg_metrics['avg_word_length'] - avg_metrics['avg_words_per_line']
             # final_score = avg_metrics['avg_word_length'] - avg_metrics['avg_words_per_line']
-            # final_score = passing_rate + 4*avg_metrics['avg_word_length'] 
-            final_score = passing_rate + 4*avg_metrics['avg_syllables_per_word'] 
+            final_score = passing_rate + 4*avg_metrics['avg_word_length'] 
+            # final_score = passing_rate + 4*avg_metrics['avg_syllables_per_word'] 
             # final_score = avg_metrics['avg_word_length'] 
         else:
             final_score = passing_rate
@@ -392,7 +397,7 @@ class Evaluator:
         avg_metrics['passing_rate'] = passing_rate
         avg_metrics['avg_score'] = final_score
         avg_metrics = record_problem_scores(problem_passing_rates, avg_metrics, "passing_rate") # add the problem passing rates to the metrics
-        avg_metrics = record_problem_scores(problem_readability_scores, avg_metrics, "avg_syllables_per_word") # add the problem avg word length to the metrics
+        avg_metrics = record_problem_scores(problem_readability_scores, avg_metrics, "avg_word_length") # add the problem avg word length to the metrics
         # avg_metrics = record_problem_scores(problem_conciseness_scores, avg_metrics, "avg_words_per_line") # add the problem avg word length to the metrics
 
         # feedback = self.get_feedback(results, dev_score)

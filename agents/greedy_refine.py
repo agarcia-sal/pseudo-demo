@@ -69,8 +69,8 @@ class GreedyRefine:
         self.solution.append(Solution(prompt=prompt, response=response)) #[TO DO]: change
         print(f'len self.solution in step() for stage: {self.stage}:')
         print(len(self.solution))
-        print(f'self.solution in step for stage: {self.stage}: ')
-        print(self.solution)
+        # print(f'self.solution in step for stage: {self.stage}: ')
+        # print(self.solution)
         self.iteration += 1
         return prompt
 
@@ -83,8 +83,8 @@ class GreedyRefine:
         return
 
     def finalize(self):
-        print('len self.solution in finalize()')
-        print(len(self.solution))
+        # print('len self.solution in finalize()')
+        # print(len(self.solution))
         previous_best = sorted(self.solution, key=lambda x: x.score)[-1]
         # if self.stage == 'decoder':
         #     previous_best = sorted(self.solution, key=lambda x: x.score)[-1]

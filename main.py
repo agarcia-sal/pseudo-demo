@@ -9,8 +9,9 @@ import json
 import numpy as np
 import cProfile
 import pstats
+import traceback
 from utils.utils import init_client, file_to_string, setup_dataset, minify_code
-from evaluation.utils import save_metrics, save_prompt, get_pseudocode_dataset, evaluate_classifier_prompt, save_classifier_score, record_previous_best_solution, get_avg_test_case_length, get_num_difficulty, copy_difficulty_problems, get_positive_labels, write_dataset_to_file, write_error_strings_to_file
+from evaluation.utils import save_metrics, save_prompt, get_pseudocode_dataset, evaluate_classifier_prompt, save_classifier_score, record_previous_best_solution, get_avg_test_case_length, get_num_difficulty, copy_difficulty_problems, get_positive_labels, write_dataset_to_file, write_error_strings_to_file, reformat_human_eval_file
 # from agents import GreedyRefine
 from evaluation import Evaluator, get_data
 from openai import OpenAI
@@ -66,9 +67,10 @@ def main(cfg):
         raise NotImplementedError
     
     # Main algorithm
+    problems_dir_name = 'human_eval'
     # problems_dir_name = 'leet_code'
     # problems_dir_name = 'cosmetic_pseudocodes'
-    problems_dir_name = 'classifier_pseudocodes'
+    # problems_dir_name = 'classifier_pseudocodes'
     if problems_dir_name == 'leet_code':
         # version = 'v0.1.0'
         version = 'v0.3.0-hard'
@@ -79,8 +81,9 @@ def main(cfg):
         problems_filename = f'LeetCodeDataset-{version}-{split}.jsonl'
         data = get_data(problems_dir_name, problems_filename, src_dir=f'{ROOT_DIR}/data')
     elif problems_dir_name == "cosmetic_pseudocodes":
-        previous_timestamp = '2025-09-18_21-00-18'
-        previous_timestamp = '2025-09-18_04-55-13'
+        # previous_timestamp = '2025-09-18_21-00-18'
+        # previous_timestamp = '2025-09-18_04-55-13'
+        previous_timestamp = '2025-09-24_15-05-02'
         problems_filename = f"positive_labels_{previous_timestamp}.jsonl"
         data = get_data(problems_dir_name, problems_filename, src_dir=f'{ROOT_DIR}/data')
     elif problems_dir_name == "classifier_pseudocodes":
@@ -90,7 +93,8 @@ def main(cfg):
         # dev_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl")
         data = get_data(problems_dir_name, problems_filename, src_dir=f'{ROOT_DIR}/data')
     else:
-        problems_filename = 'HumanEval.jsonl'
+        split = "train"
+        problems_filename = f'HumanEval-{split}.jsonl'
         data = get_data(problems_dir_name, problems_filename, src_dir=f'{ROOT_DIR}/data')
 
 
@@ -98,7 +102,7 @@ def main(cfg):
     print(problems_filename)
 
     starting_iteration = 1
-    iterations = 12# [TO DO]: CO-Bench paper uses 64
+    iterations = 32# [TO DO]: CO-Bench paper uses 64
     rounds = 2# [TO DO]: this is a hyperparameter i need to tune; am using 10 for now
     timestamp = hydra.core.hydra_config.HydraConfig.get().run.dir.split("/")[-1] # this should syncronize with hydra's timestamp
     
@@ -128,7 +132,6 @@ def main(cfg):
     #     # api_key=os.environ.get("OPENAI_API_KEY"),  # This is the default and can be omitted
     #     api_key = os.getenv('OPENAI_API_KEY'),
     # )
-
    
 
     encoding_agent = ga(
@@ -224,6 +227,7 @@ def main(cfg):
                 #     break
             except Exception as e:
                 print(f"Error in iteration {it} for stage {stage}: {e}")
+                traceback.print_exc()
                 continue  # Skip to the next round
         if evolving_decoding:
             stage = 'decoder'
@@ -312,20 +316,22 @@ def main(cfg):
     new_filename = f'LeetCodeDataset-v0.3.0-hard-train.jsonl'
     # copy_difficulty_problems(os.path.join(problems_dir, problems_filename), os.path.join(problems_dir, new_filename), difficulty_map, limit)
 
-    store_pseudocode = True
+    store_pseudocode = False
     if store_pseudocode:
         print('in store pseudocode')
         stage = 'encoder'
         # timestamp = '2025-06-16_14-15-27'
         first_timestamp = '' # <- passing rate + natural language + conciseness
-        first_timestamp = '2025-09-18_21-00-18' # <- passing rate + natural language
+        # first_timestamp = '2025-09-18_21-00-18' # <- passing rate + natural language
         # first_timestamp = '2025-09-18_04-55-13'
         # first_timestamp = '2025-09-18_21-00-18'
-        first_dir_name = 'leet_code'
+        first_timestamp = '2025-09-24_15-05-02'
+        first_dir_name = 'human_eval'
         first_pipeline_json_path_name = f"{ROOT_DIR}/data/{first_dir_name}/metrics/{first_timestamp}_metrics.json"
-        second_timestamp =  '2025-09-18_21-00-18' # <- just readability: avg_word_length - avg_words_per_line
-        second_timestamp =  '2025-09-19_11-38-47'
-        second_timestamp =  '2025-09-20_00-16-56'
+        # second_timestamp =  '2025-09-18_21-00-18' # <- just readability: avg_word_length - avg_words_per_line
+        # second_timestamp =  '2025-09-19_11-38-47'
+        # second_timestamp =  '2025-09-20_00-16-56'
+        second_timestamp =  '2025-09-24_18-22-37'
         # second_timestamp =  '2025-09-20_19-13-22'
         second_dir_name = 'cosmetic_pseudocodes'
         # second_dir_name = 'leet_code'
@@ -334,21 +340,24 @@ def main(cfg):
         # problems_filename = f'LeetCodeDataset-v0.3.0tiny-train.jsonl'
         # problems_filename = f'LeetCodeDataset-v0.3.0-hard-train.jsonl'
         # problems_dir = f"{ROOT_DIR}/data/{first_dir_name}"
-        first_problems_filename = f'LeetCodeDataset-v0.3.0-hard-train.jsonl'
+        # first_problems_filename = f'LeetCodeDataset-v0.3.0-hard-train.jsonl'
+        first_problems_filename = f'HumanEval-train.jsonl'
         first_dir = f"{ROOT_DIR}/data/{first_dir_name}"
         second_dir = f"{ROOT_DIR}/data/{second_dir_name}"
         second_problems_filename = f"positive_labels_{first_timestamp}.jsonl"
         # second_problems_filename = f'LeetCodeDataset-v0.3.0-hard-train.jsonl'
         # positive_labels_path_name = os.path.join(ROOT_DIR, "outputs", "pseudocodes", f"positive_labels_{timestamp}")
         # GET POSITIVE EXAMPLES:
-        first_timestamp = '2025-09-18_21-00-18'
+        # first_timestamp = '2025-09-18_21-00-18'
+        first_timestamp = '2025-09-24_15-05-02'
+        
         new_file_name = os.path.join(ROOT_DIR, "data", "cosmetic_pseudocodes", f"positive_labels_{first_timestamp}.jsonl")
         # positive_examples = get_positive_labels(first_pipeline_json_path_name, first_dir, first_problems_filename, new_file_name, first_timestamp)
         # positive_examples = get_positive_labels(first_pipeline_json_path_name, problems_dir, problems_filename, first_timestamp, iterations)
         
         # GET PSEUDOCODE DATASET FOR THE CLASSIFIER:
         limit = 150
-        # problem_results, dev_set_results = get_pseudocode_dataset(first_pipeline_json_path_name, second_pipeline_json_path_name, first_dir, second_dir, first_problems_filename, second_problems_filename, first_timestamp, second_timestamp, iterations, limit)
+        problem_results, dev_set_results = get_pseudocode_dataset(first_pipeline_json_path_name, second_pipeline_json_path_name, first_dir, second_dir, first_problems_filename, second_problems_filename, first_timestamp, second_timestamp, iterations, limit)
         # print('problem_results: ')
         # print(problem_results)
         # print('dev_set_results:')
@@ -371,7 +380,11 @@ def main(cfg):
         version = 3
         new_file_name = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl")
         # new_file_name = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-train.jsonl" )
-        write_error_strings_to_file(file_name, new_file_name, decoder_prompt, client)
+        # write_error_strings_to_file(file_name, new_file_name, decoder_prompt, client)
+        # split = "test"
+        # problems_filename = f'HumanEval-{split}.jsonl'
+        # file_name = os.path.join(ROOT_DIR, "data", "human_eval", problems_filename)
+        # reformat_human_eval_file(file_name)
 
     ######################## Create cosmetic changes for the positive labels: ################################
 
@@ -394,7 +407,8 @@ def main(cfg):
     # positive_examples_file_name = os.path.join(ROOT_DIR, "outputs", "pseudocodes", f"positive_labels_{timestamp}.jsonl")
     final_iter = 34
     # previous_timestamp = '2025-09-18_21-00-18'
-    previous_timestamp = '2025-09-18_04-55-13'
+    # previous_timestamp = '2025-09-18_04-55-13'
+    previous_timestamp = '2025-09-24_15-05-02'
     positive_examples_file_name = f"positive_labels_{previous_timestamp}.jsonl"
     decoder_prompt = file_to_string(f"{ROOT_DIR}/outputs/prompts/{previous_timestamp}/prompt_iter_{final_iter}_decoder.txt")
 
@@ -449,7 +463,7 @@ def main(cfg):
         stage='classifier'
     )
     # evolving_classifier = False
-    classifier_iterations = 5
+    classifier_iterations = 7
     # rounds = 1
     previous_timestamp = '2025-09-18_21-00-18'
     final_iter = 34
@@ -476,11 +490,11 @@ def main(cfg):
                 save_prompt(str(generated_prompts_path), prompt, it, stage)
                 # print('right before calling evaluate() within the round')
                 # feedback = evaluator_classifier.evaluate_classifier(prompt, decoder_prompt, stage, timestamp, it, client)
-                # mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, it)
-                mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, it)
+                mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, it)
+                # mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, it)
                 # print('step:', 1)
-                # feedback = evaluator_classifier.get_feedback_classifier(mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
-                feedback = evaluator_classifier.get_feedback_classifier(mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
+                feedback = evaluator_classifier.get_feedback_classifier(mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
+                # feedback = evaluator_classifier.get_feedback_classifier(mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
                 # print('step:', 2)
                 score = feedback.dev_score
                 # save_metrics(avg_metrics, metrics_path, timestamp, stage, it, round, rounds)
@@ -580,14 +594,16 @@ def main(cfg):
 
     timestamp = '2025-09-15_01-29-56' # readability: "avg_syllables_per_word", "line_count"]
     timestamp = '2025-09-18_21-00-18'
-    problems_dir_name = 'leet_code'
+    timestamp = '2025-09-24_15-05-02'
+    # problems_dir_name = 'leet_code'
     problem_metrics_file = f"{ROOT_DIR}/data/{problems_dir_name}/metrics/{timestamp}_metrics.json"
     with open(problem_metrics_file, "r") as f:
         data = json.load(f)
     df_enc_2 = pd.DataFrame(data)
 
     # metrics = ["passing_rate", "avg_word_length", "avg_words_per_line"]
-    metrics = ["passing_rate", "avg_syllables_per_word", "avg_words_per_line"]
+    # metrics = ["passing_rate", "avg_syllables_per_word", "avg_words_per_line"]
+    metrics = ["passing_rate"]
     # metrics = ["passing_rate", "avg_word_length"]
     # metrics = ["avg_score"]
 
@@ -596,7 +612,7 @@ def main(cfg):
         x="iter",              # X-axis
         y=metrics,                         # Y-columns (as a list)
         figsize=(10, 5),                   # Figure size
-        title="Metrics Over Time - Autoencoder",  # Plot title
+        title="Metrics Over Time - Autoencoder - HumanEval",  # Plot title
         grid=True,                         # Show grid
         marker="o"                         # Marker style
     )
