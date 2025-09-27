@@ -26,7 +26,7 @@ def evaluate_instance(instance, solve, eval_func):
 
 
 class Evaluator:
-    def __init__(self, data, timeout=10, cpu_num=None, feedback_length=64, line_count=20, example_count=8, num_errors_shown=1, classifier_count=2):
+    def __init__(self, data, timeout=10, cpu_num=None, feedback_length=64, line_count=20, example_count=8, num_errors_shown=1, classifier_count=4):
         self.data = data
         self.timeout = timeout
         data_size = {problem: [1] * len(
@@ -136,20 +136,21 @@ class Evaluator:
             for idx in range(len(pseudocode_list)):
                 prev_score.append(f"\nPseudocode for Problem {idx+1}:\n" + pseudocode_list[idx])
                 prev_score.append(f"\nModified Pseudocode for Problem {idx+1}:\n" + code_list[idx])
-                if error_strings[idx]:
-                    prev_score.append(f"\nError(s) from the decoded code for Problem {idx+1}:\n" + error_strings[idx])
+                # if error_strings[idx]:
+                #     prev_score.append(f"\nError(s) from the decoded code for Problem {idx+1}:\n" + error_strings[idx])
 
         prev_score = '\n'.join(prev_score)
 
         if stage == 'encoder':
             # prev_score += f'\nAvg Passing Rate Minus Line Count: {avg_score}'
             # prev_score += f'\nScore of Average word length for ALL the problems: {avg_score}'
-            prev_score += f'\nScore of (4*(Average word length) + passing rate) for ALL the problems: {avg_score}'
+            prev_score += f'\nScore of (4*(Average syllables per word) + passing rate) for ALL the problems: {avg_score}'
             # prev_score += f'\nScore of (Average word length - average words per line) for ALL the problems: {avg_score}'
         elif stage == 'decoder':
             prev_score += f'\nAvg Passing Rate for ALL the problems: {avg_score}'
         elif stage == 'cosmetic':
-            prev_score += f'\nScore of Passing Rate - BLEU Score for ALL the problems: {avg_score}'
+            # prev_score += f'\nScore of Passing Rate - BLEU Score for ALL the problems: {avg_score}'
+            prev_score += f'\nScore of -1*(BLEU Score) for ALL the problems: {avg_score}'
 
         # print("PREV_SCORE:")
         # print(prev_score)
@@ -171,14 +172,16 @@ class Evaluator:
         negative_error_task_ids = set(true_negative_errors.keys())
         near_miss_error_task_ids = set(near_miss_errors.keys())
 
-        feedback = 'We have a 4 way split for the pseudocodes: true positives, which are pseudocodes that correspond to code that passes all test cases.\n'
+        feedback = ''
+
+        feedback = 'We have a 2 way split for the pseudocodes: true positives, which are pseudocodes that correspond to code that passes all test cases.\n'
         feedback += 'We also have true negatives, which are pseudocodes that correspond to code that do not pass all test cases.\n'
-        feedback += 'We have cosmetic, which are pseudocodes that are variations of the positive pseudocodes and also pass all test cases.\n'
-        feedback += 'We have near-misses, which are pseudocodes that correspond to code that almost passes all test cases but do not. They pass at least 80% of test cases\n'
-        feedback += f'Here is the score for this prompt on positive-labeled pseudocodes: {avg_metrics["true_positive"]}\n'
-        feedback += f'Here is the score for this prompt on negative-labeled pseudocodes: {avg_metrics["true_negative"]}\n'
-        feedback += f'Here is the score for this prompt on cosmetic-labeled pseudocodes: {avg_metrics["cosmetic"]}\n'
-        feedback += f'Here is the score for this prompt on near_miss-labeled pseudocodes: {avg_metrics["near_miss"]}\n\n'
+        # feedback += 'We have cosmetic, which are pseudocodes that are variations of the positive pseudocodes and also pass all test cases.\n'
+        # feedback += 'We have near-misses, which are pseudocodes that correspond to code that almost passes all test cases but do not. They pass at least 80% of test cases\n'
+        # feedback += f'Here is the score for this prompt on positive-labeled pseudocodes: {avg_metrics["true_positive"]}\n'
+        # feedback += f'Here is the score for this prompt on negative-labeled pseudocodes: {avg_metrics["true_negative"]}\n'
+        # feedback += f'Here is the score for this prompt on cosmetic-labeled pseudocodes: {avg_metrics["cosmetic"]}\n'
+        # feedback += f'Here is the score for this prompt on near_miss-labeled pseudocodes: {avg_metrics["near_miss"]}\n\n'
         
         num_problems_shown = 2
         num_problems = 0
@@ -209,13 +212,13 @@ class Evaluator:
             feedback += "The following are pseudocodes that are reproducible but were labeled as not:\n"
             for entry in positives:
                 feedback += entry["pseudocode"]+"\n"
-        if cosmetic:
-            feedback += "\nThe following are modified pseudocodes of other reproducible versions of pseudocode that are reproducible but were labeled as not:\n"
-            for entry in cosmetic:
-                feedback += "original version of the pseudocode for this problem that is reproducible:\n" 
-                feedback += entry["true_positive"] + "\n"
-                feedback += "modified version of the pseudocode for this problem that is also reproducible:\n"
-                feedback += entry["pseudocode"]+"\n"
+        # if cosmetic:
+        #     feedback += "\nThe following are cosmetic or modified pseudocodes of other reproducible versions of pseudocode that are reproducible but were labeled as not:\n"
+        #     for entry in cosmetic:
+        #         feedback += "original version of the pseudocode for this problem that is reproducible:\n" 
+        #         feedback += entry["true_positive"] + "\n"
+        #         feedback += "modified version of the pseudocode for this problem that is also reproducible:\n"
+        #         feedback += entry["pseudocode"]+"\n"
         if negatives:
             feedback += "\nThe following are pseudocodes that are not reproducible but were labeled as reproducible:\n"
             for entry in negatives:
@@ -228,19 +231,19 @@ class Evaluator:
                     feedback += error_string + "\n"
                 feedback += "Here is a version of the pseudocode that IS reproducible:\n"
                 feedback += entry["true_positive"] + "\n"
-        if near_misses:
-            feedback += "\nThe following are near-miss pseudocodes - they are almost reproducible but were labeled as reproducible:\n"
-            for entry in near_misses:
-                feedback += entry["pseudocode"]+"\n"
-                feedback += f"Passing rate for this pseudocode: {entry['score']}, but was given a label of 1\n"
-                task_id = entry["task_id"]
-                if near_miss_errors[task_id]:
-                    error_string = near_miss_errors[task_id]
-                    feedback += "Here are the errors for this pseudocode:\n"
-                    # feedback += str(error_list[:self.num_errors_shown]) + "\n"
-                    feedback += error_string + "\n"
-                feedback += "Here is a version of the pseudocode that IS reproducible:\n"
-                feedback += entry["true_positive"] + "\n"
+        # if near_misses:
+        #     feedback += "\nThe following are near-miss pseudocodes - they are almost reproducible but were labeled as reproducible:\n"
+        #     for entry in near_misses:
+        #         feedback += entry["pseudocode"]+"\n"
+        #         feedback += f"Passing rate for this pseudocode: {entry['score']}, but was given a label of 1\n"
+        #         task_id = entry["task_id"]
+        #         if near_miss_errors[task_id]:
+        #             error_string = near_miss_errors[task_id]
+        #             feedback += "Here are the errors for this pseudocode:\n"
+        #             # feedback += str(error_list[:self.num_errors_shown]) + "\n"
+        #             feedback += error_string + "\n"
+        #         feedback += "Here is a version of the pseudocode that IS reproducible:\n"
+        #         feedback += entry["true_positive"] + "\n"
         
         feedback += f'\nAvg Score for all pseudocodes: {final_score}'
 
@@ -330,7 +333,8 @@ class Evaluator:
         # it's just the bleu score so no need to normalize
         avg_metrics = average_metrics(metrics) # averaged across all problems
 
-        final_score = passing_rate - avg_metrics['bleu_score'] 
+        # final_score = passing_rate - avg_metrics['bleu_score'] 
+        final_score = -1*avg_metrics['bleu_score']
 
         avg_metrics['passing_rate'] = passing_rate
         avg_metrics['avg_score'] = final_score
@@ -374,9 +378,9 @@ class Evaluator:
         metrics = check_if_no_metrics(metrics)
         normalized_metrics = normalize_metrics(metrics)
         # print('normalized_metrics in evaluate():', normalize_metrics)
-        problem_readability_scores = get_problem_readability_scores(metrics, "avg_word_length")
+        # problem_readability_scores = get_problem_readability_scores(metrics, "avg_word_length")
         # problem_readability_scores = get_problem_readability_scores(metrics, "readability")
-        # problem_readability_scores = get_problem_readability_scores(metrics, "avg_syllables_per_word")
+        problem_readability_scores = get_problem_readability_scores(metrics, "avg_syllables_per_word")
         # problem_conciseness_scores = get_problem_readability_scores(metrics, "avg_words_per_line")
         avg_metrics = average_metrics(normalized_metrics)
         # avg_metrics = average_metrics(metrics)
@@ -387,8 +391,8 @@ class Evaluator:
             # final_score = avg_metrics['line_length']
             # final_score = 0.5*passing_rate + 4*avg_metrics['avg_word_length'] - avg_metrics['avg_words_per_line']
             # final_score = avg_metrics['avg_word_length'] - avg_metrics['avg_words_per_line']
-            final_score = passing_rate + 4*avg_metrics['avg_word_length'] 
-            # final_score = passing_rate + 4*avg_metrics['avg_syllables_per_word'] 
+            # final_score = passing_rate + 4*avg_metrics['avg_word_length'] 
+            final_score = passing_rate + 4*avg_metrics['avg_syllables_per_word'] 
             # final_score = avg_metrics['avg_word_length'] 
         else:
             final_score = passing_rate
@@ -397,7 +401,7 @@ class Evaluator:
         avg_metrics['passing_rate'] = passing_rate
         avg_metrics['avg_score'] = final_score
         avg_metrics = record_problem_scores(problem_passing_rates, avg_metrics, "passing_rate") # add the problem passing rates to the metrics
-        avg_metrics = record_problem_scores(problem_readability_scores, avg_metrics, "avg_word_length") # add the problem avg word length to the metrics
+        avg_metrics = record_problem_scores(problem_readability_scores, avg_metrics, "avg_syllables_per_word") # add the problem avg word length to the metrics
         # avg_metrics = record_problem_scores(problem_conciseness_scores, avg_metrics, "avg_words_per_line") # add the problem avg word length to the metrics
 
         # feedback = self.get_feedback(results, dev_score)

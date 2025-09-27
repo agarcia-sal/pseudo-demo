@@ -122,8 +122,8 @@ def list_jsonl_task_ids(path=".", split='', version=''):
     #             print(f"Error details: {e}")
     #             raise
     for problem in read_jsonl(path):
-        print('problem in list_jsonl_task_ids:')
-        print(problem)
+        # print('problem in list_jsonl_task_ids:')
+        # print(problem)
         task_id = problem["task_id"]
         task_id = task_id.replace("/", "-")
         task_ids.append(task_id)
@@ -798,8 +798,8 @@ class ParallelRun:
             original_pseudocodes = get_original_pseudocodes_jsonl(problems_file)
             encoding_prompt = prompt
             decoding_prompt = prev_stage_prompt
-            print('origianl pseudocodes:')
-            print(original_pseudocodes)
+            # print('origianl pseudocodes:')
+            # print(original_pseudocodes)
 
         
         # print('case workers: ', case_workers)
@@ -1477,8 +1477,8 @@ def check_if_no_metrics(metrics):
             new_metrics_dict[problem_name_key] = metrics_dict
     return new_metrics_dict
 
-def record_previous_best_solution(previous_best_path, prompt, dev_score, dev_feedback):
-    previous_best = {"prompt": prompt, "response": prompt, "score": dev_score, "feedback": dev_feedback}
+def record_previous_best_solution(previous_best_path, prompt, dev_score, dev_feedback, it):
+    previous_best = {"prompt": prompt, "response": prompt, "score": dev_score, "feedback": dev_feedback, "iter": it}
     with open(previous_best_path, "w") as file:
         json.dump(previous_best, file, indent=2)
 
@@ -1559,6 +1559,53 @@ def copy_difficulty_problems(problems_file_name, new_file_name, difficulty_map, 
                 num_problems_map[difficulty] += 1
                 result.append(problem)
     write_jsonl(new_file_name, result)
+
+def get_pseudocode_labels(metrics_json_path_name, problems_dir, problems_filename, new_file_name, first_timestamp):
+    problems_file_name = os.path.join(problems_dir,problems_filename)
+    problems = list_jsonl_task_ids(problems_file_name)
+    num_problems = len(problems)
+
+    pseudocode_examples = []
+
+    with open(metrics_json_path_name, 'r') as file:
+        pipeline_data = json.load(file)
+
+    for i in range(len(pipeline_data)-1, -1, -1): # how to iterate? i suppose starting from the back to get the best ones? with the most iterations?
+        entry = pipeline_data[i]
+        for problem in read_jsonl(problems_file_name):
+            task_id = problem["task_id"]
+            prompt = problem["prompt"]
+            entry_point = problem["entry_point"]
+            if "leet_code" in problems_dir:
+                test_cases = problem["input_output"]
+            elif "human_eval" in problems_dir:
+                test_cases = problem["test"]
+
+            if "leet_code" in problems_dir:
+                original_code = problem["prompt"] + problem["response"]
+            elif "human_eval" in problems_dir:
+                original_code = problem["prompt"] + problem["canonical_solution"]
+
+            score = entry[f"{task_id}_passing_rate"]
+
+            iteration = entry["iter"]
+            stage = entry["stage"]
+            pseudocode_path_name = os.path.join(problems_dir, "outputs", first_timestamp, f"iter_{iteration}", "pseudocodes", f"{task_id}_pseudocode_{stage}.txt")
+            with open(pseudocode_path_name, 'r') as file:
+                pseudocode = file.read()
+
+            error_file_path = os.path.join(problems_dir, "outputs", first_timestamp, f"iter_{iteration}", "errors", f"{task_id}_errors.txt")
+            if os.path.isfile(error_file_path):
+                with open(error_file_path, 'r') as file:
+                    error = file.read()
+            else:
+                error = ''
+            if "leet_code" in problems_dir:
+                pseudocode_examples.append({"task_id":task_id, "score": score, "pseudocode": pseudocode, "prompt": prompt, "entry_point": entry_point, "input_output": test_cases, "original_code": original_code, "error": error})
+            elif "human_eval" in problems_dir:
+                pseudocode_examples.append({"task_id":task_id, "score": score, "pseudocode": pseudocode, "prompt": prompt, "entry_point": entry_point, "test": test_cases, "original_code": original_code, "error": error})
+
+    write_jsonl(new_file_name, pseudocode_examples)
     
 def get_positive_labels(metrics_json_path_name, problems_dir, problems_filename, new_file_name, first_timestamp):
     problems_file_name = os.path.join(problems_dir,problems_filename)
@@ -1645,7 +1692,96 @@ def write_errors_to_file(error_file_path, errors, num_errors):
     #     if error_list:
     #         with open(problem_error_file_path, 'w') as file:
     #             file.write(str(error_list[:num_errors]))
+def get_pseudocode_dataset_test(first_pipeline_json_path_name, first_problems_dir, first_problems_filename, first_timestamp, limit):
+    problems = list_jsonl_task_ids(os.path.join(first_problems_dir, first_problems_filename)) 
+    
+    true_positive_problems = set()
+    true_negative_problems = set()
+    
+    true_positive_examples = {problem : [] for problem in problems}
+    true_negative_examples = {problem : [] for problem in problems}
 
+    problem_positive_count_dict = {problem: 0 for problem in problems}
+    problem_negatives_count_dict = {problem: 0 for problem in problems}
+    
+       
+    with open(first_pipeline_json_path_name, 'r') as file:
+        first_pipeline_data = json.load(file)
+
+    for i in range(len(first_pipeline_data)-1, -1, -1): # how to iterate? i suppose starting from the back to get the best ones? with the most iterations?
+        entry = first_pipeline_data[i]
+        for problem in problems:
+            if entry[f"{problem}_passing_rate"] == 1.0: # per set I only want one problem
+                true_positive_examples[problem].append({"score": 1.0, "iter": entry["iter"], "stage": entry["stage"]})
+                true_positive_problems.add(problem)
+                problem_positive_count_dict[problem] += 1
+            else:
+                true_negative_examples[problem].append({"score": entry[f"{problem}_passing_rate"], "iter": entry["iter"], "stage": entry["stage"]})
+                true_negative_problems.add(problem)
+                problem_negatives_count_dict[problem] += 1
+
+    print('len of positive problems:', len(true_positive_problems))
+    print('len of negative problems: ', len(true_negative_problems))
+
+    problems_overlap = true_positive_problems.intersection(true_negative_problems)
+    limited_problems = random.sample(sorted(problems_overlap), min(len(problems_overlap), limit))
+    print('size of overlap: ', len(limited_problems))
+
+    problems_json_file = os.path.join(first_problems_dir,first_problems_filename)
+
+    problem_results = []
+
+    for entry in read_jsonl(problems_json_file):
+        problem = entry["task_id"]
+        
+        if problem in limited_problems:
+            if "leet_code" in first_problems_dir:
+                original_code = entry["prompt"] + entry["response"]
+            elif "human_eval" in first_problems_dir:
+                original_code = entry["prompt"] + entry["canonical_solution"]
+            elif 'pseudocode_labels' in first_problems_filename:
+                original_code = entry["original_code"]
+
+            prompt = entry["prompt"]
+            entry_point = entry["entry_point"]
+            if "leet_code" in first_problems_dir or ('pseudocode_labels' in first_problems_filename):
+                test_cases = entry["input_output"]
+                test_cases_key = 'input_output'
+            elif "human_eval" in first_problems_dir:
+                test_cases = entry["test"]
+                test_cases_key = 'test'
+            train_set = []
+            true_positive_entries = true_positive_examples[problem]
+            true_negative_entries = true_negative_examples[problem]
+
+            # get true positive example
+            iteration = true_positive_entries[0]["iter"]
+            score = true_positive_entries[0]["score"]
+            stage = true_positive_entries[0]["stage"]
+            pseudocode_path_name = os.path.join(first_problems_dir, "outputs", first_timestamp, f"iter_{iteration}", "pseudocodes", f"{problem}_pseudocode_{stage}.txt")
+            with open(pseudocode_path_name, 'r') as file:
+                pseudocode = file.read()
+            true_positive_pseudocode = pseudocode
+            train_set.append({"label": "true_positive","pseudocode": pseudocode,  "score": score})
+
+            # get true negative example
+            iteration = true_negative_entries[0]["iter"]
+            score = true_negative_entries[0]["score"]
+            stage = true_negative_entries[0]["stage"]
+            pseudocode_path_name = os.path.join(first_problems_dir, "outputs", first_timestamp, f"iter_{iteration}", "pseudocodes", f"{problem}_pseudocode_{stage}.txt")
+            with open(pseudocode_path_name, 'r') as file:
+                pseudocode = file.read()
+            error_file_path = os.path.join(first_problems_dir, "outputs", first_timestamp, f"iter_{iteration}", "errors", f"{problem}_errors.txt")
+            if os.path.isfile(error_file_path):
+                with open(error_file_path, 'r') as file:
+                    error = file.read()
+            else:
+                error = ''
+            train_set.append({"label": "true_negative","pseudocode": pseudocode,  "score": score, "error": error, "true_positive": true_positive_pseudocode})
+
+            problem_results.append({"task_id":problem, "pseudocode_dataset": train_set, "original_code": original_code, "prompt": prompt, "entry_point": entry_point, f"{test_cases_key}": test_cases})
+    return problem_results
+            
 
 def get_pseudocode_dataset(first_pipeline_json_path_name, second_pipeline_json_path_name, first_problems_dir, second_problems_dir, first_problems_filename, second_problems_filename, first_timestamp, second_timestamp, num_iterations, limit):
     # First step: go into the metrics json file and see which iters have a score of 1.0 and which don't.
@@ -2274,6 +2410,134 @@ def gen_multi_chat_decodings(dataset_name, problem_cases, decoding_prompt, pseud
 
     return code_decodings_list, task_pseudocodes_codes
 
+def evaluate_classifier_prompt_test(test_set_filename, prompt, client):
+    true_positives = []
+    true_negatives = []
+    num_problems = 0
+    true_negative_errors = {}
+
+    metrics = {}
+
+    task_ids = set()
+
+    for problem in read_jsonl(test_set_filename):
+        num_problems += 1
+        task_id = problem["task_id"]
+        task_ids.add(task_id)
+        metrics[task_id] = {"accuracy_score": 0, "true_positive": 0, "true_negative": 0, "near_miss": 0, "cosmetic": 0 }
+
+        pseudocode_dataset = problem["pseudocode_dataset"]
+        for entry in pseudocode_dataset:
+            if entry["label"] == "true_positive":
+                entry["task_id"] = task_id
+                true_positives.append(entry)
+                true_positive_pseudocode = entry["pseudocode"]
+            if entry["label"] == "true_negative":
+                entry["task_id"] = task_id
+                # entry["true_positive"] = true_positive_pseudocode
+                true_negatives.append(entry)
+
+                # error_string = entry["error_string"]
+                error_string = entry["error"]
+                true_negative_errors[task_id] = error_string
+            
+
+    train_pseudocodes_dataset = true_positives + true_negatives
+    # print('train_pseudocodes_dataset:', train_pseudocodes_dataset)
+
+    # print('len of train_pseudocodes_dataset: ', len(train_pseudocodes_dataset))
+    
+    pseudocodes = []
+
+    score = 0
+
+    for entry in train_pseudocodes_dataset:
+        pseudocodes.append(entry['pseudocode'])
+    # Feed problems to prompt
+    # let's say num problems = 3
+    output_list = gen_classifier_outputs(pseudocodes, prompt, client)
+    positives_outputs = output_list[:num_problems] # [:3] [0, 1, 2]
+    negatives_outputs = output_list[num_problems:] #[3:6] = [3,4,5]
+
+
+
+
+    # print('len of train_pseudocodes_dataset: ', len(train_pseudocodes_dataset))
+    # print('len of output_list: ', len(output_list))
+    mislabeled_positives = []
+    mislabeled_negatives = []
+
+    mislabeled_positives_task_ids = set()
+    mislabeled_negatives_task_ids = set()
+    # print('metrics:')
+    # print(metrics)
+    # print('true positives:')
+    # print(true_positives)
+
+    for i in range(len(true_positives)):
+        entry = true_positives[i]
+        label = entry["score"]
+        task_id = entry["task_id"]
+        output = positives_outputs[i]
+        
+
+        if label == output:
+            score += 1
+            metrics[task_id]["accuracy_score"] += 1
+            metrics[task_id]["true_positive"] += 1
+        else:
+            mislabeled_positives.append(entry)
+            # mislabeled_positives_task_ids.add(task_id)
+
+    print('len of positive mislabeled:', len(mislabeled_positives))
+
+    for i in range(len(true_negatives)):
+        entry = true_negatives[i]
+        label = entry["score"]
+        task_id = entry["task_id"]
+        output = negatives_outputs[i]
+
+        if output == 0:
+            score += 1
+            metrics[task_id]["accuracy_score"] += 1
+            metrics[task_id]["true_negative"] += 1
+        else:
+            mislabeled_negatives.append(entry)
+            # mislabeled_negatives_task_ids.add(task_id)
+
+    print('len of negative mislabeled: ', len(mislabeled_negatives))
+
+    # See if the outputs correspond to the actual labels
+    # for i in range(len(train_pseudocodes_dataset)):
+    #     entry = train_pseudocodes_dataset[i]
+    #     label = entry["score"]
+    #     output = near_miss_outputs[i]
+
+    #     if output < 1:
+    #         score += 1
+    #     else:
+    #         mislabeled_near_misses.append(entry)
+    for task_id in metrics:
+        metrics[task_id]["accuracy_score"] /= 2
+
+
+    final_score = score / (len(train_pseudocodes_dataset)) if train_pseudocodes_dataset else 0
+
+    print("final score: ", final_score)
+    # print('final_metrics:')
+    # print(final_metrics)
+    # return mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics
+
+    metrics = check_if_no_metrics(metrics)
+    avg_metrics = average_metrics(metrics)
+
+    avg_metrics['final_score'] = final_score
+    avg_metrics['avg_score'] = avg_metrics['accuracy_score']
+
+    return avg_metrics
+
+    return mislabeled_positives, mislabeled_negatives, true_negative_errors, final_score, metrics
+
 
 def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, dataset_name, timestamp, it ):
     # Decide whcih problems to feed to the prompt, first half of the positive examples and first half of the negative examples
@@ -2646,4 +2910,12 @@ def reformat_human_eval_file(file_name):
         results.append(problem)
 
     write_jsonl(file_name, results)
+
+def print_feedback_from_file(file_name_json):
+    if os.path.exists(file_name_json):
+        with open(file_name_json, "r") as f:
+            results = json.load(f)
+
+    print('feedback:')
+    print(results['feedback'])
 

@@ -455,7 +455,7 @@ def check_correctness(
         elif "leet_code" in dataset_name:
             result = safe_execute_leet_code(problem, completion, timeout + 1)
         else:
-            result = safe_execute(problem, completion, timeout + 1)
+            result = safe_execute_leet_code(problem, completion, timeout + 1)
         # result = safe_execute(problem, completion, timeout + 1)
         # print('result from unsafe_execute:')
         # print(result)

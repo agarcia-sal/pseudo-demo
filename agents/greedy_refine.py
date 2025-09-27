@@ -11,6 +11,7 @@ class Solution:
     score: Optional[float] = None
     feedback: Optional[str] = None
     response: Optional[str] = None
+    iter: Optional[float] = None
 
 
 class GreedyRefine:
@@ -35,8 +36,9 @@ class GreedyRefine:
                 prompt = previous_best["prompt"]
                 response = previous_best["response"]
                 score = previous_best["score"]
+                iter = previous_best["iter"]
                 feedback = previous_best
-                self.solution.append(Solution(prompt=prompt, score=score, feedback=feedback, response=response))
+                self.solution.append(Solution(prompt=prompt, score=score, feedback=feedback, response=response, iter=iter))
         else:
             raise ValueError("previous_best_path does not exist")
 
@@ -74,11 +76,12 @@ class GreedyRefine:
         self.iteration += 1
         return prompt
 
-    def feedback(self, score, feedback):
+    def feedback(self, score, feedback, iter):
         # print('in feedback() of greedy_define agent')
         
         self.solution[-1].score = score
         self.solution[-1].feedback = feedback
+        self.solution[-1].iter = iter
         # print('self.solution: ', self.solution)
         return
 
@@ -94,4 +97,4 @@ class GreedyRefine:
 
     def get_previous_best(self):
         previous_best = sorted(self.solution, key=lambda x: x.score)[-1]
-        return previous_best.prompt, previous_best.score, previous_best.feedback
+        return previous_best.prompt, previous_best.score, previous_best.feedback, previous_best.iter
