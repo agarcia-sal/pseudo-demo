@@ -1,0 +1,26 @@
+FUNCTION get_max_triples(n: integer)
+  PROCEDURE build_sequence(index: integer, acc: list)
+    IF index > n THEN
+      EXECUTE acc
+    ELSE
+      INVOKE build_sequence(index + 1, acc + [(index * index) - index + 1])
+    ENDIF
+  END PROCEDURE
+
+  PROCEDURE find_valid_combinations(a_seq: list, left: integer, mid: integer, right: integer, collected: list)
+    IF left >= n - 2 THEN
+      EXECUTE LENGTH(collected)
+    ELSIF mid >= n - 1 THEN
+      INVOKE find_valid_combinations(a_seq, left + 1, left + 2, left + 3, collected)
+    ELSIF right >= n THEN
+      INVOKE find_valid_combinations(a_seq, left, mid + 1, mid + 2, collected)
+    ELSE
+      SET total_sum TO a_seq[left] + a_seq[mid] + a_seq[right]
+      SET updated_collected TO (total_sum MOD 3 = 0) ? collected + [(a_seq[left], a_seq[mid], a_seq[right])] : collected
+      INVOKE find_valid_combinations(a_seq, left, mid, right + 1, updated_collected)
+    ENDIF
+  END PROCEDURE
+
+  INVOKE build_sequence(1, []) INTO sequence_list
+  EXECUTE find_valid_combinations(sequence_list, 0, 1, 2, [])
+END FUNCTION

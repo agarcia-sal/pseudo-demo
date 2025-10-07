@@ -1,0 +1,57 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    
+    FUNCTION parse_paren_group(group_string)
+        SET depth_counter TO 0
+        SET deepest_level TO 0
+        SET idx TO 0
+        WHILE idx < LENGTH(group_string)
+            SET sym TO group_string.at(idx)
+            IF sym = '(' THEN
+                SET depth_counter TO depth_counter + 1
+                IF depth_counter > deepest_level THEN
+                    SET deepest_level TO depth_counter
+                END IF
+            ELSE
+                SET depth_counter TO depth_counter - 1
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+        RETURN deepest_level
+    END FUNCTION
+
+    SET segments TO []
+    SET buffer TO ""
+    SET pointer TO 0
+    WHILE pointer < LENGTH(parentheses_string)
+        SET char TO parentheses_string.at(pointer)
+        IF char = ' ' THEN
+            IF buffer != "" THEN
+                APPEND buffer TO segments
+                SET buffer TO ""
+            END IF
+        ELSE
+            SET buffer TO buffer + char
+        END IF
+        SET pointer TO pointer + 1
+    END WHILE
+
+    IF buffer != "" THEN
+        APPEND buffer TO segments
+    END IF
+
+    SET results TO []
+    SET pos TO 0
+    WHILE pos < LENGTH(segments)
+        SET block TO segments.at(pos)
+        IF block != "" THEN
+            SET depth_found TO parse_paren_group(block)
+            APPEND depth_found TO results
+        END IF
+        SET pos TO pos + 1
+    END WHILE
+
+    RETURN results
+
+END FUNCTION
+```

@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+        INITIALIZE graph AS empty dictionary mapping keys TO lists
+        FOR index FROM 0 TO LENGTH(edges) - 1
+            LET firstNode BE edges[index][0]
+            LET secondNode BE edges[index][1]
+            ASSIGN graph[firstNode] TO graph.GET(firstNode, empty list) APPENDED WITH secondNode
+            ASSIGN graph[secondNode] TO graph.GET(secondNode, empty list) CONCATENATED WITH [firstNode]
+        END FOR
+
+        ASSIGN max_size TO 1
+
+        FUNCTION dfs WITH PARAMETERS currentNode parentNode
+            SET subtree_count TO 1
+            SET all_same_color_children TO TRUE
+
+            LET neighborsList BE graph[currentNode] IF currentNode IN graph ELSE empty list
+            INITIALIZE iterator TO 0
+            WHILE iterator < LENGTH(neighborsList)
+                LET adjNode BE neighborsList[iterator]
+                IF adjNode != parentNode THEN
+                    LET returnedCount BE dfs(adjNode, currentNode)
+                    IF returnedCount == 0 THEN
+                        SET all_same_color_children TO FALSE
+                    ELSE
+                        IF colors[adjNode] == colors[currentNode] THEN
+                            subtree_count = subtree_count + returnedCount
+                        ELSE
+                            all_same_color_children = FALSE
+                        END IF
+                    END IF
+                END IF
+                iterator = iterator + 1
+            END WHILE
+
+            IF all_same_color_children == TRUE THEN
+                IF subtree_count > max_size THEN
+                    max_size = subtree_count
+                END IF
+                RETURN subtree_count
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        LET initialNode BE 0
+        LET noParent BE -1
+        CALL dfs(initialNode, noParent)
+        RETURN max_size
+    END FUNCTION
+END CLASS

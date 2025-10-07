@@ -1,0 +1,122 @@
+CLASS Solution
+    FUNCTION minimizeStringValue(sourceString)
+        PROCEDURE constructFrequencyMap(text, outputMap)
+            SET idx TO 0
+            WHILE idx < LENGTH(text) DO
+                SET currentChar TO CHAR_AT(text, idx)
+                SET val TO 0
+                IF currentChar IN outputMap THEN
+                    SET val TO outputMap[currentChar]
+                END IF
+                SET outputMap[currentChar] TO val + 1
+                SET idx TO idx + 1
+            END WHILE
+        END PROCEDURE
+        
+        PROCEDURE removeKeyIfPresent(mapping, key)
+            IF key IN mapping THEN
+                DELETE mapping[key]
+            END IF
+        END PROCEDURE
+        
+        FUNCTION alphabetSequence()
+            SET resultList TO EMPTY_LIST
+            SET startCode TO ASCII('a')
+            SET endCode TO ASCII('z')
+            SET codeVar TO startCode
+            REPEAT
+                APPEND CHAR_FROM_ASCII(codeVar) TO resultList
+                SET codeVar TO codeVar + 1
+            UNTIL codeVar > endCode
+            RETURN resultList
+        END FUNCTION
+        
+        PROCEDURE sortLexical(listToSort)
+            SET lenList TO LENGTH(listToSort)
+            SET i TO 0
+            WHILE i < lenList - 1 DO
+                SET j TO 0
+                WHILE j < lenList - i - 1 DO
+                    IF listToSort[j] > listToSort[j + 1] THEN
+                        SET tempVar TO listToSort[j]
+                        SET listToSort[j] TO listToSort[j + 1]
+                        SET listToSort[j + 1] TO tempVar
+                    END IF
+                    SET j TO j + 1
+                END WHILE
+                SET i TO i + 1
+            END WHILE
+        END PROCEDURE
+        
+        SET countMap TO EMPTY_MAP
+        CALL constructFrequencyMap(sourceString, countMap)
+        CALL removeKeyIfPresent(countMap, '?')
+        
+        SET questionPositions TO EMPTY_LIST
+        SET posIndex TO 0
+        REPEAT
+            IF posIndex >= LENGTH(sourceString) THEN BREAK END IF
+            SET currentLetter TO CHAR_AT(sourceString, posIndex)
+            IF currentLetter == '?' THEN
+                APPEND posIndex TO questionPositions
+            END IF
+            SET posIndex TO posIndex + 1
+        UNTIL FALSE
+        
+        SET replacements TO EMPTY_LIST
+        
+        FUNCTION getCountOrZero(m, k)
+            IF k IN m THEN
+                RETURN m[k]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+        
+        FOR EACH positionIndex IN questionPositions DO
+            SET minimumCount TO (1 + (2 * 2147483647))  // Large positive constant representation of infinity
+            SET characterWithMinCount TO NULL
+            SET letters TO alphabetSequence()
+            SET letterIterator TO 0
+            WHILE letterIterator < LENGTH(letters) DO
+                SET letterChar TO letters[letterIterator]
+                SET currentCount TO getCountOrZero(countMap, letterChar)
+                IF currentCount < minimumCount THEN
+                    SET minimumCount TO currentCount
+                    SET characterWithMinCount TO letterChar
+                END IF
+                SET letterIterator TO letterIterator + 1
+            END WHILE
+            
+            APPEND characterWithMinCount TO replacements
+            SET countMap[characterWithMinCount] TO getCountOrZero(countMap, characterWithMinCount) + 1
+        END FOR
+        
+        CALL sortLexical(replacements)
+        
+        SET charArray TO EMPTY_LIST
+        SET srcIndex TO 0
+        REPEAT
+            IF srcIndex >= LENGTH(sourceString) THEN BREAK END IF
+            APPEND CHAR_AT(sourceString, srcIndex) TO charArray
+            SET srcIndex TO srcIndex + 1
+        UNTIL FALSE
+        
+        SET replIndex TO 0
+        SET qPosIndex TO 0
+        WHILE qPosIndex < LENGTH(questionPositions) DO
+            SET charArray[ questionPositions[qPosIndex] ] TO replacements[replIndex]
+            SET qPosIndex TO qPosIndex + 1
+            SET replIndex TO replIndex + 1
+        END WHILE
+        
+        SET finalResult TO ""
+        SET concatIndex TO 0
+        WHILE concatIndex < LENGTH(charArray) DO
+            SET finalResult TO finalResult + charArray[concatIndex]
+            SET concatIndex TO concatIndex + 1
+        END WHILE
+        
+        RETURN finalResult
+    END FUNCTION
+END CLASS

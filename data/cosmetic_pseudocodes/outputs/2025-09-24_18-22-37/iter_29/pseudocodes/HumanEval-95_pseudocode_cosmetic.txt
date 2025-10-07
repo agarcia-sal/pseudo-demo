@@ -1,0 +1,41 @@
+```
+FUNCTION check_dict_case(arg_map)
+   IF 0 >= COUNT OF KEYS IN arg_map THEN RETURN False
+   END IF
+
+   VAR flag = "start"
+   VAR idx = 0
+   VAR key_val = NULL
+   WHILE idx < COUNT OF KEYS IN arg_map
+       SET key_val = KEYS OF arg_map AT idx
+       IF NOT (key_val INSTANCEOF STRING)
+          flag = "mixed"
+          EXIT WHILE
+       END IF
+
+       IF flag = "start" THEN
+          IF key_val EQUALS key_val TO UPPERCASE(key_val)
+             flag = "upper"
+          ELSE
+             IF key_val EQUALS key_val TO LOWERCASE(key_val)
+                flag = "lower"
+             ELSE
+                EXIT WHILE
+             END IF
+          END IF
+       ELSE 
+          VAR cond1 = (flag = "upper" AND NOT (key_val EQUALS UPPERCASE(key_val)))
+          VAR cond2 = (flag = "lower" AND NOT (key_val EQUALS LOWERCASE(key_val)))
+          IF cond1 OR cond2
+             flag = "mixed"
+             EXIT WHILE
+          ELSE
+             EXIT WHILE
+          END IF
+       END IF
+       idx = idx + 1
+   END WHILE
+
+   RETURN (flag = "upper") OR (flag = "lower")
+END FUNCTION
+```

@@ -1,0 +1,46 @@
+```
+FUNCTION get_row(data_structure, key_value)
+    FUNCTION recurse_row(i, acc)
+        IF NOT (i < LENGTH(data_structure)) THEN
+            RETURN acc
+        ELSE
+            RETURN recurse_col(i, 0, acc)
+    END FUNCTION
+
+    FUNCTION recurse_col(row_idx, j, accum_list)
+        IF NOT (j < LENGTH(data_structure[row_idx])) THEN
+            RETURN recurse_row(row_idx + 1, accum_list)
+        ELSE
+            IF (data_structure[row_idx][j] = key_value) THEN
+                SET new_accum_list TO accum_list + [(row_idx, j)]
+            ELSE
+                SET new_accum_list TO accum_list
+            RETURN recurse_col(row_idx, j + 1, new_accum_list)
+    END FUNCTION
+
+    SET filtered_coords TO recurse_row(0, [])
+
+    FUNCTION sort_by_first(lst)
+        IF lst = [] THEN RETURN []
+        LET pivot = lst[0]
+        LET less = [x FOR x IN lst WHERE x[0] < pivot[0]]
+        LET equal = [x FOR x IN lst WHERE x[0] = pivot[0]]
+        LET greater = [x FOR x IN lst WHERE x[0] > pivot[0]]
+        RETURN sort_by_first(less) + equal + sort_by_first(greater)
+    END FUNCTION
+
+    FUNCTION sort_by_second_desc(lst)
+        IF lst = [] THEN RETURN []
+        LET pivot = lst[0]
+        LET greater = [x FOR x IN lst WHERE x[1] > pivot[1]]
+        LET equal = [x FOR x IN lst WHERE x[1] = pivot[1]]
+        LET less = [x FOR x IN lst WHERE x[1] < pivot[1]]
+        RETURN greater + equal + sort_by_second_desc(less)
+    END FUNCTION
+
+    SET step_one_sorted TO sort_by_second_desc(filtered_coords)
+    SET final_sorted TO sort_by_first(step_one_sorted)
+
+    RETURN final_sorted
+END FUNCTION
+```

@@ -1,0 +1,77 @@
+CLASS Solution
+    FUNCTION numberOfSubmatrices(grid)
+        IF (grid == empty) OR ((grid[0]) == empty) THEN
+            RETURN 0
+        END IF
+        LET a TO LENGTH(grid)
+        LET b TO LENGTH(grid[0])
+        FUNCTION computePrefixSUM(aList, idx)
+            LET outputList TO list OF zeros WITH LENGTH (b + 1)
+            LET r TO 1
+            WHILE r <= b DO
+                outputList[r] = outputList[r - 1] + aList[r - 1][idx]
+                r = r + 1
+            END WHILE
+            RETURN outputList
+        END FUNCTION
+        DECLARE prefix_sum AS LIST
+        DECLARE w TO 0
+        DECLARE q TO 0
+        prefix_sum = LIST
+        LOOP
+            IF q > a THEN BREAK END IF
+            DECLARE innerLayer AS LIST
+            w = 0
+            REPEAT
+                IF w > b THEN
+                    EXIT REPEAT
+                END IF
+                innerLayer.APPEND([0,0])
+                w = w + 1
+            UNTIL FALSE
+            prefix_sum.APPEND(innerLayer)
+            q = q + 1
+        END LOOP
+        DECLARE m TO 1
+        LOOP START
+            IF NOT (m <= a) THEN
+                EXIT LOOP
+            END IF
+            DECLARE n TO 1
+            LOOP START
+                IF NOT (n <= b) THEN
+                    EXIT LOOP
+                END IF
+                prefix_sum[m][n][0] = prefix_sum[m][n - 1][0] + prefix_sum[m - 1][n][0] - prefix_sum[m - 1][n - 1][0]
+                prefix_sum[m][n][1] = prefix_sum[m][n - 1][1] + prefix_sum[m - 1][n][1] - prefix_sum[m - 1][n - 1][1]
+                IF (grid[m - 1][n - 1] == "X") THEN
+                    prefix_sum[m][n][0] = prefix_sum[m][n][0] + 1
+                ELSE
+                    IF (grid[m - 1][n - 1] == "Y") THEN
+                        prefix_sum[m][n][1] = prefix_sum[m][n][1] + 1
+                    END IF
+                END IF
+                n = n + 1
+            END LOOP
+            m = m + 1
+        END LOOP
+        LET res TO 0
+        LET c TO 1
+        REPEAT
+            IF NOT (c <= a) THEN
+                EXIT REPEAT
+            END IF
+            LET d TO 1
+            WHILE d <= b DO
+                LET f TO prefix_sum[c][d][0]
+                LET g TO prefix_sum[c][d][1]
+                IF (f > 0) AND (f == g) THEN
+                    res = res + 1
+                END IF
+                d = d + 1
+            END WHILE
+            c = c + 1
+        UNTIL FALSE
+        RETURN res
+    END FUNCTION
+END CLASS

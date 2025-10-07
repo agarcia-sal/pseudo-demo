@@ -1,0 +1,47 @@
+CLASS Solution  
+    FUNCTION findKthSmallest(coins k)  
+        FUNCTION count_smaller_or_equal(x)  
+            DECLARE total := 0  
+            DECLARE mask := 1  
+            DECLARE limit := (2 ^ (LENGTH coins)) - 1  
+            DECLARE index := 1  
+            WHILE index <= limit  
+                DECLARE current_lcm := 1  
+                DECLARE set_size := 0  
+                DECLARE pos := 0  
+                WHILE pos < LENGTH coins  
+                    DECLARE bit_check := 1 << pos  
+                    IF (index & bit_check) ≠ 0 THEN  
+                        DECLARE gcd_val := GCD(current_lcm, coins[pos])  
+                        DECLARE multiplied := current_lcm * coins[pos]  
+                        SET current_lcm := multiplied / gcd_val  
+                        SET set_size := set_size + 1  
+                    END IF  
+                    SET pos := pos + 1  
+                END WHILE  
+                DECLARE is_odd := (set_size % 2) = 1  
+                DECLARE div_result := FLOOR(x / current_lcm)  
+                IF is_odd = TRUE THEN  
+                    SET total := total + div_result  
+                ELSE  
+                    SET total := total - div_result  
+                END IF  
+                SET index := index + 1  
+            END WHILE  
+            RETURN total  
+        END FUNCTION  
+
+        DECLARE low_bound := 1  
+        DECLARE high_bound := k * (MIN(coins))  
+        WHILE low_bound < high_bound  
+            DECLARE mid_val := FLOOR((low_bound + high_bound) / 2)  
+            DECLARE count_val := count_smaller_or_equal(mid_val)  
+            IF count_val < k THEN  
+                SET low_bound := mid_val + 1  
+            ELSE  
+                SET high_bound := mid_val  
+            END IF  
+        END WHILE  
+        RETURN low_bound  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,125 @@
+CLASS Solution
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+        SET CONST_MODULO TO ((5 * 2) * (10 ^ 8)) + 1
+
+        SET conversion_table TO list containing twenty six references to lists containing zeroes repeated twenty six times
+        SET counter_i TO 0
+        LABEL outer_loop:
+        IF counter_i GREATER THAN OR EQUAL TO 26 THEN GOTO build_functions
+            SET counter_j TO 0
+            LABEL inner_loop:
+            IF counter_j GREATER THAN OR EQUAL TO (nums[counter_i] - 1) THEN
+                SET counter_i TO counter_i + 1
+                GOTO outer_loop
+            ENDIF
+            SET calculation_index TO ((counter_i + counter_j) + 1) MOD 26
+            SET conversion_table[counter_i][calculation_index] TO conversion_table[counter_i][calculation_index] + 1
+            SET counter_j TO counter_j + 1
+            GOTO inner_loop
+        LABEL build_functions:
+
+        FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+            SET result_matrix TO list containing twenty six sublists each initialized with zeroes twenty six times
+            SET outer_x TO 0
+            LABEL loop_i:
+            IF outer_x GREATER THAN 25 THEN RETURN result_matrix ENDIF
+                SET outer_y TO 0
+                LABEL loop_j:
+                IF outer_y GREATER THAN 25 THEN
+                    SET outer_x TO outer_x + 1
+                    GOTO loop_i
+                ENDIF
+                    SET idx_k TO 0
+                    LABEL loop_k:
+                    IF idx_k GREATER THAN 25 THEN
+                        SET outer_y TO outer_y + 1
+                        GOTO loop_j
+                    ENDIF
+                    SET intermediate_sum TO (result_matrix[outer_x][outer_y] + (A[outer_x][idx_k] * B[idx_k][outer_y])) MOD CONST_MODULO
+                    SET result_matrix[outer_x][outer_y] TO intermediate_sum
+                    SET idx_k TO idx_k + 1
+                    GOTO loop_k
+        END FUNCTION
+
+        FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+            SET identity_mat TO list
+            SET row_counter TO 0
+            LABEL identity_fill:
+            IF row_counter GREATER THAN 25 THEN
+                SET temp_base TO matrix
+                SET exp_power TO power
+                SET accum_result TO identity_mat
+                LABEL power_loop:
+                IF exp_power LESS THAN 1 THEN RETURN accum_result ENDIF
+                    IF (exp_power MOD 2) EQUALS 1 THEN
+                        SET accum_result TO matrix_multiply(accum_result, temp_base)
+                    ENDIF
+                    SET temp_base TO matrix_multiply(temp_base, temp_base)
+                    SET exp_power TO exp_power DIVIDED BY 2
+                    GOTO power_loop
+            ENDIF
+            SET identity_mat[row_counter] TO list of length 26
+            SET col_counter TO 0
+            LABEL identity_row_fill:
+            IF col_counter GREATER THAN 25 THEN
+                SET row_counter TO row_counter + 1
+                GOTO identity_fill
+            ENDIF
+            IF row_counter EQUALS col_counter THEN
+                SET identity_mat[row_counter][col_counter] TO 1
+            ELSE
+                SET identity_mat[row_counter][col_counter] TO 0
+            ENDIF
+            SET col_counter TO col_counter + 1
+            GOTO identity_row_fill
+        END FUNCTION
+
+        SET powered_matrix TO matrix_power(trans_matrix, t)
+
+        SET symbol_counts TO list initialized with twenty six zeroes
+        SET pos_char_index TO 0
+
+        FUNCTION char_to_num(c parameter c IS character) RETURNS integer
+            RETURN ASCII(c) - ASCII('a')
+        END FUNCTION
+
+        LABEL count_loop_chars:
+        IF pos_char_index GREATER THAN OR EQUAL TO LENGTH OF s THEN GOTO count_complete
+            SET curr_char TO s[pos_char_index]
+            SET converted_index TO char_to_num(curr_char)
+            SET temp_count_val TO symbol_counts[converted_index] + 1
+            SET symbol_counts[converted_index] TO temp_count_val
+            SET pos_char_index TO pos_char_index + 1
+            GOTO count_loop_chars
+        LABEL count_complete:
+
+        SET output_counts TO list of length 26 filled with zeroes
+        SET idx_outer TO 0
+        LABEL multi_loop_outer:
+        IF idx_outer GREATER THAN 25 THEN GOTO multi_loop_end
+
+            SET idx_inner TO 0
+            LABEL multi_loop_inner:
+            IF idx_inner GREATER THAN 25 THEN
+                SET idx_outer TO idx_outer + 1
+                GOTO multi_loop_outer
+            ENDIF
+
+            SET previous_sum TO output_counts[idx_inner]
+            SET multiplied_val TO (symbol_counts[idx_outer] * powered_matrix[idx_outer][idx_inner]) MOD CONST_MODULO
+            SET output_counts[idx_inner] TO (previous_sum + multiplied_val) MOD CONST_MODULO
+            SET idx_inner TO idx_inner + 1
+            GOTO multi_loop_inner
+
+        LABEL multi_loop_end:
+
+        SET summation_index TO 0
+        SET total_sum TO 0
+        LABEL sum_loop:
+        IF summation_index GREATER THAN 25 THEN RETURN (total_sum MOD CONST_MODULO) ENDIF
+            SET total_sum TO total_sum + output_counts[summation_index]
+            SET summation_index TO summation_index + 1
+            GOTO sum_loop
+
+    END FUNCTION
+END CLASS

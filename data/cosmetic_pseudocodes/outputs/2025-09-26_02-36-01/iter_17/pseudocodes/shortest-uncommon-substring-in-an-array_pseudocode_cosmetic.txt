@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        DECLARE charMap AS dictionary defaulting to zero
+        PROCEDURE countSubs(strList, idx)
+            IF idx >= LENGTH(strList) THEN RETURN
+            DECLARE currentString AS strList[idx]
+            DECLARE lenStr AS LENGTH(currentString)
+            DECLARE outerPos AS 0
+            WHILE outerPos < lenStr
+                DECLARE innerPos AS outerPos + 1
+                WHILE innerPos <= lenStr
+                    DECLARE tempSubstr AS SUBSTRING(currentString, outerPos, innerPos - 1)
+                    charMap[tempSubstr] = charMap[tempSubstr] + 1
+                    innerPos = innerPos + 1
+                END WHILE
+                outerPos = outerPos + 1
+            END WHILE
+            CALL countSubs(strList, idx + 1)
+        END PROCEDURE
+
+        CALL countSubs(arr, 0)
+
+        DECLARE resultList AS EMPTY LIST
+        PROCEDURE findShortest(strList, idx)
+            IF idx >= LENGTH(strList) THEN RETURN
+            DECLARE candidate AS ""
+            DECLARE chkString AS strList[idx]
+            DECLARE maxLen AS LENGTH(chkString)
+            DECLARE x AS 0
+            FIND_LOOP:
+            IF x >= maxLen THEN
+                resultList.APPEND(candidate)
+                CALL findShortest(strList, idx + 1)
+                RETURN
+            END IF
+            DECLARE y AS x + 1
+            INNER_FIND:
+            IF y > maxLen THEN
+                x = x + 1
+                GOTO FIND_LOOP
+            END IF
+            DECLARE subStr AS SUBSTRING(chkString, x, y - 1)
+            IF charMap[subStr] = 1 THEN
+                IF candidate = "" THEN
+                    candidate = subStr
+                ELSE
+                    DECLARE cond1 AS LENGTH(subStr) < LENGTH(candidate)
+                    DECLARE cond2 AS (LENGTH(subStr) = LENGTH(candidate)) AND (subStr < candidate)
+                    IF cond1 OR cond2 THEN
+                        candidate = subStr
+                    END IF
+                END IF
+            END IF
+            y = y + 1
+            GOTO INNER_FIND
+        END PROCEDURE
+
+        CALL findShortest(arr, 0)
+
+        RETURN resultList
+    END FUNCTION
+END CLASS

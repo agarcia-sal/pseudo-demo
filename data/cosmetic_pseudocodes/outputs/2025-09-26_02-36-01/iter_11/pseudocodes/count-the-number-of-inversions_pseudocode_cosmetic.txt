@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION numberOfPermutations(n, requirements)
+        SET CONSTANT_BASE TO 10
+        SET CONSTANT_EXP TO 9
+        SET CONSTANT_ADD TO 7
+        FUNCTION pow10(exp)
+            IF exp = 0 THEN
+                RETURN 1
+            ELSE
+                RETURN CONSTANT_BASE * pow10(exp - 1)
+            END IF
+        END FUNCTION
+        SET MOD TO pow10(CONSTANT_EXP) + CONSTANT_ADD
+
+        SET dict_reqs TO {}
+        SET idxA TO 0
+        WHILE idxA < LENGTH(requirements)
+            SET req_pair TO requirements[idxA]
+            SET dict_reqs[req_pair[0]] = req_pair[1]
+            SET idxA TO idxA + 1
+        END WHILE
+
+        FUNCTION count_permutations(prefix_len, inv_count, bits_used)
+            IF prefix_len = n THEN
+                FUNCTION get_req_value(key)
+                    IF key IN dict_reqs THEN
+                        RETURN dict_reqs[key]
+                    ELSE
+                        RETURN 0
+                    END IF
+                END FUNCTION
+                IF inv_count = get_req_value(n - 1) THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            ELSE
+                FUNCTION get_req_val_2(key)
+                    IF key IN dict_reqs THEN
+                        RETURN dict_reqs[key]
+                    ELSE
+                        RETURN key
+                    END IF
+                END FUNCTION
+                IF prefix_len > 0 THEN
+                    IF inv_count != get_req_val_2(prefix_len - 1) THEN
+                        RETURN 0
+                    END IF
+                END IF
+            END IF
+
+            SET total_count TO 0
+            FUNCTION bit_mask(pos)
+                RETURN 1 << pos
+            END FUNCTION
+
+            FUNCTION update_inversions(num_val, used_bits_local)
+                SET local_inv TO inv_count
+                SET idx_inner TO num_val + 1
+                WHILE idx_inner < n
+                    IF (used_bits_local & bit_mask(idx_inner)) != 0 THEN
+                        SET local_inv TO local_inv + 1
+                    END IF
+                    SET idx_inner TO idx_inner + 1
+                END WHILE
+                RETURN local_inv
+            END FUNCTION
+
+            FUNCTION calculate_count(accum_count, add_val)
+                RETURN (accum_count + add_val) % MOD
+            END FUNCTION
+
+            FUNCTION rec_loop(i, accum)
+                IF i >= n THEN
+                    RETURN accum
+                END IF
+                IF (bits_used & bit_mask(i)) = 0 THEN
+                    SET new_inv TO update_inversions(i, bits_used)
+                    SET next_bits_used TO bits_used | bit_mask(i)
+                    SET accum TO calculate_count(accum, count_permutations(prefix_len + 1, new_inv, next_bits_used))
+                END IF
+                RETURN rec_loop(i + 1, accum)
+            END FUNCTION
+
+            RETURN rec_loop(0, total_count)
+        END FUNCTION
+
+        RETURN count_permutations(0, 0, 0)
+    END FUNCTION
+END CLASS

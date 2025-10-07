@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION maxFrequency(dataList, limit, operationsCount)
+        FUNCTION initializeDefaultMap() 
+            ASSIGN mapInstance TO an empty dictionary
+            RETURN mapInstance
+        END FUNCTION
+
+        FUNCTION incrementMapValue(m, k, inc)
+            IF k NOT IN m THEN
+                m[k] = 0
+            END IF
+            m[k] = m[k] + inc
+        END FUNCTION
+ 
+        ASSIGN reference counterMap TO initializeDefaultMap()
+        ASSIGN reference deltaMap TO initializeDefaultMap()
+
+        PROCEDURE processElement(e)
+            CALL incrementMapValue(counterMap, e, 1)
+            CALL incrementMapValue(deltaMap, e, 0)
+            CALL incrementMapValue(deltaMap, e - limit, 1)
+            CALL incrementMapValue(deltaMap, e + limit + 1, -1)
+        END PROCEDURE
+
+        DECLARE idx TO 0
+        WHILE idx < LENGTH(dataList)
+            CALL processElement(dataList[idx])
+            idx = idx + 1
+        END WHILE
+
+        ASSIGN maximumFrequency TO 0
+        ASSIGN runningSum TO 0
+
+        DECLARE keysArray TO sorted keys of deltaMap
+        DECLARE pos TO 0
+        DEFINE LENGTH_KEYS AS LENGTH(keysArray)
+
+        WHILE pos < LENGTH_KEYS
+            ASSIGN currentKey TO keysArray[pos]
+            ASSIGN currentVal TO deltaMap[currentKey]
+
+            runningSum = runningSum + currentVal
+
+            ASSIGN candidateVal TO 0
+            IF runningSum < (counterMap[currentKey] + operationsCount) THEN
+                candidateVal = runningSum
+            ELSE
+                candidateVal = counterMap[currentKey] + operationsCount
+            END IF
+
+            IF candidateVal > maximumFrequency THEN
+                maximumFrequency = candidateVal
+            END IF
+
+            pos = pos + 1
+        END WHILE
+
+        RETURN maximumFrequency
+    END FUNCTION
+END CLASS

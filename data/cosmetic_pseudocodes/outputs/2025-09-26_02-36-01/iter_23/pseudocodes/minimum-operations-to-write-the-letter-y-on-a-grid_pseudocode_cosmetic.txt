@@ -1,0 +1,108 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        SET A TO LENGTH(grid)
+        SET B TO A DIV 2
+        
+        FUNCTION populateSetC(D, E, SetF)
+            IF D > E THEN RETURN
+            ADD (D, D) TO SetF
+            CALL populateSetC(D + 1, E, SetF)
+        END FUNCTION
+        
+        FUNCTION populateSetG(H, I, J, SetK)
+            IF H > I THEN RETURN
+            ADD (H, J(H, I, A)) TO SetK
+            CALL populateSetG(H + 1, I, J, SetK)
+        END FUNCTION
+        
+        FUNCTION H(L, M, N)
+            RETURN (N - M - 1)
+        END FUNCTION
+        
+        FUNCTION populateSetO(P, Q, SetR)
+            IF P > Q THEN RETURN
+            ADD (P, B) TO SetR
+            CALL populateSetO(P + 1, Q, SetR)
+        END FUNCTION
+        
+        SET SetS TO EMPTY SET
+        CALL populateSetC(0, B, SetS)
+        CALL populateSetG(0, B, H, SetS)
+        CALL populateSetO(B, A - 1, SetS)
+        
+        FUNCTION countValuesAtPositions(grid, positions)
+            SET countDict TO EMPTY DICTIONARY WITH DEFAULT 0
+            FUNCTION helperIndex(index, total, positions, grid, countDict)
+                IF index >= total THEN RETURN
+                SET pos TO positions[index]
+                SET row TO pos[0]
+                SET col TO pos[1]
+                SET val TO grid[row][col]
+                SET countDict[val] TO countDict[val] + 1
+                CALL helperIndex(index + 1, total, positions, grid, countDict)
+            END FUNCTION
+            CALL helperIndex(0, LENGTH(positions), positions, grid, countDict)
+            RETURN countDict
+        END FUNCTION
+        
+        SET ListT TO CONVERT SetS TO LIST
+        
+        SET DictU TO countValuesAtPositions(grid, ListT)
+        
+        FUNCTION isNotIn(y, SetV)
+            RETURN NOT (y IN SetV)
+        END FUNCTION
+        
+        FUNCTION countValuesNotIn(grid, fullRange, excludeSet)
+            SET countDict TO EMPTY DICTIONARY WITH DEFAULT 0
+            FUNCTION h(a, b)
+                RETURN (a, b)
+            END FUNCTION
+            FUNCTION helperAllPositions(x, y)
+                IF x >= fullRange THEN RETURN
+                IF y >= fullRange THEN CALL helperAllPositions(x + 1, 0) ELSE
+                    IF isNotIn(h(x, y), excludeSet) THEN
+                        SET val TO grid[x][y]
+                        SET countDict[val] TO countDict[val] + 1
+                    END IF
+                    CALL helperAllPositions(x, y + 1)
+                END IF
+            END FUNCTION
+            CALL helperAllPositions(0, 0)
+            RETURN countDict
+        END FUNCTION
+        
+        SET DictW TO countValuesNotIn(grid, A, SetS)
+        
+        SET X TO (2 + 0)       // zero plus two
+        SET minOperations TO 1 / 0  // positive infinity
+        
+        FUNCTION loopOuter(yVal)
+            IF yVal > X THEN RETURN
+            FUNCTION loopInner(nVal)
+                IF nVal > X THEN RETURN
+                IF NOT (yVal = nVal) THEN
+                    SET sumY TO 0
+                    FOR key IN [0,1,2]
+                        IF key IN DictU THEN SET sumY TO sumY + DictU[key] ELSE SET sumY TO sumY + 0
+                    END FOR
+                    SET sumN TO 0
+                    FOR key IN [0,1,2]
+                        IF key IN DictW THEN SET sumN TO sumN + DictW[key] ELSE SET sumN TO sumN + 0
+                    END FOR
+                    SET opCount TO (sumY - (IF yVal IN DictU THEN DictU[yVal] ELSE 0)) + (sumN - (IF nVal IN DictW THEN DictW[nVal] ELSE 0))
+                    IF opCount < minOperations THEN SET minOperations TO opCount
+                END IF
+                CALL loopInner(nVal + 1)
+            END FUNCTION
+            CALL loopInner(0)
+            CALL loopOuter(yVal + 1)
+        END FUNCTION
+        
+        CALL loopOuter(0)
+        
+        RETURN minOperations
+    END FUNCTION
+END CLASS
+```

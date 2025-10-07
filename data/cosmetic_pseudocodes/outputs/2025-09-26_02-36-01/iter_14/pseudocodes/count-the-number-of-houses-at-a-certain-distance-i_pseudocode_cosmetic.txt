@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION countOfPairs(n parameter, x parameter, y parameter) RETURNS list of integer  
+        SET answer TO list of zeros with length n  
+        
+        FUNCTION traverseBreadth(start parameter)  
+            SET visitedFlags TO list of False with length n + 1  
+            SET levels TO list of zeros with length n + 1  
+            SET nodesQueue TO double-ended queue initialized with start parameter  
+            SET visitedFlags[start parameter] TO True  
+            
+            REPEAT UNTIL nodesQueue IS empty  
+                SET currentNode TO element removed from front of nodesQueue  
+                
+                FOR each adjNode IN list of (currentNode - 1, currentNode + 1)  
+                    IF adjNode >= 1 AND adjNode <= n AND visitedFlags[adjNode] EQUALS False THEN  
+                        SET visitedFlags[adjNode] TO True  
+                        SET levels[adjNode] TO levels[currentNode] + 1  
+                        APPEND adjNode TO end of nodesQueue  
+                    END IF  
+                END FOR  
+                
+                IF currentNode EQUALS x AND visitedFlags[y] EQUALS False THEN  
+                    SET visitedFlags[y] TO True  
+                    SET levels[y] TO levels[currentNode] + 1  
+                    APPEND y TO end of nodesQueue  
+                END IF  
+                
+                IF currentNode EQUALS y AND visitedFlags[x] EQUALS False THEN  
+                    SET visitedFlags[x] TO True  
+                    SET levels[x] TO levels[currentNode] + 1  
+                    APPEND x TO end of nodesQueue  
+                END IF  
+            END REPEAT  
+            
+            SET idx TO 1  
+            WHILE idx <= n  
+                IF levels[idx] > 0 THEN  
+                    SET answer[levels[idx] - 1] TO answer[levels[idx] - 1] + 1  
+                END IF  
+                SET idx TO idx + 1  
+            END WHILE  
+        END FUNCTION  
+        
+        PROCEDURE runTraversal()  
+            SET counter TO 1  
+            WHILE counter <= n  
+                CALL traverseBreadth(counter)  
+                SET counter TO counter + 1  
+            END WHILE  
+        END PROCEDURE  
+        
+        CALL runTraversal()  
+        RETURN answer  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,128 @@
+CLASS Solution
+	Function getSum(nums)
+		
+		Function compute(listInput)
+			
+			Function createZeroList(size)
+				Declare arr = []
+				Declare idx = 0
+				While idx < size
+					arr = arr + [0]
+					idx = idx + 1
+				EndWhile
+				Return arr
+			EndFunction
+			
+			Function newCounter()
+				Declare mapObj = {}
+				Function increment(key, val)
+					If key In mapObj Then
+						mapObj[key] = mapObj[key] + val
+					Else
+						mapObj[key] = val
+					EndIf
+				EndFunction
+				Function getCount(key)
+					If key In mapObj Then
+						Return mapObj[key]
+					EndIf
+					Return 0
+				EndFunction
+				Return {inc: increment, get: getCount}
+			EndFunction
+			
+			
+			Declare lengthVal = 0
+			While True
+				Try
+					lengthVal = listInput[lengthVal]
+					lengthVal = lengthVal + 1
+				Catch error
+					Break
+				EndTry
+			EndWhile
+			Declare leftSide = createZeroList(lengthVal)
+			Declare rightSide = createZeroList(lengthVal)
+			Declare tracking = newCounter()
+			
+			Declare iteratorIndex = 1
+			Repeat Until iteratorIndex >= (lengthVal)
+				Declare key1 = listInput[iteratorIndex - 1]
+				Declare currentCount1 = tracking.get(key1 - 1)
+				tracking.inc(key1 - 1, (1 + currentCount1))
+				leftSide[iteratorIndex] = tracking.get(key1)
+				iteratorIndex = iteratorIndex + 1
+			EndRepeat
+			
+			tracking = newCounter()
+			
+			Declare k = lengthVal - 2
+			While k >= 0
+				Declare key2 = listInput[k + 1]
+				Declare currentCount2 = tracking.get(key2 + 1)
+				tracking.inc(key2 + 1, (1 + currentCount2))
+				rightSide[k] = tracking.get(key2)
+				k = k - 1
+			EndWhile
+			
+			Declare grandSum = 0
+			Declare indexer = 0
+			While indexer < lengthVal
+				Declare lVal = leftSide[indexer]
+				Declare rVal = rightSide[indexer]
+				Declare xVal = listInput[indexer]
+				Declare partSum = ((lVal + rVal) + (lVal * rVal)) * xVal
+				grandSum = grandSum + partSum
+				indexer = indexer + 1
+			EndWhile
+			
+			Return grandSum MOD (1000000000 + 7)
+			
+		EndFunction
+		
+		Declare MOD_VALUE = (10 * 100000000) + 7
+		Declare firstResult = compute(nums)
+		
+		Function reverseList(lst)
+			Declare startIdx = 0
+			Declare endIdx = 0
+			While True
+				Try
+					endIdx = lst[endIdx]
+					endIdx = endIdx + 1
+				Catch e
+					Break
+				EndTry
+			EndWhile
+			endIdx = endIdx - 1
+			
+			While startIdx < endIdx
+				Declare tempVar = lst[startIdx]
+				lst[startIdx] = lst[endIdx]
+				lst[endIdx] = tempVar
+				startIdx = startIdx + 1
+				endIdx = endIdx - 1
+			EndWhile
+			Return lst
+		EndFunction
+		
+		Declare reversedNums = reverseList(nums)
+		Declare secondResult = compute(reversedNums)
+		
+		Declare totalAccumulator = 0
+		Declare iterator = 0
+		While True
+			Try
+				Declare elem = nums[iterator]
+				totalAccumulator = totalAccumulator + elem
+				iterator = iterator + 1
+			Catch exception
+				Break
+			EndTry
+		EndWhile
+		
+		Declare finalAnswer = (firstResult + secondResult + totalAccumulator) MOD MOD_VALUE
+		Return finalAnswer
+		
+	EndFunction
+END CLASS

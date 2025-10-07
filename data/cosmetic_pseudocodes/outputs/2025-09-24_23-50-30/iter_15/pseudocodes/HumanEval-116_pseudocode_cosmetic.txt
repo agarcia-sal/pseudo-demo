@@ -1,0 +1,66 @@
+```
+FUNCTION sort_array(array_of_integers)
+  DECLARE buffer_list AS LIST OF INTEGERS INITIALIZED WITH array_of_integers
+  DECLARE step_one AS LIST OF INTEGERS
+  DECLARE step_two AS LIST OF INTEGERS
+
+  step_one ← EMPTY LIST
+  WHILE buffer_list IS NOT EMPTY DO
+    DECLARE min_element AS INTEGER ← buffer_list[0]
+    DECLARE index_tracker AS INTEGER ← 0
+    FOR index_tracker IN 0 TO LENGTH(buffer_list) - 1 DO
+      IF buffer_list[index_tracker] < min_element THEN
+        min_element ← buffer_list[index_tracker]
+      END IF
+    END FOR
+    APPEND min_element TO step_one
+    
+    DECLARE temp_list AS LIST OF INTEGERS
+    temp_list ← EMPTY LIST
+    FOR each_element IN buffer_list DO
+      IF each_element ≠ min_element THEN
+        APPEND each_element TO temp_list
+      END IF
+    END FOR
+    buffer_list ← temp_list
+  END WHILE
+
+  DECLARE count_ones AS FUNCTION(number)
+    DECLARE binary_version AS STRING ← ""
+    DECLARE count_accumulator AS INTEGER ← 0
+    DECLARE remainder_var AS INTEGER
+    DECLARE quotient_var AS INTEGER ← number
+    WHILE quotient_var > 0 DO
+      remainder_var ← quotient_var % 2
+      quotient_var ← (quotient_var - remainder_var) / 2
+      IF remainder_var ≠ 0 THEN
+        count_accumulator ← count_accumulator + 1
+      END IF
+    END WHILE
+    RETURN count_accumulator
+  END FUNCTION
+
+  step_two ← EMPTY LIST
+  DECLARE processed_map AS DICTIONARY WITH KEYS AS INTEGERS AND VALUES AS LISTS OF INTEGERS
+
+  FOR element IN step_one DO
+    DECLARE key_value AS INTEGER ← count_ones(element)
+    IF NOT (key_value IN processed_map) THEN
+      processed_map[key_value] ← EMPTY LIST
+    END IF
+    APPEND element TO processed_map[key_value]
+  END FOR
+
+  DECLARE final_result AS LIST OF INTEGERS ← EMPTY LIST
+  DECLARE sorted_keys AS LIST OF INTEGERS ← KEYS OF processed_map
+  DECLARE index_var AS INTEGER ← 0
+  WHILE index_var < LENGTH(sorted_keys) DO
+    FOR element IN processed_map[sorted_keys[index_var]] DO
+      APPEND element TO final_result
+    END FOR
+    index_var ← index_var + 1
+  END WHILE
+  
+  RETURN final_result
+END FUNCTION
+```

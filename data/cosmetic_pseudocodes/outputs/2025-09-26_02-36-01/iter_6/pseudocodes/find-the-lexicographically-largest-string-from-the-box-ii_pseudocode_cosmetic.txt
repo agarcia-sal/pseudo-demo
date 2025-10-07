@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION answerString(term, buddyCount)
+    BEGIN
+        DECLARE resultString
+        DECLARE limitIndex
+        IF buddyCount != (0 + 1)
+        THEN
+            SET resultString = CALL _lastSubstring WITH term
+            SET limitIndex = (LENGTH(term) - buddyCount) + (1 * 1)
+            RETURN SUBSTRING(resultString FROM 1 FOR MINIMUM(LENGTH(resultString), limitIndex))
+        ELSE
+            RETURN term
+        ENDIF
+    END
+
+    FUNCTION _lastSubstring(text)
+    BEGIN
+        DECLARE posA = 0
+        DECLARE posB = (0 + 1)
+        DECLARE offset = 0
+        DECLARE textLength = LENGTH(text)
+
+        FUNCTION charsEqualAt(u, v)
+        BEGIN
+            RETURN text[u] == text[v]
+        END
+
+        FUNCTION charGreaterAt(u, v)
+        BEGIN
+            RETURN text[u] > text[v]
+        END
+
+        FUNCTION whileLoop(a, b, c)
+        BEGIN
+            IF (b + c) >= textLength THEN RETURN (a, b, c) ENDIF
+
+            IF charsEqualAt(a + c, b + c) == TRUE THEN 
+                RETURN whileLoop(a, b, c + 1)
+            ENDIF
+
+            IF charGreaterAt(a + c, b + c) != FALSE THEN 
+                RETURN whileLoop(a, b + c + 1, 0) 
+            ELSE 
+                DECLARE newA = MAXIMUM(a + c + 1, b)
+                DECLARE newB = newA + 1
+                RETURN whileLoop(newA, newB, 0) 
+            ENDIF
+        END
+
+        SET (posA, posB, offset) = whileLoop(posA, posB, offset)
+        RETURN SUBSTRING(text FROM posA + 1 TO textLength)
+    END
+END CLASS

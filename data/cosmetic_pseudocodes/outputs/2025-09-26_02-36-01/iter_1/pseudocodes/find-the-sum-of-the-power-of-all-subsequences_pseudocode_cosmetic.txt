@@ -1,0 +1,36 @@
+CLASS Solution  
+    FUNCTION sumOfPower(nums parameter, k parameter)  
+        ASSIGN MODULUS TO 1000000007  
+        LET length BE LENGTH OF nums  
+        INITIALIZE dp_table AS ARRAY OF (length + 1) ELEMENTS, EACH IS ARRAY OF (k + 1) ZEROS  
+        SET dp_table[0][0] TO 1  
+        
+        FOR index FROM 1 TO length DO  
+            FOR sum_val FROM 0 TO k DO  
+                dp_table[index][sum_val] = dp_table[index - 1][sum_val]  
+                IF sum_val >= nums[index - 1] THEN  
+                    dp_table[index][sum_val] += dp_table[index - 1][sum_val - nums[index - 1]]  
+                END IF  
+                dp_table[index][sum_val] = dp_table[index][sum_val] MOD MODULUS  
+            END FOR  
+        END FOR  
+        
+        SET final_result TO 0  
+        FOR subset_mask FROM 1 TO (2 ^ length) - 1 DO  
+            INITIALIZE subset_sum TO 0  
+            INITIALIZE elements_count TO 0  
+            FOR pos FROM 0 TO length - 1 DO  
+                IF (subset_mask RIGHT SHIFT pos) BITWISE AND 1 EQUALS 1 THEN  
+                    subset_sum += nums[pos]  
+                    elements_count += 1  
+                END IF  
+            END FOR  
+            IF subset_sum EQUALS k THEN  
+                final_result += (2 ^ (length - elements_count))  
+                final_result = final_result MOD MODULUS  
+            END IF  
+        END FOR  
+        
+        RETURN final_result  
+    END FUNCTION  
+END CLASS

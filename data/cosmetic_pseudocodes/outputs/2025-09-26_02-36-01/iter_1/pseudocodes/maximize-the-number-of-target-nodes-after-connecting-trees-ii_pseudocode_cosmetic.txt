@@ -1,0 +1,85 @@
+CLASS Solution  
+    FUNCTION maxTargetNodes(edges1, edges2)  
+        DECLARE graphA AS dictionary with default value empty list  
+        DECLARE graphB AS dictionary with default value empty list  
+
+        FOR EACH (x, y) IN edges1 DO  
+            graphA[x].ADD(y)  
+            graphA[y].ADD(x)  
+        END FOR  
+
+        FOR EACH (x, y) IN edges2 DO  
+            graphB[x].ADD(y)  
+            graphB[y].ADD(x)  
+        END FOR  
+
+        SET sizeA TO COUNT_KEYS(graphA)  
+        SET sizeB TO COUNT_KEYS(graphB)  
+
+        FUNCTION bfs(tree, source)  
+            DECLARE distQueue AS a queue initialized with (source, 0)  
+            DECLARE seenNodes AS set containing source  
+            DECLARE countEven AS 0  
+            DECLARE countOdd AS 0  
+
+            WHILE distQueue IS NOT EMPTY DO  
+                DEQUEUE currentNode, currDist FROM distQueue  
+                IF (currDist MOD 2) IS 0 THEN  
+                    countEven = countEven + 1  
+                ELSE  
+                    countOdd = countOdd + 1  
+                END IF  
+
+                FOR EACH neighbor IN tree[currentNode] DO  
+                    IF neighbor NOT IN seenNodes THEN  
+                        seenNodes.ADD(neighbor)  
+                        ENQUEUE (neighbor, currDist + 1) INTO distQueue  
+                    END IF  
+                END FOR  
+            END WHILE  
+
+            RETURN (countEven, countOdd)  
+        END FUNCTION  
+
+        DECLARE countsA AS empty list  
+        DECLARE idx AS 0  
+        WHILE idx < sizeA DO  
+            countsA.ADD(bfs(graphA, idx))  
+            idx = idx + 1  
+        END WHILE  
+
+        DECLARE countsB AS empty list  
+        SET idx = 0  
+        WHILE idx < sizeB DO  
+            countsB.ADD(bfs(graphB, idx))  
+            idx = idx + 1  
+        END WHILE  
+
+        DECLARE combinedResults AS empty list  
+        SET idx = 0  
+        WHILE idx < sizeA DO  
+            LET (evenA, oddA) = countsA[idx]  
+            DECLARE bestTarget AS 0  
+            DECLARE jdx AS 0  
+
+            WHILE jdx < sizeB DO  
+                LET (evenB, oddB) = countsB[jdx]  
+                IF idx == jdx OR (idx MOD 2) == (jdx MOD 2) THEN  
+                    currentTarget = evenB  
+                ELSE  
+                    currentTarget = oddB  
+                END IF  
+
+                IF currentTarget > bestTarget THEN  
+                    bestTarget = currentTarget  
+                END IF  
+                jdx = jdx + 1  
+            END WHILE  
+
+            combinedResults.ADD(evenA + bestTarget)  
+            idx = idx + 1  
+        END WHILE  
+
+        RETURN combinedResults  
+    END FUNCTION  
+END CLASS

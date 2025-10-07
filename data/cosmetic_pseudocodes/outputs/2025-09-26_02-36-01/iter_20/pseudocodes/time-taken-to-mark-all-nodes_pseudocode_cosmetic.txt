@@ -1,0 +1,110 @@
+CLASS Solution
+    FUNCTION timeTaken(edges)
+        DEFINE _enqueue(tgt, tme, q)
+            q.ADD_TO_BACK((tgt, tme))
+        END FUNCTION
+
+        DEFINE _is_even(num)
+            RETURN (num MOD 2) = 0
+        END FUNCTION
+
+        DEFINE _make_visited(length)
+            SET arr TO EMPTY_LIST
+            SET idx TO 0
+            REPEAT
+                IF idx >= length THEN
+                    BREAK
+                END IF
+                arr.ADD(False)
+                SET idx TO idx + 1
+            UNTIL FALSE
+            RETURN arr
+        END FUNCTION
+
+        DEFINE _bfs(src)
+            SET dq TO DOUBLE_ENDED_QUEUE
+            CALL _enqueue(src, 0, dq)
+
+            SET vis TO _make_visited(n)
+            SET vis[src] TO True
+
+            SET mx TO 0
+
+            PERFORM
+                IF dq.IS_EMPTY() THEN
+                    EXIT_LOOP
+                END IF
+
+                SET pair TO dq.REMOVE_FRONT()
+                SET cur TO pair[0]
+                SET t TO pair[1]
+
+                IF mx < t THEN
+                    SET mx TO t
+                END IF
+
+                DEFINE _process_neighbors(index)
+                    IF index >= ADJACENT_SIZE THEN
+                        RETURN
+                    END IF
+
+                    SET nbr TO adj[cur][index]
+                    IF NOT vis[nbr] THEN
+                        SET vis[nbr] TO True
+                        IF _is_even(nbr) THEN
+                            CALL _enqueue(nbr, t + 2, dq)
+                        ELSE
+                            CALL _enqueue(nbr, t + 1, dq)
+                        END IF
+                    END IF
+
+                    CALL _process_neighbors(index + 1)
+                END DEFINE
+
+                SET ADJACENT_SIZE TO LENGTH OF adj[cur]
+                CALL _process_neighbors(0)
+
+            UNTIL FALSE
+
+            RETURN mx
+        END FUNCTION
+
+        SET n TO (LENGTH OF edges) + 1
+
+        DEFINE _build_adj_list(items)
+            SET res TO EMPTY_LIST
+            SET idx TO 0
+            WHILE idx < n
+                res.ADD(EMPTY_LIST)
+                SET idx TO idx + 1
+            END WHILE
+
+            DEFINE _fill(i)
+                IF i >= LENGTH OF items THEN
+                    RETURN
+                END IF
+                res[items[i][0]].ADD(items[i][1])
+                res[items[i][1]].ADD(items[i][0])
+                CALL _fill(i + 1)
+            END DEFINE
+
+            CALL _fill(0)
+            RETURN res
+        END DEFINE
+
+        SET adj TO _build_adj_list(edges)
+
+        SET result TO EMPTY_LIST
+        DEFINE _compute(i)
+            IF i >= n THEN
+                RETURN
+            END IF
+            result.ADD(_bfs(i))
+            CALL _compute(i + 1)
+        END DEFINE
+
+        CALL _compute(0)
+
+        RETURN result
+    END FUNCTION
+END CLASS

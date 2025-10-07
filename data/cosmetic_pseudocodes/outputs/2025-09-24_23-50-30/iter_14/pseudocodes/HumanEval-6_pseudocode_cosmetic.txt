@@ -1,0 +1,41 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+  FUNCTION parse_paren_group(group_string)
+    FUNCTION helper(index, depth, max_depth)
+      IF index >= LENGTH(group_string)
+        RETURN max_depth
+      END IF
+
+      IF group_string[index] = '('
+        RETURN helper(index + 1, depth + 1, (depth + 1 > max_depth) ? (depth + 1) : max_depth)
+      ELSE 
+        RETURN helper(index + 1, depth - 1, max_depth)
+      END IF
+    END FUNCTION
+
+    RETURN helper(0, 0, 0)
+  END FUNCTION
+
+  SET result TO []
+  SET tokens TO []
+  SET temp_string TO ""
+  FOR each ch IN parentheses_string
+    IF ch = ' '
+      IF LENGTH(temp_string) > 0
+        APPEND temp_string TO tokens
+        SET temp_string TO ""
+      END IF
+    ELSE
+      temp_string = temp_string + ch
+    END IF
+  END FOR
+  IF LENGTH(temp_string) > 0
+    APPEND temp_string TO tokens
+  END IF
+
+  FOR each token IN tokens
+    APPEND parse_paren_group(token) TO result
+  END FOR
+  RETURN result
+END FUNCTION
+```

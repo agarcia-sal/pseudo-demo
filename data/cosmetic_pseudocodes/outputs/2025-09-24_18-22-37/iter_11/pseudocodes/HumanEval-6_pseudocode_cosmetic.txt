@@ -1,0 +1,63 @@
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        SET depth_counter TO 0
+        SET highest_depth TO 0
+        SET idx TO 0
+        SET len_group TO LENGTH OF group_string
+
+        WHILE idx < len_group DO
+            SET current_char TO group_string.at(idx)
+            
+            SWITCH current_char
+                CASE '(':
+                    SET depth_counter TO depth_counter + 1
+                    IF depth_counter > highest_depth THEN
+                        SET highest_depth TO depth_counter
+                    END IF
+                    BREAK
+
+                DEFAULT:
+                    SET depth_counter TO depth_counter - 1
+                    BREAK
+            END SWITCH
+            
+            SET idx TO idx + 1
+        END WHILE
+        
+        RETURN highest_depth
+    END FUNCTION
+
+    SET all_groups TO []
+    SET start_idx TO 0
+    SET str_len TO LENGTH OF parentheses_string
+    SET end_idx TO 0
+
+    WHILE end_idx < str_len DO
+        IF parentheses_string.at(end_idx) = ' ' THEN
+            SET temp_group TO SUBSTRING of parentheses_string FROM start_idx TO end_idx - 1
+            IF LENGTH OF temp_group <> 0 THEN
+                APPEND temp_group TO all_groups
+            END IF
+            SET start_idx TO end_idx + 1
+        END IF
+        SET end_idx TO end_idx + 1
+    END WHILE
+
+    SET last_group TO SUBSTRING of parentheses_string FROM start_idx TO str_len - 1
+    IF LENGTH OF last_group > 0 THEN
+        APPEND last_group TO all_groups
+    END IF
+
+    SET result_list TO []
+    SET group_pos TO 0
+    SET groups_len TO LENGTH OF all_groups
+
+    WHILE group_pos < groups_len DO
+        SET current_group TO all_groups.at(group_pos)
+        SET depth_val TO parse_paren_group(current_group)
+        APPEND depth_val TO result_list
+        SET group_pos TO group_pos + 1
+    END WHILE
+
+    RETURN result_list
+END FUNCTION

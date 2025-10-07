@@ -1,0 +1,59 @@
+```
+FUNCTION maximum(array_of_integers, positive_integer_k)
+	TYPE IntList AS LIST OF INTEGER
+	TYPE IterState AS RECORD
+		data: IntList
+		pos: INTEGER
+	END RECORD
+	DECLARATION FUNC slice_from_end(s: IntList, count: INTEGER) RETURNS IntList
+		FUNC inner_slice(state: IterState, acc: IntList) RETURNS IntList
+			WHEN state.pos LESS THAN LENGTH(state.data) MINUS count
+				RETURN inner_slice(RECORD(data = state.data, pos = state.pos + 1), acc)
+			WHEN OTHERWISE
+				WHEN state.pos GREATER OR EQUAL TO LENGTH(state.data)
+					RETURN REVERSE(acc)
+				WHEN OTHERWISE
+					RETURN inner_slice(RECORD(data = state.data, pos = state.pos + 1), PREPEND(state.data[state.pos], acc))
+		END FUNC
+		RETURN inner_slice(RECORD(data = s, pos = 0), [])
+	END DECLARATION
+	
+	DECLARATION FUNC quicksort(l: IntList) RETURNS IntList
+		WHEN l EQUALS []
+			RETURN []
+		WHEN OTHERWISE
+			PIVOT := l[0]
+			DECLARATION FUNC filter_less(elems: IntList, pivotVal: INTEGER) RETURNS IntList
+				WHEN elems EQUALS []
+					RETURN []
+				WHEN elems[0] LESS THAN pivotVal
+					RETURN CONCAT([elems[0]], filter_less(TAIL(elems), pivotVal))
+				WHEN OTHERWISE
+					RETURN filter_less(TAIL(elems), pivotVal)
+			END FUNC
+
+			DECLARATION FUNC filter_greater_equal(elems: IntList, pivotVal: INTEGER) RETURNS IntList
+				WHEN elems EQUALS []
+					RETURN []
+				WHEN elems[0] GREATER OR EQUAL TO pivotVal
+					RETURN CONCAT([elems[0]], filter_greater_equal(TAIL(elems), pivotVal))
+				WHEN OTHERWISE
+					RETURN filter_greater_equal(TAIL(elems), pivotVal)
+			END FUNC
+
+			LEFT_PART := quicksort(filter_less(TAIL(l), PIVOT))
+			RIGHT_PART := quicksort(filter_greater_equal(TAIL(l), PIVOT))
+			RETURN CONCAT(LEFT_PART, [PIVOT], RIGHT_PART)
+	END DECLARATION
+	
+	DECLARATION FUNC identity_or_empty(kVal: INTEGER, arr: IntList) RETURNS IntList
+		WHEN NOT (kVal GREATER THAN 0)
+			RETURN []
+		WHEN OTHERWISE
+			sorted_arr := quicksort(arr)
+			RETURN slice_from_end(sorted_arr, kVal)
+	END DECLARATION
+	
+	RETURN identity_or_empty(positive_integer_k, array_of_integers)
+END FUNCTION
+```

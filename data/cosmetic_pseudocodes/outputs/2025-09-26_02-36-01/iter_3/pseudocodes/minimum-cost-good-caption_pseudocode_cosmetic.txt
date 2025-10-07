@@ -1,0 +1,60 @@
+CLASS Solution  
+    FUNCTION minCostGoodCaption(caption)  
+        LET lengthCaption ← SIZE(caption)  
+        IF lengthCaption <= 2  
+            RETURN ""  
+        END IF  
+        
+        LET charsArray ← ARRAY_FROM(caption)  
+        
+        LET index ← 0  
+        WHILE index < lengthCaption  
+            LET sequenceStart ← index  
+            WHILE index < lengthCaption AND charsArray[index] = charsArray[sequenceStart]  
+                index ← index + 1  
+            END WHILE  
+            
+            LET segmentLength ← index - sequenceStart  
+            
+            IF segmentLength < 3 THEN
+                IF sequenceStart > 0 AND charsArray[sequenceStart - 1] = charsArray[sequenceStart] THEN
+                    charsArray[sequenceStart - 1] ← charsArray[sequenceStart]  
+                    sequenceStart ← sequenceStart - 1  
+                    segmentLength ← segmentLength + 1  
+                END IF  
+                
+                IF index < lengthCaption AND charsArray[index - 1] = charsArray[index] THEN  
+                    charsArray[index] ← charsArray[index - 1]  
+                    index ← index + 1  
+                    segmentLength ← segmentLength + 1  
+                END IF  
+                
+                IF segmentLength < 3 THEN  
+                    LET replacementChar ← NULL  
+                    IF sequenceStart > 0  
+                        replacementChar ← charsArray[sequenceStart - 1]  
+                    ELSE  
+                        replacementChar ← charsArray[index]  
+                    END IF  
+                    
+                    IF replacementChar = 'a' THEN  
+                        replacementChar ← 'b'  
+                    ELSE IF replacementChar = 'z' THEN  
+                        replacementChar ← 'y'  
+                    ELSE  
+                        LET charCode ← ASCII_CODE(replacementChar)  
+                        replacementChar ← CHAR_FROM_CODE(charCode + 1)  
+                    END IF  
+                    
+                    FOR pos ← sequenceStart TO sequenceStart + segmentLength - 1 STEP 1  
+                        charsArray[pos] ← replacementChar  
+                    END FOR  
+                    
+                    index ← sequenceStart + segmentLength  
+                END IF  
+            END IF  
+        END WHILE  
+        
+        RETURN STRING_JOIN(charsArray)  
+    END FUNCTION  
+END CLASS

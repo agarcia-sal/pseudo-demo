@@ -1,0 +1,72 @@
+FUNCTION sort_array(arr)
+    SET sorted_by_value TO LIST WITH ELEMENTS EMPTY
+    SET length_arr TO LENGTH OF arr
+    FOR index_value FROM 0 TO length_arr MINUS 1
+        APPEND arr[index_value] TO sorted_by_value
+    CALL sorted_by_value SORT IN ASCENDING ORDER
+
+    SET sorted_by_ones TO LIST WITH ELEMENTS EMPTY
+    SET length_sorted_by_value TO LENGTH OF sorted_by_value
+    FOR index_value FROM 0 TO length_sorted_by_value MINUS 1
+        SET current_value TO sorted_by_value[index_value]
+        SET binary_string TO EMPTY STRING
+        SET temp_value TO current_value
+        IF temp_value EQUALS 0
+            SET binary_string TO "0"
+        ELSE IF temp_value GREATER THAN 0
+            WHILE temp_value GREATER THAN 0
+                SET remainder TO temp_value MODULO 2
+                SET temp_value TO temp_value DIVIDE BY 2
+                CONVERT remainder TO STRING AND CONCATENATE binary_string TO THE LEFT
+            END WHILE
+        ELSE
+            SET positive_temp TO ABSOLUTE VALUE OF temp_value
+            SET binary_string TO EMPTY STRING
+            WHILE positive_temp GREATER THAN 0
+                SET remainder TO positive_temp MODULO 2
+                SET positive_temp TO positive_temp DIVIDE BY 2
+                CONVERT remainder TO STRING AND CONCATENATE binary_string TO THE LEFT
+            END WHILE
+        END IF
+
+        SET count_ones TO 0
+        SET length_binary TO LENGTH OF binary_string
+        FOR index_char FROM 0 TO length_binary MINUS 1
+            IF binary_string[index_char] EQUALS "1"
+                INCREMENT count_ones BY 1
+            END IF
+        END FOR
+
+        APPEND LIST WITH ELEMENTS current_value AND count_ones TO sorted_by_ones
+    END FOR
+
+    SET length_sorted_by_ones TO LENGTH OF sorted_by_ones
+    FOR i FROM 0 TO length_sorted_by_ones MINUS 2
+        FOR j FROM 0 TO length_sorted_by_ones MINUS 2 MINUS i
+            IF sorted_by_ones[j][1] GREATER THAN sorted_by_ones[j PLUS 1][1]
+                SET temp TO sorted_by_ones[j]
+                SET sorted_by_ones[j] TO sorted_by_ones[j PLUS 1]
+                SET sorted_by_ones[j PLUS 1] TO temp
+            END IF
+        END FOR
+    END FOR
+    
+    SET length_sorted_by_ones TO LENGTH OF sorted_by_ones
+    FOR i FROM 0 TO length_sorted_by_ones MINUS 2
+        FOR j FROM 0 TO length_sorted_by_ones MINUS 2 MINUS i
+            IF sorted_by_ones[j][1] EQUALS sorted_by_ones[j PLUS 1][1]
+                IF sorted_by_ones[j][0] GREATER THAN sorted_by_ones[j PLUS 1][0]
+                    SET temp TO sorted_by_ones[j]
+                    SET sorted_by_ones[j] TO sorted_by_ones[j PLUS 1]
+                    SET sorted_by_ones[j PLUS 1] TO temp
+                END IF
+            END IF
+        END FOR
+    END FOR
+
+    SET result TO LIST WITH ELEMENTS EMPTY
+    FOR index_value FROM 0 TO length_sorted_by_ones MINUS 1
+        APPEND sorted_by_ones[index_value][0] TO result
+    END FOR
+    RETURN result
+END FUNCTION

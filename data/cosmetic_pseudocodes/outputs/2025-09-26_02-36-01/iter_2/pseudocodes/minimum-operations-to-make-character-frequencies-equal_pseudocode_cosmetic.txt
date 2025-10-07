@@ -1,0 +1,80 @@
+CLASS Solution  
+    FUNCTION makeStringGood(s)  
+        DECLARE frequency ARRAY OF SIZE 26 INITIALIZED WITH ZEROS  
+        SET idx TO 0  
+        WHILE idx LESS THAN LENGTH OF s DO  
+            LET ch BE s[idx]  
+            COMPUTE pos AS ORDINAL(ch) - ORDINAL('a')  
+            frequency[pos] = frequency[pos] + 1  
+            idx = idx + 1  
+        END WHILE  
+  
+        LET maxCount BE 0  
+        FOR value IN frequency DO  
+            IF value > maxCount THEN  
+                maxCount = value  
+            END IF  
+        END FOR  
+  
+        LET minimumOperations BE NULL  
+        LET t BE 1  
+        WHILE t <= maxCount DO  
+            LET candidateOps BE _getMinOperations(frequency, t)  
+            IF minimumOperations IS NULL OR candidateOps < minimumOperations THEN  
+                minimumOperations = candidateOps  
+            END IF  
+            t = t + 1  
+        END WHILE  
+  
+        RETURN minimumOperations  
+    END FUNCTION  
+  
+    FUNCTION _getMinOperations(count, target)  
+        DECLARE dp ARRAY OF LENGTH 27 INITIALIZED WITH ZEROS  
+        LET i BE 25  
+        WHILE i >= 0 DO  
+            LET deleteAll = count[i]  
+            LET diffDeleteInsert = 0  
+            IF target > count[i] THEN  
+                diffDeleteInsert = target - count[i]  
+            ELSE  
+                diffDeleteInsert = count[i] - target  
+            END IF  
+  
+            LET withNextStep = diffDeleteInsert + dp[i + 1]  
+            LET currentMin = deleteAll  
+            IF withNextStep < currentMin THEN  
+                currentMin = withNextStep  
+            END IF  
+  
+            IF (i + 1) < 26 THEN  
+                IF count[i + 1] < target THEN  
+                    LET deficitNext = target - count[i + 1]  
+                    LET needChange = 0  
+                    IF count[i] <= target THEN  
+                        needChange = count[i]  
+                    ELSE  
+                        needChange = count[i] - target  
+                    END IF  
+  
+                    LET changeCost = 0  
+                    IF deficitNext > needChange THEN  
+                        changeCost = needChange + (deficitNext - needChange)  
+                    ELSE  
+                        changeCost = deficitNext + (needChange - deficitNext)  
+                    END IF  
+  
+                    LET candidateVal = changeCost + dp[i + 2]  
+                    IF candidateVal < currentMin THEN  
+                        currentMin = candidateVal  
+                    END IF  
+                END IF  
+            END IF  
+  
+            dp[i] = currentMin  
+            i = i - 1  
+        END WHILE  
+  
+        RETURN dp[0]  
+    END FUNCTION  
+END CLASS

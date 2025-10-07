@@ -1,0 +1,94 @@
+CLASS Solution  
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)  
+        SET graph TO a new empty mapping from integer to list of integers  
+        SET reverse_graph TO a new empty mapping from integer to list of integers  
+
+        FOR each pair u and v FROM flowFrom and flowTo IN PARALLEL  
+            APPEND v TO the list at key u in graph  
+            APPEND u TO the list at key v in reverse_graph  
+        END FOR  
+
+        FUNCTION tarjan(node)  
+            SET indices at position node TO index  
+            SET low_links at position node TO index  
+            INCREMENT index BY one  
+            APPEND node TO stack  
+            SET on_stack at position node TO True  
+
+            FOR each neighbor IN the list at key node in graph  
+                IF indices at position neighbor EQUALS negative one  
+                    CALL tarjan(neighbor)  
+                    SET low_links at position node TO the smaller value BETWEEN low_links at position node AND low_links at position neighbor  
+                ELSE IF on_stack at position neighbor IS True  
+                    SET low_links at position node TO the smaller value BETWEEN low_links at position node AND indices at position neighbor  
+                END IF  
+            END FOR  
+
+            IF low_links at position node EQUALS indices at position node  
+                SET scc TO an empty list  
+                WHILE True  
+                    REMOVE the last element FROM stack AND ASSIGN TO w  
+                    SET on_stack at position w TO False  
+                    APPEND w TO scc  
+                    IF w EQUALS node  
+                        BREAK the loop  
+                    END IF  
+                END WHILE  
+                APPEND scc TO sccs  
+            END IF  
+        END FUNCTION  
+
+        SET indices TO a list of size n FILLED WITH negative one  
+        SET low_links TO a list of size n FILLED WITH zero  
+        SET on_stack TO a list of size n FILLED WITH False  
+        SET stack TO an empty list  
+        SET index TO zero  
+        SET sccs TO an empty list  
+
+        FOR i FROM zero TO n MINUS one  
+            IF indices at position i EQUALS negative one  
+                CALL tarjan(i)  
+            END IF  
+        END FOR  
+
+        SET scc_graph TO a new empty mapping from integer to list of integers  
+        SET scc_index TO a list of size n FILLED WITH negative one  
+        SET scc_has_crystal TO a list of size the LENGTH OF sccs FILLED WITH False  
+        SET scc_count TO zero  
+
+        FOR each pair i and scc FROM ALL ELEMENTS OF sccs WITH THEIR INDEX  
+            FOR each node IN scc  
+                SET scc_index at position node TO scc_count  
+                IF node IS IN crystals  
+                    SET scc_has_crystal at position i TO True  
+                END IF  
+            END FOR  
+            INCREMENT scc_count BY one  
+        END FOR  
+
+        FOR each pair u and v FROM flowFrom and flowTo IN PARALLEL  
+            SET u_scc TO scc_index at position u  
+            SET v_scc TO scc_index at position v  
+            IF u_scc NOT EQUALS v_scc  
+                APPEND v_scc TO the list at key u_scc in scc_graph  
+            END IF  
+        END FOR  
+
+        SET in_degree TO a list of size the LENGTH OF sccs FILLED WITH zero  
+
+        FOR scc FROM zero TO the LENGTH OF sccs MINUS one  
+            FOR each neighbor IN the list at key scc in scc_graph  
+                INCREMENT in_degree at position neighbor BY one  
+            END FOR  
+        END FOR  
+
+        SET additional_runes TO zero  
+        FOR scc FROM zero TO the LENGTH OF sccs MINUS one  
+            IF in_degree at position scc EQUALS zero AND scc_has_crystal at position scc IS False  
+                INCREMENT additional_runes BY one  
+            END IF  
+        END FOR  
+
+        RETURN additional_runes  
+    END FUNCTION  
+END CLASS

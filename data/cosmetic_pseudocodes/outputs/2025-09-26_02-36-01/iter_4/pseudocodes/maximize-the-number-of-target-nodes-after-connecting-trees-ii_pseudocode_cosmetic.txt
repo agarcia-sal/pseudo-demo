@@ -1,0 +1,94 @@
+CLASS Solution  
+    FUNCTION maxTargetNodes(edges1, edges2)  
+        DECLARE adjacencyMap1 AS a default dictionary with list default  
+        DECLARE adjacencyMap2 AS a default dictionary with list default  
+        
+        LET index1 TO 0  
+        WHILE index1 LESS THAN LENGTH OF edges1  
+            LET fromNode TO edges1[index1][0]  
+            LET toNode TO edges1[index1][1]  
+            APPEND toNode TO adjacencyMap1[fromNode]  
+            APPEND fromNode TO adjacencyMap1[toNode]  
+            INCREMENT index1 BY one  
+        END WHILE  
+        
+        LET index2 TO 0  
+        WHILE index2 LESS THAN LENGTH OF edges2  
+            LET source TO edges2[index2][0]  
+            LET dest TO edges2[index2][1]  
+            APPEND dest TO adjacencyMap2[source]  
+            APPEND source TO adjacencyMap2[dest]  
+            INCREMENT index2 BY one  
+        END WHILE  
+        
+        LET size1 TO LENGTH OF KEYS IN adjacencyMap1  
+        LET size2 TO LENGTH OF KEYS IN adjacencyMap2  
+        
+        FUNCTION bfs(treeStructure, origin)  
+            LET evenOccurrences AS zero  
+            LET oddOccurrences AS zero  
+            LET processingQueue AS a deque initialized WITH (origin, zero)  
+            LET seenNodes AS a set CONTAINING origin  
+            
+            WHILE NOT (LENGTH OF processingQueue EQUALS zero)  
+                LET currentPair TO REMOVE FIRST ELEMENT FROM processingQueue  
+                LET currentNode TO currentPair[0]  
+                LET currentDistance TO currentPair[1]  
+                
+                IF NOT (currentDistance MODULO 2) THEN  
+                    INCREMENT evenOccurrences BY 1  
+                ELSE  
+                    INCREMENT oddOccurrences BY 1  
+                END IF  
+                
+                FOR EACH adjacentNode IN treeStructure[currentNode]  
+                    IF adjacentNode NOT IN seenNodes THEN  
+                        ADD adjacentNode TO seenNodes  
+                        APPEND (adjacentNode, currentDistance PLUS 1) TO processingQueue  
+                    END IF  
+                END FOR  
+            END WHILE  
+            
+            RETURN (evenOccurrences, oddOccurrences)  
+        END FUNCTION  
+        
+        LET counts1 TO an empty list  
+        LET idx TO zero  
+        WHILE idx LESS THAN size1  
+            APPEND bfs(adjacencyMap1, idx) TO counts1  
+            INCREMENT idx BY 1  
+        END WHILE  
+        
+        LET counts2 TO an empty list  
+        SET idx TO zero  
+        WHILE idx LESS THAN size2  
+            APPEND bfs(adjacencyMap2, idx) TO counts2  
+            INCREMENT idx BY 1  
+        END WHILE  
+        
+        LET outputList TO an initially empty list  
+        LET outerIdx TO zero  
+        WHILE outerIdx LESS THAN size1  
+            LET (evenCountFirst, oddCountFirst) TO counts1[outerIdx]  
+            LET bestTargets TO zero  
+            LET innerIdx TO zero  
+            WHILE innerIdx LESS THAN size2  
+                LET (evenCountSecond, oddCountSecond) TO counts2[innerIdx]  
+                IF outerIdx EQUALS innerIdx OR (outerIdx MODULO 2) EQUALS (innerIdx MODULO 2) THEN  
+                    LET candidateTargets TO evenCountSecond  
+                ELSE  
+                    LET candidateTargets TO oddCountSecond  
+                END IF  
+                
+                IF candidateTargets GREATER THAN bestTargets THEN  
+                    SET bestTargets TO candidateTargets  
+                END IF  
+                INCREMENT innerIdx BY 1  
+            END WHILE  
+            APPEND evenCountFirst PLUS bestTargets TO outputList  
+            INCREMENT outerIdx BY 1  
+        END WHILE  
+        
+        RETURN outputList  
+    END FUNCTION  
+END CLASS

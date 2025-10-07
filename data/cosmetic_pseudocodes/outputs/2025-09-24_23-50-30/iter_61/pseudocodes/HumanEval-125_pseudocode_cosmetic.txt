@@ -1,0 +1,42 @@
+```
+FUNCTION split_words(alpha)
+	DECISION_TABLE lookup_char_in_alpha_CHAR:
+		case contains_space = (EXISTS char IN alpha WHERE char EQUALS ' ')
+		case contains_comma = (EXISTS char IN alpha WHERE char EQUALS ',')
+	END_LOOKUP
+
+	DEFINE recursive_split(list_chars, acc):
+		IF list_chars IS EMPTY
+			RETURN acc
+		ELSE
+			LET head BE FIRST ELEMENT OF list_chars
+			LET tail BE REMAINING ELEMENTS OF list_chars
+			IF head EQUALS ' ' OR head EQUALS '\t' OR head EQUALS '\n'
+				IF acc IS EMPTY
+					RETURN [ ] + recursive_split(tail, "")
+				ELSE
+					RETURN [acc] + recursive_split(tail, "")
+			ELSE
+				RETURN recursive_split(tail, acc + head)
+	DEFINE split_string(textual):
+		RETURN FILTERED(LET res BE recursive_split(TEXT_TO_LIST(textual), ""), WHERE element LENGTH > 0)
+
+	LET conditions BE lookup_char_in_alpha_CHAR
+
+	SWITCH TRUE:
+		CASE conditions.contains_space:
+			RETURN split_string(alpha)
+		CASE conditions.contains_comma:
+			LET replaced_list BE MAP EACH char IN TEXT_TO_LIST(alpha) TO (IF char EQUALS ',' THEN ' ' ELSE char)
+			LET replaced_string BE LIST_TO_TEXT(replaced_list)
+			RETURN split_string(replaced_string)
+		DEFAULT:
+			DEFINE to_numeric(c): RETURN ASCII_CODE_OF(c)
+			DEFINE is_lower_even(c):
+				RETURN (c >= 'a' AND c <= 'z') AND ((to_numeric(c) MOD 2) EQUALS 0)
+			LET chars_list BE TEXT_TO_LIST(alpha)
+			LET filtered_chars BE FILTER chars_list BY is_lower_even
+			LET result_length BE LENGTH(filtered_chars)
+			RETURN result_length
+END FUNCTION
+```

@@ -1,0 +1,60 @@
+```
+FUNCTION sort_array(numbers)
+    FUNCTION count_ones(bitstring, index, tally)
+        IF index = LENGTH(bitstring) THEN
+            RETURN tally
+        ELSE
+            RETURN count_ones(bitstring, index + 1, tally + (bitstring[index] = '1' ? 1 : 0))
+        ENDIF
+    END FUNCTION
+
+    SET preliminary_step TO array_of(numbers)
+    SET preliminary_step TO preliminary_step SORTED ASCENDINGLY
+
+    FUNCTION ones_key(element)
+        SET binary_version TO TO_BINARY_STRING(element)
+        RETURN count_ones(binary_version, 0, 0)
+    END FUNCTION
+
+    FUNCTION stable_sort(list_to_sort, comparator)
+        IF LENGTH(list_to_sort) ≤ 1 THEN
+            RETURN list_to_sort
+        ENDIF
+
+        SET pivot_index TO FLOOR(LENGTH(list_to_sort) / 2)
+        SET pivot_element TO list_to_sort[pivot_index]
+        SET lesser TO EMPTY LIST
+        SET equal TO EMPTY LIST
+        SET greater TO EMPTY LIST
+
+        FOR EACH candidate IN list_to_sort DO
+            SET comp_result TO comparator(candidate, pivot_element)
+            IF comp_result < 0 THEN
+                ADD candidate TO lesser
+            ELSEIF comp_result = 0 THEN
+                ADD candidate TO equal
+            ELSE
+                ADD candidate TO greater
+            ENDIF
+        ENDFOR
+
+        RETURN CONCATENATE(
+            stable_sort(lesser, comparator),
+            equal,
+            stable_sort(greater, comparator)
+        )
+    END FUNCTION
+
+    FUNCTION compare_by_ones(a, b)
+        IF ones_key(a) < ones_key(b) THEN
+            RETURN -1
+        ELSEIF ones_key(a) > ones_key(b) THEN
+            RETURN 1
+        ELSE
+            RETURN 0
+        ENDIF
+    END FUNCTION
+
+    RETURN stable_sort(preliminary_step, compare_by_ones)
+END FUNCTION
+```

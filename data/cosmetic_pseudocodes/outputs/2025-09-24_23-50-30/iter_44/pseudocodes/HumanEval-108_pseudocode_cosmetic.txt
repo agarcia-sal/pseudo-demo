@@ -1,0 +1,38 @@
+```
+FUNCTION count_nums(collection_of_values)
+    FUNCTION digits_sum(number_value)
+        SET multiplier_sign TO 1
+        IF NOT (number_value >= 0) THEN
+            SET number_value TO 0 - number_value
+            SET multiplier_sign TO 0 - 1
+        END IF
+        SET character_digits TO SPLIT STRING(number_value) INTO CHARACTERS
+        SET integer_digits TO [ CONVERT c TO INTEGER FOR c IN character_digits ]
+        SET integer_digits[0] TO integer_digits[0] * multiplier_sign
+        RETURN REDUCE (a, b) -> a + b OVER integer_digits
+    END FUNCTION
+
+    FUNCTION accumulate_sums(values, index, accumulator)
+        IF index >= LENGTH(values) THEN
+            RETURN accumulator
+        ELSE
+            RETURN accumulate_sums(values, index + 1, accumulator + [digits_sum(values[index])])
+        END IF
+    END FUNCTION
+
+    SET sums_list TO accumulate_sums(collection_of_values, 0, [])
+
+    FUNCTION filter_positive(lst, idx, res)
+        IF idx == LENGTH(lst) THEN
+            RETURN res
+        ELSE IF NOT (lst[idx] <= 0) THEN
+            RETURN filter_positive(lst, idx + 1, res + [lst[idx]])
+        ELSE
+            RETURN filter_positive(lst, idx + 1, res)
+        END IF
+    END FUNCTION
+
+    SET positives TO filter_positive(sums_list, 0, [])
+    RETURN LENGTH(positives)
+END FUNCTION
+```

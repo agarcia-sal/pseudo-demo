@@ -1,0 +1,85 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        FUNCTION splitString(input STRing, delimiter CHAR) RETURNS LIST OF STRING
+            SET resultList TO empty list
+            SET currentIndex TO 0
+            SET delimiterIndex TO indexOf(input, delimiter, currentIndex)
+            WHILE delimiterIndex NOT EQUAL TO -1 DO
+                APPEND substring(input, currentIndex, delimiterIndex) TO resultList
+                SET currentIndex TO delimiterIndex + 1
+                SET delimiterIndex TO indexOf(input, delimiter, currentIndex)
+            END WHILE
+            APPEND substring(input, currentIndex, length(input)) TO resultList
+            RETURN resultList
+        END FUNCTION
+
+        FUNCTION indexOf(text STRING, char CHAR, startAt INTEGER) RETURNS INTEGER
+            FOR iterator FROM startAt TO length(text) - 1 DO
+                IF characterAt(text, iterator) EQUALS char THEN
+                    RETURN iterator
+                END IF
+            END FOR
+            RETURN -1
+        END FUNCTION
+
+        FUNCTION characterAt(text STRING, pos INTEGER) RETURNS CHAR
+            RETURN text[pos]
+        END FUNCTION
+
+        FUNCTION sortByLengthAscending(arr LIST OF STRING) RETURNS LIST OF STRING
+            FUNCTION comparator(a STRING, b STRING) RETURNS BOOLEAN
+                RETURN length(a) LESS THAN length(b)
+            END FUNCTION
+            SET sortedArr TO copy(arr)
+            FOR i FROM 0 TO length(sortedArr) - 2
+                FOR j FROM 0 TO length(sortedArr) - i - 2
+                    IF NOT comparator(sortedArr[j], sortedArr[j + 1]) THEN
+                        SET tempStr TO sortedArr[j]
+                        SET sortedArr[j] TO sortedArr[j + 1]
+                        SET sortedArr[j + 1] TO tempStr
+                    END IF
+                END FOR
+            END FOR
+            RETURN sortedArr
+        END FUNCTION
+
+        SET segments TO splitString(road, '.')
+        SET sortedSegments TO sortByLengthAscending(segments)
+
+        FUNCTION processSegmentList(segmentList LIST OF STRING, currentBudget INTEGER, fixedSum INTEGER, idx INTEGER) RETURNS INTEGER
+            IF idx GREATER THAN OR EQUAL TO length(segmentList) THEN
+                RETURN fixedSum
+            END IF
+            SET segmentString TO segmentList[idx]
+            SET segmentLength TO length(segmentString)
+
+            IF segmentLength EQUALS 0 THEN
+                RETURN processSegmentList(segmentList, currentBudget, fixedSum, idx + 1)
+            END IF
+
+            SET fixCost TO segmentLength + (1 * 1)
+            IF fixCost LESS THAN OR EQUAL TO currentBudget THEN
+                SET newFixedSum TO fixedSum + segmentLength
+                SET newBudget TO currentBudget - fixCost
+                RETURN processSegmentList(segmentList, newBudget, newFixedSum, idx + 1)
+            ELSE
+                RETURN handlePartialFix(segmentLength, currentBudget, fixedSum, segmentList, idx)
+            END IF
+        END FUNCTION
+
+        FUNCTION handlePartialFix(n INTEGER, currBudget INTEGER, fixedCount INTEGER, segList LIST OF STRING, index INTEGER) RETURNS INTEGER
+            IF n LESS THAN OR EQUAL TO 0 OR currBudget LESS THAN OR EQUAL TO 0 THEN
+                RETURN processSegmentList(segList, currBudget, fixedCount, index + 1)
+            END IF
+            SET currentCost TO n + 1
+            IF currBudget GREATER THAN OR EQUAL TO currentCost THEN
+                RETURN processSegmentList(segList, currBudget - currentCost, fixedCount + n, index + 1)
+            ELSE
+                RETURN handlePartialFix(n - 1, currBudget, fixedCount, segList, index)
+            END IF
+        END FUNCTION
+
+        SET totalFixed TO processSegmentList(sortedSegments, budget, 0, 0)
+        RETURN totalFixed
+    END FUNCTION
+END CLASS

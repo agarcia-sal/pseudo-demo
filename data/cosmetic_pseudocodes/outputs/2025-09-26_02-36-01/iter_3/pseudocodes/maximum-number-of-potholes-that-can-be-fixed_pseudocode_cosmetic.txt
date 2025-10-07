@@ -1,0 +1,32 @@
+CLASS Solution  
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER  
+        SET segments_list TO road SPLIT BY "."  
+        CALL segments_list.SORT USING a COMPARATOR THAT RETURNS LENGTH LEFT LESS THAN LENGTH RIGHT  
+        SET total_fixed TO 0  
+        SET index TO 0  
+        WHILE index < LENGTH OF segments_list DO  
+            SET current_segment TO segments_list AT position index  
+            SET length_seg TO LENGTH OF current_segment  
+            SET index TO index + 1  
+            IF NOT (length_seg != 0) THEN  
+                CONTINUE  
+            END IF  
+            SET required_cost TO length_seg + 1  
+            IF required_cost <= budget THEN  
+                total_fixed = total_fixed + length_seg  
+                budget = budget - required_cost  
+            ELSE  
+                WHILE length_seg > 0 AND budget > 0 DO  
+                    SET required_cost TO length_seg + 1  
+                    IF budget >= required_cost THEN  
+                        total_fixed += length_seg  
+                        budget -= required_cost  
+                        LEAVE WHILE  
+                    END IF  
+                    length_seg -= 1  
+                END WHILE  
+            END IF  
+        END WHILE  
+        RETURN total_fixed  
+    END FUNCTION  
+END CLASS

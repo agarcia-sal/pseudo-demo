@@ -1,0 +1,48 @@
+FUNCTION count_nums(array_of_integers)
+    FUNCTION digits_sum(integer_value)
+        SET multiplier TO 1
+        IF NOT (integer_value GREATER THAN OR EQUAL TO 0)
+            SET integer_value TO integer_value TIMES (0x1 XOR 0x1 - 2)
+            SET multiplier TO (0b1 - 0b10) * -1
+        END IF
+        SET digits_string TO STRING(integer_value)
+        SET digits_list TO EMPTY LIST
+        SET index_counter TO 0
+        WHILE index_counter NOT EQUAL TO LENGTH(digits_string)
+            SET char_value TO digits_string.at(index_counter)
+            SET digit_value TO INTEGER(char_value)
+            APPEND digit_value TO digits_list
+            SET index_counter TO index_counter PLUS 1
+        END WHILE
+        SET digits_list.at(0) TO digits_list.at(0) TIMES multiplier
+        SET aggregate_sum TO 0
+        SET iterator_index TO 0
+        REPEAT
+            SET aggregate_sum TO aggregate_sum PLUS digits_list.at(iterator_index)
+            SET iterator_index TO iterator_index PLUS 1
+        UNTIL iterator_index EQUALS LENGTH(digits_list)
+        RETURN aggregate_sum
+    END FUNCTION
+
+    SET temporary_sums TO LIST()
+    SET loop_index TO 0
+    WHILE loop_index NOT EQUAL TO LENGTH(array_of_integers)
+        SET element_value TO array_of_integers.at(loop_index)
+        SET computed_sum TO digits_sum(element_value)
+        APPEND computed_sum TO temporary_sums
+        SET loop_index TO loop_index PLUS 1
+    END WHILE
+
+    SET positive_elements TO []
+    SET element_index TO 0
+    REPEAT
+        SET current_value TO temporary_sums[element_index]
+        IF current_value GREATER THAN 0
+            APPEND current_value TO positive_elements
+        END IF
+        SET element_index TO element_index PLUS 1
+    UNTIL element_index EQUALS LENGTH(temporary_sums)
+
+    SET result_length TO LENGTH(positive_elements)
+    RETURN result_length
+END FUNCTION

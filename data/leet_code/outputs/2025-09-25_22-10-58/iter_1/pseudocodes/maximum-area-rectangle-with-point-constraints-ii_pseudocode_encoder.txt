@@ -1,0 +1,49 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, n)  
+        SET self.tree TO a list of zeros with length n PLUS one  
+    END FUNCTION  
+
+    FUNCTION add(self, i)  
+        WHILE i LESS THAN the LENGTH OF self.tree  
+            INCREMENT the element at position i of self.tree BY one  
+            SET i TO i PLUS the bitwise AND of i and the bitwise NEGATION of i  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION pre(self, i)  
+        SET res TO zero  
+        WHILE i GREATER THAN zero  
+            INCREMENT res BY the element at position i of self.tree  
+            SET i TO the bitwise AND of i and i MINUS one  
+        END WHILE  
+        RETURN res  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        RETURN the result of calling self.pre with argument r MINUS the result of calling self.pre with argument l MINUS one  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+        SET points TO the list of pairs obtained by pairing elements of xCoord and yCoord SORTED in ascending order  
+        SET ys TO the sorted list of unique elements of yCoord  
+        SET ans TO negative one  
+        ASSIGN reference tree TO a new Fenwick object initialized with the length of ys  
+        CALL the add function of tree with the result of the bisect left function applied to ys and the element at position zero of points at the second element PLUS one  
+        SET pre TO an empty dictionary  
+        FOR each pair of pairs (x1, y1) and (x2, y2) obtained by iterating pairwise over points  
+            SET y TO the result of the bisect left function applied to ys and y2 PLUS one  
+            CALL the add function of tree with y  
+            IF x1 NOT EQUALS x2  
+                CONTINUE the current iteration  
+            END IF  
+            SET cur TO the result of calling the query function of tree with the result of the bisect left function applied to ys and y1 PLUS one and y  
+            IF y2 IS A key IN pre AND the second element of the value at key y2 in pre EQUALS y1 AND the third element of the value at key y2 in pre PLUS two EQUALS cur  
+                SET ans TO the maximum of ans and the product of x2 MINUS the first element of the value at key y2 in pre AND y2 MINUS y1  
+            END IF  
+            SET the value at key y2 in pre TO a tuple containing x1, y1, and cur  
+        END FOR  
+        RETURN ans  
+    END FUNCTION  
+END CLASS

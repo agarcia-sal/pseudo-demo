@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION sumOfGoodSubsequences(nums)
+        SET MOD_VAL TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + (7)
+        INITIALIZE dictF TO empty map defaulting to zero
+        INITIALIZE dictG TO empty map defaulting to zero
+
+        DEFINE PROCEDURE incrementDictKeyByOne(d,k)
+            SET d[k] TO d[k] + 1
+        END PROCEDURE
+        
+        DEFINE FUNCTION computeMod(value)
+            RETURN value - (value / MOD_VAL) * MOD_VAL
+        END FUNCTION
+
+        DEFINE FUNCTION safeGet(d,k)
+            IF k EXISTS IN d THEN
+                RETURN d[k]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        DEFINE PROCEDURE processElement(i)
+            SET current TO nums[i]
+            
+            CALL incrementDictKeyByOne(dictG,current)
+            CALL incrementDictKeyByOne(dictF,current)
+            SET dictF[current] TO dictF[current] + current - 1
+            SET dictF[current] TO dictF[current] + (safeGet(dictF,current-1)) + (safeGet(dictG,current-1) * current)
+
+            SET dictF[current] TO computeMod(dictF[current])
+
+            SET dictG[current] TO dictG[current] + safeGet(dictG,current - 1)
+            SET dictG[current] TO computeMod(dictG[current])
+
+            SET dictF[current] TO dictF[current] + safeGet(dictF,current + 1) + (safeGet(dictG,current + 1) * current)
+            SET dictF[current] TO computeMod(dictF[current])
+
+            SET dictG[current] TO dictG[current] + safeGet(dictG,current + 1)
+            SET dictG[current] TO computeMod(dictG[current])
+        END PROCEDURE
+
+        PROCEDURE loopOverNums(index)
+            IF index >= LENGTH(nums) THEN RETURN
+            CALL processElement(index)
+            CALL loopOverNums(index + 1)
+        END PROCEDURE
+        
+        CALL loopOverNums(0)
+
+        DEFINE FUNCTION sumValues(mapArg)
+            SET accumulator TO 0
+            SET keyList TO list of keys in mapArg
+
+            FUNCTION recursiveSum(arrIndex)
+                IF arrIndex >= LENGTH(keyList) THEN
+                    RETURN accumulator
+                END IF
+                SET accumulator TO accumulator + mapArg[keyList[arrIndex]]
+                RETURN recursiveSum(arrIndex + 1)
+            END FUNCTION
+
+            RETURN recursiveSum(0)
+        END FUNCTION
+
+        SET totalSum TO sumValues(dictF)
+        SET finalResult TO totalSum - (totalSum / MOD_VAL) * MOD_VAL
+        RETURN finalResult
+    END FUNCTION
+END CLASS

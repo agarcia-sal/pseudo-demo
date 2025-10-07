@@ -1,0 +1,92 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+        LET self.mod BE mod  
+        LET self.h BE list containing (LENGTH OF s PLUS 1) zeros  
+        LET self.p BE list containing (LENGTH OF s PLUS 1) ones  
+        LET idx BE 1  
+        WHILE idx <= LENGTH OF s  
+            LET prevHash BE self.h AT idx MINUS 1  
+            LET charCode BE UNICODE code point OF s AT idx MINUS 1  
+            LET self.h AT idx BE (prevHash TIMES base PLUS charCode) MOD mod  
+            LET self.p AT idx BE (self.p AT idx MINUS 1 TIMES base) MOD mod  
+            SET idx TO idx PLUS 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        LET diff BE self.h AT r MINUS self.h AT (l MINUS 1) TIMES self.p AT (r MINUS l PLUS 1)  
+        LET result BE diff MOD self.mod  
+        RETURN result  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+        LET dfsStr BE empty list  
+        LET pos BE empty dictionary  
+        LET g BE new list  
+        LET n BE LENGTH OF s  
+        LET i BE 0  
+        REPEAT WHILE i < n  
+            APPEND empty list TO g  
+            SET i TO i PLUS 1  
+        END REPEAT  
+
+        LET j BE 1  
+        REPEAT WHILE j < n  
+            LET pIdx BE parent AT j  
+            APPEND j TO g AT pIdx  
+            SET j TO j PLUS 1  
+        END REPEAT  
+
+        FUNCTION dfs(i)  
+            LET leftIdx BE LENGTH OF dfsStr PLUS 1  
+            FOR EACH child IN g AT i  
+                CALL dfs(child)  
+            END FOR  
+            APPEND s AT i TO dfsStr  
+            LET rightIdx BE LENGTH OF dfsStr  
+            SET pos AT i TO PAIR leftIdx AND rightIdx  
+        END FUNCTION  
+
+        CALL dfs(0)  
+
+        LET base BE 33331  
+        LET mod BE 998244353  
+        LET h1 BE NEW Hashing WITH dfsStr, base, mod  
+        LET revStr BE empty list  
+        LET idxRev BE LENGTH OF dfsStr MINUS 1  
+        WHILE idxRev >= 0  
+            APPEND dfsStr AT idxRev TO revStr  
+            SET idxRev TO idxRev MINUS 1  
+        END WHILE  
+        LET h2 BE NEW Hashing WITH revStr, base, mod  
+
+        LET ans BE empty list  
+        LET x BE 0  
+        WHILE x < n  
+            LET boundaries BE pos AT x  
+            LET leftB BE boundaries FIRST ELEMENT  
+            LET rightB BE boundaries SECOND ELEMENT  
+            LET lengthSub BE rightB MINUS leftB PLUS 1  
+            IF (lengthSub MOD 2) = 0 THEN  
+                LET leftRangeEnd BE leftB PLUS (lengthSub DIV 2) MINUS 1  
+                LET rightRangeStart BE (n MINUS rightB PLUS 1)  
+                LET rightRangeEnd BE rightRangeStart PLUS (lengthSub DIV 2) MINUS 1  
+                LET v1 BE h1.query(leftB, leftRangeEnd)  
+                LET v2 BE h2.query(rightRangeStart, rightRangeEnd)  
+            ELSE  
+                LET leftRangeEnd BE leftB PLUS (lengthSub DIV 2) MINUS 1  
+                LET rightRangeStart BE (n MINUS rightB PLUS 1)  
+                LET rightRangeEnd BE rightRangeStart PLUS (lengthSub DIV 2) MINUS 1  
+                LET v1 BE h1.query(leftB, leftRangeEnd)  
+                LET v2 BE h2.query(rightRangeStart, rightRangeEnd)  
+            END IF  
+            LET res BE (v1 = v2)  
+            APPEND res TO ans  
+            SET x TO x PLUS 1  
+        END WHILE  
+
+        RETURN ans  
+    END FUNCTION  
+END CLASS

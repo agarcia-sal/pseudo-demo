@@ -1,0 +1,42 @@
+CLASS Solution  
+    FUNCTION numberOfWays(n integer parameter, x integer parameter, y integer parameter) RETURNS integer  
+        DECLARE moduloValue AS 1000000007  
+        DECLARE matrix AS array OF arrays WITH size (n PLUS 1)  
+        INDEX countOuter FROM 0 TO n DO  
+            SET matrix[countOuter] TO array OF zeros WITH size (x PLUS 1)  
+        END INDEX  
+        SET matrix[0][0] TO 1  
+        
+        DECLARE rowIndex AS 1  
+        WHILE rowIndex IS LESS THAN OR EQUAL TO n DO  
+            DECLARE colIndex AS 1  
+            WHILE colIndex IS LESS THAN OR EQUAL TO x DO  
+                LET prevRowSameCol := matrix[rowIndex MINUS 1][colIndex]  
+                LET prevRowPrevCol := matrix[rowIndex MINUS 1][colIndex MINUS 1]  
+                
+                LET termOne := prevRowSameCol TIMES colIndex  
+                LET tempDiff := x MINUS (colIndex MINUS 1)  
+                LET termTwo := prevRowPrevCol TIMES tempDiff  
+                
+                LET sumTerms := (termOne PLUS termTwo)  
+                LET remainder MOD := sumTerms MINUS (sumTerms DIV idiv moduloValue TIMES moduloValue)  
+                SET matrix[rowIndex][colIndex] TO remainder MOD  
+                
+                colIndex := colIndex PLUS 1  
+            END WHILE  
+            rowIndex := rowIndex PLUS 1  
+        END WHILE  
+        
+        DECLARE resultAccumulator AS 0  
+        DECLARE powerMultiplier AS 1  
+        DECLARE indexCounter AS 1  
+        WHILE indexCounter IS LESS THAN OR EQUAL TO x DO  
+            LET powerMultiplier := (powerMultiplier TIMES y) MOD moduloValue  
+            LET addend := (matrix[n][indexCounter] TIMES powerMultiplier) MOD moduloValue  
+            LET resultAccumulator := (resultAccumulator PLUS addend) MOD moduloValue  
+            indexCounter := indexCounter PLUS 1  
+        END WHILE  
+        
+        RETURN resultAccumulator  
+    END FUNCTION  
+END CLASS

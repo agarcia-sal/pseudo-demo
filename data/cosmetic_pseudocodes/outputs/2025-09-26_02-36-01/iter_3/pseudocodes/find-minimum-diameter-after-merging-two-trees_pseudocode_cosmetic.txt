@@ -1,0 +1,133 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+        LET length_graph BE THE LENGTH OF graph
+        LET marked_nodes BE A LIST FILLED WITH false WITH SIZE length_graph
+        LET traversal_queue BE A NEW deque CONTAINING (start, 0)
+        marked_nodes[start] ← true
+        LET candidate_node BE start
+        LET max_dist ← 0
+
+        WHILE NOT traversal_queue IS EMPTY
+            (current_node, curr_dist) ← POP LEFT FROM traversal_queue
+            IF curr_dist > max_dist THEN
+                max_dist ← curr_dist
+                candidate_node ← current_node
+            END IF
+
+            INDEX ← 0
+            WHILE INDEX < LENGTH OF graph[current_node]
+                LET adj_node BE graph[current_node][INDEX]
+                IF NOT marked_nodes[adj_node] THEN
+                    marked_nodes[adj_node] ← true
+                    traversal_queue APPEND (adj_node, curr_dist + 1)
+                END IF
+                INDEX ← INDEX + 1
+            END WHILE
+        END WHILE
+
+        RETURN candidate_node, max_dist
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        LET initial_start BE 0
+        LET endpoint, _var_unused ← bfs(graph, initial_start)
+        LET _another_unused, longest_dist ← bfs(graph, endpoint)
+        RETURN longest_dist
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+        LET nodes_count BE THE LENGTH OF graph
+        LET visited_nodes BE A LIST OF false VALUES LENGTH nodes_count
+        LET exploration_queue BE A deque WITH (node, 0)
+        visited_nodes[node] ← true
+        LET maximum_length BE 0
+
+        WHILE NOT exploration_queue IS EMPTY
+            (curr_node, distance) ← POP LEFT FROM exploration_queue
+
+            IF maximum_length < distance THEN
+                maximum_length ← distance
+            END IF
+
+            INDEX ← 0
+            WHILE INDEX < LENGTH OF graph[curr_node]
+                LET neighbour_node BE graph[curr_node][INDEX]
+                IF NOT visited_nodes[neighbour_node] THEN
+                    visited_nodes[neighbour_node] ← true
+                    exploration_queue APPEND (neighbour_node, distance + 1)
+                END IF
+                INDEX ← INDEX + 1
+            END WHILE
+        END WHILE
+
+        RETURN maximum_length
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        LET size_g1 BE (LENGTH OF edges1) + 1
+        LET size_g2 BE (LENGTH OF edges2) + 1
+
+        LET trees1 BE A LIST FILLED WITH EMPTY LISTS REPEATED size_g1 TIMES
+        LET trees2 BE A LIST OF EMPTY LISTS REPEATED size_g2 TIMES
+
+        LET idx ← 0
+        WHILE idx < LENGTH OF edges1
+            (first_node, second_node) ← edges1[idx]
+            trees1[first_node] APPEND second_node
+            trees1[second_node] APPEND first_node
+            idx ← idx + 1
+        END WHILE
+
+        idx ← 0
+        WHILE idx < LENGTH OF edges2
+            (first_node, second_node) ← edges2[idx]
+            trees2[first_node] APPEND second_node
+            trees2[second_node] APPEND first_node
+            idx ← idx + 1
+        END WHILE
+
+        LET diameter_tree1 BE tree_diameter(trees1)
+        LET diameter_tree2 BE tree_diameter(trees2)
+
+        LET max_paths_tree1 BE EMPTY LIST
+        LET counter ← 0
+        WHILE counter < size_g1
+            max_paths_tree1 APPEND maximum_path_length_from_node(trees1, counter)
+            counter ← counter + 1
+        END WHILE
+
+        LET max_paths_tree2 BE EMPTY LIST
+        counter ← 0
+        WHILE counter < size_g2
+            max_paths_tree2 APPEND maximum_path_length_from_node(trees2, counter)
+            counter ← counter + 1
+        END WHILE
+
+        LET minimum_possible_diameter BE positive infinity_value
+
+        LET outer ← 0
+        WHILE outer < size_g1
+            LET inner ← 0
+            WHILE inner < size_g2
+                LET candidate_diameter_candidates BE [diameter_tree1, diameter_tree2,
+                    max_paths_tree1[outer] + max_paths_tree2[inner] + (1 * 1)]
+                LET candidate_diameter BE candidate_diameter_candidates[0]
+                LET idx_candidates ← 1
+                WHILE idx_candidates < LENGTH OF candidate_diameter_candidates
+                    IF candidate_diameter_candidates[idx_candidates] > candidate_diameter THEN
+                        candidate_diameter ← candidate_diameter_candidates[idx_candidates]
+                    END IF
+                    idx_candidates ← idx_candidates + 1
+                END WHILE
+
+                IF candidate_diameter < minimum_possible_diameter THEN
+                    minimum_possible_diameter ← candidate_diameter
+                END IF
+                inner ← inner + 1
+            END WHILE
+            outer ← outer + 1
+        END WHILE
+
+        RETURN minimum_possible_diameter
+    END FUNCTION
+END CLASS

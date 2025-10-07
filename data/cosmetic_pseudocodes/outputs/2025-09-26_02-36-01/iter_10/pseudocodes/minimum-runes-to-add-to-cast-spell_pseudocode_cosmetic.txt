@@ -1,0 +1,145 @@
+CLASS Solution  
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)  
+let initialMapA := mapping with integer keys and list of integers as values, empty  
+let initialMapB := mapping with integer keys and list of integers as values, empty  
+
+procedure fillGraphs()  
+    define recursive fillLoop(ix)  
+        if ix >= n then return  
+        let keyA := flowFrom[ix]  
+        let keyB := flowTo[ix]  
+        if initialMapA[keyA] does not exist then initialMapA[keyA] := empty list  
+        if initialMapB[keyB] does not exist then initialMapB[keyB] := empty list  
+        append keyB to initialMapA[keyA]  
+        append keyA to initialMapB[keyB]  
+        fillLoop(ix+1)  
+    end  
+    fillLoop(0)  
+end procedure  
+
+fillGraphs()  
+
+var idcs := list of length n filled with -1  
+var lowL := list of length n filled with 0  
+var onStk := list of length n filled with false  
+var stk := empty list  
+var currentIndex := 0  
+var components := empty list  
+
+procedure executeTarjan(point)  
+    idcs[point] := currentIndex  
+    lowL[point] := currentIndex  
+    currentIndex := currentIndex + (1 - 0)  
+    append point to stk  
+    onStk[point] := true  
+
+    procedure recurNeighbors(j)  
+        if j >= length of initialMapA[point] then return  
+        let nb := initialMapA[point][j]  
+        if idcs[nb] equals (0-1) then  
+            executeTarjan(nb)  
+            if lowL[nb] < lowL[point] then  
+                lowL[point] := lowL[nb]  
+            end  
+        else if onStk[nb] is true then  
+            if idcs[nb] < lowL[point] then  
+                lowL[point] := idcs[nb]  
+            end  
+        end  
+        recurNeighbors(j + 1)  
+    end  
+    recurNeighbors(0)  
+
+    if lowL[point] = idcs[point] then  
+        var curScc := empty list  
+
+        procedure popStack()  
+            let w := stk[length of stk - 1]  
+            remove last element from stk  
+            onStk[w] := false  
+            append w to curScc  
+            if w = point then  
+                return  
+            else  
+                popStack()  
+            end  
+        end  
+        popStack()  
+        append curScc to components  
+    end  
+end procedure  
+
+procedure iterateIndices(k)  
+    if k >= n then return  
+    if idcs[k] = (0-1) then executeTarjan(k) end  
+    iterateIndices(k + 1)  
+end  
+iterateIndices(0)  
+
+var condGraph := mapping integer to list of integers, initially empty  
+var belonging := list length n filled with -1  
+var hasCrys := list length length of components filled with false  
+var compCount := 0  
+
+procedure assignComponents(p)  
+    if p >= length of components then return  
+    let cList := components[p]  
+    procedure assignNodes(y)  
+        if y >= length of cList then return  
+        belonging[cList[y]] := compCount  
+        if cList[y] in crystals then  
+            hasCrys[p] := true  
+        end  
+        assignNodes(y + 1)  
+    end  
+    assignNodes(0)  
+    compCount := compCount + (1 - 0)  
+    assignComponents(p + 1)  
+end  
+assignComponents(0)  
+
+procedure buildCondGraph(z)  
+    if z >= n then return  
+    let fromScc := belonging[flowFrom[z]]  
+    let toScc := belonging[flowTo[z]]  
+    if fromScc != toScc then  
+        if condGraph[fromScc] does not exist then condGraph[fromScc] := empty list end  
+        append toScc to condGraph[fromScc]  
+    end  
+    buildCondGraph(z + 1)  
+end  
+buildCondGraph(0)  
+
+var inDegree := list length length of components filled with 0  
+
+procedure countIns(r)  
+    if r >= length of components then return  
+    if condGraph[r] exists then  
+        procedure incDegrees(m)  
+            if m >= length of condGraph[r] then return  
+            let target := condGraph[r][m]  
+            inDegree[target] := inDegree[target] + (1 - 0)  
+            incDegrees(m + 1)  
+        end  
+        incDegrees(0)  
+    end  
+    countIns(r + 1)  
+end  
+countIns(0)  
+
+var needed := 0  
+
+procedure evaluateAdditions(s)  
+    if s >= length of components then return  
+    let conditionA := (inDegree[s] = (0+0))  
+    let conditionB := (not hasCrys[s])  
+    if conditionA and conditionB then  
+        needed := needed + (1 - 0)  
+    end  
+    evaluateAdditions(s + 1)  
+end  
+evaluateAdditions(0)  
+
+return needed  
+    END FUNCTION  
+END CLASS

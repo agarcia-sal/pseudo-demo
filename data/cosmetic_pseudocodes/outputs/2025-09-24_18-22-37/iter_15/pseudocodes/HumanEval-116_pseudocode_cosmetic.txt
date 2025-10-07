@@ -1,0 +1,110 @@
+FUNCTION sort_array(array_of_integers)
+    SET temp_result TO EMPTY LIST
+    SET temp_numbers TO EMPTY LIST
+
+    SET index_i TO 0
+    WHILE index_i < LENGTH(array_of_integers)
+        APPEND array_of_integers.at(index_i) TO temp_numbers
+        SET index_i TO index_i + 1
+    END WHILE
+
+    CALL bubble_sort_ascending(temp_numbers)
+
+    SET index_j TO 0
+    WHILE index_j < LENGTH(temp_numbers)
+        SET current_element TO temp_numbers.at(index_j)
+        SET binary_string_representation TO CONVERT_TO_BINARY(current_element)
+        SET trimmed_binary_string TO SUBSTRING(binary_string_representation, 2, LENGTH(binary_string_representation) - 2)
+
+        SET count_of_ones TO 0
+        SET k TO 0
+        WHILE k < LENGTH(trimmed_binary_string)
+            IF trimmed_binary_string.at(k) EQUALS '1' THEN
+                SET count_of_ones TO count_of_ones + 1
+            ELSE
+                /* do nothing */
+            END IF
+            SET k TO k + 1
+        END WHILE
+
+        APPEND (current_element, count_of_ones) TO temp_result
+        SET index_j TO index_j + 1
+    END WHILE
+
+    CALL sort_by_secondary_key(temp_result)
+
+    SET final_array TO EMPTY LIST
+    SET m TO 0
+    WHILE m < LENGTH(temp_result)
+        APPEND temp_result.at(m).first TO final_array
+        SET m TO m + 1
+    END WHILE
+
+    RETURN final_array
+END FUNCTION
+
+FUNCTION bubble_sort_ascending(numbers)
+    SET n TO LENGTH(numbers)
+    SET x TO n - 1
+
+    WHILE x > 0
+        SET y TO 0
+        WHILE y < x
+            IF numbers.at(y) > numbers.at(y + 1) THEN
+                SET temp_val TO numbers.at(y)
+                SET numbers[y] TO numbers.at(y + 1)
+                SET numbers[y + 1] TO temp_val
+            ELSE
+                /* no swap needed */
+            END IF
+            SET y TO y + 1
+        END WHILE
+        SET x TO x - 1
+    END WHILE
+END FUNCTION
+
+FUNCTION sort_by_secondary_key(pairs)
+    SET length_pairs TO LENGTH(pairs)
+    SET outer_index TO 0
+    WHILE outer_index < length_pairs - 1
+        SET inner_index TO 0
+        WHILE inner_index < length_pairs - outer_index - 1
+            SET current_count TO pairs.at(inner_index).second
+            SET next_count TO pairs.at(inner_index + 1).second
+
+            IF current_count > next_count THEN
+                SET temp_pair TO pairs.at(inner_index)
+                SET pairs[inner_index] TO pairs.at(inner_index + 1)
+                SET pairs[inner_index + 1] TO temp_pair
+            ELSE
+                /* already in order */
+            END IF
+            SET inner_index TO inner_index + 1
+        END WHILE
+        SET outer_index TO outer_index + 1
+    END WHILE
+END FUNCTION
+
+FUNCTION CONVERT_TO_BINARY(number)
+    SET result_string TO ""
+    SET quotient TO number
+
+    IF quotient EQUALS 0 THEN
+        RETURN "0b0"
+    END IF
+
+    WHILE quotient > 0
+        SET remainder TO quotient MOD 2
+        SET remainder_char TO ""
+        IF remainder EQUALS 0 THEN
+            SET remainder_char TO "0"
+        ELSE
+            SET remainder_char TO "1"
+        END IF
+
+        SET result_string TO remainder_char + result_string
+        SET quotient TO quotient DIV 2
+    END WHILE
+
+    RETURN "0b" + result_string
+END FUNCTION

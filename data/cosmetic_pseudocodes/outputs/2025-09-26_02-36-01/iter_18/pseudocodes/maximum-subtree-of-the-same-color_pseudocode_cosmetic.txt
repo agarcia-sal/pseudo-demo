@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+        DEFINE neighborMap AS a new mapping from keys to empty lists
+        SET indexA TO 0
+        WHILE indexA < LENGTH(edges)
+            LET pairX BE edges[indexA]
+            LET firstNode BE pairX[0]
+            LET secondNode BE pairX[1]
+            APPEND secondNode TO neighborMap[firstNode]
+            APPEND firstNode TO neighborMap[secondNode]
+            INCREMENT indexA BY 1
+        END WHILE
+
+        ASSIGN maxSubtreeCount TO 1
+
+        FUNCTION dfs WITH PARAMETERS currentNode ancestorNode
+            ASSIGN colorGroupCount TO 1
+            ASSIGN isUniformChildren TO true
+            SET locIter TO 0
+            WHILE locIter < LENGTH(neighborMap[currentNode])
+                LET adjNode BE neighborMap[currentNode][locIter]
+                IF NOT (adjNode = ancestorNode) THEN
+                    LET subtreeSize BE dfs(adjNode, currentNode)
+                    IF subtreeSize = 0 THEN
+                        SET isUniformChildren TO false
+                    ELSE
+                        IF colors[adjNode] = colors[currentNode] THEN
+                            SET colorGroupCount TO colorGroupCount + subtreeSize
+                        ELSE
+                            SET isUniformChildren TO false
+                        END IF
+                    END IF
+                END IF
+                INCREMENT locIter BY 1
+            END WHILE
+
+            IF isUniformChildren = true THEN
+                IF maxSubtreeCount < colorGroupCount THEN
+                    SET maxSubtreeCount TO colorGroupCount
+                END IF
+                RETURN colorGroupCount
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        SET startNode TO 0
+        SET invalidNode TO -1
+        LET _unusedReturn BE dfs(startNode, invalidNode)
+        RETURN maxSubtreeCount
+    END FUNCTION
+END CLASS

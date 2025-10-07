@@ -1,0 +1,82 @@
+CLASS Solution
+	FUNCTION getSum(nums)
+		FUNCTION calc(arr)
+			FUNCTION countOccurrences(lst)
+				DEFINE cntMap AS an empty map with default integer zero
+				DEFINE indices AS a sequence from 1 to LENGTH(lst) - 1
+				DEFINE result AS an array of zeros with size LENGTH(lst)
+				DEFINE procedure incrementCount(idx)
+					LET key = lst[idx - 1]
+					LET prevCount = cntMap[key]
+					cntMap[key] = prevCount + 1
+					result[idx] = prevCount
+				END PROCEDURE
+				DEFINE recursiveLoop(j)
+					IF j > LENGTH(lst) - 1 THEN RETURN
+					incrementCount(j)
+					recursiveLoop(j + 1)
+				END IF
+				recursiveLoop(1)
+				RETURN result
+			END FUNCTION
+
+			FUNCTION countOccurrencesReverse(lst)
+				DEFINE cntMap AS an empty map with default integer zero
+				DEFINE length AS LENGTH(lst)
+				DEFINE result AS an array of zeros with size length
+				DEFINE procedure incrementCountRev(idx)
+					LET key = lst[idx + 1]
+					LET prevCount = cntMap[key]
+					cntMap[key] = prevCount + 1
+					result[idx] = prevCount
+				END PROCEDURE
+				DEFINE i := length - 2
+				WHILE i >= 0 DO
+					incrementCountRev(i)
+					i = i - 1
+				END WHILE
+				RETURN result
+			END FUNCTION
+
+			LET n = LENGTH(arr)
+			LET leftCounts = countOccurrences(arr)
+			LET rightCounts = countOccurrencesReverse(arr)
+			LET accSum = 0
+			LET idx = 0
+			WHILE idx < n DO
+				LET l = leftCounts[idx]
+				LET r = rightCounts[idx]
+				LET val = arr[idx]
+				LET partial = (l + r + (l * r))
+				accSum = accSum + (partial * val)
+				idx = idx + 1
+			END WHILE
+			RETURN accSum MOD modVal
+		END FUNCTION
+
+		LET modVal = (10 ^ 9) + 7
+		LET firstCalc = calc(nums)
+		DEFINE procedure reverseList(aList)
+			DEFINE leftIdx = 0
+			DEFINE rightIdx = LENGTH(aList) - 1
+			WHILE leftIdx < rightIdx DO
+				LET tmp = aList[leftIdx]
+				aList[leftIdx] = aList[rightIdx]
+				aList[rightIdx] = tmp
+				leftIdx = leftIdx + 1
+				rightIdx = rightIdx - 1
+			END WHILE
+		END PROCEDURE
+		reverseList(nums)
+		LET secondCalc = calc(nums)
+		LET elemsSum = 0
+		DEFINE pointer = 0
+		REPEAT
+			IF pointer >= LENGTH(nums) THEN BREAK END IF
+			elemsSum = elemsSum + nums[pointer]
+			pointer = pointer + 1
+		UNTIL FALSE
+		LET finalResult = (firstCalc + secondCalc + elemsSum) MOD modVal
+		RETURN finalResult
+	END FUNCTION
+END CLASS

@@ -1,0 +1,11 @@
+from typing import Union
+
+def digits(n: Union[int, str]) -> int:
+    product = 1
+    odd_count = 0
+    for character_digit in str(n):
+        int_digit = int(character_digit)
+        if int_digit % 2 == 1:
+            product *= int_digit
+            odd_count += 1
+    return product if odd_count > 0 else 0

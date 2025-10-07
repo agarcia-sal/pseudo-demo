@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION medianOfUniquenessArray(nums)
+        FUNCTION calculateCountThreshold(bound)
+            VARIABLE accumulator := 0
+            VARIABLE frontIndex := 0
+            VARIABLE frequencyMap := new empty dictionary mapping elements to integers
+            VARIABLE uniqueTracker := 0
+
+            PROCEDURE incrementFrequency(element)
+                IF NOT frequencyMap contains element THEN
+                    frequencyMap[element] := 0
+                END IF
+                frequencyMap[element] := frequencyMap[element] + 1
+            END PROCEDURE
+
+            PROCEDURE decrementFrequency(element)
+                frequencyMap[element] := frequencyMap[element] - 1
+                IF frequencyMap[element] = 0 THEN
+                    uniqueTracker := uniqueTracker - 1
+                END IF
+            END PROCEDURE
+
+            FUNCTION getFrequency(element)
+                IF frequencyMap contains element THEN
+                    RETURN frequencyMap[element]
+                ELSE
+                    RETURN 0
+                END IF
+            END FUNCTION
+
+            FUNCTION expandWindow(index)
+                IF getFrequency(nums[index]) = 0 THEN
+                    uniqueTracker := uniqueTracker + 1
+                END IF
+                incrementFrequency(nums[index])
+            END FUNCTION
+
+            FUNCTION shrinkWindow()
+                decrementFrequency(nums[frontIndex])
+                frontIndex := frontIndex + 1
+            END FUNCTION
+
+            VARIABLE position := 0
+            WHILE position < length(nums)
+                CALL expandWindow(position)
+                WHILE uniqueTracker > bound DO
+                    CALL shrinkWindow()
+                END WHILE
+                accumulator := accumulator + (position - frontIndex + 1)
+                position := position + 1
+            END WHILE
+
+            RETURN accumulator
+        END FUNCTION
+
+        VARIABLE lengthNums := length(nums)
+        VARIABLE totalSubarrays := (lengthNums * (lengthNums + 1)) / 2
+        VARIABLE halfPoint := (totalSubarrays + 1) / 2
+        VARIABLE minRange := 1
+        VARIABLE maxRange := lengthNums
+
+        PROCEDURE updateMidpoint(outputRef)
+            outputRef := (minRange + maxRange) // 2
+        END PROCEDURE
+
+        WHILE minRange < maxRange DO
+            VARIABLE midValue := 0
+            CALL updateMidpoint(midValue)
+            VARIABLE count := calculateCountThreshold(midValue)
+            IF count < halfPoint THEN
+                minRange := midValue + 1
+            ELSE
+                maxRange := midValue
+            END IF
+        END WHILE
+
+        RETURN minRange
+    END FUNCTION
+END CLASS

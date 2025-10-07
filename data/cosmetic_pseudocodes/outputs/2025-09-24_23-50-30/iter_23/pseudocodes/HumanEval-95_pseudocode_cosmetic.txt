@@ -1,0 +1,34 @@
+```
+FUNCTION check_dict_case(alpha_map)
+  IF NOT (COUNT alpha_map KEYS > 0) THEN RETURN False ENDIF
+  LET mode = "start"
+  LET sequence = CONVERT_TO_LIST(alpha_map KEYS)
+  
+  PROCEDURE traverse(index)
+  WHILE index < LENGTH(sequence) DO
+    LET item = sequence[index]
+    IF NOT IS_OF_TYPE(item, STRING) THEN
+      mode = "mixed"
+      BREAK
+    ELSEIF mode = "start" THEN
+      IF IS_ALL_CAPITALS(item) THEN
+        mode = "upper"
+      ELSEIF IS_ALL_LOWERCASE(item) THEN
+        mode = "lower"
+      ELSE
+        BREAK
+      ENDIF
+    ELSEIF (mode = "upper" AND NOT IS_ALL_CAPITALS(item)) OR (mode = "lower" AND NOT IS_ALL_LOWERCASE(item)) THEN
+      mode = "mixed"
+      BREAK
+    ELSE
+      BREAK
+    ENDIF
+    index = index + 1
+  ENDWHILE
+  ENDPROCEDURE
+  
+  traverse(0)
+  RETURN (mode = "upper") OR (mode = "lower")
+END FUNCTION
+```

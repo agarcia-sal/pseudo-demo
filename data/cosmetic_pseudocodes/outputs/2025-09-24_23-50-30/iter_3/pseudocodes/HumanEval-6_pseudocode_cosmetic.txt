@@ -1,0 +1,39 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        SET depth_counter TO 0
+        SET max_level TO 0
+        FOR index FROM 1 TO LENGTH(group_string)
+            SET symbol TO SUBSTRING(group_string, index, 1)
+            IF symbol = '(' THEN
+                depth_counter ← depth_counter + 1
+                IF depth_counter > max_level THEN
+                    max_level ← depth_counter
+                END IF
+            ELSE
+                depth_counter ← depth_counter - 1
+            END IF
+        END FOR
+        RETURN max_level
+    END FUNCTION
+
+    SET sliced_groups TO []
+    SET start_index TO 1
+    FOR position FROM 1 TO LENGTH(parentheses_string)+1
+        IF position = LENGTH(parentheses_string)+1 OR SUBSTRING(parentheses_string, position, 1) = ' ' THEN
+            SET segment_length TO position - start_index
+            IF segment_length > 0 THEN
+                APPEND SUBSTRING(parentheses_string, start_index, segment_length) TO sliced_groups
+            END IF
+            start_index ← position + 1
+        END IF
+    END FOR
+
+    SET results TO []
+    FOR EACH segment IN sliced_groups
+        APPEND parse_paren_group(segment) TO results
+    END FOR
+
+    RETURN results
+END FUNCTION
+```

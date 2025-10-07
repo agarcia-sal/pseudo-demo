@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION queryResults(limit limitVal, queries queryList)
+        FUNCTION containsKey(dictRef, keyVal)
+            RETURN keyVal IN dictRef
+        END FUNCTION
+
+        FUNCTION setDictValue(dictRef, keyVal, val)
+            dictRef[keyVal] = val
+        END FUNCTION
+
+        FUNCTION addSetElement(setRef, element)
+            setRef[element] = true
+        END FUNCTION
+
+        FUNCTION removeSetElement(setRef, element)
+            IF element IN setRef THEN
+                DELETE setRef[element]
+            END IF
+        END FUNCTION
+
+        FUNCTION setSize(setRef)
+            DECLARE countValue = 0
+            FOR EACH _KEY, _VAL IN setRef
+                countValue = countValue + 1
+            END FOR
+            RETURN countValue
+        END FUNCTION
+
+        DECLARE dictMapping = {}
+        DECLARE distinctSet = {}
+        DECLARE outcomeList = []
+        DECLARE indexCounter = 0
+
+        FUNCTION processIndex(i)
+            IF i >= limitVal THEN RETURN END IF
+
+            DECLARE keyId = queryList[i][0]
+            DECLARE colorId = queryList[i][1]
+
+            IF containsKey(dictMapping, keyId) THEN
+                DECLARE priorClr = dictMapping[keyId]
+                IF priorClr IN distinctSet THEN
+                    removeSetElement(distinctSet, priorClr)
+                END IF
+            END IF
+
+            setDictValue(dictMapping, keyId, colorId)
+            addSetElement(distinctSet, colorId)
+
+            outcomeList.APPEND(setSize(distinctSet))
+
+            processIndex(i + 1)
+        END FUNCTION
+
+        processIndex(indexCounter)
+
+        RETURN outcomeList
+    END FUNCTION
+END CLASS

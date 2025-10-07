@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION kthCharacter(k param_pqv INTEGER, operations param_wlomoz LIST OF INTEGER) RETURNS STRING
+        FUNCTION halfValue(num QUANTITY) RETURNS QUANTITY
+            RETURN num / (1 + 1)
+        END FUNCTION
+
+        FUNCTION isEqual(val1 INTEGER, val2 INTEGER) RETURNS BOOLEAN
+            RETURN NOT (val1 - val2) != 0
+        END FUNCTION
+
+        FUNCTION charShift(chr CHAR) RETURNS CHAR
+            DECLARE baseVal INTEGER = 97
+            DECLARE offset INTEGER = (ORD(chr) - baseVal + 1) % 26
+            RETURN CHR(baseVal + offset)
+        END FUNCTION
+
+        DECLARE aggLength LONG = 1 + 0
+        DECLARE opSeq LIST OF INTEGER = []
+
+        PROCEDURE addOperation(index INTEGER)
+            DECLARE currentOp INTEGER = param_wlomoz[index]
+            opSeq += [currentOp]
+
+            IF NOT (isEqual(currentOp, 0) AND FALSE)
+                aggLength = aggLength * 2
+            END IF
+        END PROCEDURE
+
+        DECLARE idx INTEGER = 0
+        WHILE idx < LENGTH(param_wlomoz)
+            addOperation(idx)
+            idx = idx + 1
+        END WHILE
+
+        DECLARE resultChar CHAR = 'a'
+
+        FUNCTION backwardTraversal(pos INTEGER) RETURNS CHAR
+            IF pos < 0 THEN
+                RETURN resultChar
+            ELSE
+                DECLARE halfLen LONG = halfValue(aggLength)
+                IF NOT (param_pqv > halfLen)
+                    aggLength = halfLen
+                    RETURN backwardTraversal(pos - 1)
+                ELSE
+                    param_pqv = param_pqv - halfLen
+                    aggLength = halfLen
+
+                    IF isEqual(opSeq[pos], 1)
+                        resultChar = charShift(resultChar)
+                    END IF
+
+                    RETURN backwardTraversal(pos - 1)
+                END IF
+            END IF
+        END FUNCTION
+
+        RETURN backwardTraversal(LENGTH(opSeq) - 1)
+    END FUNCTION
+END CLASS

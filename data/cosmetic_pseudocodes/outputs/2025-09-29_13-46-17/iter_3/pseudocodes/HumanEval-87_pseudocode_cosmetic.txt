@@ -1,0 +1,68 @@
+```
+FUNCTION get_row(two_dimensional_list, target_integer)
+  
+  PROCEDURE findMatches(rowList, tgt, rowIdx, colIdx, foundCoords)
+    IF rowIdx = LENGTH(rowList) THEN
+      RETURN foundCoords
+    END IF
+
+    IF colIdx = LENGTH(rowList[rowIdx]) THEN
+      RETURN findMatches(rowList, tgt, rowIdx + 1, 0, foundCoords)
+    END IF
+
+    LET currentVal BE rowList[rowIdx][colIdx]
+    LET updatedCoords BE foundCoords
+
+    IF NOT (currentVal <> tgt) THEN
+      LET updatedCoords BE foundCoords APPEND (rowIdx, colIdx)
+    END IF
+
+    RETURN findMatches(rowList, tgt, rowIdx, colIdx + 1, updatedCoords)
+  END PROCEDURE
+
+  LET initialCoords BE EMPTY LIST
+  LET collectedCoords BE findMatches(two_dimensional_list, target_integer, 0, 0, initialCoords)
+
+  PROCEDURE sortBySecondDesc(coords, sorted)
+    IF coords = EMPTY LIST THEN
+      RETURN sorted
+    END IF
+
+    LET maxPair BE coords[0]
+    LET restPairs BE REMOVE_AT(coords, 0)
+
+    FOR EACH itm IN restPairs DO
+      IF itm[1] > maxPair[1] THEN
+        LET maxPair BE itm
+      END IF
+    END FOR
+
+    LET filteredRest BE FILTER(restPairs, p -> p <> maxPair)
+    RETURN sortBySecondDesc(filteredRest, sorted + [maxPair])
+  END PROCEDURE
+
+  PROCEDURE sortByFirstAsc(coords, sorted)
+    IF coords = EMPTY LIST THEN
+      RETURN sorted
+    END IF
+
+    LET minPair BE coords[0]
+    LET restPairs BE REMOVE_AT(coords, 0)
+
+    FOR EACH itm IN restPairs DO
+      IF itm[0] < minPair[0] THEN
+        LET minPair BE itm
+      END IF
+    END FOR
+
+    LET filteredRest BE FILTER(restPairs, p -> p <> minPair)
+    RETURN sortByFirstAsc(filteredRest, sorted + [minPair])
+  END PROCEDURE
+
+  LET coordsSortedBySecondDesc BE sortBySecondDesc(collectedCoords, EMPTY LIST)
+  LET coordsSortedByFirstAsc THEN  sortByFirstAsc(coordsSortedBySecondDesc, EMPTY LIST)
+
+  RETURN coordsSortedByFirstAsc
+
+END FUNCTION
+```

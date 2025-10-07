@@ -1,0 +1,96 @@
+```
+CLASS UnionFind
+  FUNCTION __init__(self, n)
+    SET self.parent TO empty list
+    SET self.rank TO empty list
+    SET counter TO 0
+    WHILE counter LESS THAN n DO
+      APPEND counter TO self.parent
+      APPEND 1 TO self.rank
+      INCREMENT counter BY 1
+    END WHILE
+  END FUNCTION
+
+  FUNCTION find(self, x)
+    FUNCTION recurse_find(y)
+      IF self.parent[y] EQUALS y THEN
+        RETURN y
+      ELSE
+        SET self.parent[y] TO recurse_find(self.parent[y])
+        RETURN self.parent[y]
+      END IF
+    END FUNCTION
+    RETURN recurse_find(x)
+  END FUNCTION
+
+  FUNCTION union(self, a, b)
+    SET rootA TO self.find(a)
+    SET rootB TO self.find(b)
+    IF rootA EQUALS rootB THEN
+      RETURN
+    ELSE
+      IF (self.rank[rootA] LESS THAN self.rank[rootB]) IS FALSE THEN
+        IF (self.rank[rootA] GREATER THAN self.rank[rootB]) IS FALSE THEN
+          SET self.parent[rootB] TO rootA
+          SET self.rank[rootA] TO self.rank[rootA] PLUS 1
+        ELSE
+          SET self.parent[rootB] TO rootA
+        END IF
+      ELSE
+        SET self.parent[rootA] TO rootB
+      END IF
+    END IF
+  END FUNCTION
+END CLASS
+
+CLASS Solution
+  FUNCTION minimumCost(self, n, edges, query)
+    SET uf TO UnionFind(n)
+    SET mask_value TO 4294967295   # 2^32 - 1
+    SET bits_list TO empty list
+    SET index_counter TO 0
+    WHILE index_counter LESS THAN n DO
+      APPEND mask_value TO bits_list
+      INCREMENT index_counter BY 1
+    END WHILE
+
+    FOR EACH triple e IN edges DO
+      SET uu TO e[0]
+      SET vv TO e[1]
+      SET ww TO e[2]
+      CALL uf.union(uu, vv)
+      SET rootU TO uf.find(uu)
+      SET bits_list[rootU] TO bits_list[rootU] BITWISE AND ww
+    END FOR
+
+    SET comp_cost TO empty dictionary
+    FOR iter_i FROM 0 TO n MINUS 1 DO
+      SET root_i TO uf.find(iter_i)
+      IF root_i NOT IN comp_cost THEN
+        SET comp_cost[root_i] TO bits_list[root_i]
+      END IF
+    END FOR
+
+    SET ans_list TO empty list
+    FUNCTION determine_answer(x, y)
+      IF x EQUALS y THEN
+        RETURN 0
+      ELSE
+        SET fx TO uf.find(x)
+        SET fy TO uf.find(y)
+        IF fx EQUALS fy THEN
+          RETURN comp_cost[fx]
+        ELSE
+          RETURN -1
+        END IF
+      END IF
+    END FUNCTION
+
+    FOR EACH pair q IN query DO
+      APPEND determine_answer(q[0], q[1]) TO ans_list
+    END FOR
+
+    RETURN ans_list
+  END FUNCTION
+END CLASS
+```

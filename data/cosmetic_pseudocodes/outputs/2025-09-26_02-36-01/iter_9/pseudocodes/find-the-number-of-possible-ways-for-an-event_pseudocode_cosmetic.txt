@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION numberOfWays(q integer parameter, r integer parameter, s integer parameter) RETURNS integer
+
+        PROCEDURE modAdd(a integer, b integer, m integer) RETURNS integer
+            SET res TO a + b
+            IF res >= m THEN
+                SET res TO res - m
+            END IF
+            RETURN res
+        END PROCEDURE
+
+        PROCEDURE modMul(a integer, b integer, m integer) RETURNS integer
+            RETURN (a * b) - m * ((a * b) / m)  // truncated division assumed
+        END PROCEDURE
+
+        SET modulus TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+
+        PROCEDURE initializeMatrix(rows integer, cols integer) RETURNS list of list of integer
+            SET matrix TO empty list
+            SET outerIndex TO 0
+            WHILE outerIndex < rows DO
+                SET innerIndex TO 0
+                SET innerList TO empty list
+                REPEAT
+                    INNERCONTINUE:
+                    innerList.ADD(0)
+                    SET innerIndex TO innerIndex + 1
+                    IF innerIndex >= cols THEN BREAK INNERCONTINUE
+                UNTIL innerIndex >= cols
+                matrix.ADD(innerList)
+                SET outerIndex TO outerIndex + 1
+            END WHILE
+            RETURN matrix
+        END PROCEDURE
+
+        SET W TO initializeMatrix(q + 1, r + 1)
+        SET firstList TO W[0]
+        SET firstList[0] TO 1
+
+        PROCEDURE computeValue(i integer, j integer) RETURNS integer
+            SET prior_i TO i - 1
+            RETURN ( (W[prior_i][j] * j) mod modulus + (W[prior_i][j - 1] * (r - j + 1)) mod modulus ) mod modulus
+        END PROCEDURE
+
+        SET rowCounter TO 1
+        WHILE rowCounter <= q DO
+            SET colCounter TO 1
+            WHILE colCounter <= r DO
+
+                SET W[rowCounter][colCounter] TO computeValue(rowCounter, colCounter)
+
+                SET colCounter TO colCounter + 1
+            END WHILE
+
+            SET rowCounter TO rowCounter + 1
+        END WHILE
+
+        SET total TO 0
+        SET powerAcc TO 1
+        SET indexCounter TO 1
+
+        WHILE indexCounter <= r DO
+
+            SET powerAcc TO (powerAcc * s) % modulus
+            SET total TO (total + (W[q][indexCounter] * powerAcc) % modulus) % modulus
+
+            SET indexCounter TO indexCounter + 1
+        END WHILE
+
+        RETURN total
+
+    END FUNCTION
+END CLASS

@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION maximumStrength(nums k)
+        FUNCTION helper_max(a b)
+            IF a GREATER THAN b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        FUNCTION helper_len(arr)
+            SET cnt TO 0
+            LABEL length_calc_start
+            IF cnt LESS THAN LEN(arr) THEN
+                SET cnt TO cnt PLUS 1
+                GOTO length_calc_start
+            END IF
+            RETURN cnt
+        END FUNCTION
+
+        SET alpha TO helper_len(nums)
+        SET beta TO k
+
+        FUNCTION negative_infinity()
+            RETURN -999999999
+        END FUNCTION
+
+        SET matrix TO []
+        SET idx_outer TO 0
+        LABEL outer_init
+        IF idx_outer LESS THAN alpha PLUS 1 THEN
+            SET row TO []
+            SET idx_inner TO 0
+            LABEL inner_init
+            IF idx_inner LESS THAN beta PLUS 1 THEN
+                CALL row.APPEND(negative_infinity())
+                SET idx_inner TO idx_inner PLUS 1
+                GOTO inner_init
+            END IF
+            CALL matrix.APPEND(row)
+            SET idx_outer TO idx_outer PLUS 1
+            GOTO outer_init
+        END IF
+
+        SET matrix[0][0] TO 0
+
+        FUNCTION calc_sign(value)
+            FUNCTION is_odd(x)
+                RETURN x MOD 2 EQUALS 1
+            END FUNCTION
+
+            IF is_odd(value) THEN
+                RETURN beta MINUS value MINUS 1 PLUS 1
+            ELSE
+                RETURN -(beta MINUS value MINUS 1 PLUS 1)
+            END IF
+        END FUNCTION
+
+        SET i TO 1
+        LABEL loop_i
+        IF i LESS THAN OR EQUAL TO alpha THEN
+            SET j TO 1
+            LABEL loop_j
+            IF j LESS THAN OR EQUAL TO beta THEN
+                SET temp_sum TO 0
+                SET end_idx TO i
+                LABEL loop_end
+                IF end_idx GREATER THAN OR EQUAL TO 1 THEN
+                    SET temp_sum TO temp_sum PLUS nums[end_idx MINUS 1]
+                    SET sign_val TO calc_sign(j)
+                    SET candidate TO matrix[end_idx MINUS 1][j MINUS 1] PLUS (sign_val MULTIPLIED BY temp_sum)
+                    SET matrix[i][j] TO helper_max(matrix[i][j], candidate)
+                    SET end_idx TO end_idx MINUS 1
+                    GOTO loop_end
+                END IF
+                SET matrix[i][j] TO helper_max(matrix[i][j], matrix[i MINUS 1][j])
+                SET j TO j PLUS 1
+                GOTO loop_j
+            END IF
+            SET i TO i PLUS 1
+            GOTO loop_i
+        END IF
+
+        RETURN matrix[alpha][beta]
+    END FUNCTION
+END CLASS

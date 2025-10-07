@@ -1,0 +1,87 @@
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+        SET size TO LENGTH OF fruits
+
+        SET arrayA TO [(1,1), (2,1), (0,1)]
+        SET arrayB TO [(1,0), (1,-1), (1,1)]
+        SET arrayC TO [(-1,1), (0,1), (1,1)]
+
+        SET cache TO EMPTY DICTIONARY
+
+        FUNCTION recurse(aX, aY, bX, bY, cX, cY)
+            FUNCTION outOfBounds(px, py)
+                RETURN (px < 0 OR px >= size) OR (py < 0 OR py >= size)
+            END FUNCTION
+
+            IF outOfBounds(aX, aY) OR outOfBounds(bX, bY) OR outOfBounds(cX, cY) THEN
+                RETURN -999999999
+            END IF
+
+            IF aX = aY = bX = bY = cX = cY = size - 1 THEN
+                RETURN fruits[size - 1][size - 1]
+            END IF
+
+            SET key TO (aX, aY, bX, bY, cX, cY)
+            IF key IN cache THEN
+                RETURN cache[key]
+            END IF
+
+            SET sumFruits TO fruits[aX][aY]
+
+            IF (aX = bX AND aY = bY) OR (aX = cX AND aY = cY) THEN
+                SET sumFruits TO 0
+            END IF
+
+            IF bX = cX AND bY = cY THEN
+                SET sumFruits TO sumFruits + fruits[bX][bY]
+            ELSE
+                SET sumFruits TO sumFruits + fruits[bX][bY] + fruits[cX][cY]
+            END IF
+
+            SET best TO -999999999
+
+            SET i TO 0
+            FUNCTION loopI()
+                IF i >= LENGTH OF arrayA THEN
+                    RETURN
+                END IF
+                SET dx1, dy1 TO arrayA[i]
+
+                SET j TO 0
+                FUNCTION loopJ()
+                    IF j >= LENGTH OF arrayB THEN
+                        SET i TO i + 1
+                        CALL loopI()
+                        RETURN
+                    END IF
+                    SET dx2, dy2 TO arrayB[j]
+
+                    SET k TO 0
+                    FUNCTION loopK()
+                        IF k >= LENGTH OF arrayC THEN
+                            SET j TO j + 1
+                            CALL loopJ()
+                            RETURN
+                        END IF
+                        SET dx3, dy3 TO arrayC[k]
+
+                        SET val TO recurse(aX + dx1, aY + dy1, bX + dx2, bY + dy2, cX + dx3, cY + dy3)
+                        IF val > best THEN
+                            SET best TO val
+                        END IF
+                        SET k TO k + 1
+                        CALL loopK()
+                    END FUNCTION
+                    CALL loopK()
+                END FUNCTION
+                CALL loopJ()
+            END FUNCTION
+            CALL loopI()
+
+            SET cache[key] TO sumFruits + best
+            RETURN sumFruits + best
+        END FUNCTION
+
+        RETURN recurse(0, 0, 0, size - 1, size - 1, 0)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION canReachCorner(xCorner yCorner circles)
+        FUNCTION check_point_inside(a b c d e)
+            SET diff_x TO a - c
+            SET diff_y TO b - d
+            SET radius_sq TO e * e
+            RETURN (diff_x * diff_x + diff_y * diff_y) <= radius_sq
+        END FUNCTION
+
+        FUNCTION touches_left_top(cx cy rad)
+            SET cond1 TO (abs(cx) <= rad) AND (0 <= cy) AND (cy <= yCorner)
+            SET cond2 TO (abs(cy - yCorner) <= rad) AND (0 <= cx) AND (cx <= xCorner)
+            RETURN cond1 OR cond2
+        END FUNCTION
+
+        FUNCTION touches_right_bottom(cx cy radius)
+            SET condA TO (abs(cx - xCorner) <= radius) AND (0 <= cy) AND (cy <= yCorner)
+            SET condB TO (abs(cy) <= radius) AND (0 <= cx) AND (cx <= xCorner)
+            RETURN condA OR condB
+        END FUNCTION
+
+        FUNCTION explore(depth)
+            SET ox TO circles at position depth at position 0
+            SET oy TO circles at position depth at position 1
+            SET oradius TO circles at position depth at position 2
+            IF touches_right_bottom(ox oy oradius) THEN
+                RETURN True
+            END IF
+            SET vis at position depth TO True
+            FOR each idx AND (cx cy rad) IN enumeration of circles
+                IF vis at position idx EQUALS True THEN
+                    CONTINUE
+                END IF
+                SET dist_sq TO (ox - cx) * (ox - cx) + (oy - cy) * (oy - cy)
+                SET radii_sum TO oradius + rad
+                IF dist_sq > radii_sum * radii_sum THEN
+                    CONTINUE
+                END IF
+                SET cond_x TO (ox * rad + cx * oradius) < (radii_sum * xCorner)
+                SET cond_y TO (oy * rad + cy * oradius) < (radii_sum * yCorner)
+                IF cond_x AND cond_y AND explore(idx) THEN
+                    RETURN True
+                END IF
+            END FOR
+            RETURN False
+        END FUNCTION
+
+        SET visited TO list of False of length of circles
+        FOR each pos AND (a b c) IN enumeration of circles
+            IF check_point_inside(0 0 a b c) OR check_point_inside(xCorner yCorner a b c) THEN
+                RETURN False
+            END IF
+            IF NOT visited at position pos AND touches_left_top(a b c) AND explore(pos) THEN
+                RETURN False
+            END IF
+        END FOR
+        RETURN True
+    END FUNCTION
+END CLASS

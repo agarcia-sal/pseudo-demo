@@ -1,0 +1,64 @@
+```pseudocode
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+        FUNCTION isAlpha(x)
+            RETURN NOT ((x < 'A') OR (x > 'Z' AND x < 'a') OR (x > 'z'))
+        END FUNCTION
+
+        DEFINE counts_map AS dictionary WITH default 0
+
+        SET holder_char TO "" 
+        SET accumulator_val TO 0
+
+        FUNCTION addCount()
+            IF holder_char != "" THEN
+                counts_map[holder_char] = counts_map[holder_char] + accumulator_val
+            END IF
+        END FUNCTION
+
+        FUNCTION toInt(ch)
+            RETURN ASCII(ch) - ASCII('0')
+        END FUNCTION
+
+        SET idx TO 1
+        WHILE idx <= LENGTH(compressed)
+            SET cur_char TO compressed[idx]
+            IF isAlpha(cur_char) THEN
+                CALL addCount()
+                holder_char = cur_char
+                accumulator_val = 0
+            ELSE
+                accumulator_val = (accumulator_val * (4 * 2 + 2)) + toInt(cur_char)
+            END IF
+            idx = idx + 1
+        END WHILE
+
+        CALL addCount()
+
+        DEFINE result_parts AS empty list
+
+        FUNCTION quickSortKeys(arr)
+            IF LENGTH(arr) <= 1 THEN RETURN arr
+            SET pivot TO arr[1]
+            DEFINE left_arr AS empty list
+            DEFINE right_arr AS empty list
+            FOR i FROM 2 TO LENGTH(arr)
+                IF arr[i] < pivot THEN
+                    APPEND arr[i] TO left_arr
+                ELSE
+                    APPEND arr[i] TO right_arr
+                END IF
+            END FOR
+            RETURN quickSortKeys(left_arr) + [pivot] + quickSortKeys(right_arr)
+        END FUNCTION
+
+        SET sorted_keys TO quickSortKeys(LIST_OF_KEYS(counts_map))
+
+        FOR each key_var IN sorted_keys
+            APPEND key_var + STR(counts_map[key_var]) TO result_parts
+        END FOR
+
+        RETURN CONCATENATE_ALL(result_parts)
+    END FUNCTION
+END CLASS
+```

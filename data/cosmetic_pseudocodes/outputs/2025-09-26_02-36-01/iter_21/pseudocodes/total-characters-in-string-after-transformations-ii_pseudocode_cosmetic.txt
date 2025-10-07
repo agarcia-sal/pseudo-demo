@@ -1,0 +1,158 @@
+CLASS Solution
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+
+        SET mod_val TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+
+        FUNCTION zero_matrix(rows parameter rows IS integer cols parameter cols IS integer) RETURNS list of lists of integers
+            FUNCTION build_row(idx parameter idx IS integer) RETURNS list of integers
+                IF idx LESS THAN cols
+                    RETURN [0] + build_row(idx + 1)
+                ELSE
+                    RETURN []
+                END IF
+            END FUNCTION
+            FUNCTION build_matrix(ridx parameter ridx IS integer) RETURNS list of lists of integers
+                IF ridx LESS THAN rows
+                    RETURN [build_row(0)] + build_matrix(ridx + 1)
+                ELSE
+                    RETURN []
+                END IF
+            END FUNCTION
+            RETURN build_matrix(0)
+        END FUNCTION
+
+        SET trans_matrix TO zero_matrix(26, 26)
+
+        FUNCTION increment_trans_matrix(x parameter x IS integer y parameter y IS integer)
+            SET trans_matrix[x][y] TO (trans_matrix[x][y] + 1)
+        END FUNCTION
+
+        FUNCTION process_row(i parameter i IS integer, j parameter j IS integer)
+            IF j LESS THAN nums[i]
+                SET idx TO ((i + j + 1) MOD 26)
+                increment_trans_matrix(i, idx)
+                process_row(i, j + 1)
+            END IF
+        END FUNCTION
+
+        FUNCTION process_rows(i parameter i IS integer)
+            IF i LESS THAN 26
+                process_row(i, 0)
+                process_rows(i + 1)
+            END IF
+        END FUNCTION
+
+        process_rows(0)
+
+        FUNCTION mat_mult(A parameter A IS list of lists of integers, B parameter B IS list of lists of integers) RETURNS list of lists of integers
+            SET res TO zero_matrix(26, 26)
+
+            FUNCTION mult_cell(i parameter i IS integer, j parameter j IS integer, k parameter k IS integer, acc parameter acc IS integer) RETURNS integer
+                IF k LESS THAN 26
+                    RETURN mult_cell(i, j, k + 1, (acc + (A[i][k] * B[k][j]) MOD mod_val) MOD mod_val)
+                ELSE
+                    RETURN acc
+                END IF
+            END FUNCTION
+
+            FUNCTION fill_row(i parameter i IS integer, j parameter j IS integer)
+                IF j LESS THAN 26
+                    SET res[i][j] TO mult_cell(i, j, 0, 0)
+                    fill_row(i, j + 1)
+                END IF
+            END FUNCTION
+
+            FUNCTION fill_matrix(i parameter i IS integer)
+                IF i LESS THAN 26
+                    fill_row(i, 0)
+                    fill_matrix(i + 1)
+                END IF
+            END FUNCTION
+
+            fill_matrix(0)
+            RETURN res
+        END FUNCTION
+
+        FUNCTION identity_matrix(size parameter size IS integer) RETURNS list of lists of integers
+            SET id_mat TO zero_matrix(size, size)
+
+            FUNCTION set_identity(idx parameter idx IS integer)
+                IF idx LESS THAN size
+                    SET id_mat[idx][idx] TO 1
+                    set_identity(idx + 1)
+                END IF
+            END FUNCTION
+
+            set_identity(0)
+            RETURN id_mat
+        END FUNCTION
+
+        FUNCTION mat_power(matrix parameter matrix IS list of lists of integers, power_ parameter power_ IS integer) RETURNS list of lists of integers
+            SET result TO identity_matrix(26)
+            SET base TO matrix
+            SET exp TO power_
+
+            FUNCTION loop()
+                IF exp GREATER THAN 0
+                    IF ((exp MOD 2) NOT EQUAL 0)
+                        SET result TO mat_mult(result, base)
+                    END IF
+                    SET base TO mat_mult(base, base)
+                    SET exp TO (exp DIV 2)
+                    loop()
+                END IF
+            END FUNCTION
+
+            loop()
+            RETURN result
+        END FUNCTION
+
+        SET final_matrix TO mat_power(trans_matrix, t)
+
+        FUNCTION count_chars(string parameter string IS string) RETURNS list of integers
+            SET cnt TO list of 26 zeros
+
+            FUNCTION process_char(idx parameter idx IS integer)
+                IF idx LESS THAN LENGTH(string)
+                    FUNCTION char_to_index(c parameter c IS string) RETURNS integer
+                        RETURN ASCII(c) - ASCII('a')
+                    END FUNCTION
+                    SET pos TO char_to_index(string[idx])
+                    SET cnt[pos] TO cnt[pos] + 1
+                    process_char(idx + 1)
+                END IF
+            END FUNCTION
+
+            process_char(0)
+            RETURN cnt
+        END FUNCTION
+
+        SET current_count TO count_chars(s)
+
+        SET final_count TO list of 26 zeros
+
+        FUNCTION update_final(i parameter i IS integer, j parameter j IS integer)
+            IF i LESS THAN 26
+                IF j LESS THAN 26
+                    SET val TO (final_count[j] + ((current_count[i] MOD mod_val) * (final_matrix[i][j] MOD mod_val))) MOD mod_val
+                    SET final_count[j] TO val
+                    update_final(i, j + 1)
+                ELSE
+                    update_final(i + 1, 0)
+                END IF
+            END IF
+        END FUNCTION
+
+        update_final(0, 0)
+
+        FUNCTION sum_list(lst parameter lst IS list of integers, idx parameter idx IS integer, acc parameter acc IS integer) RETURNS integer
+            IF idx LESS THAN LENGTH(lst)
+                RETURN sum_list(lst, idx + 1, (acc + lst[idx]) MOD mod_val)
+            ELSE
+                RETURN acc
+            END IF
+        END FUNCTION
+
+        RETURN sum_list(final_count, 0, 0)
+    END FUNCTION
+END CLASS

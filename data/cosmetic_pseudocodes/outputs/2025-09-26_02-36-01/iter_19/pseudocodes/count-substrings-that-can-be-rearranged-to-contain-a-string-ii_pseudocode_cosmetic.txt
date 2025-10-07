@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION validSubstringCount(word1, word2)
+        IMPORT the Counter functionality from the collections module
+
+        SET alpha_map TO Counter(word2)
+        SET beta_map TO Counter()
+        SET demanded TO 0
+        SET fixed TO COUNT_KEYS_IN(alpha_map)
+        SET pstart TO 0
+        SET results TO 0
+
+        PROCEDURE increase_counter(mapping, key)
+            IF key IN mapping THEN
+                SET mapping[key] TO mapping[key] + 1
+            ELSE
+                SET mapping[key] TO 1
+            END IF
+        END PROCEDURE
+
+        PROCEDURE decrease_counter(mapping, key)
+            IF key IN mapping THEN
+                SET mapping[key] TO mapping[key] - 1
+                IF mapping[key] = 0 THEN
+                    REMOVE key FROM mapping
+                END IF
+            END IF
+        END PROCEDURE
+
+        PROCEDURE keys_count(mapping)
+            RETURN LENGTH_OF_KEYS(mapping)
+        END PROCEDURE
+
+        SET qpos TO 0
+        REPEAT
+            IF qpos >= LENGTH(word1) THEN
+                BREAK
+            END IF
+
+            SET letter TO INDEX_OF(word1, qpos)
+            CALL increase_counter(beta_map, letter)
+
+            IF letter IN alpha_map THEN
+                IF beta_map[letter] = alpha_map[letter] THEN
+                    SET demanded TO demanded + 1
+                END IF
+            END IF
+
+            WHILE (demanded = fixed) AND ((qpos + 1 - pstart) >= LENGTH(word2))
+                SET results TO results + (LENGTH(word1) - qpos)
+                SET left_letter TO INDEX_OF(word1, pstart)
+                CALL decrease_counter(beta_map, left_letter)
+
+                IF left_letter IN alpha_map THEN
+                    IF beta_map[left_letter] < alpha_map[left_letter] THEN
+                        SET demanded TO demanded - 1
+                    END IF
+                END IF
+                SET pstart TO pstart + 1
+            END WHILE
+
+            SET qpos TO qpos + 1
+        UNTIL FALSE
+
+        RETURN results
+    END FUNCTION
+END CLASS

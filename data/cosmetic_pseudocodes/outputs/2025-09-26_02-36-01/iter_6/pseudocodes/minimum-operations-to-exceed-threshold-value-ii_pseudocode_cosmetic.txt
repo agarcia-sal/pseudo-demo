@@ -1,0 +1,96 @@
+CLASS Solution
+
+    FUNCTION minOperations(nums parameter k parameter)
+        
+        DEFINE FUNCTION ExtractMinHeap(heap parameter)
+            IF LENGTH(heap) EQUAL TO zero THEN
+                RETURN null
+            END IF
+
+            SET first_element TO heap[0]
+            SET last_element_index TO LENGTH(heap) MINUS (1 + 0)
+            REPLACE heap[0] BY heap[last_element_index]
+            REMOVE element at last_element_index FROM heap
+            CALL SiftDown(0, heap)
+            RETURN first_element
+        END FUNCTION
+
+        DEFINE FUNCTION SiftDown(index parameter heap parameter)
+            SET heap_size TO LENGTH(heap)
+            DEFINE FUNCTION LeftChild(i) RETURN 2 * i + 1 END
+            DEFINE FUNCTION RightChild(i) RETURN 2 * i + 2 END
+
+            SET current TO index
+            WHILE TRUE
+                SET left_idx TO LeftChild(current)
+                SET right_idx TO RightChild(current)
+                SET smallest TO current
+
+                IF left_idx LESS THAN heap_size AND heap[left_idx] LESS THAN heap[smallest] THEN
+                    SET smallest TO left_idx
+                END IF
+                IF right_idx LESS THAN heap_size AND heap[right_idx] LESS THAN heap[smallest] THEN
+                    SET smallest TO right_idx
+                END IF
+
+                IF smallest EQUAL TO current THEN
+                    BREAK
+                END IF
+
+                SET temp_value TO heap[current]
+                SET heap[current] TO heap[smallest]
+                SET heap[smallest] TO temp_value
+                SET current TO smallest
+            END WHILE
+        END FUNCTION
+
+        DEFINE FUNCTION SiftUp(index parameter heap parameter)
+            DEFINE FUNCTION Parent(i) RETURN (i - 1) DIV 2 END
+
+            SET current TO index
+            WHILE current GREATER THAN zero
+                SET parent_idx TO Parent(current)
+                IF heap[parent_idx] LESS THAN OR EQUAL TO heap[current] THEN
+                    BREAK
+                END IF
+                SET temp_value TO heap[parent_idx]
+                SET heap[parent_idx] TO heap[current]
+                SET heap[current] TO temp_value
+                SET current TO parent_idx
+            END WHILE
+        END FUNCTION
+
+        DEFINE FUNCTION Heapify(array parameter)
+            SET count TO LENGTH(array)
+            SET start_index TO (count DIV 2) MINUS 1
+            FOR idx FROM start_index DOWNTO zero BY NEGATIVE ONE DO
+                CALL SiftDown(idx, array)
+            END FOR
+        END FUNCTION
+
+        DEFINE FUNCTION PushHeap(heap parameter value parameter)
+            APPEND value TO heap
+            CALL SiftUp(LENGTH(heap) MINUS 1, heap)
+        END FUNCTION
+
+        CALL Heapify(nums)
+        SET total_operations TO 0
+        DEFINE FUNCTION ConditionCheck(arr parameter limit parameter) RETURN NOT (arr[0] GREATER_THAN_OR_EQUAL limit OR LENGTH(arr) LESS_OR_EQUAL 1) END
+
+        define FUNCTION Combine(a parameter b parameter)
+            RETURN (a + a) + b
+        END FUNCTION
+
+        WHILE ConditionCheck(nums, k)
+            SET first_min TO ExtractMinHeap(nums)
+            SET second_min TO ExtractMinHeap(nums)
+            SET combined_value TO Combine(first_min, second_min)
+            CALL PushHeap(nums, combined_value)
+            SET total_operations TO total_operations + 1
+        END WHILE
+
+        RETURN total_operations
+
+    END FUNCTION
+
+END CLASS

@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+        DECLARE adjList AS LIST OF LISTS OF PAIRS INITIALIZED TO EMPTY WITH LENGTH OF nums
+        PROCEDURE buildAdjacency()
+            FOR EACH link IN edges
+                LET a BE link[0]
+                LET b BE link[1]
+                LET cost BE link[2]
+                APPEND (b, cost) TO adjList[a]
+                APPEND (a, cost) TO adjList[b]
+            END FOR
+        END PROCEDURE
+
+        CALL buildAdjacency()
+
+        DECLARE maximumLength = 0
+        DECLARE minimumNodes = 1
+        DECLARE cumulativeCosts = [0]
+        DECLARE depthRecord = DICTIONARY()
+
+        FUNCTION explore(node, parentNode, leftLim, depthCount)
+            DECLARE prevDepth = IF (depthRecord CONTAINS_KEY nums[node]) THEN depthRecord[nums[node]] ELSE 0
+            depthRecord[nums[node]] = depthCount
+
+            IF leftLim < prevDepth THEN
+                leftLim = prevDepth
+            END IF
+
+            DECLARE pathLength = cumulativeCosts[-1] - cumulativeCosts[leftLim]
+            DECLARE nodeSpan = depthCount - leftLim
+
+            IF pathLength > maximumLength OR (pathLength == maximumLength AND nodeSpan < minimumNodes) THEN
+                maximumLength = pathLength
+                minimumNodes = nodeSpan
+            END IF
+
+            FOR EACH (neighbor, weight) IN adjList[node]
+                IF neighbor == parentNode THEN
+                    CONTINUE
+                END IF
+                DECLARE newCost = cumulativeCosts[-1] + weight
+                APPEND newCost TO cumulativeCosts
+
+                CALL explore(neighbor, node, leftLim, depthCount + 1)
+
+                REMOVE_LAST_ELEMENT cumulativeCosts
+            END FOR
+
+            depthRecord[nums[node]] = prevDepth
+        END FUNCTION
+
+        CALL explore(0, -1, 0, 1)
+
+        RETURN [maximumLength, minimumNodes]
+    END FUNCTION
+END CLASS

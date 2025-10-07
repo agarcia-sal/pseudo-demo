@@ -1,0 +1,99 @@
+CLASS Solution
+
+    FUNCTION minimumDeletions(word, k)
+      DEFINE FUNCTION count_characters(str)
+        SET tally TO empty map
+        DEFINE FUNCTION helper(pos)
+          IF pos EQUALS length of str THEN
+            RETURN
+          END IF
+          SET ch TO character at str[pos]
+          IF ch IN tally THEN
+            SET tally[ch] TO tally[ch] PLUS 1
+          ELSE
+            SET tally[ch] TO 1
+          END IF
+          CALL helper(pos PLUS 1)
+        END FUNCTION
+        CALL helper(0)
+        RETURN tally
+      END FUNCTION
+
+      SET freqTbl TO count_characters(word)
+
+      DEFINE FUNCTION insertion_sort(arr)
+        SET n TO length of arr
+        DEFINE FUNCTION outer_loop(i)
+          IF i GREATER THAN OR EQUAL TO n THEN
+            RETURN
+          END IF
+          DEFINE FUNCTION inner_loop(j, key)
+            IF j LESS THAN 0 OR arr[j] LESS THAN OR EQUAL TO key THEN
+              SET arr[j PLUS 1] TO key
+              RETURN
+            ELSE
+              SET arr[j PLUS 1] TO arr[j]
+              CALL inner_loop(j MINUS 1, key)
+            END IF
+          END FUNCTION
+          SET temp TO arr[i]
+          CALL inner_loop(i MINUS 1, temp)
+          CALL outer_loop(i PLUS 1)
+        END FUNCTION
+        CALL outer_loop(1)
+        RETURN arr
+      END FUNCTION
+
+      SET frequencies TO empty list
+      FOR EACH key IN freqTbl KEYS DO
+        APPEND freqTbl[key] TO frequencies
+      END FOR
+
+      CALL insertion_sort(frequencies)
+
+      SET INF TO 1 DIVIDED BY 0
+      SET ans TO INF
+
+      DEFINE FUNCTION process_index(ix)
+        IF ix GREATER THAN OR EQUAL TO length of frequencies THEN
+          RETURN
+        END IF
+
+        LET maxAllowed TO frequencies[ix] PLUS k
+
+        SET deletionsCount TO 0
+
+        DEFINE FUNCTION sum_high(start)
+          IF start GREATER THAN OR EQUAL TO length of frequencies THEN
+            RETURN 0
+          END IF
+          LET val TO frequencies[start]
+          IF val GREATER THAN maxAllowed THEN
+            RETURN (val MINUS maxAllowed) PLUS sum_high(start PLUS 1)
+          ELSE
+            RETURN sum_high(start PLUS 1)
+          END IF
+        END FUNCTION
+
+        DEFINE FUNCTION sum_low(end)
+          IF end LESS THAN 0 THEN
+            RETURN 0
+          END IF
+          RETURN frequencies[end] PLUS sum_low(end MINUS 1)
+        END FUNCTION
+
+        SET deletionsCount TO sum_high(ix PLUS 1) PLUS sum_low(ix MINUS 1)
+
+        IF deletionsCount LESS THAN ans THEN
+          SET ans TO deletionsCount
+        END IF
+
+        CALL process_index(ix PLUS 1)
+      END FUNCTION
+
+      CALL process_index(0)
+
+      RETURN ans
+    END FUNCTION
+
+END CLASS

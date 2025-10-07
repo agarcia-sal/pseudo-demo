@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION maximumLength(unordered_values total_divisor)
+        
+        PROCEDURE initializeMapArray(size, output_array)
+            SET idx TO 0
+            REPEAT
+                IF idx GREATER THAN OR EQUAL TO size THEN
+                    EXIT
+                END IF
+                SET output_array[idx] TO new empty mapping
+                SET idx TO idx + 1
+            UNTIL false
+        END PROCEDURE
+        
+        FUNCTION containsKey(mapping_structure, query_key)
+            FOR EACH key_entry IN mapping_structure
+                IF key_entry EQUALS query_key THEN
+                    RETURN true
+                END IF
+            END FOR
+            RETURN false
+        END FUNCTION
+        
+        SET length_count TO 0
+        WHILE length_count LESS THAN LENGTH OF unordered_values DO
+            SET length_count TO length_count + 1
+        END WHILE
+        
+        IF length_count EQUALS 1 THEN
+            RETURN 1
+        END IF
+        
+        SET state_maps TO empty list
+        CALL initializeMapArray(length_count, state_maps)
+        
+        SET global_maximum TO 1
+        
+        PROCEDURE processIndices(first_index, second_index, current_max)
+            FUNCTION calculateModSum(val1, val2, mod_divisor)
+                SET total_sum TO 0
+                SET total_sum TO val1 + val2
+                SET remainder_calc TO total_sum - (mod_divisor * (total_sum / mod_divisor))
+                RETURN remainder_calc
+            END FUNCTION
+            
+            SET rem_value TO calculateModSum(unordered_values[first_index], unordered_values[second_index], total_divisor)
+            IF containsKey(state_maps[second_index], rem_value) THEN
+                SET previous_val TO state_maps[second_index][rem_value]
+                SET state_maps[first_index][rem_value] TO previous_val + 1
+            ELSE
+                SET state_maps[first_index][rem_value] TO 2
+            END IF
+            
+            IF state_maps[first_index][rem_value] GREATER THAN current_max THEN
+                SET current_max TO state_maps[first_index][rem_value]
+            END IF
+            RETURN current_max
+        END PROCEDURE
+        
+        SET outer_pos TO 0
+        WHILE outer_pos LESS THAN length_count DO
+            SET inner_pos TO 0
+            WHILE inner_pos LESS THAN outer_pos DO
+                SET global_maximum TO processIndices(outer_pos, inner_pos, global_maximum)
+                SET inner_pos TO inner_pos + 1
+            END WHILE
+            SET outer_pos TO outer_pos + 1
+        END WHILE
+        
+        RETURN global_maximum
+    END FUNCTION
+END CLASS

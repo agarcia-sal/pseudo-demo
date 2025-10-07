@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION maxFrequency(nums, k, numOperations)
+        DEFINE FUNCTION InsertDefault(dictionary, key, defaultVal)
+            IF NOT dictionary CONTAINS key THEN
+                dictionary[key] = defaultVal
+            END IF
+        END FUNCTION
+
+        DECLARE containerA AS new map
+        DECLARE containerB AS new map
+
+        DECLARE ITER index = 0
+        DECLARE maxIndex = LENGTH(nums) - 1
+
+        WHILE index <= maxIndex DO
+            DECLARE element = nums[index]
+            CALL InsertDefault(containerA, element, 0)
+            CALL InsertDefault(containerB, element, 0)
+            
+            containerA[element] = containerA[element] + 1
+
+            DECLARE shiftLeft = element - k
+            CALL InsertDefault(containerB, shiftLeft, 0)
+            containerB[shiftLeft] = containerB[shiftLeft] + 1
+
+            DECLARE shiftRight = element + k + 1
+            CALL InsertDefault(containerB, shiftRight, 0)
+            containerB[shiftRight] = containerB[shiftRight] - 1
+
+            index = index + 1
+        END WHILE
+
+        DECLARE outputResult = 0
+        DECLARE cumSum = 0
+
+        DECLARE keysList = EMPTY LIST
+        FOR EACH key IN containerB KEYS DO
+            APPEND key TO keysList
+        END FOR
+
+        DECLARE FUNCTION SortAsc(inputList)
+            DECLARE swapped = TRUE
+            WHILE swapped DO
+                swapped = FALSE
+                DECLARE idx = 0
+                WHILE idx < LENGTH(inputList) - 1 DO
+                    IF inputList[idx] > inputList[idx + 1] THEN
+                        DECLARE tempVal = inputList[idx]
+                        inputList[idx] = inputList[idx + 1]
+                        inputList[idx + 1] = tempVal
+                        swapped = TRUE
+                    END IF
+                    idx = idx + 1
+                END WHILE
+            END WHILE
+        END FUNCTION
+
+        CALL SortAsc(keysList)
+
+        DECLARE pointer = 0
+        DECLARE maxIndex2 = LENGTH(keysList) - 1
+
+        LOOP
+            IF pointer > maxIndex2 THEN
+                BREAK
+            END IF
+            DECLARE keyX = keysList[pointer]
+            DECLARE valueT = containerB[keyX]
+
+            cumSum = cumSum + valueT
+
+            DECLARE candidate1 = outputResult
+            DECLARE candidate2 = cumSum
+            DECLARE candidate3 = 0
+
+            IF containerA CONTAINS keyX THEN
+                candidate3 = containerA[keyX]
+            ELSE
+                candidate3 = 0
+            END IF
+
+            DECLARE minVal = candidate2
+            IF candidate3 < minVal THEN
+                minVal = candidate3
+            END IF
+
+            DECLARE sumWithOp = minVal + numOperations
+
+            IF candidate1 >= sumWithOp THEN
+                outputResult = candidate1
+            ELSE
+                outputResult = sumWithOp
+            END IF
+
+            pointer = pointer + 1
+        END LOOP
+
+        RETURN outputResult
+    END FUNCTION
+END CLASS

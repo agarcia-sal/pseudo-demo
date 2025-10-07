@@ -1,0 +1,74 @@
+CLASS Solution
+	 FUNCTION maxValue(nums LIST OF INTEGER, k INTEGER) RETURNS INTEGER
+		  DEFINE expVal AS (1 LEFTSHIFT 5) LEFTSHIFT 2    # 2^(5+2) = 2^7 = 128
+		  DEFINE lengthNums AS SIZE OF nums
+
+		  DECLARE dpForward AS ARRAY OF DIMENSION [lengthNums + 1][k + 2][expVal] FILLED WITH FALSE
+		  ASSIGN dpForward[0][0][0] <- TRUE
+
+		  SET indexI TO 0
+		  WHILE indexI < lengthNums
+				SET indexJ TO 0
+				WHILE indexJ <= k
+					 SET indexX TO 0
+					 WHILE indexX < expVal
+						  dpForward[indexI + 1][indexJ][indexX] <- dpForward[indexI + 1][indexJ][indexX] OR dpForward[indexI][indexJ][indexX]
+
+						  # Compute OR bit mask
+						  SET orMask TO indexX OR nums[indexI]
+						  dpForward[indexI + 1][indexJ + 1][orMask] <- dpForward[indexI + 1][indexJ + 1][orMask] OR dpForward[indexI][indexJ][indexX]
+
+						  INCREMENT indexX BY 1
+					 END WHILE
+					 INCREMENT indexJ BY 1
+				END WHILE
+				INCREMENT indexI BY 1
+		  END WHILE
+
+		  DECLARE dpBackward AS ARRAY OF DIMENSION [lengthNums + 1][k + 2][expVal] FILLED WITH FALSE
+		  ASSIGN dpBackward[lengthNums][0][0] <- TRUE
+
+		  SET idxI TO lengthNums
+		  REPEAT
+				IF idxI = 0 THEN BREAK END IF
+
+				SET idxJ TO 0
+				REPEAT
+					 IF idxJ > k THEN BREAK END IF
+
+					 SET idxY TO 0
+					 REPEAT
+						  IF idxY >= expVal THEN BREAK END IF
+
+						  dpBackward[idxI - 1][idxJ][idxY] <- dpBackward[idxI - 1][idxJ][idxY] OR dpBackward[idxI][idxJ][idxY]
+
+						  SET combinedMask TO idxY OR nums[idxI - 1]
+						  dpBackward[idxI - 1][idxJ + 1][combinedMask] <- dpBackward[idxI - 1][idxJ + 1][combinedMask] OR dpBackward[idxI][idxJ][idxY]
+
+						  idxY <- idxY + 1
+					 UNTIL FALSE
+
+					 idxJ <- idxJ + 1
+				UNTIL FALSE
+
+				idxI <- idxI - 1
+		  UNTIL FALSE
+
+		  DEFINE result AS 0
+		  FOR iterI FROM k TO (lengthNums - k) DO
+				FOR maskX FROM 0 TO expVal - 1 DO
+					 IF dpForward[iterI][k][maskX] THEN
+						  FOR maskY FROM 0 TO expVal - 1 DO
+								IF dpBackward[iterI][k][maskY] THEN
+									 SET candidateVal TO maskX XOR maskY
+									 IF candidateVal > result THEN
+										  result <- candidateVal
+									 END IF
+								END IF
+						  END FOR
+					 END IF
+				END FOR
+		  END FOR
+		  RETURN result
+	 END FUNCTION
+END CLASS

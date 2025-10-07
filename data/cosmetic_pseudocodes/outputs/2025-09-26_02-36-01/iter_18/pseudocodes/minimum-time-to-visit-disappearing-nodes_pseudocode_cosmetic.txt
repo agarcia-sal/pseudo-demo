@@ -1,0 +1,117 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minimumTime(total, links, vanish)
+        SET network TO a mapping defaulting to empty list
+        SET idx1 TO 0
+        WHILE idx1 < LENGTH OF links
+            SET entry TO links[idx1]
+            SET src TO entry[0]
+            SET dst TO entry[1]
+            SET cost TO entry[2]
+
+            SET adj1 TO network[src]
+            APPEND (dst, cost) TO adj1
+            SET network[src] TO adj1
+
+            SET adj2 TO network[dst]
+            APPEND (src, cost) TO adj2
+            SET network[dst] TO adj2
+
+            SET idx1 TO idx1 + 1
+        END WHILE
+
+        SET vals TO a list of size total FILLED WITH infinity
+        SET vals[0] TO 0
+
+        SET heap TO [(0, 0)]
+
+        LABEL pile_loop
+        WHILE LENGTH OF heap > 0
+            CALL pop_min_element ON heap RETURNING acc_dist, acc_node
+
+            IF NOT (acc_dist < vanish[acc_node])
+                CONTINUE pile_loop
+            END IF
+
+            IF acc_dist >= vals[acc_node]
+                CONTINUE pile_loop
+            END IF
+
+            SET adjacents TO network[acc_node]
+            SET idx2 TO 0
+            WHILE idx2 < LENGTH OF adjacents
+                SET pair TO adjacents[idx2]
+                SET nbr TO pair[0]
+                SET wgt TO pair[1]
+
+                SET new_d TO acc_dist + wgt
+
+                IF new_d >= vals[nbr] OR new_d >= vanish[nbr]
+                    SET idx2 TO idx2 + 1
+                    CONTINUE
+                END IF
+
+                SET vals[nbr] TO new_d
+                CALL insert_heap WITH heap AND (new_d, nbr)
+
+                SET idx2 TO idx2 + 1
+            END WHILE
+        END WHILE
+
+        SET ans TO a list of size total FILLED WITH -1
+
+        SET pos TO 0
+        REPEAT
+            IF vals[pos] < vanish[pos]
+                SET ans[pos] TO vals[pos]
+            END IF
+            SET pos TO pos + 1
+        UNTIL pos >= total
+
+        RETURN ans
+    END FUNCTION
+
+    FUNCTION pop_min_element(h)
+        SET swap_finished TO FALSE
+        SET last_index TO LENGTH OF h - 1
+        SET min_item TO h[0]
+        SET h[0] TO h[last_index]
+        REMOVE element at last_index from h
+
+        SET idx TO 0
+        WHILE NOT swap_finished AND idx * 2 + 1 < LENGTH OF h
+            SET left_c TO idx * 2 + 1
+            SET right_c TO idx * 2 + 2
+            SET smallest TO left_c
+
+            IF right_c < LENGTH OF h AND h[right_c][0] < h[left_c][0]
+                SET smallest TO right_c
+            END IF
+
+            IF h[idx][0] > h[smallest][0]
+                SWAP h[idx], h[smallest]
+                SET idx TO smallest
+            ELSE
+                SET swap_finished TO TRUE
+            END IF
+        END WHILE
+
+        RETURN min_item[0], min_item[1]
+    END FUNCTION
+
+    FUNCTION insert_heap(h, item)
+        APPEND item TO h
+        SET pos TO LENGTH OF h - 1
+
+        WHILE pos > 0
+            SET parent TO (pos - 1) // 2
+            IF h[parent][0] > h[pos][0]
+                SWAP h[parent], h[pos]
+                SET pos TO parent
+            ELSE
+                BREAK
+            END IF
+        END WHILE
+    END FUNCTION
+END CLASS
+```

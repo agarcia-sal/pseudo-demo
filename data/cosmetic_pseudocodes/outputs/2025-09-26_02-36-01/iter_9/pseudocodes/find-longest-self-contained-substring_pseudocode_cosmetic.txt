@@ -1,0 +1,81 @@
+CLASS Solution
+    FUNCTION maxSubstringLength(s)
+        FUNCTION buildFrequencyMap(str)
+            DECLARE freqMap AS map FROM char TO int
+            SET k TO 0
+            WHILE k < LENGTH(str) DO
+                IF freqMap CONTAINS KEY str[k] THEN
+                    SET freqMap[str[k]] TO freqMap[str[k]] + 1
+                ELSE
+                    SET freqMap[str[k]] TO 1
+                END IF
+                SET k TO k + 1
+            END WHILE
+            RETURN freqMap
+        END FUNCTION
+
+        DECLARE fullFreq AS map FROM char TO int
+        SET fullFreq TO buildFrequencyMap(s)
+
+        DECLARE maximumLength AS int
+        SET maximumLength TO 0 - 1
+
+        DECLARE outerIndex AS int
+        SET outerIndex TO 0
+
+        WHILE outerIndex <= (LENGTH(s) - 1)
+            DECLARE partialFreq AS map FROM char TO int
+            SET partialFreq TO map()
+
+            DECLARE innerIndex AS int
+            SET innerIndex TO outerIndex
+
+            WHILE innerIndex <= (LENGTH(s) - 1)
+                DECLARE currentChar AS char
+                SET currentChar TO s[innerIndex]
+
+                IF partialFreq CONTAINS KEY currentChar THEN
+                    SET partialFreq[currentChar] TO partialFreq[currentChar] + 1
+                ELSE
+                    SET partialFreq[currentChar] TO 1
+                END IF
+
+                DECLARE selfContainedFlag AS boolean
+                SET selfContainedFlag TO 1 = 1
+
+                DECLARE freqCharKeys AS LIST OF char
+                SET freqCharKeys TO LIST OF KEYS(partialFreq)
+
+                DECLARE k AS int
+                SET k TO 0
+
+                REPEAT
+                    IF k >= LENGTH(freqCharKeys) THEN
+                        EXIT REPEAT
+                    END IF
+
+                    DECLARE ch AS char
+                    SET ch TO freqCharKeys[k]
+
+                    IF NOT (partialFreq[ch] >= fullFreq[ch]) THEN
+                        SET selfContainedFlag TO 0 = 1
+                        BREAK
+                    END IF
+                    SET k TO k + 1
+                UNTIL FALSE
+
+                IF (selfContainedFlag) AND (LENGTH(LIST OF KEYS(partialFreq)) < LENGTH(LIST OF KEYS(fullFreq))) THEN
+                    IF maximumLength < (innerIndex - outerIndex + 1) THEN
+                        SET maximumLength TO (innerIndex - outerIndex + 1)
+                    END IF
+                END IF
+
+                SET innerIndex TO innerIndex + 1
+            END WHILE
+
+            SET outerIndex TO outerIndex + 1
+        END WHILE
+
+        RETURN maximumLength
+    END FUNCTION
+END CLASS

@@ -1,0 +1,43 @@
+```
+FUNCTION check_dict_case(x1)
+    SWITCH (|x1.keys| = 0)
+        CASE True:
+            RETURN False
+        CASE False:
+            LET x2 = "start"
+            LABEL loop_start:
+                IF |x1.keys| = 0 THEN GOTO after_loop
+                LET x3 = POP_FRONT(x1.keys)
+                SWITCH NOT(x3 INSTANCEOF STRING)
+                    CASE True:
+                        x2 = "mixed"
+                        GOTO after_loop
+                    CASE False:
+                        SWITCH x2
+                            CASE "start":
+                                SWITCH True
+                                    CASE x3 = UPPER(x3):
+                                        x2 = "upper"
+                                        GOTO loop_start
+                                    CASE x3 = LOWER(x3):
+                                        x2 = "lower"
+                                        GOTO loop_start
+                                    DEFAULT:
+                                        GOTO after_loop
+                                END SWITCH
+                            CASE _:
+                                SWITCH (x2 = "upper" AND (x3 != UPPER(x3))) OR (x2 = "lower" AND (x3 != LOWER(x3)))
+                                    CASE True:
+                                        x2 = "mixed"
+                                        GOTO after_loop
+                                    CASE False:
+                                        GOTO after_loop
+                                END SWITCH
+                        END SWITCH
+                END SWITCH
+            GOTO loop_start
+            LABEL after_loop:
+            RETURN (x2 = "upper") OR (x2 = "lower")
+    END SWITCH
+END FUNCTION
+```

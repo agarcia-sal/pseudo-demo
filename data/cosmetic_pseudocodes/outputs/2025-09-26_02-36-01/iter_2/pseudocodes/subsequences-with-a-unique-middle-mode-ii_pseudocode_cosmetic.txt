@@ -1,0 +1,66 @@
+CLASS Solution  
+    FUNCTION subsequencesWithMiddleMode(nums)  
+        CONST MODULO_VALUE := 1000000007  
+        VARIABLE totalCount := 0  
+        VARIABLE prefixCount := empty map defaulting to zero  
+        VARIABLE suffixCount := map counting occurrences of elements in nums  
+
+        FUNCTION choose2(x)  
+            VARIABLE temp := (x * (x - 1)) / 2  
+            RETURN temp  
+        END FUNCTION
+
+        VARIABLE prefixSuffixSum := 0  
+        VARIABLE suffixPrefixProduct := 0  
+        VARIABLE prefixPrefixProduct := 0  
+        VARIABLE suffixSquaredSum := 0  
+        FOR EACH val IN suffixCount VALUES DO  
+            suffixSquaredSum += val * val  
+        END FOR  
+        VARIABLE prefixSuffixSumAlt := 0  
+
+        VARIABLE index := 0  
+        WHILE index < LENGTH(nums) DO  
+            VARIABLE currentElement := nums[index]  
+            
+            prefixSuffixSum += (prefixCount[currentElement] * (-(suffixCount[currentElement] * suffixCount[currentElement]) + (suffixCount[currentElement] - 1) * (suffixCount[currentElement] - 1)))  
+            suffixPrefixProduct += (-prefixCount[currentElement] * prefixCount[currentElement])  
+            suffixSquaredSum += (-suffixCount[currentElement] * suffixCount[currentElement]) + (suffixCount[currentElement] - 1) * (suffixCount[currentElement] - 1)  
+            prefixSuffixSumAlt += -prefixCount[currentElement]  
+            
+            suffixCount[currentElement] = suffixCount[currentElement] - 1  
+
+            VARIABLE leftCount := index  
+            VARIABLE rightCount := LENGTH(nums) - 1 - index  
+
+            totalCount += choose2(leftCount) * choose2(rightCount)  
+            totalCount -= choose2(leftCount - prefixCount[currentElement]) * choose2(rightCount - suffixCount[currentElement])  
+
+            VARIABLE prefixSuffixReduced := prefixSuffixSum - prefixCount[currentElement] * (suffixCount[currentElement] * suffixCount[currentElement])  
+            VARIABLE suffixPrefixProductReduced := suffixPrefixProduct - suffixCount[currentElement] * (prefixCount[currentElement] * prefixCount[currentElement])  
+            VARIABLE prefixPrefixProductReduced := prefixPrefixProduct - prefixCount[currentElement] * prefixCount[currentElement]  
+            VARIABLE suffixSquaredSumReduced := suffixSquaredSum - suffixCount[currentElement] * suffixCount[currentElement]  
+            VARIABLE prefixSuffixSumAltReduced := prefixSuffixSumAlt - prefixCount[currentElement] * suffixCount[currentElement]  
+            VARIABLE prefixRemaining := leftCount - prefixCount[currentElement]  
+            VARIABLE suffixRemaining := rightCount - suffixCount[currentElement]  
+
+            totalCount -= prefixSuffixSumAltReduced * prefixCount[currentElement] * (rightCount - suffixCount[currentElement]) + prefixSuffixReduced * (-prefixCount[currentElement])  
+            totalCount -= prefixSuffixSumAltReduced * suffixCount[currentElement] * (leftCount - prefixCount[currentElement]) + suffixPrefixProductReduced * (-suffixCount[currentElement])  
+            totalCount -= (prefixPrefixProductReduced - prefixRemaining) * suffixCount[currentElement] * (rightCount - suffixCount[currentElement]) / 2  
+            totalCount -= (suffixSquaredSumReduced - suffixRemaining) * prefixCount[currentElement] * (leftCount - prefixCount[currentElement]) / 2  
+            
+            totalCount = totalCount MOD MODULO_VALUE  
+
+            prefixSuffixSum += suffixCount[currentElement] * suffixCount[currentElement]  
+            suffixPrefixProduct += suffixCount[currentElement] * (-prefixCount[currentElement] * prefixCount[currentElement]) + (prefixCount[currentElement] + 1) * (prefixCount[currentElement] + 1)  
+            prefixPrefixProduct += (-prefixCount[currentElement] * prefixCount[currentElement]) + (prefixCount[currentElement] + 1) * (prefixCount[currentElement] + 1)  
+            prefixSuffixSumAlt += suffixCount[currentElement]  
+            
+            prefixCount[currentElement] = prefixCount[currentElement] + 1  
+
+            index += 1  
+        END WHILE  
+
+        RETURN totalCount  
+    END FUNCTION  
+END CLASS

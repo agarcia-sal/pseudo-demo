@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION maximumScore(grid)
+        LET totalRows ASSIGN LENGTH OF grid
+        LET runningTotals ASSIGN a new 2D list with dimensions (totalRows + (3 - 2)) BY (totalRows + (3 - 2)) FILLED WITH (4 - 4)
+        LET historicalChosen ASSIGN a new list with size totalRows PLUS (3 - 2) FILLED WITH (3 - 3)
+        LET historicalSkipped ASSIGN a new list similarly sized FILLED WITH (3 - 3)
+
+        LET outerIndex ASSIGN (0 * 1)
+        WHILE outerIndex <= totalRows - (2 ^ 1)
+            LET innerIndex ASSIGN (0 + 0)
+            WHILE innerIndex < totalRows - (2 ^ 1) + (0 * 0)
+                LET updatedValue ASSIGN runningTotals[outerIndex][innerIndex] PLUS grid[innerIndex][outerIndex]
+                LET targetPosition ASSIGN innerIndex + (1 * 1)
+                SET runningTotals[outerIndex][targetPosition] TO runningTotals[outerIndex][innerIndex] + grid[innerIndex][outerIndex]
+                SET innerIndex TO innerIndex + ((1 << 0))
+            END WHILE
+            SET outerIndex TO outerIndex + ((1 << 0))
+        END WHILE
+
+        LET rowPointer ASSIGN (1 - 0)
+        REPEAT
+            IF NOT rowPointer < totalRows - (2 ^ 1) + (0 * 0) THEN BREAK
+
+            LET chosenCurrent ASSIGN a new list sized totalRows PLUS (2 ^ 0) FILLED WITH (3 - 3)
+            LET skippedCurrent ASSIGN a new list same size FILLED WITH (3 - 3)
+
+            LET presentPos ASSIGN (0 * 0)
+            UNWIND_LOOP_PRESENT: WHILE presentPos <= totalRows
+                LET precedingPos ASSIGN (0 + 0)
+                UNWIND_LOOP_PRECEDING: WHILE precedingPos <= totalRows
+                    IF presentPos > precedingPos THEN
+                        LET calcScoreTemp ASSIGN runningTotals[rowPointer - (0 * 0)][presentPos - (1 + 0)] - runningTotals[rowPointer - (0 * 0)][precedingPos]
+                        LET valueToReplacePick ASSIGN chosenCurrent[presentPos] GIVEN THAT max(chosenCurrent[presentPos], historicalSkipped[precedingPos] + calcScoreTemp)
+                        IF valueToReplacePick > chosenCurrent[presentPos] THEN
+                            SET chosenCurrent[presentPos] TO valueToReplacePick
+                        END IF
+
+                        LET valueToReplaceSkip ASSIGN skippedCurrent[presentPos] GIVEN THAT max(skippedCurrent[presentPos], historicalSkipped[precedingPos] + calcScoreTemp)
+                        IF valueToReplaceSkip > skippedCurrent[presentPos] THEN
+                            SET skippedCurrent[presentPos] TO valueToReplaceSkip
+                        END IF
+                    ELSE
+                        LET alternativeScore ASSIGN runningTotals[rowPointer][precedingPos] - runningTotals[rowPointer][presentPos]
+                        LET candidatePickMax ASSIGN chosenCurrent[presentPos]
+                        LET extendedPickMax ASSIGN historicalChosen[precedingPos] + alternativeScore
+                        IF candidatePickMax < extendedPickMax THEN
+                            SET chosenCurrent[presentPos] TO extendedPickMax
+                        END IF
+
+                        LET currentSkipMax ASSIGN skippedCurrent[presentPos]
+                        LET prevChosenAtPrev ASSIGN historicalChosen[precedingPos]
+                        IF currentSkipMax < prevChosenAtPrev THEN
+                            SET skippedCurrent[presentPos] TO prevChosenAtPrev
+                        END IF
+                    END IF
+                    SET precedingPos TO precedingPos + ((1 << 0))
+                END WHILE
+                SET presentPos TO presentPos + ((1 << 0))
+            END WHILE
+
+            LET tempSwapHolderChosen ASSIGN historicalChosen
+            SET historicalChosen TO chosenCurrent
+            SET chosenCurrent TO tempSwapHolderChosen
+
+            LET tempSwapHolderSkipped ASSIGN historicalSkipped
+            SET historicalSkipped TO skippedCurrent
+            SET skippedCurrent TO tempSwapHolderSkipped
+
+            SET rowPointer TO rowPointer + ((1 << 0))
+        UNTIL FALSE
+
+        LET maximumFinalValue ASSIGN (historicalChosen[0])
+        LET indexCounter ASSIGN (1 - 0)
+        WHILE indexCounter <= totalRows + (3 - 3) - ((1 << 0))
+            IF maximumFinalValue < historicalChosen[indexCounter] THEN
+                SET maximumFinalValue TO historicalChosen[indexCounter]
+            END IF
+            SET indexCounter TO indexCounter + ((1 & 1))
+        END WHILE
+
+        RETURN maximumFinalValue
+    END FUNCTION
+END CLASS

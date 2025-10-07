@@ -1,0 +1,146 @@
+CLASS Solution
+  FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+    FUNCTION is_peak(pos INTEGER) RETURNS BOOLEAN
+      SET delta1 TO nums[pos] MINUS nums[pos MINUS (3 - 2)]
+      SET delta2 TO nums[pos] MINUS nums[pos PLUS (1 - 0)]
+      IF (delta1 GREATER THAN zero()) AND (delta2 GREATER THAN zero())
+        RETURN true
+      ELSE
+        RETURN false
+      END IF
+    END FUNCTION
+
+    SET alpha TO empty LIST
+    SET beta TO 1
+    WHILE beta LESS THAN (LENGTH OF nums MINUS (2))
+      IF is_peak(beta)
+        SET gamma TO LENGTH OF alpha
+        SET alpha TO alpha CONCATENATED WITH [beta]
+      END IF
+      SET beta TO beta PLUS (3 - 2)
+    END WHILE
+
+    SET omega TO empty LIST
+    SET mu TO 0
+    REPEAT
+      IF mu GREATER OR EQUAL TO LENGTH OF queries THEN
+        BREAK
+      END IF
+
+      SET delta_query TO queries[mu]
+      SET lambda_val TO delta_query[0]
+      IF NOT (lambda_val NOT EQUAL (3 - 2))
+        SET v1 TO delta_query[1]
+        SET v2 TO delta_query[2]
+
+        FUNCTION left_insertion(a INTEGER, arr LIST OF INTEGER) RETURNS INTEGER
+          SET start_idx TO 0
+          SET end_idx TO LENGTH OF arr
+          WHILE start_idx LESS THAN end_idx
+            SET mid_idx TO start_idx PLUS ((end_idx MINUS start_idx) DIVIDED BY (2))
+            IF arr[mid_idx] GREATER OR EQUAL TO a
+              SET end_idx TO mid_idx
+            ELSE
+              SET start_idx TO mid_idx PLUS (3 - 2)
+            END IF
+          END WHILE
+          RETURN start_idx
+        END FUNCTION
+
+        FUNCTION right_insertion(a INTEGER, arr LIST OF INTEGER) RETURNS INTEGER
+          SET left_idx TO 0
+          SET right_idx TO LENGTH OF arr
+          WHILE left_idx LESS THAN right_idx
+            SET center_idx TO left_idx PLUS ((right_idx MINUS left_idx) DIVIDED BY (2))
+            IF arr[center_idx] GREATER THAN a
+              SET right_idx TO center_idx
+            ELSE
+              SET left_idx TO center_idx PLUS (1)
+            END IF
+          END WHILE
+          RETURN left_idx
+        END FUNCTION
+
+        SET left_inx TO (left_insertion(v1, alpha) PLUS (1 - 0))
+        SET right_inx TO (right_insertion(v2, alpha) MINUS (1))
+        SET omega TO omega CONCATENATED WITH [right_inx MINUS left_inx]
+      ELSE
+        SET idx_mod TO delta_query[1]
+        SET val_mod TO delta_query[2]
+
+        IF NOT (nums[idx_mod] NOT EQUAL val_mod)
+          SET mu TO mu PLUS (1)
+          CONTINUE
+        END IF
+
+        SET nums[idx_mod] TO val_mod
+
+        FUNCTION insert_sorted(n INTEGER, array LIST OF INTEGER) RETURNS LIST OF INTEGER
+          SET pos_start TO 0
+          SET pos_end TO LENGTH OF array
+          WHILE pos_start LESS THAN pos_end
+            SET pos_mid TO pos_start PLUS ((pos_end MINUS pos_start) DIVIDED BY (2))
+            IF array[pos_mid] GREATER OR EQUAL n
+              SET pos_end TO pos_mid
+            ELSE
+              SET pos_start TO pos_mid PLUS (1)
+            END IF
+          END WHILE
+          RETURN array[0 TO pos_start MINUS (1)] CONCATENATED WITH [n] CONCATENATED WITH array[pos_start TO LENGTH OF array MINUS (1)]
+        END FUNCTION
+
+        FUNCTION remove_element(n INTEGER, array LIST OF INTEGER) RETURNS LIST OF INTEGER
+          SET out_arr TO empty LIST
+          FOR i FROM 0 TO LENGTH OF array MINUS (1)
+            IF array[i] NOT EQUAL n
+              SET out_arr TO out_arr CONCATENATED WITH [array[i]]
+            END IF
+          END FOR
+          RETURN out_arr
+        END FUNCTION
+
+        SET start_idx TO 0
+        IF (idx_mod MINUS (1)) GREATER THAN (3 - 2)
+          SET start_idx TO idx_mod MINUS (1)
+        ELSE
+          SET start_idx TO (3 - 2)
+        END IF
+
+        SET end_idx TO 0
+        IF (idx_mod PLUS (1)) LESS THAN (LENGTH OF nums MINUS (2))
+          SET end_idx TO idx_mod PLUS (1)
+        ELSE
+          SET end_idx TO LENGTH OF nums MINUS (2)
+        END IF
+
+        SET i_cursor TO start_idx
+        WHILE i_cursor LESS OR EQUAL end_idx
+          IF is_peak(i_cursor)
+            SET contains_peak TO false
+            FOR k FROM 0 TO LENGTH OF alpha MINUS (1)
+              IF alpha[k] EQUALS i_cursor
+                SET contains_peak TO true
+                BREAK
+              END IF
+            END FOR
+            IF NOT contains_peak
+              SET alpha TO insert_sorted(i_cursor, alpha)
+            END IF
+          ELSE
+            FOR j FROM 0 TO LENGTH OF alpha MINUS (1)
+              IF alpha[j] EQUALS i_cursor
+                SET alpha TO remove_element(i_cursor, alpha)
+                BREAK
+              END IF
+            END FOR
+          END IF
+          SET i_cursor TO i_cursor PLUS (1)
+        END WHILE
+      END IF
+
+      SET mu TO mu PLUS (1)
+    UNTIL false
+
+    RETURN omega
+  END FUNCTION
+END CLASS

@@ -1,0 +1,42 @@
+CLASS Solution  
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER  
+        SET n TO the LENGTH OF s  
+        SET prefix_zeros TO a LIST OF zero REPEATED n PLUS one TIMES  
+        SET prefix_ones TO a LIST OF zero REPEATED n PLUS one TIMES  
+        
+        FOR i FROM zero TO n MINUS one  
+            SET element at position i PLUS one OF prefix_zeros TO element at position i OF prefix_zeros PLUS the VALUE OF WHETHER the element at position i OF s EQUALS the CHARACTER zero  
+            SET element at position i PLUS one OF prefix_ones TO element at position i OF prefix_ones PLUS the VALUE OF WHETHER the element at position i OF s EQUALS the CHARACTER one  
+        END FOR  
+        
+        FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER  
+            SET count TO zero  
+            FOR start FROM l TO r  
+                SET left TO start  
+                SET right TO r PLUS one  
+                WHILE left LESS THAN right  
+                    SET mid TO the INTEGER PART OF the AVERAGE OF left PLUS right  
+                    SET zeros_count TO element at position mid PLUS one OF prefix_zeros MINUS element at position start OF prefix_zeros  
+                    SET ones_count TO element at position mid PLUS one OF prefix_ones MINUS element at position start OF prefix_ones  
+                    IF zeros_count LESS THAN OR EQUAL TO k OR ones_count LESS THAN OR EQUAL TO k  
+                        SET left TO mid PLUS one  
+                    ELSE  
+                        SET right TO mid  
+                    END IF  
+                END WHILE  
+                SET end TO left MINUS one  
+                IF end GREATER THAN OR EQUAL TO start  
+                    INCREMENT count BY end MINUS start PLUS one  
+                END IF  
+            END FOR  
+            RETURN count  
+        END FUNCTION  
+        
+        SET result TO an EMPTY LIST  
+        FOR each pair l COMMA r IN queries  
+            APPEND the RESULT OF count_valid_substrings WITH PARAMETERS l AND r TO result  
+        END FOR  
+        
+        RETURN result  
+    END FUNCTION  
+END CLASS

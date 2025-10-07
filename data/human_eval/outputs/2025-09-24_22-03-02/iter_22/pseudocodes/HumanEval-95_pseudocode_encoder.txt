@@ -1,0 +1,35 @@
+FUNCTION check_dict_case(dict)
+    IF CALL len WITH ARGUMENTS CALL dict.keys WITH ARGUMENTS EQUALS 0 THEN
+        RETURN False
+    ELSE
+        SET state TO "start"
+        SET keys TO CALL dict.keys WITH ARGUMENTS
+        SET index TO 0
+        WHILE index LESS THAN CALL len WITH ARGUMENTS keys
+            SET key TO keys AT index
+            IF CALL isinstance WITH ARGUMENTS key, str EQUALS False THEN
+                SET state TO "mixed"
+                BREAK
+            END IF
+            IF state EQUALS "start" THEN
+                IF CALL key.isupper WITH ARGUMENTS EQUALS True THEN
+                    SET state TO "upper"
+                ELSE IF CALL key.islower WITH ARGUMENTS EQUALS True THEN
+                    SET state TO "lower"
+                ELSE
+                    BREAK
+                END IF
+            ELSE IF state EQUALS "upper" AND NOT CALL key.isupper WITH ARGUMENTS THEN
+                SET state TO "mixed"
+                BREAK
+            ELSE IF state EQUALS "lower" AND NOT CALL key.islower WITH ARGUMENTS THEN
+                SET state TO "mixed"
+                BREAK
+            ELSE
+                BREAK
+            END IF
+            INCREMENT index BY 1
+        END WHILE
+        RETURN state EQUALS "upper" OR state EQUALS "lower"
+    END IF
+END FUNCTION

@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION findPermutation(nums)
+        SET n TO LENGTH OF nums
+        INITIALIZE ans AS empty list
+
+        FUNCTION dfs(currentMask, previousIndex)
+            IF currentMask EQUALS (1 LEFT SHIFTED BY n) MINUS 1 THEN
+                RETURN ABSOLUTE VALUE OF (nums[previousIndex] MINUS nums[0])
+            END IF
+
+            SET minimumCost TO infinity
+            FOR index FROM 0 TO n MINUS 1 DO
+                IF (currentMask RIGHT SHIFTED BY index) BITWISE AND 1 EQUALS 0 THEN
+                    SET nextMask TO currentMask BITWISE OR (1 LEFT SHIFTED BY index)
+                    SET cost TO ABSOLUTE VALUE OF (nums[previousIndex] MINUS nums[index]) PLUS dfs(nextMask, index)
+                    IF cost LESS THAN minimumCost THEN
+                        SET minimumCost TO cost
+                    END IF
+                END IF
+            END FOR
+            RETURN minimumCost
+        END FUNCTION
+
+        FUNCTION buildPath(mask, prev)
+            APPEND prev TO ans
+            IF mask EQUALS (1 LEFT SHIFTED BY n) MINUS 1 THEN
+                RETURN
+            END IF
+
+            SET targetCost TO dfs(mask, prev)
+            FOR i FROM 0 TO n MINUS 1 DO
+                IF ((mask RIGHT SHIFTED BY i) BITWISE AND 1) EQUALS 0 THEN
+                    SET candidateMask TO mask BITWISE OR (1 LEFT SHIFTED BY i)
+                    SET candidateCost TO ABSOLUTE VALUE OF (nums[prev] MINUS nums[i]) PLUS dfs(candidateMask, i)
+                    IF candidateCost EQUALS targetCost THEN
+                        CALL buildPath(candidateMask, i)
+                        BREAK
+                    END IF
+                END IF
+            END FOR
+        END FUNCTION
+
+        CALL buildPath(1 LEFT SHIFTED BY 0, 0)
+        RETURN ans
+    END FUNCTION
+END CLASS

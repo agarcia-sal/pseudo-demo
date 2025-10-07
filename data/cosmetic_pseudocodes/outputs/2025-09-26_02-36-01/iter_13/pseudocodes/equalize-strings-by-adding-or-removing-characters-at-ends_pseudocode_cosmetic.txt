@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION minOperations(initial parameter TO string, target parameter TO string) RETURNS integer
+        SET len_initial TO 0
+        SET len_target TO 0
+        SET idx_outer TO 1
+        SET idx_inner TO 1
+        SET max_length TO 0
+        SET dp_matrix TO []
+        SET result TO 0
+
+        PROCEDURE initialize_lengths()
+            SET len_initial TO 0
+            SET len_target TO 0
+            WHILE true
+                IF len_initial EQUALS LENGTH OF initial THEN
+                    BREAK
+                END IF
+                SET len_initial TO len_initial PLUS 1
+            END WHILE
+            WHILE true
+                IF len_target EQUALS LENGTH OF target THEN
+                    BREAK
+                END IF
+                SET len_target TO len_target PLUS 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE create_dp()
+            SET dp_matrix TO []
+            SET row_idx TO 0
+            REPEAT
+                IF row_idx GREATER THAN len_initial THEN
+                    BREAK
+                END IF
+                SET new_row TO []
+                SET col_idx TO 0
+                REPEAT
+                    IF col_idx GREATER THAN len_target THEN
+                        BREAK
+                    END IF
+                    APPEND 0 TO new_row
+                    SET col_idx TO col_idx PLUS 1
+                UNTIL false
+                APPEND new_row TO dp_matrix
+                SET row_idx TO row_idx PLUS 1
+            UNTIL false
+        END PROCEDURE
+
+        FUNCTION get_char_at_pos(s STRING, pos INTEGER) RETURNS CHARACTER
+            SET ctr TO 0
+            WHILE true
+                IF ctr EQUALS pos THEN
+                    RETURN s[ctr]
+                END IF
+                SET ctr TO ctr PLUS 1
+            END WHILE
+        END FUNCTION
+
+        PROCEDURE compute_lcs(i INTEGER, j INTEGER)
+            IF i GREATER THAN len_initial THEN
+                RETURN
+            END IF
+            IF j GREATER THAN len_target THEN
+                COMPUTE_NEXT_I(i PLUS 1)
+                RETURN
+            END IF
+            IF get_char_at_pos(initial, i MINUS 1) EQUALS get_char_at_pos(target, j MINUS 1) THEN
+                SET dp_matrix[i][j] TO dp_matrix[i MINUS 1][j MINUS 1] PLUS 1
+                IF max_length LESS THAN dp_matrix[i][j] THEN
+                    SET max_length TO dp_matrix[i][j]
+                END IF
+            END IF
+            compute_lcs(i, j PLUS 1)
+        END PROCEDURE
+
+        PROCEDURE COMPUTE_NEXT_I(new_i INTEGER)
+            IF new_i GREATER THAN len_initial THEN
+                RETURN
+            END IF
+            compute_lcs(new_i, 1)
+        END PROCEDURE
+
+        initialize_lengths()
+        create_dp()
+        COMPUTE_NEXT_I(1)
+
+        SET result TO (len_initial PLUS len_target) MINUS (2 MULTIPLIED BY max_length)
+        RETURN result
+    END FUNCTION
+END CLASS

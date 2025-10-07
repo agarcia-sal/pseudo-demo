@@ -1,0 +1,74 @@
+```  
+CLASS Solution  
+    FUNCTION maximumScore(grid)  
+        FUNCTION calculatePrefixSums(matrix, dimension, accumulator)  
+            FUNCTION fillRow(colIndex, rowIndex)  
+                IF rowIndex < dimension THEN  
+                    LET accVal BE accumulator[colIndex][rowIndex + 1] + matrix[rowIndex][colIndex]  
+                    SET accumulator[colIndex][rowIndex + 1] TO accVal  
+                    CALL fillRow(colIndex, rowIndex + 1)  
+                END IF  
+            END FUNCTION  
+            FUNCTION processColumns(currCol)  
+                IF currCol < dimension THEN  
+                    CALL fillRow(currCol, 0)  
+                    CALL processColumns(currCol + 1)  
+                END IF  
+            END FUNCTION  
+            CALL processColumns(0)  
+        END FUNCTION  
+
+        LET szA BE LENGTH(grid)  
+        LET prefixGrid BE LIST OF LISTS composed of (szA + 1) rows each containing (szA + 1) zero elements  
+        LET previousSelection BE LIST of (szA + 1) zero elements  
+        LET previousOmission BE LIST of (szA + 1) zero elements  
+
+        CALL calculatePrefixSums(grid, szA, prefixGrid)  
+
+        FUNCTION iterateRows(rowIndex)  
+            IF rowIndex < szA THEN  
+                LET currentSelection BE LIST of (szA + 1) zeros  
+                LET currentOmission BE LIST of (szA + 1) zeros  
+                FUNCTION outerLoop(currIndex)  
+                    IF currIndex <= szA THEN  
+                        FUNCTION innerLoop(prevIndex)  
+                            IF prevIndex <= szA THEN  
+                                IF currIndex > prevIndex THEN  
+                                    LET computedScore BE prefixGrid[rowIndex][currIndex - 1] - prefixGrid[rowIndex][prevIndex]  
+                                    LET currentSelection[currIndex] BE MAXIMUM OF currentSelection[currIndex] AND (previousOmission[prevIndex] + computedScore)  
+                                    LET currentOmission[currIndex] BE MAXIMUM OF currentOmission[currIndex] AND (previousOmission[prevIndex] + computedScore)  
+                                ELSE  
+                                    LET computedScore BE prefixGrid[rowIndex][prevIndex] - prefixGrid[rowIndex][currIndex]  
+                                    LET currentSelection[currIndex] BE MAXIMUM OF currentSelection[currIndex] AND (previousSelection[prevIndex] + computedScore)  
+                                    LET currentOmission[currIndex] BE MAXIMUM OF currentOmission[currIndex] AND previousSelection[prevIndex]  
+                                END IF  
+                                CALL innerLoop(prevIndex + 1)  
+                            END IF  
+                        END FUNCTION  
+                        CALL innerLoop(0)  
+                        CALL outerLoop(currIndex + 1)  
+                    END IF  
+                END FUNCTION  
+                CALL outerLoop(0)  
+                SET previousSelection TO currentSelection  
+                SET previousOmission TO currentOmission  
+                CALL iterateRows(rowIndex + 1)  
+            END IF  
+        END FUNCTION  
+
+        CALL iterateRows(1)  
+
+        FUNCTION findMaxValue(sequence, index, bestSoFar)  
+            IF index < LENGTH(sequence) THEN  
+                LET candidate BE sequence[index]  
+                LET newBest BE candidate > bestSoFar ? candidate : bestSoFar  
+                RETURN findMaxValue(sequence, index + 1, newBest)  
+            ELSE  
+                RETURN bestSoFar  
+            END IF  
+        END FUNCTION  
+
+        RETURN findMaxValue(previousSelection, 0, -(1 + 1))  
+    END FUNCTION  
+END CLASS  
+```

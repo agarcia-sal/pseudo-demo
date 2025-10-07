@@ -1,0 +1,78 @@
+CLASS Solution
+{
+    FUNCTION minimumDeletions(word, k)
+    {
+        CONST INF_VAL = (1 << 30) + (1 << 31)  // Emulate positive infinity with large value
+        LET freqCounter = {}
+        LET charIndex = 0
+
+        LOOP
+            IF charIndex >= LENGTH(word) THEN BREAK END IF
+            LET charKey = word[charIndex]
+            IF NOT (charKey IN freqCounter) THEN
+                freqCounter[charKey] = 0
+            END IF
+            freqCounter[charKey] = freqCounter[charKey] + (1 * 1)
+            charIndex = charIndex + 1
+        END LOOP
+
+        LET countsArray = []
+        FOR EACH key IN KEYS(freqCounter)
+            countsArray.APPEND(freqCounter[key])
+        END FOR
+
+        // Sort ascending via simple selection sort as alternate to built-in sort
+        LET i = 0, lenCounts = LENGTH(countsArray)
+        WHILE i < lenCounts - 1
+            LET minPos = i
+            LET j = i + 1
+            WHILE j < lenCounts
+                IF countsArray[j] < countsArray[minPos] THEN
+                    minPos = j
+                END IF
+                j = j + 1
+            END WHILE
+            IF minPos != i THEN
+                LET tempVal = countsArray[i]
+                countsArray[i] = countsArray[minPos]
+                countsArray[minPos] = tempVal
+            END IF
+            i = i + 1
+        END WHILE
+
+        LET bestDeletionCount = INF_VAL
+
+        FUNCTION computeDeletions(currentIndex)
+        {
+            IF currentIndex == LENGTH(countsArray) THEN
+                RETURN bestDeletionCount
+            END IF
+
+            LET maxFreq = countsArray[currentIndex] + k
+            LET totalDeletion = 0
+            LET forwardIdx = currentIndex + 1
+
+            WHILE forwardIdx < LENGTH(countsArray)
+                LET valFreq = countsArray[forwardIdx]
+                IF valFreq > maxFreq THEN
+                    totalDeletion = totalDeletion + (valFreq - maxFreq)
+                END IF
+                forwardIdx = forwardIdx + 1
+            END WHILE
+
+            LET backwardIdx = 0
+            WHILE backwardIdx < currentIndex
+                totalDeletion = totalDeletion + countsArray[backwardIdx]
+                backwardIdx = backwardIdx + 1
+            END WHILE
+
+            IF totalDeletion < bestDeletionCount THEN
+                bestDeletionCount = totalDeletion
+            END IF
+
+            RETURN computeDeletions(currentIndex + 1)
+        }
+
+        RETURN computeDeletions(0)
+    }
+}

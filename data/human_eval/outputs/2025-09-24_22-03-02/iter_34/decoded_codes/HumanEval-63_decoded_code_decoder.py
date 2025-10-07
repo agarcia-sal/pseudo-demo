@@ -1,0 +1,15 @@
+from functools import lru_cache
+
+@lru_cache(None)
+def fibfib(n: int) -> int:
+    if n == 0:
+        return 0
+    if n == 1:
+        return 0
+    if n == 2:
+        return 1
+    value1 = fibfib(n - 1)
+    value2 = fibfib(n - 2)
+    value3 = fibfib(n - 3)
+    result = value1 + value2 + value3
+    return result

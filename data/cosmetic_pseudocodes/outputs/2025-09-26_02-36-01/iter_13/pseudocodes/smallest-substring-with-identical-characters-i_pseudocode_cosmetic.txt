@@ -1,0 +1,103 @@
+CLASS Solution
+    FUNCTION minLength(s parameter, numOps parameter)
+        FUNCTION count_ones(x parameter)
+            SET total TO 0
+            SET n TO x
+            WHILE n NOT EQUALS 0
+                SET total TO total + (n AND 1)
+                SET n TO n RIGHT SHIFTED BY 1
+            END WHILE
+            RETURN total
+        END FUNCTION
+
+        FUNCTION longest_uniform_substring(s parameter)
+            FUNCTION helper(idx parameter, prev_char parameter, current_len parameter, max_len parameter)
+                IF idx GREATER THAN OR EQUAL TO LENGTH OF s
+                    RETURN max_len
+                ELSE
+                    IF s[idx] EQUALS prev_char
+                        RETURN helper(idx + 1, prev_char, current_len + 1, max_len)
+                    ELSE
+                        SET updated_max TO max_len
+                        IF current_len GREATER THAN max_len
+                            SET updated_max TO current_len
+                        END IF
+                        RETURN helper(idx + 1, s[idx], 1, updated_max)
+                    END IF
+                END IF
+            END FUNCTION
+
+            IF LENGTH OF s EQUALS 0
+                RETURN 0
+            END IF
+
+            SET initial_char TO s[0]
+            SET result TO helper(1, initial_char, 1, 0)
+            IF result GREATER THAN current_len
+                RETURN result
+            ELSE
+                RETURN current_len
+            END IF
+        END FUNCTION
+
+        FUNCTION flip_char(c parameter)
+            IF c EQUALS '0'
+                RETURN '1'
+            ELSE
+                RETURN '0'
+            END IF
+        END FUNCTION
+
+        FUNCTION to_char_list(str parameter)
+            SET result_list TO empty list
+            SET index TO 0
+            WHILE index LESS THAN LENGTH OF str
+                APPEND str[index] TO result_list
+                SET index TO index + 1
+            END WHILE
+            RETURN result_list
+        END FUNCTION
+
+        FUNCTION list_to_str(lst parameter)
+            SET accumulator TO empty string
+            SET pointer TO 0
+            WHILE pointer LESS THAN LENGTH OF lst
+                SET accumulator TO accumulator + lst[pointer]
+                SET pointer TO pointer + 1
+            END WHILE
+            RETURN accumulator
+        END FUNCTION
+
+        SET min_length TO LENGTH OF s
+        SET limit TO 2 LEFT SHIFTED BY (LENGTH OF s MINUS 1)
+        SET counter TO 0
+        REPEAT
+            IF counter GREATER THAN OR EQUAL TO limit
+                BREAK
+            END IF
+            IF count_ones(counter) GREATER THAN numOps
+                SET counter TO counter + 1
+                CONTINUE
+            END IF
+            SET new_s TO to_char_list(s)
+            SET bit_pos TO 0
+            REPEAT
+                IF bit_pos GREATER THAN OR EQUAL TO LENGTH OF s
+                    BREAK
+                END IF
+                IF (counter AND (1 LEFT SHIFTED BY bit_pos)) NOT EQUALS 0
+                    SET current_char TO new_s[bit_pos]
+                    SET new_s[bit_pos] TO flip_char(current_char)
+                END IF
+                SET bit_pos TO bit_pos + 1
+            UNTIL FALSE
+            SET candidate_length TO longest_uniform_substring(new_s)
+            IF min_length GREATER THAN candidate_length
+                SET min_length TO candidate_length
+            END IF
+            SET counter TO counter + 1
+        UNTIL FALSE
+
+        RETURN min_length
+    END FUNCTION
+END CLASS

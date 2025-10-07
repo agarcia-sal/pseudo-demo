@@ -1,0 +1,89 @@
+CLASS Solution
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+    SET alpha TO LENGTH OF image
+    SET beta TO LENGTH OF element at position zero of image
+    SET omega TO a LIST OF alpha ELEMENTS EACH INITIALIZED TO a LIST OF beta ELEMENTS EACH SET TO zero
+    SET sigma TO a LIST OF alpha ELEMENTS EACH INITIALIZED TO a LIST OF beta ELEMENTS EACH SET TO zero
+
+    FUNCTION is_valid_region(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE boolean
+        SET p TO x
+        WHILE p LESS THAN (x + (2 + 1)) DO
+            SET q TO y
+            WHILE q LESS THAN (y + (2 + 1)) DO
+                DEFINE directions AS LIST OF PAIRS: (-1, 0), (1, 0), (0, -1), (0, 1)
+                FOR EACH (deltaX, deltaY) IN directions DO
+                    SET candidateX TO p + deltaX
+                    SET candidateY TO q + deltaY
+                    IF candidateX IS AT LEAST 0 THEN
+                        IF candidateX LESS THAN (x + (2 + 1)) THEN
+                            IF candidateY IS AT LEAST 0 THEN
+                                IF candidateY LESS THAN (y + (2 + 1)) THEN
+                                    IF ABS(image at position p at position q MINUS image at position candidateX at position candidateY) GREATER THAN threshold THEN
+                                        RETURN False
+                                    END IF
+                                END IF
+                            END IF
+                        END IF
+                    END IF
+                END FOR
+                SET q TO q + 1
+            END WHILE
+            SET p TO p + 1
+        END WHILE
+        RETURN True
+    END FUNCTION
+
+    FUNCTION calculate_average(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE integer
+        SET aggregateSum TO 0
+        SET r TO x
+        REPEAT
+            SET s TO y
+            REPEAT
+                aggregateSum = aggregateSum + image at position r at position s
+                s = s + 1
+            UNTIL s EQUALS (y + (2 + 1))
+            r = r + 1
+        UNTIL r EQUALS (x + (2 + 1))
+        SET divisor TO 3 * 3
+        RETURN aggregateSum DIVIDED BY divisor
+    END FUNCTION
+
+    SET indexI TO 0
+    WHILE indexI LESS THAN (alpha + (-3)) DO
+        SET indexJ TO 0
+        WHILE indexJ LESS THAN (beta + (-3)) DO
+            IF is_valid_region(indexI, indexJ) EQUALS True THEN
+                SET avgVal TO calculate_average(indexI, indexJ)
+                SET posX TO indexI
+                WHILE posX LESS THAN (indexI + (2 + 1)) DO
+                    SET posY TO indexJ
+                    WHILE posY LESS THAN (indexJ + (2 + 1)) DO
+                        omega at position posX at position posY = omega at position posX at position posY + avgVal
+                        sigma at position posX at position posY = sigma at position posX at position posY + 1
+                        posY = posY + 1
+                    END WHILE
+                    posX = posX + 1
+                END WHILE
+            END IF
+            indexJ = indexJ + 1
+        END WHILE
+        indexI = indexI + 1
+    END WHILE
+
+    SET scanI TO 0
+    REPEAT
+        SET scanJ TO 0
+        REPEAT
+            IF sigma at position scanI at position scanJ GREATER THAN 0 THEN
+                omega at position scanI at position scanJ = omega at position scanI at position scanJ DIVIDED BY sigma at position scanI at position scanJ
+            ELSE
+                omega at position scanI at position scanJ = image at position scanI at position scanJ
+            END IF
+            scanJ = scanJ + 1
+        UNTIL scanJ EQUALS beta
+        scanI = scanI + 1
+    UNTIL scanI EQUALS alpha
+
+    RETURN omega
+    END FUNCTION
+END CLASS

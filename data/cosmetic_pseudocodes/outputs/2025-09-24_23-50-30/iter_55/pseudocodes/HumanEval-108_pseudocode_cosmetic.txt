@@ -1,0 +1,37 @@
+```
+FUNCTION count_nums(array_of_integers)
+    FUNCTION digits_sum(integer_value)
+        SET flag_sign TO 1
+        SWITCH integer_value < 0
+            CASE true:
+                SET integer_value TO (-1) * integer_value
+                SET flag_sign TO -1
+        END SWITCH
+        SET chars_list TO STRING(integer_value)
+        SET digit_values TO EMPTY ARRAY
+        FOR index IN RANGE 0 TO LENGTH(chars_list) - 1
+            ADD INTEGER(chars_list[index]) TO digit_values
+        END FOR
+        SET digit_values[0] TO digit_values[0] * flag_sign
+        RETURN REDUCE((acc, val) -> acc + val, digit_values, 0)
+    END FUNCTION
+
+    FUNCTION gather_sums(init_index, limit_index, input_arr, acc_arr)
+        IF NOT (init_index < limit_index)
+            RETURN acc_arr
+        ELSE
+            SET updated_acc TO acc_arr + [digits_sum(input_arr[init_index])]
+            RETURN gather_sums(init_index + 1, limit_index, input_arr, updated_acc)
+        END IF
+    END FUNCTION
+
+    SET all_sums TO gather_sums(0, LENGTH(array_of_integers), array_of_integers, [])
+    SET positive_sums TO []
+    FOR each_val IN all_sums
+        IF each_val > 0
+            ADD each_val TO positive_sums
+        END IF
+    END FOR
+    RETURN LENGTH(positive_sums)
+END FUNCTION
+```

@@ -1,0 +1,39 @@
+CLASS Solution
+    FUNCTION maximumValueSum(nums k edges)
+        SET sum_accumulator TO 0
+        SET positive_gain_counter TO 0
+        SET smallest_gain TO 1 / 0
+
+        DEFINE FUNCTION recursiveProcess(index, sum_acc, gain_count, min_g)
+            IF index EQUALS LENGTH(nums)
+                RETURN [sum_acc, gain_count, min_g]
+            END IF
+
+            SET current_num TO nums[index]
+            SET xor_result TO k XOR current_num
+            SET gain_val TO xor_result MINUS current_num
+
+            IF 0 LESS THAN gain_val
+                SET updated_gain_count TO gain_count PLUS 1
+            ELSE
+                SET updated_gain_count TO gain_count
+            END IF
+
+            SET updated_sum TO sum_acc PLUS (IF current_num GREATER THAN xor_result THEN current_num ELSE xor_result)
+            SET updated_min_gain TO (IF min_g LESS THAN ABS(gain_val) THEN min_g ELSE ABS(gain_val))
+            RETURN recursiveProcess(index PLUS 1, updated_sum, updated_gain_count, updated_min_gain)
+        END FUNCTION
+
+        SET results TO recursiveProcess(0, sum_accumulator, positive_gain_counter, smallest_gain)
+        SET sum_accumulator TO results[0]
+        SET positive_gain_counter TO results[1]
+        SET smallest_gain TO results[2]
+
+        IF 0 NOT EQUAL TO (positive_gain_counter MOD 2)
+            SET sum_accumulator TO sum_accumulator MINUS smallest_gain
+        END IF
+
+        SET final_result TO sum_accumulator
+        RETURN final_result
+    END FUNCTION
+END CLASS

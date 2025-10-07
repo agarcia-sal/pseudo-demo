@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION findKthSmallest(coins k)
+        FUNCTION count_smaller_or_equal(x)
+            SET alpha TO 0
+            SET beta TO 1
+            DEFINE FUNCTION gcd_impl(a_val, b_val)
+                IF b_val = 0 THEN
+                    RETURN a_val
+                ELSE
+                    RETURN gcd_impl(b_val, a_val MOD b_val)
+                END IF
+            END FUNCTION
+            SET gamma TO (2 ^ LENGTH(coins)) - 1
+            FUNCTION helper_loop(r)
+                IF r > gamma THEN
+                    RETURN 0
+                ELSE
+                    SET delta TO 1
+                    SET epsilon TO 0
+                    SET zeta TO 0
+                    WHILE zeta < LENGTH(coins)
+                        IF (r BITAND (1 << zeta)) != 0 THEN
+                            SET nu TO gcd_impl(delta, coins[zeta])
+                            SET delta TO (delta * coins[zeta]) / nu
+                            SET epsilon TO epsilon + 1
+                        END IF
+                        SET zeta TO zeta + 1
+                    END WHILE
+                    IF (epsilon MOD 2) = 1 THEN
+                        RETURN (x DIV delta) + helper_loop(r + 1)
+                    ELSE
+                        RETURN (- (x DIV delta)) + helper_loop(r + 1)
+                    END IF
+                END IF
+            END FUNCTION
+            SET alpha TO helper_loop(beta)
+            RETURN alpha
+        END FUNCTION
+
+        SET mu TO 1
+        SET sigma TO LENGTH(coins)
+        SET omega TO coins[0]
+        SET pi TO 1
+        WHILE pi < sigma
+            IF coins[pi] < omega THEN
+                SET omega TO coins[pi]
+            END IF
+            SET pi TO pi + 1
+        END WHILE
+        SET left TO mu
+        SET right TO k * omega
+        FUNCTION binary_search()
+            IF left >= right THEN
+                RETURN left
+            ELSE
+                SET mid_point TO (left + right) DIV 2
+                IF count_smaller_or_equal(mid_point) < k THEN
+                    SET left TO mid_point + 1
+                ELSE
+                    SET right TO mid_point
+                END IF
+                RETURN binary_search()
+            END IF
+        END FUNCTION
+        RETURN binary_search()
+    END FUNCTION
+END CLASS

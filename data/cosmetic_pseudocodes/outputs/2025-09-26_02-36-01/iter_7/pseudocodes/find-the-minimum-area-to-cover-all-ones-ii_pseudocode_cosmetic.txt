@@ -1,0 +1,99 @@
+CLASS Solution
+    FUNCTION minimumSum(grid)
+      DEFINE infinitePos AS (1 * (10 ^ 9)) + (1 * (10 ^ 9))
+      LET onePositions:= []
+      LET rowIdx:= 0
+      WHILE rowIdx <= (LENGTH(grid) - (1 * 1))
+        LET colIdx:= 0
+        REPEAT
+          EXIT WHEN colIdx > (LENGTH(grid[rowIdx]) - 1)
+          IF NOT (grid[rowIdx][colIdx] = 1) THEN
+            colIdx := colIdx + 1
+            CYCLE
+          END IF
+          onePositions APPEND (rowIdx, colIdx)
+          colIdx := colIdx + 1
+        END REPEAT
+        rowIdx := rowIdx + 1
+      END WHILE
+      
+      FUNCTION rect_area(points)
+        IF LENGTH(points) = 0 THEN RETURN 0 END IF
+        LET minRow := points[0][0]
+        LET maxRow := points[0][0]
+        LET minCol := points[0][1]
+        LET maxCol := points[0][1]
+        LET idx := 1
+        WHILE idx < LENGTH(points)
+          IF points[idx][0] < minRow THEN minRow := points[idx][0] END IF
+          IF points[idx][0] > maxRow THEN maxRow := points[idx][0] END IF
+          IF points[idx][1] < minCol THEN minCol := points[idx][1] END IF
+          IF points[idx][1] > maxCol THEN maxCol := points[idx][1] END IF
+          idx := idx + 1
+        END WHILE
+        LET width := (maxRow - minRow) + 1
+        LET height := (maxCol - minCol) + 1
+        RETURN width * height
+      END FUNCTION
+      
+      LET minimalSum := infinitePos
+      LET totalOnes := LENGTH(onePositions)
+      
+      FUNCTION generateCombinations(collection, size)
+        IF size = 0 THEN RETURN [[]] END IF
+        IF LENGTH(collection) < size THEN RETURN [] END IF
+        LET firstElem := collection[0]
+        LET remaining := collection[1:]
+        LET withFirst := generateCombinations(remaining, size - 1)
+        FOR EACH comb IN withFirst DO
+          INSERT (firstElem) AT FRONT OF comb
+        END FOR
+        LET withoutFirst := generateCombinations(remaining, size)
+        RETURN withFirst + withoutFirst
+      END FUNCTION
+      
+      LET iVar := 1
+      WHILE iVar <= totalOnes - 1
+        LET jVar := iVar + 1
+        WHILE jVar <= totalOnes - 1
+          LET kVar := jVar + 1
+          WHILE kVar <= totalOnes
+            LET combosI := generateCombinations(onePositions, iVar)
+            FOR EACH subsetA IN combosI DO
+              LET setOnePositions := {}
+              LET subsetAMap := {}
+              FOR EACH elem IN onePositions DO setOnePositions[elem] = TRUE END FOR
+              FOR EACH elem IN subsetA DO subsetAMap[elem] = TRUE END FOR
+              LET restAfterA := []
+              FOR EACH elem IN onePositions DO
+                IF NOT subsetAMap[elem] THEN restAfterA.APPEND(elem) END IF
+              END FOR
+              LET combosJ := generateCombinations(restAfterA, jVar - iVar)
+              FOR EACH subsetB IN combosJ DO
+                LET subsetBMap := {}
+                FOR EACH elem IN subsetB DO subsetBMap[elem] = TRUE END FOR
+                LET subsetC := []
+                FOR EACH elem IN restAfterA DO
+                  IF NOT subsetBMap[elem] THEN subsetC.APPEND(elem) END IF
+                END FOR
+                LET areaA := rect_area(subsetA)
+                LET areaB := rect_area(subsetB)
+                LET areaC := rect_area(subsetC)
+                IF (areaA > 0) AND (areaB > 0) AND (areaC > 0) THEN
+                  LET summed := (areaA + areaB) + areaC
+                  IF summed < minimalSum THEN
+                    minimalSum := summed
+                  END IF
+                END IF
+              END FOR
+            END FOR
+            kVar := kVar + 1
+          END WHILE
+          jVar := jVar + 1
+        END WHILE
+        iVar := iVar + 1
+      END WHILE
+      
+      RETURN minimalSum
+    END FUNCTION
+END CLASS

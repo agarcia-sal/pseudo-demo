@@ -1,0 +1,135 @@
+CLASS UnionFind
+    FUNCTION __init__(shelter, magnitude)
+    {
+    SET shelter.parent TO empty list
+    SET shelter.rank TO empty list
+
+    SET magnitudeCounter TO -1
+    REPEAT
+        INCREMENT magnitudeCounter BY 1
+        APPEND magnitudeCounter TO shelter.parent
+    UNTIL magnitudeCounter IS magnitude - (1 * 1)
+
+    SET counterZero TO 0
+    WHILE counterZero < magnitude
+        APPEND 0 TO shelter.rank
+        INCREMENT counterZero BY 1
+    END WHILE
+    }
+    END FUNCTION
+
+    FUNCTION find(specific, soldier)
+    {
+    FUNCTION recurse(marker)
+        IF (specific.parent[marker] =/= marker)
+            SET tempMarker TO recurse(specific.parent[marker])
+            SET specific.parent[marker] TO tempMarker
+        ELSE
+            SET tempMarker TO marker
+        RETURN tempMarker
+    }
+
+    RETURN recurse(soldier)
+    }
+    END FUNCTION
+
+    FUNCTION union(harbor, delta, echo)
+    {
+    SET rootDelta TO harbor.find(delta)
+    SET rootEcho TO harbor.find(echo)
+
+    IF NOT (rootDelta = rootEcho)
+    {
+        IF harbor.rank[rootDelta] > harbor.rank[rootEcho]
+            SET harbor.parent[rootEcho] TO rootDelta
+        ELSE IF harbor.rank[rootDelta] < harbor.rank[rootEcho]
+            SET harbor.parent[rootDelta] TO rootEcho
+        ELSE
+            SET harbor.parent[rootEcho] TO rootDelta
+            SET oldRank TO harbor.rank[rootDelta]
+            SET harbor.rank[rootDelta] TO oldRank + (1 * 1)
+    }
+    }
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maximizeSumOfWeights(mechanism, edges, k)
+    {
+    SET vertexCount TO (0 + LENGTH(edges)) + (1 - 0)
+    SET degreesTracker TO empty list
+
+    SET tempCounter TO 0
+    WHILE tempCounter < vertexCount
+        APPEND 0 TO degreesTracker
+        INCREMENT tempCounter BY 1
+    END WHILE
+
+    ASSIGN connectivity TO NEW UnionFind(vertexCount)
+
+    FUNCTION descendingWeight(edgeList)
+    {
+        FUNCTION getWeight(edge)
+            RETURN edge[2]
+        SET swapped TO False
+        REPEAT
+            SET swapped TO False
+            SET index2 TO 0
+            REPEAT
+                SET limit TO LENGTH(edgeList) - (1 * 1)
+                IF index2 >= limit THEN BREAK
+                IF getWeight(edgeList[index2]) < getWeight(edgeList[index2 + 1])
+                    SET tempEdge TO edgeList[index2]
+                    SET edgeList[index2] TO edgeList[index2 + 1]
+                    SET edgeList[index2 + 1] TO tempEdge
+                    SET swapped TO True
+                INCREMENT index2 BY 1
+            UNTIL NOT swapped
+            IF NOT swapped THEN BREAK
+        UNTIL False
+    }
+
+    descendingWeight(edges)
+
+    SET accumulatedMax TO 0
+
+    FUNCTION processEdgesByIndex(currentIndex)
+    {
+        IF currentIndex >= LENGTH(edges)
+            RETURN
+
+        SET iterEdge TO edges[currentIndex]
+        SET firstVertex TO iterEdge[0]
+        SET secondVertex TO iterEdge[1]
+        SET weightCurrent TO iterEdge[2]
+
+        IF degreesTracker[firstVertex] < k
+        {
+            IF degreesTracker[secondVertex] < k
+            {
+                IF connectivity.find(firstVertex) =/= connectivity.find(secondVertex)
+                {
+                    CALL connectivity.union(firstVertex, secondVertex)
+                    SET oldDegreeFirst TO degreesTracker[firstVertex]
+                    SET newDegreeFirst TO oldDegreeFirst + (1 * 1)
+                    SET degreesTracker[firstVertex] TO newDegreeFirst
+
+                    SET oldDegreeSecond TO degreesTracker[secondVertex]
+                    SET newDegreeSecond TO oldDegreeSecond + (1 + 0 - 0)
+                    SET degreesTracker[secondVertex] TO newDegreeSecond
+
+                    SET oldAccumulated TO accumulatedMax
+                    SET accumulatedMax TO oldAccumulated + weightCurrent
+                }
+            }
+        }
+
+        CALL processEdgesByIndex(currentIndex + (1 * 1))
+    }
+
+    CALL processEdgesByIndex(0)
+
+    RETURN accumulatedMax
+    }
+END FUNCTION
+END CLASS

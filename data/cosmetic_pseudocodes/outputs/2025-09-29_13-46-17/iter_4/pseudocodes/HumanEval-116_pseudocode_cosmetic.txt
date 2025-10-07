@@ -1,0 +1,49 @@
+```
+FUNCTION sort_array(array_of_integers)
+    FUNCTION count_ones_in_binary(num)
+        SET bin_repr TO CONVERT num TO BINARY STRING
+        SET ones_tally TO 0
+        FOR idx FROM 3 TO LENGTH(bin_repr) + 1 DO
+            IF bin_repr[idx - 1] = '1' THEN
+                SET ones_tally TO ones_tally + 1
+            END IF
+        END FOR
+        RETURN ones_tally
+    END FUNCTION
+
+    SET array_sorted_decimal TO array_of_integers
+    FOR i FROM 0 TO LENGTH(array_sorted_decimal) - 2 DO
+        FOR j FROM 0 TO LENGTH(array_sorted_decimal) - 2 - i DO
+            IF array_sorted_decimal[j] > array_sorted_decimal[j + 1] THEN
+                SET temp_var TO array_sorted_decimal[j]
+                SET array_sorted_decimal[j] TO array_sorted_decimal[j + 1]
+                SET array_sorted_decimal[j + 1] TO temp_var
+            END IF
+        END FOR
+    END FOR
+
+    FUNCTION insert_element(sorted_list, item, start_index, end_index)
+        IF start_index > end_index THEN
+            SET sorted_list[end_index + 1] TO item
+            RETURN
+        END IF
+        SET middle TO (start_index + end_index) / 2
+        IF count_ones_in_binary(item) < count_ones_in_binary(sorted_list[middle]) THEN
+            CALL insert_element(sorted_list, item, start_index, middle - 1)
+        ELSE
+            CALL insert_element(sorted_list, item, middle + 1, end_index)
+        END IF
+    END FUNCTION
+
+    SET final_sorted_list TO EMPTY LIST
+    FOR element IN array_sorted_decimal DO
+        IF LENGTH(final_sorted_list) = 0 THEN
+            APPEND element TO final_sorted_list
+        ELSE
+            CALL insert_element(final_sorted_list, element, 0, LENGTH(final_sorted_list) - 1)
+        END IF
+    END FOR
+
+    RETURN final_sorted_list
+END FUNCTION
+```

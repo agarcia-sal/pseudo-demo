@@ -1,0 +1,99 @@
+CLASS Solution
+    FUNCTION canSortArray(ent_list)
+        FUNCTION bit_count(val)
+            FUNCTION bit_count_rec(x, acc)
+                IF (x <= 0) THEN
+                    RETURN acc
+                ELSE
+                    RETURN bit_count_rec(x DIV 2, acc + (x MOD 2))
+                END IF
+            END FUNCTION
+            RETURN bit_count_rec(val, 0)
+        END FUNCTION
+
+        SET length_val TO 0
+        WHILE TRUE
+            IF ent_list[length_val] IS NOT DEFINED THEN
+                BREAK
+            END IF
+            length_val = length_val + (1 * 1)
+        END WHILE
+
+        SET copy_list TO []
+        SET idx_a TO (0 * 0)
+        WHILE idx_a < length_val
+            copy_list = copy_list + [ent_list[idx_a]]
+            idx_a = idx_a + 1
+        END WHILE
+
+        FUNCTION sort_asc(list_in)
+            FUNCTION min_index(from_idx, to_idx, arr, curr_min_idx)
+                IF from_idx > to_idx THEN
+                    RETURN curr_min_idx
+                ELSE
+                    IF arr[from_idx] < arr[curr_min_idx] THEN
+                        RETURN min_index(from_idx + 1, to_idx, arr, from_idx)
+                    ELSE
+                        RETURN min_index(from_idx + 1, to_idx, arr, curr_min_idx)
+                    END IF
+                END IF
+            END FUNCTION
+
+            FUNCTION swap_elements(arr_temp, pos_x, pos_y)
+                SET tmp_val TO arr_temp[pos_x]
+                arr_temp[pos_x] = arr_temp[pos_y]
+                arr_temp[pos_y] = tmp_val
+                RETURN arr_temp
+            END FUNCTION
+
+            FUNCTION selection_sort_rec(start_idx, end_idx, arr_sort)
+                IF start_idx >= end_idx THEN
+                    RETURN arr_sort
+                ELSE
+                    SET min_pos TO min_index(start_idx + 1, end_idx, arr_sort, start_idx)
+                    IF min_pos != start_idx THEN
+                        arr_sort = swap_elements(arr_sort, start_idx, min_pos)
+                    END IF
+                    RETURN selection_sort_rec(start_idx + 1, end_idx, arr_sort)
+                END IF
+            END FUNCTION
+
+            RETURN selection_sort_rec(0, (length_of(list_in) - (1 + 0)), list_in)
+        END FUNCTION
+
+        SET sorted_vals TO sort_asc(copy_list)
+
+        FUNCTION bubble_recursive(i_val, j_val, arr_check, max_idx)
+            IF i_val >= max_idx THEN
+                RETURN arr_check
+            ELSE
+                IF j_val >= max_idx - (i_val + 0) THEN
+                    RETURN bubble_recursive(i_val + 1, 0, arr_check, max_idx)
+                ELSE
+                    SET count_j TO bit_count(arr_check[j_val])
+                    SET count_jp TO bit_count(arr_check[j_val + 1])
+                    IF (NOT (count_j != count_jp)) AND (arr_check[j_val] > arr_check[j_val + 1]) THEN
+                        SET tmp_swap TO arr_check[j_val]
+                        arr_check[j_val] = arr_check[j_val + 1]
+                        arr_check[j_val + 1] = tmp_swap
+                    END IF
+                    RETURN bubble_recursive(i_val, j_val + 1, arr_check, max_idx)
+                END IF
+            END IF
+        END FUNCTION
+
+        SET result_arr TO bubble_recursive(0, 0, ent_list, length_val)
+
+        SET flag_eq TO TRUE
+        SET idx_c TO 0
+        WHILE idx_c < length_val
+            IF result_arr[idx_c] != sorted_vals[idx_c] THEN
+                flag_eq = FALSE
+                BREAK
+            END IF
+            idx_c = idx_c + 1
+        END WHILE
+
+        RETURN flag_eq
+    END FUNCTION
+END CLASS

@@ -1,0 +1,63 @@
+CLASS Solution
+	FUNCTION longestSpecialPath(edges, nums)
+		SET adjacency TO array filled with empty arrays, length equal to LENGTH(nums)
+		
+		SET index TO 0
+		WHILE index LESS THAN LENGTH(edges)
+			SET startVertex TO edges[index].u
+			SET endVertex TO edges[index].v
+			SET edgeWeight TO edges[index].w
+			CONCATENATE (endVertex, edgeWeight) TO adjacency[startVertex]
+			CONCATENATE (startVertex, edgeWeight) TO adjacency[endVertex]
+			SET index TO index PLUS 1
+		END WHILE
+
+		FUNCTION dfs(currentNode, previousNode, boundary, depth)
+			ACCESS maxLength FROM OUTER SCOPE
+			ACCESS minNodes FROM OUTER SCOPE
+
+			IF nums[currentNode] IN lastSeenDepth THEN
+				SET priorDepth TO lastSeenDepth[nums[currentNode]]
+			ELSE
+				SET priorDepth TO 0
+			END IF
+
+			lastSeenDepth[nums[currentNode]] = depth
+
+			IF boundary LESS THAN priorDepth THEN
+				SET boundary TO priorDepth
+			END IF
+
+			SET pathSum TO prefix[ LENGTH(prefix) - 1 ] MINUS prefix[boundary]
+			SET pathNodes TO depth MINUS boundary
+
+			IF pathSum GREATER THAN maxLength OR (pathSum EQUALS maxLength AND pathNodes LESS THAN minNodes) THEN
+				SET maxLength TO pathSum
+				SET minNodes TO pathNodes
+			END IF
+
+			FOR EACH edgePair IN adjacency[currentNode]
+				SET nextNode TO edgePair[0]
+				SET weightVal TO edgePair[1]
+				IF nextNode EQUALS previousNode THEN
+					GOTO continueLoop
+				END IF
+
+				APPEND (prefix[LENGTH(prefix)-1] PLUS weightVal) TO prefix
+				dfs(nextNode, currentNode, boundary, depth PLUS 1)
+				REMOVE LAST ELEMENT FROM prefix
+				:continueLoop
+			END FOR
+
+			lastSeenDepth[nums[currentNode]] = priorDepth
+		END FUNCTION
+
+		SET maxLength TO 0
+		SET minNodes TO 1
+		SET prefix TO ARRAY WITH ELEMENT [0]
+		SET lastSeenDepth TO EMPTY MAP
+
+		dfs(0, -1, 0, 1)
+		RETURN [maxLength, minNodes]
+	END FUNCTION
+END CLASS

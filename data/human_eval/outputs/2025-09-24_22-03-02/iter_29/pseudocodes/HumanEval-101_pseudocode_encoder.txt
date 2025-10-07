@@ -1,0 +1,33 @@
+FUNCTION words_string WITH PARAMETER s OF TYPE string RETURNS list
+    IF s EQUALS EMPTY STRING THEN
+        RETURN LIST WITH ELEMENTS EMPTY
+    ENDIF
+    SET s_list TO LIST WITH ELEMENTS EMPTY
+    FOR index FROM 0 TO LENGTH OF s MINUS 1
+        SET letter TO CHARACTER AT POSITION index OF s
+        IF letter EQUALS COMMA THEN
+            CALL APPEND WITH ARGUMENTS ' ' ON s_list
+        ELSE
+            CALL APPEND WITH ARGUMENTS letter ON s_list
+        ENDIF
+    ENDFOR
+    SET joined_string TO EMPTY STRING
+    FOR index FROM 0 TO LENGTH OF s_list MINUS 1
+        SET joined_string TO CONCATENATE joined_string WITH ELEMENT AT POSITION index OF s_list
+    ENDFOR
+    SET split_list TO LIST WITH ELEMENTS EMPTY
+    SET word_start TO 0
+    FOR index FROM 0 TO LENGTH OF joined_string
+        IF index EQUALS LENGTH OF joined_string OR CHARACTER AT POSITION index OF joined_string EQUALS SPACE THEN
+            IF index GREATER THAN word_start THEN
+                SET word TO EMPTY STRING
+                FOR subindex FROM word_start TO index MINUS 1
+                    SET word TO CONCATENATE word WITH CHARACTER AT POSITION subindex OF joined_string
+                ENDFOR
+                CALL APPEND WITH ARGUMENTS word ON split_list
+            ENDIF
+            SET word_start TO index PLUS 1
+        ENDIF
+    ENDFOR
+    RETURN split_list
+END FUNCTION

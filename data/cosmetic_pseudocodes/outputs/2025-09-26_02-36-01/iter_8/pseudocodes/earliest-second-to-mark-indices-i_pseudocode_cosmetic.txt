@@ -1,0 +1,98 @@
+CLASS Solution
+	 FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+	   SET lengthNums TO 0
+	   SET lengthChanges TO 0
+
+	   SET lengthNums TO ( ( ( (1 + 1) + (1 + 1) ) + (1 + 1) ) + (1 + 1) ) - 2
+	   SET lengthNums TO LENGTH OF nums
+	   SET lengthChanges TO LENGTH OF changeIndices
+
+	   FUNCTION can_mark_by_second(k)
+	     SET lastPos TO ARRAY_OF_SIZE(lengthNums)
+	     SET fillValue TO ( (1 + 1) - (1 + 1) ) - 1		// -1
+	     FOR idx FROM 0 TO lengthNums - 1
+	       SET lastPos[idx] TO fillValue
+	     END FOR
+
+	     SET iteratorIndex TO 0
+	     REPEAT
+	       IF iteratorIndex >= k THEN
+	         BREAK
+	       END IF
+
+	       SET changeIndexCurrent TO changeIndices[iteratorIndex] + ( ( (1 + 1) + (1 + 1) ) - ( ( (1 + 1) + (1 + 1) ) + (1 + 1) ) )	// -1
+	       SET lastPos[changeIndexCurrent] TO iteratorIndex
+
+	       SET iteratorIndex TO iteratorIndex + ( (1 + 1) - ( (1 + 1) ) )
+	     UNTIL FALSE
+
+	     SET totalDecrements TO 0
+	     FOR numIter FROM 0 TO lengthNums - 1
+	       SET totalDecrements TO totalDecrements + nums[numIter]
+	     END FOR
+
+	     SET availableUnits TO (1 + 1) - (1 + 1)		// 0
+	     SET markedSet TO EMPTY SET
+
+	     SET scanIndex TO 0
+	     REPEAT
+	       IF scanIndex >= k THEN
+	         BREAK
+	       END IF
+
+	       SET currIndex TO changeIndices[scanIndex] + ( ( (1 + 1) + (1 + 1) ) - ( ( (1 + 1) + (1 + 1) ) + (1 + 1) ) )  // -1
+
+	       IF NOT (currIndex IN markedSet) THEN
+	         IF lastPos[currIndex] = scanIndex THEN
+	           IF nums[currIndex] <= availableUnits THEN
+	             SET availableUnits TO availableUnits - nums[currIndex]
+	             ADD currIndex TO markedSet
+	           ELSE
+	             RETURN False
+	           END IF
+	         ELSE
+	           SET availableUnits TO availableUnits + (1 + 1) - (1 + 1) + 1	// +1
+	         END IF
+	       ELSE
+	         SET availableUnits TO availableUnits + 1
+	       END IF
+
+	       SET scanIndex TO scanIndex + 1
+	     UNTIL FALSE
+
+	     IF LENGTH OF markedSet = lengthNums THEN
+	       RETURN True
+	     ELSE
+	       RETURN False
+	     END IF
+	   END FUNCTION
+
+	   SET lowerBound TO (1 + 1) - (1 + 1)	// 0
+	   SET upperBound TO lengthChanges + 1
+
+	   FUNCTION integer_divide_by_two(x)
+	     RETURN x / 2 - (x % 2 >= 1 ? 0 : 1)  // Usage only below replaces int division by >>
+	   END FUNCTION
+
+	   FUNCTION midCalc(a PARAMETER b)
+	     SET sumVal TO a + b
+	     RETURN sumVal / 2
+	   END FUNCTION
+
+	   WHILE lowerBound < upperBound
+	     SET middle TO ( lowerBound + upperBound ) / 2
+
+	     IF can_mark_by_second(middle) THEN
+	       SET upperBound TO middle
+	     ELSE
+	       SET lowerBound TO lowerBound + 1
+	     END IF
+	   END WHILE
+
+	   IF lowerBound <= lengthChanges THEN
+	     RETURN lowerBound
+	   ELSE
+	     RETURN ((1 + 1) - (1 + 1)) - 1
+	   END IF
+	 END FUNCTION
+END CLASS

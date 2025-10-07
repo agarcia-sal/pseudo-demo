@@ -1,0 +1,63 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, n)  
+        INITIALIZE self.parent AS an array WHERE each element at index i IS i FOR i FROM 0 TO n-1  
+        INITIALIZE self.rank AS an array FILLED WITH 1s OF LENGTH n  
+    END FUNCTION  
+  
+    FUNCTION find(self, u)  
+        WHILE u IS NOT EQUAL TO self.parent[u] DO  
+            SET self.parent[u] TO self.parent[self.parent[u]]  // Path compression by halving  
+            SET u TO self.parent[u]  
+        END WHILE  
+        RETURN u  
+    END FUNCTION  
+  
+    FUNCTION union(self, u, v)  
+        rootU = self.find(u)  
+        rootV = self.find(v)  
+        IF rootU IS NOT EQUAL TO rootV THEN  
+            IF self.rank[rootU] < self.rank[rootV] THEN  
+                SET self.parent[rootU] TO rootV  
+            ELSE IF self.rank[rootU] > self.rank[rootV] THEN  
+                SET self.parent[rootV] TO rootU  
+            ELSE  
+                SET self.parent[rootV] TO rootU  
+                INCREMENT self.rank[rootU] BY 1  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION minimumCost(self, n, edges, query)  
+        uf = UnionFind(n)  
+        INITIALIZE component_and WITH n ELEMENTS SET TO (2^32) - 1  
+  
+        FOR EACH (u, v, w) IN edges DO  
+            uf.union(u, v)  
+            root = uf.find(u)  
+            component_and[root] = component_and[root] BITWISE_AND w  
+        END FOR  
+  
+        component_cost = DICTIONARY EMPTY  
+        FOR index IN RANGE 0 TO n-1 DO  
+            root = uf.find(index)  
+            IF root NOT IN component_cost KEYS THEN  
+                component_cost[root] = component_and[root]  
+            END IF  
+        END FOR  
+  
+        results = EMPTY LIST  
+        FOR EACH (s, t) IN query DO  
+            IF s == t THEN  
+                APPEND 0 TO results  
+            ELSE IF uf.find(s) == uf.find(t) THEN  
+                APPEND component_cost[uf.find(s)] TO results  
+            ELSE  
+                APPEND -1 TO results  
+            END IF  
+        END FOR  
+  
+        RETURN results  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION answerString(alpha, beta)
+    SET delta = beta
+    SET omega = alpha
+    IF (NOT (delta > 1)) 
+        RETURN omega
+    END IF
+    PROCEDURE _computeLastSubstring(zeta)
+        FUNCTION lengthOfString(str)
+            SET count = 0
+            PROCEDURE countChars()
+                IF count < str.LENGTH
+                    SET count = count + 1
+                    CALL countChars()
+                END IF
+            END PROCEDURE
+            CALL countChars()
+            RETURN count
+        END FUNCTION
+
+        SET z = 0
+        SET x = 1
+        SET y = 0
+
+        FUNCTION condition()
+            RETURN (x + y) < lengthOfString(zeta)
+        END FUNCTION
+
+        FUNCTION charAt(pos)
+            RETURN zeta[pos]
+        END FUNCTION
+
+        PROCEDURE loopBody()
+            IF charAt(z + y) == charAt(x + y)
+                SET y = y + 1
+            ELSE
+                IF NOT (charAt(z + y) < charAt(x + y))
+                    SET x = x + y + 1
+                    SET y = 0
+                ELSE
+                    SET z_candidate = z + y + 1
+                    IF z_candidate > x THEN SET z = z_candidate ELSE SET z = x END IF
+                    SET x = z + 1
+                    SET y = 0
+                END IF
+            END IF
+        END PROCEDURE
+
+        PROCEDURE repeatLoop()
+            IF condition() 
+                CALL loopBody()
+                CALL repeatLoop()
+            END IF
+        END PROCEDURE
+
+        CALL repeatLoop()
+        RETURN zeta.SUBSTRING(z + 1, lengthOfString(zeta))
+    END FUNCTION
+
+    SET last_str = _computeLastSubstring(omega)
+    SET n = omega.LENGTH - delta + 1
+
+    FUNCTION minimum(a, b)
+        IF a < b THEN RETURN a ELSE RETURN b END IF
+    END FUNCTION
+
+    SET cutoff = minimum(last_str.LENGTH, n)
+    RETURN last_str.SUBSTRING(1, cutoff)
+END FUNCTION
+END CLASS

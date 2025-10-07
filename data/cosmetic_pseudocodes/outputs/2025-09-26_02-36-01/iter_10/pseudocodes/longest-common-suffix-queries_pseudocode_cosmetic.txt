@@ -1,0 +1,76 @@
+CLASS Solution
+	FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+		DEFINE FUNCTION isSmaller(x TO INTEGER, y TO INTEGER) RETURNS BOOLEAN
+			RETURN x < y
+		END FUNCTION
+
+		DEFINE FUNCTION minimalIndex(container TO LIST OF STRING) RETURNS INTEGER
+			SET smallestIdx TO 0
+			SET smallestLength TO LENGTH(container[0])
+			SET pos TO 1
+			WHILE pos < LENGTH(container)
+				IF LENGTH(container[pos]) < smallestLength OR (LENGTH(container[pos]) = smallestLength AND isSmaller(pos, smallestIdx)) THEN
+					SET smallestLength TO LENGTH(container[pos])
+					SET smallestIdx TO pos
+				END IF
+				SET pos TO pos + 1
+			END WHILE
+			RETURN smallestIdx
+		END FUNCTION
+
+		DEFINE FUNCTION subStr(s TO STRING, startPos TO INTEGER) RETURNS STRING
+			SET acc TO ""
+			SET idx TO startPos
+			WHILE idx < LENGTH(s)
+				SET acc TO acc + s[idx]
+				SET idx TO idx + 1
+			END WHILE
+			RETURN acc
+		END FUNCTION
+
+		SET m TO dictionary STRING TO INTEGER (empty)
+
+		DEFINE FUNCTION updateMap(wrd TO STRING, idx TO INTEGER)
+			SET j TO 0
+			WHILE j < LENGTH(wrd)
+				SET fragment TO subStr(wrd, j)
+				IF NOT m CONTAINS fragment THEN
+					SET m[fragment] TO idx
+				ELSE
+					SET oldIdx TO m[fragment]
+					SET oldWord TO wordsContainer[oldIdx]
+					IF LENGTH(wrd) < LENGTH(oldWord) OR (LENGTH(wrd) = LENGTH(oldWord) AND idx < oldIdx) THEN
+						SET m[fragment] TO idx
+					END IF
+				END IF
+				SET j TO j + 1
+			END WHILE
+		END FUNCTION
+
+		SET p TO 0
+		WHILE p < LENGTH(wordsContainer)
+			CALL updateMap(wordsContainer[p], p)
+			SET p TO p + 1
+		END WHILE
+
+		DEFINE FUNCTION get_best_match(query TO STRING) RETURNS INTEGER
+			SET i TO 0
+			LOOP
+				IF i >= LENGTH(query) THEN BREAK END IF
+				SET suffix TO subStr(query, i)
+				IF m CONTAINS suffix THEN
+					RETURN m[suffix]
+				END IF
+				SET i TO i + 1
+			END LOOP
+			RETURN minimalIndex(wordsContainer)
+		END FUNCTION
+
+		SET accumulator TO empty LIST OF INTEGER
+		FOR EACH q IN wordsQuery DO
+			SET val TO get_best_match(q)
+			APPEND val TO accumulator
+		END FOR
+		RETURN accumulator
+	END FUNCTION
+END CLASS

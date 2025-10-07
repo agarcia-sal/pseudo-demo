@@ -1,0 +1,86 @@
+CLASS Solution
+	Function canReachCorner(xCorner yCorner circles)
+		Function insideCircle(a b c d e)
+			RETURN ((a - c) * (a - c) + (b - d) * (b - d)) <= (e * e)
+		End Function
+
+		Function overlapsLeftTop(p q s)
+			Bool condOne = (ABS(p) <= s) AND (0 <= q) AND (q <= yCorner)
+			Bool condTwo = (ABS(q - yCorner) <= s) AND (0 <= p) AND (p <= xCorner)
+			RETURN condOne OR condTwo
+		End Function
+
+		Function overlapsRightBottom(u v w)
+			Bool condA = (ABS(u - xCorner) <= w) AND (0 <= v) AND (v <= yCorner)
+			Bool condB = (ABS(v) <= w) AND (0 <= u) AND (u <= xCorner)
+			RETURN condA OR condB
+		End Function
+
+		Function explore(index)
+			Float cx = circles[index][0]
+			Float cy = circles[index][1]
+			Float radius = circles[index][2]
+
+			If overlapsRightBottom(cx cy radius)
+				RETURN True
+			End If
+
+			vis[index] = True
+
+			Function checkNext(j)
+				Float nx = circles[j][0]
+				Float ny = circles[j][1]
+				Float nr = circles[j][2]
+
+				Float distSq = (cx - nx) * (cx - nx) + (cy - ny) * (cy - ny)
+				Float radiusSum = radius + nr
+				Boolean intersecting = distSq <= (radiusSum * radiusSum)
+
+				If (vis[j] = True) OR (intersecting = False)
+					RETURN False
+				End If
+
+				Float leftSideX = cx * nr + nx * radius
+				Float rightSideX = radiusSum * xCorner
+				Float leftSideY = cy * nr + ny * radius
+				Float rightSideY = radiusSum * yCorner
+
+				If (leftSideX < rightSideX) AND (leftSideY < rightSideY) AND explore(j)
+					RETURN True
+				End If
+
+				RETURN False
+			End Function
+
+			Integer k = 0
+			While k < LENGTH circles
+				If checkNext(k)
+					RETURN True
+				End If
+				k = k + 1
+			End While
+
+			RETURN False
+		End Function
+
+		vis = EMPTY LIST
+		For m = 0 To LENGTH circles - 1
+			vis APPEND False
+		End For
+
+		Integer idx = 0
+		repeat
+			If insideCircle(0 0 circles[idx][0] circles[idx][1] circles[idx][2]) OR insideCircle(xCorner yCorner circles[idx][0] circles[idx][1] circles[idx][2])
+				RETURN False
+			End If
+
+			If (vis[idx] = False) AND overlapsLeftTop(circles[idx][0] circles[idx][1] circles[idx][2]) AND explore(idx)
+				RETURN False
+			End If
+
+			idx = idx + 1
+		until idx >= LENGTH circles
+
+		RETURN True
+	End Function
+END CLASS

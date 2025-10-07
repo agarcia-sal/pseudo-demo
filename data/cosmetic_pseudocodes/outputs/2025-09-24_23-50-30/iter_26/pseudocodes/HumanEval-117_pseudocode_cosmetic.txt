@@ -1,0 +1,34 @@
+```
+FUNCTION select_words(string_s, natural_number_n)
+    SET output_list TO []
+    SET word_array TO FILTER MAP SPLIT string_s BY " " WITH LAMBDA x: x
+    CALL iterate_words(word_array, 0, natural_number_n, output_list)
+    RETURN output_list
+END FUNCTION
+
+FUNCTION iterate_words(word_set, pos_i, target_count, acc_list)
+    IF pos_i >= LENGTH OF word_set THEN
+        RETURN
+    ELSE
+        CALL count_consonants(word_set[pos_i], 0, 0, target_count, acc_list)
+        CALL iterate_words(word_set, pos_i + 1, target_count, acc_list)
+    END IF
+END FUNCTION
+
+FUNCTION count_consonants(text_str, current_j, count_c, limit_n, collected)
+    IF current_j >= LENGTH OF text_str THEN
+        IF count_c = limit_n THEN
+            APPEND text_str TO collected
+        END IF
+        RETURN
+    ELSE
+        SET ch TO LOWERCASE OF text_str[current_j]
+        SWITCH ch
+            CASE "a", "e", "i", "o", "u":
+                CALL count_consonants(text_str, current_j + 1, count_c, limit_n, collected)
+            DEFAULT:
+                CALL count_consonants(text_str, current_j + 1, count_c + 1, limit_n, collected)
+        END SWITCH
+    END IF
+END FUNCTION
+```

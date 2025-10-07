@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION countCompleteDayPairs WITH parameter inputList
+        FUNCTION mod24 WITH parameter val
+            RETURN val - 24 * (val / 24 - (val / 24 % 1))
+        END FUNCTION
+
+        FUNCTION modSub24 WITH parameters a, b
+            RETURN mod24(a - b + 24)
+        END FUNCTION
+
+        SET mapCounts TO new empty mapping defaulting to zero
+        SET totalPairs TO 0
+
+        FUNCTION incMapping WITH parameter key
+            SET currentVal TO 0
+            IF mapCounts CONTAINS key THEN
+                SET currentVal TO mapCounts[key]
+            END IF
+            SET mapCounts[key] TO currentVal + 1
+        END FUNCTION
+
+        FUNCTION getMapping WITH parameter key
+            IF mapCounts CONTAINS key THEN
+                RETURN mapCounts[key]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        FUNCTION processElement WITH parameter elemIndex
+            IF elemIndex < 0 THEN
+                RETURN
+            END IF
+            CALL processElement(elemIndex - 1)
+            SET currentVal TO inputList[elemIndex]
+            SET moddedVal TO mod24(currentVal)
+            SET complementVal TO modSub24(24, moddedVal)
+
+            SET totalPairs TO totalPairs + getMapping(complementVal)
+            CALL incMapping(moddedVal)
+        END FUNCTION
+
+        CALL processElement(len(inputList) - 1)
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

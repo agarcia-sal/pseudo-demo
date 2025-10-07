@@ -1,0 +1,100 @@
+CLASS Solution
+	FUNCTION countPairsOfConnectableServers(edges, signalSpeed)
+		DEFINE FUNCTION makeAdjacencyMap(edgeList)
+			SET adjacency TO an empty mapping from integer to list
+			DEFINE PROCEDURE addEdge(x, y, weight)
+				IF x NOT IN adjacency THEN
+					SET adjacency[x] TO an empty list
+				END IF
+				APPEND (y, weight) TO adjacency[x]
+			END PROCEDURE
+
+			SET index TO 0
+			WHILE index < LENGTH(edgeList) DO
+				SET currentEdge TO edgeList[index]
+				CALL addEdge(currentEdge[0], currentEdge[1], currentEdge[2])
+				CALL addEdge(currentEdge[1], currentEdge[0], currentEdge[2])
+				SET index TO index + 1
+			END WHILE
+			RETURN adjacency
+		END FUNCTION
+
+		SET graphMap TO makeAdjacencyMap(edges)
+
+		SET totalNodes TO 0
+		FOR key IN graphMap DO
+			SET totalNodes TO totalNodes + 1
+		END FOR
+
+		SET resultList TO a new list with totalNodes elements each set to 0
+
+		DEFINE FUNCTION isDivisible(dist, divisor)
+			RETURN (dist MOD divisor) == 0
+		END FUNCTION
+
+		DEFINE FUNCTION depthSearch(current, prev, distAcc, collectedPath)
+			IF isDivisible(distAcc, signalSpeed) THEN
+				APPEND current TO collectedPath
+			END IF
+
+			SET subtreeCount TO 0
+			DECLARE neighborsList AS graphMap[current]
+
+			SET idxNeighbor TO 0
+			WHILE idxNeighbor < LENGTH(neighborsList) DO
+				SET nextNode TO neighborsList[idxNeighbor][0]
+				SET edgeWeight TO neighborsList[idxNeighbor][1]
+				IF nextNode != prev THEN
+					SET subtreeCount TO subtreeCount + depthSearch(nextNode, current, distAcc + edgeWeight, collectedPath)
+				END IF
+				SET idxNeighbor TO idxNeighbor + 1
+			END WHILE
+
+			IF isDivisible(distAcc, signalSpeed) THEN
+				RETURN subtreeCount + 1
+			ELSE
+				RETURN subtreeCount
+			END IF
+		END FUNCTION
+
+		DEFINE FUNCTION pairsCountCenter(centerNode)
+			SET allPathsLists TO empty list
+			FOR EACH (neigh, w) IN graphMap[centerNode] DO
+				SET singlePath TO empty list
+				CALL depthSearch(neigh, centerNode, w, singlePath)
+				APPEND singlePath TO allPathsLists
+			END FOR
+
+			SET pairsTotal TO 0
+			SET outerIndex TO 0
+			REPEAT
+				IF outerIndex >= LENGTH(allPathsLists) - 1 THEN
+					EXIT REPEAT
+				END IF
+				SET innerIndex TO outerIndex + 1
+				REPEAT
+					IF innerIndex >= LENGTH(allPathsLists) THEN
+						EXIT REPEAT
+					END IF
+					SET lengthProd TO LENGTH(allPathsLists[outerIndex]) * LENGTH(allPathsLists[innerIndex])
+					SET pairsTotal TO pairsTotal + lengthProd
+					SET innerIndex TO innerIndex + 1
+				END REPEAT
+				SET outerIndex TO outerIndex + 1
+			END REPEAT
+
+			RETURN pairsTotal
+		END FUNCTION
+
+		SET indexNode TO 0
+		REPEAT
+			IF indexNode >= totalNodes THEN
+				EXIT REPEAT
+			END IF
+			SET resultList[indexNode] TO pairsCountCenter(indexNode)
+			SET indexNode TO indexNode + 1
+		END REPEAT
+
+		RETURN resultList
+	END FUNCTION
+END CLASS

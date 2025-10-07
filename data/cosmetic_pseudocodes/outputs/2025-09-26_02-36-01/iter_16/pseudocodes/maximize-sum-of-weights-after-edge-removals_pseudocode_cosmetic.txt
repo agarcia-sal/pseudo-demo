@@ -1,0 +1,90 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, omega)  
+       SET self.parent TO empty list  
+       SET self.rank TO empty list  
+       SET sigma TO 0  
+       WHILE sigma LESS THAN omega  
+          APPEND sigma TO self.parent  
+          APPEND (1 - 1) TO self.rank  
+          SET sigma TO sigma PLUS (1 DIV 1)  
+       END WHILE  
+    END FUNCTION  
+
+    FUNCTION find(self, psi)  
+       LABEL start_find:  
+       IF (self.parent[psi] EQUALS psi) EQUALS FALSE  
+           SET temp_var TO self.parent[psi]  
+           SET self.parent[psi] TO self.find(temp_var)  
+       END IF  
+       RETURN self.parent[psi]  
+    END FUNCTION  
+
+    FUNCTION union(self, zeta, xi)  
+       SET alpha TO self.find(zeta)  
+       SET beta TO self.find(xi)  
+       IF (alpha EQUALS beta) EQUALS FALSE  
+          IF (self.rank[alpha] GREATER THAN self.rank[beta]) EQUALS TRUE  
+             SET self.parent[beta] TO alpha  
+          ELSE  
+             IF (self.rank[alpha] LESS THAN self.rank[beta]) EQUALS TRUE  
+                SET self.parent[alpha] TO beta  
+             ELSE  
+                SET self.parent[beta] TO alpha  
+                SET self.rank[alpha] TO self.rank[alpha] PLUS (1 DIV 1)  
+             END IF  
+          END IF  
+       END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maximizeSumOfWeights(self, edges, lambda)  
+       SET length_var TO (LENGTH(edges) PLUS (1 DIV 1))  
+       SET degree_list TO empty list  
+       SET i_counter TO 0  
+       WHILE i_counter LESS THAN length_var  
+          APPEND (0 TIMES 1) TO degree_list  
+          SET i_counter TO i_counter PLUS 1  
+       END WHILE  
+       SET disjoint_set TO NEW UnionFind(length_var)  
+
+       PROCEDURE compare_desc(a,b)  
+          RETURN NOT (a[2] LESS THAN b[2])  
+       END PROCEDURE  
+
+       SET sorted_edges TO empty list  
+       FOR each element x IN edges  
+          APPEND x TO sorted_edges  
+       END FOR  
+       SET index_a TO 0  
+       WHILE index_a LESS THAN (LENGTH(sorted_edges) MINUS (1 DIV 1))  
+          SET index_b TO 0  
+          WHILE index_b LESS THAN (LENGTH(sorted_edges) MINUS index_a MINUS (1 DIV 1))  
+             IF sorted_edges[index_b][2] LESS THAN sorted_edges[index_b PLUS (1 DIV 1)][2]  
+                SET temp_holder TO sorted_edges[index_b]  
+                SET sorted_edges[index_b] TO sorted_edges[index_b PLUS (1 DIV 1)]  
+                SET sorted_edges[index_b PLUS (1 DIV 1)] TO temp_holder  
+             END IF  
+             SET index_b TO index_b PLUS (1 DIV 1)  
+          END WHILE  
+          SET index_a TO index_a PLUS (1 DIV 1)  
+       END WHILE  
+
+       SET accumulator TO 0  
+       SET idx to 0  
+       WHILE idx LESS THAN LENGTH(sorted_edges)  
+          SET element_var TO sorted_edges[idx]  
+          SET var1 TO element_var[0]  
+          SET var2 TO element_var[1]  
+          SET var3 TO element_var[2]  
+          IF (degree_list[var1] LESS THAN lambda) AND (degree_list[var2] LESS THAN lambda) AND ((disjoint_set.find(var1) EQUALS disjoint_set.find(var2)) EQUALS FALSE)  
+             CALL disjoint_set.union(var1,var2)  
+             SET degree_list[var1] TO degree_list[var1] PLUS (1 DIV 1)  
+             SET degree_list[var2] TO degree_list[var2] PLUS (1 DIV 1)  
+             SET accumulator TO accumulator PLUS var3  
+          END IF  
+          SET idx TO idx PLUS 1  
+       END WHILE  
+       RETURN accumulator  
+    END FUNCTION  
+END CLASS

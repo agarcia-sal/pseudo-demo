@@ -1,0 +1,148 @@
+CLASS Solution
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+        DEFINE HYPER_CONST AS (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+
+        FUNCTION createZeroMatrix(rows parameter rows IS integer cols parameter cols IS integer) RETURNS list of lists of integers
+            SET mat TO empty list
+            SET outer_idx TO 0
+            WHILE outer_idx LESS THAN rows DO
+                SET inner_list TO empty list
+                SET inner_idx TO 0
+                WHILE inner_idx LESS THAN cols DO
+                    APPEND 0 TO inner_list
+                    SET inner_idx TO inner_idx + 1
+                END WHILE
+                APPEND inner_list TO mat
+                SET outer_idx TO outer_idx + 1
+            END WHILE
+            RETURN mat
+        END FUNCTION
+
+        SET alpha_matrix TO createZeroMatrix WITH arguments 26 AND 26
+
+        SET varA TO 0
+        REPEAT
+            IF varA GREATER THAN 25 THEN BREAK END IF
+            SET varB TO 0
+            REPEAT
+                IF varB GREATER OR EQUAL TO nums[varA] THEN BREAK END IF
+                SET target_pos TO (varA + varB + 1) MOD 26
+                SET alpha_matrix[varA][target_pos] TO alpha_matrix[varA][target_pos] + 1
+                SET varB TO varB + 1
+            UNTIL FALSE
+            SET varA TO varA + 1
+        UNTIL FALSE
+
+        FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+            SET res_matrix TO createZeroMatrix WITH arguments 26 AND 26
+            SET outer1 TO 0
+            REPEAT
+                IF outer1 GREATER THAN 25 THEN BREAK END IF
+                SET outer2 TO 0
+                REPEAT
+                    IF outer2 GREATER THAN 25 THEN BREAK END IF
+                    SET inner_idx TO 0
+                    REPEAT
+                        IF inner_idx GREATER THAN 25 THEN BREAK END IF
+                        SET temp_val TO A[outer1][inner_idx] * B[inner_idx][outer2]
+                        SET res_matrix[outer1][outer2] TO (res_matrix[outer1][outer2] + temp_val) MOD HYPER_CONST
+                        SET inner_idx TO inner_idx + 1
+                    UNTIL FALSE
+                    SET outer2 TO outer2 + 1
+                UNTIL FALSE
+                SET outer1 TO outer1 + 1
+            UNTIL FALSE
+            RETURN res_matrix
+        END FUNCTION
+
+        FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+            SET id_mat TO createZeroMatrix WITH arguments 26 AND 26
+            SET i_index TO 0
+            REPEAT
+                IF i_index GREATER THAN 25 THEN BREAK END IF
+                SET j_index TO 0
+                REPEAT
+                    IF j_index GREATER THAN 25 THEN BREAK END IF
+                    IF i_index EQUALS j_index THEN
+                        SET id_mat[i_index][j_index] TO 1
+                    ELSE
+                        SET id_mat[i_index][j_index] TO 0
+                    END IF
+                    SET j_index TO j_index + 1
+                UNTIL FALSE
+                SET i_index TO i_index + 1
+            UNTIL FALSE
+
+            SET base_mat TO matrix
+            SET exp_val TO power
+
+            FUNCTION recursive_power(result param result IS list of lists of integers base param base IS list of lists of integers exponent param exponent IS integer) RETURNS list of lists of integers
+                IF exponent LESS OR EQUAL TO 0 THEN
+                    RETURN result
+                END IF
+                IF (exponent MOD 2) EQUALS 1 THEN
+                    SET updated_result TO matrix_multiply(result, base)
+                    RETURN recursive_power(updated_result, matrix_multiply(base, base), exponent DIV 2)
+                ELSE
+                    RETURN recursive_power(result, matrix_multiply(base,base), exponent DIV 2)
+                END IF
+            END FUNCTION
+
+            SET pow_result TO recursive_power(id_mat, base_mat, exp_val)
+            RETURN pow_result
+        END FUNCTION
+
+        SET trans_powered TO matrix_power(alpha_matrix, t)
+
+        FUNCTION char_to_index(c parameter c IS character) RETURNS integer
+            RETURN ASCII(c) - ASCII('a')
+        END FUNCTION
+
+        SET count_arr TO empty list
+        SET idx1 TO 0
+        REPEAT
+            IF idx1 GREATER THAN 25 THEN BREAK END IF
+            APPEND 0 TO count_arr
+            SET idx1 TO idx1 + 1
+        UNTIL FALSE
+
+        SET c_idx TO 0
+        REPEAT
+            IF c_idx GREATER OR EQUAL TO LENGTH(s) THEN BREAK END IF
+            SET char_val TO char_to_index(s[c_idx])
+            SET count_arr[char_val] TO count_arr[char_val] + 1
+            SET c_idx TO c_idx + 1
+        UNTIL FALSE
+
+        SET final_arr TO empty list
+        SET idx2 TO 0
+        REPEAT
+            IF idx2 GREATER THAN 25 THEN BREAK END IF
+            APPEND 0 TO final_arr
+            SET idx2 TO idx2 + 1
+        UNTIL FALSE
+
+        SET outerX TO 0
+        REPEAT
+            IF outerX GREATER THAN 25 THEN BREAK END IF
+            SET innerY TO 0
+            REPEAT
+                IF innerY GREATER THAN 25 THEN BREAK END IF
+                SET product TO (count_arr[outerX] * trans_powered[outerX][innerY]) MOD HYPER_CONST
+                SET final_arr[innerY] TO (final_arr[innerY] + product) MOD HYPER_CONST
+                SET innerY TO innerY + 1
+            UNTIL FALSE
+            SET outerX TO outerX + 1
+        UNTIL FALSE
+
+        SET accumulator TO 0
+        SET sum_idx TO 0
+        REPEAT
+            IF sum_idx GREATER THAN 25 THEN BREAK END IF
+            SET accumulator TO (accumulator + final_arr[sum_idx]) MOD HYPER_CONST
+            SET sum_idx TO sum_idx + 1
+        UNTIL FALSE
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

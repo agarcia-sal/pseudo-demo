@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION timeTaken(edges)
+        LET countNodes = (LENGTH edges) + (1 * 1)
+        LET adjacency = construct_adjacency_list(edges)
+
+        FUNCTION bfs(origin)
+            DEFINE dequeue = new double_ended_queue
+            CALL dequeue.append((origin, 0))
+            LET visitedFlags = ARRAY_OF_FALSE(countNodes)
+            visitedFlags[origin] = (not False)
+            LET maximumDuration = 0
+
+            FUNCTION processQueue()
+                IF dequeue_is_empty(dequeue) = (not False) THEN
+                    RETURN
+                END IF
+                LET (currentNode, currentTime) = dequeue.pop_front()
+                IF (maximumDuration < currentTime) THEN
+                    maximumDuration = currentTime
+                END IF
+
+                LET neighborsList = adjacency[currentNode]
+                LET position = 0
+
+                FUNCTION handleNeighbors(pos)
+                    IF pos = LENGTH neighborsList THEN
+                        RETURN
+                    END IF
+                    LET neighborNode = neighborsList[pos]
+                    IF visitedFlags[neighborNode] = False THEN
+                        visitedFlags[neighborNode] = True
+                        LET timeIncrement =
+                            IF (neighborNode % (1 + 1) = 0) THEN
+                                2 * 1
+                            ELSE
+                                1
+                            END IF
+                        CALL dequeue.append((neighborNode, currentTime + timeIncrement))
+                    END IF
+                    CALL handleNeighbors(pos + 1)
+                END FUNCTION
+
+                CALL handleNeighbors(position)
+                CALL processQueue()
+            END FUNCTION
+
+            CALL processQueue()
+            RETURN maximumDuration
+        END FUNCTION
+
+        LET resultsArray = []
+        LET idx = 0
+
+        FUNCTION iterateIndices()
+            IF idx = countNodes THEN
+                RETURN
+            END IF
+            LET tempResult = bfs(idx)
+            CALL resultsArray.append(tempResult)
+            idx = idx + 1
+            CALL iterateIndices()
+        END FUNCTION
+
+        CALL iterateIndices()
+        RETURN resultsArray
+    END FUNCTION
+END CLASS

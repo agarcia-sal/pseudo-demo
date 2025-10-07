@@ -1,0 +1,138 @@
+CLASS Solution  
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)  
+        SET mapAdjacency TO an empty mapping integer → list of integer  
+        SET mapReverse TO an empty mapping integer → list of integer  
+
+        SET iter_src TO iterator of flowFrom  
+        SET iter_dst TO iterator of flowTo  
+        WHILE TRUE  
+            SET hasSrc TO next element from iter_src OR null if empty  
+            SET hasDst TO next element from iter_dst OR null if empty  
+            IF hasSrc IS null OR hasDst IS null  
+                BREAK  
+            END IF  
+            IF hasSrc NOT IN mapAdjacency  
+                SET mapAdjacency[hasSrc] TO empty list  
+            END IF  
+            APPEND hasDst TO mapAdjacency[hasSrc]  
+            IF hasDst NOT IN mapReverse  
+                SET mapReverse[hasDst] TO empty list  
+            END IF  
+            APPEND hasSrc TO mapReverse[hasDst]  
+        END WHILE  
+
+        SET idx_vals TO list of size n FILLED WITH -1  
+        SET low_link_vals TO list of size n FILLED WITH 0  
+        SET flags_on_stack TO list size n FILLED WITH False  
+        SET stk TO empty list  
+        SET running_index TO 0  
+        SET scc_collections TO empty list  
+
+        FUNCTION dfs_tarjan(vertex)  
+            SET idx_vals[vertex] TO running_index  
+            SET low_link_vals[vertex] TO running_index  
+            SET running_index TO running_index + 1  
+            APPEND vertex TO stk  
+            SET flags_on_stack[vertex] TO True  
+
+            SET neighbors TO mapAdjacency[vertex] IF vertex IN mapAdjacency ELSE empty list  
+            FOR each adj_node IN neighbors  
+                IF idx_vals[adj_node] EQUALS -1 THEN  
+                    CALL dfs_tarjan(adj_node)  
+                    IF low_link_vals[adj_node] < low_link_vals[vertex] THEN  
+                        SET low_link_vals[vertex] TO low_link_vals[adj_node]  
+                    END IF  
+                ELSE  
+                    IF flags_on_stack[adj_node] IS True THEN  
+                        IF idx_vals[adj_node] < low_link_vals[vertex] THEN  
+                            SET low_link_vals[vertex] TO idx_vals[adj_node]  
+                        END IF  
+                    END IF  
+                END IF  
+            END FOR  
+
+            IF low_link_vals[vertex] EQUALS idx_vals[vertex] THEN  
+                SET current_scc TO empty list  
+                WHILE TRUE  
+                    SET popped_node TO REMOVE last element FROM stk  
+                    SET flags_on_stack[popped_node] TO False  
+                    APPEND popped_node TO current_scc  
+                    IF popped_node EQUALS vertex THEN  
+                        BREAK  
+                    END IF  
+                END WHILE  
+                APPEND current_scc TO scc_collections  
+            END IF  
+        END FUNCTION  
+
+        SET counter TO 0  
+        WHILE counter < n  
+            IF idx_vals[counter] EQUALS -1 THEN  
+                CALL dfs_tarjan(counter)  
+            END IF  
+            SET counter TO counter + 1  
+        END WHILE  
+
+        SET scc_representation TO empty mapping integer → list of integer  
+        SET map_node_to_scc TO list size n FILLED WITH -1  
+        SET has_crystal_flag TO list size LENGTH OF scc_collections FILLED WITH False  
+        SET scc_id TO 0  
+
+        SET scc_iter TO iterator of scc_collections with index  
+        REPEAT  
+            SET hasValue TO next scc_iter OR null  
+            IF hasValue IS null  
+                BREAK  
+            END IF  
+            SET idx_scc TO hasValue.index  
+            SET arr_nodes TO hasValue.value  
+            FOR each nodeElem IN arr_nodes  
+                SET map_node_to_scc[nodeElem] TO scc_id  
+                IF nodeElem IN crystals THEN  
+                    SET has_crystal_flag[idx_scc] TO True  
+                END IF  
+            END FOR  
+            SET scc_id TO scc_id + 1  
+        END REPEAT  
+
+        SET iter_u TO iterator of flowFrom  
+        SET iter_v TO iterator of flowTo  
+        WHILE TRUE  
+            SET val_u TO next element from iter_u OR null  
+            SET val_v TO next element from iter_v OR null  
+            IF val_u IS null OR val_v IS null  
+                BREAK  
+            END IF  
+            SET scc_u TO map_node_to_scc[val_u]  
+            SET scc_v TO map_node_to_scc[val_v]  
+            IF scc_u NOT EQUALS scc_v THEN  
+                IF scc_u NOT IN scc_representation  
+                    SET scc_representation[scc_u] TO empty list  
+                END IF  
+                APPEND scc_v TO scc_representation[scc_u]  
+            END IF  
+        END WHILE  
+
+        SET in_deg_list TO list LENGTH OF scc_collections FILLED WITH 0  
+        SET idx_scc2 TO 0  
+        WHILE idx_scc2 < LENGTH OF scc_collections  
+            IF idx_scc2 IN scc_representation THEN  
+                FOR each neighbor_scc IN scc_representation[idx_scc2]  
+                    SET in_deg_list[neighbor_scc] TO in_deg_list[neighbor_scc] + 1  
+                END FOR  
+            END IF  
+            SET idx_scc2 TO idx_scc2 + 1  
+        END WHILE  
+
+        SET needed_runes TO 0  
+        SET idx_scc3 TO 0  
+        WHILE idx_scc3 < LENGTH OF scc_collections  
+            IF in_deg_list[idx_scc3] EQUALS 0 AND has_crystal_flag[idx_scc3] IS False THEN  
+                SET needed_runes TO needed_runes + 1  
+            END IF  
+            SET idx_scc3 TO idx_scc3 + 1  
+        END WHILE  
+
+        RETURN needed_runes  
+    END FUNCTION  
+END CLASS

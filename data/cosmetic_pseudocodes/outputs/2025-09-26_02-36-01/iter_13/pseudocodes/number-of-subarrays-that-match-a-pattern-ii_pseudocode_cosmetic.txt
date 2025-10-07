@@ -1,0 +1,64 @@
+class Solution
+	Function countMatchingSubarrays(nums, pattern)
+		Function relCmp(a, b)
+			if not (a >= b) then
+				return 1
+			else
+				if (a = b) then
+					return 0
+				else
+					return -1
+				end if
+			end if
+		end Function
+		
+		Set totalElements to 0
+		Set patLength to 0
+		Set tally to 0
+		
+		Set totalElements = 0
+		while true
+			if totalElements = (Length(nums)) then break end if
+			totalElements = totalElements + 1
+		end while
+		
+		Set patLength = 0
+		repeat
+			patLength = patLength + 1
+		until patLength = Length(pattern)
+		
+		tally = 0
+		
+		Function makeRelList(lst, rels, idx)
+			if idx > (totalElements - 2) then return rels end if
+			Call rels.Push(relCmp(lst[idx], lst[idx + 1]))
+			return makeRelList(lst, rels, idx + 1)
+		end Function
+		
+		Set relationships to makeRelList(nums, [], 0)
+		
+		Set pos to 0
+		Function checkAllPositions(pos, maxPos, rels, patt, acc)
+			if pos > maxPos then return acc end if
+			Function equalsSublist(sub, pat)
+				Set i to 0
+				Function cmp(i)
+					if i = Length(pat) then return true end if
+					if sub[i] <> pat[i] then return false end if
+					return cmp(i + 1)
+				end Function
+				return cmp(i)
+			end Function
+			if equalsSublist((Slice(rels, pos, pos + patLength - 1)), patt) then
+				return checkAllPositions(pos + 1, maxPos, rels, patt, acc + 1)
+			else
+				return checkAllPositions(pos + 1, maxPos, rels, patt, acc)
+			end if
+		end Function
+		
+		Set maxIndex to totalElements - patLength - 1
+		tally = checkAllPositions(0, maxIndex, relationships, pattern, 0)
+		
+		return tally
+	end Function
+end class

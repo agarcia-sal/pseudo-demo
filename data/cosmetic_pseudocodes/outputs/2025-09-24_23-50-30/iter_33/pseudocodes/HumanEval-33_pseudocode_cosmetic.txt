@@ -1,0 +1,34 @@
+```
+FUNCTION sort_third(collection_seed)
+    SET aggregate_items TO NEW LIST FROM collection_seed
+    SET filter_buffer TO EMPTY LIST
+    FOR idx FROM 0 TO LENGTH(aggregate_items) - 1
+        IF (idx MODULO 3) EQUALS 0 THEN
+            APPEND aggregate_items[idx] TO filter_buffer
+    END FOR
+
+    DEFINE FUNCTION quicksort(arr)
+        IF LENGTH(arr) <= 1 THEN
+            RETURN arr
+        ELSE
+            SET pivot_index TO 0
+            SET pivot_value TO arr[pivot_index]
+            SET left_part TO quicksort(FILTER arr[i] WHERE i != pivot_index AND arr[i] < pivot_value)
+            SET right_part TO quicksort(FILTER arr[i] WHERE i != pivot_index AND arr[i] >= pivot_value)
+            RETURN CONCATENATE left_part, [pivot_value], right_part
+        END IF
+    END FUNCTION
+
+    SET sorted_elements TO quicksort(filter_buffer)
+    SET replacement_counter TO 0
+
+    FOR index_position FROM 0 TO LENGTH(aggregate_items) - 1
+        IF (index_position MODULO 3) EQUALS 0 THEN
+            SET aggregate_items[index_position] TO sorted_elements[replacement_counter]
+            SET replacement_counter TO replacement_counter + 1
+        END IF
+    END FOR
+
+    RETURN aggregate_items
+END FUNCTION
+```

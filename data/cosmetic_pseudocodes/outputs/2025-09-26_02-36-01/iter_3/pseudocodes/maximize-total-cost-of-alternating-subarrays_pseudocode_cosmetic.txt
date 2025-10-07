@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION maximumTotalCost(nums)
+        LET lengthNums BE LENGTH OF nums
+        IF lengthNums == 1 THEN
+            RETURN nums[0]
+        END IF
+
+        LET dpArr BE ARRAY OF ZEROS OF SIZE lengthNums
+        dpArr[lengthNums - 1] <- nums[lengthNums - 1]
+
+        LET idx BE lengthNums - 2
+        WHILE idx >= 0 DO
+            LET accumCost BE nums[idx]
+            IF accumCost > dpArr[idx + 1] THEN
+                dpArr[idx] <- accumCost
+            ELSE
+                dpArr[idx] <- dpArr[idx + 1] + accumCost
+            END IF
+
+            LET pos BE idx + 1
+            WHILE pos < lengthNums DO
+                LET signVal BE 1
+                LET diffVal BE pos - idx
+                IF diffVal % 2 != 0 THEN
+                    signVal <- -1
+                END IF
+
+                accumCost <- accumCost + signVal * nums[pos]
+
+                IF (pos + 1) < lengthNums THEN
+                    IF dpArr[idx] < accumCost + dpArr[pos + 1] THEN
+                        dpArr[idx] <- accumCost + dpArr[pos + 1]
+                    END IF
+                ELSE
+                    IF dpArr[idx] < accumCost THEN
+                        dpArr[idx] <- accumCost
+                    END IF
+                END IF
+                pos <- pos + 1
+            END WHILE
+            idx <- idx - 1
+        END WHILE
+
+        RETURN dpArr[0]
+    END FUNCTION
+END CLASS

@@ -1,0 +1,89 @@
+CLASS Solution
+  FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+    SET p TO LENGTH OF nums
+    SET q TO LENGTH OF changeIndices
+
+    FUNCTION can_mark_by_second(r)
+      SET w TO -1
+      SET last_log TO LIST[p] FILLED WITH w
+      SET x TO 0
+      WHILE x < r
+        SET y TO changeIndices[x] - 1
+        SET last_log[y] TO x
+        SET x TO x + 1
+      END WHILE
+
+      FUNCTION sum_all(z)
+        SET acc TO 0
+        SET idx TO 0
+        WHILE idx < LENGTH OF z
+          SET acc TO acc + z[idx]
+          SET idx TO idx + 1
+        END WHILE
+        RETURN acc
+      END FUNCTION
+
+      SET s TO sum_all(nums)
+      SET v TO 0
+      SET marked_set TO EMPTY SET
+
+      FUNCTION proc_loop(t)
+        IF t = r
+          RETURN
+        ELSE
+          SET u TO changeIndices[t] - 1
+          IF u NOT IN marked_set
+            IF last_log[u] = t
+              IF nums[u] <= v
+                SET v TO v - nums[u]
+                ADD u TO marked_set
+              ELSE
+                SET global_result TO FALSE
+                RETURN
+              END IF
+            ELSE
+              SET v TO v + 1
+            END IF
+          ELSE
+            SET v TO v + 1
+          END IF
+          CALL proc_loop(t + 1)
+        END IF
+      END FUNCTION
+
+      SET global_result TO TRUE
+      CALL proc_loop(0)
+      IF global_result = FALSE
+        RETURN FALSE
+      END IF
+
+      RETURN LENGTH OF marked_set = p
+    END FUNCTION
+
+    SET low TO 0
+    SET high TO q + 1
+
+    FUNCTION binary_search()
+      IF low >= high
+        RETURN
+      ELSE
+        SET mid_val TO (low + high) DIV 2
+        IF can_mark_by_second(mid_val)
+          SET high TO mid_val
+          CALL binary_search()
+        ELSE
+          SET low TO low + 1
+          CALL binary_search()
+        END IF
+      END IF
+    END FUNCTION
+
+    CALL binary_search()
+
+    IF low <= q
+      RETURN low
+    ELSE
+      RETURN -1
+    END IF
+  END FUNCTION
+END CLASS

@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION minCostGoodCaption(caption)
+  SET totalChars TO LENGTH OF caption
+  IF NOT (totalChars >= 3) THEN
+    RETURN ""
+  END IF
+
+  SET charArray TO []
+  FOR idx FROM 0 TO totalChars - 1
+    APPEND caption AT idx TO charArray
+  END FOR
+
+  SET pos TO 0
+  LOOP
+    IF NOT (pos < totalChars) THEN BREAK END IF
+    SET groupStart TO pos
+
+    PERFORM
+      IF pos >= totalChars THEN BREAK END IF
+      IF NOT (charArray AT pos = charArray AT groupStart) THEN BREAK END IF
+      SET pos TO pos + 1
+    REPEAT
+
+    SET groupLen TO pos - groupStart
+
+    IF groupLen < 3 THEN
+      IF groupStart > 0 AND charArray AT (groupStart - 1) = charArray AT groupStart THEN
+        SET charArray AT (groupStart - 1) TO charArray AT groupStart
+        SET groupStart TO groupStart - 1
+        SET groupLen TO groupLen + 1
+      END IF
+
+      IF pos < totalChars AND charArray AT (pos - 1) = charArray AT pos THEN
+        SET charArray AT pos TO charArray AT (pos - 1)
+        SET pos TO pos + 1
+        SET groupLen TO groupLen + 1
+      END IF
+
+      IF groupLen < 3 THEN
+        IF groupStart > 0 THEN
+          SET chosenChar TO charArray AT (groupStart - 1)
+        ELSE
+          SET chosenChar TO charArray AT pos
+        END IF
+
+        FUNCTION nextAlphabetChar(c)
+          IF c = "a" THEN
+            RETURN "b"
+          ELSE IF c = "z" THEN
+            RETURN "y"
+          ELSE
+            SET codeVal TO ASCII_VALUE(c)
+            RETURN CHARACTER_FROM_ASCII(codeVal + 1)
+          END IF
+        END FUNCTION
+
+        SET replacementChar TO nextAlphabetChar(chosenChar)
+
+        FOR offset FROM 0 TO groupLen - 1
+          SET charArray AT (groupStart + offset) TO replacementChar
+        END FOR
+
+        SET pos TO groupStart + groupLen
+      END IF
+    END IF
+  END LOOP
+
+  SET resultStr TO ""
+  FOR idx FROM 0 TO totalChars - 1
+    SET resultStr TO resultStr + charArray AT idx
+  END FOR
+
+  RETURN resultStr
+    END FUNCTION
+END CLASS

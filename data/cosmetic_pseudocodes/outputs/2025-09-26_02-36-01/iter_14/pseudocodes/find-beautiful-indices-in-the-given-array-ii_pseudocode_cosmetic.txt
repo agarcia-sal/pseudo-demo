@@ -1,0 +1,78 @@
+```
+CLASS Solution
+    FUNCTION beautifulIndices(s parameter a parameter b parameter k)
+  DECLARE tempListX AS list := []
+  DECLARE tempListY AS list := []
+  DECLARE resultAcc AS list := []
+  
+  PROCEDURE locateOccurrencesX()
+    DECLARE ctrX AS integer := 0
+    DECLARE limitX AS integer := ( LENGTH(s) - LENGTH(a) )
+    WHILE ctrX <= limitX
+      DECLARE segmentX AS string := ""
+      DECLARE posEndX AS integer := ctrX + LENGTH(a) - 1
+      DECLARE posY AS integer := ctrX
+      REPEAT
+        SET segmentX := segmentX + s[posY]
+        SET posY := posY + 1
+      UNTIL posY > posEndX
+      IF NOT (segmentX != a)
+        APPEND ctrX TO tempListX
+      END IF
+      SET ctrX := ctrX + 1
+    END WHILE
+  END PROCEDURE
+  
+  PROCEDURE locateOccurrencesY()
+    DECLARE ctrY AS integer := 0
+    DECLARE limitY AS integer := ( LENGTH(s) - LENGTH(b) )
+    FOR ctrY FROM 0 TO limitY STEP 1
+      DECLARE segmentY AS string := ""
+      DECLARE posEndY AS integer := ctrY + LENGTH(b) - 1
+      DECLARE idxY AS integer := ctrY
+      WHILE idxY <= posEndY
+        SET segmentY := segmentY + s[idxY]
+        SET idxY := idxY + 1
+      END WHILE
+      IF segmentY == b
+        APPEND ctrY TO tempListY
+      END IF
+    END FOR
+  END PROCEDURE
+  
+  CALL locateOccurrencesX()
+  CALL locateOccurrencesY()
+  
+  DECLARE p AS integer := 0
+  DECLARE q AS integer := 0
+  DECLARE countP AS integer := LENGTH(tempListX)
+  DECLARE countQ AS integer := LENGTH(tempListY)
+  
+  LOOP
+    IF NOT (p < countP AND q < countQ)
+      BREAK
+    END IF
+    
+    DECLARE distDiff AS integer := tempListX[p]
+    IF tempListX[p] - tempListY[q] < 0
+      SET distDiff := -(tempListX[p] - tempListY[q])
+    ELSE
+      SET distDiff := tempListX[p] - tempListY[q]
+    END IF
+    
+    IF distDiff <= k
+      APPEND tempListX[p] TO resultAcc
+      SET p := p + 1
+    ELSE 
+      IF tempListX[p] < tempListY[q]
+        SET p := p + 1
+      ELSE 
+        SET q := q + 1
+      END IF
+    END IF
+  END LOOP
+  
+  RETURN resultAcc
+    END FUNCTION
+END CLASS
+```

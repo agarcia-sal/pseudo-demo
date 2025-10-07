@@ -1,0 +1,42 @@
+```
+FUNCTION select_words(string_s, natural_number_n)
+  DECLARE result_list AS LIST 
+  ASSIGN result_list ← []
+
+  DECLARE word_queue AS LIST 
+  ASSIGN word_queue ← SPLIT string_s BY " "
+
+  DECLARE PROCESS_WORDS(remaining_words, collected)
+    IF LENGTH OF remaining_words = 0 THEN
+      RETURN collected
+    ELSE
+      DECLARE current_word AS STRING ← remaining_words[0]
+      DECLARE remaining_rest AS LIST ← SLICE remaining_words FROM 1 TO END
+
+      DECLARE consonant_count AS NATURAL ← 0
+      DECLARE char_index AS NATURAL ← 0
+
+      WHILE char_index < LENGTH OF current_word DO
+        DECLARE current_char AS STRING ← LOWERCASE OF current_word[char_index]
+        IF NOT (current_char = "a" OR current_char = "e" OR current_char = "i" OR current_char = "o" OR current_char = "u") THEN
+          consonant_count ← consonant_count + 1
+        END IF
+        char_index ← char_index + 1
+      END WHILE
+
+      DECLARE new_collected AS LIST
+      SWITCH consonant_count
+        CASE natural_number_n:
+          new_collected ← collected + [current_word]
+          BREAK
+        DEFAULT:
+          new_collected ← collected
+      END SWITCH
+
+      RETURN PROCESS_WORDS(remaining_rest, new_collected)
+    END IF
+  END DECLARE
+
+  RETURN PROCESS_WORDS(word_queue, result_list)
+END FUNCTION
+```

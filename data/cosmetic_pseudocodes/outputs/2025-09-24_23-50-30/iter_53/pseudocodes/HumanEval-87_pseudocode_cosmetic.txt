@@ -1,0 +1,44 @@
+FUNCTION get_row(uniform_structure, pivotal_value)  
+    FUNCTION explore_positions(position_tracker, current_primary, boundary_primary, primary_limit)  
+        IF current_primary > boundary_primary THEN  
+            RETURN position_tracker  
+        ELSE  
+            FUNCTION traverse_secondary(positions_list, current_secondary, boundary_secondary)  
+                IF current_secondary > boundary_secondary THEN  
+                    RETURN positions_list  
+                ELSE  
+                    IF uniform_structure AT current_primary AT current_secondary EQUALS pivotal_value THEN  
+                        APPEND TUPLE(current_primary, current_secondary) TO positions_list  
+                    END IF  
+                    RETURN traverse_secondary(positions_list, current_secondary + 1, boundary_secondary)  
+                END IF  
+            END FUNCTION  
+            LET updated_positions = traverse_secondary(position_tracker, 0, LENGTH OF uniform_structure AT current_primary - 1)  
+            RETURN explore_positions(updated_positions, current_primary + 1, boundary_primary, primary_limit)  
+        END IF  
+    END FUNCTION  
+  
+    LET interim_coords = explore_positions(EMPTY LIST, 0, LENGTH OF uniform_structure - 1, LENGTH OF uniform_structure)  
+  
+    FUNCTION insertion_sort(coords_list, index, n, comparator)  
+        IF index >= n THEN  
+            RETURN coords_list  
+        END IF  
+        LET key_element = coords_list AT index  
+        LET predecessor = index - 1  
+        WHILE predecessor >= 0 AND comparator(coords_list AT predecessor, key_element) DO  
+            SET coords_list AT predecessor + 1 TO coords_list AT predecessor  
+            SET predecessor TO predecessor - 1  
+        END WHILE  
+        SET coords_list AT predecessor + 1 TO key_element  
+        RETURN insertion_sort(coords_list, index + 1, n, comparator)  
+    END FUNCTION  
+  
+    LET sort_by_second_desc = FUNCTION(a, b) RETURN (a SECOND ELEMENT < b SECOND ELEMENT) END FUNCTION  
+    LET sort_by_first_asc = FUNCTION(a, b) RETURN (a FIRST ELEMENT > b FIRST ELEMENT) END FUNCTION  
+  
+    LET after_second_sort = insertion_sort(interim_coords, 1, LENGTH OF interim_coords, sort_by_second_desc)  
+    LET after_first_sort = insertion_sort(after_second_sort, 1, LENGTH OF after_second_sort, sort_by_first_asc)  
+  
+    RETURN after_first_sort  
+END FUNCTION

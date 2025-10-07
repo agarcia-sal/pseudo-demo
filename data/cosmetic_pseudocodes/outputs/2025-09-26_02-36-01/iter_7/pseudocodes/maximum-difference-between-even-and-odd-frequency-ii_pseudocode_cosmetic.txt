@@ -1,0 +1,66 @@
+CLASS Solution  
+FUNCTION maxDifference(s, k)  
+  SET result TO -1 * (2 ^ 31)  // represent negative infinity as a very small number  
+  SET chars TO ["zero", "one", "two", "three", "four"]  
+  SET pairs TO empty list  
+  SET i TO 0  
+  WHILE i < LENGTH(chars)  
+    SET j TO 0  
+    WHILE j < LENGTH(chars)  
+      IF chars[i] ≠ chars[j] THEN  
+        APPEND (chars[i], chars[j]) TO pairs  
+      END IF  
+      SET j TO j + 1  
+    END WHILE  
+    SET i TO i + 1  
+  END WHILE  
+
+  SET idx TO 0  
+  WHILE idx < LENGTH(pairs)  
+    SET x TO pairs[idx][0]  
+    SET y TO pairs[idx][1]  
+
+    SET cache TO dictionary WITH default value (2 ^ 31)  
+    SET prefixCountX TO [0]  
+    SET prefixCountY TO [0]  
+    SET left TO 0  
+
+    SET position TO 0  
+    WHILE position < LENGTH(s)  
+      SET ch TO s[position]  
+      IF ch = x THEN  
+        APPEND (prefixCountX[ LENGTH(prefixCountX) - 1 ] + 1) TO prefixCountX  
+      ELSE  
+        APPEND prefixCountX[LENGTH(prefixCountX) - 1] TO prefixCountX  
+      END IF  
+
+      IF ch = y THEN  
+        APPEND (prefixCountY[LENGTH(prefixCountY) - 1] + 1) TO prefixCountY  
+      ELSE  
+        APPEND prefixCountY[LENGTH(prefixCountY) - 1] TO prefixCountY  
+      END IF  
+
+      WHILE (position - left + 1) >= k AND prefixCountX[left] < prefixCountX[LENGTH(prefixCountX) - 1] AND prefixCountY[left] < prefixCountY[LENGTH(prefixCountY) - 1]  
+        SET parityKey TO (prefixCountX[left] MOD 2, prefixCountY[left] MOD 2)  
+        IF cache[parityKey] > (prefixCountX[left] - prefixCountY[left]) THEN  
+          SET cache[parityKey] TO (prefixCountX[left] - prefixCountY[left])  
+        END IF  
+        SET left TO left + 1  
+      END WHILE  
+
+      SET endX TO prefixCountX[LENGTH(prefixCountX) - 1]  
+      SET endY TO prefixCountY[LENGTH(prefixCountY) - 1]  
+      SET currentParityKey TO ((1 - (endX MOD 2)), (endY MOD 2))  
+
+      SET tempDiff TO (endX - endY - cache[currentParityKey])  
+      IF result < tempDiff THEN  
+        SET result TO tempDiff  
+      END IF  
+
+      SET position TO position + 1  
+    END WHILE  
+    SET idx TO idx + 1  
+  END WHILE  
+  RETURN result  
+END FUNCTION  
+END CLASS

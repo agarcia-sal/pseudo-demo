@@ -1,0 +1,81 @@
+CLASS Solution
+{
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER
+    {
+        SET modBase TO ( ( 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 ) + 7 )
+        SET accumulativeTotal TO 0
+
+        FUNCTION absVal(x)
+        {
+            IF (x < 0) THEN
+                RETURN (0 - x)
+            ELSE
+                RETURN x
+            END IF
+        }
+
+        FUNCTION generateCombinations(inputList, selectionCount) RETURNS LIST OF LISTS
+        {
+            SET resultList TO empty LIST
+
+            FUNCTION recHelper(startIndex, pathList)
+            {
+                IF (LENGTH(pathList) = selectionCount) THEN
+                    APPEND pathList TO resultList
+                    RETURN
+                END IF
+
+                SET idx TO startIndex
+                WHILE (idx < LENGTH(inputList))
+                {
+                    CALL recHelper(idx + 1, CONCAT(pathList, [inputList[idx]]))
+                    SET idx TO idx + 1
+                }
+            }
+
+            CALL recHelper(0, [])
+            RETURN resultList
+        }
+
+        SET combinationCollection TO generateCombinations(nums, k)
+
+        FUNCTION computeMinDiff(values)
+        {
+            /* Use recursion to replace nested loops */
+            FUNCTION innerLoopOuter(x, y, currentMin)
+            {
+                IF (x >= LENGTH(values) - 1)
+                THEN
+                    RETURN currentMin
+                ELSE IF (y >= LENGTH(values))
+                THEN
+                    RETURN innerLoopOuter(x + 1, x + 2, currentMin)
+                ELSE
+                    SET diffToEvaluate TO absVal(values[x] - values[y])
+                    SET newMin TO currentMin
+                    IF (diffToEvaluate < currentMin) THEN
+                        SET newMin TO diffToEvaluate
+                    END IF
+                    RETURN innerLoopOuter(x, y + 1, newMin)
+                END IF
+            }
+            RETURN innerLoopOuter(0, 1, (1 << 30)) /* large number */
+        }
+
+        FUNCTION processCombinations( combinationIndex, accum )
+        {
+            IF (combinationIndex >= LENGTH(combinationCollection))
+            THEN
+                RETURN accum
+            ELSE
+                SET minDifferenceVal TO computeMinDiff(combinationCollection[combinationIndex])
+                SET updatedSum TO (accum + minDifferenceVal)
+                SET moddedSum TO (updatedSum - ( (updatedSum / modBase) * modBase ))
+                RETURN processCombinations(combinationIndex + 1, moddedSum)
+            END IF
+        }
+
+        SET finalResult TO processCombinations(0, accumulativeTotal)
+        RETURN finalResult
+    }
+}

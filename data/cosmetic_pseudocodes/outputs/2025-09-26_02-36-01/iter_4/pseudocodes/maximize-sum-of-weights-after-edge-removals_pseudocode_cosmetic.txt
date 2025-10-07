@@ -1,0 +1,68 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, size)  
+        DECLARE idx TO zero  
+        DECLARE parents AS empty list  
+        WHILE idx LESS THAN size  
+            APPEND idx TO parents  
+            INCREMENT idx BY one  
+        END WHILE  
+        SET self.parent AS parents  
+        LET self.rank ASSIGNED TO list containing size copies of zero  
+    END FUNCTION  
+  
+    FUNCTION find(self, u)  
+        IF NOT (self.parent[u] EQUALS u)  
+            LET self.parent[u] ASSIGNED TO self.find(self.parent[u])  
+        END IF  
+        GIVEBACK self.parent[u]  
+    END FUNCTION  
+  
+    FUNCTION union(self, u, v)  
+        LET rootU ASSIGNED TO self.find(u)  
+        LET rootV ASSIGNED TO self.find(v)  
+        IF rootU NOT EQUALS rootV THEN  
+            IF NOT (self.rank[rootU] LESS THAN OR EQUAL TO self.rank[rootV])  
+                SET self.parent[rootV] AS rootU  
+            ELSEIF self.rank[rootU] LESS THAN self.rank[rootV]  
+                LET self.parent[rootU] TO rootV  
+            ELSE  
+                LET tmpParent ASSIGNED TO rootU  
+                SET self.parent[rootV] TO tmpParent  
+                LET self.rank[rootU] TO self.rank[rootU] PLUS one  
+            ENDIF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION maximizeSumOfWeights(self, edges, k)  
+        LET total_nodes ASSIGNED TO ( LENGTH(edges) PLUS one )  
+        LET deg_list TO list of total_nodes zeros  
+        LET uf ASSIGNED TO NEW UnionFind(total_nodes)  
+  
+        DECLARE temp_edges TO edges  
+        temp_edges SORTED BY element at index two DESCENDING  
+  
+        LET maxSum ASSIGNED TO zero  
+  
+        DECLARE pointer TO zero  
+        DECLARE count_edges TO LENGTH(temp_edges)  
+        WHILE pointer LESS THAN count_edges  
+            LET current_edge ASSIGNED TO temp_edges[pointer]  
+            LET nodeA TO current_edge[0]  
+            LET nodeB TO current_edge[1]  
+            LET weight TO current_edge[2]  
+  
+            IF (deg_list[nodeA] LESS THAN k) AND (deg_list[nodeB] LESS THAN k) AND (uf.find(nodeA) NOT EQUALS uf.find(nodeB)) THEN  
+                uf.union(nodeA, nodeB)  
+                LET deg_list[nodeA] TO deg_list[nodeA] PLUS 1  
+                LET deg_list[nodeB] TO deg_list[nodeB] PLUS 1  
+                LET maxSum TO maxSum PLUS weight  
+            ENDIF  
+  
+            INCREMENT pointer BY one  
+        END WHILE  
+  
+        GIVEBACK maxSum  
+    END FUNCTION  
+END CLASS

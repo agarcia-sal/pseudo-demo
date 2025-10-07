@@ -1,0 +1,47 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+  FUNCTION parse_paren_group(string_chunk)
+    VARIABLE depth_counter := 0
+    VARIABLE peak_depth := 0
+    VARIABLE index := 0
+
+    WHILE index < LENGTH(string_chunk)
+      VARIABLE symbol := string_chunk[index]
+      index := index + 1
+
+      SWITCH symbol
+        CASE '(':
+          depth_counter := depth_counter + 1
+          peak_depth := (depth_counter > peak_depth) AND depth_counter OR peak_depth
+          CONTINUE
+        DEFAULT:
+          depth_counter := depth_counter - 1
+      END SWITCH
+    END WHILE
+
+    RETURN peak_depth
+  END FUNCTION
+
+  VARIABLE segments := []
+  VARIABLE start := 0
+
+  FOR position := 0 TO LENGTH(parentheses_string)
+    IF position = LENGTH(parentheses_string) OR parentheses_string[position] = ' ' THEN
+      IF start < position THEN
+        APPEND SUBSTRING(parentheses_string, start, position) TO segments
+      END IF
+      start := position + 1
+    END IF
+  END FOR
+
+  VARIABLE results := []
+  VARIABLE iterator := 0
+
+  WHILE iterator < LENGTH(segments)
+    APPEND parse_paren_group(segments[iterator]) TO results
+    iterator := iterator + 1
+  END WHILE
+
+  RETURN results
+END FUNCTION
+```

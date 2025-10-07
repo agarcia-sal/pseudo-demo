@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION longestCommonPrefix(arr1 arr1 OF integers arr2 arr2 OF integers) RETURNS integer
+        DECLARE setA AS empty set
+        DECLARE idxX, lenX, stringX, sliceX, lengthPrefix, maxLen AS integer
+        DECLARE prefixIter, prefixInSet AS string
+        
+        PROCEDURE AddAllPrefixes(sequence):
+            DECLARE elementStr, pos AS string, integer
+            SET elementStr = ""
+            SET pos = 0
+            WHILE pos < LENGTH(sequence)
+                SET elementStr = TO_STRING(sequence[pos])
+                DECLARE prefixPos = 1
+                WHILE prefixPos <= LENGTH(elementStr)
+                    ADD SUBSTRING(elementStr, 1, prefixPos) TO setA
+                    SET prefixPos = prefixPos + 1
+                END WHILE
+                SET pos = pos + 1
+            END WHILE
+        END PROCEDURE
+        
+        SET setA TO empty set
+        CALL AddAllPrefixes(arr1)
+        DECLARE setB AS empty set
+        SET setB TO empty set
+        PROCEDURE AddAllPrefixesToB(sequence):
+            DECLARE elemStr, p AS string, idx AS integer
+            SET idx = 1
+            WHILE idx <= LENGTH(sequence)
+                SET elemStr = TO_STRING(sequence[idx - 1])
+                SET p = 1
+                WHILE p <= LENGTH(elemStr)
+                    ADD SUBSTRING(elemStr, 1, p) TO setB
+                    SET p = p + 1
+                END WHILE
+                SET idx = idx + 1
+            END WHILE
+        END PROCEDURE
+        CALL AddAllPrefixesToB(arr2)
+
+        SET maxLen = 0
+        FOR EACH prefixIter IN setA
+            IF prefixIter IN setB THEN
+                SET lengthPrefix = LENGTH(prefixIter)
+                IF lengthPrefix > maxLen THEN
+                    SET maxLen = lengthPrefix
+                END IF
+            END IF
+        END FOR
+
+        RETURN maxLen
+    END FUNCTION
+END CLASS

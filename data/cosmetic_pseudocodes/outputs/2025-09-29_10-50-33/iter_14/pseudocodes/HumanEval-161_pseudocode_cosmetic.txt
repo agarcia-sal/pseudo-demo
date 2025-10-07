@@ -1,0 +1,69 @@
+FUNCTION solve(str_input)
+    
+    DEFINE FUNCTION process_chars(pos, acc_container, status_flag)
+        IF pos ≥ LENGTH(str_input) THEN 
+            RETURN (acc_container, status_flag) 
+        ELSE
+            LET current_char = str_input[pos]
+            LET updated_acc = acc_container
+            LET updated_flag = status_flag
+            IF (NOT (current_char < 'A' OR (current_char > 'Z' AND current_char < 'a') OR current_char > 'z')) THEN
+                IF current_char ≥ 'a' THEN
+                    updated_acc[pos] = TO_UPPER(current_char)
+                ELSE 
+                    updated_acc[pos] = TO_LOWER(current_char)
+                END IF
+                updated_flag = 1
+            END IF
+            RETURN process_chars(pos + 1, updated_acc, updated_flag)
+        END IF
+    END FUNCTION
+
+    
+    LET char_list ← TUPLE_FROM_STRING(str_input)
+    LET (processed_list, found_alpha) ← process_chars(0, char_list, 0)
+    LET output_string ← ""
+
+    LET iterator_index ← 0
+    REPEAT
+        EXIT WHEN iterator_index = LENGTH(processed_list)
+        output_string ← output_string + processed_list[iterator_index]
+        iterator_index ← iterator_index + 1
+    UNTIL FALSE
+
+    SWITCH found_alpha
+        CASE 0:
+            INVOKE REVERSE_STRING(output_string)
+            BREAK
+        DEFAULT:
+            BREAK
+    END SWITCH
+    
+    RETURN output_string
+END FUNCTION
+
+DEFINE FUNCTION TO_UPPER(ch)
+    IF ch ≥ 'a' AND ch ≤ 'z' THEN
+        RETURN CHAR_VALUE(ch) - 32
+    ELSE
+        RETURN ch
+    END IF
+END FUNCTION
+
+DEFINE FUNCTION TO_LOWER(ch)
+    IF ch ≥ 'A' AND ch ≤ 'Z' THEN
+        RETURN CHAR_VALUE(ch) + 32
+    ELSE
+        RETURN ch
+    END IF
+END FUNCTION
+
+DEFINE FUNCTION REVERSE_STRING(s)
+    LET reversed ← ""
+    LET pos_pointer ← LENGTH(s) - 1
+    WHILE pos_pointer ≥ 0 DO
+        reversed ← reversed + s[pos_pointer]
+        pos_pointer ← pos_pointer - 1
+    END WHILE
+    RETURN reversed
+END FUNCTION

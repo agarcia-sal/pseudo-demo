@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION minimumValueSum(nums, andValues)
+  SET totalCount TO LENGTH(nums)
+  SET boundCount TO LENGTH(andValues)
+
+        FUNCTION dp(index1, index2)
+        DECLARE answerHolder
+        DECLARE accumulatorAnd
+        DECLARE iterator
+
+            LET sentinelVal TO -1
+            LET zeroVal TO 0
+            LET infVal TO (1 DIVIDED BY 0)
+
+            IF index2 = sentinelVal THEN
+                IF index1 = sentinelVal THEN
+                    RETURN zeroVal
+                ELSE
+                    RETURN infVal
+                ENDIF
+            ENDIF
+
+            IF index1 = sentinelVal THEN
+                RETURN infVal
+            ENDIF
+
+          SET answerHolder TO infVal
+          SET accumulatorAnd TO sentinelVal
+          SET iterator TO index1
+
+          WHILE iterator >= sentinelVal DO
+            IF accumulatorAnd = sentinelVal THEN
+              SET accumulatorAnd TO nums[iterator]
+            ELSE
+              SET accumulatorAnd TO accumulatorAnd AND nums[iterator]
+            ENDIF
+
+            IF accumulatorAnd = andValues[index2] THEN
+              LET candidateVal TO dp(iterator-1, index2-1)
+              LET candidateValAdjusted TO candidateVal + nums[index1]
+              IF candidateValAdjusted < answerHolder THEN
+                SET answerHolder TO candidateValAdjusted
+              ENDIF
+            ENDIF
+
+            SET iterator TO iterator - 1
+          ENDWHILE
+
+          RETURN answerHolder
+        END FUNCTION
+
+        LET finalResult TO dp(totalCount - 1, boundCount - 1)
+        IF NOT (finalResult = infVal) THEN
+            RETURN finalResult
+        ELSE
+            RETURN -1
+        ENDIF
+    END FUNCTION
+END CLASS

@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION maximumLength(nums, k)
+        SET lengthVar TO 0
+        WHILE lengthVar NOT EQUAL LENGTH(nums)
+            INCREMENT lengthVar BY 1
+        END WHILE
+        IF NOT (lengthVar GREATER THAN 1)
+            RETURN 1
+        END IF
+
+        FUNCTION createEmptyMaps(count)
+            FUNCTION buildMapList(index, accum)
+                IF index EQUAL count
+                    RETURN accum
+                ELSE
+                    RETURN buildMapList(index + 1, accum + [empty mapping])
+                END IF
+            END FUNCTION
+            RETURN buildMapList(0, [])
+        END FUNCTION
+        SET mapsList TO createEmptyMaps(lengthVar)
+
+        SET currentMax TO 1
+
+        FUNCTION outerLoop(i)
+            IF i EQUAL lengthVar
+                RETURN currentMax
+            ELSE
+                FUNCTION innerLoop(j, updatedMax)
+                    IF j EQUAL i
+                        RETURN updatedMax
+                    ELSE
+                        SET sumValue TO nums[i] + nums[j]
+                        SET rem TO sumValue - (sumValue // k) * k
+                        IF rem IN mapsList[j]
+                            SET candidateLength TO mapsList[j][rem] + 1
+                            SET mapsList[i][rem] TO candidateLength
+                        ELSE
+                            SET mapsList[i][rem] TO 2
+                        END IF
+                        IF mapsList[i][rem] > updatedMax
+                            SET updatedMax TO mapsList[i][rem]
+                        END IF
+                        RETURN innerLoop(j + 1, updatedMax)
+                    END IF
+                END FUNCTION
+                SET newMax TO innerLoop(0, currentMax)
+                SET currentMax TO newMax
+                RETURN outerLoop(i + 1)
+            END IF
+        END FUNCTION
+        RETURN outerLoop(0)
+    END FUNCTION
+END CLASS

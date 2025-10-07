@@ -1,0 +1,106 @@
+CLASS Solution
+    FUNCTION longestCommonPrefix(arr1 arr1 OF integers arr2 arr2 OF integers) RETURNS integer
+
+        FUNCTION strOfNumber(n INTEGER) RETURNS string
+            // Convert integer to string using recursive division
+            IF n < 10 THEN
+                RETURN CHAR(n + 48)
+            ELSE
+                RETURN CONCAT(strOfNumber(n DIV 10), CHAR((n MOD 10) + 48))
+            END IF
+        END FUNCTION
+
+        FUNCTION substr(s STRING, start INTEGER, end INTEGER) RETURNS string
+            // Extract substring from start to end (1-based)
+            IF start > end OR start < 1 OR end > LENGTH(s) THEN
+                RETURN ""
+            END IF
+            IF start = end THEN
+                RETURN CHAR(ORD(s[start]))
+            ELSE
+                RETURN CONCAT(CHAR(ORD(s[start])), substr(s, start + 1, end))
+            END IF
+        END FUNCTION
+
+        FUNCTION contains(set_to_check SET OF strings, val STRING) RETURNS boolean
+            // Check membership in set
+            IF val IN set_to_check THEN
+                RETURN true
+            ELSE
+                RETURN false
+            END IF
+        END FUNCTION
+
+        FUNCTION lengthOf(s STRING) RETURNS integer
+            IF s = "" THEN
+                RETURN 0
+            ELSE
+                RETURN 1 + lengthOf(s[2..LENGTH(s)])
+            END IF
+        END FUNCTION
+
+        FUNCTION addPrefixes(numbers ARRAY OF integers, accumulator SET OF strings, idx INTEGER) RETURNS SET OF strings
+            // Recursive population of prefixes for array numbers at index idx
+            IF idx > LENGTH(numbers) THEN
+                RETURN accumulator
+            ELSE
+                let num_str STRING = strOfNumber(numbers[idx])
+                FUNCTION addSubPrefixes(str STRING, pos INTEGER, acc SET OF strings) RETURNS SET OF strings
+                    IF pos > lengthOf(str) THEN
+                        RETURN acc
+                    ELSE
+                        let new_acc SET OF strings = acc
+                        new_acc = new_acc UNION {substr(str, 1, pos)}
+                        RETURN addSubPrefixes(str, pos + 1, new_acc)
+                    END IF
+                END FUNCTION
+
+                let updated SET OF strings = addSubPrefixes(num_str, 1, accumulator)
+
+                RETURN addPrefixes(numbers, updated, idx + 1)
+            END IF
+        END FUNCTION
+
+        let setA SET OF strings = {}
+        let prefixesA SET OF strings = addPrefixes(arr1, setA, 1)
+
+        let setB SET OF strings = {}
+        let prefixesB SET OF strings = addPrefixes(arr2, setB, 1)
+
+        FUNCTION maxLengthCommon(set1 SET OF strings, set2 SET OF strings, elems ARRAY OF strings, pos INTEGER, current_max INTEGER) RETURNS integer
+            IF pos > LENGTH(elems) THEN
+                RETURN current_max
+            ELSE
+                let cur STRING = elems[pos]
+                IF contains(set2, cur) THEN
+                    let len_cur INTEGER = lengthOf(cur)
+                    IF len_cur > current_max THEN
+                        RETURN maxLengthCommon(set1, set2, elems, pos + 1, len_cur)
+                    ELSE
+                        RETURN maxLengthCommon(set1, set2, elems, pos + 1, current_max)
+                    END IF
+                ELSE
+                    RETURN maxLengthCommon(set1, set2, elems, pos + 1, current_max)
+                END IF
+            END IF
+        END FUNCTION
+
+        // Convert prefixesA set to array:
+        FUNCTION setToArray(s SET OF strings, acc ARRAY OF strings) RETURNS ARRAY OF strings
+            IF s = {} THEN
+                RETURN acc
+            ELSE
+                let elem STRING = CHOOSE(s)
+                let rem SET OF strings = s \ {elem}
+                RETURN setToArray(rem, acc + [elem])
+            END IF
+        END FUNCTION
+
+        let arrPrefixesA ARRAY OF strings = setToArray(prefixesA, [])
+
+        let answer INTEGER = maxLengthCommon(prefixesA, prefixesB, arrPrefixesA, 1, 0)
+
+        RETURN answer
+
+    END FUNCTION
+END CLASS

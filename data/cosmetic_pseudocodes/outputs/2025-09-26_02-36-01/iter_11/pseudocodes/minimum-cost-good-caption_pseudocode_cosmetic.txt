@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION minCostGoodCaption(caption)
+        
+        PROCEDURE replicateCharList(str, arr)
+            SET idx TO 0
+            SET lim TO LENGTH OF str
+            SET arr TO EMPTY LIST
+            WHILE idx < lim
+                APPEND str[idx] TO arr
+                SET idx TO idx + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE nextAlphaChar(ch, outch)
+            IF ch = 'a' THEN
+                SET outch TO 'b'
+            ELSE IF ch = 'z' THEN
+                SET outch TO 'y'
+            ELSE
+                SET tempVal TO ASCII_VALUE_OF(ch) + 1
+                SET outch TO CHARACTER_FROM_ASCII(tempVal)
+            END IF
+        END PROCEDURE
+
+        SET count TO LENGTH OF caption
+        IF count < 3 THEN
+            RETURN ""
+        END IF
+
+        DECLARE charList
+        CALL replicateCharList(caption, charList)
+
+        SET pos TO 0
+        WHILE pos < count
+            SET mark TO pos
+            WHILE (pos < count) AND (charList[pos] = charList[mark])
+                SET pos TO pos + 1
+            END WHILE
+
+            SET segLen TO pos - mark
+
+            IF segLen < 3 THEN
+
+                IF (mark > 0) AND (charList[mark - 1] = charList[mark]) THEN
+                    SET charList[mark - 1] TO charList[mark]
+                    SET mark TO mark - 1
+                    SET segLen TO segLen + 1
+                END IF
+
+                IF (pos < count) AND (charList[pos - 1] = charList[pos]) THEN
+                    SET charList[pos] TO charList[pos - 1]
+                    SET pos TO pos + 1
+                    SET segLen TO segLen + 1
+                END IF
+
+                IF segLen < 3 THEN
+                    IF mark > 0 THEN
+                        SET adjChar TO charList[mark - 1]
+                    ELSE
+                        SET adjChar TO charList[pos]
+                    END IF
+
+                    DECLARE replacementChar
+                    CALL nextAlphaChar(adjChar, replacementChar)
+
+                    SET idxVar TO mark
+                    DECLARE endIdx
+                    SET endIdx TO mark + segLen - 1
+
+                    WHILE idxVar <= endIdx
+                        SET charList[idxVar] TO replacementChar
+                        SET idxVar TO idxVar + 1
+                    END WHILE
+
+                    SET pos TO mark + segLen
+                END IF
+            END IF
+        END WHILE
+
+        DECLARE result
+        SET result TO ""
+        SET indexer TO 0
+        WHILE indexer < count
+            SET result TO result + charList[indexer]
+            SET indexer TO indexer + 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

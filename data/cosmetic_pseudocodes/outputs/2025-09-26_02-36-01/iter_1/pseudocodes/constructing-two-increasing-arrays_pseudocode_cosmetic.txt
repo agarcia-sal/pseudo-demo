@@ -1,0 +1,39 @@
+CLASS Solution
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer  
+        FUNCTION nxt(x x AS integer y y AS integer) RETURNS integer  
+            IF (x BITWISE_AND (1 XOR y)) IS EQUAL TO 1 THEN  
+                RETURN x + 1  
+            ELSE  
+                RETURN x + 2  
+            END IF  
+        END FUNCTION  
+
+        LET m BE LENGTH(nums1)  
+        LET n BE LENGTH(nums2)  
+        DECLARE f AS LIST OF LIST OF INTEGER WITH DIMENSIONS (m + 1) BY (n + 1), FILLED WITH 0  
+
+        FOR i IN RANGE 1 TO m DO  
+            LET current_x BE nums1[i]  
+            LET prev_val BE f[i - 1][0]  
+            f[i][0] = nxt(prev_val, current_x)  
+        END FOR  
+
+        FOR j IN RANGE 1 TO n DO  
+            LET current_y BE nums2[j]  
+            LET prev_val BE f[0][j - 1]  
+            f[0][j] = nxt(prev_val, current_y)  
+        END FOR  
+
+        FOR i IN RANGE 1 TO m DO  
+            LET current_x BE nums1[i]  
+            FOR j IN RANGE 1 TO n DO  
+                LET current_y BE nums2[j]  
+                LET option1 BE nxt(f[i - 1][j], current_x)  
+                LET option2 BE nxt(f[i][j - 1], current_y)  
+                f[i][j] = MINIMUM(option1, option2)  
+            END FOR  
+        END FOR  
+
+        RETURN f[m][n]  
+    END FUNCTION  
+END CLASS

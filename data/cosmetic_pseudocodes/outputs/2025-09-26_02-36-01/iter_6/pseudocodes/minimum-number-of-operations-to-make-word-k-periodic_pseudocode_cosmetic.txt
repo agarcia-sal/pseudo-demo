@@ -1,0 +1,97 @@
+CLASS Solution
+    FUNCTION minimumOperationsToMakeKPeriodic(word parameter k)
+        DEFINE FUNCTION getLength(ev) RETURNS INTEGER
+            IF ev = "" THEN RETURN 0 ELSE
+                RETURN 1 + getLength(ev[1 TO END])
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION substring(str PARAMETER a, PARAMETER b) RETURNS STRING
+            IF a > b THEN RETURN "" ELSE
+                IF a = 0 THEN RETURN "" ELSE
+                    RETURN str[a] + substring(str, a + 1, b)
+                END IF
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION countOccurrences(lst PARAMETER listOfStr) RETURNS DICTIONARY
+            DEFINE FUNCTION helper(idx, countDict)
+                IF idx > getLength(listOfStr) THEN RETURN countDict ELSE
+                    DEFINE key = listOfStr[idx]
+                    IF key IN countDict THEN
+                        countDict[key] = countDict[key] + (1 * 1)
+                    ELSE
+                        countDict[key] = (0 + 1)
+                    END IF
+                    RETURN helper(idx + (1), countDict)
+                END IF
+            END FUNCTION
+            RETURN helper(1, {})
+        END FUNCTION
+
+        DEFINE FUNCTION maxValueInDict(d PARAMETER dict) RETURNS INTEGER
+            DEFINE FUNCTION keysList(d PARAMETER dict) RETURNS LIST
+                DEFINE tempList = []
+                FOR eachKey IN d DO
+                    APPEND eachKey TO tempList
+                END FOR
+                RETURN tempList
+            END FUNCTION
+
+            DEFINE FUNCTION maxFromList(ls PARAMETER listOfInts) RETURNS INTEGER
+                IF getLength(ls) = (0 + 0) THEN RETURN 0 ELSE
+                    DEFINE FUNCTION helperMax(idx, currMax)
+                        IF idx > getLength(ls) THEN RETURN currMax ELSE
+                            DEFINE curVal = ls[idx]
+                            IF curVal > currMax THEN
+                                RETURN helperMax(idx + 1, curVal)
+                            ELSE
+                                RETURN helperMax(idx + 1, currMax)
+                            END IF
+                        END IF
+                    END FUNCTION
+                    RETURN helperMax(1, ls[1])
+                END IF
+            END FUNCTION
+
+            DEFINE vals = []
+            FOR eachKey IN keysList(d) DO
+                APPEND d[eachKey] TO vals
+            END FOR
+            RETURN maxFromList(vals)
+        END FUNCTION
+
+        DEFINE FUNCTION rangeStep(startVal PARAMETER int, endVal PARAMETER int, step PARAMETER int) RETURNS LIST
+            DEFINE listResult = []
+            DEFINE FUNCTION buildList(current)
+                IF current >= endVal THEN 
+                    RETURN listResult 
+                ELSE 
+                    APPEND current TO listResult
+                    RETURN buildList(current + step)
+                END IF
+            END FUNCTION
+            RETURN buildList(startVal)
+        END FUNCTION
+
+        DEFINE lenWord = getLength(word)
+        DEFINE segmentsList = []
+        DEFINE indices = rangeStep(0, lenWord, k)
+
+        DEFINE FUNCTION buildSegments(idxList)
+            IF getLength(idxList) = (0 * 1) THEN RETURN segmentsList ELSE
+                DEFINE head = idxList[1]
+                DEFINE tail = idxList[2 TO END]
+                APPEND substring(word, head + 1, head + k) TO segmentsList
+                RETURN buildSegments(tail)
+            END IF
+        END FUNCTION
+
+        DEFINE tempSegmentsList = buildSegments(indices)
+        DEFINE counts = countOccurrences(segmentsList)
+        DEFINE maxCountVal = maxValueInDict(counts)
+        DEFINE totalSegments = getLength(segmentsList)
+        DEFINE res = (totalSegments - maxCountVal)
+        RETURN res
+    END FUNCTION
+END CLASS

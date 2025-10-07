@@ -1,0 +1,22 @@
+FUNCTION encode_cyclic(INPUT s AS STRING) RETURNS STRING
+    SET groups TO EMPTY LIST
+    FOR i FROM 0 TO (LENGTH OF s + 2) DIVIDED BY 3 MINUS 1 DO
+        SET start_index TO 3 TIMES i
+        SET end_index TO MINIMUM OF (3 TIMES i PLUS 3) AND LENGTH OF s
+        SET group TO SUBSTRING OF s FROM start_index TO end_index
+        ADD group TO groups
+    END FOR
+
+    FOR EACH group IN groups DO
+        IF LENGTH OF group IS EQUAL TO 3 THEN
+            SET group TO CONCATENATION OF SUBSTRING OF group FROM INDEX 1 TO END AND group AT INDEX 0
+        END IF
+    END FOR
+
+    RETURN CONCATENATION OF ALL ELEMENTS IN groups
+END FUNCTION
+
+
+FUNCTION decode_cyclic(INPUT s AS STRING) RETURNS STRING
+    RETURN encode_cyclic(encode_cyclic(s))
+END FUNCTION

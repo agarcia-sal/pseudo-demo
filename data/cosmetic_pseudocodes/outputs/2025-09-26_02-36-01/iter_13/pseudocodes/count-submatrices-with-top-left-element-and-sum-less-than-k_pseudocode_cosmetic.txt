@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+        DECLARE FUNCTION computeSumArray(arr)
+            DECLARE FUNCTION helper(pos, acc, res)
+                IF pos GREATER THAN LENGTH(arr) MINUS 1 THEN
+                    RETURN res
+                ELSE
+                    LET newAcc = acc PLUS arr[pos]
+                    SET res[pos] = newAcc
+                    RETURN helper(pos PLUS 1, newAcc, res)
+                END IF
+            END FUNCTION
+            LET prefixArr = LIST_OF_SIZE(LENGTH(arr), 0)
+            RETURN helper(0, 0, prefixArr)
+        END FUNCTION
+
+        DECLARE FUNCTION lessOrEqual(x, y)
+            RETURN NOT (x GREATER THAN y)
+        END FUNCTION
+
+        IF grid IS NULL OR LENGTH(grid) EQUALS 0 OR LENGTH(grid[0]) EQUALS 0 THEN
+            RETURN 0
+        END IF
+
+        LET rowCount = LENGTH(grid)
+        LET colCount = LENGTH(grid[0])
+        LET prefixSum = LIST_OF_SIZE(rowCount, NULL)
+        FOR idx FROM 0 TO rowCount MINUS 1
+            SET prefixSum[idx] = LIST_OF_SIZE(colCount, 0)
+        END FOR
+
+        LET totalCount = 0
+
+        LET outerIndex = 0
+        WHILE outerIndex LESS THAN rowCount
+            LET innerIndex = 0
+            WHILE innerIndex LESS THAN colCount
+                IF outerIndex EQUALS 0 AND innerIndex EQUALS 0 THEN
+                    SET prefixSum[outerIndex][innerIndex] = grid[outerIndex][innerIndex]
+                ELSE IF outerIndex EQUALS 0 THEN
+                    LET left = prefixSum[outerIndex][innerIndex MINUS 1]
+                    LET current = grid[outerIndex][innerIndex]
+                    SET prefixSum[outerIndex][innerIndex] = left PLUS current
+                ELSE IF innerIndex EQUALS 0 THEN
+                    LET above = prefixSum[outerIndex MINUS 1][innerIndex]
+                    LET current = grid[outerIndex][innerIndex]
+                    SET prefixSum[outerIndex][innerIndex] = above PLUS current
+                ELSE
+                    LET above = prefixSum[outerIndex MINUS 1][innerIndex]
+                    LET left = prefixSum[outerIndex][innerIndex MINUS 1]
+                    LET diag = prefixSum[outerIndex MINUS 1][innerIndex MINUS 1]
+                    LET current = grid[outerIndex][innerIndex]
+                    SET prefixSum[outerIndex][innerIndex] = above PLUS left MINUS diag PLUS current
+                END IF
+
+                IF lessOrEqual(prefixSum[outerIndex][innerIndex], k) THEN
+                    SET totalCount = totalCount PLUS 1
+                END IF
+
+                SET innerIndex = innerIndex PLUS 1
+            END WHILE
+            SET outerIndex = outerIndex PLUS 1
+        END WHILE
+
+        RETURN totalCount
+    END FUNCTION
+END CLASS

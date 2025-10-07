@@ -1,0 +1,95 @@
+CLASS Solution
+    FUNCTION mostFrequentIDs(numbers PARAMETER, frequencies PARAMETER)
+        DEFINE FUNCTION addToDictionary(dict, key, value)
+            IF key IN dict THEN
+                SET dict[key] TO dict[key] + value
+            ELSE
+                SET dict[key] TO value
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION heapPush(heap, element)
+            APPEND element TO heap
+            SET index TO LENGTH(heap) - 1
+            WHILE index > 0
+                SET parent TO (index - 1) / 2
+                IF heap[parent][0] >= heap[index][0] THEN
+                    BREAK
+                END IF
+                SWAP heap[parent] WITH heap[index]
+                SET index TO parent
+            END WHILE
+        END FUNCTION
+
+        DEFINE FUNCTION heapPop(heap)
+            IF LENGTH(heap) = 0 THEN
+                RETURN NULL
+            END IF
+            SET result TO heap[0]
+            SET heap[0] TO heap[LENGTH(heap) - 1]
+            REMOVE heap[LENGTH(heap) - 1]
+            SET index TO 0
+            WHILE TRUE
+                SET left TO index * 2 + 1
+                SET right TO index * 2 + 2
+                SET largest TO index
+
+                IF left < LENGTH(heap) AND heap[left][0] > heap[largest][0] THEN
+                    SET largest TO left
+                END IF
+
+                IF right < LENGTH(heap) AND heap[right][0] > heap[largest][0] THEN
+                    SET largest TO right
+                END IF
+
+                IF largest = index THEN
+                    BREAK
+                END IF
+
+                SWAP heap[index] WITH heap[largest]
+                SET index TO largest
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        DEFINE FUNCTION heapPeek(heap)
+            IF LENGTH(heap) > 0 THEN
+                RETURN heap[0]
+            ELSE
+                RETURN NULL
+            END IF
+        END FUNCTION
+
+        SET frequencyMap TO empty dictionary
+        SET heapList TO empty list
+        SET outputList TO empty list
+
+        DEFINE FUNCTION processPair(index, nList, fList)
+            IF index >= LENGTH(nList) THEN
+                RETURN
+            END IF
+            CALL addToDictionary(frequencyMap, nList[index], fList[index])
+            CALL heapPush(heapList, ARRAY(-frequencyMap[nList[index]], nList[index]))
+
+            WHILE LENGTH(heapList) > 0
+                SET topPair TO heapPeek(heapList)
+                SET freqValueMatch TO frequencyMap[topPair[1]]
+                IF -topPair[0] = freqValueMatch THEN
+                    BREAK
+                END IF
+                CALL heapPop(heapList)
+            END WHILE
+
+            IF LENGTH(heapList) > 0 THEN
+                APPEND -heapPeek(heapList)[0] TO outputList
+            ELSE
+                APPEND 0 TO outputList
+            END IF
+
+            CALL processPair(index + 1, nList, fList)
+        END FUNCTION
+
+        CALL processPair(0, numbers, frequencies)
+        RETURN outputList
+    END FUNCTION
+END CLASS

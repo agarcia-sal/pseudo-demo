@@ -1,0 +1,82 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+        ASSIGN self.mod := mod  
+        ASSIGN size := LENGTH OF s  
+        ASSIGN self.h := ARRAY of zeros WITH size PLUS 1 elements  
+        ASSIGN self.p := ARRAY of ones WITH size PLUS 1 elements  
+        SET idx := 1  
+        WHILE idx <= size  
+            ASSIGN temp1 := self.h[idx - 1] TIMES base  
+            ASSIGN temp2 := UNICODE CODE POINT OF s[idx - 1]  
+            ASSIGN self.h[idx] := (temp1 + temp2) MODULO mod  
+            ASSIGN self.p[idx] := (self.p[idx - 1] TIMES base) MODULO mod  
+            INCREMENT idx BY 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        ASSIGN part1 := self.h[r]  
+        ASSIGN part2 := (self.h[l - 1] TIMES self.p[r - l + 1]) MODULO self.mod  
+        ASSIGN result := (part1 - part2 + self.mod) MODULO self.mod  
+        RETURN result  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+        ASSIGN n := LENGTH OF s  
+        ASSIGN g := ARRAY of n empty ARRAYS  
+        ASSIGN i := 1  
+        WHILE i < n  
+            LET p := parent[i]  
+            APPEND i TO g[p]  
+            INCREMENT i BY 1  
+        END WHILE  
+
+        ASSIGN dfsStr := EMPTY ARRAY  
+        ASSIGN pos := EMPTY DICTIONARY  
+
+        FUNCTION dfs(idx)  
+            ASSIGN left := LENGTH OF dfsStr PLUS 1  
+            FOR EACH childElement IN g[idx] DO  
+                CALL dfs(childElement)  
+            END FOR  
+            APPEND s[idx] TO dfsStr  
+            ASSIGN right := LENGTH OF dfsStr  
+            ASSIGN pos[idx] := (left, right)  
+        END FUNCTION  
+
+        CALL dfs(0)  
+
+        ASSIGN base := 33331  
+        ASSIGN mod := 998244353  
+        ASSIGN h1 := NEW Hashing WITH (dfsStr, base, mod)  
+        ASSIGN reversedStr := EMPTY ARRAY  
+        ASSIGN j := LENGTH OF dfsStr  
+        WHILE j > 0  
+            APPEND dfsStr[j - 1] TO reversedStr  
+            DECREMENT j BY 1  
+        END WHILE  
+        ASSIGN h2 := NEW Hashing WITH (reversedStr, base, mod)  
+
+        ASSIGN results := EMPTY ARRAY  
+        ASSIGN index := 0  
+        WHILE index < n  
+            LET (leftBound, rightBound) := pos[index]  
+            ASSIGN lengthSub := rightBound - leftBound + 1  
+            IF (lengthSub % 2) == 0 THEN  
+                ASSIGN halfLen := lengthSub DIVIDED BY 2  
+                ASSIGN val1 := h1.query(leftBound, leftBound + halfLen - 1)  
+                ASSIGN val2 := h2.query(n - rightBound + 1, n - rightBound + halfLen)  
+            ELSE  
+                ASSIGN halfLen := lengthSub DIVIDED BY 2  
+                ASSIGN val1 := h1.query(leftBound, leftBound + halfLen - 1)  
+                ASSIGN val2 := h2.query(n - rightBound + 1, n - rightBound + halfLen)  
+            END IF  
+            APPEND (val1 == val2) TO results  
+            INCREMENT index BY 1  
+        END WHILE  
+
+        RETURN results  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,48 @@
+CLASS Solution  
+    FUNCTION longestSpecialPath(edges, nums)  
+        SET graph TO empty list of empty lists with the number of elements equal to the length of nums  
+        
+        FOR each edge consisting of u vertex v vertex and w weight IN edges  
+            APPEND pair consisting of vertex v and weight w TO element at position u of graph  
+            APPEND pair consisting of vertex u and weight w TO element at position v of graph  
+        END FOR  
+        
+        FUNCTION dfs(u, prev, leftBoundary, currentDepth)  
+            ACCESS maxLength from enclosing scope  
+            ACCESS minNodes from enclosing scope  
+            
+            SET prevDepth TO value obtained from lastSeenDepth dictionary for key element at position u of nums WITH DEFAULT zero  
+            SET element at key element at position u of nums in lastSeenDepth dictionary TO currentDepth  
+            
+            IF leftBoundary LESS THAN prevDepth THEN  
+                SET leftBoundary TO prevDepth  
+            END IF  
+            
+            SET length TO element at last position of prefix MINUS element at position leftBoundary of prefix  
+            SET nodes TO currentDepth MINUS leftBoundary  
+            
+            IF length GREATER THAN maxLength OR (length EQUALS maxLength AND nodes LESS THAN minNodes) THEN  
+                SET maxLength TO length  
+                SET minNodes TO nodes  
+            END IF  
+            
+            FOR each pair consisting of vertex v and weight w IN element at position u of graph  
+                IF v EQUALS prev THEN  
+                    CONTINUE to next iteration  
+                END IF  
+                APPEND element at last position of prefix PLUS w TO prefix  
+                CALL dfs with arguments v prev leftBoundary currentDepth PLUS one  
+                REMOVE last element from prefix  
+            END FOR  
+            
+            SET element at key element at position u of nums in lastSeenDepth dictionary TO prevDepth  
+        END FUNCTION  
+        
+        SET maxLength TO zero  
+        SET minNodes TO one  
+        SET prefix TO list containing single element zero  
+        SET lastSeenDepth TO empty dictionary  
+        CALL dfs with arguments zero MINUS one zero one  
+        RETURN list containing maxLength and minNodes  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,179 @@
+CLASS Solution
+    FUNCTION smallestNumber(num, t)
+        SET primeNumCount, isTotallyDivisible TO self._getPrimeCount(t)
+        IF isTotallyDivisible == FALSE THEN
+            RETURN "-1"
+        END IF
+
+        SET factorNumCount TO self._getFactorCount(primeNumCount)
+        SET totalFactors TO 0
+        FOR EACH freq IN factorNumCount.values()
+            SET totalFactors TO totalFactors + freq
+        END FOR
+        IF totalFactors > LENGTH(num) THEN
+            SET resultStr TO ""
+            FOR EACH factorStr, freqCount IN factorNumCount.items()
+                SET repeatIdx TO 0
+                WHILE repeatIdx < freqCount
+                    SET resultStr TO resultStr + factorStr
+                    SET repeatIdx TO repeatIdx + 1
+                END WHILE
+            END FOR
+            RETURN resultStr
+        END IF
+
+        SET primePrefixCount TO {}
+        FOR EACH digitChar IN num
+            SET digitVal TO INTEGER(digitChar)
+            FOR EACH k, v IN FACTOR_COUNTS[digitVal].items()
+                IF primePrefixCount CONTAINS k THEN
+                    SET primePrefixCount[k] TO primePrefixCount[k] + v
+                ELSE
+                    SET primePrefixCount[k] TO v
+                END IF
+            END FOR
+        END FOR
+
+        SET zeroPos TO LENGTH(num)
+        FOR pos FROM 0 TO LENGTH(num) - 1
+            IF CHAR_AT(num, pos) == '0' THEN
+                SET zeroPos TO pos
+                BREAK
+            END IF
+        END FOR
+
+        IF zeroPos == LENGTH(num) AND self._compareCounterSum(primeNumCount, primePrefixCount) <= 0 THEN
+            RETURN num
+        END IF
+
+        SET idxRev TO LENGTH(num) - 1
+        WHILE idxRev >= 0
+            SET chDigit TO CHAR_AT(num, idxRev)
+            SET intDigit TO INTEGER(chDigit)
+            FOR EACH k IN FACTOR_COUNTS[intDigit].keys()
+                SET primePrefixCount[k] TO primePrefixCount[k] - FACTOR_COUNTS[intDigit][k]
+            END FOR
+            SET tailLen TO (LENGTH(num) - 1) - idxRev
+
+            IF idxRev <= zeroPos THEN
+                SET candidateDigit TO intDigit + 1
+                WHILE candidateDigit <= 9
+                    SET candidatePrimeCount TO {}
+                    FOR EACH key IN primeNumCount.keys()
+                        SET candidatePrimeCount[key] TO primeNumCount[key] - primePrefixCount.get(key, 0) - FACTOR_COUNTS[candidateDigit].get(key, 0)
+                    END FOR
+
+                    SET sumCandidatePrime TO 0
+                    FOR EACH val IN candidatePrimeCount.values()
+                        SET sumCandidatePrime TO sumCandidatePrime + val
+                    END FOR
+
+                    IF sumCandidatePrime <= tailLen THEN
+                        SET fillOnesCount TO tailLen - sumCandidatePrime
+                        SET prefixSubstr TO ""
+                        IF idxRev > 0 THEN
+                            SET prefixSubstr TO SUBSTRING(num, 0, idxRev)
+                        END IF
+                        SET candidateStr TO prefixSubstr + STRING(candidateDigit) + REPEAT_CHAR('1', fillOnesCount)
+                        FOR EACH digitStr, freqVal IN candidatePrimeCount.items()
+                            SET repIdx2 TO 0
+                            WHILE repIdx2 < freqVal
+                                SET candidateStr TO candidateStr + digitStr
+                                SET repIdx2 TO repIdx2 + 1
+                            END WHILE
+                        END FOR
+                        RETURN candidateStr
+                    END IF
+                    SET candidateDigit TO candidateDigit + 1
+                END WHILE
+            END IF
+            SET idxRev TO idxRev - 1
+        END WHILE
+
+        SET factorNumCountFinal TO self._getFactorCount(primeNumCount)
+        SET sumFreq TO 0
+        FOR EACH val2 IN factorNumCountFinal.values()
+            SET sumFreq TO sumFreq + val2
+        END FOR
+        SET leadingOnesCount TO (LENGTH(num) + 1) - sumFreq
+        SET finalString TO REPEAT_CHAR('1', leadingOnesCount)
+        FOR EACH k2, v2 IN factorNumCountFinal.items()
+            SET rI TO 0
+            WHILE rI < v2
+                SET finalString TO finalString + k2
+                SET rI TO rI + 1
+            END WHILE
+        END FOR
+        RETURN finalString
+    END FUNCTION
+
+    FUNCTION _getPrimeCount(t)
+        SET primeCounts TO {}
+        SET primesList TO [2, 3, 5, 7]
+        FOR EACH primeNum IN primesList
+            WHILE t MOD primeNum == 0
+                SET t TO t / primeNum
+                IF primeNum IN primeCounts THEN
+                    SET primeCounts[primeNum] TO primeCounts[primeNum] + 1
+                ELSE
+                    SET primeCounts[primeNum] TO 1
+                END IF
+            END WHILE
+        END FOR
+        SET successFlag TO (t == 1)
+        RETURN primeCounts, successFlag
+    END FUNCTION
+
+    FUNCTION _getFactorCount(count)
+        SET twoVal TO count.get(2, 0)
+        SET threeVal TO count.get(3, 0)
+        SET fiveVal TO count.get(5, 0)
+        SET sevenVal TO count.get(7, 0)
+
+        SET countEight TO twoVal // 3
+        SET remTwo TO twoVal % 3
+
+        SET countNine TO threeVal // 2
+        SET countThreeRemainder TO threeVal % 2
+
+        SET countFour TO remTwo // 2
+        SET countTwoRemainder TO remTwo % 2
+
+        SET countSixVal TO 0
+        IF countTwoRemainder == 1 AND countThreeRemainder == 1 THEN
+            SET countTwoRemainder TO 0
+            SET countThreeRemainder TO 0
+            SET countSixVal TO 1
+        END IF
+
+        IF countThreeRemainder == 1 AND countFour == 1 THEN
+            SET countTwoRemainder TO 1
+            SET countSixVal TO 1
+            SET countThreeRemainder TO 0
+            SET countFour TO 0
+        END IF
+
+        RETURN {
+            "2": countTwoRemainder,
+            "3": countThreeRemainder,
+            "4": countFour,
+            "5": fiveVal,
+            "6": countSixVal,
+            "7": sevenVal,
+            "8": countEight,
+            "9": countNine
+        }
+    END FUNCTION
+
+    FUNCTION _compareCounterSum(counterA, counterB)
+        SET sumA TO 0
+        SET sumB TO 0
+        FOR EACH val IN counterA.values()
+            SET sumA TO sumA + val
+        END FOR
+        FOR EACH val IN counterB.values()
+            SET sumB TO sumB + val
+        END FOR
+        RETURN sumA - sumB
+    END FUNCTION
+END CLASS

@@ -1,0 +1,148 @@
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        FUNCTION makeEmptyList()
+            RETURN []
+        END FUNCTION
+
+        FUNCTION removeMin(heap)
+            FUNCTION siftDown(heapList)
+                SET lengthVar TO LENGTH of heapList
+                SET parentIdx TO 0
+                WHILE (parentIdx * 2 + 1) LESS THAN lengthVar
+                    SET leftChildIdx TO parentIdx * 2 + 1
+                    SET rightChildIdx TO leftChildIdx + 1
+                    SET smallestChildIdx TO leftChildIdx
+                    IF rightChildIdx LESS THAN lengthVar AND heapList[rightChildIdx][0] LESS THAN heapList[leftChildIdx][0]
+                        SET smallestChildIdx TO rightChildIdx
+                    END IF
+                    IF heapList[parentIdx][0] LESS THAN OR EQUAL TO heapList[smallestChildIdx][0]
+                        BREAK
+                    END IF
+                    SET heapList[parentIdx], heapList[smallestChildIdx] TO heapList[smallestChildIdx], heapList[parentIdx]
+                    SET parentIdx TO smallestChildIdx
+                END WHILE
+            END FUNCTION
+
+            SET lastItem TO heap[ LENGTH of heap MINUS 1]
+            SET minItem TO heap[0]
+            SET heap[0] TO lastItem
+            DELETE heap[ LENGTH of heap MINUS 1]
+            CALL siftDown(heap)
+            RETURN minItem
+        END FUNCTION
+
+        FUNCTION heapify(listToHeapify)
+            FUNCTION siftUp(heapList, idx)
+                WHILE idx GREATER THAN 0
+                    SET parentIdx TO (idx MINUS 1) DIV 2
+                    IF heapList[idx][0] GREATER THAN OR EQUAL TO heapList[parentIdx][0]
+                        BREAK
+                    END IF
+                    SET heapList[idx], heapList[parentIdx] TO heapList[parentIdx], heapList[idx]
+                    SET idx TO parentIdx
+                END WHILE
+            END FUNCTION
+
+            SET lengthVar TO LENGTH of listToHeapify
+            SET idx TO 1
+            WHILE idx LESS THAN lengthVar
+                CALL siftUp(listToHeapify, idx)
+                SET idx TO idx PLUS 1
+            END WHILE
+        END FUNCTION
+
+        SET tempList TO makeEmptyList()
+        SET posIdx TO 0
+        WHILE posIdx LESS THAN LENGTH of nums
+            SET elementPair TO (nums[posIdx], posIdx)
+            CALL tempList.APPEND(elementPair)
+            SET posIdx TO posIdx PLUS 1
+        END WHILE
+
+        CALL heapify(tempList)
+
+        FUNCTION contains(setCollection, element)
+            RETURN element IN setCollection
+        END FUNCTION
+
+        FUNCTION addElement(setCollection, element)
+            CALL setCollection.ADD(element)
+        END FUNCTION
+
+        FUNCTION sumElements(listElems)
+            SET accumulator TO 0
+            SET idxLocal TO 0
+            WHILE idxLocal LESS THAN LENGTH of listElems
+                SET accumulator TO accumulator PLUS listElems[idxLocal]
+                SET idxLocal TO idxLocal PLUS 1
+            END WHILE
+            RETURN accumulator
+        END FUNCTION
+
+        SET indicatorSet TO new SET()
+        SET runningSum TO sumElements(nums)
+        SET answerList TO makeEmptyList()
+
+        FUNCTION getQueryLength(collection)
+            RETURN LENGTH of collection
+        END FUNCTION
+
+        SET queryPointer TO 0
+        WHILE queryPointer LESS THAN getQueryLength(queries)
+            SET pairItem TO queries[queryPointer]
+            SET idxVal TO pairItem[0]
+            SET kVal TO pairItem[1]
+
+            IF contains(indicatorSet, idxVal) EQUALS false
+                CALL addElement(indicatorSet, idxVal)
+                SET runningSum TO runningSum MINUS nums[idxVal]
+            END IF
+
+            FUNCTION processHeap(countLimit, heapLocal, markedSet)
+                FUNCTION recursivePop(countNow, remainingCount, heapState, markedInd)
+                    IF remainingCount LESS THAN 1 OR LENGTH of heapState EQUALS 0
+                        RETURN countNow, heapState, markedInd
+                    END IF
+                    SET poppedPair TO removeMin(heapState)
+                    SET valExtracted TO poppedPair[0]
+                    SET idxExtracted TO poppedPair[1]
+
+                    IF contains(markedInd, idxExtracted) EQUALS false
+                        CALL addElement(markedInd, idxExtracted)
+                        RETURN recursivePop(countNow + 1, remainingCount - 1, heapState, markedInd)
+                    ELSE
+                        RETURN recursivePop(countNow, remainingCount, heapState, markedInd)
+                    END IF
+                END FUNCTION
+
+                RETURN recursivePop(0, countLimit, heapLocal, markedSet)
+            END FUNCTION
+
+            SET poppedCount TO 0
+            SET tempHeap TO tempList
+            SET tempMarked TO indicatorSet
+            SET poppedCount, tempHeap, tempMarked TO processHeap(kVal, tempHeap, tempMarked)
+            SET tempList TO tempHeap
+            SET indicatorSet TO tempMarked
+
+            FUNCTION recomputeSum(runningTotal, exclusionSet, numberList)
+                SET idxIter TO 0
+                SET accSum TO runningTotal
+                WHILE idxIter LESS THAN LENGTH of numberList
+                    IF contains(exclusionSet, idxIter) EQUALS true
+                        SET accSum TO accSum MINUS numberList[idxIter]
+                    END IF
+                    SET idxIter TO idxIter PLUS 1
+                END WHILE
+                RETURN accSum
+            END FUNCTION
+
+            SET runningSum TO recomputeSum(runningSum, indicatorSet, nums) PLUS (runningSum - recomputeSum(runningSum, indicatorSet, nums))
+
+            CALL answerList.APPEND(runningSum)
+            SET queryPointer TO queryPointer PLUS 1
+        END WHILE
+
+        RETURN answerList
+    END FUNCTION
+END CLASS

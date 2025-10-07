@@ -1,0 +1,119 @@
+```pseudocode
+CLASS Solution
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+
+      SET CONST_MOD TO ( ( 1000 * 1000 * 1000 ) + 1 )
+
+      SET matrix_transformation TO empty list
+      FOR alpha FROM 0 TO 25 DO
+         SET row_alpha TO empty list
+         FOR beta FROM 0 TO 25 DO
+           APPEND 0 TO row_alpha
+         END FOR
+         APPEND row_alpha TO matrix_transformation
+      END FOR
+
+      SET index_i TO 0
+      WHILE index_i <= 25
+         SET index_j TO 0
+         REPEAT
+            IF index_j >= nums[index_i] THEN EXIT
+            SET column_index TO ( index_i + index_j + 1 ) MOD 26
+            SET matrix_transformation[index_i][column_index] = matrix_transformation[index_i][column_index] + 1
+            SET index_j TO index_j + 1
+         UNTIL FALSE
+         SET index_i TO index_i + 1
+      END WHILE
+
+      FUNCTION multiply_matrices(M1 parameter M1 IS list of lists of integers M2 parameter M2 IS list of lists of integers) RETURNS list of lists of integers
+         SET mat_res TO empty list
+         FOR row FROM 0 TO 25
+            SET temp_row TO empty list
+            FOR col FROM 0 TO 25
+               APPEND 0 TO temp_row
+            END FOR
+            APPEND temp_row TO mat_res
+         END FOR
+
+         FOR idx_i FROM 0 TO 25
+            SET idx_j TO 0
+            WHILE idx_j <= 25
+               SET idx_k TO 0
+               REPEAT
+                  IF idx_k > 25 THEN EXIT
+                  SET val_before TO mat_res[idx_i][idx_j]
+                  SET val_addition TO ( M1[idx_i][idx_k] * M2[idx_k][idx_j] ) MOD CONST_MOD
+                  SET mat_res[idx_i][idx_j] = ( val_before + val_addition ) MOD CONST_MOD
+                  SET idx_k TO idx_k + 1
+               UNTIL FALSE
+               SET idx_j TO idx_j + 1
+            END WHILE
+         END FOR
+
+         RETURN mat_res
+      END FUNCTION
+
+      FUNCTION power_matrix(base_mat parameter base_mat IS list of lists of integers exponent parameter exponent IS integer) RETURNS list of lists of integers
+         SET identity_mat TO empty list
+         FOR row_index FROM 0 TO 25
+            SET ident_row TO empty list
+            FOR col_index FROM 0 TO 25
+               IF row_index = col_index THEN
+                  APPEND 1 TO ident_row
+               ELSE
+                  APPEND 0 TO ident_row
+               END IF
+            END FOR
+            APPEND ident_row TO identity_mat
+         END FOR
+
+         SET current_base TO base_mat
+         SET exp_counter TO exponent
+         WHILE exp_counter != 0
+            IF (exp_counter MOD 2) != 0 THEN
+               SET identity_mat TO multiply_matrices(identity_mat, current_base)
+            END IF
+            SET current_base TO multiply_matrices(current_base, current_base)
+            SET exp_counter TO exp_counter DIV 2
+         END WHILE
+
+         RETURN identity_mat
+      END FUNCTION
+
+      SET powered_matrix TO power_matrix(matrix_transformation, t)
+
+      SET count_chars TO empty list
+      FOR i_idx FROM 0 TO 25
+         APPEND 0 TO count_chars
+      END FOR
+
+      FOR ch IN s
+         SET pos_val TO (ASCII(ch) - ASCII('a'))
+         SET prev_val TO count_chars[pos_val]
+         SET count_chars[pos_val] = prev_val + 1
+      END FOR
+
+      SET final_counting TO empty list
+      FOR idx_j FROM 0 TO 25
+         APPEND 0 TO final_counting
+      END FOR
+
+      FOR idx_i FROM 0 TO 25
+         SET idx_j TO 0
+         WHILE idx_j <= 25
+            SET prev_final TO final_counting[idx_j]
+            SET addition_val TO ( count_chars[idx_i] * powered_matrix[idx_i][idx_j] ) MOD CONST_MOD
+            SET final_counting[idx_j] = (prev_final + addition_val) MOD CONST_MOD
+            SET idx_j TO idx_j + 1
+         END WHILE
+      END FOR
+
+      SET acc_sum TO 0
+      FOR element IN final_counting
+         SET acc_sum = (acc_sum + element) MOD CONST_MOD
+      END FOR
+
+      RETURN acc_sum
+    END FUNCTION
+END CLASS
+```

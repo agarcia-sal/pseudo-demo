@@ -1,0 +1,61 @@
+CLASS Solution
+	FUNCTION countDays(days, meetings)
+		DEFINE FUNCTION mySort(arr, cmp)
+			DEFINE FUNCTION swap(a, b)
+				SET temp TO arr[a]
+				SET arr[a] TO arr[b]
+				SET arr[b] TO temp
+			END FUNCTION
+			SET n TO 0
+			WHILE n LESS THAN LENGTH(arr) - 1
+				SET i TO 0
+				SET swapped TO false
+				REPEAT
+					IF cmp(arr[i], arr[i + 1]) GREATER THAN 0 THEN
+						CALL swap(i, i + 1)
+						SET swapped TO true
+					END IF
+					SET i TO i + 1
+				UNTIL i GREATER THAN OR EQUAL TO LENGTH(arr) - 1
+				IF NOT swapped THEN
+					SET n TO LENGTH(arr) - 1
+				ELSE
+					SET n TO n + 1
+				END IF
+			END WHILE
+		END FUNCTION
+
+		DEFINE FUNCTION cmpFirstElement(a, b)
+			RETURN a[0] - b[0]
+		END FUNCTION
+
+		CALL mySort(meetings, cmpFirstElement)
+
+		SET x TO 1
+		SET y TO 0
+
+		DEFINE FUNCTION processMeetings(index)
+			IF index GREATER THAN OR EQUAL TO LENGTH(meetings) THEN
+				RETURN
+			END IF
+			SET m TO meetings[index]
+			SET s TO m[0]
+			SET e TO m[1]
+			IF x LESS THAN s THEN
+				SET diff TO s - x
+				SET y TO y + diff
+			END IF
+			SET x TO (x GREATER THAN e) * x + (x LESS THAN OR EQUAL TO e) * (e + 1)
+			CALL processMeetings(index + 1)
+		END FUNCTION
+
+		CALL processMeetings(0)
+
+		IF x LESS THAN OR EQUAL TO days THEN
+			SET delta TO (days - x + 1)
+			SET y TO y + delta
+		END IF
+
+		RETURN y
+	END FUNCTION
+END CLASS

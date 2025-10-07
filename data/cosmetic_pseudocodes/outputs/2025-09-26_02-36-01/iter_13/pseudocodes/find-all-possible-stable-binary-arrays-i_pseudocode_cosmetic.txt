@@ -1,0 +1,41 @@
+CLASS Solution
+    FUNCTION numberOfStableArrays(zero, one, limit)
+        CONST MODULO_CONST <- (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+
+        FUNCTION recursiveHelper(remainingZeroes, remainingOnes, previousChar, previousRun)
+            SET answerHolder TO 0
+
+            FUNCTION addModulo(a, b)
+                RETURN (a + b) - ((a + b) / MODULO_CONST) * MODULO_CONST
+            END FUNCTION
+
+            IF (remainingZeroes = 0) AND (remainingOnes = 0) THEN
+                RETURN 1
+            END IF
+
+            IF (remainingZeroes < 0) OR (remainingOnes < 0) THEN
+                RETURN 0
+            END IF
+
+            IF NOT (previousChar = 0) OR (previousRun < limit) THEN
+                SET nextRunLength TO 1
+                IF previousChar = 0 THEN
+                    nextRunLength <- previousRun + 1
+                END IF
+                SET answerHolder TO addModulo(answerHolder, recursiveHelper(remainingZeroes - 1, remainingOnes, 0, nextRunLength))
+            END IF
+
+            IF (previousChar <> 1) OR NOT (previousRun >= limit) THEN
+                SET nextCount TO 1
+                IF previousChar = 1 THEN
+                    nextCount <- previousRun + 1
+                END IF
+                SET answerHolder TO addModulo(answerHolder, recursiveHelper(remainingZeroes, remainingOnes - 1, 1, nextCount))
+            END IF
+
+            RETURN answerHolder
+        END FUNCTION
+
+        RETURN recursiveHelper(zero, one, -1, 0)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION constructGridLayout(n, edges)
+        INITIALIZE graph AS list with n elements, each an empty list
+        FOR EACH (u, v) IN edges DO
+            graph[u].ADD(v)
+            graph[v].ADD(u)
+        END FOR
+
+        CREATE degreePositions AS list of size 5 filled with -1
+        FOR index i FROM 0 TO LENGTH(graph) - 1 DO
+            lengthDegree = LENGTH(graph[i])
+            degreePositions[lengthDegree] = i
+        END FOR
+
+        DECLARE row AS EMPTY LIST
+        IF degreePositions[1] IS NOT -1 THEN
+            row = [degreePositions[1]]
+        ELSE IF degreePositions[4] IS -1 THEN
+            candidate = degreePositions[2]
+            FOR neighbor IN graph[candidate] DO
+                IF LENGTH(graph[neighbor]) == 2 THEN
+                    row = [candidate, neighbor]
+                    BREAK
+                END IF
+            END FOR
+        ELSE
+            current = degreePositions[2]
+            row = [current]
+            previous = current
+            current = graph[current][0]
+            WHILE LENGTH(graph[current]) > 2 DO
+                row.ADD(current)
+                FOR neighbor IN graph[current] DO
+                    IF neighbor != previous AND LENGTH(graph[neighbor]) < 4 THEN
+                        previous = current
+                        current = neighbor
+                        BREAK
+                    END IF
+                END FOR
+            END WHILE
+            row.ADD(current)
+        END IF
+
+        answer = [row]
+        visited = list of size n initialized with FALSE
+        steps = n / LENGTH(row) - 1
+        FOR i FROM 1 TO steps DO
+            FOR node IN row DO
+                visited[node] = TRUE
+            END FOR
+            nextRow = EMPTY LIST
+            FOR node IN row DO
+                FOR neighbor IN graph[node] DO
+                    IF visited[neighbor] == FALSE THEN
+                        nextRow.ADD(neighbor)
+                        BREAK
+                    END IF
+                END FOR
+            END FOR
+            answer.ADD(nextRow)
+            row = nextRow
+        END FOR
+
+        RETURN answer
+    END FUNCTION
+END CLASS

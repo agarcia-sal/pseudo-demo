@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        FUNCTION push_all(heap FUNCTION PARAMETER, elements FUNCTION PARAMETER) RETURNS VOID
+            INDEX_VAR := 0
+            PROCEDURE push_element()
+                IF INDEX_VAR < LENGTH(elements) THEN
+                    CALL heap_append(heap, elements[INDEX_VAR])
+                    INDEX_VAR := INDEX_VAR + 1
+                    CALL push_element()
+                END IF
+            END PROCEDURE
+            CALL push_element()
+        END FUNCTION
+
+        FUNCTION pop_valid(heap FUNCTION PARAMETER, excluded_set FUNCTION PARAMETER) RETURNS tuple
+            LOCAL popped := NULL
+            REPEAT
+                IF LENGTH(heap) = 0 THEN
+                    RETURN NULL, NULL
+                END IF
+                popped := CALL heap_pop(heap)
+            UNTIL NOT popped[1] IN excluded_set
+            RETURN popped[0], popped[1]
+        END FUNCTION
+
+        DECLARE container_heap := []
+        DECLARE elements_list := []
+        FOR idx_var := 0 TO LENGTH(nums) - 1
+            elements_list := elements_list + [(nums[idx_var], idx_var)]
+        END FOR
+        CALL push_all(container_heap, elements_list)
+        CALL heapify(container_heap)
+
+        DECLARE excluded_indices := SET()
+        DECLARE summation := 0
+        DECLARE result_list := []
+        FOR elem := 0 TO LENGTH(nums) - 1
+            summation := summation + nums[elem]
+        END FOR
+
+        DECLARE query_pos := 0
+        WHILE query_pos < LENGTH(queries)
+            DECLARE pos_index, k_val := queries[query_pos][0], queries[query_pos][1]
+            IF NOT pos_index IN excluded_indices THEN
+                excluded_indices := excluded_indices + SET(pos_index)
+                summation := summation + (-1 * nums[pos_index])
+            END IF
+
+            DECLARE counter := 0
+            DECLARE continue_loop := TRUE
+            WHILE continue_loop
+                IF counter >= k_val OR LENGTH(container_heap) = 0 THEN
+                    continue_loop := FALSE
+                ELSE
+                    DECLARE val_popped, idx_popped := CALL pop_valid(container_heap, excluded_indices)
+                    IF idx_popped = NULL THEN
+                        continue_loop := FALSE
+                    ELSE
+                        excluded_indices := excluded_indices + SET(idx_popped)
+                        summation := summation + (-1 * val_popped)
+                        counter := counter + 1
+                    END IF
+                END IF
+            END WHILE
+
+            result_list := result_list + [summation]
+            query_pos := query_pos + 1
+        END WHILE
+
+        RETURN result_list
+    END FUNCTION
+END CLASS

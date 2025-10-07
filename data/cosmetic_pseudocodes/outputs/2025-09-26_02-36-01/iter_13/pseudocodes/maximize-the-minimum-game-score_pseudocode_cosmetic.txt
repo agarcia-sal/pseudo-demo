@@ -1,0 +1,48 @@
+class Solution
+    function maxScore(points, m)
+        function isPossible(minVal, m)
+            assign counter := 0
+            assign prior := 0
+            assign idx := 0
+            repeat-until idx >= length(points)
+                assign curPoint := points[idx]
+                assign neededRaw := (minVal + curPoint - 1) / curPoint
+                assign neededFloor := floor(neededRaw)
+                assign needed := neededFloor
+                if (needed - prior) < 0 then
+                    assign needed := 0
+                else
+                    assign needed := needed - prior
+                end if
+                if needed > 0 then
+                    assign counter := counter + 2 * needed - 1
+                    assign prior := needed - 1
+                else
+                    if idx + 1 < length(points) then
+                        assign counter := counter + 1
+                        assign prior := 0
+                    end if
+                end if
+                if counter > m then
+                    return false
+                end if
+                assign idx := idx + 1
+            end repeat-until
+            return true
+        end function
+
+        assign low := 0
+        assign high := ((m + 1) / 2) * (points[0] + 1)
+
+        while low < high
+            assign midpoint := (low + high + 1) / 2
+            if isPossible(midpoint, m) = true then
+                assign low := midpoint
+            else
+                assign high := midpoint - 1
+            end if
+        end while
+
+        return low
+    end function
+end class

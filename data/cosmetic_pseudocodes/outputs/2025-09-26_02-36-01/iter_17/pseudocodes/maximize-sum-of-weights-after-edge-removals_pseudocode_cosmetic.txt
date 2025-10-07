@@ -1,0 +1,85 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, size)  
+        BEGIN  
+            DECLARE a, b  
+            SET a TO 0  
+            SET b TO size - 1  
+            SET self.parent TO EMPTY LIST  
+            SET self.rank TO EMPTY LIST  
+            WHILE a <= b DO  
+                APPEND a TO self.parent  
+                APPEND 0 TO self.rank  
+                SET a TO a + 1  
+            END WHILE  
+        END  
+    END FUNCTION  
+  
+    FUNCTION find(self, u)  
+        BEGIN  
+            DECLARE val, res  
+            SET val TO self.parent[u]  
+            IF val <> u THEN  
+                SET res TO self.find(val)  
+                SET self.parent[u] TO res  
+            END IF  
+            RETURN self.parent[u]  
+        END  
+    END FUNCTION  
+  
+    FUNCTION union(self, u, v)  
+        BEGIN  
+            DECLARE p, q  
+            SET p TO self.find(u)  
+            SET q TO self.find(v)  
+            IF p <> q THEN  
+                IF self.rank[p] > self.rank[q] THEN  
+                    SET self.parent[q] TO p  
+                ELSE  
+                    IF self.rank[p] < self.rank[q] THEN  
+                        SET self.parent[p] TO q  
+                    ELSE  
+                        SET self.parent[q] TO p  
+                        SET self.rank[p] TO self.rank[p] + 1  
+                    END IF  
+                END IF  
+            END IF  
+        END  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION maximizeSumOfWeights(self, edges, k)  
+        BEGIN  
+            DECLARE totalCount, indices, counts, unionFindInstance, currentSum, idx  
+            SET totalCount TO LENGTH(edges) + 1  
+            SET counts TO LIST OF ZEROS WITH LENGTH totalCount  
+            SET unionFindInstance TO UnionFind(totalCount)  
+            SET currentSum TO 0  
+              
+            FUNCTION comparator(a, b)  
+                RETURN (a[2] >= b[2])  
+            END FUNCTION  
+              
+            CALL SORT edges BY comparator IN DESCENDING ORDER  
+              
+            SET idx TO 0  
+            WHILE idx < LENGTH(edges) DO  
+                BEGIN  
+                    DECLARE edgeU, edgeV, edgeW, canConnect  
+                    SET edgeU TO edges[idx][0]  
+                    SET edgeV TO edges[idx][1]  
+                    SET edgeW TO edges[idx][2]  
+                    SET canConnect TO (counts[edgeU] < k) AND (counts[edgeV] < k) AND (unionFindInstance.find(edgeU) <> unionFindInstance.find(edgeV))  
+                    IF canConnect THEN  
+                        CALL unionFindInstance.union(edgeU, edgeV)  
+                        SET counts[edgeU] TO counts[edgeU] + 1  
+                        SET counts[edgeV] TO counts[edgeV] + 1  
+                        SET currentSum TO currentSum + edgeW  
+                    END IF  
+                    SET idx TO idx + 1  
+                END  
+            END WHILE  
+            RETURN currentSum  
+        END  
+    END FUNCTION  
+END CLASS

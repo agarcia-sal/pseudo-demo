@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION countDays(days, meetings)
+        PROCEDURE sortMeetings(index, length, arr)
+            IF index >= length - 1 THEN RETURN
+            SET minIdx TO index
+            SET j TO index + 1
+            WHILE j < length
+                IF arr[j][0] < arr[minIdx][0] THEN SET minIdx TO j
+                SET j TO j + 1
+            END WHILE
+            IF minIdx != index
+                SET temp TO arr[index]
+                SET arr[index] TO arr[minIdx]
+                SET arr[minIdx] TO temp
+            END IF
+            CALL sortMeetings(index + 1, length, arr)
+        END PROCEDURE
+
+        CALL sortMeetings(0, LENGTH(meetings), meetings)
+
+        SET dayCursor TO 1
+        SET freeDaysCount TO 0
+
+        FUNCTION processMeetings(pos, total, meets, curr, freeCount)
+            IF pos == total THEN RETURN freeCount
+            SET meetStart TO meets[pos][0]
+            SET meetEnd TO meets[pos][1]
+
+            IF curr < meetStart THEN
+                SET diff TO meetStart - curr
+                SET freeCount TO freeCount + diff
+            END IF
+
+            SET nextDay TO (IF curr > meetEnd THEN curr ELSE meetEnd + 1)
+            RETURN processMeetings(pos + 1, total, meets, nextDay, freeCount)
+        END FUNCTION
+
+        SET freeDaysCount TO processMeetings(0, LENGTH(meetings), meetings, dayCursor, freeDaysCount)
+
+        IF dayCursor <= days THEN
+            SET gap TO days - dayCursor + 1
+            SET freeDaysCount TO freeDaysCount + gap
+        END IF
+
+        IF dayCursor > days THEN
+            SET available TO freeDaysCount
+        ELSE
+            SET available TO freeDaysCount
+        END IF
+
+        RETURN available
+    END FUNCTION
+END CLASS

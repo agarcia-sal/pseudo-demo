@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION minOperationsToMakeMedianK(nums k)
+        PROCEDURE AscendSort(arr)
+            FUNCTION Partition(low high)
+                SET pivotVal TO arr[high]
+                SET i TO low - 1
+                SET j TO low
+                WHILE j <= high - 1
+                    IF arr[j] <= pivotVal
+                        SET i TO i + 1
+                        CALL Swap(i j)
+                    END IF
+                    SET j TO j + 1
+                END WHILE
+                CALL Swap(i + 1 high)
+                RETURN i + 1
+            END FUNCTION
+
+            PROCEDURE QuickSort(low high)
+                IF low < high
+                    SET pi TO Partition(low high)
+                    CALL QuickSort(low pi - 1)
+                    CALL QuickSort(pi + 1 high)
+                END IF
+            END PROCEDURE
+
+            PROCEDURE Swap(x y)
+                SET temp TO arr[x]
+                SET arr[x] TO arr[y]
+                SET arr[y] TO temp
+            END PROCEDURE
+
+            CALL QuickSort(0 LENGTH(arr) - 1)
+        END PROCEDURE
+
+        CALL AscendSort(nums)
+        SET m TO LENGTH(nums)
+        SET p TO m DIV 2
+
+        FUNCTION Equal(a b)
+            RETURN (NOT (a < b)) AND (NOT (b < a))
+        END FUNCTION
+
+        IF Equal(nums[p] k)
+            RETURN 0
+        END IF
+
+        SET sumOps TO 0
+
+        FUNCTION Less(a b)
+            RETURN (a < b)
+        END FUNCTION
+
+        PROCEDURE IncrementOpsForward()
+            SET q TO p
+            WHILE TRUE
+                IF NOT Less(nums[q] k)
+                    BREAK
+                END IF
+                SET delta TO k - nums[q]
+                SET sumOps TO sumOps + delta
+                SET q TO q + 1
+                IF q >= m
+                    BREAK
+                END IF
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE IncrementOpsBackward()
+            SET r TO p
+            WHILE TRUE
+                IF NOT Less(k nums[r])
+                    BREAK
+                END IF
+                SET delta TO nums[r] - k
+                SET sumOps TO sumOps + delta
+                SET r TO r - 1
+                IF r < 0
+                    BREAK
+                END IF
+            END WHILE
+        END PROCEDURE
+
+        IF Less(nums[p] k)
+            CALL IncrementOpsForward()
+        ELSE
+            CALL IncrementOpsBackward()
+        END IF
+
+        RETURN sumOps
+    END FUNCTION
+END CLASS

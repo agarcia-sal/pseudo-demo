@@ -1,0 +1,75 @@
+```
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        DEFINE FUNCTION extractMin(heapParam) RETURNS tuple
+            RETURN heappop(heapParam)
+        END FUNCTION
+
+        SET heapContainer TO []
+        SET iteratorIndex TO 0
+        SET iteratorValue TO 0
+        SET enumerIndex TO 0
+
+        LOOP
+            IF enumerIndex >= LENGTH(nums) THEN
+                BREAK
+            END IF
+
+            SET iteratorValue TO nums[enumerIndex]
+            SET iteratorIndex TO enumerIndex
+            APPEND [iteratorValue, iteratorIndex] TO heapContainer
+            SET enumerIndex TO enumerIndex + 1
+        END LOOP
+
+        CALL heapify(heapContainer)
+
+        SET collectedMarks TO {}
+        SET aggregateSum TO 0
+        SET idxCounter TO 0
+        LOOP
+            IF idxCounter >= LENGTH(nums) THEN
+                BREAK
+            END IF
+
+            SET aggregateSum TO aggregateSum + nums[idxCounter]
+            SET idxCounter TO idxCounter + 1
+        END LOOP
+
+        SET outputList TO []
+        SET queryCursor TO 0
+
+        LOOP
+            IF queryCursor >= LENGTH(queries) THEN
+                BREAK
+            END IF
+
+            SET currentIndex TO queries[queryCursor][0]
+            SET currentK TO queries[queryCursor][1]
+
+            IF NOT (currentIndex IN collectedMarks) THEN
+                ADD currentIndex TO collectedMarks
+                SET aggregateSum TO aggregateSum + (-1 * nums[currentIndex])
+            END IF
+
+            SET hitsCounter TO 0
+
+            WHILE hitsCounter < currentK AND LENGTH(heapContainer) > 0
+                SET unpackedPair TO extractMin(heapContainer)
+                SET valExtracted TO unpackedPair[0]
+                SET idxExtracted TO unpackedPair[1]
+
+                IF NOT (idxExtracted IN collectedMarks) THEN
+                    ADD idxExtracted TO collectedMarks
+                    SET aggregateSum TO aggregateSum - valExtracted
+                    SET hitsCounter TO hitsCounter + 1
+                END IF
+            END WHILE
+
+            APPEND aggregateSum TO outputList
+            SET queryCursor TO queryCursor + 1
+        END LOOP
+
+        RETURN outputList
+    END FUNCTION
+END CLASS
+```

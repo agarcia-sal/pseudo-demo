@@ -1,0 +1,95 @@
+CLASS Solution
+    FUNCTION numberOfSpecialChars(word)
+        FUNCTION lookupContainsKey(collection,key)
+            INDEX := 0
+            REPEAT
+                IF INDEX >= length(collection) THEN
+                    RETURN false
+                END IF
+                IF collection[INDEX].key == key THEN
+                    RETURN true
+                END IF
+                INDEX := INDEX + 1
+            UNTIL false
+        END FUNCTION
+
+        FUNCTION assignKeyValue(collection,key,value)
+            INDEX := 0
+            LOOP
+                IF INDEX >= length(collection) THEN
+                    collection := collection + [(key,value)]
+                    RETURN
+                END IF
+                IF collection[INDEX].key == key THEN
+                    collection[INDEX].value := value
+                    RETURN
+                END IF
+                INDEX := INDEX + 1
+            END LOOP
+        END FUNCTION
+
+        FUNCTION getValue(collection,key)
+            IDX := 0
+            WHILE IDX < length(collection)
+                IF collection[IDX].key == key THEN
+                    RETURN collection[IDX].value
+                END IF
+                IDX := IDX + 1
+            END WHILE
+        END FUNCTION
+
+        FUNCTION getKeys(collection)
+            RESULT := []
+            IDX2 := 0
+            REPEAT
+                IF IDX2 >= length(collection) THEN
+                    RETURN RESULT
+                END IF
+                RESULT := RESULT + [collection[IDX2].key]
+                IDX2 := IDX2 + 1
+            UNTIL false
+        END FUNCTION
+
+        LOWERCASE := array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z')
+        UPPERCASE := array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z')
+
+        first := []  // collection of key-value pairs
+        last := []
+
+        FUNCTION processChars(pos,wordlength)
+            IF pos >= wordlength THEN
+                RETURN
+            END IF
+            char := word[pos]
+            IF NOT lookupContainsKey(first,char) THEN
+                assignKeyValue(first,char,pos)
+            END IF
+            assignKeyValue(last,char,pos)
+            processChars(pos + 1, wordlength)
+        END FUNCTION
+
+        processChars(0, length(word))
+
+        count := 0
+
+        FUNCTION countAccum(index)
+            IF index >= length(LOWERCASE) THEN
+                RETURN count
+            END IF
+            a := LOWERCASE[index]
+            b := UPPERCASE[index]
+            cond1 := lookupContainsKey(last,a)
+            cond2 := lookupContainsKey(first,b)
+            IF cond1 AND cond2 THEN
+                valA := getValue(last,a)
+                valB := getValue(first,b)
+                IF valA < valB THEN
+                    count := count + 1
+                END IF
+            END IF
+            RETURN countAccum(index + 1)
+        END FUNCTION
+
+        RETURN countAccum(0)
+    END FUNCTION
+END CLASS

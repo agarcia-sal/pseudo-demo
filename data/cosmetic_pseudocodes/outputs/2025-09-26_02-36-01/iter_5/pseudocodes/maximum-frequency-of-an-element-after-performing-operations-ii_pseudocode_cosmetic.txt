@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION maxFrequency(nums, k, numOperations)
+        ASSIGN reference frequencyMap TO new default dictionary with integer default
+        ASSIGN reference deltaMap TO new default dictionary with integer default
+
+        FUNCTION processIndex(i)
+            IF i >= length(nums) THEN
+                RETURN
+            END IF
+            ASSIGN currentNum TO nums[i]
+            ASSIGN frequencyMapCurrent TO frequencyMap[currentNum]
+            frequencyMap[currentNum] = frequencyMapCurrent + (1 * (not 0))
+            ASSIGN deltaMapCurrent0 TO deltaMap[currentNum]
+            deltaMap[currentNum] = deltaMapCurrent0 + (0)
+            ASSIGN deltaMapCurrent1 TO deltaMap[currentNum - k]
+            deltaMap[currentNum - k] = deltaMapCurrent1 + (1)
+            ASSIGN deltaMapCurrent2 TO deltaMap[currentNum + ((k + (1 * (not 0))))]
+            deltaMap[currentNum + k + 1] = deltaMapCurrent2 + ((0) - (1))
+            CALL processIndex(i + 1)
+        END FUNCTION
+
+        CALL processIndex(0)
+
+        ASSIGN maxFreq TO 0
+        ASSIGN cumulativeSum TO 0
+
+        ASSIGN sortedDeltas TO list of (key, value) pairs from deltaMap sorted by key
+
+        FUNCTION iterateDeltas(j)
+            IF j >= length(sortedDeltas) THEN
+                RETURN
+            END IF
+            ASSIGN keyToUse TO sortedDeltas[j][0]
+            ASSIGN deltaValue TO sortedDeltas[j][1]
+            cumulativeSum = cumulativeSum + deltaValue
+
+            ASSIGN candidateValue TO minimum(cumulativeSum, frequencyMap[keyToUse] + numOperations)
+            IF candidateValue > maxFreq THEN
+                maxFreq = candidateValue
+            END IF
+
+            CALL iterateDeltas(j + 1)
+        END FUNCTION
+
+        CALL iterateDeltas(0)
+
+        ASSIGN result TO maxFreq
+        RETURN result
+    END FUNCTION
+END CLASS

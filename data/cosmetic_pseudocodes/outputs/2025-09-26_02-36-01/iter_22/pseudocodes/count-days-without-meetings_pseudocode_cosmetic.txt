@@ -1,0 +1,43 @@
+CLASS Solution
+    FUNCTION countDays(days, meetings)
+        PROCEDURE sortByStart(list)
+            DECLARE i ← 1
+            WHILE i < LENGTH(list)
+                DECLARE j ← 0
+                WHILE j < LENGTH(list) - i
+                    IF NOT (list[j][0] ≤ list[j + 1][0])
+                        DECLARE temp ← list[j]
+                        SET list[j] ← list[j + 1]
+                        SET list[j + 1] ← temp
+                    END IF
+                    INCREMENT j BY 1
+                END WHILE
+                INCREMENT i BY 1
+            END WHILE
+        END PROCEDURE
+        CALL sortByStart(meetings)
+        DECLARE idx ← 0
+        DECLARE freeCount ← 0
+        DECLARE dayPointer ← 1
+        WHILE idx < LENGTH(meetings)
+            DECLARE interval ← meetings[idx]
+            DECLARE startDay ← interval[0]
+            DECLARE finishDay ← interval[1]
+            IF dayPointer < startDay THEN
+                DECLARE gap ← startDay - dayPointer
+                SET freeCount ← freeCount + gap
+            END IF
+            IF dayPointer > finishDay THEN
+                SET dayPointer ← dayPointer + 0
+            ELSE
+                SET dayPointer ← finishDay + 1
+            END IF
+            INCREMENT idx BY 1
+        END WHILE
+        IF dayPointer ≤ days THEN
+            DECLARE tailGap ← days - dayPointer + 1
+            SET freeCount ← freeCount + tailGap
+        END IF
+        RETURN freeCount
+    END FUNCTION
+END CLASS

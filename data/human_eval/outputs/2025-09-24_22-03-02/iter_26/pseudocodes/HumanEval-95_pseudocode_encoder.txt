@@ -1,0 +1,44 @@
+FUNCTION check_dict_case(dict)
+    SET keys_list TO CALL keys METHOD OF dict
+    IF LENGTH OF keys_list EQUALS 0 THEN
+        RETURN False
+    ELSE
+        SET state TO "start"
+        FOR index FROM 0 TO LENGTH OF keys_list MINUS 1
+            SET key TO ELEMENT AT index IN keys_list
+            SET is_string TO CALL isinstance WITH ARGUMENTS key AND str
+            IF is_string EQUALS False THEN
+                SET state TO "mixed"
+                BREAK
+            END IF
+            IF state EQUALS "start" THEN
+                SET is_upper TO CALL isupper METHOD OF key
+                IF is_upper EQUALS True THEN
+                    SET state TO "upper"
+                ELSE
+                    SET is_lower TO CALL islower METHOD OF key
+                    IF is_lower EQUALS True THEN
+                        SET state TO "lower"
+                    ELSE
+                        BREAK
+                    END IF
+                END IF
+            ELSE IF state EQUALS "upper" THEN
+                SET is_upper TO CALL isupper METHOD OF key
+                IF is_upper EQUALS False THEN
+                    SET state TO "mixed"
+                    BREAK
+                END IF
+            ELSE IF state EQUALS "lower" THEN
+                SET is_lower TO CALL islower METHOD OF key
+                IF is_lower EQUALS False THEN
+                    SET state TO "mixed"
+                    BREAK
+                END IF
+            ELSE
+                BREAK
+            END IF
+        END FOR
+        RETURN state EQUALS "upper" OR state EQUALS "lower"
+    END IF
+END FUNCTION

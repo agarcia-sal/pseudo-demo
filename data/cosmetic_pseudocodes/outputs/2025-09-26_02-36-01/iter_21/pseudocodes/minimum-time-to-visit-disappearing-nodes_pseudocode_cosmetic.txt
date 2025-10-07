@@ -1,0 +1,130 @@
+CLASS Solution  
+    FUNCTION minimumTime(n, edges, disappear)  
+        
+        FUNCTION insertHeap(heapList, item)  
+            SET heapList TO heapList APPENDED WITH item  
+            SET index TO LENGTH OF heapList MINUS one  
+            
+            WHILE index GREATER THAN zero  
+                SET parentIdx TO (index MINUS 1) DIV 2  
+                IF heapList[parentIdx][0] GREATER THAN heapList[index][0]  
+                    SWAP heapList[parentIdx] WITH heapList[index]  
+                    SET index TO parentIdx  
+                ELSE  
+                    BREAK  
+                END IF  
+            END WHILE  
+            RETURN heapList  
+        END FUNCTION
+        
+        FUNCTION popMin(heapList)  
+            IF LENGTH OF heapList EQUALS zero  
+                RETURN NULL, NULL, heapList  
+            END IF  
+            SET firstItem TO heapList[0]  
+            SET lastItem TO heapList[LENGTH OF heapList MINUS one]  
+            SET heapList TO SUBLIST heapList FROM 0 TO LENGTH OF heapList MINUS 2  
+            IF LENGTH OF heapList GREATER THAN zero  
+                SET heapList[0] TO lastItem
+                SET idx TO 0
+                WHILE TRUE  
+                    SET leftChild TO idx TIMES 2 PLUS 1
+                    SET rightChild TO idx TIMES 2 PLUS 2
+                    SET smallest TO idx
+                    
+                    IF leftChild LESS THAN LENGTH OF heapList AND heapList[leftChild][0] LESS THAN heapList[smallest][0]  
+                        SET smallest TO leftChild  
+                    END IF  
+                    IF rightChild LESS THAN LENGTH OF heapList AND heapList[rightChild][0] LESS THAN heapList[smallest][0]  
+                        SET smallest TO rightChild  
+                    END IF  
+                    IF smallest EQUALS idx  
+                        BREAK  
+                    END IF  
+                    SWAP heapList[idx] WITH heapList[smallest]  
+                    SET idx TO smallest  
+                END WHILE  
+            END IF  
+            RETURN firstItem[0], firstItem[1], heapList  
+        END FUNCTION
+        
+        FUNCTION buildGraph(edgeList)  
+            SET graphMap TO EMPTY MAPPING DEFAULT VALUE EMPTY LIST  
+            FUNCTION processEdge(u, v, w)  
+                SET currentListU TO graphMap[u]  
+                SET currentListU TO currentListU APPEND (v, w)  
+                SET graphMap[u] TO currentListU  
+                SET currentListV TO graphMap[v]  
+                SET currentListV TO currentListV APPEND (u, w)  
+                SET graphMap[v] TO currentListV  
+            END FUNCTION
+            
+            SET idx TO 0
+            WHILE idx LESS THAN LENGTH OF edgeList  
+                SET e TO edgeList[idx] 
+                CALL processEdge(e[0], e[1], e[2])  
+                SET idx TO idx PLUS 1  
+            END WHILE  
+            RETURN graphMap  
+        END FUNCTION
+        
+        SET graph TO buildGraph(edges)
+        
+        SET distList TO A LIST OF size n FILLED WITH (10 TIMES 10 TIMES 10 TIMES 10 TIMES 10 TIMES 10 TIMES 10 TIMES 10 TIMES 10 TIMES 10) 
+        SET distList[0] TO 0
+        
+        SET heapStructure TO LIST CONTAINING (0, 0)
+        
+        FUNCTION dijkstraLoop(heapCurrent, distCurrent)  
+            IF LENGTH OF heapCurrent EQUALS zero  
+                RETURN distCurrent  
+            END IF  
+            
+            SET heapDist, heapNode, heapCurrent TO popMin(heapCurrent)  
+            
+            IF heapDist GREATER THAN OR EQUAL TO disappear[heapNode]  
+                RETURN dijkstraLoop(heapCurrent, distCurrent)  
+            END IF  
+            
+            IF heapDist GREATER THAN distCurrent[heapNode]  
+                RETURN dijkstraLoop(heapCurrent, distCurrent)  
+            END IF  
+            
+            FUNCTION neighborScan(idx)  
+                IF idx GREATER OR EQUAL THAN LENGTH OF graph[heapNode]  
+                    RETURN  
+                END IF  
+                SET nbrData TO graph[heapNode][idx]  
+                SET nbrNode TO nbrData[0]  
+                SET nbrLen TO nbrData[1]  
+                SET newDist TO heapDist PLUS nbrLen  
+                
+                IF newDist LESS THAN distCurrent[nbrNode] AND newDist LESS THAN disappear[nbrNode]  
+                    SET distCurrent[nbrNode] TO newDist  
+                    SET heapCurrent TO insertHeap(heapCurrent, (newDist, nbrNode))  
+                END IF  
+                CALL neighborScan(idx PLUS 1)  
+            END FUNCTION  
+            CALL neighborScan(0)  
+            
+            RETURN dijkstraLoop(heapCurrent, distCurrent)  
+        END FUNCTION
+        
+        SET distances TO dijkstraLoop(heapStructure, distList)
+        
+        SET outputResult TO A LIST OF size n FILLED WITH ((0 MINUS 1))  
+        
+        FUNCTION fillResult(index)  
+            IF index GREATER OR EQUAL THAN n  
+                RETURN  
+            END IF  
+            IF distances[index] LESS THAN disappear[index]  
+                SET outputResult[index] TO distances[index]  
+            END IF  
+            CALL fillResult(index PLUS 1)  
+        END FUNCTION  
+        CALL fillResult(0)
+        
+        RETURN outputResult  
+    END FUNCTION  
+END CLASS

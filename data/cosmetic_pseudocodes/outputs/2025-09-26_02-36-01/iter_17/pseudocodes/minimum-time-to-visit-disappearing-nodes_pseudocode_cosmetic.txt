@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION minimumTime(n, edges, disappear)
+        DECLARE maze AS a default mapping to empty lists
+        FOR each x y z IN edges DO
+            maze[x] = maze[x] + [(y, z)]
+            maze[y] = maze[y] + [(x, z)]
+        END FOR
+
+        DECLARE cost AS list with n elements all set to +∞
+        cost[0] = 0
+
+        DECLARE heap_container AS [(0, 0)]
+
+        WHILE TRUE DO
+            IF heap_container IS empty THEN
+                BREAK
+            END IF
+            DECLARE selected_element AS (inf, -1)
+            DECLARE selected_index AS -1
+            FOR idx FROM 0 TO LENGTH(heap_container) - 1 DO
+                IF heap_container[idx].0 < selected_element.0 THEN
+                    selected_element = heap_container[idx]
+                    selected_index = idx
+                END IF
+            END FOR
+            REMOVE heap_container[selected_index]
+
+            DECLARE dist_current AS selected_element.0
+            DECLARE node_current AS selected_element.1
+
+            IF dist_current >= disappear[node_current] THEN
+                CONTINUE
+            END IF
+
+            IF dist_current > cost[node_current] THEN
+                CONTINUE
+            END IF
+
+            FOR each (adj_node, weight_edge) IN maze[node_current] DO
+                DECLARE dist_proposed AS dist_current + weight_edge
+                DECLARE cond1 AS dist_proposed < cost[adj_node]
+                DECLARE cond2 AS dist_proposed < disappear[adj_node]
+                IF cond1 AND cond2 THEN
+                    cost[adj_node] = dist_proposed
+                    heap_container = heap_container + [(dist_proposed, adj_node)]
+                END IF
+            END FOR
+        END WHILE
+
+        DECLARE output_list AS list of size n filled with (-1)
+
+        DECLARE idx_loop AS 0
+        REPEAT
+            IF idx_loop == n THEN
+                BREAK
+            END IF
+            IF cost[idx_loop] < disappear[idx_loop] THEN
+                output_list[idx_loop] = cost[idx_loop]
+            END IF
+            idx_loop = idx_loop + 1
+        UNTIL FALSE
+
+        RETURN output_list
+    END FUNCTION
+END CLASS

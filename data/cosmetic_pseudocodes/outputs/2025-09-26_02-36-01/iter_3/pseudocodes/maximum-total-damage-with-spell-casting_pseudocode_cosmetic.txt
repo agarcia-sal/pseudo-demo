@@ -1,0 +1,63 @@
+CLASS Solution  
+    FUNCTION maximumTotalDamage(power)  
+        DECLARE freqMap AS mapping  
+        DECLARE idx AS integer  
+        FOR val IN power DO  
+            IF val IN freqMap THEN  
+                freqMap[val] ← freqMap[val] PLUS 1  
+            ELSE  
+                freqMap[val] ← 1  
+            END IF  
+        END FOR  
+
+        DECLARE sortedPowers AS list ← empty list  
+        FOR key IN freqMap KEYS DO  
+            APPEND key TO sortedPowers  
+        END FOR  
+        CALL sortedPowers SORTED ascendingly  
+
+        DECLARE dpMap AS mapping  
+        DECLARE totalEntries AS LENGTH of sortedPowers  
+        idx ← 0  
+        WHILE idx LESS THAN totalEntries DO  
+            DECLARE currentVal AS sortedPowers AT idx  
+
+            DECLARE optionSkip AS 0  
+            IF idx GREATER THAN 0 THEN  
+                DECLARE prevVal AS sortedPowers AT (idx MINUS 1)  
+                IF prevVal IN dpMap THEN  
+                    optionSkip ← dpMap[prevVal]  
+                ELSE  
+                    optionSkip ← 0  
+                END IF  
+            END IF  
+
+            DECLARE optionTake AS currentVal TIMES freqMap[currentVal]  
+            DECLARE prevIndex AS idx MINUS 1  
+            WHILE prevIndex GREATER THAN OR EQUAL TO 0 AND sortedPowers AT prevIndex GREATER THAN OR EQUAL TO currentVal MINUS 2 DO  
+                prevIndex ← prevIndex MINUS 1  
+            END WHILE  
+
+            IF prevIndex GREATER THAN OR EQUAL TO 0 THEN  
+                optionTake ← optionTake PLUS dpMap[sortedPowers AT prevIndex]  
+            END IF  
+
+            IF optionTake GREATER THAN OR EQUAL TO optionSkip THEN  
+                dpMap[currentVal] ← optionTake  
+            ELSE  
+                dpMap[currentVal] ← optionSkip  
+            END IF  
+
+            idx ← idx PLUS 1  
+        END WHILE  
+
+        DECLARE bestDamage AS 0  
+        FOR val IN dpMap VALUES DO  
+            IF val GREATER THAN bestDamage THEN  
+                bestDamage ← val  
+            END IF  
+        END FOR  
+
+        RETURN bestDamage  
+    END FUNCTION  
+END CLASS

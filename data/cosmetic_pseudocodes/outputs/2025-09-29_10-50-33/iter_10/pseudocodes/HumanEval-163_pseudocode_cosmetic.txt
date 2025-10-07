@@ -1,0 +1,35 @@
+FUNCTION generate_integers(integer_a, integer_b)
+{
+	invoke helper_loop(2, 8, integer_a, integer_b, 2, [])
+}
+
+FUNCTION helper_loop(fixed_min, fixed_max, param_x, param_y, step_val, acc_collection)
+BEGIN
+	SET bound_low TO fixed_min
+	IF (param_x < param_y) AND (param_x < fixed_min) THEN
+		bound_low = param_x
+	ELSE IF (param_y < param_x) AND (param_y < fixed_min) THEN
+		bound_low = param_y
+	END IF
+
+	SET bound_high TO fixed_max
+	IF (param_x > param_y) AND (param_x > fixed_max) THEN
+		bound_high = param_x
+	ELSE IF (param_y > param_x) AND (param_y > fixed_max) THEN
+		bound_high = param_y
+	END IF
+
+	PROC recursive_collect(current)
+	BEGIN
+		IF current > bound_high THEN
+			RETURN acc_collection
+		END
+		IF (current MOD step_val) == 0 THEN
+			CALL recursive_collect(current + 1) WITH acc_collection + [current]
+		ELSE
+			CALL recursive_collect(current + 1) WITH acc_collection
+		END
+	END
+
+	RETURN recursive_collect(bound_low)
+END

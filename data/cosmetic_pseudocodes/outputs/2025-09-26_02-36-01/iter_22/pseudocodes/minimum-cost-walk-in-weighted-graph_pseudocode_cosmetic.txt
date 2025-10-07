@@ -1,0 +1,91 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, n)  
+        SET x9 TO n  
+        SET self.parent TO empty list  
+        SET self.rank TO empty list  
+        SET y4 TO 0  
+        WHILE y4 LESS THAN x9 DO  
+            APPEND y4 TO self.parent  
+            APPEND 1 TO self.rank  
+            SET y4 TO y4 PLUS 1  
+        END WHILE  
+    END FUNCTION  
+  
+    FUNCTION find(self, u)  
+        DEFINE FUNCTION inner_find(a)  
+            IF self.parent[a] EQUALS a THEN  
+                RETURN a  
+            ELSE  
+                SET self.parent[a] TO inner_find(self.parent[a])  
+                RETURN self.parent[a]  
+            END IF  
+        END FUNCTION  
+        RETURN inner_find(u)  
+    END FUNCTION  
+  
+    FUNCTION union(self, u, v)  
+        SET rU TO self.find(u)  
+        SET rV TO self.find(v)  
+        IF rU NOT EQUALS rV THEN  
+            IF self.rank[rU] GREATER THAN self.rank[rV] THEN  
+                SET self.parent[rV] TO rU  
+            ELSE  
+                IF self.rank[rU] LESS THAN self.rank[rV] THEN  
+                    SET self.parent[rU] TO rV  
+                ELSE  
+                    SET self.parent[rV] TO rU  
+                    SET self.rank[rU] TO self.rank[rU] PLUS 1  
+                END IF  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION minimumCost(self, n, edges, query)  
+        SET uf TO UnionFind(n)  
+        SET mask TO (2 TO THE POWER OF 32) MINUS 1  
+        SET bitwise_list TO empty list  
+        SET idx0 TO 0  
+        WHILE idx0 LESS THAN n DO  
+            APPEND mask TO bitwise_list  
+            SET idx0 TO idx0 PLUS 1  
+        END WHILE  
+  
+        FOR EACH triple IN edges DO  
+            SET ux TO triple[0]  
+            SET vx TO triple[1]  
+            SET wx TO triple[2]  
+            CALL uf.union(ux, vx)  
+            SET p_root TO uf.find(ux)  
+            SET bitwise_list[p_root] TO bitwise_list[p_root] BITWISE AND wx  
+        END FOR  
+  
+        SET comp_cost_map TO empty dictionary  
+        SET z7 TO 0  
+        WHILE z7 LESS THAN n DO  
+            SET root_key TO uf.find(z7)  
+            IF root_key NOT IN comp_cost_map THEN  
+                SET comp_cost_map[root_key] TO bitwise_list[root_key]  
+            END IF  
+            SET z7 TO z7 PLUS 1  
+        END WHILE  
+  
+        SET res_list TO empty list  
+        FOR EACH pair IN query DO  
+            SET start_pt TO pair[0]  
+            SET end_pt TO pair[1]  
+            IF start_pt EQUALS end_pt THEN  
+                APPEND 0 TO res_list  
+            ELSE  
+                IF uf.find(start_pt) EQUALS uf.find(end_pt) THEN  
+                    APPEND comp_cost_map[uf.find(start_pt)] TO res_list  
+                ELSE  
+                    APPEND -1 TO res_list  
+                END IF  
+            END IF  
+        END FOR  
+  
+        RETURN res_list  
+    END FUNCTION  
+END CLASS

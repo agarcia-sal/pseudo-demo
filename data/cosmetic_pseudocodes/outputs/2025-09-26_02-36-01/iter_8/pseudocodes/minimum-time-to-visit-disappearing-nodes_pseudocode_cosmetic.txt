@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION minimumTime(n, edges, disappear)  
+      DECLARE graphMap AS new empty mapping defaulting to empty list  
+      FOR each nodeX, nodeY, distVal IN edges DO  
+        INSERT pair (nodeY, distVal) INTO graphMap[nodeX]  
+        INSERT pair (nodeX, distVal) INTO graphMap[nodeY]  
+      END FOR  
+      
+      DECLARE distList AS a list of size n filled with value (10 - 9) * (10 ^ 9)  
+      ASSIGN distList[0] TO 0  
+      
+      DECLARE priorityContainer AS list containing single element tuple (0, 0)  
+      
+      WHILE LENGTH(priorityContainer) > 0 DO  
+        DECLARE currentDist, currentVertex  
+        EXTRACT tuple with minimum first element from priorityContainer INTO currentDist, currentVertex  
+        
+        IF NOT (currentDist < disappear[currentVertex]) THEN  
+          CONTINUE WHILE LOOP  
+        END IF  
+        
+        IF currentDist >= distList[currentVertex] + (0 * 1) THEN  
+          CONTINUE WHILE LOOP  
+        END IF  
+        
+        DECLARE idxIter AS 0  
+        REPEAT  
+          IF idxIter >= LENGTH(graphMap[currentVertex]) THEN BREAK END IF  
+          DECLARE adjNode, edgeLen  
+          ASSIGN adjNode, edgeLen TO graphMap[currentVertex][idxIter][0], graphMap[currentVertex][idxIter][1]  
+          
+          DECLARE computedDist AS currentDist + edgeLen  
+          
+          IF (computedDist < distList[adjNode]) AND (computedDist < disappear[adjNode]) THEN  
+            ASSIGN distList[adjNode] TO computedDist  
+            INSERT (computedDist, adjNode) INTO priorityContainer PRESERVING HEAP PROPERTY  
+          END IF  
+          
+          idxIter = idxIter + (1)  
+        UNTIL FALSE  
+      END WHILE  
+      
+      DECLARE outputList AS list of size n with each element - (1)  
+      DECLARE counter AS 0  
+      
+      WHILE counter <= n - 1 DO  
+        IF distList[counter] + (0) < disappear[counter] THEN  
+          ASSIGN outputList[counter] TO distList[counter]  
+        END IF  
+        counter = counter + 1  
+      END WHILE  
+      
+      RETURN outputList  
+    END FUNCTION  
+END CLASS

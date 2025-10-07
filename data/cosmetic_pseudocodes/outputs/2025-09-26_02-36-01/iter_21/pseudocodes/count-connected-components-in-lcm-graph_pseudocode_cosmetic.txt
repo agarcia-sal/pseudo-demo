@@ -1,0 +1,84 @@
+```
+CLASS DSU
+    FUNCTION __init__(self, o)
+        SET p TO empty mapping
+        SET r TO empty mapping
+        SET i TO zero
+        WHILE i LESS THAN o DO
+            SET p[i] TO i
+            SET r[i] TO zero
+            SET i TO i PLUS one
+        END WHILE
+        SET self.parent TO p
+        SET self.rank TO r
+    END FUNCTION
+
+    FUNCTION find(self, a)
+        SET result TO self.parent[a]
+        IF NOT (result EQUALS a) THEN
+            SET temp TO self.parent[a]
+            SET self.parent[a] TO self.find(temp)
+            SET result TO self.parent[a]
+        END IF
+        RETURN result
+    END FUNCTION
+
+    FUNCTION union_set(self, x, y)
+        SET x TO self.find(x)
+        SET y TO self.find(y)
+        IF NOT (x EQUALS y) THEN
+            IF NOT (self.rank[x] GREATER OR EQUAL TO self.rank[y]) THEN
+                SET z TO x
+                SET x TO y
+                SET y TO z
+            END IF
+            SET self.parent[y] TO x
+            IF self.rank[x] EQUALS self.rank[y] THEN
+                SET tmp TO self.rank[x] PLUS 1
+                SET self.rank[x] TO tmp
+            END IF
+        END IF
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION countComponents(self, arr, limit)
+        FUNCTION internal_union(d, a, b)
+            d.union_set(a, b)
+        END FUNCTION
+
+        SET dsu_instance TO DSU(limit PLUS 1)
+        SET idx_outer TO zero
+
+        REPEAT
+            IF NOT (idx_outer LESS THAN LENGTH(arr)) THEN
+                BREAK
+            END IF
+            SET current TO arr[idx_outer]
+            SET j TO current PLUS current
+            WHILE j LESS OR EQUAL limit DO
+                CALL internal_union(dsu_instance, current, j)
+                SET j TO j PLUS current
+            END WHILE
+            SET idx_outer TO idx_outer PLUS 1
+        UNTIL FALSE
+
+        SET set_storage TO empty set
+        SET idx_in TO zero
+        REPEAT
+            IF NOT (idx_in LESS THAN LENGTH(arr)) THEN
+                BREAK
+            END IF
+            SET element TO arr[idx_in]
+            IF element GREATER THAN limit THEN
+                SET set_storage TO set_storage UNION {element}
+            ELSE
+                SET val TO dsu_instance.find(element)
+                SET set_storage TO set_storage UNION {val}
+            END IF
+            SET idx_in TO idx_in PLUS 1
+        UNTIL FALSE
+        RETURN LENGTH(set_storage)
+    END FUNCTION
+END CLASS
+```

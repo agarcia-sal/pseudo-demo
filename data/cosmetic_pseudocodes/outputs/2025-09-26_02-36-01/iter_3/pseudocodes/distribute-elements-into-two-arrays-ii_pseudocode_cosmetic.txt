@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION resultArray(nums)
+        LET firstPart BE [nums[0]]
+        LET secondPart BE [nums[1]]
+        LET orderedFirst BE [nums[0]]
+        LET orderedSecond BE [nums[1]]
+
+        FUNCTION greaterCount(arr, element)
+            LET lowBound BE 0
+            LET highBound BE LENGTH(arr)
+            WHILE lowBound < highBound
+                LET midPoint BE lowBound + ((highBound - lowBound) DIV 2)
+                IF NOT (element < arr[midPoint])
+                    LET lowBound BE midPoint + 1
+                ELSE
+                    LET highBound BE midPoint
+                END IF
+            END WHILE
+            LET count BE LENGTH(arr) - lowBound
+            RETURN count
+        END FUNCTION
+
+        LET index BE 2
+        WHILE index < (LENGTH(nums))
+            LET currentVal BE nums[index]
+            LET countFirst BE greaterCount(orderedFirst, currentVal)
+            LET countSecond BE greaterCount(orderedSecond, currentVal)
+
+            IF (countFirst > countSecond) THEN
+                firstPart[length(firstPart)] = currentVal
+                LET insertPos BE 0
+                WHILE (insertPos < LENGTH(orderedFirst)) AND (orderedFirst[insertPos] < currentVal)
+                    insertPos = insertPos + 1
+                END WHILE
+                orderedFirst = orderedFirst[0:insertPos] + [currentVal] + orderedFirst[insertPos:]
+            ELSE IF (countFirst < countSecond) THEN
+                secondPart[length(secondPart)] = currentVal
+                LET insertPos2 BE 0
+                WHILE (insertPos2 < LENGTH(orderedSecond)) AND (orderedSecond[insertPos2] < currentVal)
+                    insertPos2 = insertPos2 + 1
+                END WHILE
+                orderedSecond = orderedSecond[0:insertPos2] + [currentVal] + orderedSecond[insertPos2:]
+            ELSE
+                LET lenFirst BE LENGTH(firstPart)
+                LET lenSecond BE LENGTH(secondPart)
+                IF lenFirst <= lenSecond THEN
+                    firstPart[length(firstPart)] = currentVal
+                    LET pos3 BE 0
+                    WHILE pos3 < LENGTH(orderedFirst) AND orderedFirst[pos3] < currentVal
+                        pos3 = pos3 + 1
+                    END WHILE
+                    orderedFirst = orderedFirst[0:pos3] + [currentVal] + orderedFirst[pos3:]
+                ELSE
+                    secondPart[length(secondPart)] = currentVal
+                    LET pos4 BE 0
+                    WHILE pos4 < LENGTH(orderedSecond) AND orderedSecond[pos4] < currentVal
+                        pos4 = pos4 + 1
+                    END WHILE
+                    orderedSecond = orderedSecond[0:pos4] + [currentVal] + orderedSecond[pos4:]
+                END IF
+            END IF
+            index = index + 1
+        END WHILE
+
+        LET combinedResult BE []
+        LET pointer1 BE 0
+        LET pointer2 BE 0
+        WHILE pointer1 < LENGTH(firstPart)
+            combinedResult[length(combinedResult)] = firstPart[pointer1]
+            pointer1 = pointer1 + 1
+        END WHILE
+        WHILE pointer2 < LENGTH(secondPart)
+            combinedResult[length(combinedResult)] = secondPart[pointer2]
+            pointer2 = pointer2 + 1
+        END WHILE
+
+        RETURN combinedResult
+    END FUNCTION
+END CLASS

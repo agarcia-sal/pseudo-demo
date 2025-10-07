@@ -1,0 +1,56 @@
+CLASS Solution
+	Function maxHammingDistances(nums LIST OF INTEGER, m INTEGER) RETURNS LIST OF INTEGER
+		VAR collectedStrings = []
+		
+		PROC toBinary(n INTEGER, length INTEGER) RETURNS STRING
+			VAR bits = ""
+			PROC innerConvert(x, rem)
+				IF rem = 0 THEN RETURN
+				innerConvert(x DIV 2, rem - 1)
+				bits := bits + TO_STRING(x MOD 2)
+			END
+			innerConvert(n, length)
+			RETURN bits
+		END
+		
+		VAR idx1 = 0
+		TailRecursionConvert:
+		IF idx1 >= LENGTH(nums) THEN GOTO CollectResults
+		collectedStrings APPEND toBinary(nums[idx1], m)
+		idx1 := idx1 + 1
+		GOTO TailRecursionConvert
+		
+		CollectResults:
+		VAR results = []
+		
+		FUNCTION hamming_distance(binX STRING, binY STRING) RETURNS INTEGER
+			VAR pos = 0
+			VAR count_mismatches = 0
+			CheckCharLoop:
+			IF pos >= LENGTH(binX) THEN RETURN count_mismatches
+			IF NOT (binX[pos] = binY[pos]) THEN count_mismatches := count_mismatches + 1
+			pos := pos + 1
+			GOTO CheckCharLoop
+		END
+		
+		VAR outerIndex = 0
+	OuterLoopStart:
+		IF outerIndex >= LENGTH(nums) THEN RETURN results
+		VAR current_max = 0
+		VAR innerIndex = 0
+	InnerLoopStart:
+		IF innerIndex >= LENGTH(nums) THEN
+			results APPEND current_max
+			outerIndex := outerIndex + 1
+			GOTO OuterLoopStart
+		END
+		IF outerIndex <> innerIndex THEN
+			VAR distVal = hamming_distance(collectedStrings[outerIndex], collectedStrings[innerIndex])
+			IF distVal > current_max THEN
+				current_max := distVal
+			END
+		END
+		innerIndex := innerIndex + 1
+		GOTO InnerLoopStart
+	END FUNCTION
+END CLASS

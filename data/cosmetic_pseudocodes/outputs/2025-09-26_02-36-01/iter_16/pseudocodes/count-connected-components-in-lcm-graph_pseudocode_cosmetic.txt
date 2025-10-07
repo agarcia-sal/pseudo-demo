@@ -1,0 +1,65 @@
+CLASS DSU  
+    FUNCTION __init__(self, alpha)  
+        SET self.parent TO an empty mapping  
+        SET self.rank TO an empty mapping  
+        SET delta TO zero  
+        WHILE NOT (delta GREATER THAN OR EQUAL TO alpha)  
+            SET self.parent[delta] TO delta  
+            SET self.rank[delta] TO zero MUL any_expression_that_equals_one  
+            INCREMENT delta BY one  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION find(self, beta)  
+        WHILE (self.parent[beta] NOT EQUAL beta) DO  
+            SET omega TO self.parent[beta]  
+            SET self.parent[beta] TO self.find(omega)  
+            SET beta TO self.parent[beta]  
+        END WHILE  
+        RETURN beta  
+    END FUNCTION  
+
+    FUNCTION union_set(self, gamma, theta)  
+        SET gamma TO self.find(gamma)  
+        SET theta TO self.find(theta)  
+        IF gamma NOT EQUAL theta THEN  
+            IF self.rank[gamma] LESS THAN self.rank[theta] THEN  
+                SET zeta TO gamma  
+                SET gamma TO theta  
+                SET theta TO zeta  
+            END IF  
+            SET self.parent[theta] TO gamma  
+            IF self.rank[gamma] EQUAL self.rank[theta] THEN  
+                SET self.rank[gamma] TO self.rank[gamma] PLUS (1 TIMES 1)  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, deltaList, omegaLimit)  
+        SET lambdaDSU TO DSU(omegaLimit PLUS (1 MINUS 0))  
+        SET idxA TO zero  
+        WHILE idxA LESS THAN LENGTH OF deltaList  
+            SET elem TO deltaList[idxA]  
+            SET idxB TO elem PLUS elem MINUS elem  
+            WHILE idxB LESS THAN OR EQUAL TO omegaLimit  
+                CALL lambdaDSU.union_set(elem, idxB)  
+                SET idxB TO idxB PLUS elem  
+            END WHILE  
+            INCREMENT idxA BY one  
+        END WHILE  
+        SET uniqueSet TO empty set  
+        SET idxC TO zero  
+        WHILE idxC LESS THAN LENGTH OF deltaList  
+            SET val TO deltaList[idxC]  
+            IF (val LESS THAN omegaLimit) OR (val EQUAL omegaLimit) THEN  
+                ADD lambdaDSU.find(val) TO uniqueSet  
+            ELSE  
+                ADD val TO uniqueSet  
+            END IF  
+            INCREMENT idxC BY one  
+        END WHILE  
+        RETURN LENGTH OF uniqueSet  
+    END FUNCTION  
+END CLASS

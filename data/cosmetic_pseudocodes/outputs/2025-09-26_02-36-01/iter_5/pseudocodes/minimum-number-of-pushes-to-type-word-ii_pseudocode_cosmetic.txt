@@ -1,0 +1,80 @@
+CLASS Solution
+    FUNCTION minimumPushes(word)
+        FUNCTION countFrequency(idx, freqMap)
+            IF idx EQUALS LENGTH(word) THEN
+                RETURN freqMap
+            ELSE
+                SET currentChar TO word[idx]
+                IF currentChar IN freqMap THEN
+                    SET updatedCount TO freqMap[currentChar] PLUS 1
+                    SET freqMap[currentChar] TO updatedCount
+                ELSE
+                    SET freqMap[currentChar] TO 1
+                END IF
+                RETURN countFrequency(idx PLUS 1, freqMap)
+            END IF
+        END FUNCTION
+
+        SET freq_counts TO countFrequency(0, {})
+
+        FUNCTION extractValues(mappings, valuesList)
+            IF LENGTH(mappings) EQUALS 0 THEN
+                RETURN valuesList
+            ELSE
+                SET firstKey TO mappings[0]
+                SET newValuesList TO valuesList
+                ADD freq_counts[firstKey] TO newValuesList
+                RETURN extractValues(mappings[1 TO END], newValuesList)
+            END IF
+        END FUNCTION
+
+        SET keysArray TO KEYS(freq_counts)
+        SET countsList TO extractValues(keysArray, [])
+        SET sortedCounts TO []
+        FUNCTION sortDescending(lst)
+            IF LENGTH(lst) LESS OR EQUAL TO 1 THEN
+                RETURN lst
+            ELSE
+                SET pivot TO lst[0]
+                SET greater TO []
+                SET lesserEqual TO []
+                FUNCTION partition(i, g, le)
+                    IF i EQUALS LENGTH(lst) THEN
+                        RETURN (g, le)
+                    ELSE
+                        IF lst[i] GREATER THAN pivot THEN
+                            RETURN partition(i PLUS 1, g PLUS [lst[i]], le)
+                        ELSE
+                            RETURN partition(i PLUS 1, g, le PLUS [lst[i]])
+                        END IF
+                    END IF
+                END FUNCTION
+                SET (gPart, lePart) TO partition(1, [], [])
+                RETURN sortDescending(gPart) PLUS [pivot] PLUS sortDescending(lePart)
+            END IF
+        END FUNCTION
+        SET sortedCounts TO sortDescending(countsList)
+
+        SET totalPushesAccum TO 0
+        SET currentKeyPress TO 1
+        SET keysAssignedCount TO 0
+
+        FUNCTION accumulate(i, totalAcc, keyPressNum, assignedCount)
+            IF i EQUALS LENGTH(sortedCounts) THEN
+                RETURN totalAcc
+            ELSE
+                SET val TO sortedCounts[i]
+                SET updatedTotal TO totalAcc PLUS val TIMES keyPressNum
+                SET updatedAssigned TO assignedCount PLUS 1
+                IF updatedAssigned EQUALS 8 THEN
+                    RETURN accumulate(i PLUS 1, updatedTotal, keyPressNum PLUS 1, 0)
+                ELSE
+                    RETURN accumulate(i PLUS 1, updatedTotal, keyPressNum, updatedAssigned)
+                END IF
+            END IF
+        END FUNCTION
+
+        SET result TO accumulate(0, totalPushesAccum, currentKeyPress, keysAssignedCount)
+        RETURN result
+    END FUNCTION
+END CLASS

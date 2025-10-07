@@ -1,0 +1,79 @@
+CLASS Solution
+		FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+LET Dval BE (5 * 2 * 10^8) + 1
+
+LET matrixTransition BE a 26×26 grid filled with zeros
+LET loopOuterIdx BE 0
+WHILE loopOuterIdx NOT EQUAL TO 26
+	LET loopInnerIdx BE 0
+	LET limitInner BE (nums element_at loopOuterIdx) MINUS 1
+	REPEAT
+		LET tgtIdx BE ((loopOuterIdx PLUS loopInnerIdx PLUS 1) MOD 26)
+		matrixTransition element_at loopOuterIdx element_at tgtIdx BE matrixTransition element_at loopOuterIdx element_at tgtIdx PLUS 1
+		LET loopInnerIdx BE loopInnerIdx PLUS 1
+	UNTIL loopInnerIdx GREATER_THAN limitInner
+	LET loopOuterIdx BE loopOuterIdx PLUS 1
+END WHILE
+
+FUNCTION multMatrices(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+	LET resGrid BE a 26×26 grid filled with zeros
+	LET out_i BE 0
+	WHILE out_i NOT EQUAL TO 26
+		LET out_j BE 0
+		REPEAT
+			LET accVal BE 0
+			LET inner_k BE 0
+			WHILE inner_k NOT EQUAL TO 26
+				LET productVal BE A element_at out_i element_at inner_k TIMES B element_at inner_k element_at out_j
+				LET accVal BE (accVal PLUS productVal) MOD Dval
+				LET inner_k BE inner_k PLUS 1
+			END WHILE
+			resGrid element_at out_i element_at out_j BE accVal
+			LET out_j BE out_j PLUS 1
+		UNTIL out_j EQUALS 26
+		LET out_i BE out_i PLUS 1
+	END WHILE
+	RETURN resGrid
+END FUNCTION
+
+FUNCTION powerMatrix(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+	LET idMatrix BE a 26×26 grid where each element_at r c IS 1 IF r EQUALS c OTHERWISE 0
+	LET baseMat BE matrix
+	WHILE power GREATER_THAN 0
+		IF (power MOD 2) EQUALS 1 THEN
+			idMatrix BE multMatrices(idMatrix, baseMat)
+		END IF
+		baseMat BE multMatrices(baseMat, baseMat)
+		power BE power DIV 2
+	END WHILE
+	RETURN idMatrix
+END FUNCTION
+
+LET poweredMatrix BE powerMatrix(matrixTransition, t)
+
+LET countCurrChars BE a list of 26 zeros
+FOR EACH item IN s
+	LET positionIdx BE ASCII_CODE(item) MINUS ASCII_CODE('a')
+	countCurrChars element_at positionIdx BE countCurrChars element_at positionIdx PLUS 1
+END FOR
+
+LET finalCountArr BE a 26-element list filled with zeros
+LET outer_x BE 0
+WHILE outer_x NOT EQUAL TO 26
+	LET inner_y BE 0
+	REPEAT
+		LET prodVal BE countCurrChars element_at outer_x TIMES poweredMatrix element_at outer_x element_at inner_y
+		finalCountArr element_at inner_y BE (finalCountArr element_at inner_y PLUS prodVal) MOD Dval
+		LET inner_y BE inner_y PLUS 1
+	UNTIL inner_y EQUALS 26
+	LET outer_x BE outer_x PLUS 1
+END WHILE
+
+LET sumResult BE 0
+FOR EACH val IN finalCountArr
+	sumResult BE (sumResult PLUS val) MOD Dval
+END FOR
+
+RETURN sumResult
+		END FUNCTION
+END CLASS

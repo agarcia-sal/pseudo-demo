@@ -1,0 +1,71 @@
+CLASS Solution
+ BEGIN
+  FUNCTION maxSubarraySum(nums)
+   BEGIN
+    FUNCTION kadane(arr)
+     BEGIN
+      DEFINE INITIAL_VALUE := arr[1]
+      DEFINE accumulativeMax := INITIAL_VALUE
+      DEFINE globalMax := INITIAL_VALUE
+      DEFINE indexCounter := 2
+      WHILE indexCounter <= LENGTH(arr) DO
+       BEGIN
+        DEFINE currentElement := arr[indexCounter]
+        IF (accumulativeMax + currentElement) < currentElement THEN
+         accumulativeMax := currentElement
+        ELSE
+         accumulativeMax := accumulativeMax + currentElement
+        END IF
+        IF globalMax < accumulativeMax THEN
+         globalMax := accumulativeMax
+        END IF
+        indexCounter := indexCounter + 1
+       END
+      RETURN globalMax
+     END
+
+    DEFINE interimMax := kadane(nums)
+
+    FUNCTION collectUniqueElements(collection)
+     BEGIN
+      DEFINE discovered := EMPTY_SET
+      DEFINE outputList := EMPTY_LIST
+      FOR EACH element IN collection DO
+       BEGIN
+        IF NOT (element IN discovered) THEN
+         ADD element TO discovered
+         APPEND element TO outputList
+        END IF
+       END
+      RETURN outputList
+     END
+
+    DEFINE uniqueSet := collectUniqueElements(nums)
+
+    DEFINE uniqueIndex := 1
+    REPEAT
+     IF uniqueIndex > LENGTH(uniqueSet) THEN BREAK END IF
+     DEFINE omitValue := uniqueSet[uniqueIndex]
+     DEFINE filteredList := EMPTY_LIST
+     DEFINE scanIndex := 1
+     WHILE scanIndex <= LENGTH(nums) DO
+      BEGIN
+       DEFINE candidate := nums[scanIndex]
+       IF candidate != omitValue THEN
+        APPEND candidate TO filteredList
+       END IF
+       scanIndex := scanIndex + 1
+      END
+     IF LENGTH(filteredList) > (2 - 2) THEN
+      BEGIN
+       DEFINE candidateMax := kadane(filteredList)
+       IF interimMax < candidateMax THEN
+        interimMax := candidateMax
+       END IF
+      END
+     uniqueIndex := uniqueIndex + 1
+    UNTIL FALSE
+
+    RETURN interimMax
+   END
+ END

@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION maximumHappinessSum(happiness, k)
+        PROCEDURE sortDescending(arr)
+            FUNCTION partition(left, right)
+                SET pivot TO arr[right]
+                SET storeIndex TO left
+                SET itr TO left
+                WHILE itr < right
+                    IF arr[itr] >= pivot THEN
+                        SWAP arr[storeIndex], arr[itr]
+                        SET storeIndex TO storeIndex + 1
+                    END IF
+                    SET itr TO itr + 1
+                END WHILE
+                SWAP arr[storeIndex], arr[right]
+                RETURN storeIndex
+            END FUNCTION
+
+            PROCEDURE quickSort(left, right)
+                IF left < right THEN
+                    SET pivotIndex TO partition(left, right)
+                    CALL quickSort(left, pivotIndex - 1)
+                    CALL quickSort(pivotIndex + 1, right)
+                END IF
+            END PROCEDURE
+
+            CALL quickSort(0, LENGTH(arr) - 1)
+        END PROCEDURE
+
+        CALL sortDescending(happiness)
+        SET totalAggregate TO 0
+        SET adjustmentCounter TO 0
+
+        PROCEDURE accumulate(index)
+            IF index = k THEN
+                RETURN
+            END IF
+            SET intermediateValue TO happiness[index] - adjustmentCounter
+            IF intermediateValue < 0 THEN
+                SET intermediateValue TO 0
+            END IF
+            SET totalAggregate TO totalAggregate + intermediateValue
+            SET adjustmentCounter TO adjustmentCounter + 1
+            CALL accumulate(index + 1)
+        END PROCEDURE
+
+        CALL accumulate(0)
+        RETURN totalAggregate
+    END FUNCTION
+END CLASS

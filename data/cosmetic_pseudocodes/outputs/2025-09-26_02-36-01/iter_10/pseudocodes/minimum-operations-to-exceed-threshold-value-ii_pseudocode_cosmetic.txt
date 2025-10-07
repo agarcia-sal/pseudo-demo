@@ -1,0 +1,77 @@
+CLASS Solution
+    FUNCTION minOperations(nums parameter k parameter)
+        PROCEDURE rebuildHeap(arr parameter)
+            LET n BE LENGTH(arr)
+            LET m BE FLOOR(n / 2) - 1
+            FUNCTION siftDown(i parameter)
+                LET size BE LENGTH(arr)
+                WHILE i < size
+                    LET l BE 2 * i + 1
+                    LET r BE 2 * i + 2
+                    IF l >= size THEN BREAK END IF
+                    LET smallest BE l
+                    IF r < size AND arr[r] < arr[l] THEN
+                        SET smallest TO r
+                    END IF
+                    IF arr[i] <= arr[smallest] THEN BREAK END IF
+                    SWAP arr[i], arr[smallest]
+                    SET i TO smallest
+                END WHILE
+            END FUNCTION
+            FOR j FROM m DOWNTO 0 DO
+                CALL siftDown(j)
+            END FOR
+        END PROCEDURE
+
+        FUNCTION extractMin(collection parameter)
+            LET lastIdx BE LENGTH(collection) - 1
+            IF lastIdx < 0 THEN RETURN NIL END IF
+            LET minimum BE collection[0]
+            SET collection[0] TO collection[lastIdx]
+            REMOVE ELEMENT AT lastIdx FROM collection
+            LET index BE 0
+            LET limit BE LENGTH(collection)
+            WHILE TRUE
+                LET leftIdx BE 2 * index + 1
+                LET rightIdx BE 2 * index + 2
+                IF leftIdx >= limit THEN BREAK END IF
+                LET lesserChild BE leftIdx
+                IF rightIdx < limit AND collection[rightIdx] < collection[leftIdx] THEN
+                    SET lesserChild TO rightIdx
+                END IF
+                IF collection[index] <= collection[lesserChild] THEN BREAK END IF
+                SWAP collection[index], collection[lesserChild]
+                SET index TO lesserChild
+            END WHILE
+            RETURN minimum
+        END FUNCTION
+
+        PROCEDURE insertHeap(collection parameter, val parameter)
+            APPEND val TO collection
+            LET pos BE LENGTH(collection) - 1
+            WHILE pos > 0
+                LET parentIdx BE (pos - 1) / 2
+                IF collection[parentIdx] <= collection[pos] THEN BREAK END IF
+                SWAP collection[parentIdx], collection[pos]
+                SET pos TO parentIdx
+            END WHILE
+        END PROCEDURE
+
+        CALL rebuildHeap(nums)
+        LET countOps BE 0
+
+        WHILE TRUE
+            IF LENGTH(nums) <= 1 THEN BREAK END IF
+            IF nums[0] >= k THEN BREAK END IF
+            LET valA BE extractMin(nums)
+            LET valB BE extractMin(nums)
+            LET minVal BE IF valA < valB THEN valA ELSE valB
+            LET maxVal BE IF valA > valB THEN valA ELSE valB
+            LET combinedVal BE (minVal * 2) + maxVal
+            CALL insertHeap(nums, combinedVal)
+            SET countOps TO countOps + 1
+        END WHILE
+
+        RETURN countOps
+    END FUNCTION
+END CLASS

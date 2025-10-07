@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER m INTEGER) RETURNS LIST OF INTEGER
+        SET omega TO empty list
+        SET alpha TO 0
+        SET kappa TO LENGTH(nums)
+        SET fz0 TO m - alpha
+
+        PROCEDURE stringify(n INTEGER, length INTEGER)
+            FUNCTION inner_stringify(x INTEGER, l INTEGER) RETURNS STRING
+                IF l = 0 THEN
+                    RETURN ""
+                ELSE
+                    SET prefix TO inner_stringify(x DIV 2, l - 1)
+                    SET bit TO (x MOD 2)
+                    RETURN prefix + (bit = 1 ? "1" : "0")
+                END IF
+            END FUNCTION
+            SET raw_str TO inner_stringify(n, length)
+            RETURN raw_str
+        END PROCEDURE
+
+        SET zq1 TO 0
+        WHILE zq1 < kappa DO
+            SET raw_bin TO stringify(nums[zq1], m)
+            APPEND raw_bin TO omega
+            SET zq1 TO zq1 + 1
+        END WHILE
+
+        SET retVal TO []
+        
+        FUNCTION hamming_distance(bin1 STRING bin2 STRING) RETURNS INTEGER
+            SET distVal TO 0
+            SET pos TO 0
+            WHILE pos < LENGTH(bin1) DO
+                IF (bin1[pos] <> bin2[pos]) THEN
+                    SET distVal TO distVal + 1
+                END IF
+                SET pos TO pos + 1
+            END WHILE
+            RETURN distVal
+        END FUNCTION
+
+        SET idxI TO 0
+        REPEAT
+            IF idxI >= kappa THEN BREAK END IF
+            SET maxDTracker TO 0
+
+            SET idxJ TO 0
+            WHILE idxJ < kappa DO
+                IF idxI <> idxJ THEN
+                    SET tempDist TO hamming_distance(omega[idxI], omega[idxJ])
+                    IF maxDTracker < tempDist THEN
+                        SET maxDTracker TO tempDist
+                    END IF
+                END IF
+                SET idxJ TO idxJ + 1
+            END WHILE
+
+            APPEND maxDTracker TO retVal
+            SET idxI TO idxI + 1
+        UNTIL FALSE
+
+        RETURN retVal
+    END FUNCTION
+END CLASS

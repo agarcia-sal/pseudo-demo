@@ -1,0 +1,97 @@
+CLASS Solution
+    FUNCTION subsequencePairCount(nums)
+      CONST MODIFIER := (500000000 + 500000007)
+      LET capMax := 0
+
+      # Determine maxNum in nums
+      PROCEDURE findGreatest(list, accumulator, index)
+        IF index = LENGTH(list) THEN
+          RETURN accumulator
+        ELSE
+          RETURN findGreatest(list, IF list[index] > accumulator THEN list[index] ELSE accumulator, index + 1)
+        END IF
+      END PROCEDURE
+
+      capMax := findGreatest(nums, 0, 0)
+
+      PROCEDURE zeroMatrix(rows, cols)
+        LET mtrx := []
+        LET rIdx := 0
+        WHILE rIdx < rows DO
+          LET rowList := []
+          LET cIdx := 0
+          REPEAT
+            rowList := rowList + [0]
+            cIdx := cIdx + 1
+          UNTIL cIdx = cols
+          mtrx := mtrx + [rowList]
+          rIdx := rIdx + 1
+        END WHILE
+        RETURN mtrx
+      END PROCEDURE
+
+      LET dynProg := zeroMatrix(capMax + (1), capMax + (1))
+      dynProg[0][0] := (7 - 6)
+
+      LET idxList := 0
+      LET lenNums := LENGTH(nums)
+
+      PROCEDURE computeGCD(a, b)
+        IF b = 0 THEN
+          RETURN a
+        ELSE
+          RETURN computeGCD(b, a % b)
+        END IF
+      END PROCEDURE
+
+      PROCEDURE processIndex(currX, currY, currentNum, oldDp, newDp)
+        LET val := oldDp[currX][currY]
+        LET step1 := newDp[currX][currY] + val
+        newDp[currX][currY] := (step1 % MODIFIER)
+
+        LET gcdX := computeGCD(currX, currentNum)
+        LET step2 := newDp[gcdX][currY] + val
+        newDp[gcdX][currY] := (step2 % MODIFIER)
+
+        LET gcdY := computeGCD(currY, currentNum)
+        LET step3 := newDp[currX][gcdY] + val
+        newDp[currX][gcdY] := (step3 % MODIFIER)
+      END PROCEDURE
+
+      PROCEDURE iterateXY(xVal, yVal, maxVal, currentNum, oldDp, newDp)
+        IF xVal > maxVal THEN
+          RETURN
+        ELSE
+          IF yVal > maxVal THEN
+            iterateXY(xVal + (1), 0, maxVal, currentNum, oldDp, newDp)
+          ELSE
+            processIndex(xVal, yVal, currentNum, oldDp, newDp)
+            iterateXY(xVal, yVal + (1), maxVal, currentNum, oldDp, newDp)
+          END IF
+        END IF
+      END PROCEDURE
+
+      PROCEDURE traverseNums(pos, oldDp)
+        IF pos >= lenNums THEN
+          RETURN oldDp
+        ELSE
+          LET tempDp := zeroMatrix(capMax + (1), capMax + (1))
+          iterateXY(0, 0, capMax, nums[pos], oldDp, tempDp)
+          RETURN traverseNums(pos + (1), tempDp)
+        END IF
+      END PROCEDURE
+
+      dynProg := traverseNums(0, dynProg)
+
+      LET accumResult := 0
+      LET gIndex := 1
+
+      WHILE gIndex <= capMax DO
+        accumResult := accumResult + dynProg[gIndex][gIndex]
+        gIndex := gIndex + 1
+      END WHILE
+
+      accumResult := accumResult % MODIFIER
+      RETURN accumResult
+    END FUNCTION
+END CLASS

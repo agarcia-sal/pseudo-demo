@@ -1,0 +1,44 @@
+```
+FUNCTION sort_array(input_sequence)
+  FUNCTION count_ones(bit_string, idx, accum)
+    IF idx < 0 THEN
+      RETURN accum
+    ELSE 
+      RETURN count_ones(bit_string, idx - 1, accum + (1 IF bit_string[idx] = '1' ELSE 0))
+    ENDIF
+  END FUNCTION
+
+  FUNCTION binary_ones_count(number)
+    LET binary_str BE SUBSTRING(CONVERT_TO_BINARY(number), 3, LENGTH(CONVERT_TO_BINARY(number))) 
+    RETURN count_ones(binary_str, LENGTH(binary_str) - 1, 0)
+  END FUNCTION
+
+  FUNCTION secondary_sort(seq, acc)
+    IF LENGTH(seq) = 0 THEN RETURN acc ENDIF
+
+    LET minimum = seq[0]
+    FOR EACH item IN seq
+      IF item < minimum THEN minimum = item ENDIF
+    END FOR
+    LET filtered_seq = FILTER(seq, (x) => x != minimum)
+    RETURN secondary_sort(filtered_seq, acc + [minimum])
+  END FUNCTION
+
+  LET prim_sorted = secondary_sort(input_sequence, [])
+  FUNCTION key_sort(list_to_sort, acc)
+    IF LENGTH(list_to_sort) = 0 THEN RETURN acc ENDIF
+
+    LET min_with_key = list_to_sort[0]
+    FOR EACH candidate IN list_to_sort
+      IF binary_ones_count(candidate) < binary_ones_count(min_with_key) OR 
+         (binary_ones_count(candidate) = binary_ones_count(min_with_key) AND candidate < min_with_key)
+      THEN min_with_key = candidate
+      ENDIF
+    END FOR
+    LET reduced_list = FILTER(list_to_sort, (v) => v != min_with_key)
+    RETURN key_sort(reduced_list, acc + [min_with_key])
+  END FUNCTION
+
+  RETURN key_sort(prim_sorted, [])
+END FUNCTION
+```

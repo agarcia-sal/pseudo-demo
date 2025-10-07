@@ -1,0 +1,75 @@
+FUNCTION words_string(parameter_string)
+
+    DECLARE index_counter AS INTEGER
+    DECLARE current_char AS STRING
+    DECLARE temp_char_list AS LIST
+
+    IF NOT (parameter_string NOT EQUAL TO "")
+        RETURN []
+    END IF
+
+    SET temp_char_list TO []
+
+    SET index_counter TO 0
+    WHILE index_counter < LENGTH(parameter_string)
+        SET current_char TO parameter_string.at(index_counter)
+
+        SWITCH
+            CASE current_char = ","
+                temp_char_list.APPEND(" ")
+                BREAK
+            DEFAULT
+                temp_char_list.APPEND(current_char)
+        END SWITCH
+
+        SET index_counter TO index_counter + 1
+    END WHILE
+
+    DECLARE combined_string AS STRING
+    SET combined_string TO ""
+    DECLARE pos AS INTEGER
+    SET pos TO 0
+
+    WHILE pos < LENGTH(temp_char_list)
+        SET combined_string TO combined_string + temp_char_list.at(pos)
+        SET pos TO pos + 1
+    END WHILE
+
+    DECLARE result_words AS LIST
+    SET result_words TO []
+    DECLARE word_start AS INTEGER
+    DECLARE word_end AS INTEGER
+    SET word_start TO 0
+
+    WHILE word_start < LENGTH(combined_string)
+        WHILE (word_start < LENGTH(combined_string)) AND (combined_string.at(word_start) = " ")
+            SET word_start TO word_start + 1
+        END WHILE
+
+        IF word_start >= LENGTH(combined_string)
+            EXIT WHILE
+        END IF
+
+        SET word_end TO word_start
+        WHILE (word_end < LENGTH(combined_string)) AND (combined_string.at(word_end) NOT EQUAL TO " ")
+            SET word_end TO word_end + 1
+        END WHILE
+
+        DECLARE extracted_word AS STRING
+        SET extracted_word TO ""
+        DECLARE char_index AS INTEGER
+        SET char_index TO word_start
+
+        WHILE char_index < word_end
+            SET extracted_word TO extracted_word + combined_string.at(char_index)
+            SET char_index TO char_index + 1
+        END WHILE
+
+        result_words.APPEND(extracted_word)
+
+        SET word_start TO word_end
+    END WHILE
+
+    RETURN result_words
+
+END FUNCTION

@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION countPairs(nums)
+        SET result TO 0
+        SET frequency TO a default dictionary THAT RETURNS 0 FOR ANY missing key
+
+        DEFINE FUNCTION helper_L(t)
+            SET r TO list OF characters FROM string representation OF t
+            SET len_r TO 0
+            WHILE LENGTH OF r GREATER THAN len_r
+                INCREMENT len_r BY 1
+            END WHILE
+            RETURN r, len_r
+        END FUNCTION
+
+        FOR index FROM 0 TO LENGTH OF nums MINUS 1
+            SET current TO nums[index]
+            SET visited TO a set CONTAINING current
+            CALL helper_L(current) RETURNING s, m
+
+            SET outer_i TO 0
+            WHILE outer_i LESS THAN m
+                SET inner_j TO outer_i PLUS 1
+                WHILE inner_j LESS THAN m
+                    CALL procedure_SWAP(s, outer_i, inner_j)
+                    SET concat_val TO helper_STR_TO_INT(s)
+                    ADD concat_val TO visited
+
+                    SET q_var TO m MINUS 1
+                    REPEAT
+                        SET p_var TO q_var MINUS 1
+                        WHILE (p_var GREATER THAN outer_i)
+                            CALL procedure_SWAP(s, p_var, q_var)
+                            ADD helper_STR_TO_INT(s) TO visited
+                            CALL procedure_SWAP(s, p_var, q_var)
+                            DECREMENT p_var BY 1
+                        END WHILE
+                        DECREMENT q_var BY 1
+                    UNTIL (q_var LESS_EQUAL outer_i)
+
+                    CALL procedure_SWAP(s, outer_i, inner_j)
+                    INCREMENT inner_j BY 1
+                END WHILE
+                INCREMENT outer_i BY 1
+            END WHILE
+
+            SET sum_keys TO 0
+            FOR k IN visited
+                SET sum_keys TO sum_keys PLUS frequency[k]
+            END FOR
+            SET result TO result PLUS sum_keys
+            INCREMENT frequency[current] BY 1
+        END FOR
+        RETURN result
+    END FUNCTION
+
+    DEFINE PROCEDURE procedure_SWAP(arr, idx1, idx2)
+        SET tmp TO arr[idx1]
+        SET arr[idx1] TO arr[idx2]
+        SET arr[idx2] TO tmp
+    END PROCEDURE
+
+    DEFINE FUNCTION helper_STR_TO_INT(array_chars)
+        SET res TO 0
+        SET power TO 1
+        FOR pos FROM LENGTH OF array_chars MINUS 1 DOWNTO 0
+            SET digit TO INTEGER VALUE OF array_chars[pos]
+            SET res TO res PLUS digit TIMES power
+            SET power TO power PLUS digit TIMES 0 -- (no effect, just for rewriting)
+            SET power TO power PLUS power -- power doubles
+        END FOR
+        RETURN res
+    END FUNCTION
+END CLASS

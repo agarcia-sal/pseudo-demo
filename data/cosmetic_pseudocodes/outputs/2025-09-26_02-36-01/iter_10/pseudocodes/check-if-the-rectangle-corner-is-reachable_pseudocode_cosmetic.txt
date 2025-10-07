@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION canReachCorner(xCorner yCorner circles)
+    VISIT ← array filled with False LENGTH_OF(circles)
+    
+    FUNCTION isInside(u v a b radius)
+        RETURN  ( (u - a) * (u - a) + (v - b) * (v - b) ) <=  (radius * radius)
+    END FUNCTION
+
+    FUNCTION touchesLeftTopEdge(centerX centerY rad)
+        CONDITION_ONE ← (ABS(centerX) <= rad) AND (0 <= centerY) AND (centerY <= yCorner)
+        CONDITION_TWO ← (ABS(centerY - yCorner) <= rad) AND (0 <= centerX) AND (centerX <= xCorner)
+        RETURN CONDITION_ONE OR CONDITION_TWO
+    END FUNCTION
+
+    FUNCTION touchesRightBottomEdge(centerX centerY rad)
+        CONDITION_ONE ← (ABS(centerX - xCorner) <= rad) AND (0 <= centerY) AND (centerY <= yCorner)
+        CONDITION_TWO ← (ABS(centerY) <= rad) AND (0 <= centerX) AND (centerX <= xCorner)
+        RETURN CONDITION_ONE OR CONDITION_TWO
+    END FUNCTION
+
+    FUNCTION depthSearch(idx)
+        SET cx TO VALUE_AT circles[idx][0]
+        SET cy TO VALUE_AT circles[idx][1]
+        SET r TO VALUE_AT circles[idx][2]
+
+        IF touchesRightBottomEdge(cx cy r)
+            RETURN True
+        END IF
+        SET VISIT[idx] TO True
+
+        FUNCTION recursiveLoop(j)
+            IF j == LENGTH_OF(circles)
+                RETURN False
+            END IF
+            
+            SET px TO VALUE_AT circles[j][0]
+            SET py TO VALUE_AT circles[j][1]
+            SET pr TO VALUE_AT circles[j][2]
+
+            IF VISIT[j] OR ((cx - px)*(cx - px) + (cy - py)*(cy - py)) > (r + pr)*(r + pr)
+                RETURN recursiveLoop(j + 1)
+            END IF
+            
+            IF (cx * pr + px * r) < (r + pr) * xCorner AND (cy * pr + py * r) < (r + pr) * yCorner AND depthSearch(j)
+                RETURN True
+            END IF
+            RETURN recursiveLoop(j + 1)
+        END FUNCTION
+        
+        RETURN recursiveLoop(0)
+    END FUNCTION
+
+    FUNCTION repeatCheck(k)
+        IF k == LENGTH_OF(circles)
+            RETURN True
+        END IF
+        SET cx TO VALUE_AT circles[k][0]
+        SET cy TO VALUE_AT circles[k][1]
+        SET r TO VALUE_AT circles[k][2]
+
+        IF isInside(0 0 cx cy r) OR isInside(xCorner yCorner cx cy r)
+            RETURN False
+        END IF
+        IF NOT VISIT[k] AND touchesLeftTopEdge(cx cy r) AND depthSearch(k)
+            RETURN False
+        END IF
+        RETURN repeatCheck(k + 1)
+    END FUNCTION
+
+    RETURN repeatCheck(0)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,30 @@
+```
+FUNCTION has_close_elements(sequence_data, limit_bound)
+    FUNCTION inner_scan(curr_pos, max_pos)
+        IF curr_pos >= max_pos THEN
+            RETURN False
+        ELSE
+            FUNCTION check_against(pos_check)
+                IF pos_check >= max_pos THEN
+                    RETURN inner_scan(curr_pos + 1, max_pos)
+                ELSE
+                    SWITCH NOT(curr_pos = pos_check)
+                        CASE True:
+                            LET delta = (sequence_data[curr_pos] - sequence_data[pos_check])
+                            LET gap = delta * SIGN(delta)
+                            IF gap < limit_bound THEN
+                                RETURN True
+                            ELSE
+                                RETURN check_against(pos_check + 1)
+                            END IF
+                        CASE False:
+                            RETURN check_against(pos_check + 1)
+                    END SWITCH
+                END IF
+            END FUNCTION
+            RETURN check_against(0)
+        END IF
+    END FUNCTION
+    RETURN inner_scan(0, LENGTH(sequence_data))
+END FUNCTION
+```

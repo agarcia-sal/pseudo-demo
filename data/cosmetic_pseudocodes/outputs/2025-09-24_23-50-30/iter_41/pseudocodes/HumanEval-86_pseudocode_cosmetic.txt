@@ -1,0 +1,35 @@
+```
+FUNCTION anti_shuffle(observable)
+    PROCEDURE process_words(words, acc, index)
+        IF index = LENGTH(words) THEN
+            RETURN acc
+        END IF
+        SET current_word TO words[index]
+        SET chars TO EMPTY LIST
+        FOR i FROM 0 TO LENGTH(current_word) - 1
+            ADD current_word[i] TO chars
+        END FOR
+        CALL sort_chars(chars, 0)
+        SET new_word TO STRING_FROM_LIST(chars, 0, LENGTH(chars))
+        RETURN process_words(words, acc + [new_word], index + 1)
+    END PROCEDURE
+
+    PROCEDURE sort_chars(arr, start)
+        IF start >= LENGTH(arr) - 1 THEN
+            RETURN
+        END IF
+        FOR j FROM start + 1 TO LENGTH(arr) - 1
+            IF arr[j] < arr[start] THEN
+                SET temp TO arr[start]
+                SET arr[start] TO arr[j]
+                SET arr[j] TO temp
+            END IF
+        END FOR
+        CALL sort_chars(arr, start + 1)
+    END PROCEDURE
+
+    SET tokens TO SPLIT observable BY " "
+    SET sorted_words TO process_words(tokens, [], 0)
+    RETURN JOIN sorted_words WITH " "
+END FUNCTION
+```

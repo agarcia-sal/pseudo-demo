@@ -1,0 +1,29 @@
+CLASS Solution
+    FUNCTION countCompleteDayPairs WITH parameter hours
+        SET result_accumulator TO 0
+        SET occurrence_map TO mapping where any missing key returns 0
+
+        DEFINE FUNCTION modulo_twenty_four WITH input_value
+            RETURN input_value - (24 * (input_value DIV 24))
+        END FUNCTION
+
+        DEFINE FUNCTION process_index WITH position, arr, map_ref, pairs_ref
+            IF position EQUALS LENGTH(arr) THEN
+                RETURN
+            ELSE
+                SET current_element TO arr[position]
+                SET current_modulo TO modulo_twenty_four(current_element)
+                SET complement_val TO modulo_twenty_four(24 - current_modulo)
+
+                SET pairs_ref TO pairs_ref + map_ref[complement_val]
+                SET map_ref[current_modulo] TO map_ref[current_modulo] + 1
+
+                CALL process_index(position + 1, arr, map_ref, pairs_ref)
+            END IF
+        END FUNCTION
+
+        CALL process_index(0, hours, occurrence_map, result_accumulator)
+
+        RETURN result_accumulator
+    END FUNCTION
+END CLASS

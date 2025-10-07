@@ -1,0 +1,97 @@
+CLASS Solution
+    FUNCTION lastMarkedNodes(edges)
+      FUNCTION explore(node, parent, distances)
+        DECLARE index = 0
+        WHILE index < LENGTH(g[node])
+            DECLARE neighbor = g[node][index]
+            IF parent != neighbor THEN
+                distances[neighbor] = distances[node] + 1
+                CALL explore(neighbor, node, distances)
+            END IF
+          index = index + 1
+        END WHILE
+      END FUNCTION
+
+      DECLARE totalNodes = LENGTH(edges) + 1
+      DECLARE g = []
+      DECLARE counter = 0
+      WHILE counter < totalNodes
+          APPEND [] TO g
+          counter = counter + 1
+      END WHILE
+
+      DECLARE edgeIndex = 0
+      WHILE edgeIndex < LENGTH(edges)
+          DECLARE uNode = edges[edgeIndex][0]
+          DECLARE vNode = edges[edgeIndex][1]
+          APPEND vNode TO g[uNode]
+          APPEND uNode TO g[vNode]
+          edgeIndex = edgeIndex + 1
+      END WHILE
+
+      DECLARE distFirst = []
+      DECLARE i = 0
+      WHILE i < totalNodes
+          APPEND -1 TO distFirst
+          i = i + 1
+      END WHILE
+      distFirst[0] = 0
+      CALL explore(0, -1, distFirst)
+
+      DECLARE farNodeA = 0
+      DECLARE maxDistA = distFirst[0]
+      DECLARE idxA = 0
+      WHILE idxA < totalNodes
+          IF distFirst[idxA] > maxDistA THEN
+              farNodeA = idxA
+              maxDistA = distFirst[idxA]
+          END IF
+          idxA = idxA + 1
+      END WHILE
+
+      DECLARE distSecond = []
+      DECLARE j = 0
+      REPEAT
+          IF j >= totalNodes THEN BREAK END IF
+          APPEND -1 TO distSecond
+          j = j + 1
+      UNTIL j >= totalNodes
+      distSecond[farNodeA] = 0
+      CALL explore(farNodeA, -1, distSecond)
+
+      DECLARE farNodeB = 0
+      DECLARE maxDistB = distSecond[0]
+      DECLARE idxB = 0
+      UNTIL idxB >= totalNodes
+          IF distSecond[idxB] > maxDistB THEN
+              farNodeB = idxB
+              maxDistB = distSecond[idxB]
+          END IF
+          idxB = idxB + 1
+      END UNTIL
+
+      DECLARE distThird = []
+      REPEAT
+          IF LENGTH(distThird) >= totalNodes THEN BREAK END IF
+          APPEND (-1) TO distThird
+      UNTIL LENGTH(distThird) >= totalNodes
+      distThird[farNodeB] = 0
+      CALL explore(farNodeB, -1, distThird)
+
+      DECLARE res = []
+      DECLARE pos = 0
+      WHILE pos < totalNodes
+          DECLARE valX = distSecond[pos]
+          DECLARE valY = distThird[pos]
+          IF valX <= valY THEN
+              APPEND farNodeB TO res
+          END IF
+          IF valX > valY THEN
+              APPEND farNodeA TO res
+          END IF
+          pos = pos + 1
+      END WHILE
+
+      RETURN res
+    END FUNCTION
+END CLASS

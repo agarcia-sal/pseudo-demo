@@ -1,0 +1,45 @@
+CLASS Solution
+    FUNCTION sumOfPower(nums parameter, k parameter)
+       ASSIGN modulus TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+       LET length TO SIZE OF nums
+       INITIALIZE dp AS ARRAY WITH (length + 1) ELEMENTS EACH BEING ARRAY WITH (k + 1) ZEROS
+       dp[0][0] ASSIGN 1
+
+       LET idx_outer BE 1
+       WHILE idx_outer <= length
+           LET idx_inner BE 0
+           WHILE idx_inner <= k
+               dp[idx_outer][idx_inner] ASSIGN dp[idx_outer - 1][idx_inner]
+               IF idx_inner >= nums[idx_outer - 1] THEN
+                   dp[idx_outer][idx_inner] ADD EQUALS dp[idx_outer - 1][idx_inner - nums[idx_outer - 1]]
+               END IF
+               dp[idx_outer][idx_inner] REMAINDER_EQUALS modulus
+               idx_inner INCREMENT BY 1
+           END WHILE
+           idx_outer INCREMENT BY 1
+       END WHILE
+
+       LET aggregate_power BE 0
+       LET upper_limit BE (2 ^ length) - 1
+       LET subset_id BE 1
+       WHILE subset_id <= upper_limit
+           LET partial_sum BE 0
+           LET elems_count BE 0
+           LET bit_pos BE 0
+           WHILE bit_pos < length
+               IF (subset_id BITWISE_AND (1 << bit_pos)) != 0 THEN
+                   partial_sum ADD EQUALS nums[bit_pos]
+                   elems_count INCREMENT BY 1
+               END IF
+               bit_pos INCREMENT BY 1
+           END WHILE
+           IF partial_sum == k THEN
+               aggregate_power ADD EQUALS 2 ^ (length - elems_count)
+               aggregate_power REMAINDER_EQUALS modulus
+           END IF
+           subset_id INCREMENT BY 1
+       END WHILE
+
+       RETURN aggregate_power
+    END FUNCTION
+END CLASS

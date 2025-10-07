@@ -1,0 +1,73 @@
+CLASS Solution
+  FUNCTION countSubmatrices(grid, k)
+    LET rows ASSIGN THE LENGTH OF grid
+    LET cols ASSIGN THE LENGTH OF grid[0]
+    LET total ASSIGN 0
+
+    FUNCTION check_within_bounds(matrix)
+      DEFINE i AS 0
+      CHANNEL condition_met IS True
+      WHILE i LESS THAN LENGTH OF matrix AND condition_met
+        DEFINE j AS 0
+        WHILE j LESS THAN LENGTH OF matrix[i] AND condition_met
+          IF NOT (matrix[i][j] <= k) THEN
+            condition_met ASSIGN False
+          END IF
+          j ASSIGN j PLUS 1
+        END WHILE
+        i ASSIGN i PLUS 1
+      END WHILE
+      RETURN condition_met
+    END FUNCTION
+
+    FUNCTION check_descending_rows(matrix)
+      DEFINE idx_row AS 0
+      LET invariant ASSIGN True
+      WHILE idx_row LESS THAN LENGTH OF matrix AND invariant
+        DEFINE idx_col AS 1
+        WHILE idx_col LESS THAN LENGTH OF matrix[idx_row] AND invariant
+          IF NOT (matrix[idx_row][idx_col] <= matrix[idx_row][idx_col - 1]) THEN
+            invariant ASSIGN False
+          END IF
+          idx_col ASSIGN idx_col PLUS 1
+        END WHILE
+        idx_row ASSIGN idx_row PLUS 1
+      END WHILE
+      RETURN invariant
+    END FUNCTION
+
+    DEFINE start_row AS 0
+    WHILE start_row LESS THAN rows
+      DEFINE start_col AS 0
+      WHILE start_col LESS THAN cols
+        DEFINE end_row AS start_row
+        WHILE end_row LESS THAN rows
+          DEFINE end_col AS start_col
+          WHILE end_col LESS THAN cols
+            LET extracted ASSIGN an empty list
+            DEFINE sel_row AS start_row
+            WHILE sel_row LESS THAN end_row PLUS (1 TIMES 1)
+              LET row_slice ASSIGN an empty list
+              DEFINE sel_col AS start_col
+              WHILE sel_col LESS THAN end_col PLUS (1 TIMES 1)
+                CALL row_slice.APPEND(grid[sel_row][sel_col])
+                sel_col ASSIGN sel_col PLUS 1
+              END WHILE
+              CALL extracted.APPEND(row_slice)
+              sel_row ASSIGN sel_row PLUS 1
+            END WHILE
+            IF (check_within_bounds(extracted) AND check_descending_rows(extracted)) THEN
+              total ASSIGN total PLUS (1 TIMES 1)
+            END IF
+            end_col ASSIGN end_col PLUS 1
+          END WHILE
+          end_row ASSIGN end_row PLUS 1
+        END WHILE
+        start_col ASSIGN start_col PLUS 1
+      END WHILE
+      start_row ASSIGN start_row PLUS 1
+    END WHILE
+
+    RETURN total
+  END FUNCTION
+END CLASS

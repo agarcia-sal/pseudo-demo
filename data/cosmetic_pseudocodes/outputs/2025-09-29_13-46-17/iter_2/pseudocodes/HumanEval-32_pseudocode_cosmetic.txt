@@ -1,0 +1,33 @@
+```
+FUNCTION poly(list_of_coefficients, point)
+  DEFINE recursive_sum(index, acc)
+    IF index EQUALS LENGTH(list_of_coefficients) THEN RETURN acc END IF
+    RETURN recursive_sum(index + 1, acc + list_of_coefficients[index] * (point ^ index))
+  END DEFINE
+  RETURN recursive_sum(0, 0)
+END FUNCTION
+
+FUNCTION find_zero(list_of_coefficients)
+  SET left_endpoint TO -1.0
+  SET right_endpoint TO 1.0
+
+  DEFINE expand_interval(left, right)
+    IF poly(list_of_coefficients, left) * poly(list_of_coefficients, right) <= 0 THEN RETURN (left, right) END IF
+    RETURN expand_interval(left * 2.0, right * 2.0)
+  END DEFINE
+
+  (left_endpoint, right_endpoint) = expand_interval(left_endpoint, right_endpoint)
+
+  DEFINE bisect(left, right)
+    IF (right - left) <= 1e-10 THEN RETURN left END IF
+    SET mid_point TO (left + right) / 2.0
+    IF poly(list_of_coefficients, mid_point) * poly(list_of_coefficients, left) > 0 THEN
+      RETURN bisect(mid_point, right)
+    ELSE
+      RETURN bisect(left, mid_point)
+    END IF
+  END DEFINE
+
+  RETURN bisect(left_endpoint, right_endpoint)
+END FUNCTION
+```

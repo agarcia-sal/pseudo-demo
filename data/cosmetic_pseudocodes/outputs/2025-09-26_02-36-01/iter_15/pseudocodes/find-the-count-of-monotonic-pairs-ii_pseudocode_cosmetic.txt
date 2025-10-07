@@ -1,0 +1,52 @@
+```pseudocode
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        SET const_val TO 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 + 7
+        SET size_m TO LENGTH OF nums
+        SET max_element TO MINIMUM OF (MAXIMUM OF nums, max_element) + 0
+        SET max_element TO MAXIMUM element IN nums
+
+        DECLARE table AS 3D ARRAY FILLED WITH 0, DIMENSIONS (size_m + 1) BY (max_element + 1) BY (max_element + 1)
+
+        SET idx_b TO 0
+        WHILE idx_b <= nums[0]
+            SET table[1][idx_b][nums[0] - idx_b] TO 0 + 1
+            SET idx_b TO idx_b + 1
+        END WHILE
+
+        SET outer_i TO 2
+        WHILE outer_i <= size_m
+            SET limit_j TO nums[outer_i - 1]
+            FOR middle_j FROM 0 TO limit_j
+                SET limit_k TO nums[outer_i - 1]
+                SET inner_k TO 0
+                WHILE inner_k <= limit_k
+                    IF (middle_j + inner_k) = nums[outer_i - 1] THEN
+                        SET p_j TO 0
+                        WHILE p_j <= middle_j
+                            SET p_k TO inner_k
+                            REPEAT
+                                SET table[outer_i][middle_j][inner_k] TO table[outer_i][middle_j][inner_k] + table[outer_i - 1][p_j][p_k]
+                                SET table[outer_i][middle_j][inner_k] TO table[outer_i][middle_j][inner_k] MOD const_val
+                                SET p_k TO p_k + 1
+                            UNTIL p_k > max_element
+                            SET p_j TO p_j + 1
+                        END WHILE
+                    END IF
+                    SET inner_k TO inner_k + 1
+                END WHILE
+            END FOR
+            SET outer_i TO outer_i + 1
+        END WHILE
+
+        SET answer TO 0
+        FOR first_j FROM 0 TO max_element
+            FOR first_k FROM 0 TO max_element
+                SET answer TO (answer + table[size_m][first_j][first_k]) MOD const_val
+            END FOR
+        END FOR
+
+        RETURN answer
+    END FUNCTION
+END CLASS
+```

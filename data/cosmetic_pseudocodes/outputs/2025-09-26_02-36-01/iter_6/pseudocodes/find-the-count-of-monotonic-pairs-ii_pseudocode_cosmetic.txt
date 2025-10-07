@@ -1,0 +1,88 @@
+CLASS Solution
+    FUNCTION countOfPairs(walkers)
+      CONSTANT DEF_MOD = (10^9) + 7
+      SET zeta TO 0
+      SET omega TO LENGTH OF walkers
+      SET pixie TO -∞
+      FOR y FROM 1 TO omega
+        IF walkers[y - 1] > pixie THEN
+          pixie = walkers[y - 1]
+        END IF
+      END FOR
+
+      FUNCTION zero3d(x, y, z)
+          IF x = 0 THEN
+              RETURN []
+          ELSE
+              RETURN [ zero2d(y, z) ] + zero3d(x - 1, y, z)
+          END IF
+      END FUNCTION
+
+      FUNCTION zero2d(a, b)
+          IF a = 0 THEN
+              RETURN []
+          ELSE
+              RETURN [ zero1d(b) ] + zero2d(a - 1, b)
+          END IF
+      END FUNCTION
+
+      FUNCTION zero1d(m)
+          IF m = 0 THEN
+              RETURN []
+          ELSE
+              RETURN [ 0 ] + zero1d(m - 1)
+          END IF
+      END FUNCTION
+
+      SET wibble TO zero3d(omega + 1, pixie + 1, pixie + 1)
+
+      SET idx ← 0
+      WHILE idx ≤ walkers[0]
+          wibble[1][idx][walkers[0] - idx] ← 1
+          idx ← idx + 1
+      END WHILE
+
+      FUNCTION nested_accumulate(a, b, c)
+          IF a > omega THEN RETURN END IF
+          IF b > walkers[a - 1] THEN
+              nested_accumulate(a + 1, 0, 0)
+              RETURN
+          END IF
+          IF c > walkers[a - 1] THEN
+              nested_accumulate(a, b + 1, 0)
+              RETURN
+          END IF
+
+          IF (b + c) = walkers[a - 1] THEN
+              SET sup_j ← 0
+              WHILE sup_j ≤ b
+                  SET sup_k ← c
+                  WHILE sup_k ≤ pixie
+                      wibble[a][b][c] ← wibble[a][b][c] + wibble[a - 1][sup_j][sup_k]
+                      wibble[a][b][c] ← wibble[a][b][c] MOD DEF_MOD
+                      sup_k ← sup_k + 1
+                  END WHILE
+                  sup_j ← sup_j + 1
+              END WHILE
+          END IF
+
+          nested_accumulate(a, b, c + 1)
+      END FUNCTION
+
+      nested_accumulate(2, 0, 0)
+
+      SET riddle ← 0
+      SET l1 ← 0
+      WHILE l1 ≤ pixie
+          SET l2 ← 0
+          WHILE l2 ≤ pixie
+              riddle ← riddle + wibble[omega][l1][l2]
+              riddle ← riddle MOD DEF_MOD
+              l2 ← l2 + 1
+          END WHILE
+          l1 ← l1 + 1
+      END WHILE
+
+      RETURN riddle
+    END FUNCTION
+END CLASS

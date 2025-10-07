@@ -1,0 +1,103 @@
+``` 
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        DEFINE FUNCTION count_chars(sequence)
+            SET freq_map TO empty map
+            SET idx TO 0
+            WHILE idx < LENGTH(sequence) DO
+                SET current_char TO sequence[idx]
+                IF current_char IN freq_map THEN
+                    SET freq_map[current_char] TO freq_map[current_char] + 1
+                ELSE
+                    SET freq_map[current_char] TO 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN freq_map
+        END FUNCTION
+
+        SET local_counter TO count_chars(s)
+        IF "?" IN local_counter THEN
+            DELETE local_counter["?"]
+        END IF
+
+        SET positions TO empty list
+        SET ptr TO 0
+        WHILE ptr < LENGTH(s) DO
+            IF s[ptr] = "?" THEN
+                APPEND ptr TO positions
+            END IF
+            SET ptr TO ptr + 1
+        END WHILE
+
+        SET substitutions TO empty list
+
+        DEFINE FUNCTION least_frequent_char(count_map)
+            SET best_count TO positive_infinity
+            SET best_letter TO null
+            SET letter_ascii TO 97
+            WHILE letter_ascii <= 122 DO
+                SET letter TO CHAR(letter_ascii)
+                IF (letter NOT IN count_map) OR (count_map[letter] < best_count) THEN
+                    SET best_count TO IF letter IN count_map THEN count_map[letter] ELSE 0
+                    SET best_letter TO letter
+                END IF
+                SET letter_ascii TO letter_ascii + 1
+            END WHILE
+            RETURN best_letter
+        END FUNCTION
+
+        SET pos_idx TO 0
+        WHILE pos_idx < LENGTH(positions) DO
+            SET candidate TO least_frequent_char(local_counter)
+            APPEND candidate TO substitutions
+            SET current_freq TO IF candidate IN local_counter THEN local_counter[candidate] ELSE 0
+            SET local_counter[candidate] TO current_freq + 1
+            SET pos_idx TO pos_idx + 1
+        END WHILE
+
+        DEFINE FUNCTION sort_chars(char_list)
+            IF LENGTH(char_list) <= 1 THEN
+                RETURN char_list
+            END IF
+            SET pivot TO char_list[0]
+            SET left_side TO empty list
+            SET right_side TO empty list
+            SET i TO 1
+            WHILE i < LENGTH(char_list) DO
+                IF char_list[i] <= pivot THEN
+                    APPEND char_list[i] TO left_side
+                ELSE
+                    APPEND char_list[i] TO right_side
+                END IF
+                SET i TO i + 1
+            END WHILE
+            RETURN sort_chars(left_side) + [pivot] + sort_chars(right_side)
+        END FUNCTION
+
+        SET sorted_substitutions TO sort_chars(substitutions)
+
+        SET mutable_str TO empty list
+        SET index_var TO 0
+        WHILE index_var < LENGTH(s) DO
+            APPEND s[index_var] TO mutable_str
+            SET index_var TO index_var + 1
+        END WHILE
+
+        SET pair_idx TO 0
+        WHILE pair_idx < LENGTH(positions) DO
+            SET mutable_str[positions[pair_idx]] TO sorted_substitutions[pair_idx]
+            SET pair_idx TO pair_idx + 1
+        END WHILE
+
+        SET output_str TO ""
+        SET out_idx TO 0
+        WHILE out_idx < LENGTH(mutable_str) DO
+            SET output_str TO output_str + mutable_str[out_idx]
+            SET out_idx TO out_idx + 1
+        END WHILE
+
+        RETURN output_str
+    END FUNCTION
+END CLASS
+```

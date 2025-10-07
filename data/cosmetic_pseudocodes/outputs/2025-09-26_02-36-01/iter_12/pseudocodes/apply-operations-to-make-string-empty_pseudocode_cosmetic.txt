@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION lastNonEmptyString(s)
+        FUNCTION computeCounts(text)
+            SET index TO 0
+            SET countsMap TO empty dictionary
+            WHILE index < LENGTH(text)
+                SET currentChar TO text[index]
+                IF currentChar IN countsMap THEN
+                    SET countsMap[currentChar] TO countsMap[currentChar] + 1
+                ELSE
+                    SET countsMap[currentChar] TO 1
+                END IF
+                SET index TO index + 1
+            END WHILE
+            RETURN countsMap
+        END FUNCTION
+        
+        FUNCTION findMaximumValue(dictionary)
+            SET iterator TO dictionary VALUES
+            SET maximumValue TO NEGATIVE_INFINITY
+            FOR EACH val IN iterator
+                IF val > maximumValue THEN
+                    SET maximumValue TO val
+                END IF
+            END FOR
+            RETURN maximumValue
+        END FUNCTION
+        
+        FUNCTION collectKeysWithValue(dictionary, target)
+            SET keysMatching TO empty set
+            FOR EACH key IN dictionary KEYS
+                IF dictionary[key] == target THEN
+                    ADD key TO keysMatching
+                END IF
+            END FOR
+            RETURN keysMatching
+        END FUNCTION
+        
+        FUNCTION gatherChars(sourceString, charsSet)
+            SET collectedList TO empty list
+            FUNCTION walkBackwards(pos, acc)
+                IF pos < 0 THEN
+                    RETURN acc
+                ELSE
+                    SET ch TO sourceString[pos]
+                    IF ch IN charsSet THEN
+                        REMOVE ch FROM charsSet
+                        SET newAcc TO [ch] + acc
+                        RETURN walkBackwards(pos - 1, newAcc)
+                    ELSE
+                        RETURN walkBackwards(pos - 1, acc)
+                    END IF
+                END IF
+            END FUNCTION
+            RETURN walkBackwards(LENGTH(sourceString) - 1, collectedList)
+        END FUNCTION
+        
+        SET frequencyCounts TO computeCounts(s)
+        SET highestFrequency TO findMaximumValue(frequencyCounts)
+        SET relevantChars TO collectKeysWithValue(frequencyCounts, highestFrequency)
+        SET charsCollected TO gatherChars(s, relevantChars)
+        
+        FUNCTION concatenateChars(charList)
+            SET assembledString TO empty string
+            SET idx TO 0
+            WHILE idx < LENGTH(charList)
+                SET assembledString TO assembledString + charList[idx]
+                SET idx TO idx + 1
+            END WHILE
+            RETURN assembledString
+        END FUNCTION
+        
+        RETURN concatenateChars(charsCollected)
+    END FUNCTION
+END CLASS

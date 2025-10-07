@@ -1,0 +1,46 @@
+``` 
+CLASS Solution  
+	FUNCTION maxSubstringLength(s)  
+		SET alpha_freq TO empty frequency count  
+		FOR idx_char FROM 0 TO LENGTH(s) - 1  
+			IF s[idx_char] EXISTS IN alpha_freq  
+				SET alpha_freq[s[idx_char]] TO alpha_freq[s[idx_char]] + 1  
+			ELSE  
+				SET alpha_freq[s[idx_char]] TO 1  
+			END IF  
+		END FOR  
+
+		SET best_len TO -1  
+		SET outer_idx TO 0  
+		WHILE outer_idx <= LENGTH(s) - 1  
+			SET segment_freq TO empty frequency count  
+			SET inner_idx TO outer_idx  
+			REPEAT  
+				IF s[inner_idx] NOT IN segment_freq  
+					SET segment_freq[s[inner_idx]] TO 1  
+				ELSE  
+					SET segment_freq[s[inner_idx]] TO segment_freq[s[inner_idx]] + 1  
+				END IF  
+
+				SET flag_complete TO 1  
+				FOR each k_char IN KEYS(segment_freq)  
+					IF segment_freq[k_char] < alpha_freq[k_char]  
+						SET flag_complete TO 0  
+						EXIT FOR  
+					END IF  
+				END FOR  
+
+				IF flag_complete = 1 AND LENGTH(KEYS(segment_freq)) < LENGTH(KEYS(alpha_freq))  
+					IF best_len < (inner_idx - outer_idx + 1)  
+						SET best_len TO inner_idx - outer_idx + 1  
+					END IF  
+				END IF  
+				SET inner_idx TO inner_idx + 1  
+			UNTIL inner_idx > LENGTH(s) - 1  
+			SET outer_idx TO outer_idx + 1  
+		END WHILE  
+
+		RETURN best_len  
+	END FUNCTION  
+END CLASS
+```

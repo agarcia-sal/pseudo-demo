@@ -1,0 +1,104 @@
+CLASS Solution
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+        FUNCTION sum_of_list(lst)
+            SET total TO 0
+            SET idx TO 0
+            REPEAT
+                IF idx IS EQUAL TO LENGTH OF lst
+                    BREAK
+                END IF
+                SET total TO total PLUS element at position idx of lst
+                SET idx TO idx PLUS 1
+            UNTIL FALSE
+            RETURN total
+        END FUNCTION
+
+        FUNCTION can_mark_by_second(k)
+            FUNCTION create_list(size, val)
+                SET res TO empty list
+                SET counter TO 0
+                WHILE counter LESS THAN size
+                    APPEND val TO res
+                    SET counter TO counter PLUS 1
+                END WHILE
+                RETURN res
+            END FUNCTION
+            
+            SET last_occurrence TO create_list(LENGTH OF nums, -1)
+            SET s TO 0
+            WHILE s NOT EQUAL TO k
+                SET i TO element at position s of changeIndices MINUS 1
+                SET element at position i of last_occurrence TO s
+                SET s TO s PLUS 1
+            END WHILE
+            
+            SET total_decrements_needed TO sum_of_list(nums)
+            SET available_decrement_tokens TO 0
+            SET marked_indices SET TO empty set
+            
+            FUNCTION increment_available()
+                SET available_decrement_tokens TO available_decrement_tokens PLUS 1
+            END FUNCTION
+
+            SET s TO 0
+            REPEAT
+                IF s EQUALS k
+                    BREAK
+                END IF
+                SET i TO element at position s of changeIndices MINUS 1
+                IF i NOT IN marked_indices
+                    IF element at position i of last_occurrence EQUALS s
+                        IF element at position i of nums LESS OR EQUAL TO available_decrement_tokens
+                            SET available_decrement_tokens TO available_decrement_tokens MINUS element at position i of nums
+                            ADD i TO marked_indices
+                        ELSE
+                            RETURN False
+                        END IF
+                    ELSE
+                        CALL increment_available()
+                    END IF
+                ELSE
+                    CALL increment_available()
+                END IF
+                SET s TO s PLUS 1
+            UNTIL FALSE
+            
+            IF LENGTH OF marked_indices EQUALS LENGTH OF nums
+                RETURN True
+            ELSE
+                RETURN False
+            END IF
+        END FUNCTION
+
+        SET l TO 0
+        SET r TO LENGTH OF changeIndices PLUS 1
+        FUNCTION integer_divide(a, b)
+            SET quotient TO 0
+            SET product TO 0
+            WHILE product PLUS b LESS OR EQUAL TO a
+                SET product TO product PLUS b
+                SET quotient TO quotient PLUS 1
+            END WHILE
+            RETURN quotient
+        END FUNCTION
+
+        WHILE l LESS THAN r
+            SET midpoint TO l PLUS integer_divide(r MINUS l, 2)
+            IF can_mark_by_second(midpoint)
+                SET r TO midpoint
+            ELSE
+                SET l TO l PLUS 1
+            END IF
+        END WHILE
+        
+        FUNCTION negative_one_when_outside_range(x, upper_bound)
+            IF x GREATER THAN upper_bound
+                RETURN -(1)
+            ELSE
+                RETURN x
+            END IF
+        END FUNCTION
+
+        RETURN negative_one_when_outside_range(l, LENGTH OF changeIndices)
+    END FUNCTION
+END CLASS

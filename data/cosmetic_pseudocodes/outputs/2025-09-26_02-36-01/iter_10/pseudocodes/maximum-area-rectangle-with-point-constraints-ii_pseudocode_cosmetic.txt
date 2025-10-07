@@ -1,0 +1,123 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, n)  
+        PROCEDURE initArray(k)  
+            RETURN [0 FOR _ IN range(k)]  
+        END PROCEDURE  
+        SET self.tree TO initArray(n + 1)  
+    END FUNCTION  
+
+    FUNCTION add(self, i)  
+        FUNCTION nextIndex(idx)  
+            RETURN idx + (idx & (-idx))  
+        END FUNCTION  
+        FUNCTION incrementPosition(arr, pos)  
+            arr[pos] = arr[pos] + 1  
+        END FUNCTION  
+        
+        FUNCTION loopIncrement(idx)  
+            IF idx >= LENGTH(self.tree) THEN RETURN END IF  
+            incrementPosition(self.tree, idx)  
+            loopIncrement(nextIndex(idx))  
+        END FUNCTION  
+        
+        loopIncrement(i)  
+    END FUNCTION  
+
+    FUNCTION pre(self, i)  
+        FUNCTION nextIndex(idx)  
+            RETURN idx & (idx - 1)  
+        END FUNCTION  
+        
+        FUNCTION sumRec(idx, accum)  
+            IF idx <= 0 THEN RETURN accum END IF  
+            RETURN sumRec(nextIndex(idx), accum + self.tree[idx])  
+        END FUNCTION  
+        
+        RETURN sumRec(i, 0)  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        RETURN self.pre(r) - self.pre(l - 1)  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+        FUNCTION zipSort(a, b)  
+            SET zippedList TO []  
+            FOR m FROM 0 TO LENGTH(a) - 1 DO  
+                APPEND (a[m], b[m]) TO zippedList  
+            END FOR  
+            PROCEDURE bubbleSortPairs(arr)  
+                FOR i FROM 0 TO LENGTH(arr) - 2 DO  
+                    FOR j FROM 0 TO LENGTH(arr) - i - 2 DO  
+                        IF arr[j][0] > arr[j+1][0] OR (arr[j][0] == arr[j+1][0] AND arr[j][1] > arr[j+1][1]) THEN  
+                            SET temp TO arr[j]  
+                            SET arr[j] TO arr[j+1]  
+                            SET arr[j+1] TO temp  
+                        END IF  
+                    END FOR  
+                END FOR  
+            END PROCEDURE  
+            bubbleSortPairs(zippedList)  
+            RETURN zippedList  
+        END FUNCTION  
+
+        FUNCTION uniqueSorted(arr)  
+            SET result TO []  
+            FOR val IN arr DO  
+                IF LENGTH(result) == 0 OR result[LENGTH(result) - 1] != val THEN  
+                    APPEND val TO result  
+                END IF  
+            END FOR  
+            RETURN result  
+        END FUNCTION  
+
+        FUNCTION bisectLeft(arr, target)  
+            FUNCTION bisectRec(left, right)  
+                IF left >= right THEN RETURN left END IF  
+                SET middle TO (left + right) DIV 2  
+                IF arr[middle] < target THEN  
+                    RETURN bisectRec(middle + 1, right)  
+                ELSE  
+                    RETURN bisectRec(left, middle)  
+                END IF  
+            END FUNCTION  
+            RETURN bisectRec(0, LENGTH(arr))  
+        END FUNCTION  
+
+        SET points TO zipSort(xCoord, yCoord)  
+        SET ys TO uniqueSorted(sort(yCoord))  
+
+        SET ans TO -1  
+
+        SET tree TO Fenwick(LENGTH(ys))  
+        CALL tree.add(bisectLeft(ys, points[0][1]) + 1)  
+
+        SET pre TO {}  
+
+        FUNCTION processPairs(idx)  
+            IF idx >= LENGTH(points) - 1 THEN RETURN END IF  
+            SET p1 TO points[idx]  
+            SET p2 TO points[idx + 1]  
+            SET yVal TO bisectLeft(ys, p2[1]) + 1  
+            CALL tree.add(yVal)  
+
+            IF p1[0] == p2[0] THEN  
+                SET cur TO tree.query(bisectLeft(ys, p1[1]) + 1, yVal)  
+                IF p2[1] IN pre AND pre[p2[1]][1] == p1[1] AND pre[p2[1]][2] + 2 == cur THEN  
+                    SET candidate TO (p2[0] - pre[p2[1]][0]) * (p2[1] - p1[1])  
+                    IF candidate > ans THEN  
+                        ans = candidate  
+                    END IF  
+                END IF  
+                SET pre[p2[1]] TO (p1[0], p1[1], cur)  
+            END IF  
+            processPairs(idx + 1)  
+        END FUNCTION  
+
+        CALL processPairs(0)  
+
+        RETURN ans  
+    END FUNCTION  
+END CLASS

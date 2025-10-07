@@ -1,0 +1,55 @@
+```
+FUNCTION get_row(two_dimensional_list, target_integer)
+    FUNCTION explore_rows(current_row, acc_coordinates)
+        IF current_row >= LENGTH two_dimensional_list THEN
+            RETURN acc_coordinates
+        END IF
+        FUNCTION explore_columns(current_col, row_accum)
+            IF current_col >= LENGTH two_dimensional_list AT current_row THEN
+                RETURN row_accum
+            END IF
+            IF (two_dimensional_list AT current_row AT current_col) = target_integer THEN
+                RETURN explore_columns(current_col + 1, row_accum + [(current_row, current_col)])
+            ELSE
+                RETURN explore_columns(current_col + 1, row_accum)
+            END IF
+        END FUNCTION
+        LET updated_acc = explore_columns(0, acc_coordinates)
+        RETURN explore_rows(current_row + 1, updated_acc)
+    END FUNCTION
+
+    LET all_coordinates = explore_rows(0, [])
+
+    LET sorted_by_second_desc = []
+    FOR EACH coord IN all_coordinates
+        LET inserted = false
+        FOR i FROM 0 TO LENGTH sorted_by_second_desc MINUS 1
+            IF sorted_by_second_desc[i][1] < coord[1] THEN
+                INSERT coord AT i IN sorted_by_second_desc
+                LET inserted = true
+                BREAK
+            END IF
+        END FOR
+        IF NOT inserted THEN
+            APPEND coord TO sorted_by_second_desc
+        END IF
+    END FOR
+
+    LET final_sorted = []
+    FOR EACH coord IN sorted_by_second_desc
+        LET placed = false
+        FOR j FROM 0 TO LENGTH final_sorted MINUS 1
+            IF final_sorted[j][0] > coord[0] THEN
+                INSERT coord AT j IN final_sorted
+                LET placed = true
+                BREAK
+            END IF
+        END FOR
+        IF NOT placed THEN
+            APPEND coord TO final_sorted
+        END IF
+    END FOR
+
+    RETURN final_sorted
+END FUNCTION
+```

@@ -1,0 +1,80 @@
+CLASS Solution
+    FUNCTION maxPartitionsAfterOperations(s parameter k parameter)
+        FUNCTION max_partitions(s parameter k parameter)
+            SET alphaSet TO empty set
+            SET tally TO 0
+            PROCEDURE addCharToSet(c)
+                alphaSet <- alphaSet + {c}
+            END PROCEDURE
+            SET idx TO 0
+            WHILE idx < LENGTH(s parameter)
+                SET currentChar TO s parameter[idx]
+                IF (NOT (currentChar IN alphaSet)) AND (LENGTH(alphaSet) >= k parameter) THEN
+                    tally <- tally + 1
+                    alphaSet <- {currentChar}
+                ELSE
+                    IF NOT (currentChar IN alphaSet) THEN
+                        CALL addCharToSet(currentChar)
+                    END IF
+                END IF
+                idx <- idx + 1
+            END WHILE
+            IF LENGTH(alphaSet) > 0 THEN
+                tally <- tally + 1
+            END IF
+            RETURN tally
+        END FUNCTION
+
+        FUNCTION alt_ord(c)
+            RETURN (c - 'a') + 1
+        END FUNCTION
+
+        FUNCTION alt_chr(val)
+            RETURN (val - 1) + 'a'
+        END FUNCTION
+
+        FUNCTION letter_sequence()
+            SET letters TO empty list
+            SET n TO ('z' - 'a') + 1
+            SET pos TO 1
+            REPEAT
+                letters <- letters + [alt_chr(pos)]
+                pos <- pos + 1
+            UNTIL pos > n
+            RETURN letters
+        END FUNCTION
+
+        SET best_partitions TO max_partitions(s parameter k parameter)
+
+        FUNCTION maximum(a b)
+            IF a >= b THEN RETURN a
+            ELSE RETURN b
+            END IF
+        END FUNCTION
+
+        SET xIndex TO 0
+        WHILE xIndex < LENGTH(s parameter)
+            SET originalChar TO s parameter[xIndex]
+            SET lettersList TO letter_sequence()
+            SET letterIndex TO 0
+            REPEAT
+                SET candidateChar TO lettersList[letterIndex]
+                letterIndex <- letterIndex + 1
+                IF candidateChar = originalChar THEN CONTINUE END IF
+                SET leftSub TO ""
+                SET rightSub TO ""
+                IF xIndex > 0 THEN
+                    SET leftSub TO SUBSTRING(s parameter, 0, xIndex - 1 + 1)
+                END IF
+                IF xIndex + 1 < LENGTH(s parameter) THEN
+                    SET rightSub TO SUBSTRING(s parameter, xIndex + 1, LENGTH(s parameter) - 1)
+                END IF
+                SET novelString TO leftSub + candidateChar + rightSub
+                best_partitions <- maximum(best_partitions, max_partitions(novelString, k parameter))
+            UNTIL letterIndex >= LENGTH(lettersList)
+            xIndex <- xIndex + 1
+        END WHILE
+
+        RETURN best_partitions
+    END FUNCTION
+END CLASS

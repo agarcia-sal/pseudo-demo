@@ -1,0 +1,132 @@
+CLASS Solution
+    FUNCTION numberOfPairs(points)
+        DEFINE FUNCTION isWithinBounds(a_x,a_y,b_x,b_y,c_x,c_y)
+            SET result TO FALSE
+            IF a_x <= c_x THEN
+                IF c_x <= b_x THEN
+                    IF a_y >= c_y THEN
+                        IF c_y >= b_y THEN
+                            SET result TO TRUE
+                        END IF
+                    END IF
+                END IF
+            END IF
+            RETURN result
+        END FUNCTION
+
+        DEFINE FUNCTION getCoord(coordList, idx, pos)
+            RETURN (coordList[idx])[pos]
+        END FUNCTION
+
+        SET lengthPoints TO 0
+        SET accCount TO 0
+        SET tmpIdx1 TO 0
+
+        WHILE TRUE
+            IF tmpIdx1 < ( LENGTH(points) ) THEN
+                SET lengthPoints TO LENGTH(points)
+            ELSE
+                BREAK
+            END IF
+            SET tmpIdx1 TO lengthPoints
+            IF tmpIdx1 >= LENGTH(points) THEN
+                BREAK
+            END IF
+        END WHILE
+
+        SET idxOuter TO 0
+        DECLARE countAccumulator
+        countAccumulator = 0
+
+        DEFINE PROCEDURE incrementCounter()
+            countAccumulator = countAccumulator + 1
+        END PROCEDURE
+
+        DEFINE FUNCTION areIndicesDifferent(x,y)
+            IF x = y THEN
+                RETURN FALSE
+            ELSE
+                RETURN TRUE
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION scanInner(kIn, iIn, jIn, pointsList)
+            IF areIndicesDifferent(kIn, iIn) AND areIndicesDifferent(kIn, jIn) THEN
+                SET x_k TO getCoord(pointsList, kIn, 0)
+                SET y_k TO getCoord(pointsList, kIn, 1)
+                SET x_i TO getCoord(pointsList, iIn, 0)
+                SET y_i TO getCoord(pointsList, iIn, 1)
+                SET x_j TO getCoord(pointsList, jIn, 0)
+                SET y_j TO getCoord(pointsList, jIn, 1)
+
+                IF isWithinBounds(x_i,y_i,x_j,y_j,x_k,y_k) THEN
+                    RETURN FALSE
+                END IF
+            END IF
+            RETURN TRUE
+        END FUNCTION
+
+        DEFINE FUNCTION innerLoop(iIdx, jIdx, pointsList)
+            FUNCTION recur(kIdx, limit)
+                IF kIdx = limit THEN
+                    RETURN TRUE
+                ELSE
+                    IF scanInner(kIdx,iIdx,jIdx,pointsList) = FALSE THEN
+                        RETURN FALSE
+                    ELSE
+                        RETURN recur(kIdx + 1, limit)
+                    END IF
+                END IF
+            END FUNCTION
+
+            RETURN recur(0, lengthPoints)
+        END FUNCTION
+
+        DEFINE FUNCTION conditionCheck(iIdx, jIdx, pointsList)
+            SET x_i TO getCoord(pointsList, iIdx, 0)
+            SET y_i TO getCoord(pointsList, iIdx, 1)
+            SET x_j TO getCoord(pointsList, jIdx, 0)
+            SET y_j TO getCoord(pointsList, jIdx, 1)
+            IF x_i <= x_j THEN
+                IF y_i >= y_j THEN
+                    RETURN TRUE
+                ELSE
+                    RETURN FALSE
+                END IF
+            ELSE
+                RETURN FALSE
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION outerLoop(iPos)
+            IF iPos = lengthPoints THEN
+                RETURN
+            ELSE
+                SET jPos TO 0
+                DECLARE nestedLoop
+
+                FUNCTION nestedLoopFunc(jPosInner)
+                    IF jPosInner = lengthPoints THEN
+                        RETURN
+                    ELSE
+                        IF areIndicesDifferent(iPos, jPosInner) THEN
+                            IF conditionCheck(iPos,jPosInner,points) THEN
+                                IF innerLoop(iPos,jPosInner,points) THEN
+                                    incrementCounter()
+                                END IF
+                            END IF
+                        END IF
+                        nestedLoopFunc(jPosInner+1)
+                    END IF
+                END FUNCTION
+
+                nestedLoopFunc(jPos)
+                outerLoop(iPos+1)
+            END IF
+        END FUNCTION
+
+        outerLoop(0)
+
+        RETURN countAccumulator
+    END FUNCTION
+END CLASS

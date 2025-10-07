@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+        SET rowsCount TO LENGTH(grid)
+        SET colsCount TO LENGTH(grid[0])
+        SET totalCount TO 0
+
+        FUNCTION is_valid_submatrix(submat)
+            SET rowIndex TO 0
+            WHILE rowIndex < LENGTH(submat)
+                SET colIndex TO 0
+                WHILE colIndex < LENGTH(submat[rowIndex])
+                    IF submat[rowIndex][colIndex] > k THEN
+                        RETURN False
+                    END IF
+                    SET colIndex TO colIndex + 1
+                END WHILE
+                SET rowIndex TO rowIndex + 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        FUNCTION is_sorted_submatrix(submat)
+            SET r TO 0
+            WHILE r < LENGTH(submat)
+                SET c TO 1
+                WHILE c < LENGTH(submat[r])
+                    IF NOT (submat[r][c] <= submat[r][c - 1]) THEN
+                        RETURN False
+                    END IF
+                    SET c TO c + 1
+                END WHILE
+                SET r TO r + 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        SET startRow TO 0
+        WHILE startRow < rowsCount
+            SET startCol TO 0
+            WHILE startCol < colsCount
+                SET endRow TO startRow
+                WHILE endRow < rowsCount
+                    SET endCol TO startCol
+                    WHILE endCol < colsCount
+                        SET tempSubmatrix TO []
+                        SET rowIter TO startRow
+                        WHILE rowIter <= endRow
+                            SET currRowSegment TO []
+                            SET colIter TO startCol
+                            WHILE colIter <= endCol
+                                APPEND grid[rowIter][colIter] TO currRowSegment
+                                SET colIter TO colIter + 1
+                            END WHILE
+                            APPEND currRowSegment TO tempSubmatrix
+                            SET rowIter TO rowIter + 1
+                        END WHILE
+                        IF is_valid_submatrix(tempSubmatrix) AND is_sorted_submatrix(tempSubmatrix) THEN
+                            totalCount = totalCount + 1
+                        END IF
+                        SET endCol TO endCol + 1
+                    END WHILE
+                    SET endRow TO endRow + 1
+                END WHILE
+                SET startCol TO startCol + 1
+            END WHILE
+            SET startRow TO startRow + 1
+        END WHILE
+
+        RETURN totalCount
+    END FUNCTION
+END CLASS

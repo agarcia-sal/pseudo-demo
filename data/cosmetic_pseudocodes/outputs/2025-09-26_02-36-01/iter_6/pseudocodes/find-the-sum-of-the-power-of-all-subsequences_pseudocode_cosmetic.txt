@@ -1,0 +1,62 @@
+CLASS Solution  
+    FUNCTION sumOfPower(nums parameter, k parameter)  
+      SET MOD TO (1000000000 + 7)  
+      SET len_nums TO LENGTH OF nums  
+      SET table TO LIST  
+      SET idx_outer TO 0  
+      
+      WHILE idx_outer <= (len_nums + (1)) - 1  
+        SET inner_list TO LIST  
+        SET idx_inner TO 0  
+        WHILE idx_inner <= (k + 1) - 1  
+          APPEND 0 TO inner_list  
+          SET idx_inner TO idx_inner + 1  
+        END WHILE  
+        APPEND inner_list TO table  
+        SET idx_outer TO idx_outer + 1  
+      END WHILE  
+      
+      SET table[0][0] TO 1  
+      
+      SET outer_counter TO 1  
+      WHILE outer_counter <= len_nums  
+        SET inner_counter TO 0  
+        WHILE inner_counter <= k  
+          SET prev_val TO table[outer_counter - 1][inner_counter]  
+          SET table[outer_counter][inner_counter] TO prev_val  
+          
+          IF inner_counter >= nums[outer_counter - 1] THEN  
+            SET index_to_use TO inner_counter - nums[outer_counter - 1]  
+            SET increment_val TO table[outer_counter - 1][index_to_use]  
+            SET table[outer_counter][inner_counter] TO table[outer_counter][inner_counter] + increment_val  
+          END IF  
+          
+          SET table[outer_counter][inner_counter] TO table[outer_counter][inner_counter] MOD MOD  
+          SET inner_counter TO inner_counter + 1  
+        END WHILE  
+        SET outer_counter TO outer_counter + 1  
+      END WHILE  
+      
+      SET final_answer TO 0  
+      SET mask TO 1  
+      WHILE mask <= ((2 ^ len_nums) - 1)  
+        SET acc_sum TO 0  
+        SET bits_set TO 0  
+        SET bit_idx TO 0  
+        WHILE bit_idx <= len_nums - 1  
+          IF ((mask >> bit_idx) AND 1) = 1 THEN  
+            SET acc_sum TO acc_sum + nums[bit_idx]  
+            SET bits_set TO bits_set + 1  
+          END IF  
+          SET bit_idx TO bit_idx + 1  
+        END WHILE  
+        IF acc_sum = k THEN  
+          SET final_answer TO final_answer + (2 ^ (len_nums - bits_set))  
+          SET final_answer TO final_answer MOD MOD  
+        END IF  
+        SET mask TO mask + 1  
+      END WHILE  
+      
+      RETURN final_answer  
+    END FUNCTION  
+END CLASS

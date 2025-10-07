@@ -1,0 +1,35 @@
+```
+FUNCTION encode_cyclic(input_string)
+    DEFINE FUNCTION cycle_shift(chunk_list, current_index, collected)
+        IF current_index >= LENGTH(chunk_list)
+            RETURN collected
+        SET current_chunk TO chunk_list[current_index]
+        IF LENGTH(current_chunk) != 3
+            SET updated_collected TO collected + [current_chunk]
+        ELSE
+            SET rotated_chunk TO SUBSTRING(current_chunk, 1, 3) + SUBSTRING(current_chunk, 0, 1)
+            SET updated_collected TO collected + [rotated_chunk]
+        RETURN cycle_shift(chunk_list, current_index + 1, updated_collected)
+
+    DEFINE FUNCTION generate_chunks(source, position, result)
+        IF position >= LENGTH(source)
+            RETURN result
+        SET end_pos TO position + 3
+        IF end_pos > LENGTH(source)
+            SET end_pos TO LENGTH(source)
+        SET extracted_chunk TO SUBSTRING(source, position, end_pos)
+        RETURN generate_chunks(source, position + 3, result + [extracted_chunk])
+
+    SET initial_chunks TO generate_chunks(input_string, 0, [])
+    SET transformed_chunks TO cycle_shift(initial_chunks, 0, [])
+    SET combined_string TO ""
+    FOR EACH piece IN transformed_chunks
+        combined_string = combined_string + piece
+    RETURN combined_string
+END FUNCTION
+
+FUNCTION decode_cyclic(input_string)
+    SET first_encode TO encode_cyclic(input_string)
+    RETURN encode_cyclic(first_encode)
+END FUNCTION
+```

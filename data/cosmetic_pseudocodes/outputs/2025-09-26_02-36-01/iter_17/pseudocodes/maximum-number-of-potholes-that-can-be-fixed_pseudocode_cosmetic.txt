@@ -1,0 +1,59 @@
+CLASS Solution  
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER  
+        DECLARE segments ARRAY OF STRING = SPLIT(road, ".")  
+        DECLARE sortedSegments ARRAY OF STRING = []  
+        DECLARE idx INTEGER = 0  
+        WHILE idx LESS THAN LENGTH(segments) DO  
+            INSERT segments[idx] INTO sortedSegments  
+            SET idx = idx + 1  
+        END WHILE  
+        DECLARE i INTEGER = 1  
+        DECLARE temp STRING  
+        WHILE i LESS THAN LENGTH(sortedSegments) DO  
+            DECLARE j INTEGER = i  
+            WHILE j GREATER THAN 0 AND LENGTH(sortedSegments[j - 1]) GREATER THAN LENGTH(sortedSegments[j]) DO  
+                SET temp = sortedSegments[j - 1]  
+                SET sortedSegments[j - 1] = sortedSegments[j]  
+                SET sortedSegments[j] = temp  
+                SET j = j - 1  
+            END WHILE  
+            SET i = i + 1  
+        END WHILE  
+        DECLARE totalFixed INTEGER = 0  
+        DECLARE p INTEGER = 0  
+        REPEAT  
+            IF p GREATER THAN OR EQUAL TO LENGTH(sortedSegments) THEN  
+                BREAK  
+            END IF  
+            DECLARE curSegment STRING = sortedSegments[p]  
+            DECLARE lengthSegment INTEGER = LENGTH(curSegment)  
+            IF lengthSegment EQUALS 0 THEN  
+                SET p = p + 1  
+                CONTINUE  
+            END IF  
+            DECLARE expense INTEGER = lengthSegment + 1  
+            IF budget GREATER THAN OR EQUAL TO expense THEN  
+                SET totalFixed = totalFixed + lengthSegment  
+                SET budget = budget - expense  
+                SET p = p + 1  
+            ELSE  
+                DECLARE rem INTEGER = lengthSegment  
+                CALL handlePartialFix(rem, budget, totalFixed)  
+                SET p = p + 1  
+            END IF  
+        UNTIL FALSE  
+        RETURN totalFixed  
+    END FUNCTION  
+
+    FUNCTION handlePartialFix(ref rem INTEGER, ref budget INTEGER, ref totalFixed INTEGER)  
+        WHILE rem GREATER THAN 0 AND budget GREATER THAN 0 DO  
+            DECLARE cost INTEGER = rem + 1  
+            IF budget GREATER THAN OR EQUAL TO cost THEN  
+                SET totalFixed = totalFixed + rem  
+                SET budget = budget - cost  
+                EXIT  
+            END IF  
+            SET rem = rem - 1  
+        END WHILE  
+    END FUNCTION  
+END CLASS

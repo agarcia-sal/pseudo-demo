@@ -1,0 +1,126 @@
+```pseudocode
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+
+        FUNCTION is_peak(x INTEGER) RETURNS BOOLEAN
+            RETURN (nums[x] > nums[x - 1]) AND (nums[x] > nums[x + 1])
+        END FUNCTION
+
+        SET peak_positions TO empty list
+        SET idx TO 1
+        WHILE idx <= LENGTH(nums) - 2
+            IF is_peak(idx) THEN
+                peak_positions.APPEND(idx)
+            END IF
+            idx ← idx + 1
+        END WHILE
+
+        FUNCTION find_left_insert(pos INTEGER) RETURNS INTEGER
+            SET low TO 0
+            SET high TO LENGTH(peak_positions)
+            WHILE low < high
+                SET mid TO (low + high) DIV 2
+                IF peak_positions[mid] < pos THEN
+                    low ← mid + 1
+                ELSE
+                    high ← mid
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        FUNCTION find_right_insert(pos INTEGER) RETURNS INTEGER
+            SET low TO 0
+            SET high TO LENGTH(peak_positions)
+            WHILE low < high
+                SET mid TO (low + high) DIV 2
+                IF peak_positions[mid] <= pos THEN
+                    low ← mid + 1
+                ELSE
+                    high ← mid
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        SET outputs TO empty list
+
+        SET qIndex TO 0
+        WHILE qIndex < LENGTH(queries)
+            SET curQuery TO queries[qIndex]
+            IF curQuery[0] = 1 THEN
+                SET left_bound TO curQuery[1]
+                SET right_bound TO curQuery[2]
+
+                SET lpos TO find_left_insert(left_bound + 1)
+                SET rpos TO find_right_insert(right_bound) - 1
+
+                IF rpos < lpos THEN
+                    outputs.APPEND(0)
+                ELSE
+                    outputs.APPEND(rpos - lpos + 1)
+                END IF
+            ELSE
+                SET pos_chg TO curQuery[1]
+                SET val_chg TO curQuery[2]
+
+                IF nums[pos_chg] = val_chg THEN
+                    qIndex ← qIndex + 1
+                    CONTINUE
+                END IF
+
+                nums[pos_chg] ← val_chg
+
+                SET check_start TO MAX(1, pos_chg - 1)
+                SET check_end TO MIN(LENGTH(nums) - 2, pos_chg + 1)
+
+                SET i TO check_start
+                WHILE i <= check_end
+                    SET currently_peak TO is_peak(i)
+                    SET found_index TO -1
+
+                    SET left_bound TO 0
+                    SET right_bound TO LENGTH(peak_positions) - 1
+                    WHILE left_bound <= right_bound
+                        SET mid TO (left_bound + right_bound) DIV 2
+                        IF peak_positions[mid] = i THEN
+                            found_index ← mid
+                            BREAK
+                        ELSEIF peak_positions[mid] < i THEN
+                            left_bound ← mid + 1
+                        ELSE
+                            right_bound ← mid - 1
+                        END IF
+                    END WHILE
+
+                    IF currently_peak THEN
+                        IF found_index = -1 THEN
+                            SET insert_pos TO 0
+                            SET lo TO 0
+                            SET hi TO LENGTH(peak_positions)
+                            WHILE lo < hi
+                                SET md TO (lo + hi) DIV 2
+                                IF peak_positions[md] < i THEN
+                                    lo ← md + 1
+                                ELSE
+                                    hi ← md
+                                END IF
+                            END WHILE
+                            insert_pos ← lo
+                            peak_positions.INSERT(insert_pos, i)
+                        END IF
+                    ELSE
+                        IF found_index <> -1 THEN
+                            peak_positions.REMOVE_AT(found_index)
+                        END IF
+                    END IF
+                    i ← i + 1
+                END WHILE
+            END IF
+            qIndex ← qIndex + 1
+        END WHILE
+
+        RETURN outputs
+    END FUNCTION
+END CLASS
+```

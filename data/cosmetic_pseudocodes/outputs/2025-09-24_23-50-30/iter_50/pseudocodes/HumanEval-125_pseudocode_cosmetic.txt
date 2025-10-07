@@ -1,0 +1,59 @@
+```
+FUNCTION split_words(input_string)
+    PROCEDURE process_with_space(str, acc, idx, len)
+        IF idx >= len THEN
+            RETURN acc
+        ELSE
+            IF str[idx] = ' ' THEN
+                RETURN process_with_space(str, acc + [""], idx + 1, len)
+            ELSE
+                SET tail = acc[-1]
+                SET new_tail = tail + str[idx]
+                RETURN process_with_space(str, acc[0:-1] + [new_tail], idx + 1, len)
+    END PROCEDURE
+
+    PROCEDURE contains_char(str, ch, pos, length)
+        IF pos >= length THEN
+            RETURN FALSE
+        ELSE IF str[pos] = ch THEN
+            RETURN TRUE
+        ELSE
+            RETURN contains_char(str, ch, pos + 1, length)
+    END PROCEDURE
+
+    PROCEDURE replace_comma_with_space(str, pos, length, builder)
+        IF pos >= length THEN
+            RETURN builder
+        ELSE
+            IF str[pos] = ',' THEN
+                SET builder2 = builder + [' ']
+            ELSE
+                SET builder2 = builder + [str[pos]]
+            RETURN replace_comma_with_space(str, pos + 1, length, builder2)
+    END PROCEDURE
+
+    PROCEDURE count_lowercase_even_ascii(str, idx, length, cnt)
+        IF idx >= length THEN 
+            RETURN cnt
+        ELSE
+            SET c = str[idx]
+            SET is_lower = (c >= 'a' AND c <= 'z')
+            SET ascii_val = ASCII(c)
+            SET even_check = (ascii_val MOD 2) = 0
+            IF is_lower AND even_check THEN
+                RETURN count_lowercase_even_ascii(str, idx + 1, length, cnt + 1)
+            ELSE
+                RETURN count_lowercase_even_ascii(str, idx + 1, length, cnt)
+    END PROCEDURE
+
+    SET n = LENGTH(input_string)
+    IF contains_char(input_string, ' ', 0, n) THEN
+        RETURN process_with_space(input_string, [""], 0, n)
+    ELSE IF contains_char(input_string, ',', 0, n) THEN
+        SET replaced_list = replace_comma_with_space(input_string, 0, n, [])
+        SET replaced_str = JOIN("", replaced_list)
+        RETURN process_with_space(replaced_str, [""], 0, LENGTH(replaced_str))
+    ELSE
+        RETURN count_lowercase_even_ascii(input_string, 0, n, 0)
+END FUNCTION
+```

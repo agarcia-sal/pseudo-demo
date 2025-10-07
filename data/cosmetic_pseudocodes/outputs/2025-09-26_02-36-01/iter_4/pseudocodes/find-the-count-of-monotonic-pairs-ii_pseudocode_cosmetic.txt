@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        LET modulus BE 1000000000 + 7
+        LET length BE LENGTH(nums)
+        LET highest BE MAX_ELEMENT(nums)
+        
+        CREATE dpList WITH DIMENSIONS (length + 1) x (highest + 1) x (highest + 1), FILLED WITH 0
+        
+        LET firstNum BE nums[0]
+        LET counter BE 0
+        WHILE counter <= firstNum
+            dpList[1][counter][firstNum - counter] <- 1
+            INCREMENT counter BY 1
+        END WHILE
+        
+        LET indexOuter BE 2
+        WHILE indexOuter <= length
+            LET currentNum BE nums[indexOuter - 1]
+            LET jIndex BE 0
+            WHILE jIndex <= currentNum
+                LET kIndex BE 0
+                WHILE kIndex <= currentNum
+                    IF (jIndex + kIndex) == currentNum THEN
+                        LET prevJIndex BE 0
+                        WHILE prevJIndex <= jIndex
+                            LET prevKIndex BE kIndex
+                            WHILE prevKIndex <= highest
+                                LET previousValue BE dpList[indexOuter - 1][prevJIndex][prevKIndex]
+                                LET currentValue BE dpList[indexOuter][jIndex][kIndex]
+                                LET sumValue BE currentValue + previousValue
+                                LET remainderValue BE sumValue - (modulus * INTEGER_DIVIDE(sumValue, modulus))
+                                dpList[indexOuter][jIndex][kIndex] <- remainderValue
+                                INCREMENT prevKIndex BY 1
+                            END WHILE
+                            INCREMENT prevJIndex BY 1
+                        END WHILE
+                    END IF
+                    INCREMENT kIndex BY 1
+                END WHILE
+                INCREMENT jIndex BY 1
+            END WHILE
+            INCREMENT indexOuter BY 1
+        END WHILE
+        
+        LET total BE 0
+        LET outerSumIndex BE 0
+        WHILE outerSumIndex <= highest
+            LET innerSumIndex BE 0
+            WHILE innerSumIndex <= highest
+                LET tempSum BE total + dpList[length][outerSumIndex][innerSumIndex]
+                total <- tempSum - (modulus * INTEGER_DIVIDE(tempSum, modulus))
+                INCREMENT innerSumIndex BY 1
+            END WHILE
+            INCREMENT outerSumIndex BY 1
+        END WHILE
+        
+        RETURN total
+    END FUNCTION
+END CLASS

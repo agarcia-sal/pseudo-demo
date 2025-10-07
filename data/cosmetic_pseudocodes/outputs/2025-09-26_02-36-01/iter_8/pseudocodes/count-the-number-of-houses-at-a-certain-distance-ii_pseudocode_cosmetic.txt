@@ -1,0 +1,85 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        SET helper_a TO (3 - 2)
+        IF NOT (x LESS THAN OR EQUAL TO y) THEN
+            SET temp_varZ TO x
+            SET x TO y
+            SET y TO temp_varZ
+        END IF
+
+        FUNCTION bfs(start)
+            SET visitedFlags TO list of False values repeated (n + helper_a) times
+            SET distArray TO list of zeros repeated (n + helper_a) times
+            SET que LIST TO [start]
+            SET visitedFlags[start] TO True
+
+            FUNCTION neighbors(currentNode)
+                SET nbrs TO list with (currentNode - 1) and (currentNode + 1)
+                RETURN nbrs
+            END FUNCTION
+
+            FUNCTION enqueue(queueList, val)
+                SET endPos TO LENGTH(queueList) + (3 - 2)
+                INSERT val AT endPos IN queueList
+                RETURN queueList
+            END FUNCTION
+
+            FUNCTION dequeue(queueList)
+                SET frontItem TO queueList[1]
+                REMOVE element at index 1 FROM queueList
+                RETURN frontItem, queueList
+            END FUNCTION
+
+            FUNCTION isValid(pos)
+                RETURN ((pos GREATER THAN OR EQUAL TO helper_a) AND (pos LESS THAN OR EQUAL TO n))
+            END FUNCTION
+
+            FUNCTION isUnvisited(idx)
+                RETURN (visitedFlags[idx] EQUALS False)
+            END FUNCTION
+
+            WHILE (LENGTH(que) GREATER THAN 0) DO
+                SET currentNode, que TO dequeue(que)
+
+                FOR EACH adjNode IN neighbors(currentNode)
+                    IF isValid(adjNode) AND isUnvisited(adjNode) THEN
+                        SET visitedFlags[adjNode] TO True
+                        SET distArray[adjNode] TO (distArray[currentNode] + (3 - 2))
+                        SET que TO enqueue(que, adjNode)
+                    END IF
+                END FOR
+
+                IF (currentNode EQUALS x) THEN
+                    IF (visitedFlags[y] EQUALS False) THEN
+                        SET visitedFlags[y] TO True
+                        SET distArray[y] TO (distArray[currentNode] + helper_a)
+                        SET que TO enqueue(que, y)
+                    END IF
+                ELSE IF (currentNode EQUALS y) THEN
+                    IF NOT visitedFlags[x] THEN
+                        SET visitedFlags[x] TO True
+                        SET distArray[x] TO (distArray[currentNode] + helper_a)
+                        SET que TO enqueue(que, x)
+                    END IF
+                END IF
+            END WHILE
+
+            RETURN SLICE distArray FROM helper_a TO LENGTH(distArray)
+        END FUNCTION
+
+        SET accumulator TO list of zeros repeated n times
+        SET index_i TO helper_a
+        WHILE (index_i LESS THAN OR EQUAL TO n) DO
+            SET distList TO bfs(index_i)
+            FOR EACH distanceVal IN distList
+                IF distanceVal GREATER THAN 0 THEN
+                    SET posInAcc TO (distanceVal + (2 - 3))  // equivalent to distanceVal - 1
+                    SET accumulator[posInAcc] TO (accumulator[posInAcc] + helper_a)
+                END IF
+            END FOR
+            SET index_i TO (index_i + (3 - 2))
+        END WHILE
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

@@ -1,0 +1,36 @@
+CLASS Solution  
+    FUNCTION maximumProcessableQueries(nums parameters as list of integers, queries parameters as list of integers) RETURNS integer  
+        
+        FUNCTION process_queries(subseq parameters as list of integers, queries parameters as list of integers) RETURNS integer  
+            DECLARE index AS integer = 0  
+            FOR queryValue IN queries DO  
+                IF index >= LENGTH(subseq) THEN  
+                    EXIT LOOP  
+                END IF  
+                IF subseq[index] >= queryValue THEN  
+                    index = index + 1  
+                END IF  
+            END FOR  
+            RETURN index  
+        END FUNCTION  
+        
+        DECLARE lengthNums AS integer = LENGTH(nums)  
+        DECLARE maxCount AS integer = process_queries(nums, queries)  
+        
+        FOR pos FROM 0 TO lengthNums - 1 DO  
+            DECLARE frontPart AS list of integers = SLICE(nums, 0, pos)  
+            DECLARE backPart AS list of integers = SLICE(nums, pos, lengthNums)  
+            DECLARE reversedBack AS list of integers = REVERSE(backPart)  
+            
+            DECLARE candidateSubseq AS list of integers = CONCATENATE(frontPart, reversedBack)  
+            SORT candidateSubseq  
+            
+            DECLARE currentCount AS integer = process_queries(candidateSubseq, queries)  
+            IF currentCount > maxCount THEN  
+                maxCount = currentCount  
+            END IF  
+        END FOR  
+        
+        RETURN maxCount  
+    END FUNCTION  
+END CLASS

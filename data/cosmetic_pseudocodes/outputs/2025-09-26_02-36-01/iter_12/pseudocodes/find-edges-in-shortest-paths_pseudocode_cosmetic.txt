@@ -1,0 +1,173 @@
+CLASS Solution
+    FUNCTION findAnswer(n, edges)
+        
+        FUNCTION minTupleExtract(heap)
+            SET idx TO 0
+            SET minIdx TO 0
+            SET lenHeap TO LENGTH(heap)
+            WHILE idx LESS THAN lenHeap
+                IF heap[idx][0] LESS THAN heap[minIdx][0]
+                    SET minIdx TO idx
+                END IF
+                SET idx TO idx PLUS 1
+            END WHILE
+            SET result TO heap[minIdx]
+            SWAP heap[minIdx] WITH heap[lenHeap MINUS 1]
+            DELETE heap[lenHeap MINUS 1]
+            
+            SET parent TO 0
+            SET size TO LENGTH(heap)
+            WHILE TRUE
+                SET leftChild TO (2 TIMES parent) PLUS 1
+                SET rightChild TO leftChild PLUS 1
+                SET smallest TO parent
+                
+                IF leftChild LESS THAN size AND heap[leftChild][0] LESS THAN heap[smallest][0]
+                    SET smallest TO leftChild
+                END IF
+                IF rightChild LESS THAN size AND heap[rightChild][0] LESS THAN heap[smallest][0]
+                    SET smallest TO rightChild
+                END IF
+                IF smallest EQUALS parent
+                    BREAK
+                END IF
+                SWAP heap[parent] WITH heap[smallest]
+                SET parent TO smallest
+            END WHILE
+            
+            RETURN result
+        END FUNCTION
+        
+        FUNCTION heapPush(heap, val)
+            APPEND val TO heap
+            SET idx TO LENGTH(heap) MINUS 1
+            WHILE idx GREATER THAN 0
+                SET parent TO (idx MINUS 1) DIVIDED BY 2
+                IF heap[parent][0] LESS THAN OR EQUAL TO heap[idx][0]
+                    BREAK
+                END IF
+                SWAP heap[parent] WITH heap[idx]
+                SET idx TO parent
+            END WHILE
+        END FUNCTION
+        
+        
+        SET adjacencyMap TO EMPTY MAPPING
+        SET each_key TO 0
+        WHILE each_key LESS THAN n
+            ASSIGN adjacencyMap[each_key] TO EMPTY LIST
+            SET each_key TO each_key PLUS 1
+        END WHILE
+        
+        SET index_i TO 0
+        WHILE index_i LESS THAN LENGTH(edges)
+            SET edgeTriple TO edges[index_i]
+            SET nodeP TO edgeTriple[0]
+            SET nodeQ TO edgeTriple[1]
+            SET weightR TO edgeTriple[2]
+            
+            APPEND (nodeQ, weightR) TO adjacencyMap[nodeP]
+            APPEND (nodeP, weightR) TO adjacencyMap[nodeQ]
+            
+            SET index_i TO index_i PLUS 1
+        END WHILE
+        
+        
+        SET distList TO EMPTY LIST
+        SET fillPos TO 0
+        WHILE fillPos LESS THAN n
+            APPEND +1 TIMES (10 TO THE POWER OF 9) TO distList
+            SET fillPos TO fillPos PLUS 1
+        END WHILE
+        
+        SET distList[0] TO 0
+        
+        SET priorityQueue TO [(0, 0)]
+        
+        FUNCTION pqHasElements(pq)
+            RETURN LENGTH(pq) GREATER THAN 0
+        END FUNCTION
+        
+        WHILE pqHasElements(priorityQueue)
+            SET (currD, currNode) TO minTupleExtract(priorityQueue)
+            IF currD GREATER THAN distList[currNode]
+                CONTINUE
+            END IF
+            
+            SET idx_j TO 0
+            SET neighList TO adjacencyMap[currNode]
+            WHILE idx_j LESS THAN LENGTH(neighList)
+                SET (neighbor, weightVal) TO neighList[idx_j]
+                SET tentative TO currD PLUS weightVal
+                
+                IF tentative LESS THAN distList[neighbor]
+                    SET distList[neighbor] TO tentative
+                    heapPush(priorityQueue, (tentative, neighbor))
+                END IF
+                
+                SET idx_j TO idx_j PLUS 1
+            END WHILE
+        END WHILE
+        
+        
+        SET edgeSet TO EMPTY SET
+        
+        SET stackList TO [(n MINUS 1, distList[n MINUS 1])]
+        SET visitedList TO EMPTY LIST
+        SET idx_v TO 0
+        WHILE idx_v LESS THAN n
+            APPEND FALSE TO visitedList
+            SET idx_v TO idx_v PLUS 1
+        END WHILE
+        
+        FUNCTION stackNotEmpty(stk)
+            RETURN LENGTH(stk) GREATER THAN 0
+        END FUNCTION
+        
+        WHILE stackNotEmpty(stackList)
+            SET (nodeX, distX) TO stackList[LENGTH(stackList) MINUS 1]
+            DELETE stackList[LENGTH(stackList) MINUS 1]
+            
+            IF visitedList[nodeX]
+                CONTINUE
+            END IF
+            
+            SET visitedList[nodeX] TO TRUE
+            
+            SET idx_k TO 0
+            SET nghList2 TO adjacencyMap[nodeX]
+            WHILE idx_k LESS THAN LENGTH(nghList2)
+                SET (nbrNode, wgt) TO nghList2[idx_k]
+                IF distX EQUALS distList[nbrNode] PLUS wgt
+                    IF nodeX LESS THAN nbrNode
+                        SET edgeSet TO edgeSet UNION SET((nodeX, nbrNode))
+                    ELSE
+                        SET edgeSet TO edgeSet UNION SET((nbrNode, nodeX))
+                    END IF
+                    APPEND (nbrNode, distList[nbrNode]) TO stackList
+                END IF
+                SET idx_k TO idx_k PLUS 1
+            END WHILE
+        END WHILE
+        
+        
+        SET resultArr TO EMPTY LIST
+        SET idx_m TO 0
+        WHILE idx_m LESS THAN LENGTH(edges)
+            SET (x1, x2, _) TO edges[idx_m]
+            IF x1 LESS THAN x2
+                SET edgeTuple TO (x1, x2)
+            ELSE
+                SET edgeTuple TO (x2, x1)
+            END IF
+            IF edgeTuple IN edgeSet
+                APPEND TRUE TO resultArr
+            ELSE
+                APPEND FALSE TO resultArr
+            END IF
+            SET idx_m TO idx_m PLUS 1
+        END WHILE
+        
+        RETURN resultArr
+    END FUNCTION
+END CLASS

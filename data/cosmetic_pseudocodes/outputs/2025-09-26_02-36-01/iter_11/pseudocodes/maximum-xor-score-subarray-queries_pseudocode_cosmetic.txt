@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+        SET t TO LENGTH(nums)
+        SET u TO a 2D array of size t BY t FILLED WITH 0
+        SET v TO a 2D array of size t BY t FILLED WITH 0
+
+        FUNCTION xorCompute(a PARAMETER, b PARAMETER)
+            RETURN a XOR b
+        END FUNCTION
+
+        FUNCTION maxCompute(a PARAMETER, b PARAMETER, c PARAMETER)
+            IF a >= b AND a >= c THEN
+                RETURN a
+            ELSE IF b >= c THEN
+                RETURN b
+            ELSE
+                RETURN c
+            END IF
+        END FUNCTION
+
+        FUNCTION processIndex(w PARAMETER)
+            IF w < 0 THEN
+                RETURN
+            ELSE
+                SET u[w][w] TO nums[w]
+                SET v[w][w] TO nums[w]
+
+                FUNCTION iteratej(x PARAMETER)
+                    IF x >= t THEN
+                        RETURN
+                    ELSE
+                        SET u[w][x] TO xorCompute(u[w][x - 1], u[w + 1][x])
+                        SET v[w][x] TO maxCompute(u[w][x], v[w][x - 1], v[w + 1][x])
+                        iteratej(x + 1)
+                    END IF
+                END FUNCTION
+
+                iteratej(w + 1)
+                processIndex(w - 1)
+            END IF
+        END FUNCTION
+
+        processIndex(t - 1)
+
+        SET result TO empty list
+        SET m TO 0
+        WHILE m < LENGTH(queries) DO
+            SET q TO queries[m]
+            SET l TO q[0]
+            SET r TO q[1]
+            APPEND v[l][r] TO result
+            SET m TO m + 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

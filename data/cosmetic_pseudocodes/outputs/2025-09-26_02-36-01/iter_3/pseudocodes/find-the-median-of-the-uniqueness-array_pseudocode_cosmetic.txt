@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION medianOfUniquenessArray(nums)
+        FUNCTION countLessOrEqual(target)
+            DECLARE totalCount AS integer = 0
+            DECLARE startIdx AS integer = 0
+            DECLARE freqMap AS map FROM integer TO integer INIT empty
+            DECLARE uniqElems AS integer = 0
+
+            DECLARE endIdx AS integer = 0
+            WHILE endIdx <= LENGTH(nums) - 1
+                DECLARE currentNum AS integer = nums[endIdx]
+
+                IF NOT freqMap CONTAINS currentNum OR freqMap[currentNum] = 0 THEN
+                    uniqElems = uniqElems + 1
+                END IF
+
+                IF freqMap CONTAINS currentNum THEN
+                    freqMap[currentNum] = freqMap[currentNum] + 1
+                ELSE
+                    freqMap[currentNum] = 1
+                END IF
+
+                WHILE uniqElems > target
+                    DECLARE leftNum AS integer = nums[startIdx]
+                    freqMap[leftNum] = freqMap[leftNum] - 1
+                    IF freqMap[leftNum] = 0 THEN
+                        uniqElems = uniqElems - 1
+                    END IF
+                    startIdx = startIdx + 1
+                END WHILE
+
+                totalCount = totalCount + (endIdx - startIdx + 1)
+                endIdx = endIdx + 1
+            END WHILE
+
+            RETURN totalCount
+        END FUNCTION
+
+        DECLARE n AS integer = LENGTH(nums)
+        DECLARE totalSubs AS integer = (n * (n + 1)) / 2
+        DECLARE medianIdx AS integer = (totalSubs + 1) / 2
+        DECLARE leftBound AS integer = 1
+        DECLARE rightBound AS integer = n
+
+        WHILE leftBound < rightBound
+            DECLARE midpoint AS integer = leftBound + (rightBound - leftBound) / 2
+            IF countLessOrEqual(midpoint) < medianIdx THEN
+                leftBound = midpoint + 1
+            ELSE
+                rightBound = midpoint
+            END IF
+        END WHILE
+
+        RETURN leftBound
+    END FUNCTION
+END CLASS

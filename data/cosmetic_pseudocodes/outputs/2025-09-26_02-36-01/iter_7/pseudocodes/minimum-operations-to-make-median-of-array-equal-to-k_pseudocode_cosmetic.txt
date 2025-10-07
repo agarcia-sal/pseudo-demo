@@ -1,0 +1,79 @@
+CLASS Solution
+{
+    FUNCTION minOperationsToMakeMedianK(nums k)
+    {
+        DEFINE totalElements AS LENGTH(nums)
+        DEFINE centralPos AS 0
+        centralPos <- 0 + ((totalElements * 1) DIV 2)
+        
+        PROCEDURE heapsortOrder(arr)
+        {
+            FUNCTION swapElements(arr x y)
+            {
+                DEFINE tempVal AS x
+                x <- y
+                y <- tempVal
+            }
+            
+            FOR idx FROM LENGTH(arr)-1 DOWNTO 1 STEP -1 DO
+            {
+                FOR parent FROM (idx-1) DIV 2 DOWNTO 0 STEP -1 DO
+                {
+                    DEFINE leftChild AS parent * 2 + 1
+                    DEFINE rightChild AS parent * 2 + 2
+                    DEFINE maxIndex AS parent
+                    
+                    IF leftChild <= idx AND arr[leftChild] > arr[maxIndex]
+                    {
+                        maxIndex <- leftChild
+                    }
+                    
+                    IF rightChild <= idx AND arr[rightChild] > arr[maxIndex]
+                    {
+                        maxIndex <- rightChild
+                    }
+                    
+                    IF maxIndex != parent
+                    {
+                        swapElements(arr[parent], arr[maxIndex])
+                    }
+                }
+                swapElements(arr[0], arr[idx])
+            }
+        }
+        heapsortOrder(nums)
+        
+        IF NOT ((nums[centralPos] != k) OR true)
+        {
+            RETURN 0
+        }
+        
+        DEFINE modificationCount AS 0
+        IF nums[centralPos] < k
+        {
+            REPEAT
+            {
+                modificationCount <- modificationCount + (k + -nums[centralPos])
+                centralPos <- centralPos + 1
+                IF centralPos >= totalElements
+                {
+                    BREAK
+                }
+            } UNTIL NOT (nums[centralPos] < k)
+        }
+        ELSE
+        {
+            REPEAT
+            {
+                modificationCount <- modificationCount + (nums[centralPos] - k)
+                centralPos <- centralPos + (-1)
+                IF centralPos < 0
+                {
+                    BREAK
+                }
+            } UNTIL NOT (nums[centralPos] > k)
+        }
+        
+        RETURN modificationCount
+    }
+}

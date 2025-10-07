@@ -1,0 +1,83 @@
+CLASS Solution  
+    FUNCTION minimumOperationsToWriteY(grid)  
+        n ← LENGTH(grid)  
+        midpoint ← n DIV 2  
+        target_cells ← NEW SET()  
+        
+        k ← 0  
+        WHILE k ≤ midpoint DO  
+            target_cells.ADD((k, k))  
+            k ← k + 1  
+        END WHILE  
+        
+        m ← 0  
+        WHILE m ≤ midpoint DO  
+            target_cells.ADD((m, (n - m) - 1))  
+            m ← m + 1  
+        END WHILE  
+        
+        p ← midpoint  
+        REPEAT  
+            target_cells.ADD((p, midpoint))  
+            p ← p + 1  
+        UNTIL p > (n - 1)  
+        
+        FUNCTION count_occurrences(grid_data, positions)  
+            value_freqs ← NEW MAP()  
+            value_freqs[0] ← 0  
+            value_freqs[1] ← 0  
+            value_freqs[2] ← 0  
+            FOR EACH (x, y) IN positions DO  
+                val ← grid_data[x][y]  
+                value_freqs[val] ← value_freqs[val] + 1  
+            END FOR  
+            RETURN value_freqs  
+        END FUNCTION  
+        
+        freq_in_targets ← count_occurrences(grid, target_cells)  
+        
+        all_positions ← NEW LIST()  
+        FOR q ← 0 TO n - 1 DO  
+            FOR r ← 0 TO n - 1 DO  
+                all_positions.APPEND((q, r))  
+            END FOR  
+        END FOR  
+        
+        complement_positions ← NEW LIST()  
+        FOR pos IN all_positions DO  
+            IF NOT target_cells.CONTAINS(pos) THEN  
+                complement_positions.APPEND(pos)  
+            END IF  
+        END FOR  
+        
+        freq_outside_targets ← count_occurrences(grid, complement_positions)  
+        
+        infinity_val ← 0  
+        WHILE infinity_val < (2 ^ 60) DO  
+            infinity_val ← infinity_val + infinity_val + 1  
+        END WHILE  
+        
+        minimum_needed ← infinity_val  
+        
+        candidate_y ← 0  
+        WHILE candidate_y ≤ 2 DO  
+            candidate_non_y ← 0  
+            WHILE candidate_non_y ≤ 2 DO  
+                IF candidate_y <> candidate_non_y THEN  
+                    total_y ← freq_in_targets[0] + freq_in_targets[1] + freq_in_targets[2]  
+                    total_y_adjusted ← total_y - freq_in_targets[candidate_y]  
+                    total_non_y ← freq_outside_targets[0] + freq_outside_targets[1] + freq_outside_targets[2]  
+                    total_non_y_adjusted ← total_non_y - freq_outside_targets[candidate_non_y]  
+                    candidate_operations ← total_y_adjusted + total_non_y_adjusted  
+                    IF candidate_operations < minimum_needed THEN  
+                        minimum_needed ← candidate_operations  
+                    END IF  
+                END IF  
+                candidate_non_y ← candidate_non_y + 1  
+            END WHILE  
+            candidate_y ← candidate_y + 1  
+        END WHILE  
+        
+        RETURN minimum_needed  
+    END FUNCTION  
+END CLASS

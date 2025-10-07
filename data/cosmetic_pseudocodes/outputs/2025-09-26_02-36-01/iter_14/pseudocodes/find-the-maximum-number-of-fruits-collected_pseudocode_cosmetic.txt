@@ -1,0 +1,76 @@
+CLASS Solution
+	FUNCTION maxCollectedFruits(fruits)
+		SET lengthVar TO the LENGTH OF fruits
+		
+		SET movesA TO the LIST of PAIRS consisting of ONE PLUS ZERO AND ONE PLUS ONE ZERO PLUS ONE
+		SET movesB TO the LIST of PAIRS consisting of ONE AND ZERO MINUS ONE ONE PLUS ZERO ZERO PLUS ONE
+		SET movesC TO the LIST of PAIRS consisting of ZERO MINUS ONE MINUS ONE PLUS ONE ONE PLUS ONE
+		
+		SET cacheMap TO an EMPTY DICTIONARY
+		
+		FUNCTION recursiveSearch(aX, aY, bX, bY, cX, cY)
+			IF (aX LESS THAN ZERO) OR (aX GREATER THAN OR EQUAL TO lengthVar) OR (aY LESS THAN ZERO) OR (aY GREATER THAN OR EQUAL TO lengthVar) OR (bX LESS THAN ZERO) OR (bX GREATER THAN OR EQUAL TO lengthVar) OR (bY LESS THAN ZERO) OR (bY GREATER THAN OR EQUAL TO lengthVar) OR (cX LESS THAN ZERO) OR (cX GREATER THAN OR EQUAL TO lengthVar) OR (cY LESS THAN ZERO) OR (cY GREATER THAN OR EQUAL TO lengthVar) THEN
+				RETURN negative infinity
+			END IF
+			
+			IF (aX EQUALS aY) AND (aY EQUALS bX) AND (bX EQUALS bY) AND (bY EQUALS cX) AND (cX EQUALS cY) AND (cY EQUALS lengthVar MINUS ONE) THEN
+				RETURN element at position (lengthVar MINUS ONE) of the element at position (lengthVar MINUS ONE) of fruits
+			END IF
+			
+			IF the TUPLE consisting of aX aY bX bY cX cY EXISTS AS A KEY IN cacheMap THEN
+				RETURN the VALUE ASSOCIATED WITH the TUPLE consisting of aX aY bX bY cX cY IN cacheMap
+			END IF
+			
+			SET sumVar TO the element at position aX of the element at position aY of fruits
+			
+			IF ((aX EQUALS bX) AND (aY EQUALS bY)) OR ((aX EQUALS cX) AND (aY EQUALS cY)) THEN
+				SET sumVar TO zero
+			END IF
+			
+			IF (bX EQUALS cX) AND (bY EQUALS cY) THEN
+				SET sumVar TO sumVar PLUS the element at position bX of the element at position bY of fruits
+			ELSE
+				SET sumVar TO sumVar PLUS the element at position bX of the element at position bY of fruits
+				SET sumVar TO sumVar PLUS the element at position cX of the element at position cY of fruits
+			END IF
+			
+			SET maxResult TO negative infinity
+			
+			SET idx1 TO zero
+			WHILE idx1 LESS THAN the LENGTH OF movesA DO
+				SET move1 TO the element at position idx1 of movesA
+				SET dxA TO the element at position zero of move1
+				SET dyA TO the element at position one of move1
+				
+				SET idx2 TO zero
+				WHILE idx2 LESS THAN the LENGTH OF movesB DO
+					SET move2 TO the element at position idx2 of movesB
+					SET dxB TO the element at position zero of move2
+					SET dyB TO the element at position one of move2
+					
+					SET idx3 TO zero
+					REPEAT
+						SET move3 TO the element at position idx3 of movesC
+						SET dxC TO the element at position zero of move3
+						SET dyC TO the element at position one of move3
+						
+						SET tempCandidate TO recursiveSearch(aX PLUS dxA, aY PLUS dyA, bX PLUS dxB, bY PLUS dyB, cX PLUS dxC, cY PLUS dyC)
+						
+						IF tempCandidate GREATER THAN maxResult THEN
+							SET maxResult TO tempCandidate
+						END IF
+						
+						SET idx3 TO idx3 PLUS ONE
+					UNTIL idx3 GREATER THAN OR EQUAL TO the LENGTH OF movesC
+					SET idx2 TO idx2 PLUS ONE
+				END WHILE
+				SET idx1 TO idx1 PLUS ONE
+			END WHILE
+			
+			SET cacheMap with KEY the TUPLE consisting of aX aY bX bY cX cY TO sumVar PLUS maxResult
+			RETURN sumVar PLUS maxResult
+		END FUNCTION
+		
+		RETURN recursiveSearch(zero, zero, zero, lengthVar MINUS ONE, lengthVar MINUS ONE, zero)
+	END FUNCTION
+END CLASS

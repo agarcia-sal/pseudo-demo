@@ -1,0 +1,69 @@
+CLASS Solution  
+    FUNCTION maxMoves(kx, ky, positions)  
+        SET knight_moves TO list of pairs representing two and one moves in all eight knight directions  
+        SET pawn_positions TO an empty set  
+        FOR each position IN positions  
+            CONVERT position to tuple and ADD to pawn_positions  
+        END FOR  
+        SET num_pawns TO the number of elements in pawn_positions  
+        
+        FUNCTION dp(kx, ky, mask, is_alice)  
+            IF mask EQUALS zero THEN  
+                RETURN zero  
+            END IF  
+            
+            IF is_alice EQUALS True THEN  
+                SET max_min_moves TO zero  
+            ELSE  
+                SET max_min_moves TO positive infinity  
+            END IF  
+            
+            FOR index FROM zero TO num_pawns MINUS one  
+                IF bitwise AND of mask AND two RAISED TO the power of index NOT EQUALS zero THEN  
+                    SET px TO element at position index in positions at zero  
+                    SET py TO element at position index in positions at one  
+                    
+                    SET queue TO list containing tuple of kx, ky, zero  
+                    SET visited TO an empty set  
+                    ADD tuple of kx, ky TO visited  
+                    SET found TO False  
+                    
+                    WHILE queue IS NOT empty  
+                        REMOVE the first element from queue AND ASSIGN values to cx, cy, steps  
+                        IF cx EQUALS px AND cy EQUALS py THEN  
+                            SET found TO True  
+                            EXIT WHILE  
+                        END IF  
+                        
+                        FOR each pair dx, dy IN knight_moves  
+                            SET nx TO cx PLUS dx  
+                            SET ny TO cy PLUS dy  
+                            IF nx GREATER THAN OR EQUAL TO zero AND nx LESS THAN fifty AND ny GREATER THAN OR EQUAL TO zero AND ny LESS THAN fifty AND tuple of nx, ny NOT IN visited THEN  
+                                ADD tuple of nx, ny TO visited  
+                                APPEND tuple of nx, ny, steps PLUS one TO queue  
+                            END IF  
+                        END FOR  
+                    END WHILE  
+                    
+                    IF found EQUALS True THEN  
+                        SET new_mask TO bitwise XOR of mask AND two RAISED TO the power of index  
+                        IF is_alice EQUALS True THEN  
+                            IF max_min_moves LESS THAN steps PLUS dp(px, py, new_mask, logical NOT of is_alice) THEN  
+                                SET max_min_moves TO steps PLUS dp(px, py, new_mask, logical NOT of is_alice)  
+                            END IF  
+                        ELSE  
+                            IF max_min_moves GREATER THAN steps PLUS dp(px, py, new_mask, logical NOT of is_alice) THEN  
+                                SET max_min_moves TO steps PLUS dp(px, py, new_mask, logical NOT of is_alice)  
+                            END IF  
+                        END IF  
+                    END IF  
+                END IF  
+            END FOR  
+            
+            RETURN max_min_moves  
+        END FUNCTION  
+        
+        SET all_pawns_mask TO two RAISED TO the power of num_pawns MINUS one  
+        RETURN dp(kx, ky, all_pawns_mask, True)  
+    END FUNCTION  
+END CLASS

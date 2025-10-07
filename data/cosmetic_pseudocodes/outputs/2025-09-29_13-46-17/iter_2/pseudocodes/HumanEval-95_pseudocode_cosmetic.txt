@@ -1,0 +1,46 @@
+```
+FUNCTION check_dict_case(dictionary)
+  DEFINE keys_list = GET_KEYS(dictionary)
+  IF NOT (SIZE(keys_list) <> 0)
+    RETURN False
+  END IF
+
+  DEFINE status = "start"
+
+  FUNCTION process_keys(idx)
+    IF idx >= SIZE(keys_list)
+      RETURN
+    END IF
+
+    DEFINE currentKey = keys_list[idx]
+
+    IF TYPE_OF(currentKey) IS NOT STRING
+      status = "mixed"
+      RETURN
+    END IF
+
+    IF status = "start" THEN
+      IF currentKey = TO_UPPERCASE(currentKey) THEN
+        status = "upper"
+      ELSE IF currentKey = TO_LOWERCASE(currentKey) THEN
+        status = "lower"
+      ELSE
+        RETURN
+      END IF
+    ELSE
+      IF (status = "upper" AND currentKey <> TO_UPPERCASE(currentKey)) OR (status = "lower" AND currentKey <> TO_LOWERCASE(currentKey)) THEN
+        status = "mixed"
+        RETURN
+      ELSE
+        RETURN
+      END IF
+    END IF
+
+    process_keys(idx + 1)
+  END FUNCTION
+
+  process_keys(0)
+
+  RETURN status = "upper" OR status = "lower"
+END FUNCTION
+```

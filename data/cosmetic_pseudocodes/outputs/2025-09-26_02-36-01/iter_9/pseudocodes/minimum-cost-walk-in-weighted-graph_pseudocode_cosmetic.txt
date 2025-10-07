@@ -1,0 +1,106 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, m)  
+      DECLARE alpha ← empty list  
+      DECLARE beta ← empty list  
+      DECLARE i ← 0  
+      WHILE i < m DO  
+        APPEND i TO alpha  
+        APPEND 1 TO beta  
+        SET i ← i + 1  
+      END WHILE  
+      SET self.parent TO alpha  
+      SET self.rank TO beta  
+    END FUNCTION  
+  
+    FUNCTION find(self, x)  
+      FUNCTION helper(y)  
+        IF self.parent[y] = y THEN  
+          RETURN y  
+        ELSE  
+          SET self.parent[y] ← helper(self.parent[y])  
+          RETURN self.parent[y]  
+        END IF  
+      END FUNCTION  
+      RETURN helper(x)  
+    END FUNCTION  
+  
+    FUNCTION union(self, r, s)  
+      DECLARE rootA ← self.find(r)  
+      DECLARE rootB ← self.find(s)  
+      IF NOT (rootA = rootB) THEN  
+        IF self.rank[rootA] > self.rank[rootB] THEN  
+          SET self.parent[rootB] ← rootA  
+        ELSE  
+          IF self.rank[rootA] < self.rank[rootB] THEN  
+            SET self.parent[rootA] ← rootB  
+          ELSE  
+            SET self.parent[rootB] ← rootA  
+            SET self.rank[rootA] ← self.rank[rootA] + (1)  
+          END IF  
+        END IF  
+      END IF  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION minimumCost(self, p, edges, queries)  
+      DECLARE uf ← UnionFind(p)  
+      DECLARE full_mask ← (2 ^ 32) - 1  
+      DECLARE bitwise_accumulator ← Array of length p filled with full_mask  
+      
+      PROCEDURE process_edges(lst)  
+        DECLARE idx ← 0  
+        FUNCTION reduce_edge()  
+          IF idx >= LENGTH(lst) THEN RETURN END IF  
+          DECLARE triple ← lst[idx]  
+          DECLARE a ← triple[0]  
+          DECLARE b ← triple[1]  
+          DECLARE c ← triple[2]  
+          uf.union(a, b)  
+          DECLARE par ← uf.find(a)  
+          SET bitwise_accumulator[par] ← bitwise_accumulator[par] & c  
+          SET idx ← idx + 1  
+          CALL reduce_edge()  
+        END FUNCTION  
+        CALL reduce_edge()  
+      END PROCEDURE  
+      
+      CALL process_edges(edges)  
+      
+      DECLARE components_map ← empty dictionary  
+      DECLARE j ← 0  
+      WHILE j < p DO  
+        DECLARE leader ← uf.find(j)  
+        IF leader NOT IN components_map THEN  
+          SET components_map[leader] ← bitwise_accumulator[leader]  
+        END IF  
+        SET j ← j + 1  
+      END WHILE  
+      
+      DECLARE output ← empty list  
+      PROCEDURE query_handler(lst2)  
+        DECLARE k ← 0  
+        WHILE k < LENGTH(lst2) DO  
+          DECLARE pair ← lst2[k]  
+          DECLARE first_val ← pair[0]  
+          DECLARE second_val ← pair[1]  
+          IF first_val = second_val THEN  
+            APPEND 0 TO output  
+          ELSE  
+            DECLARE first_leader ← uf.find(first_val)  
+            DECLARE second_leader ← uf.find(second_val)  
+            IF NOT (first_leader ≠ second_leader) THEN  
+              APPEND components_map[first_leader] TO output  
+            ELSE  
+              APPEND -1 TO output  
+            END IF  
+          END IF  
+          SET k ← k + 1  
+        END WHILE  
+      END PROCEDURE  
+      
+      CALL query_handler(queries)  
+      
+      RETURN output  
+    END FUNCTION  
+END CLASS

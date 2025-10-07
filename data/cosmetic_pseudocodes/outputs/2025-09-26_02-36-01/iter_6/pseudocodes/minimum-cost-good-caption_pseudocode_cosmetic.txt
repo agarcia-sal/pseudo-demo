@@ -1,0 +1,73 @@
+CLASS Solution   
+    FUNCTION minCostGoodCaption(caption)  
+      SET lenCaption TO LENGTH(caption)    
+      IF (NOT (lenCaption >= (1 + 1 + 1))) THEN  
+        RETURN ""  
+      ENDIF  
+
+      SET charsList TO CONVERT_TO_CHAR_LIST(caption)   
+
+      SET idxTracker TO 0  
+      WHILE TRUE  
+        IF NOT (idxTracker < lenCaption) THEN  
+          BREAK  
+        ENDIF
+
+        SET segmentStart TO idxTracker  
+          
+        REPEAT  
+          IF (NOT (idxTracker < lenCaption)) THEN  
+            BREAK  
+          ENDIF  
+          IF NOT (charsList[idxTracker] = charsList[segmentStart]) THEN  
+            BREAK  
+          ENDIF  
+          SET idxTracker TO (idxTracker + 1)  
+        UNTIL FALSE  
+          
+        SET segmentLength TO (idxTracker - segmentStart)
+
+        IF (segmentLength < (2 + 1)) THEN  
+          IF (segmentStart > 0 AND charsList[segmentStart - 1] = charsList[segmentStart]) THEN  
+            SET charsList[segmentStart - 1] TO charsList[segmentStart]  
+            SET segmentStart TO (segmentStart - 1)  
+            SET segmentLength TO (segmentLength + 1)  
+          ENDIF  
+          IF ( (idxTracker < lenCaption) AND (charsList[idxTracker - 1] = charsList[idxTracker]) ) THEN  
+            SET charsList[idxTracker] TO charsList[idxTracker - 1]  
+            SET idxTracker TO (idxTracker + 1)  
+            SET segmentLength TO (segmentLength + 1)  
+          ENDIF  
+            
+          IF (segmentLength < (3)) THEN  
+            IF (segmentStart > 0) THEN  
+              SET replacementCandidate TO charsList[segmentStart - 1]  
+            ELSE  
+              SET replacementCandidate TO charsList[idxTracker]  
+            ENDIF  
+              
+            IF (replacementCandidate = "a") THEN  
+              SET replacementChar TO "b"  
+            ELSEIF (replacementCandidate = "z") THEN  
+              SET replacementChar TO "y"  
+            ELSE  
+              SET replacementChar TO CHARACTER_FROM_CODE(CHAR_CODE(replacementCandidate) + 1)  
+            ENDIF  
+              
+            SET cursorPos TO segmentStart  
+            REPEAT  
+              IF NOT (cursorPos <= (segmentStart + segmentLength - 1)) THEN  
+                BREAK  
+              ENDIF  
+              SET charsList[cursorPos] TO replacementChar  
+              SET cursorPos TO (cursorPos + 1)  
+            UNTIL FALSE  
+              
+            SET idxTracker TO (segmentStart + segmentLength)  
+          ENDIF  
+        ENDIF  
+      ENDWHILE  
+
+      RETURN JOIN_TO_STRING(charsList)  
+    END FUNCTION  
+END CLASS

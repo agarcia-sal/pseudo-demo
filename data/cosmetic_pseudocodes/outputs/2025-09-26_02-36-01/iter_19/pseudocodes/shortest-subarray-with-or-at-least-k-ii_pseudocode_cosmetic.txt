@@ -1,0 +1,53 @@
+CLASS Solution
+	FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+		PROCEDURE modifyCounter(counter LIST OF integers val integer delta integer)
+			VAR bitMask INTEGER INIT 1
+			VAR idx INTEGER INIT 0
+			WHILE idx LESS THAN 32
+				IF (val BITWISE_AND bitMask) NOT_EQUALS 0 THEN
+					counter[idx] = counter[idx] + delta
+				END IF
+				bitMask = bitMask * 2
+				idx = idx + 1
+			END WHILE
+		END PROCEDURE
+
+		FUNCTION deriveOr(counter LIST OF integers) RETURNS integer
+			VAR accOr INTEGER INIT 0
+			VAR pos INTEGER INIT 0
+			REPEAT UNTIL pos EQUALS 32
+				IF counter[pos] GREATER_THAN 0 THEN
+					accOr = accOr BITWISE_OR (1 LEFT_SHIFT pos)
+				END IF
+				pos = pos + 1
+			END REPEAT
+			RETURN accOr
+		END FUNCTION
+
+		VAR length INTEGER = LENGTH OF nums
+		VAR bitCounter LIST OF integers = [0 REPEATED 32 TIMES]
+		VAR cumulativeOr INTEGER = 0
+		VAR start INTEGER = 0
+		VAR bestLength INTEGER = +∞
+
+		FOR pointer FROM 0 TO length - 1
+			modifyCounter(bitCounter nums[pointer] 1)
+			cumulativeOr = cumulativeOr BITWISE_OR nums[pointer]
+
+			WHILE cumulativeOr GREATER_THAN_OR_EQUAL k AND start LESS_THAN_OR_EQUAL pointer
+				IF bestLength GREATER_THAN pointer - start + 1 THEN
+					bestLength = pointer - start + 1
+				END IF
+				modifyCounter(bitCounter nums[start] -1)
+				cumulativeOr = deriveOr(bitCounter)
+				start = start + 1
+			END WHILE
+		END FOR
+
+		IF bestLength EQUALS +∞ THEN
+			RETURN -1
+		ELSE
+			RETURN bestLength
+		END IF
+	END FUNCTION
+END CLASS

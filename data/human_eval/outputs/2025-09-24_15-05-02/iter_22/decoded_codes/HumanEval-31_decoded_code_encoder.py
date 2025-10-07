@@ -1,0 +1,9 @@
+from typing import Union
+
+def is_prime(number: int) -> bool:
+    if number < 2:
+        return False
+    for divisor in range(2, number - 1):
+        if number % divisor == 0:
+            return False
+    return True

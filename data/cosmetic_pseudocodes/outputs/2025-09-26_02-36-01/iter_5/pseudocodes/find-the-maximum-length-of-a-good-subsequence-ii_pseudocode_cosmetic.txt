@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+        SET lengthVal TO LENGTH OF nums
+        SET dpMatrix TO a LIST FILLED WITH lengthVal SUBLISTS EACH FILLED WITH zero, total length k PLUS one
+        SET mapsArr TO a LIST OF default dictionaries WITH INITIAL VALUE zero, size k PLUS one
+        SET tracker TO a LIST of k PLUS one sublists EACH CONTAINING zero, zero, zero
+        SET resultMax TO zero
+
+        FUNCTION processIndex(pos, currentIndex)
+            IF pos IS GREATER OR EQUAL THAN lengthVal THEN
+                RETURN currentIndex
+            ELSE
+                SET elem TO nums[pos]
+                SET idx TO 0
+                FUNCTION innerLoop(count, maximum)
+                    IF count IS GREATER THAN k THEN
+                        RETURN maximum
+                    ELSE
+                        SET dpMatrix[pos][count] TO mapsArr[count][elem]
+                        IF count > 0 THEN
+                            IF tracker[count - 1][0] NOT EQUALS nums[pos] THEN
+                                SET dpMatrix[pos][count] TO MAXIMUM OF dpMatrix[pos][count] AND tracker[count - 1][1]
+                            ELSE
+                                SET dpMatrix[pos][count] TO MAXIMUM OF dpMatrix[pos][count] AND tracker[count - 1][2]
+                            END IF
+                        END IF
+                        SET dpMatrix[pos][count] TO dpMatrix[pos][count] PLUS one
+                        SET mapsArr[count][nums[pos]] TO MAXIMUM OF mapsArr[count][nums[pos]] AND dpMatrix[pos][count]
+
+                        IF tracker[count][0] NOT EQUALS elem THEN
+                            IF dpMatrix[pos][count] GREATER OR EQUALS tracker[count][1] THEN
+                                SET tracker[count][2] TO tracker[count][1]
+                                SET tracker[count][1] TO dpMatrix[pos][count]
+                                SET tracker[count][0] TO elem
+                            ELSE
+                                SET tracker[count][2] TO MAXIMUM OF tracker[count][2] AND dpMatrix[pos][count]
+                            END IF
+                        ELSE
+                            SET tracker[count][1] TO MAXIMUM OF tracker[count][1] AND dpMatrix[pos][count]
+                        END IF
+                        SET newMax TO MAXIMUM OF maximum AND dpMatrix[pos][count]
+                        RETURN innerLoop(count PLUS one, newMax)
+                    END IF
+                END FUNCTION
+
+                SET updatedMax TO innerLoop(0, currentIndex)
+                RETURN processIndex(pos PLUS one, updatedMax)
+            END IF
+        END FUNCTION
+
+        SET resultMax TO processIndex(0, resultMax)
+        RETURN resultMax
+    END FUNCTION
+END CLASS

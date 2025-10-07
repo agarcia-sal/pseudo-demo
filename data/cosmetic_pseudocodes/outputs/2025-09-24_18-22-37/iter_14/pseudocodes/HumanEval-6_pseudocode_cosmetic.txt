@@ -1,0 +1,44 @@
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        SET sum_depth TO 0
+        SET top_depth TO 0
+        SET idx TO 0
+        WHILE idx LESS THAN LENGTH OF group_string DO
+            SET sym TO group_string.at(idx)
+            IF sym EQUALS '(' THEN
+                SET sum_depth TO sum_depth + 1
+                IF sum_depth > top_depth THEN
+                    SET top_depth TO sum_depth
+                END IF
+            ELSE IF sym EQUALS ')' THEN
+                SET sum_depth TO sum_depth - 1
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+        RETURN top_depth
+    END FUNCTION
+
+    SET all_groups TO []
+    SET start_pos TO 0
+    SET end_pos TO 0
+    WHILE end_pos LESS OR EQUAL LENGTH OF parentheses_string
+        IF end_pos EQUALS LENGTH OF parentheses_string OR parentheses_string.at(end_pos) EQUALS ' ' THEN
+            SET segment TO parentheses_string.substring(start_pos, end_pos)
+            IF LENGTH OF segment GREATER THAN 0 THEN
+                APPEND segment TO all_groups
+            END IF
+            SET start_pos TO end_pos + 1
+        END IF
+        SET end_pos TO end_pos + 1
+    END WHILE
+
+    SET depths TO []
+    SET i TO 0
+    WHILE i LESS THAN LENGTH OF all_groups DO
+        SET current_group TO all_groups.at(i)
+        SET depth_value TO parse_paren_group(current_group)
+        APPEND depth_value TO depths
+        SET i TO i + 1
+    END WHILE
+    RETURN depths
+END FUNCTION

@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION beautifulIndices(s parameter a parameter b parameter k)
+        DEFINE FUNCTION substringEqual(source parameter start parameter pattern)
+            DEFINE FUNCTION substringEqualHelper(pos parameter idx parameter)
+                IF idx GREATER THAN OR EQUAL TO LENGTH(pattern)
+                    RETURN true
+                ELSE IF source[pos + idx] NOT EQUALS pattern[idx]
+                    RETURN false
+                ELSE
+                    RETURN substringEqualHelper(pos, idx + 1)
+                END IF
+            END FUNCTION
+            RETURN substringEqualHelper(start, 0)
+        END FUNCTION
+
+        DEFINE FUNCTION indicesFind(source parameter pat parameter)
+            DECLARE container resultList SET TO newList()
+            DECLARE FUNCTION explore(index parameter)
+                IF index GREATER THAN LENGTH(source) - LENGTH(pat)
+                    RETURN
+                ELSE
+                    IF substringEqual(source, index, pat)
+                        CALL resultList.append(index)
+                    END IF
+                    CALL explore(index + 1)
+                END IF
+            END FUNCTION
+            CALL explore(0)
+            RETURN resultList
+        END FUNCTION
+
+        DECLARE alphaIndices SET TO indicesFind(s, a)
+        DECLARE betaIndices SET TO indicesFind(s, b)
+        DECLARE gammaIndices SET TO newList()
+
+        DECLARE posA SET TO 0
+        DECLARE posB SET TO 0
+
+        WHILE true
+            IF posA GREATER THAN LENGTH(alphaIndices) - 1 OR posB GREATER THAN LENGTH(betaIndices) - 1
+                BREAK
+            END IF
+
+            DECLARE delta SET TO alphaIndices[posA]
+            DECLARE epsilon SET TO betaIndices[posB]
+            DECLARE gap SET TO delta - epsilon
+
+            DECLARE maxAllowed SET TO k
+
+            DEFINE FUNCTION absoluteValue(number parameter)
+                IF number LESS THAN 0
+                    RETURN 0 - number
+                ELSE
+                    RETURN number
+                END IF
+            END FUNCTION
+
+            IF absoluteValue(gap) LESS THAN OR EQUAL TO maxAllowed
+                CALL gammaIndices.append(delta)
+                SET posA TO posA + 1
+            ELSE
+                IF delta LESS THAN epsilon
+                    SET posA TO posA + 1
+                ELSE
+                    SET posB TO posB + 1
+                END IF
+            END IF
+        END WHILE
+
+        RETURN gammaIndices
+    END FUNCTION
+END CLASS

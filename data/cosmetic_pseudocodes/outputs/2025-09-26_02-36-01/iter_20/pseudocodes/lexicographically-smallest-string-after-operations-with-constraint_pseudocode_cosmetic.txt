@@ -1,0 +1,74 @@
+CLASS Solution  
+    FUNCTION getSmallestString(s parameter of type string k parameter of type integer) RETURNS string  
+        FUNCTION cyclic_distance(c1 parameter of type character c2 parameter of type character) RETURNS integer  
+            FUNCTION abs_val(x parameter of type integer) RETURNS integer  
+                IF x GREATER THAN OR EQUAL TO zero THEN  
+                    RETURN x  
+                ELSE  
+                    RETURN 0 - x  
+                END IF  
+            END FUNCTION  
+
+            SET diff TO abs_val( (character_code_of c1) - (character_code_of c2) )  
+            SET complement TO ( 26 - diff )  
+            IF diff LESS THAN complement THEN  
+                RETURN diff  
+            ELSE  
+                RETURN complement  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION join_chars(chars parameter of type list of characters) RETURNS string  
+            SET acc TO empty string  
+            SET idx TO 0  
+            SET limit TO length_of(chars)  
+            REPEAT  
+                IF idx GREATER THAN OR EQUAL TO limit THEN EXIT REPEAT  
+                SET acc TO acc + chars[idx]  
+                SET idx TO idx + 1  
+            UNTIL false  
+            RETURN acc  
+        END FUNCTION  
+
+        SET temp_list TO empty list  
+        SET idx_iter TO 0  
+        SET len_s TO length_of(s)  
+        RECURSIVE FUNCTION fill_list(pos parameter of type integer) RETURNS void  
+            IF pos GREATER THAN OR EQUAL TO len_s THEN RETURN END IF  
+            SET temp_list TO temp_list + [ s[pos] ]  
+            fill_list(pos + 1)  
+        END FUNCTION  
+        CALL fill_list(0)  
+
+        SET p TO 0  
+        REPEAT  
+            IF NOT (k GREATER THAN 0 AND p LESS THAN len_s) THEN EXIT REPEAT  
+            IF temp_list[p] EQUALS 'a' THEN  
+                SET p TO p + 1  
+                CONTINUE REPEAT  
+            END IF  
+
+            SET delta TO cyclic_distance(temp_list[p], 'a')  
+            IF delta LESS THAN OR EQUAL TO k THEN  
+                SET temp_list[p] TO 'a'  
+                SET k TO k - delta  
+            ELSE  
+                FUNCTION char_code(ch parameter of type character) RETURNS integer  
+                    RETURN integer_value_representing(ch)  
+                END FUNCTION  
+
+                FUNCTION char_from_code(code parameter of type integer) RETURNS character  
+                    RETURN character_corresponding_to(code)  
+                END FUNCTION  
+
+                SET new_code TO char_code(temp_list[p]) - k  
+                SET temp_list[p] TO char_from_code(new_code)  
+                SET k TO 0  
+            END IF  
+
+            SET p TO p + 1  
+        UNTIL false  
+
+        RETURN join_chars(temp_list)  
+    END FUNCTION  
+END CLASS

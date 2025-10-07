@@ -1,0 +1,40 @@
+```
+FUNCTION by_length(parameter_group)
+    SET mapping_alpha TO [
+        (1, "One"),
+        (2, "Two"),
+        (3, "Three"),
+        (4, "Four"),
+        (5, "Five"),
+        (6, "Six"),
+        (7, "Seven"),
+        (8, "Eight"),
+        (9, "Nine")
+    ]
+    FUNCTION lookup(beta)
+        FOR each pair IN mapping_alpha
+            IF pair[0] = beta THEN
+                RETURN pair[1]
+            END IF
+        END FOR
+        RETURN NULL
+    END FUNCTION
+    SET ordered_set TO parameter_group SORTED BY FUNCTION(x) RETURN -x END
+    SET aggregate_gamma TO []
+    FUNCTION recursive_process(delta)
+        IF delta IS EMPTY THEN
+            RETURN
+        ELSE
+            SET item TO delta[0]
+            SET next_delta TO delta[1:]
+            SET candidate TO lookup(item)
+            IF candidate IS NOT NULL THEN
+                aggregate_gamma.APPEND(candidate)
+            END IF
+            recursive_process(next_delta)
+        END IF
+    END FUNCTION
+    recursive_process(ordered_set)
+    RETURN aggregate_gamma
+END FUNCTION
+```

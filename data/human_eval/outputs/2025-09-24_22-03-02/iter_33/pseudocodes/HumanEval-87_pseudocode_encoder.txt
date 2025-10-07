@@ -1,0 +1,54 @@
+FUNCTION get_row WITH PARAMETERS lst, x
+    SET coords TO EMPTY LIST
+    SET i TO 0
+    WHILE i LESS THAN LENGTH OF lst
+        SET row TO lst AT INDEX i
+        SET j TO 0
+        WHILE j LESS THAN LENGTH OF row
+            SET element TO row AT INDEX j
+            IF element EQUALS x THEN
+                APPEND TUPLE WITH ELEMENTS i, j TO coords
+            END IF
+            INCREMENT j BY 1
+        END WHILE
+        INCREMENT i BY 1
+    END WHILE
+
+    SET coords_sorted_by_column_desc TO EMPTY LIST
+    SET indices_column_desc TO RANGE FROM 0 TO LENGTH OF coords MINUS ONE
+    WHILE LENGTH OF indices_column_desc GREATER THAN 0
+        SET max_index TO indices_column_desc AT INDEX 0
+        SET k TO 1
+        WHILE k LESS THAN LENGTH OF indices_column_desc
+            SET current_index TO indices_column_desc AT INDEX k
+            SET max_column TO coords AT INDEX max_index, SECOND ELEMENT
+            SET current_column TO coords AT INDEX current_index, SECOND ELEMENT
+            IF current_column GREATER THAN max_column THEN
+                SET max_index TO current_index
+            END IF
+            INCREMENT k BY 1
+        END WHILE
+        APPEND coords AT INDEX max_index TO coords_sorted_by_column_desc
+        REMOVE max_index FROM indices_column_desc
+    END WHILE
+
+    SET coords_sorted_by_row_asc TO EMPTY LIST
+    SET indices_row_asc TO RANGE FROM 0 TO LENGTH OF coords_sorted_by_column_desc MINUS ONE
+    WHILE LENGTH OF indices_row_asc GREATER THAN 0
+        SET min_index TO indices_row_asc AT INDEX 0
+        SET k TO 1
+        WHILE k LESS THAN LENGTH OF indices_row_asc
+            SET current_index TO indices_row_asc AT INDEX k
+            SET min_row TO coords_sorted_by_column_desc AT INDEX min_index, FIRST ELEMENT
+            SET current_row TO coords_sorted_by_column_desc AT INDEX current_index, FIRST ELEMENT
+            IF current_row LESS THAN min_row THEN
+                SET min_index TO current_index
+            END IF
+            INCREMENT k BY 1
+        END WHILE
+        APPEND coords_sorted_by_column_desc AT INDEX min_index TO coords_sorted_by_row_asc
+        REMOVE min_index FROM indices_row_asc
+    END WHILE
+
+    RETURN coords_sorted_by_row_asc
+END FUNCTION

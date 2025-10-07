@@ -1,0 +1,92 @@
+class Solution
+    function gcdValues(nums, queries)
+        define function bisectRight(arr, target)
+            var left ← 0
+            var right ← length(arr)
+            repeat
+                if left = right then break
+                var mid ← (left + right) // 2
+                if arr[mid] ≤ target then
+                    left ← mid + 1
+                else
+                    right ← mid
+            until false
+            return left
+        end function
+
+        var maxVal ← 0
+        var idx ← 0
+
+        func findMax(index)
+            if index = length(nums) then return
+            if nums[index] > maxVal then maxVal ← nums[index]
+            findMax(index + 1)
+        end func
+
+        findMax(0)
+
+        var frequencyMap ← empty map
+        func buildFrequency(index)
+            if index = length(nums) then return
+            var key ← nums[index]
+            if frequencyMap[key] is undefined then
+                frequencyMap[key] ← 1
+            else
+                frequencyMap[key] ← frequencyMap[key] + 1
+            buildFrequency(index + 1)
+        end func
+
+        buildFrequency(0)
+
+        var countG ← list of zeros with size maxVal + 1
+
+        function rangeStep(startVal, endVal, stepVal, callback)
+            var current ← startVal
+            while true
+                if stepVal > 0 and current > endVal then break
+                if stepVal < 0 and current < endVal then break
+                callback(current)
+                current ← current + stepVal
+        end function
+
+        var i ← maxVal
+        loopI:
+        while i ≥ 1
+            var vAcc ← 0
+            rangeStep(i, maxVal, i, function(j)
+                var cntj ← 0
+                if frequencyMap[j] is not undefined then cntj ← frequencyMap[j]
+                vAcc ← vAcc + cntj
+                countG[i] ← countG[i] - countG[j]
+            end function)
+            countG[i] ← countG[i] + (vAcc * (vAcc - 1)) // 2
+            i ← i - 1
+        end while
+
+        var prefixSum ← list with first element 0
+        var idxP ← 1
+
+        function buildPrefixSum(arr)
+            if idxP > length(countG) - 1 then return
+            prefixSum[idxP] ← prefixSum[idxP - 1] + countG[idxP]
+            idxP ← idxP + 1
+            buildPrefixSum(arr)
+        end function
+
+        buildPrefixSum(countG)
+
+        var answers ← empty list
+
+        func processQueries(index)
+            if index = length(queries) then return
+            var qVal ← queries[index]
+            var pos ← bisectRight(prefixSum, qVal)
+            append pos to answers
+            processQueries(index + 1)
+        end func
+
+        processQueries(0)
+
+        return answers
+    end function
+end class

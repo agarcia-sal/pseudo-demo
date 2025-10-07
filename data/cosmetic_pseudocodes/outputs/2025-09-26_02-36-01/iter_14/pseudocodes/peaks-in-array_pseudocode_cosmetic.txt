@@ -1,0 +1,120 @@
+```
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+
+        FUNCTION peakCheck(pos INTEGER) RETURNS BOOLEAN
+            RETURN NOT (nums[pos] <= nums[pos - 1] OR nums[pos] <= nums[pos + 1])
+        END FUNCTION
+
+        SET peakPositions TO new empty LIST
+        SET idx TO 1
+        WHILE idx <= LENGTH(nums) - 2
+            IF peakCheck(idx)
+                APPEND idx TO peakPositions
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+
+        FUNCTION findLeftInsertionIndex(val INTEGER, arr LIST OF INTEGER) RETURNS INTEGER
+            SET low TO 0
+            SET high TO LENGTH(arr)
+            WHILE low < high
+                SET mid TO low + (high - low) / 2
+                IF val <= arr[mid]
+                    SET high TO mid
+                ELSE
+                    SET low TO mid + 1
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        FUNCTION findRightInsertionIndex(val INTEGER, arr LIST OF INTEGER) RETURNS INTEGER
+            SET low TO 0
+            SET high TO LENGTH(arr)
+            WHILE low < high
+                SET mid TO low + (high - low) / 2
+                IF val < arr[mid]
+                    SET high TO mid
+                ELSE
+                    SET low TO mid + 1
+                END IF
+            END WHILE
+            RETURN low - 1
+        END FUNCTION
+
+        FUNCTION containsValue(collection LIST OF INTEGER, value INTEGER) RETURNS BOOLEAN
+            SET l TO 0
+            SET r TO LENGTH(collection) - 1
+            WHILE l <= r
+                SET m TO l + (r - l) / 2
+                IF collection[m] == value
+                    RETURN true
+                ELSE IF collection[m] > value
+                    SET r TO m - 1
+                ELSE
+                    SET l TO m + 1
+                END IF
+            END WHILE
+            RETURN false
+        END FUNCTION
+
+        FUNCTION insertSorted(collection LIST OF INTEGER, val INTEGER)
+            SET pos TO findLeftInsertionIndex(val, collection)
+            INSERT val INTO collection AT pos
+        END FUNCTION
+
+        FUNCTION removeSorted(collection LIST OF INTEGER, val INTEGER)
+            SET pos TO findLeftInsertionIndex(val, collection)
+            IF pos < LENGTH(collection) AND collection[pos] == val
+                REMOVE element at position pos FROM collection
+            END IF
+        END FUNCTION
+
+        SET answers TO empty LIST
+        FOR queryIndex FROM 0 TO LENGTH(queries) - 1
+            SET currentQuery TO queries[queryIndex]
+            IF currentQuery[0] == 1
+                SET leftBound TO currentQuery[1]
+                SET rightBound TO currentQuery[2]
+                SET leftPos TO findLeftInsertionIndex(leftBound + 1, peakPositions)
+                SET rightPos TO findRightInsertionIndex(rightBound - 1, peakPositions)
+                SET diff TO rightPos - leftPos + 1
+                IF diff < 0
+                    SET diff TO 0
+                END IF
+                APPEND diff TO answers
+            ELSE
+                SET changeIndex TO currentQuery[1]
+                SET newVal TO currentQuery[2]
+                IF nums[changeIndex] == newVal
+                    CONTINUE
+                END IF
+                SET nums[changeIndex] TO newVal
+                SET startIdx TO changeIndex - 1
+                IF startIdx < 1
+                    SET startIdx TO 1
+                END IF
+                SET endIdx TO changeIndex + 1
+                IF endIdx > LENGTH(nums) - 2
+                    SET endIdx TO LENGTH(nums) - 2
+                END IF
+                WHILE startIdx <= endIdx
+                    IF peakCheck(startIdx)
+                        IF NOT containsValue(peakPositions, startIdx)
+                            insertSorted(peakPositions, startIdx)
+                        END IF
+                    ELSE
+                        IF containsValue(peakPositions, startIdx)
+                            removeSorted(peakPositions, startIdx)
+                        END IF
+                    END IF
+                    SET startIdx TO startIdx + 1
+                END WHILE
+            END IF
+        END FOR
+
+        RETURN answers
+    END FUNCTION
+END CLASS
+```

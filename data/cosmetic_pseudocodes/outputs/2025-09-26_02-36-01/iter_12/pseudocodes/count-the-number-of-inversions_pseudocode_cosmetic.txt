@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION numberOfPermutations(n, requirements)
+        CONSTANT MODULE_CONST ← 10 ^ 9 + 7
+
+        VAR condition_map ← {}
+        VAR idx ← 0
+        WHILE idx < LENGTH(requirements)
+            VAR end_val, count_val ← requirements[idx][0], requirements[idx][1]
+            condition_map[end_val] ← count_val
+            idx ← idx + 1
+        END WHILE
+
+        FUNCTION compute_count(length_prefix, current_invs, taken_bits)
+            IF length_prefix = n THEN
+                VAR target_inv ← 0
+                IF condition_map CONTAINS (n - 1)
+                    target_inv ← condition_map[n - 1]
+                END IF
+
+                IF current_invs = target_inv THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            IF length_prefix > 0 THEN
+                VAR expected_inv ← current_invs
+                IF condition_map CONTAINS (length_prefix - 1)
+                    expected_inv ← condition_map[length_prefix - 1]
+                END IF
+
+                IF current_invs ≠ expected_inv THEN
+                    RETURN 0
+                END IF
+            END IF
+
+            VAR total_ways ← 0
+            VAR candidate ← 0
+            WHILE candidate < n
+                VAR mask ← 1 << candidate
+                IF (taken_bits & mask) = 0 THEN
+                    VAR inv_count_temp ← current_invs
+                    VAR checker ← candidate + 1
+                    WHILE checker < n
+                        VAR checker_mask ← 1 << checker
+                        IF (taken_bits & checker_mask) ≠ 0 THEN
+                            inv_count_temp ← inv_count_temp + 1
+                        END IF
+                        checker ← checker + 1
+                    END WHILE
+
+                    total_ways ← (total_ways + compute_count(length_prefix + 1, inv_count_temp, taken_bits | mask)) % MODULE_CONST
+                END IF
+                candidate ← candidate + 1
+            END WHILE
+            RETURN total_ways
+        END FUNCTION
+
+        RETURN compute_count(0, 0, 0)
+    END FUNCTION
+END CLASS

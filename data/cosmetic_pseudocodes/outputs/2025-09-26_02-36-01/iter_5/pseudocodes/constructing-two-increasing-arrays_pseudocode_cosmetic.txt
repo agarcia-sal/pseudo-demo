@@ -1,0 +1,64 @@
+CLASS Solution  
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer  
+        FUNCTION nxt(xval xval AS integer yval yval AS integer) RETURNS integer  
+            IF ( (xval BITWISE_AND (1 BITWISE_XOR yval)) EQUALS 1 ) THEN  
+                RETURN xval PLUS 1  
+            ELSE  
+                RETURN xval PLUS (1 PLUS 1)  
+            END IF  
+        END FUNCTION  
+
+        SET lengthA TO LENGTH OF nums1  
+        SET lengthB TO LENGTH OF nums2  
+        SET matrix TO new list OF integers WITH (lengthA PLUS 1) ROWS AND (lengthB PLUS 1) COLUMNS FILLED WITH zero  
+
+        DEFINE PROCEDURE fillRow(i i AS integer)  
+            IF i GREATER THAN lengthA THEN  
+                RETURN  
+            END IF  
+            LET currentA BE element at position i of nums1  
+            LET prevVal BE element at position (i MINUS 1) ZERO of matrix  
+            SET element at position i ZERO of matrix TO nxt(prevVal, currentA)  
+            CALL fillRow(i PLUS 1)  
+        END PROCEDURE  
+        CALL fillRow(1)  
+
+        DEFINE PROCEDURE fillCol(j j AS integer)  
+            IF j GREATER THAN lengthB THEN  
+                RETURN  
+            END IF  
+            LET currentB BE element at position j of nums2  
+            LET prevValB BE element at position ZERO (j MINUS 1) of matrix  
+            SET element at position ZERO j of matrix TO nxt(prevValB, currentB)  
+            CALL fillCol(j PLUS 1)  
+        END PROCEDURE  
+        CALL fillCol(1)  
+
+        DEFINE PROCEDURE fillMatrix(i i AS integer j j AS integer)  
+            IF i GREATER THAN lengthA THEN  
+                RETURN  
+            END IF  
+            IF j GREATER THAN lengthB THEN  
+                CALL fillMatrix(i PLUS 1, 1)  
+                RETURN  
+            END IF  
+
+            LET valA BE element at position i of nums1  
+            LET valB BE element at position j of nums2  
+            LET topVal BE element at position (i MINUS 1) j of matrix  
+            LET leftVal BE element at position i (j MINUS 1) of matrix  
+            LET candidate1 BE nxt(topVal, valA)  
+            LET candidate2 BE nxt(leftVal, valB)  
+            IF candidate1 LESS_THAN_OR_EQUAL_TO candidate2 THEN  
+                SET element at position i j of matrix TO candidate1  
+            ELSE  
+                SET element at position i j of matrix TO candidate2  
+            END IF  
+            CALL fillMatrix(i, j PLUS 1)  
+        END PROCEDURE  
+        CALL fillMatrix(1, 1)  
+
+        LET resultVal BE element at position lengthA lengthB of matrix  
+        RETURN resultVal  
+    END FUNCTION  
+END CLASS

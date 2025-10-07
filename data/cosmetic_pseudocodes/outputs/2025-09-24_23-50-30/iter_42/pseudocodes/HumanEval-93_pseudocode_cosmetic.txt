@@ -1,0 +1,48 @@
+```
+FUNCTION encode(text)
+	vowels_set ← [ 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U' ]
+	vowshift_map ← EMPTY MAP
+	INDEX_LOOP_CURSOR ← 0
+	LOOP_BUILD_MAP:
+		IF INDEX_LOOP_CURSOR >= LENGTH(vowels_set) THEN GOTO MAP_BUILT
+		current_char ← vowels_set[INDEX_LOOP_CURSOR]
+		ascii_val ← ASCII(current_char) + 2
+		trans_char ← CHAR(ascii_val)
+		ASSIGN vowshift_map[current_char] ← trans_char
+		INDEX_LOOP_CURSOR ← INDEX_LOOP_CURSOR + 1
+		GOTO LOOP_BUILD_MAP
+	MAP_BUILT:
+
+	DECLARE SWAPPED_TEXT AS EMPTY STRING
+	INDEX_CURSOR ← 0
+	LOOP_SWAP_CASE:
+		IF INDEX_CURSOR >= LENGTH(text) THEN GOTO CASE_SWAPPED
+		c ← text[INDEX_CURSOR]
+		IF c >= 'A' AND c <= 'Z' THEN
+			swapped_c ← CHAR(ASCII(c) + 32)
+		ELSE IF c >= 'a' AND c <= 'z' THEN
+			swapped_c ← CHAR(ASCII(c) - 32)
+		ELSE
+			swapped_c ← c
+		END IF
+		SWAPPED_TEXT ← CONCAT(SWAPPED_TEXT, swapped_c)
+		INDEX_CURSOR ← INDEX_CURSOR + 1
+		GOTO LOOP_SWAP_CASE
+	CASE_SWAPPED:
+
+	ENCODED_TEXT ← EMPTY STRING
+	ENCODE_INDEX ← 0
+	ITERATE_ENCODING:
+		IF ENCODE_INDEX >= LENGTH(SWAPPED_TEXT) THEN GOTO ENCODE_DONE
+		current_let ← SWAPPED_TEXT[ENCODE_INDEX]
+		ENCODED_TEXT ← CONCAT(
+			ENCODED_TEXT,
+			IF MAP_CONTAINS(vowshift_map, current_let) THEN vowshift_map[current_let] ELSE current_let
+		)
+		ENCODE_INDEX ← ENCODE_INDEX + 1
+		GOTO ITERATE_ENCODING
+	ENCODE_DONE:
+
+	RETURN ENCODED_TEXT
+END FUNCTION
+```

@@ -1,0 +1,82 @@
+CLASS Solution  
+    FUNCTION minimumCost(target, words, costs)  
+        DECLARE cost_map AS empty dictionary  
+        PROCEDURE insert_cost(wd, val)  
+            IF wd NOT IN cost_map THEN  
+                cost_map[wd] = val  
+            ELSE  
+                IF val < cost_map[wd] THEN  
+                    cost_map[wd] = val  
+                ENDIF  
+            ENDIF  
+        END PROCEDURE  
+        DECLARE idx1 = 0  
+        WHILE idx1 < LENGTH(words) DO  
+            CALL insert_cost(words[idx1], costs[idx1])  
+            idx1 = idx1 + 1  
+        ENDWHILE  
+        SET char_list = [c FOR c IN target]  
+        FUNCTION min_cost_to_form_target(pos)  
+            IF NOT (pos != LENGTH(char_list)) THEN  
+                RETURN 0  
+            ENDIF  
+            DECLARE min_val = +∞  
+            DECLARE keys_list = KEYS(cost_map)  
+            DECLARE rev_keys = []  
+            DECLARE idx2 = LENGTH(keys_list) - 1  
+            WHILE idx2 >= 0 DO  
+                rev_keys = rev_keys + [keys_list[idx2]]  
+                idx2 = idx2 - 1  
+            ENDWHILE  
+            DECLARE idx3 = 0  
+            WHILE idx3 < LENGTH(rev_keys) DO  
+                DECLARE current_word = rev_keys[idx3]  
+                DECLARE current_cost = cost_map[current_word]  
+                DECLARE word_len = LENGTH(current_word)  
+                IF ((pos + word_len) <= LENGTH(char_list)) THEN  
+                    DECLARE segment = []  
+                    DECLARE idx4 = pos  
+                    WHILE idx4 < (pos + word_len) DO  
+                        segment = segment + [char_list[idx4]]  
+                        idx4 = idx4 + 1  
+                    ENDWHILE  
+                    DECLARE word_chars = []  
+                    DECLARE idx5 = 0  
+                    WHILE idx5 < word_len DO  
+                        word_chars = word_chars + [current_word[idx5]]  
+                        idx5 = idx5 + 1  
+                    ENDWHILE  
+                    DECLARE equal_check = TRUE  
+                    DECLARE idx6 = 0  
+                    WHILE idx6 < word_len AND equal_check DO  
+                        IF NOT(segment[idx6] = word_chars[idx6]) THEN  
+                            equal_check = FALSE  
+                        ENDIF  
+                        idx6 = idx6 + 1  
+                    ENDWHILE  
+                    IF equal_check THEN  
+                        DECLARE rec_res = min_cost_to_form_target(pos + word_len)  
+                        IF NOT(rec_res = +∞) THEN  
+                            DECLARE new_sum = current_cost + rec_res  
+                            IF new_sum < min_val THEN  
+                                min_val = new_sum  
+                            ENDIF  
+                        ENDIF  
+                    ENDIF  
+                ENDIF  
+                idx3 = idx3 + 1  
+            ENDWHILE  
+            IF (min_val != +∞) THEN  
+                RETURN min_val  
+            ELSE  
+                RETURN +∞  
+            ENDIF  
+        END FUNCTION  
+        DECLARE answer = min_cost_to_form_target(0)  
+        IF NOT (answer = +∞) THEN  
+            RETURN answer  
+        ELSE  
+            RETURN (0 - 1)  
+        ENDIF  
+    END FUNCTION  
+END CLASS

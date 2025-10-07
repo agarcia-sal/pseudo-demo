@@ -1,0 +1,52 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+	TAB parse_paren_group = FUNCTION(group_string)
+		tab_depth:=0
+		tab_highestDepth:=0
+
+		PROC iterate_chars_in_group(letters,index)
+			IF index > LENGTH(letters) THEN
+				RETURN tab_highestDepth
+			END IF
+
+			chr := letters[index]
+			tab_depth := (
+				(chr = '(') * (tab_depth + 1) +
+				(1 - (chr = '(')) * (tab_depth - 1)
+			)
+
+			tab_highestDepth := (
+				(tab_depth > tab_highestDepth) * tab_depth +
+				(1 - (tab_depth > tab_highestDepth)) * tab_highestDepth
+			)
+
+			RETURN iterate_chars_in_group(letters, index + 1)
+		END PROC
+
+		RETURN iterate_chars_in_group(group_string, 1)
+	END TAB
+
+	spacedGroups_map:=[]
+	PROC split_accumulate(s,index)
+		IF index > LENGTH(s) THEN RETURN NULL END IF
+		charAt := s[index]
+		(a,b) := IF charAt = ' ' THEN (spacedGroups_map,[ ]) ELSE (spacedGroups_map[-1] ?: '', spacedGroups_map) END IF
+
+		IF charAt = ' ' THEN spacedGroups_map := spacedGroups_map + [''] ELSE spacedGroups_map[-1] := spacedGroups_map[-1] + charAt END IF
+		RETURN split_accumulate(s, index + 1)
+	END PROC
+	split_accumulate(parentheses_string,1)
+
+	out_list_rec:=[];
+	PROC process_groups(groups_list, idx)
+		IF idx > LENGTH(groups_list) THEN RETURN out_list_rec END IF
+		grp := groups_list[idx]
+		IF LENGTH(grp) != 0 THEN
+			out_list_rec := out_list_rec + [parse_paren_group(grp)]
+		END IF
+		RETURN process_groups(groups_list, idx + 1)
+	END PROC
+
+	RETURN process_groups(spacedGroups_map, 1)
+END FUNCTION
+```

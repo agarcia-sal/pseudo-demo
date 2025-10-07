@@ -1,0 +1,49 @@
+CLASS Solution  
+    FUNCTION findPattern(board, pattern)  
+        LET total_rows BE LENGTH(board)  
+        LET total_cols BE LENGTH(board[0])  
+        LET pattern_rows BE LENGTH(pattern)  
+        LET pattern_cols BE LENGTH(pattern[0])  
+        
+        FUNCTION matches(row_start, col_start)  
+            INITIALIZE char_to_digit_map AS EMPTY DICTIONARY  
+            INITIALIZE digit_to_char_map AS EMPTY DICTIONARY  
+            
+            FOR row_offset IN RANGE(0, pattern_rows)  
+                FOR col_offset IN RANGE(0, pattern_cols)  
+                    LET pattern_char BE pattern[row_offset][col_offset]  
+                    LET board_digit BE board[row_start + row_offset][col_start + col_offset]  
+                    
+                    IF pattern_char IS A DIGIT THEN  
+                        IF TO_INTEGER(pattern_char) != board_digit THEN  
+                            RETURN False  
+                        END IF  
+                    ELSE  
+                        IF pattern_char EXISTS IN char_to_digit_map THEN  
+                            IF char_to_digit_map[pattern_char] != board_digit THEN  
+                                RETURN False  
+                            END IF  
+                        ELSE  
+                            IF board_digit EXISTS IN digit_to_char_map THEN  
+                                RETURN False  
+                            END IF  
+                            SET char_to_digit_map[pattern_char] = board_digit  
+                            SET digit_to_char_map[board_digit] = pattern_char  
+                        END IF  
+                    END IF  
+                END FOR  
+            END FOR  
+            RETURN True  
+        END FUNCTION  
+        
+        FOR row_index IN RANGE(0, total_rows - pattern_rows + 1)  
+            FOR col_index IN RANGE(0, total_cols - pattern_cols + 1)  
+                IF matches(row_index, col_index) THEN  
+                    RETURN [row_index, col_index]  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        RETURN [-1, -1]  
+    END FUNCTION  
+END CLASS

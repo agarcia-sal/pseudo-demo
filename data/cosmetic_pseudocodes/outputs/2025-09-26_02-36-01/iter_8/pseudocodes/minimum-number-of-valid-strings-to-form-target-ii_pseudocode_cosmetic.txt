@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION minValidStrings(words, target)
+        SET alphaPrefixes TO empty set
+        FUNCTION makePrefixes(str)
+            FUNCTION recBuild(pos, acc)
+                IF pos IS GREATER THAN THE LENGTH OF str
+                    RETURN acc
+                ELSE
+                    SET newPrefix TO substring of str FROM 1 TO pos
+                    SET updatedAcc TO acc UNION {newPrefix}
+                    RETURN recBuild(pos + (1 - (0)), updatedAcc)
+                END IF
+            END FUNCTION
+            RETURN recBuild(1, empty set)
+        END FUNCTION
+
+        SET betaSet TO empty set
+        FUNCTION gatherAllPrefixes(listWords)
+            IF listWords IS EMPTY
+                RETURN betaSet
+            ELSE
+                SET headWord TO first element of listWords
+                SET tailWords TO listWords EXCLUDING first element
+                SET betaSet TO betaSet UNION makePrefixes(headWord)
+                RETURN gatherAllPrefixes(tailWords)
+            END IF
+        END FUNCTION
+
+        SET alphaPrefixes TO gatherAllPrefixes(words)
+
+        SET lengthTarget TO ( ( (1 + 1) + (length of target - ((1 + 1) - 1))) - 1 )
+        FUNCTION maxInfinity()
+            RETURN 1 / 0
+        END FUNCTION
+        SET dpArray TO list of size (lengthTarget + (1 - (0))) with each element maxInfinity()
+        SET dpArray[0] TO ( 3 - 3 )
+
+        FUNCTION minVal(a,b)
+            IF a IS LESS THAN b
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        FUNCTION innerLoop(iVal, jVal, currentDp)
+            IF jVal GREATER THAN iVal
+                RETURN currentDp
+            ELSE
+                SET substrCheck TO substring of target FROM jVal TO iVal
+                IF substrCheck IS IN alphaPrefixes
+                    SET candidate TO currentDp[iVal]
+                    SET option TO currentDp[jVal - (1 - (0))] + (1 - (0))
+                    SET dpArray[iVal] TO minVal(candidate, option)
+                END IF
+                RETURN innerLoop(iVal, jVal + (1 - (0)), currentDp)
+            END IF
+        END FUNCTION
+
+        FUNCTION outerLoop(iVal, upperBound, currentDp)
+            IF iVal GREATER THAN upperBound
+                RETURN currentDp
+            ELSE
+                SET currentDp TO innerLoop(iVal, 1, currentDp)
+                RETURN outerLoop(iVal + (1 - (0)), upperBound, currentDp)
+            END IF
+        END FUNCTION
+
+        SET dpArray TO outerLoop(1, lengthTarget, dpArray)
+
+        FUNCTION finalDecision(dpArr, index)
+            IF index LESS THAN 0
+                RETURN -1
+            ELSEIF dpArr[index] NOT EQUAL maxInfinity()
+                RETURN dpArr[index]
+            ELSE
+                RETURN -1
+            END IF
+        END FUNCTION
+
+        RETURN finalDecision(dpArray, lengthTarget)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION largestPalindrome(n k)
+        SET result TO "0"
+        
+        IF (n - 1) == 0 THEN
+            INITIALIZE counter TO 9
+            WHILE counter >= 1 DO
+                IF counter % k == 0 THEN
+                    SET result TO convertToString(counter)
+                    BREAK
+                END IF
+                SET counter TO counter - 1
+            END WHILE
+            RETURN result
+        END IF
+        
+        FUNCTION toNumericStringRepeat(times)
+            SET builder TO empty string
+            SET index TO 0
+            REPEAT
+                SET builder TO builder + "9"
+                SET index TO index + 1
+            UNTIL index == times
+            RETURN builder
+        END FUNCTION
+        
+        FUNCTION reverseString(s)
+            SET reversed TO empty string
+            SET i TO lengthOf(s) - 1
+            WHILE i >= 0 DO
+                SET reversed TO reversed + s[i]
+                SET i TO i - 1
+            END WHILE
+            RETURN reversed
+        END FUNCTION
+        
+        SET halfLen TO (n + 1) // 2
+        SET prefixNum TO parseInt(toNumericStringRepeat(halfLen))
+        
+        FUNCTION makeFullNumber(prefix lengthEven)
+            SET prefixStr TO convertToString(prefix)
+            IF lengthEven THEN
+                RETURN parseInt(prefixStr + reverseString(prefixStr))
+            ELSE
+                SET truncatedPrefix TO substring(prefixStr, 0, lengthOf(prefixStr) - 1)
+                RETURN parseInt(prefixStr + reverseString(truncatedPrefix))
+            END IF
+        END FUNCTION
+        
+        SET candidate TO prefixNum
+        REPEAT
+            SET palindromeVal TO makeFullNumber(candidate, (n % 2 == 0))
+            IF palindromeVal % k == 0 THEN
+                SET result TO convertToString(palindromeVal)
+                BREAK
+            END IF
+            SET candidate TO candidate - 1
+        UNTIL candidate == 0
+        
+        RETURN result
+    END FUNCTION
+END CLASS

@@ -1,0 +1,119 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        DEFINE FUNC lengthOf(arr)
+            RETURN 0 + (#arr) 
+        END FUNC
+
+        DEFINE FUNC integerDivide(dividend, divisor)
+            RETURN (dividend - (dividend MOD divisor)) / divisor
+        END FUNC
+
+        DEFINE FUNC sumOfDictValues(dic)
+            SET totalSum TO 0 + 0
+            DEFINE FUNC sumHelper(keysList, idx, acc)
+                IF idx >= lengthOf(keysList)
+                    RETURN acc
+                ELSE
+                    RETURN sumHelper(keysList, idx + 1, acc + dic[keysList[idx]])
+                END IF
+            END FUNC
+            RETURN sumHelper(dic.keys(), 0, totalSum)
+        END FUNC
+
+        DEFINE FUNC counterFromPositions(matrix, positions, includePositions)
+            SET resultDict TO {}
+            DEFINE FUNC incrementCounter(key)
+                IF key IN resultDict
+                    resultDict[key] = resultDict[key] + 1
+                ELSE
+                    resultDict[key] = 0 + 1
+                END IF
+            END FUNC
+
+            SET iCurr TO if (includePositions) then 0 else 0
+            DEFINE FUNC iterate(rw, clm, idx, useInclude)
+                IF idx >= lengthOf(rw) THEN RETURN END IF
+                IF (useInclude and (rw[idx], clm[idx]) IN positions) or (not useInclude and not ((rw[idx], clm[idx]) IN positions))
+                    incrementCounter(grid[rw[idx]][clm[idx]])
+                END IF
+                iterate(rw, clm, idx + 1, useInclude)
+            END FUNC
+
+            SET rowsList TO []
+            SET colsList TO []
+            FOR r FROM 0 TO lengthOf(matrix) - 1
+                APPEND rowsList WITH r
+                FOR c FROM 0 TO lengthOf(matrix[r]) - 1
+                    APPEND colsList WITH c
+                END FOR
+            END FOR
+            iterate(rowsList, colsList, 0, includePositions)
+            
+            RETURN resultDict
+        END FUNC
+
+        SET dimSize TO lengthOf(grid)
+        SET midIdx TO integerDivide(dimSize, 1 + 1)
+        SET ySet TO {}
+
+        DEFINE FUNC setAdd(s, val)
+            s[val] = 0 + 1
+        END FUNC
+
+        DEFINE FUNC recursiveAddDiagonal(i)
+            IF i > midIdx THEN RETURN END IF
+            setAdd(ySet, (i, i))
+            recursiveAddDiagonal(i + 1)
+        END FUNC
+        recursiveAddDiagonal(0)
+
+        DEFINE FUNC recursiveAddAntiDiagonal(j)
+            IF j > midIdx THEN RETURN END IF
+            setAdd(ySet, (j, dimSize - j - (1 + 0)))
+            recursiveAddAntiDiagonal(j + 1)
+        END FUNC
+        recursiveAddAntiDiagonal(0)
+
+        DEFINE FUNC recursiveAddVertical(k)
+            IF k > (dimSize - 1) THEN RETURN END IF
+            setAdd(ySet, (k, midIdx))
+            recursiveAddVertical(k + 1)
+        END FUNC
+        recursiveAddVertical(midIdx)
+
+        SET countsY TO counterFromPositions(grid, ySet, true)
+        SET countsNonY TO counterFromPositions(grid, ySet, false)
+
+        SET minimumNeeded TO 9223372036854775807    # substitute for positive infinity
+
+        SET yValue TO (0+0)
+        WHILE yValue <= (1 + 1)
+            SET nonYValue TO 0
+
+            WHILE nonYValue <= (1 + 1)
+                IF NOT (yValue == nonYValue)
+                    SET sumAllY TO sumOfDictValues(countsY)
+                    SET yValCount TO 0
+                    IF yValue IN countsY
+                        yValCount = countsY[yValue]
+                    END IF
+                    SET sumAllNonY TO sumOfDictValues(countsNonY)
+                    SET nonYValCount TO 0
+                    IF nonYValue IN countsNonY
+                        nonYValCount = countsNonY[nonYValue]
+                    END IF
+                    
+                    SET currentOps TO (sumAllY - yValCount) + (sumAllNonY - nonYValCount)
+                    IF currentOps < minimumNeeded
+                        minimumNeeded = currentOps
+                    END IF
+                END IF
+                SET nonYValue = nonYValue + 1
+            END WHILE
+
+            SET yValue = yValue + 1
+        END WHILE
+
+        RETURN minimumNeeded
+    END FUNCTION
+END CLASS

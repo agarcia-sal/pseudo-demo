@@ -1,0 +1,107 @@
+CLASS Solution
+	FUNCTION maxTargetNodes(edges1, edges2)
+		SET adjacencyMap1 TO new default dictionary of lists
+		SET adjacencyMap2 TO new default dictionary of lists
+		
+		PROCEDURE buildGraph(edgeList, graph)
+			IF edgeList IS empty THEN RETURN END PROCEDURE
+			SET currentEdge TO edgeList[0]
+			APPEND currentEdge[1] TO graph[currentEdge[0]]
+			APPEND currentEdge[0] TO graph[currentEdge[1]]
+			CALL buildGraph(edgeList[1:], graph)
+		END PROCEDURE
+		
+		CALL buildGraph(edges1, adjacencyMap1)
+		CALL buildGraph(edges2, adjacencyMap2)
+		
+		SET count1 TO length of keys in adjacencyMap1
+		SET count2 TO length of keys in adjacencyMap2
+		
+		FUNCTION bfs(graphStructure, origin)
+			SET accumulateEven TO 0
+			SET accumulateOdd TO 0
+			SET processingQueue TO new deque with tuple(origin, 0)
+			SET visitedSet TO set containing origin
+			
+			FUNCTION processQueue(queue)
+				IF queue IS empty THEN
+					RETURN accumulateEven, accumulateOdd
+				END IF
+				
+				SET currentNode, currentDistance TO queue[0]
+				REMOVE first element FROM queue
+				
+				IF currentDistance - (2 * (currentDistance DIV 2)) EQUALS 0 THEN
+					SET accumulateEven TO accumulateEven + 1
+				ELSE
+					SET accumulateOdd TO accumulateOdd + 1
+				END IF
+				
+				FUNCTION iterateNeighbors(neighborsList)
+					IF neighborsList IS empty THEN RETURN END FUNCTION
+					SET nextNeighbor TO neighborsList[0]
+					IF nextNeighbor NOT IN visitedSet THEN
+						ADD nextNeighbor TO visitedSet
+						APPEND tuple(nextNeighbor, currentDistance + 1) TO queue
+					END IF
+					CALL iterateNeighbors(neighborsList[1:])
+				END FUNCTION
+				
+				CALL iterateNeighbors(graphStructure[currentNode])
+				RETURN processQueue(queue)
+			END FUNCTION
+			
+			RETURN processQueue(processingQueue)
+		END FUNCTION
+		
+		SET countsList1 TO empty list
+		FUNCTION fillCounts1(index)
+			IF index EQUALS count1 THEN RETURN END FUNCTION
+			SET countsPair TO bfs(adjacencyMap1, index)
+			APPEND countsPair TO countsList1
+			CALL fillCounts1(index + 1)
+		END FUNCTION
+		CALL fillCounts1(0)
+		
+		SET countsList2 TO empty list
+		FUNCTION fillCounts2(index)
+			IF index EQUALS count2 THEN RETURN END FUNCTION
+			SET countsPair TO bfs(adjacencyMap2, index)
+			APPEND countsPair TO countsList2
+			CALL fillCounts2(index + 1)
+		END FUNCTION
+		CALL fillCounts2(0)
+		
+		SET finalResults TO empty list
+		FUNCTION computeResults(i)
+			IF i EQUALS count1 THEN RETURN END FUNCTION
+			SET evenCountI TO countsList1[i][0]
+			SET oddCountI TO countsList1[i][1]
+			SET peakTarget TO 0
+			
+			FUNCTION innerLoop(j)
+				IF j EQUALS count2 THEN RETURN END FUNCTION
+				SET evenCountJ TO countsList2[j][0]
+				SET oddCountJ TO countsList2[j][1]
+				DECLARE candidateTargets
+				IF i EQUALS j OR ((i - 2 * (i DIV 2)) EQUALS (j - 2 * (j DIV 2))) THEN
+					SET candidateTargets TO evenCountJ
+				ELSE
+					SET candidateTargets TO oddCountJ
+				END IF
+				
+				IF candidateTargets > peakTarget THEN
+					SET peakTarget TO candidateTargets
+				END IF
+				
+				CALL innerLoop(j + 1)
+			END FUNCTION
+			CALL innerLoop(0)
+			APPEND evenCountI + peakTarget TO finalResults
+			CALL computeResults(i + 1)
+		END FUNCTION
+		
+		CALL computeResults(0)
+		RETURN finalResults
+	END FUNCTION
+END CLASS

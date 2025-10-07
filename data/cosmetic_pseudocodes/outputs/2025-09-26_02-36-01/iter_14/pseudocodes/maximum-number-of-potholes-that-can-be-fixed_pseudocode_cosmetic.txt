@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        FUNCTION computeLength(str STRING) RETURNS INTEGER
+            SET idx TO 0
+            WHILE idx < LEN(str) DO
+                SET idx TO idx + 1
+            END WHILE
+            RETURN idx
+        END FUNCTION
+
+        FUNCTION splitByDot(text STRING) RETURNS ARRAY OF STRING
+            SET result TO EMPTY ARRAY
+            SET startIdx TO 0
+            SET pos TO 0
+            WHILE pos < LEN(text) DO
+                IF text[pos] = '.' THEN
+                    APPEND SUBSTRING(text, startIdx, pos - startIdx) TO result
+                    SET startIdx TO pos + 1
+                END IF
+                SET pos TO pos + 1
+            END WHILE
+            IF startIdx <= LEN(text) THEN
+                APPEND SUBSTRING(text, startIdx, LEN(text) - startIdx) TO result
+            END IF
+            RETURN result
+        END FUNCTION
+
+        FUNCTION orderAscendingByLength(arr ARRAY OF STRING) RETURNS ARRAY OF STRING
+            SET sortedArr TO arr
+            SET changed TO TRUE
+            WHILE changed DO
+                SET changed TO FALSE
+                SET i TO 0
+                WHILE i < LEN(sortedArr) - 1 DO
+                    IF computeLength(sortedArr[i]) > computeLength(sortedArr[i+1]) THEN
+                        SET temp TO sortedArr[i]
+                        SET sortedArr[i] TO sortedArr[i+1]
+                        SET sortedArr[i+1] TO temp
+                        SET changed TO TRUE
+                    END IF
+                    SET i TO i + 1
+                END WHILE
+            END WHILE
+            RETURN sortedArr
+        END FUNCTION
+
+        SET pieces TO splitByDot(road)
+        SET orderedPieces TO orderAscendingByLength(pieces)
+        SET totalFixed TO 0
+
+        FUNCTION canFix(n INTEGER, available INTEGER) RETURNS BOOLEAN
+            RETURN NOT (available < n + 1)
+        END FUNCTION
+
+        PROCEDURE fixPartial(VAR length INTEGER, VAR budgetLeft INTEGER, VAR fixedCount INTEGER)
+            LOOP
+                IF length = 0 OR budgetLeft = 0 THEN
+                    EXIT LOOP
+                END IF
+                SET currentCost TO length + 1
+                IF budgetLeft >= currentCost THEN
+                    SET fixedCount TO fixedCount + length
+                    SET budgetLeft TO budgetLeft - currentCost
+                    EXIT LOOP
+                END IF
+                SET length TO length - 1
+            END LOOP
+        END PROCEDURE
+
+        SET idx TO 0
+        WHILE idx < LEN(orderedPieces) DO
+            SET segment TO orderedPieces[idx]
+            SET segmentLength TO computeLength(segment)
+            IF segmentLength = 0 THEN
+                SET idx TO idx + 1
+                CONTINUE
+            END IF
+
+            SET repairCost TO segmentLength + 1
+            IF canFix(segmentLength, budget) THEN
+                SET totalFixed TO totalFixed + segmentLength
+                SET budget TO budget - repairCost
+            ELSE
+                CALL fixPartial(segmentLength, budget, totalFixed)
+            END IF
+
+            SET idx TO idx + 1
+        END WHILE
+
+        RETURN totalFixed
+    END FUNCTION
+END CLASS

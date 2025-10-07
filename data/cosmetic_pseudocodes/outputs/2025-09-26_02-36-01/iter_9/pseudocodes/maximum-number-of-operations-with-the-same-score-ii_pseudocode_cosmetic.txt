@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION maxOperations(originalArray)
+        FUNCTION exploreRange(startIndex, endIndex, targetSum, cache)
+            DEFINE resultCount = 0
+            IF startIndex >= endIndex THEN
+                RETURN 0
+            END IF
+
+            DEFINE keyTriple = (startIndex, endIndex, targetSum)
+            IF keyTriple IN cache THEN
+                RETURN cache[keyTriple]
+            END IF
+
+            DEFINE computedMax = 0
+
+            DEFINE sumStartPair = originalArray[startIndex] + originalArray[startIndex + 1]
+            IF sumStartPair = targetSum THEN
+                DEFINE innerCount = exploreRange(startIndex + 2, endIndex, targetSum, cache)
+                computedMax = MAX(computedMax, 1 + innerCount)
+            END IF
+
+            DEFINE sumEndPair = originalArray[endIndex] + originalArray[endIndex - 1]
+            IF sumEndPair = targetSum THEN
+                DEFINE innerCountAlt = exploreRange(startIndex, endIndex - 2, targetSum, cache)
+                computedMax = MAX(computedMax, 1 + innerCountAlt)
+            END IF
+
+            DEFINE sumOuterPair = originalArray[startIndex] + originalArray[endIndex]
+            IF sumOuterPair = targetSum THEN
+                DEFINE innerCountCross = exploreRange(startIndex + 1, endIndex - 1, targetSum, cache)
+                computedMax = MAX(computedMax, 1 + innerCountCross)
+            END IF
+
+            cache[keyTriple] = computedMax
+            RETURN computedMax
+        END FUNCTION
+
+        DEFINE lengthVal = LENGTH(originalArray)
+        DEFINE firstPairSum = originalArray[0] + originalArray[1]
+        DEFINE lastPairSum = originalArray[lengthVal - 2] + originalArray[lengthVal - 1]
+        DEFINE mixedPairSum = originalArray[0] + originalArray[lengthVal - 1]
+
+        DEFINE optionOne = 1 + exploreRange(2, lengthVal - 1, firstPairSum, DICT())
+        DEFINE optionTwo = 1 + exploreRange(0, lengthVal - 3, lastPairSum, DICT())
+        DEFINE optionThree = 1 + exploreRange(1, lengthVal - 2, mixedPairSum, DICT())
+
+        RETURN MAX(optionOne, MAX(optionTwo, optionThree))
+    END FUNCTION
+END CLASS

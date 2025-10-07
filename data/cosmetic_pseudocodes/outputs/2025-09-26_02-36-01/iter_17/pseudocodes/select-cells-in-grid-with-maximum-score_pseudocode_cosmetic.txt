@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION maxScore(grid)
+        FUNCTION explore(r, taken, aggregate)
+            IF r >= LENGTH(grid) THEN
+                IF aggregate > global_max THEN
+                    SET global_max TO aggregate
+                END IF
+                RETURN
+            END IF
+
+            explore(r + 1, taken, aggregate)
+
+            SET idx TO 0
+            WHILE idx < LENGTH(grid[r])
+                SET candidate TO grid[r][idx]
+
+                IF NOT candidate IN taken THEN
+                    ADD candidate TO taken
+                    explore(r + 1, taken, aggregate + candidate)
+                    REMOVE candidate FROM taken
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+        END FUNCTION
+
+        FOR EACH line IN grid DO
+            DECLARE i = 0
+            REPEAT
+                IF i >= LENGTH(line) THEN BREAK END IF
+                DECLARE j = i + 1
+                REPEAT
+                    IF j >= LENGTH(line) THEN BREAK END IF
+                    IF line[j] > line[i] THEN
+                        DECLARE temp = line[i]
+                        SET line[i] = line[j]
+                        SET line[j] = temp
+                    END IF
+                    SET j = j + 1
+                UNTIL FALSE
+                SET i = i + 1
+            UNTIL FALSE
+        END FOR
+
+        SET global_max = 0
+        CALL explore(0, EMPTY SET, 0)
+
+        RETURN global_max
+    END FUNCTION
+END CLASS

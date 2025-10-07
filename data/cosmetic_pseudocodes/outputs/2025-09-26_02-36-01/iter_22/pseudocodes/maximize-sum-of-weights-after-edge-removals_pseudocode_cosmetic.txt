@@ -1,0 +1,104 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, size)  
+        LET indexer = 0  
+        LET capacity = size  
+        LET ptrs = []  
+        WHILE indexer <= capacity - 1  
+            APPEND indexer TO ptrs  
+            SET indexer TO indexer + 1  
+        END WHILE  
+        SET self.parent TO ptrs  
+        LET ranks_list = []  
+        LET counter = 0  
+        WHILE counter < capacity  
+            APPEND 0 TO ranks_list  
+            SET counter TO counter + 1  
+        END WHILE  
+        SET self.rank TO ranks_list  
+    END FUNCTION  
+  
+    FUNCTION find(self, u)  
+        REPEAT  
+            IF NOT (self.parent[u] = u) THEN  
+                LET temp_parent = self.parent[u]  
+                LET res_find = self.find(temp_parent)  
+                SET self.parent[u] TO res_find  
+            ELSE  
+                BREAK  
+            END IF  
+        UNTIL false  
+        RETURN self.parent[u]  
+    END FUNCTION  
+  
+    FUNCTION union(self, u, v)  
+        LET ru = self.find(u)  
+        LET rv = self.find(v)  
+        IF ru != rv THEN  
+            IF self.rank[ru] > self.rank[rv] THEN  
+                SET self.parent[rv] TO ru  
+            ELSE IF self.rank[ru] < self.rank[rv] THEN  
+                SET self.parent[ru] TO rv  
+            ELSE  
+                SET self.parent[rv] TO ru  
+                LET old_val = self.rank[ru]  
+                SET self.rank[ru] TO old_val + (1)  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION maximizeSumOfWeights(self, edges, k)  
+        LET count_nodes = (1 + LENGTH(edges))  
+        LET degrees_list = []  
+        LET idx = 0  
+        WHILE idx < count_nodes  
+            APPEND 0 TO degrees_list  
+            SET idx TO idx + 1  
+        END WHILE  
+        LET uf = UnionFind(count_nodes)  
+  
+        LET sorted_edges = []  
+        FOR EACH e IN edges  
+            APPEND e TO sorted_edges  
+        END FOR  
+        LET i = 0  
+        WHILE i < LENGTH(sorted_edges) - 1  
+            LET j = 0  
+            WHILE j < LENGTH(sorted_edges) - 1 - i  
+                IF sorted_edges[j][2] < sorted_edges[j + 1][2] THEN  
+                    LET temp_edge = sorted_edges[j]  
+                    SET sorted_edges[j] TO sorted_edges[j + 1]  
+                    SET sorted_edges[j + 1] TO temp_edge  
+                END IF  
+                SET j TO j + 1  
+            END WHILE  
+            SET i TO i + 1  
+        END WHILE  
+  
+        LET total_sum = 0  
+        LET edge_index = 0  
+        WHILE edge_index < LENGTH(sorted_edges)  
+            LET current_edge = sorted_edges[edge_index]  
+            LET one = current_edge[0]  
+            LET two = current_edge[1]  
+            LET weight = current_edge[2]  
+            IF degrees_list[one] < k THEN  
+                IF degrees_list[two] < k THEN  
+                    IF uf.find(one) != uf.find(two) THEN  
+                        uf.union(one, two)  
+                        LET prev_one = degrees_list[one]  
+                        SET degrees_list[one] TO prev_one + 1  
+                        LET prev_two = degrees_list[two]  
+                        SET degrees_list[two] TO prev_two + 1  
+                        LET old_sum = total_sum  
+                        SET total_sum TO old_sum + weight  
+                    END IF  
+                END IF  
+            END IF  
+            SET edge_index TO edge_index + 1  
+        END WHILE  
+  
+        RETURN total_sum  
+    END FUNCTION  
+END CLASS

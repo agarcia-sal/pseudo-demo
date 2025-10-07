@@ -1,0 +1,109 @@
+CLASS Solution
+    FUNCTION canSortArray(nums)
+        FUNCTION bitCount(x)
+            FUNCTION helperCountBits(y, acc)
+                IF y EQUALS 0 THEN
+                    RETURN acc
+                ELSE
+                    RETURN helperCountBits(FLOOR(y / 2), acc PLUS (y MOD 2))
+                END IF
+            END FUNCTION
+            RETURN helperCountBits(x, 0)
+        END FUNCTION
+
+        SET lenNums TO 0
+        WHILE TRUE
+            IF (lenNums LESS THAN LENGTH OF nums) THEN
+                SET lenNums TO lenNums PLUS 1
+            ELSE
+                BREAK
+            END IF
+        END WHILE
+
+        FUNCTION copyAndSort(arr)
+            FUNCTION findMinIndex(arrInner, start, bestIndex)
+                IF start GREATER OR EQUAL TO LENGTH OF arrInner THEN
+                    RETURN bestIndex
+                ELSE
+                    IF arrInner[start] LESS THAN arrInner[bestIndex] THEN
+                        RETURN findMinIndex(arrInner, start PLUS 1, start)
+                    ELSE
+                        RETURN findMinIndex(arrInner, start PLUS 1, bestIndex)
+                    END IF
+                END IF
+            END FUNCTION
+
+            FUNCTION selectionSortRec(arrInner, pos)
+                IF pos EQUALS LENGTH OF arrInner THEN
+                    RETURN arrInner
+                ELSE
+                    SET minIdx TO findMinIndex(arrInner, pos, pos)
+                    IF minIdx NOT EQUAL TO pos THEN
+                        SET tempVal TO arrInner[pos]
+                        SET arrInner[pos] TO arrInner[minIdx]
+                        SET arrInner[minIdx] TO tempVal
+                    END IF
+                    RETURN selectionSortRec(arrInner, pos PLUS 1)
+                END IF
+            END FUNCTION
+
+            SET newArray TO []
+            SET indexCopy TO 0
+            WHILE indexCopy LESS THAN LENGTH OF arr
+                APPEND arr[indexCopy] TO newArray
+                SET indexCopy TO indexCopy PLUS 1
+            END WHILE
+            RETURN selectionSortRec(newArray, 0)
+        END FUNCTION
+
+        SET sortedCopy TO copyAndSort(nums)
+
+        FUNCTION outerLoop(m)
+            IF m GREATER OR EQUAL TO lenNums THEN
+                RETURN
+            ELSE
+                FUNCTION innerLoop(n)
+                    IF n GREATER OR EQUAL TO lenNums MINUS 1 THEN
+                        RETURN
+                    ELSE
+                        SET cntA TO bitCount(nums[n])
+                        SET cntB TO bitCount(nums[n PLUS 1])
+                        IF cntA EQUALS cntB THEN
+                            IF nums[n] GREATER THAN nums[n PLUS 1] THEN
+                                SET tempSwap TO nums[n]
+                                SET nums[n] TO nums[n PLUS 1]
+                                SET nums[n PLUS 1] TO tempSwap
+                            END IF
+                        END IF
+                        innerLoop(n PLUS 1)
+                    END IF
+                END FUNCTION
+                innerLoop(0)
+                outerLoop(m PLUS 1)
+            END IF
+        END FUNCTION
+
+        outerLoop(0)
+
+        FUNCTION arraysEqual(a1, a2)
+            FUNCTION compareElements(k)
+                IF k EQUALS LENGTH OF a1 THEN
+                    RETURN TRUE
+                ELSE
+                    IF a1[k] NOT EQUAL TO a2[k] THEN
+                        RETURN FALSE
+                    ELSE
+                        RETURN compareElements(k PLUS 1)
+                    END IF
+                END IF
+            END FUNCTION
+            IF LENGTH OF a1 NOT EQUAL TO LENGTH OF a2 THEN
+                RETURN FALSE
+            ELSE
+                RETURN compareElements(0)
+            END IF
+        END FUNCTION
+
+        RETURN arraysEqual(nums, sortedCopy)
+    END FUNCTION
+END CLASS

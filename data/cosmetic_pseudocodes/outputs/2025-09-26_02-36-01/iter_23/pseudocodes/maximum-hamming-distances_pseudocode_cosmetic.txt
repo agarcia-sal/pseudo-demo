@@ -1,0 +1,77 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER m INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION compute_hamming_distance(a STRING b STRING) RETURNS INTEGER
+            FUNCTION recursive_compare(idx INTEGER acc INTEGER) RETURNS INTEGER
+                IF idx EQUALS LENGTH OF a THEN
+                    RETURN acc
+                ELSE
+                    SET increment TO 0
+                    IF (a AT idx) NOT EQUALS (b AT idx) THEN
+                        SET increment TO 1
+                    END IF
+                    RETURN recursive_compare(idx + 1, acc + increment)
+                END IF
+            END FUNCTION
+            RETURN recursive_compare(0, 0)
+        END FUNCTION
+
+        FUNCTION build_binary_list(src LIST OF INTEGER count INTEGER) RETURNS LIST OF STRING
+            FUNCTION helper(pos INTEGER acc_list LIST OF STRING) RETURNS LIST OF STRING
+                IF pos EQUALS count THEN
+                    RETURN acc_list
+                ELSE
+                    SET temp_num TO src AT pos
+                    SET base_bin TO ""
+                    FUNCTION convert_to_bin(value INTEGER bits_left INTEGER acc_str STRING) RETURNS STRING
+                        IF bits_left EQUALS 0 THEN
+                            RETURN acc_str
+                        ELSE
+                            SET bit_char TO "0"
+                            IF (value MOD 2) EQUALS 1 THEN
+                                SET bit_char TO "1"
+                            END IF
+                            RETURN convert_to_bin(value DIV 2, bits_left - 1, bit_char + acc_str)
+                        END IF
+                    END FUNCTION
+                    SET formatted_bin TO convert_to_bin(temp_num, m, "")
+                    RETURN helper(pos + 1, acc_list + [formatted_bin])
+                END IF
+            END FUNCTION
+            RETURN helper(0, [])
+        END FUNCTION
+
+        SET accumulated_bin_repr TO build_binary_list(nums, LENGTH OF nums)
+
+        FUNCTION find_max_for_index(current_index INTEGER total_len INTEGER) RETURNS INTEGER
+            FUNCTION inner_loop(compare_index INTEGER current_max INTEGER) RETURNS INTEGER
+                IF compare_index EQUALS total_len THEN
+                    RETURN current_max
+                ELSE
+                    SET dist_val TO 0
+                    IF current_index NOT EQUALS compare_index THEN
+                        SET dist_val TO compute_hamming_distance(accumulated_bin_repr AT current_index, accumulated_bin_repr AT compare_index)
+                    END IF
+                    SET next_max TO current_max
+                    IF dist_val GREATER THAN current_max THEN
+                        SET next_max TO dist_val
+                    END IF
+                    RETURN inner_loop(compare_index + 1, next_max)
+                END IF
+            END FUNCTION
+            RETURN inner_loop(0, 0)
+        END FUNCTION
+
+        FUNCTION gather_results(pos INTEGER total_len INTEGER result_acc LIST OF INTEGER) RETURNS LIST OF INTEGER
+            IF pos EQUALS total_len THEN
+                RETURN result_acc
+            ELSE
+                SET max_distance_val TO find_max_for_index(pos, total_len)
+                RETURN gather_results(pos + 1, total_len, result_acc + [max_distance_val])
+            END IF
+        END FUNCTION
+
+        RETURN gather_results(0, LENGTH OF nums, [])
+    END FUNCTION
+END CLASS
+```

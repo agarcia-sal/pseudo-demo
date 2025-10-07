@@ -1,0 +1,117 @@
+CLASS UnionFind
+	FUNCTION __init__(self, n)
+		SET self.parent TO []
+		SET self.rank TO []
+		SET idx TO 0
+		REPEAT
+			ADD idx TO self.parent
+			ADD 1 TO self.rank
+			ADD 1 TO idx
+		UNTIL idx GREATER THAN n MINUS 1
+	END FUNCTION
+
+	FUNCTION find(self, node)
+		FUNCTION recurse_find(x)
+			IF self.parent[x] EQUALS x THEN
+				RETURN x
+			END IF
+			SET self.parent[x] TO recurse_find(self.parent[x])
+			RETURN self.parent[x]
+		END FUNCTION
+		RETURN recurse_find(node)
+	END FUNCTION
+
+	FUNCTION union(self, a, b)
+		SET root_a TO self.find(a)
+		SET root_b TO self.find(b)
+		IF NOT root_a EQUALS root_b THEN
+			IF self.rank[root_a] GREATER THAN self.rank[root_b] THEN
+				SET self.parent[root_b] TO root_a
+			ELSE
+				IF self.rank[root_b] LESS THAN self.rank[root_a] THEN
+					SET self.parent[root_b] TO root_a
+				ELSE
+					SET self.parent[root_b] TO root_a
+					SET self.rank[root_a] TO self.rank[root_a] PLUS 1
+				END IF
+			END IF
+		END IF
+	END FUNCTION
+END CLASS
+
+CLASS Solution
+	FUNCTION minimumCost(self, count, edgesList, queries)
+		SET ufInstance TO UnionFind(count)
+
+		FUNCTION bitwise_full()
+			RETURN (2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2 TIMES 2) MINUS 1
+		END FUNCTION
+
+		SET maskArray TO []
+		SET idx1 TO 0
+		REPEAT
+			ADD bitwise_full() TO maskArray
+			ADD 1 TO idx1
+		UNTIL idx1 GREATER THAN count MINUS 1
+
+		FUNCTION processEdge(edge)
+			SET x TO edge[0]
+			SET y TO edge[1]
+			SET weight TO edge[2]
+			ufInstance.union(x, y)
+			SET root_idx TO ufInstance.find(x)
+			SET maskArray[root_idx] TO maskArray[root_idx] BITWISE AND weight
+		END FUNCTION
+
+		FUNCTION processAllEdges(current, end, data)
+			IF current GREATER THAN end THEN
+				RETURN
+			END IF
+			processEdge(data[current])
+			processAllEdges(current PLUS 1, end, data)
+		END FUNCTION
+
+		processAllEdges(0, LENGTH(edgesList) MINUS 1, edgesList)
+
+		SET compCostDict TO {}
+
+		FUNCTION fillComponentCosts(idx)
+			IF idx GREATER THAN count MINUS 1 THEN
+				RETURN
+			END IF
+			SET rt TO ufInstance.find(idx)
+			IF rt NOT IN compCostDict THEN
+				SET compCostDict[rt] TO maskArray[rt]
+			END IF
+			fillComponentCosts(idx PLUS 1)
+		END FUNCTION
+
+		fillComponentCosts(0)
+
+		SET answerList TO []
+
+		FUNCTION processQueryPair(pair)
+			SET start TO pair[0]
+			SET end TO pair[1]
+			IF start EQUALS end THEN
+				ADD 0 TO answerList
+			ELSE IF ufInstance.find(start) EQUALS ufInstance.find(end) THEN
+				ADD compCostDict[ufInstance.find(start)] TO answerList
+			ELSE
+				ADD -1 TO answerList
+			END IF
+		END FUNCTION
+
+		FUNCTION processAllQueries(qs, idx)
+			IF idx GREATER THAN LENGTH(qs) MINUS 1 THEN
+				RETURN
+			END IF
+			processQueryPair(qs[idx])
+			processAllQueries(qs, idx PLUS 1)
+		END FUNCTION
+
+		processAllQueries(queries, 0)
+
+		RETURN answerList
+	END FUNCTION
+END CLASS

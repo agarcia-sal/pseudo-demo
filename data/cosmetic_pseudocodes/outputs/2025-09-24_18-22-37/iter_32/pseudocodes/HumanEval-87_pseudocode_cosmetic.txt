@@ -1,0 +1,52 @@
+```
+FUNCTION get_row(two_dimensional_list, target_integer)
+    INITIALIZE found_positions AS EMPTY LIST
+
+    SET outer_idx TO 0
+    WHILE outer_idx < LENGTH(two_dimensional_list)
+        SET inner_idx TO 0
+        WHILE inner_idx < LENGTH(two_dimensional_list AT outer_idx)
+            IF NOT (two_dimensional_list AT outer_idx AT inner_idx NOT EQUAL target_integer)
+                INSERT (outer_idx, inner_idx) INTO found_positions END
+            END IF
+            SET inner_idx TO inner_idx + 1
+        END WHILE
+        SET outer_idx TO outer_idx + 1
+    END WHILE
+
+    SET intermediate_sorted TO EMPTY LIST
+    SET temp_idx TO 0
+    WHILE temp_idx < LENGTH(found_positions)
+        INSERT found_positions AT temp_idx INTO intermediate_sorted END
+        SET temp_idx TO temp_idx + 1
+    END WHILE
+
+    // Sort by column descending using a loop-based insertion sort
+    SET i TO 1
+    WHILE i < LENGTH(intermediate_sorted)
+        SET key TO intermediate_sorted AT i
+        SET j TO i - 1
+        WHILE j >= 0 AND (intermediate_sorted AT j).second < key.second
+            SET intermediate_sorted AT (j + 1) TO intermediate_sorted AT j
+            SET j TO j - 1
+        END WHILE
+        SET intermediate_sorted AT (j + 1) TO key
+        SET i TO i + 1
+    END WHILE
+
+    // Sort by row ascending using similar insertion sort to stabilize sorting
+    SET k TO 1
+    WHILE k < LENGTH(intermediate_sorted)
+        SET pivot TO intermediate_sorted AT k
+        SET m TO k - 1
+        WHILE m >= 0 AND (intermediate_sorted AT m).first > pivot.first
+            SET intermediate_sorted AT (m + 1) TO intermediate_sorted AT m
+            SET m TO m - 1
+        END WHILE
+        SET intermediate_sorted AT (m + 1) TO pivot
+        SET k TO k + 1
+    END WHILE
+
+    RETURN intermediate_sorted
+END FUNCTION
+```

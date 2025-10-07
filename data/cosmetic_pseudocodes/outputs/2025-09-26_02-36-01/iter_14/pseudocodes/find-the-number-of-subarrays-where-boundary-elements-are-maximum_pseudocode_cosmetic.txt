@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION numberOfSubarrays(nums)
+        DEFINE buildIndexMap(collection) AS
+            DECLARE map AS default dictionary mapping to list
+            DECLARE pos AS zero
+            WHILE pos LESS THAN length of collection DO
+                DECLARE currentVal AS collection[pos]
+                IF NOT currentVal IN map THEN
+                    ASSIGN map[currentVal] TO empty list
+                END IF
+                APPEND pos TO map[currentVal]
+                INCREMENT pos BY one
+            END WHILE
+            RETURN map
+        END DEFINE
+
+        DECLARE accu_count AS zero
+        ASSIGN idx_map TO buildIndexMap(nums)
+
+        DECLARE idx_lists AS idx_map.values()
+        SET outer_idx AS zero
+
+        WHILE outer_idx LESS THAN length of idx_lists DO
+            DECLARE positions AS idx_lists[outer_idx]
+            DECLARE length_positions AS 0
+            SET temp_idx AS 0
+            REPEAT
+                IF temp_idx EQUALS length of positions THEN
+                    BREAK
+                END IF
+                INCREMENT length_positions BY one
+                INCREMENT temp_idx BY one
+            UNTIL FALSE
+
+            DECLARE start_idx AS 0
+            REPEAT
+                IF start_idx GREATER THAN length_positions MINUS 1 THEN
+                    BREAK
+                END IF
+
+                DECLARE end_idx AS start_idx
+                REPEAT
+                    IF end_idx GREATER THAN length_positions MINUS 1 THEN
+                        BREAK
+                    END IF
+
+                    DECLARE subarr_start AS positions[start_idx]
+                    DECLARE subarr_end AS positions[end_idx]
+
+                    DECLARE subarr AS empty list
+                    DECLARE k AS subarr_start
+                    WHILE k LESS THAN OR EQUAL TO subarr_end DO
+                        APPEND nums[k] TO subarr
+                        INCREMENT k BY 1
+                    END WHILE
+
+                    DECLARE max_val AS subarr[0]
+                    DECLARE l AS 1
+                    WHILE l LESS THAN length of subarr DO
+                        IF max_val LESS THAN subarr[l] THEN
+                            ASSIGN max_val TO subarr[l]
+                        END IF
+                        INCREMENT l BY 1
+                    END WHILE
+
+                    IF max_val NOT EQUALS nums[positions[start_idx]] THEN
+                        ; do nothing
+                    ELSE
+                        ASSIGN accu_count TO accu_count PLUS 1
+                    END IF
+
+                    INCREMENT end_idx BY 1
+                UNTIL FALSE
+
+                INCREMENT start_idx BY 1
+            UNTIL FALSE
+            INCREMENT outer_idx BY 1
+        END WHILE
+
+        RETURN accu_count
+    END FUNCTION
+END CLASS

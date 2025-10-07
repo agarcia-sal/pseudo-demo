@@ -1,0 +1,172 @@
+class Solution
+    function numberOfStableArrays(zero zero, one one, limit limit) returns integer
+        let MOD = 10 * (10^8) + 1
+
+        function dp(z z, o o, last last, consecutive consecutive) returns integer
+            function isInvalid(a) returns boolean
+                return (a < 0)
+            end function
+
+            function dpInner(z, o, last, consecutive, acc) returns integer
+                if (z == 0 and o == 0) then
+                    return acc
+                elseif (isInvalid(z) or isInvalid(o)) then
+                    return 0
+                else
+                    let res = 0
+                    if (last == 0) then
+                        if (consecutive < limit) then
+                            res = (res + dp(z - 1, o, 0, consecutive + 1)) % MOD
+                        end if
+                        res = (res + dp(z, o - 1, 1, 1)) % MOD
+                    else
+                        if (z > 0) then
+                            res = (res + dp(z - 1, o, 0, 1)) % MOD
+                        end if
+                        if (consecutive < limit) then
+                            res = (res + dp(z, o - 1, 1, consecutive + 1)) % MOD
+                        end if
+                    end if
+                    return res
+                end if
+            end function
+
+            return dpInner(z, o, last, consecutive, 0)
+        end function
+
+        function helper(z z, o o, last last, consecutive consecutive, accum accum) returns integer
+            if (z == 0 and o == 0) then
+                return accum % MOD
+            elseif (z < 0 or o < 0) then
+                return accum % MOD
+            else
+                if (last == 0) then
+                    let firstBranch = 0
+                    if (consecutive < limit) then
+                        firstBranch = helper(z - 1, o, 0, consecutive + 1, 0)
+                    end if
+                    let secondBranch = helper(z, o - 1, 1, 1, 0)
+                    return (accum + firstBranch + secondBranch) % MOD
+                else
+                    let firstBranch = 0
+                    if (z > 0) then
+                        firstBranch = helper(z - 1, o, 0, 1, 0)
+                    end if
+                    let secondBranch = 0
+                    if (consecutive < limit) then
+                        secondBranch = helper(z, o - 1, 1, consecutive + 1, 0)
+                    end if
+                    return (accum + firstBranch + secondBranch) % MOD
+                end if
+            end if
+        end function
+
+        function tailDp(z z, o o, last last, consecutive consecutive, acc acc) returns integer
+            if (z == 0 and o == 0) then
+                return acc % MOD
+            elseif (z < 0 or o < 0) then
+                return acc % MOD
+            else
+                let resultAcc = acc
+                if (last == 0) then
+                    if (consecutive < limit) then
+                        let a = tailDp(z - 1, o, 0, consecutive + 1, 0)
+                        resultAcc = (resultAcc + a) % MOD
+                    end if
+                    let b = tailDp(z, o - 1, 1, 1, 0)
+                    resultAcc = (resultAcc + b) % MOD
+                else
+                    if (z > 0) then
+                        let c = tailDp(z - 1, o, 0, 1, 0)
+                        resultAcc = (resultAcc + c) % MOD
+                    end if
+                    if (consecutive < limit) then
+                        let d = tailDp(z, o - 1, 1, consecutive + 1, 0)
+                        resultAcc = (resultAcc + d) % MOD
+                    end if
+                end if
+                return resultAcc
+            end if
+        end function
+
+        let functionStack = list containing one tuple (zero, one - 1, 0, 0, 1)
+        function recursiveWrapper(z, o, last, consecutive)
+            if (z == 0 and o == 0) then
+                return 1
+            end if
+            if (z < 0 or o < 0) then
+                return 0
+            end if
+
+            let sumTotal = 0
+
+            if (last == 0) then
+                if (consecutive < limit) then
+                    sumTotal = (sumTotal + recursiveWrapper(z - 1, o, 0, consecutive + 1)) % MOD
+                end if
+                sumTotal = (sumTotal + recursiveWrapper(z, o - 1, 1, 1)) % MOD
+            else
+                if (z > 0) then
+                    sumTotal = (sumTotal + recursiveWrapper(z - 1, o, 0, 1)) % MOD
+                end if
+                if (consecutive < limit) then
+                    sumTotal = (sumTotal + recursiveWrapper(z, o - 1, 1, consecutive + 1)) % MOD
+                end if
+            end if
+
+            return sumTotal % MOD
+        end function
+
+        function iterativeDp(z z, o o, last last, consecutive consecutive) returns integer
+            let stack = empty list
+            push (z, o, last, consecutive) onto stack
+            let memo = empty map
+
+            while (stack not empty) do
+                let current = pop from stack
+                let (cz, co, clast, cconsecutive) = current
+                if ((cz, co, clast, cconsecutive) in memo) then
+                    continue
+                end if
+                if (cz == 0 and co == 0) then
+                    memo[(cz, co, clast, cconsecutive)] = 1
+                elseif (cz < 0 or co < 0) then
+                    memo[(cz, co, clast, cconsecutive)] = 0
+                else
+                    let val = 0
+                    let pending = list
+                    if (clast == 0) then
+                        if (cconsecutive < limit) then
+                            pending.append((cz - 1, co, 0, cconsecutive + 1))
+                        end if
+                        pending.append((cz, co - 1, 1, 1))
+                    else
+                        if (cz > 0) then
+                            pending.append((cz - 1, co, 0, 1))
+                        end if
+                        if (cconsecutive < limit) then
+                            pending.append((cz, co - 1, 1, cconsecutive + 1))
+                        end if
+                    end if
+                    allComputed = true
+                    for each p in pending do
+                        if p not in memo then
+                            stack.append(current)
+                            stack.append(p)
+                            allComputed = false
+                        end if
+                    end for
+                    if (allComputed) then
+                        for each p in pending do
+                            val = (val + memo[p]) % MOD
+                        end for
+                        memo[(cz, co, clast, cconsecutive)] = val
+                    end if
+                end if
+            end while
+
+            return memo[(z, o, last, consecutive)]
+        end function
+
+        return dp(zero, one - 1, 0, 0)
+end class

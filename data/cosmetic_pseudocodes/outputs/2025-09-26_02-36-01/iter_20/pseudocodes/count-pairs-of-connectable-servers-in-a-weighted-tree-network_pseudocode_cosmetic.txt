@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)
+            DEFINE FUNCTION substitute_modulo(a, b)
+                RETURN a - (a / b) * b
+            END FUNCTION
+
+            DEFINE FUNCTION substitute_length(container)
+                SET temp_var TO 0
+                SET iter_var TO container
+                WHILE True
+                    IF iter_var IS EMPTY THEN
+                        BREAK
+                    ELSE
+                        SET temp_var TO temp_var + 1
+                        REMOVE FIRST ELEMENT OF iter_var
+                    END IF
+                END WHILE
+                RETURN temp_var
+            END FUNCTION
+
+            DEFINE FUNCTION push_to_list(lst, val)
+                SET lst_length TO substitute_length(lst)
+                SET lst[lst_length] TO val
+            END FUNCTION
+
+            DECLARE graph AS mapping WITH DEFAULT empty lists
+            SET idx_x TO 0
+            WHILE idx_x < substitute_length(edges)
+                SET triple TO edges[idx_x]
+                SET u_prime TO triple[0]
+                SET v_prime TO triple[1]
+                SET w_prime TO triple[2]
+                CALL push_to_list(graph[u_prime], (v_prime, w_prime))
+                CALL push_to_list(graph[v_prime], (u_prime, w_prime))
+                SET idx_x TO idx_x + 1
+            END WHILE
+
+            SET n_val TO substitute_length(graph) 
+            SET result_lst TO LIST FILLED WITH n_val ZEROES
+            DEFINE FUNCTION dfs(xs, yt, zd, ak)
+                IF substitute_modulo(zd, signalSpeed) == 0 THEN
+                    CALL push_to_list(ak, xs)
+                END IF
+
+                SET local_ctr TO 0
+                SET iter_list TO graph[xs]
+                SET iter_idx TO 0
+                WHILE iter_idx < substitute_length(iter_list)
+                    SET tup_var TO iter_list[iter_idx]
+                    SET neighbor_it TO tup_var[0]
+                    SET weight_it TO tup_var[1]
+                    IF neighbor_it != yt THEN
+                        SET local_ctr TO local_ctr + dfs(neighbor_it, xs, zd + weight_it, ak)
+                    END IF
+                    SET iter_idx TO iter_idx + 1
+                END WHILE
+
+                IF substitute_modulo(zd, signalSpeed) == 0 THEN
+                    RETURN local_ctr + 1
+                ELSE
+                    RETURN local_ctr
+                END IF
+            END FUNCTION
+
+            DEFINE FUNCTION count_pairs_through_c(ca)
+                SET paths_accum TO EMPTY LIST
+                SET neis TO graph[ca]
+                SET kk TO 0
+                WHILE kk < substitute_length(neis)
+                    SET neighbor_p TO neis[kk][0]
+                    SET weight_p TO neis[kk][1]
+                    SET temp_path TO EMPTY LIST
+                    CALL dfs(neighbor_p, ca, weight_p, temp_path)
+                    CALL push_to_list(paths_accum, temp_path)
+                    SET kk TO kk + 1
+                END WHILE
+
+                SET total_pair_sum TO 0
+                SET bb TO 0
+                WHILE bb < (substitute_length(paths_accum) - 1)
+                    SET cc TO bb + 1
+                    WHILE cc < substitute_length(paths_accum)
+                        SET len_bb TO substitute_length(paths_accum[bb])
+                        SET len_cc TO substitute_length(paths_accum[cc])
+                        SET total_pair_sum TO total_pair_sum + (len_bb * len_cc)
+                        SET cc TO cc + 1
+                    END WHILE
+                    SET bb TO bb + 1
+                END WHILE
+                RETURN total_pair_sum
+            END FUNCTION
+
+            SET outer_idx TO 0
+            WHILE outer_idx < n_val
+                SET result_lst[outer_idx] TO count_pairs_through_c(outer_idx)
+                SET outer_idx TO outer_idx + 1
+            END WHILE
+
+            RETURN result_lst
+    END FUNCTION
+END CLASS

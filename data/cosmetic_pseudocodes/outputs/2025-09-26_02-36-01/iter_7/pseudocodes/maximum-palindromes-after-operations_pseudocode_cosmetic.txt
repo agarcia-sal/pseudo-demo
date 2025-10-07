@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION maxPalindromesAfterOperations(words)
+        DEFINE CONST ZERO_VALUE = 0
+        DECLARE charFrequency AS new map defaulting to ZERO_VALUE
+        DECLARE tempIdx = 0
+        DECLARE totalPairs = ZERO_VALUE
+        DECLARE totalSingles = ZERO_VALUE
+        DECLARE resultPalindromes = ZERO_VALUE
+
+        FUNCTION accumulateChars(listOfWords)
+            DECLARE iter = 0
+            REPEAT
+                IF iter >= LENGTH(listOfWords) THEN
+                    RETURN
+                ENDIF
+                DECLARE currentWord = listOfWords[iter]
+                DECLARE charIndex = 0
+                WHILE charIndex < LENGTH(currentWord) DO
+                    DECLARE currentChar = currentWord[charIndex]
+                    IF charFrequency[currentChar] = UNDEFINED THEN
+                        charFrequency[currentChar] = ZERO_VALUE
+                    ENDIF
+                    charFrequency[currentChar] = charFrequency[currentChar] + (1 + ZERO_VALUE)
+                    charIndex = charIndex + 1
+                ENDWHILE
+                iter = iter + 1
+            UNTIL FALSE
+        ENDFUNCTION
+
+        CALL accumulateChars(words)
+
+        DECLARE freqIter = 0
+        DECLARE freqValues = []
+        FOR key IN charFrequency DO
+            APPEND charFrequency[key] TO freqValues
+        ENDFOR
+
+        FUNCTION processCounts(counts)
+            DECLARE index = 0
+            WHILE index < LENGTH(counts) DO
+                DECLARE singleCount = counts[index]
+                totalPairs = totalPairs + (singleCount // (1 + 1))
+                totalSingles = totalSingles + (singleCount MOD (1 + 1))
+                index = index + 1
+            ENDWHILE
+        ENDFUNCTION
+
+        CALL processCounts(freqValues)
+
+        DECLARE sortedWords = words
+        FUNCTION lengthComparator(a, b)
+            RETURN LENGTH(a) - LENGTH(b)
+        ENDFUNCTION
+        sortedWords.SORT(lengthComparator)
+
+        DECLARE wordIdx = 0
+        WHILE TRUE
+            IF wordIdx >= LENGTH(sortedWords) THEN
+                BREAK
+            ENDIF
+            DECLARE curWord = sortedWords[wordIdx]
+            DECLARE halfLen = LENGTH(curWord) // (2)
+            IF totalPairs >= halfLen THEN
+                totalPairs = totalPairs - halfLen
+                resultPalindromes = resultPalindromes + (1)
+            ENDIF
+            wordIdx = wordIdx + (1)
+        ENDWHILE
+
+        RETURN resultPalindromes
+    END FUNCTION
+END CLASS

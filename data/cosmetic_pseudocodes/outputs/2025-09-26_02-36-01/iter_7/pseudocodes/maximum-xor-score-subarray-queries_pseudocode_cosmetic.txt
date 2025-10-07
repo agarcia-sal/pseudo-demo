@@ -1,0 +1,39 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+        LET lengthVars = (1 PLUS LENGTH OF nums) MINUS 1
+        LET matAlpha BE A two dimensional ARRAY OF SIZE (lengthVars PLUS 1) BY (lengthVars PLUS 1) INITIALIZED WITH ZERO
+        LET matBeta BE A two dimensional ARRAY OF SIZE (lengthVars PLUS 1) BY (lengthVars PLUS 1) INITIALIZED WITH 0
+        LET idxOuter = lengthVars
+        WHILE idxOuter IS GREATER THAN OR EQUAL TO 0
+            LET rowCol = idxOuter
+            ASSIGN matAlpha[rowCol][rowCol] = nums[rowCol]
+            LET startColumn = idxOuter
+            ASSIGN matBeta[rowCol][rowCol] = nums[rowCol]
+            LET idxInner = startColumn PLUS 1
+            WHILE idxInner NOT EQUAL TO (lengthVars PLUS 1)
+                matAlpha[rowCol][idxInner] = (matAlpha[rowCol][idxInner MINUS 1]) XOR (matAlpha[rowCol PLUS 1][idxInner])
+                LET elementsForMax = [matAlpha[rowCol][idxInner], matBeta[rowCol][idxInner MINUS 1], matBeta[rowCol PLUS 1][idxInner]]
+                LET currentMax = elementsForMax[0]
+                LET idxTempToCheck FROM 1 TO LENGTH OF elementsForMax MINUS 1
+                WHILE idxTempToCheck LESS THAN LENGTH OF elementsForMax
+                    IF elementsForMax[idxTempToCheck] GREATER THAN currentMax THEN
+                        currentMax = elementsForMax[idxTempToCheck]
+                    END IF
+                    idxTempToCheck = idxTempToCheck PLUS 1
+                END WHILE
+                matBeta[rowCol][idxInner] = currentMax
+                idxInner = idxInner PLUS 1
+            END WHILE
+            idxOuter = idxOuter MINUS 1
+        END WHILE
+        LET outputList BE AN EMPTY LIST
+        LET queryCounter = 0
+        WHILE queryCounter LESS THAN LENGTH OF queries
+            LET leftIdx = queries[queryCounter][0]
+            LET rightIdx = queries[queryCounter][1]
+            APPEND matBeta[leftIdx][rightIdx] TO outputList
+            queryCounter = queryCounter PLUS 1
+        END WHILE
+        RETURN outputList
+    END FUNCTION
+END CLASS

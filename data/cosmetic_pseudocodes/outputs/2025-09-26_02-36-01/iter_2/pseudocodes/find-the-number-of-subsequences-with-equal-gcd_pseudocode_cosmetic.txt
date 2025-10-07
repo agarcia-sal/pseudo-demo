@@ -1,0 +1,77 @@
+CLASS Solution
+    FUNCTION subsequencePairCount(numbers)
+        ASSIGN MODULUS TO 10^9 + 7
+        LET highest TO numbers[0]
+        LET index TO 1
+        WHILE index < LENGTH(numbers)
+            IF numbers[index] > highest THEN
+                SET highest TO numbers[index]
+            END IF
+            INCREMENT index BY 1
+        END WHILE
+        
+        LET dp_table TO []
+        LET row_count TO highest + 1
+        LET col_count TO highest + 1
+        FOR i FROM 0 TO row_count - 1
+            LET row TO []
+            FOR j FROM 0 TO col_count - 1
+                APPEND 0 TO row
+            END FOR
+            APPEND row TO dp_table
+        END FOR
+        
+        dp_table[0][0] <- 1
+
+        LET i TO 0
+        WHILE i < LENGTH(numbers)
+            LET current_number TO numbers[i]
+            LET updated_dp TO []
+            
+            FOR p FROM 0 TO row_count - 1
+                LET new_row TO []
+                FOR q FROM 0 TO col_count - 1
+                    APPEND 0 TO new_row
+                END FOR
+                APPEND new_row TO updated_dp
+            END FOR
+            
+            LET x TO 0
+            WHILE x < row_count
+                LET y TO 0
+                WHILE y < col_count
+                    LET curr_val TO dp_table[x][y]
+                    
+                    LET val1 TO updated_dp[x][y] + curr_val
+                    LET val1_mod TO val1 - (val1 / MODULUS) * MODULUS
+                    updated_dp[x][y] <- val1_mod
+
+                    LET gcd_x TO GCD(x, current_number)
+                    LET val2 TO updated_dp[gcd_x][y] + curr_val
+                    let val2_mod TO val2 MOD MODULUS
+                    updated_dp[gcd_x][y] <- val2_mod
+
+                    LET gcd_y TO GCD(y, current_number)
+                    LET val3 TO updated_dp[x][gcd_y] + curr_val
+                    updated_dp[x][gcd_y] <- val3 % MODULUS
+                    
+                    y <- y + 1
+                END WHILE
+                x <- x + 1
+            END WHILE
+            
+            dp_table <- updated_dp
+            i <- i + 1
+        END WHILE
+        
+        LET total TO 0
+        LET g TO 1
+        WHILE g <= highest
+            total <- total + dp_table[g][g]
+            g <- g + 1
+        END WHILE
+        
+        LET answer TO total % MODULUS
+        RETURN answer
+    END FUNCTION
+END CLASS

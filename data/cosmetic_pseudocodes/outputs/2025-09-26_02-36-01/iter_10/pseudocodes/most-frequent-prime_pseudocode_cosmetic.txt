@@ -1,0 +1,71 @@
+```
+FUNCTION is_prime(n)
+  IF (not (n > 1)) RETURN false
+  IF (not (n > 3)) RETURN true
+  IF ((n % 2) == 0) OR ((n % 3) == 0) THEN RETURN false
+  PROCEDURE check_div(k)
+    IF (k * k > n) THEN RETURN true
+    IF ((n % k) == 0) OR ((n % (k + 2)) == 0) THEN RETURN false
+    RETURN check_div(k + 6)
+  END PROCEDURE
+  RETURN check_div(5)
+END FUNCTION
+
+CLASS Solution
+  FUNCTION mostFrequentPrime(mat)
+   DEFINE HORIZONTAL_VALUES AS [(-1,0), (-1,1), (0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1)]
+   SET M TO SIZE(mat)
+   SET N TO SIZE(mat[0])
+   DEFINE frequency_map AS empty map <int,int>
+   
+   PROCEDURE walk(x_pos, y_pos, delta_x, delta_y, accumulated)
+     LET next_x := x_pos + delta_x
+     LET next_y := y_pos + delta_y
+     IF (next_x < 0 OR next_x >= M) THEN RETURN
+     IF (next_y < 0 OR next_y >= N) THEN RETURN
+     LET updated_num := accumulated * 10 + mat[next_x][next_y]
+     IF updated_num > 10
+      AND is_prime(updated_num) THEN
+        IF updated_num NOT IN frequency_map THEN
+          frequency_map[updated_num] := 0
+        END IF
+        frequency_map[updated_num] := frequency_map[updated_num] + 1
+     END IF
+     CALL walk(next_x, next_y, delta_x, delta_y, updated_num)
+   END PROCEDURE
+
+   PROCEDURE row_iterate(row_idx)
+     IF row_idx = M THEN RETURN
+     PROCEDURE col_iterate(col_idx)
+       IF col_idx = N THEN RETURN
+       PROCEDURE dir_iterate(dir_idx)
+         IF dir_idx = SIZE(HORIZONTAL_VALUES) THEN RETURN
+         LET dx := HORIZONTAL_VALUES[dir_idx][0]
+         LET dy := HORIZONTAL_VALUES[dir_idx][1]
+         CALL walk(row_idx, col_idx, dx, dy, mat[row_idx][col_idx])
+         CALL dir_iterate(dir_idx + 1)
+       END PROCEDURE
+       CALL dir_iterate(0)
+       CALL col_iterate(col_idx + 1)
+     END PROCEDURE
+     CALL col_iterate(0)
+     CALL row_iterate(row_idx + 1)
+   END PROCEDURE
+   
+   CALL row_iterate(0)
+
+   IF SIZE(frequency_map) = 0 THEN RETURN -1
+
+   LET max_entry := NULL
+   FOR EACH key,value IN frequency_map DO
+     IF (max_entry IS NULL)
+       OR (value > frequency_map[max_entry])
+       OR (value = frequency_map[max_entry] AND key > max_entry)
+     THEN
+       max_entry := key
+     END IF
+   END FOR
+   RETURN max_entry
+  END FUNCTION
+END CLASS
+```

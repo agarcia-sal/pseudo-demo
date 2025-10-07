@@ -1,0 +1,93 @@
+CLASS Solution
+    FUNCTION findAnswer(n, edges)
+        DECLARE adjacencyMap AS new dictionary with default empty arrays
+        LET idx TO zero
+        WHILE idx LESS THAN LENGTH of edges
+            LET edgeTriple TO edges[idx]
+            LET uNode TO edgeTriple.first
+            LET vNode TO edgeTriple.second
+            LET wWeight TO edgeTriple.third
+            
+            ADD (vNode, wWeight) TO adjacencyMap[uNode]
+            ADD (uNode, wWeight) TO adjacencyMap[vNode]
+            INCREMENT idx BY one
+        END WHILE
+
+        DECLARE distanceList AS array OF size n FILLED WITH infinite
+        ASSIGN distanceList[0] TO zero
+
+        INITIALIZE heapQueue WITH single element (0, 0)
+
+        WHILE LENGTH of heapQueue IS GREATER THAN zero
+            REMOVE smallestElement FROM heapQueue ACCORDING TO first tuple value
+            LET currentDistance TO smallestElement.first
+            LET currentNode TO smallestElement.second
+
+            IF currentDistance IS STRICTLY GREATER THAN distanceList[currentNode]
+                SKIP TO next iteration of the WHILE loop
+            END IF
+
+            LET nbrIndex TO zero
+            WHILE nbrIndex LESS THAN LENGTH of adjacencyMap[currentNode]
+                LET neighborPair TO adjacencyMap[currentNode][nbrIndex]
+                LET adjNode TO neighborPair.first
+                LET adjWeight TO neighborPair.second
+
+                LET calculatedDist TO currentDistance + adjWeight
+
+                IF calculatedDist IS LESS THAN distanceList[adjNode]
+                    ASSIGN distanceList[adjNode] TO calculatedDist
+                    ADD (calculatedDist, adjNode) INTO heapQueue MAINTAINING heap order
+                END IF
+                INCREMENT nbrIndex BY one
+            END WHILE
+        END WHILE
+
+        DECLARE edgesInShortestPath AS empty set
+        DECLARE nodeStack AS array CONTAINING (n minus 1, distanceList[n minus 1])
+        DECLARE visitedFlags AS array OF size n FILLED WITH False
+
+        WHILE LENGTH of nodeStack IS GREATER THAN zero
+            REMOVE lastElement FROM nodeStack
+            LET currentNode TO lastElement.first
+            LET currentDist TO lastElement.second
+
+            IF visitedFlags[currentNode] IS True
+                SKIP to next loop iteration
+            END IF
+
+            ASSIGN visitedFlags[currentNode] TO True
+
+            LET adjIndex TO zero
+            WHILE adjIndex LESS THAN LENGTH of adjacencyMap[currentNode]
+                LET adjPair TO adjacencyMap[currentNode][adjIndex]
+                LET neighborNode TO adjPair.first
+                LET weightVal TO adjPair.second
+
+                IF currentDist IS EQUAL TO distanceList[neighborNode] + weightVal
+                    LET minNode TO currentNode IF currentNode LESS THAN neighborNode ELSE neighborNode
+                    LET maxNode TO neighborNode IF currentNode LESS THAN neighborNode ELSE currentNode
+                    INSERT (minNode, maxNode) INTO edgesInShortestPath
+                    APPEND (neighborNode, distanceList[neighborNode]) TO nodeStack
+                END IF
+                INCREMENT adjIndex BY one
+            END WHILE
+        END WHILE
+
+        DECLARE resultArray AS empty list
+        LET edgeIndex TO zero
+        WHILE edgeIndex LESS THAN LENGTH of edges
+            LET edgeTriple TO edges[edgeIndex]
+            LET firstNode TO edgeTriple.first
+            LET secondNode TO edgeTriple.second
+
+            LET minVal TO firstNode IF firstNode LESS THAN secondNode ELSE secondNode
+            LET maxVal TO secondNode IF firstNode LESS THAN secondNode ELSE firstNode
+
+            APPEND ((minVal, maxVal) IS IN edgesInShortestPath) TO resultArray
+            INCREMENT edgeIndex BY one
+        END WHILE
+
+        RETURN resultArray
+    END FUNCTION
+END CLASS

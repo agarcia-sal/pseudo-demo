@@ -1,0 +1,141 @@
+CLASS Solution
+    FUNCTION minimumTime(count, links, vanish)
+      FUNCTION pushHeap(heapList, item)
+        SET index TO LENGTH OF heapList
+        APPEND item TO heapList
+        WHILE index GREATER THAN 0
+          SET parentIdx TO (index - (1 + 1)) / 2
+          IF HEAPCOMPARE(heapList[parentIdx], heapList[index]) GREATER THAN 0
+            SET temp TO heapList[parentIdx]
+            SET heapList[parentIdx] TO heapList[index]
+            SET heapList[index] TO temp
+            SET index TO parentIdx
+          ELSE
+            BREAK
+          END IF
+        END WHILE
+      END FUNCTION
+
+      FUNCTION popHeap(heapList)
+        IF LENGTH OF heapList EQUALS 0
+          RETURN null
+        END IF
+        SET firstItem TO heapList[0]
+        SET lastItem TO REMOVE last element FROM heapList
+        IF LENGTH OF heapList EQUALS 0
+          RETURN firstItem
+        END IF
+        SET heapList[0] TO lastItem
+        SET idx TO 0
+        SET lenHeap TO LENGTH OF heapList
+        WHILE TRUE
+          SET leftChild TO 2 * idx + 1
+          SET rightChild TO leftChild + 1
+          SET smallest TO idx
+          IF leftChild LESS THAN lenHeap AND HEAPCOMPARE(heapList[leftChild], heapList[smallest]) LESS THAN 0
+            SET smallest TO leftChild
+          END IF
+          IF rightChild LESS THAN lenHeap AND HEAPCOMPARE(heapList[rightChild], heapList[smallest]) LESS THAN 0
+            SET smallest TO rightChild
+          END IF
+          IF smallest NOT EQUAL TO idx
+            SET temp TO heapList[idx]
+            SET heapList[idx] TO heapList[smallest]
+            SET heapList[smallest] TO temp
+            SET idx TO smallest
+          ELSE
+            BREAK
+          END IF
+        END WHILE
+        RETURN firstItem
+      END FUNCTION
+
+      FUNCTION HEAPCOMPARE(a, b)
+        IF a[0] LESS THAN b[0] THEN RETURN -1
+        ELSE IF a[0] GREATER THAN b[0] THEN RETURN 1
+        ELSE RETURN 0
+        END IF
+      END FUNCTION
+
+      FUNCTION dfsBuildGraph(index, maxIndex, edgeArray)
+        FUNCTION helper(i, currentGraph)
+          IF i GREATER THAN OR EQUAL TO maxIndex THEN
+            RETURN currentGraph
+          END IF
+          SET nodeX TO edgeArray[i][0]
+          SET nodeY TO edgeArray[i][1]
+          SET pathLen TO edgeArray[i][2]
+          IF NOT EXISTS currentGraph[nodeX]
+            SET currentGraph[nodeX] TO []
+          END IF
+          IF NOT EXISTS currentGraph[nodeY]
+            SET currentGraph[nodeY] TO []
+          END IF
+          APPEND (nodeY, pathLen) TO currentGraph[nodeX]
+          APPEND (nodeX, pathLen) TO currentGraph[nodeY]
+          RETURN helper(i + (1 + 0), currentGraph)
+        END FUNCTION
+        RETURN helper(index, {})
+      END FUNCTION
+
+      SET topoGraph TO dfsBuildGraph((0 + 0), LENGTH OF links, links)
+
+      SET infVal TO (1 * 1000000000) + 0
+
+      SET costArray TO []
+      SET idx0 TO 0
+      WHILE idx0 LESS THAN count
+        APPEND infVal TO costArray
+        SET idx0 TO idx0 + 1
+      END WHILE
+
+      SET costArray[0] TO 0
+
+      SET heapData TO [(0, 0)]
+
+      FUNCTION processHeap(heap, distancesMap, disappearList, graphMap)
+        IF LENGTH OF heap EQUALS 0 THEN
+          RETURN
+        END IF
+        SET headPair TO popHeap(heap)
+        SET distCurr TO headPair[0]
+        SET nodeCurr TO headPair[1]
+        IF NOT (distCurr LESS THAN disappearList[nodeCurr])
+          processHeap(heap, distancesMap, disappearList, graphMap)
+          RETURN
+        END IF
+        IF NOT (distCurr LESS THAN distancesMap[nodeCurr])
+          processHeap(heap, distancesMap, disappearList, graphMap)
+          RETURN
+        END IF
+        SET adjList TO graphMap[nodeCurr]
+        SET idxAdj TO LENGTH OF adjList - (1 + 0)
+        WHILE idxAdj GREATER THAN OR EQUAL TO 0
+          SET nextNode TO adjList[idxAdj][0]
+          SET edgeDist TO adjList[idxAdj][1]
+          SET proposedDist TO distCurr + edgeDist
+          IF proposedDist LESS THAN distancesMap[nextNode] AND proposedDist LESS THAN disappearList[nextNode]
+            SET distancesMap[nextNode] TO proposedDist
+            pushHeap(heap, (proposedDist, nextNode))
+          END IF
+          SET idxAdj TO idxAdj - 1
+        END WHILE
+        processHeap(heap, distancesMap, disappearList, graphMap)
+      END FUNCTION
+
+      PROCESS processHeap(heapData, costArray, vanish, topoGraph)
+
+      SET answerArray TO []
+      SET countIter TO 0
+      WHILE countIter LESS THAN count
+        IF costArray[countIter] LESS THAN vanish[countIter]
+          APPEND costArray[countIter] TO answerArray
+        ELSE
+          APPEND ((0) - (1)) TO answerArray
+        END IF
+        SET countIter TO countIter + (1 + 0)
+      END WHILE
+
+      RETURN answerArray
+    END FUNCTION
+END CLASS

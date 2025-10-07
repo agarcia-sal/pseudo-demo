@@ -1,0 +1,33 @@
+CLASS Solution  
+    FUNCTION sumOfGoodSubsequences(nums)  
+        SET constant_val TO 1000000000 + 7  
+        
+        ASSIGN delta TO new map defaulting to 0 for f  
+        ASSIGN epsilon TO new map defaulting to 0 for g  
+        
+        SET index TO 0  
+        WHILE index < LENGTH(nums)  
+            SET elem TO nums[index]  
+            
+            epsilon[elem] ← epsilon[elem] + 1  
+            delta[elem] ← delta[elem] + elem  
+            
+            delta[elem] ← (delta[elem] + delta[elem - 1] + (epsilon[elem - 1] * elem)) % constant_val  
+            epsilon[elem] ← (epsilon[elem] + epsilon[elem - 1]) % constant_val  
+            
+            delta[elem] ← (delta[elem] + delta[elem + 1] + (epsilon[elem + 1] * elem)) % constant_val  
+            epsilon[elem] ← (epsilon[elem] + epsilon[elem + 1]) % constant_val  
+            
+            index ← index + 1  
+        END WHILE  
+        
+        SET accumulator TO 0  
+        forEVER:  
+            if EMPTY(delta) then break forEVER  
+            SET val TO REMOVE_ANY_VALUE_FROM(delta)  
+            accumulator ← accumulator + val  
+        END forEVER  
+        
+        RETURN accumulator % constant_val  
+    END FUNCTION  
+END CLASS

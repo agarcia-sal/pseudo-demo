@@ -1,0 +1,40 @@
+```
+FUNCTION check_dict_case(dict_param)
+    IF NOT (LENGTH(dict_param KEYS) > 0)
+        RETURN False
+    END IF
+
+    LET status = "start"
+    LET key_iter = ITERATOR OVER dict_param KEYS
+
+    WHILE TRUE
+        LET current_key = NEXT(key_iter, default = None)
+        IF current_key IS None
+            EXIT LOOP
+        END IF
+
+        IF NOT (current_key INSTANCEOF STRING)
+            status = "mixed"
+            BREAK
+        END IF
+
+        IF status = "start"
+            IF current_key = TOUPPER(current_key)
+                status = "upper"
+            ELSE IF current_key = TOLOWER(current_key)
+                status = "lower"
+            ELSE
+                BREAK
+            END IF
+        ELSE IF NOT ((status = "upper" AND current_key = TOUPPER(current_key)) OR (status = "lower" AND current_key = TOLOWER(current_key)))
+            status = "mixed"
+            BREAK
+        ELSE
+            BREAK
+        END IF
+
+    END WHILE
+
+    RETURN (status = "upper") OR (status = "lower")
+END FUNCTION
+```

@@ -1,0 +1,43 @@
+FUNCTION check_dict_case(dict_arg)
+    DECLARE keys_list = GET_KEYS(dict_arg)
+    DECLARE keys_count = LENGTH(keys_list)
+    IF keys_count == 0 THEN
+        RETURN False
+    END IF
+
+    DECLARE mode = "start"
+    DECLARE index = 0
+
+    WHILE index < keys_count
+        DECLARE current_key = keys_list[index]
+        IF TYPE_OF(current_key) != STRING THEN
+            mode = "mixed"
+            BREAK
+        END IF
+
+        IF mode == "start" THEN
+            SWITCH
+                CASE IS_ALL_UPPERCASE(current_key):
+                    mode = "upper"
+                    BREAK
+                CASE IS_ALL_LOWERCASE(current_key):
+                    mode = "lower"
+                    BREAK
+                DEFAULT:
+                    BREAK WHILE
+            END SWITCH
+        ELSE IF mode == "upper" AND NOT IS_ALL_UPPERCASE(current_key) THEN
+            mode = "mixed"
+            BREAK
+        ELSE IF mode == "lower" AND NOT IS_ALL_LOWERCASE(current_key) THEN
+            mode = "mixed"
+            BREAK
+        ELSE IF mode != "upper" AND mode != "lower" THEN
+            BREAK
+        END IF
+
+        index = index + 1
+    END WHILE
+
+    RETURN (mode == "upper") OR (mode == "lower")
+END FUNCTION

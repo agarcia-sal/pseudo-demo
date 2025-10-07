@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION minLength(s parameter, numOps parameter)
+        FUNCTION longest_uniform_substring(s parameter)
+            SET a TO 0
+            SET b TO 1
+            FUNCTION loop_recursive(x parameter)
+                IF x GREATER THAN THE LENGTH OF s MINUS one
+                    IF a GREATER THAN b
+                        RETURN a
+                    ELSE
+                        RETURN b
+                    END IF
+                ELSE
+                    IF NOT (s AT INDEX x NOT EQUAL TO s AT INDEX (x MINUS 1))
+                        SET b TO b PLUS 1
+                    ELSE
+                        IF a LESS THAN b
+                            SET a TO b
+                        END IF
+                        SET b TO 1
+                    END IF
+                    RETURN loop_recursive(x PLUS 1)
+                END IF
+            END FUNCTION
+            RETURN loop_recursive(1)
+        END FUNCTION
+
+        SET z TO THE LENGTH OF s
+        SET w TO 1 LEFT SHIFTED BY z
+        SET r TO z
+
+        LABEL outer_loop_start
+        SET q TO 0
+        WHILE q LESS THAN w
+            SET p TO 0
+            SET count_ones TO 0
+            WHILE p LESS THAN z
+                SET bit_mask TO 1 LEFT SHIFTED BY p
+                IF (q AND bit_mask) NOT EQUAL TO 0
+                    SET count_ones TO count_ones PLUS 1
+                END IF
+                SET p TO p PLUS 1
+            END WHILE
+
+            IF count_ones GREATER THAN numOps
+                SET q TO q PLUS 1
+                CONTINUE outer_loop_start
+            END IF
+
+            SET arr TO empty list
+            FUNCTION to_char_list(str parameter)
+                SET idx TO 0
+                SET lst TO empty list
+                REPEAT
+                    IF idx GREATER THAN OR EQUAL TO THE LENGTH OF str
+                        RETURN lst
+                    END IF
+                    APPEND str AT INDEX idx TO lst
+                    SET idx TO idx PLUS 1
+                UNTIL FALSE
+            END FUNCTION
+            SET arr TO to_char_list(s)
+
+            SET k TO 0
+            WHILE k LESS THAN z
+                SET bit_flag TO 1 LEFT SHIFTED BY k
+                IF (q AND bit_flag) NOT EQUAL TO 0
+                    IF arr AT INDEX k EQUALS '0'
+                        SET arr AT INDEX k TO '1'
+                    ELSE
+                        SET arr AT INDEX k TO '0'
+                    END IF
+                END IF
+                SET k TO k PLUS 1
+            END WHILE
+
+            FUNCTION call_longest(input parameter)
+                RETURN longest_uniform_substring(input)
+            END FUNCTION
+
+            SET temp_length TO call_longest(arr)
+
+            IF r GREATER THAN temp_length
+                SET r TO temp_length
+            END IF
+
+            SET q TO q PLUS 1
+        END WHILE
+
+        RETURN r
+    END FUNCTION
+END CLASS

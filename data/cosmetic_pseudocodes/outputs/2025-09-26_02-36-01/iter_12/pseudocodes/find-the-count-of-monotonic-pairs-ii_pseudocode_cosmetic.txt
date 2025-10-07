@@ -1,0 +1,140 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        SET CONST_MODULO TO 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 + 7
+        SET total_len TO 0
+        SET index_ptr TO 0
+        SET element_max TO 0
+        SET total_len TO (function LEN(x) start return x.length end)(nums)
+        SET element_max TO (function MAX_ARR(arr) 
+            PROCEDURE MAX_ACCUM(INDEX, MAX_SO_FAR)
+                IF INDEX >= LEN(arr) THEN
+                    RETURN MAX_SO_FAR
+                ELSE
+                    IF arr[INDEX] > MAX_SO_FAR THEN
+                        RETURN MAX_ACCUM(INDEX + 1, arr[INDEX])
+                    ELSE
+                        RETURN MAX_ACCUM(INDEX + 1, MAX_SO_FAR)
+                    END IF
+                END IF
+            END PROCEDURE
+            RETURN MAX_ACCUM(0, arr[0])
+        end)(nums)
+
+        PROCEDURE MAKE_3D_LIST(DIM1, DIM2, DIM3)
+            SET LIST_3D TO []
+            FOR IDX1 FROM 0 TO DIM1 - 1
+                SET L2 TO []
+                FOR IDX2 FROM 0 TO DIM2 - 1
+                    SET L3 TO []
+                    FOR IDX3 FROM 0 TO DIM3 - 1
+                        L3.APPEND(0)
+                    END FOR
+                    L2.APPEND(L3)
+                END FOR
+                LIST_3D.APPEND(L2)
+            END FOR
+            RETURN LIST_3D
+        END PROCEDURE
+
+        SET dp to MAKE_3D_LIST(total_len + 1, element_max + 1, element_max + 1)
+
+        PROCEDURE SET_DP_ENTRY(I, J_VAL, K_VAL, VAL)
+            dp[I][J_VAL][K_VAL] = VAL
+        END PROCEDURE
+
+        PROCEDURE GET_DP_ENTRY(I, J_VAL, K_VAL)
+            RETURN dp[I][J_VAL][K_VAL]
+        END PROCEDURE
+
+        SET first_num TO nums[0]
+
+        PROCEDURE INIT_DP()
+            REPEAT JX FROM 0 TO first_num
+                SET remainder_val TO first_num - JX
+                SET_DP_ENTRY(1, JX, remainder_val, 1)
+            END REPEAT
+        END PROCEDURE
+
+        CALL INIT_DP()
+
+        PROCEDURE ADD_MODULO(A, B)
+            RETURN (A + B) % CONST_MODULO
+        END PROCEDURE
+
+        PROCEDURE PROCESS_INDICES(I)
+            IF I > total_len THEN
+                RETURN
+            ELSE
+                SET CURRENT_NUM TO nums[I - 1]
+
+                PROCEDURE PROCESS_J(JX)
+                    IF JX > CURRENT_NUM THEN
+                        RETURN
+                    ELSE
+                        PROCEDURE PROCESS_K(KX)
+                            IF KX > CURRENT_NUM THEN
+                                RETURN
+                            ELSE
+                                IF (JX + KX) == CURRENT_NUM THEN
+                                    PROCEDURE PROCESS_PREV_J(PREV_JX, JX, KX, I)
+                                        IF PREV_JX > JX THEN RETURN END IF
+
+                                        PROCEDURE PROCESS_PREV_K(PREV_KX)
+                                            IF PREV_KX > element_max THEN RETURN END IF
+
+                                            SET CURRENT_VAL TO GET_DP_ENTRY(I, JX, KX)
+                                            SET PREV_VAL TO GET_DP_ENTRY(I - 1, PREV_JX, PREV_KX)
+                                            SET UPDATED_VAL TO ADD_MODULO(CURRENT_VAL, PREV_VAL)
+                                            SET_DP_ENTRY(I, JX, KX, UPDATED_VAL)
+
+                                            CALL PROCESS_PREV_K(PREV_KX + 1)
+                                        END PROCEDURE
+
+                                        CALL PROCESS_PREV_K(KX)
+                                        CALL PROCESS_PREV_J(PREV_JX + 1, JX, KX, I)
+                                    END PROCEDURE
+
+                                    CALL PROCESS_PREV_J(0, JX, KX, I)
+                                END IF
+
+                                CALL PROCESS_K(KX + 1)
+                            END IF
+                        END PROCEDURE
+
+                        CALL PROCESS_K(0)
+                        CALL PROCESS_J(JX + 1)
+                    END IF
+                END PROCEDURE
+                
+                CALL PROCESS_J(0)
+                CALL PROCESS_INDICES(I + 1)
+            END IF
+        END PROCEDURE
+        
+        CALL PROCESS_INDICES(2)
+
+        SET ACC_RESULT TO 0
+
+        PROCEDURE SUM_RESULTS(J)
+            IF J > element_max THEN
+                RETURN
+            ELSE
+                PROCEDURE SUM_RESULTS_K(K)
+                    IF K > element_max THEN
+                        RETURN
+                    ELSE
+                        SET ACC_RESULT TO (ACC_RESULT + dp[total_len][J][K]) % CONST_MODULO
+                        CALL SUM_RESULTS_K(K + 1)
+                    END IF
+                END PROCEDURE
+
+                CALL SUM_RESULTS_K(0)
+                CALL SUM_RESULTS(J + 1)
+            END IF
+        END PROCEDURE
+
+        CALL SUM_RESULTS(0)
+
+        RETURN ACC_RESULT
+    END FUNCTION
+END CLASS

@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER
+        SET V TO an empty list
+        SET W TO 0
+        WHILE W < LENGTH OF nums DO
+            IF nums[W] = 1 THEN
+                APPEND W TO V
+            END IF
+            SET W TO W + 1
+        END WHILE
+
+        IF LENGTH OF V = 0 THEN
+            RETURN k * (1 + 1)
+        END IF
+
+        SET U TO LENGTH OF V
+        SET X TO a list with U + 1 zeros
+        SET Y TO 0
+        WHILE Y < U DO
+            X[Y + 1] = X[Y] + V[Y]
+            SET Y TO Y + 1
+        END WHILE
+
+        FUNCTION cost(start INTEGER end INTEGER) RETURNS INTEGER
+            SET A TO (start + end) // 2
+            SET B TO V[A]
+            SET C TO 0
+            SET D TO start
+            WHILE D < A DO
+                SET C TO C + (B - V[D]) - (A - D)
+                SET D TO D + 1
+            END WHILE
+            SET E TO A + 1
+            WHILE E <= end DO
+                SET C TO C + (V[E] - B) - (E - A)
+                SET E TO E + 1
+            END WHILE
+            RETURN C
+        END FUNCTION
+
+        SET Z TO +∞
+        SET F TO 0
+        WHILE F <= U - k DO
+            SET G TO F + k - 1
+            SET H TO cost(F, G)
+
+            IF k % 2 = 1 THEN
+                SET I TO (F + G) // 2
+                SET J TO V[I]
+                SET K_var TO G - I - (J - V[I] - 1)
+            ELSE
+                SET L TO (F + G) // 2
+                SET M TO L + 1
+                SET N TO V[L]
+                SET O TO V[M]
+                SET K_var TO M - L - 1 - (O - N - 1)
+            END IF
+
+            IF K_var > maxChanges THEN
+                SET H TO H + (K_var - maxChanges)
+            END IF
+
+            IF H < Z THEN
+                SET Z TO H
+            END IF
+            SET F TO F + 1
+        END WHILE
+
+        RETURN Z
+    END FUNCTION
+END CLASS

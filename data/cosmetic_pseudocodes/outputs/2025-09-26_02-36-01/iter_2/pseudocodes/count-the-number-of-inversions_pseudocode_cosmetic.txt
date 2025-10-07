@@ -1,0 +1,49 @@
+CLASS Solution  
+    FUNCTION numberOfPermutations(size, conditions)  
+        SET modulus TO 10 EXPONENT 9 PLUS 7  
+        SET condition_map TO empty map  
+        FOR EACH (end_pos, required_count) IN conditions  
+            condition_map[end_pos] ::= required_count  
+        END FOR  
+        
+        FUNCTION count_permutations(current_length, inversion_total, bits_used)  
+            IF current_length IS size THEN  
+                SET expected_inversions TO IF condition_map HAS (size - 1) THEN condition_map[size - 1] ELSE 0  
+                IF inversion_total IS expected_inversions THEN  
+                    RETURN 1  
+                ELSE  
+                    RETURN 0  
+                END IF  
+            END IF  
+            
+            IF current_length > 0 THEN  
+                SET expected_inversions TO IF condition_map HAS (current_length - 1) THEN condition_map[current_length - 1] ELSE inversion_total  
+                IF inversion_total IS NOT expected_inversions THEN  
+                    RETURN 0  
+                END IF  
+            END IF  
+            
+            SET total_count TO 0  
+            SET candidate TO 0  
+            WHILE candidate < size DO  
+                IF (bits_used BITWISE-AND (1 LEFT_SHIFT candidate)) IS 0 THEN  
+                    SET updated_inversions TO inversion_total  
+                    SET checker TO candidate + 1  
+                    WHILE checker < size DO  
+                        IF (bits_used BITWISE-AND (1 LEFT_SHIFT checker)) IS NOT 0 THEN  
+                            SET updated_inversions TO updated_inversions PLUS 1  
+                        END IF  
+                        SET checker TO checker PLUS 1  
+                    END WHILE  
+                    SET updated_bits TO bits_used BITWISE-OR (1 LEFT_SHIFT candidate)  
+                    SET total_count TO ((total_count PLUS count_permutations(current_length + 1, updated_inversions, updated_bits)) MOD modulus)  
+                END IF  
+                SET candidate TO candidate PLUS 1  
+            END WHILE  
+            
+            RETURN total_count  
+        END FUNCTION  
+        
+        RETURN count_permutations(0, 0, 0)  
+    END FUNCTION  
+END CLASS

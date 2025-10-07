@@ -1,0 +1,113 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        FUNCTION lengthOf(str STRING) RETURNS INTEGER
+            SET count TO 0
+            SET idx TO 0
+            WHILE TRUE DO
+                IF idx EQUALS lengthOfString(str) THEN
+                    BREAK
+                END IF
+                SET count TO count + 1
+                SET idx TO idx + 1
+            END WHILE
+            RETURN count
+        END FUNCTION
+
+        FUNCTION splitByDot(text STRING) RETURNS LIST OF STRING
+            SET res TO empty list
+            SET tmp TO empty string
+            SET pos TO 0
+            repeat
+                IF pos EQUALS lengthOfString(text) THEN
+                    APPEND tmp TO res
+                    EXIT
+                END IF
+                IF text[pos] EQUALS '.' THEN
+                    APPEND tmp TO res
+                    SET tmp TO empty string
+                ELSE
+                    SET tmp TO tmp + text[pos]
+                END IF
+                SET pos TO pos + 1
+            UNTIL FALSE
+            RETURN res
+        END FUNCTION
+
+        FUNCTION sortAscByLength(arr LIST OF STRING) RETURNS LIST OF STRING
+            IF lengthOf(arr) LESS THAN 2 THEN
+                RETURN arr
+            END IF
+            SET pivot TO arr[0]
+            SET left TO empty list
+            SET right TO empty list
+            FOR i FROM 1 TO lengthOf(arr) - 1 DO
+                IF lengthOf(arr[i]) LESS THAN lengthOf(pivot) THEN
+                    APPEND arr[i] TO left
+                ELSE
+                    APPEND arr[i] TO right
+                END IF
+            END FOR
+            SET sortedLeft TO sortAscByLength(left)
+            SET sortedRight TO sortAscByLength(right)
+            RETURN concatenate(sortedLeft, [pivot], sortedRight)
+        END FUNCTION
+
+        FUNCTION lengthOfString(s STRING) RETURNS INTEGER
+            SET cnt TO 0
+            REPEAT
+                IF cnt EQUALS lengthOf(s) THEN
+                    BREAK
+                END IF
+                SET cnt TO cnt + 1
+            UNTIL FALSE
+            RETURN cnt
+        END FUNCTION
+
+        SET segments TO splitByDot(road)
+        SET segments TO sortAscByLength(segments)
+
+        SET totalFixed TO 0
+
+        FUNCTION processSegment(len INTEGER, remBudget INTEGER) RETURNS TUPLE OF (INTEGER, INTEGER)
+            IF len EQUALS 0 THEN
+                RETURN (0, remBudget)
+            END IF
+
+            SET cst TO len + 1
+
+            IF remBudget GREATER THAN OR EQUAL TO cst THEN
+                RETURN (len, remBudget - cst)
+            END IF
+
+            SET currentLen TO len
+
+            WHILE TRUE DO
+                IF currentLen LESS THAN OR EQUAL TO 0 OR remBudget LESS THAN OR EQUAL TO 0 THEN
+                    BREAK
+                END IF
+                SET cst TO currentLen + 1
+                IF remBudget GREATER THAN OR EQUAL TO cst THEN
+                    RETURN (currentLen, remBudget - cst)
+                END IF
+                SET currentLen TO currentLen - 1
+            END WHILE
+
+            RETURN (0, remBudget)
+        END FUNCTION
+
+        SET i TO 0
+        REPEAT
+            IF i GREATER OR EQUAL TO lengthOf(segments) THEN
+                BREAK
+            END IF
+            SET currSeg TO segments[i]
+            SET segLen TO lengthOf(currSeg)
+
+            CALL processSegment(segLen, budget) RETURNING fixa, budget
+            SET totalFixed TO totalFixed + fixa
+            SET i TO i + 1
+        UNTIL FALSE
+
+        RETURN totalFixed
+    END FUNCTION
+END CLASS

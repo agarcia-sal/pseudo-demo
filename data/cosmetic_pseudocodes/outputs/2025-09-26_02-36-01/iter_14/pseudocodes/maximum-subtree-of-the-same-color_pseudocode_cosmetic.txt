@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION maximumSubtreeSize(edges, colors)
+        INITIALIZE adjacencyList AS empty mapping with default empty list
+        SET idx TO 0
+        WHILE idx LESS THAN LENGTH(edges)
+            LET firstNode = edges[idx][0]
+            LET secondNode = edges[idx][1]
+            APPEND secondNode TO adjacencyList[firstNode]
+            APPEND firstNode TO adjacencyList[secondNode]
+            SET idx TO idx + 1
+        END WHILE
+
+        ASSIGN maxSubtreeSize TO 1
+
+        FUNCTION traverse(currentNode, previousNode)
+            LET currentCount = 1
+            LET uniformChildColors = true
+
+            LET neighborIndex = 0
+            WHILE neighborIndex < LENGTH(adjacencyList[currentNode])
+                LET adjNode = adjacencyList[currentNode][neighborIndex]
+                IF adjNode NOT EQUAL previousNode THEN
+                    LET subtreeSize = traverse(adjNode, currentNode)
+                    IF subtreeSize = 0 THEN
+                        uniformChildColors = false
+                    ELSE
+                        IF colors[adjNode] = colors[currentNode] THEN
+                            currentCount = currentCount + subtreeSize
+                        ELSE
+                            uniformChildColors = false
+                        END IF
+                    END IF
+                END IF
+                SET neighborIndex = neighborIndex + 1
+            END WHILE
+
+            IF uniformChildColors = false
+                RETURN 0
+            ELSE
+                IF maxSubtreeSize < currentCount THEN
+                    maxSubtreeSize = currentCount
+                END IF
+                RETURN currentCount
+            END IF
+        END FUNCTION
+
+        CALL traverse(0, -1)
+
+        RETURN maxSubtreeSize
+    END FUNCTION
+END CLASS

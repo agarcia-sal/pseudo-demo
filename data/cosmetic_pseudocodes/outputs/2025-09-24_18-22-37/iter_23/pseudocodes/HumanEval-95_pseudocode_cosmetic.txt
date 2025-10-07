@@ -1,0 +1,60 @@
+```
+FUNCTION check_dict_case(dict_param)
+    SET key_count TO SIZE(dict_param at_keys)
+    IF key_count == 0 THEN
+        RETURN False
+    END IF
+
+    DECLARE mode_variable AS STRING = "start"
+    SET key_index TO 0
+
+    WHILE key_index < key_count
+        SET current_key TO dict_param at_keys.at(key_index)
+
+        IF NOT (TYPE_OF current_key EQUALS STRING) THEN
+            mode_variable = "mixed"
+            EXIT LOOP
+        ELSE
+            SELECT mode_variable OF
+                CASE "start":
+                    IF current_key EQUALS TO current_key TO_UPPERCASE THEN
+                        mode_variable = "upper"
+                    ELSE
+                        DECLARE low_flag AS BOOLEAN = False
+                        IF current_key EQUALS TO current_key TO_LOWERCASE THEN
+                            low_flag = True
+                        END IF
+                        IF low_flag THEN
+                            mode_variable = "lower"
+                        ELSE
+                            EXIT LOOP
+                        END IF
+                    END IF
+
+                CASE "upper":
+                    IF current_key NOT_EQUALS current_key TO_UPPERCASE THEN
+                        mode_variable = "mixed"
+                        EXIT LOOP
+                    ELSE
+                        EXIT LOOP
+                    END IF
+
+                CASE "lower":
+                    IF current_key NOT_EQUALS current_key TO_LOWERCASE THEN
+                        mode_variable = "mixed"
+                        EXIT LOOP
+                    ELSE
+                        EXIT LOOP
+                    END IF
+
+                OTHERWISE:
+                    EXIT LOOP
+            END SELECT
+        END IF
+
+        key_index = key_index + 1
+    END WHILE
+
+    RETURN (mode_variable == "upper") OR (mode_variable == "lower")
+END FUNCTION
+```

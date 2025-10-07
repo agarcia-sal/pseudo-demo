@@ -1,0 +1,80 @@
+CLASS Solution  
+    FUNCTION kthCharacter(k param_k INTEGER, operations param_operations LIST OF INTEGER) RETURNS STRING  
+      VAR uLength INTEGER ← 1  
+      VAR uOps LIST OF INTEGER ← []  
+      
+      PROCEDURE appendOp(v INTEGER)  
+        uOps ← appendToList(uOps, v)  
+      END PROCEDURE  
+      
+      FUNCTION appendToList(lst LIST OF INTEGER, val INTEGER) RETURNS LIST OF INTEGER  
+        RETURN lst + [val]  
+      END FUNCTION  
+      
+      PROCEDURE processOps(index INTEGER)  
+        IF index >= lengthOf(param_operations) THEN RETURN  
+        appendOp(param_operations[index])  
+        uLength ← uLength * 2 * 1  
+        processOps(index + 1)  
+      END PROCEDURE  
+      
+      FUNCTION lengthOf(lst LIST OF INTEGER) RETURNS INTEGER  
+        VAR count INTEGER ← 0  
+        VAR pos INTEGER ← 0  
+        LOOP 
+          IF pos >= size(lst) THEN BREAK  
+          count ← count + 1  
+          pos ← pos + 1  
+        END LOOP  
+        RETURN count  
+      END FUNCTION  
+      
+      FUNCTION size(lst LIST OF INTEGER) RETURNS INTEGER  
+        RETURN lengthOf(lst)  
+      END FUNCTION  
+      
+      processOps(0)  
+      
+      VAR resultChar CHARACTER ← 'a'  
+      
+      FUNCTION getHalf(x INTEGER) RETURNS INTEGER  
+        RETURN x / 2  
+      END FUNCTION  
+      
+      FUNCTION getElement(lst LIST OF INTEGER, idx INTEGER) RETURNS INTEGER  
+        RETURN lst[idx]  
+      END FUNCTION  
+      
+      PROCEDURE loopBackward(i INTEGER)  
+        IF i < 0 THEN RETURN  
+        IF param_k ≤ getHalf(uLength) THEN  
+          uLength ← getHalf(uLength)  
+        ELSE  
+          param_k ← param_k - getHalf(uLength)  
+          uLength ← getHalf(uLength)  
+          IF getElement(uOps, i) = 1 THEN  
+            resultChar ← nextChar(resultChar)  
+          END IF  
+        END IF  
+        loopBackward(i - 1)  
+      END PROCEDURE  
+      
+      FUNCTION nextChar(c CHARACTER) RETURNS CHARACTER  
+        VAR base INTEGER ← ascii('a')  
+        VAR offset INTEGER ← (ascii(c) - base + 1) % 26  
+        RETURN charFromAscii(base + offset)  
+      END FUNCTION  
+      
+      FUNCTION ascii(c CHARACTER) RETURNS INTEGER  
+        RETURN integerValueOf(c)  
+      END FUNCTION  
+      
+      FUNCTION charFromAscii(n INTEGER) RETURNS CHARACTER  
+        RETURN characterValueOf(n)  
+      END FUNCTION  
+      
+      loopBackward(lengthOf(uOps) - 1)  
+      
+      RETURN resultChar  
+    END FUNCTION  
+END CLASS

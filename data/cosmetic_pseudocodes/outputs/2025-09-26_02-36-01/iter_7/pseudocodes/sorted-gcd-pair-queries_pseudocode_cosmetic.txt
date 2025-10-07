@@ -1,0 +1,53 @@
+CLASS Solution
+	FUNCTION gcdValues(nums, queries)
+		DEFINE maxval ← 0
+		FOR idx FROM 0 TO LENGTH(nums) - 1
+			IF maxval < nums[idx] THEN
+				maxval ← nums[idx]
+			END IF
+		END FOR
+		
+		DEFINE frequency ← NEW dictionary with default 0
+		FOR each element IN nums
+			frequency[element] ← frequency[element] + 1
+		END FOR
+
+		DEFINE gcd_counts ← ARRAY of zeros with size (maxval + 1)
+		
+		DEFINE step_i ← maxval
+		WHILE step_i ≥ 1
+			DEFINE aggregate ← 0
+			DEFINE step_j ← step_i
+			WHILE step_j ≤ maxval
+				aggregate ← aggregate + frequency[step_j]
+				gcd_counts[step_i] ← gcd_counts[step_i] - gcd_counts[step_j]
+				step_j ← step_j + step_i
+			END WHILE
+			gcd_counts[step_i] ← gcd_counts[step_i] + (aggregate * (aggregate - 1)) / 2
+			step_i ← step_i - 1
+		END WHILE
+		
+		FOR pos FROM 1 TO maxval
+			gcd_counts[pos] ← gcd_counts[pos] + gcd_counts[pos - 1]
+		END FOR
+		
+		DEFINE output ← EMPTY LIST
+		DEFINE idx_q ← 0
+		WHILE idx_q < LENGTH(queries)
+			DEFINE left ← 0
+			DEFINE right ← maxval
+			WHILE left < right
+				DEFINE mid ← (left + right) / 2
+				IF gcd_counts[mid] > queries[idx_q] THEN
+					right ← mid
+				ELSE
+					left ← mid + 1
+				END IF
+			END WHILE
+			PUSH output, left
+			idx_q ← idx_q + 1
+		END WHILE
+		
+		RETURN output
+	END FUNCTION
+END CLASS

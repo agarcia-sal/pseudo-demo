@@ -1,0 +1,58 @@
+CLASS Solution
+	FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+		DEFINE FUNCTION recursivePop(heapRef, marksRef, kVal, counterVal, sumRef)
+			IF (counterVal GREATER THAN OR EQUAL TO kVal) OR (heapRef IS EMPTY)
+				RETURN sumRef, counterVal
+			ELSE
+				SET poppedPair TO heappop(heapRef)
+				SET valTmp TO poppedPair[0]
+				SET idxTmp TO poppedPair[1]
+				IF NOT (idxTmp IN marksRef)
+					SET marksRef TO marksRef UNION {idxTmp}
+					SET sumRef TO sumRef MINUS valTmp
+					SET counterVal TO counterVal PLUS 1
+				END IF
+				RETURN recursivePop(heapRef, marksRef, kVal, counterVal, sumRef)
+			END IF
+		END FUNCTION
+
+		SET heapContainer TO []
+		SET position TO 0
+		WHILE position LESS THAN LENGTH(nums)
+			SET currentVal TO nums[position]
+			SET pairEntry TO [currentVal, position]
+			APPEND pairEntry TO heapContainer
+			SET position TO position PLUS 1
+		END WHILE
+
+		heapify(heapContainer)
+		SET markedSet TO {}
+		SET aggregateSum TO 0
+		SET idxCounter TO 0
+		WHILE idxCounter LESS THAN LENGTH(nums)
+			SET aggregateSum TO aggregateSum PLUS nums[idxCounter]
+			SET idxCounter TO idxCounter PLUS 1
+		END WHILE
+		SET outputList TO []
+
+		SET queryIdx TO 0
+		WHILE queryIdx LESS THAN LENGTH(queries)
+			SET queryPair TO queries[queryIdx]
+			SET qIndex TO queryPair[0]
+			SET qK TO queryPair[1]
+
+			IF NOT (qIndex IN markedSet)
+				SET markedSet TO markedSet UNION {qIndex}
+				SET aggregateSum TO aggregateSum MINUS nums[qIndex]
+			END IF
+
+			SET poppedCount TO 0
+			SET aggregateSum, poppedCount TO recursivePop(heapContainer, markedSet, qK, poppedCount, aggregateSum)
+
+			APPEND aggregateSum TO outputList
+			SET queryIdx TO queryIdx PLUS 1
+		END WHILE
+
+		RETURN outputList
+	END FUNCTION
+END CLASS

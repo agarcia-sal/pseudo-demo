@@ -1,0 +1,88 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        CONST MODULO_VAL <- 10^9 + 7
+
+        VAR result <- 0
+        VAR freqLeft <- map with default 0
+        VAR freqRight <- map with default 0
+
+        FOR idx FROM 0 TO LENGTH(nums) - 1
+            freqRight[nums[idx]] <- freqRight[nums[idx]] + 1
+        END FOR
+
+        FUNCTION choose2(x)
+            RETURN (x * (x - 1)) / 2
+        END FUNCTION
+
+        VAR sumPSS <- 0
+        VAR sumSPP <- 0
+        VAR sumPP <- 0
+        VAR sumSS <- 0
+        VAR sumPS <- 0
+
+        FOR EACH key IN freqRight KEYS
+            VAR freqRVal <- freqRight[key]
+            VAR sqR <- freqRVal * freqRVal
+            sumSS <- sumSS + sqR
+        END FOR
+
+        FOR i FROM 0 TO LENGTH(nums) - 1
+            VAR currentValue <- nums[i]
+
+            VAR currentP <- freqLeft[currentValue]
+            VAR currentS <- freqRight[currentValue]
+
+            VAR sSquared <- currentS * currentS
+            VAR sMinusOneSquared <- (currentS - 1) * (currentS - 1)
+            VAR pSquared <- currentP * currentP
+            VAR pMinusOneSquared <- (currentP - 1) * (currentP - 1)
+            VAR pPlusOneSquared <- (currentP + 1) * (currentP + 1)
+
+            sumPSS <- sumPSS + (currentP * (-sSquared + sMinusOneSquared))
+            sumSPP <- sumSPP + (-pSquared)
+            sumSS <- sumSS + (-sSquared + sMinusOneSquared)
+            sumPS <- sumPS + (-currentP)
+
+            freqRight[currentValue] <- freqRight[currentValue] - 1
+
+            VAR leftCount <- i
+            VAR rightCount <- (LENGTH(nums) - i - 1)
+
+            VAR val1 <- choose2(leftCount)
+            VAR val2 <- choose2(rightCount)
+            VAR val3 <- choose2(leftCount - currentP)
+            VAR val4 <- choose2(rightCount - freqRight[currentValue])
+
+            result <- result + val1 * val2
+            result <- result - val3 * val4
+
+            VAR tempPSS <- sumPSS - currentP * (freqRight[currentValue] * freqRight[currentValue])
+            VAR tempSPP <- sumSPP - freqRight[currentValue] * (currentP * currentP)
+            VAR tempPP <- sumPP - (currentP * currentP)
+            VAR tempSS <- sumSS - (freqRight[currentValue] * freqRight[currentValue])
+            VAR tempPS <- sumPS - currentP * freqRight[currentValue]
+
+            VAR pDiff <- leftCount - currentP
+            VAR sDiff <- rightCount - freqRight[currentValue]
+
+            VAR termA <- (-currentP) * tempPSS + (rightCount - freqRight[currentValue]) * currentP * tempPS
+            VAR termB <- (-freqRight[currentValue]) * tempSPP + (leftCount - currentP) * freqRight[currentValue] * tempPS
+
+            result <- result - tempPS * currentP * (rightCount - freqRight[currentValue]) + (-currentP) * tempPSS
+            result <- result - tempPS * freqRight[currentValue] * (leftCount - currentP) + (-freqRight[currentValue]) * tempSPP
+            result <- result - ((tempPP - pDiff) * freqRight[currentValue] * ((rightCount - freqRight[currentValue]) / 2))
+            result <- result - ((tempSS - sDiff) * currentP * ((leftCount - currentP) / 2))
+
+            result <- result MOD MODULO_VAL
+
+            sumPSS <- sumPSS + freqRight[currentValue] * freqRight[currentValue]
+            sumSPP <- sumSPP + freqRight[currentValue] * (-currentP * currentP + pPlusOneSquared)
+            sumPP <- sumPP + (-currentP * currentP + pPlusOneSquared)
+            sumPS <- sumPS + freqRight[currentValue]
+
+            freqLeft[currentValue] <- freqLeft[currentValue] + 1
+        END FOR
+
+        RETURN result
+    END FUNCTION
+END CLASS

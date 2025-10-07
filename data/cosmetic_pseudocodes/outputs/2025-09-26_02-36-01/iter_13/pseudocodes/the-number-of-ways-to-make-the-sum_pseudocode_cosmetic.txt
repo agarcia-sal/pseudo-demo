@@ -1,0 +1,41 @@
+CLASS Solution
+	FUNCTION numberOfWays WITH PARAMETER n
+		DEFINE CONST_MOD AS (10 ^ 9) + 7
+		PROCEDURE helperAdd(a, b)
+			RETURN (a + b) % CONST_MOD
+		END PROCEDURE
+
+		PROCEDURE processCoin(index, coinsList, dpArray)
+			IF index == LENGTH(coinsList) THEN
+				RETURN
+			END IF
+
+			DEFINE currentCoin AS ELEMENT AT index OF coinsList
+			DEFINE loopCounter AS currentCoin
+			WHILE loopCounter <= n
+				dpArray[loopCounter] = helperAdd(dpArray[loopCounter], dpArray[loopCounter - currentCoin])
+				loopCounter = loopCounter + 1
+			END WHILE
+
+			CALL processCoin(index + 1, coinsList, dpArray)
+		END PROCEDURE
+
+		DEFINE coinList AS [1, 2, 6]
+		DEFINE dpArr AS LIST OF (n + 1) ZEROS
+		dpArr[0] = 1
+
+		CALL processCoin(0, coinList, dpArr)
+
+		DEFINE resVal AS 0
+		DEFINE kVal AS 0
+
+		REPEAT 
+			IF (kVal * 4) <= n THEN
+				resVal = helperAdd(resVal, dpArr[n - (kVal * 4)])
+			END IF
+			kVal = kVal + 1
+		UNTIL kVal > 2
+
+		RETURN resVal
+	END FUNCTION
+END CLASS

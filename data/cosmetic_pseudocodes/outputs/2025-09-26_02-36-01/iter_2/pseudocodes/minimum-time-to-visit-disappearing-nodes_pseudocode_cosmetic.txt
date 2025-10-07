@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION minimumTime(n, edges, disappear)
+        LET adjacency TO a mapping defaulting to empty lists
+
+        LET idx TO 0
+        WHILE idx IS LESS THAN LENGTH OF edges
+            LET node_a, node_b, dist TO edges[idx][0], edges[idx][1], edges[idx][2]
+            APPEND (node_b, dist) TO adjacency[node_a]
+            APPEND (node_a, dist) TO adjacency[node_b]
+            INCREMENT idx BY 1
+        END WHILE
+
+        LET shortest_paths TO an array of size n FILLED WITH positive infinity
+        shortest_paths[0] ← 0
+
+        LET heap TO [(0, 0)]
+
+        WHILE LENGTH OF heap IS GREATER THAN 0
+            LET extracted_distance, extracted_node TO REMOVE_MIN(heap)
+
+            IF extracted_distance IS GREATER THAN OR EQUAL TO disappear[extracted_node]
+                CONTINUE
+            END IF
+
+            IF extracted_distance IS GREATER THAN shortest_paths[extracted_node]
+                CONTINUE
+            END IF
+
+            LET neighbours TO adjacency[extracted_node]
+            LET j TO 0
+            WHILE j IS LESS THAN LENGTH OF neighbours
+                LET adjacent_node, edge_len TO neighbours[j][0], neighbours[j][1]
+                LET new_distance TO extracted_distance PLUS edge_len
+                IF new_distance IS LESS THAN shortest_paths[adjacent_node] AND new_distance IS LESS THAN disappear[adjacent_node]
+                    shortest_paths[adjacent_node] ← new_distance
+                    INSERT_INTO_MIN_HEAP(heap, (new_distance, adjacent_node))
+                END IF
+                INCREMENT j BY 1
+            END WHILE
+        END WHILE
+
+        LET output TO ARRAY OF LENGTH n FILLED WITH -1
+        LET pos TO 0
+        WHILE pos IS LESS THAN n
+            IF shortest_paths[pos] IS STRICTLY LESS THAN disappear[pos]
+                output[pos] ← shortest_paths[pos]
+            END IF
+            INCREMENT pos BY 1
+        END WHILE
+
+        RETURN output
+    END FUNCTION
+END CLASS

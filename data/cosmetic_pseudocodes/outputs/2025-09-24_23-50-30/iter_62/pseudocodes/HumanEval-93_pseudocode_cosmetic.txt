@@ -1,0 +1,42 @@
+```
+FUNCTION encode(text)
+  SET mapping TO EMPTY DICTIONARY
+  SET vowel_list TO "aeiouAEIOU"
+  
+  DEFINE build_map(index)
+    IF index EQUALS LENGTH OF vowel_list THEN
+      RETURN
+    ENDIF
+    SET current_char TO CHAR_AT vowel_list index
+    SET mapping[current_char] TO CHAR_FROM_ASCII(ASCII_OF(current_char) + 2)
+    CALL build_map(index + 1)
+  ENDDEFINE
+  
+  CALL build_map(0)
+  
+  DEFINE swap_case_recursive(pos, accumulated)
+    IF pos EQUALS LENGTH OF text THEN
+      RETURN accumulated
+    ENDIF
+    SET c TO CHAR_AT text pos
+    SET swapped_char TO IF c EQUALS LOWERCASE c THEN UPPERCASE c ELSE LOWERCASE c ENDIF
+    RETURN swap_case_recursive(pos + 1, accumulated + swapped_char)
+  ENDDEFINE
+  
+  SET transformed_text TO swap_case_recursive(0, "")
+  
+  DEFINE replace_chars(index, result)
+    IF index EQUALS LENGTH OF transformed_text THEN
+      RETURN result
+    ENDIF
+    SET ch TO CHAR_AT transformed_text index
+    IF mapping CONTAINS_KEY ch THEN
+      RETURN replace_chars(index + 1, result + mapping[ch])
+    ELSE
+      RETURN replace_chars(index + 1, result + ch)
+    ENDIF
+  ENDDEFINE
+  
+  RETURN replace_chars(0, "")
+END FUNCTION
+```

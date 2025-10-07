@@ -1,0 +1,38 @@
+FUNCTION check_dict_case(dict_obj)
+    SET flag_empty TO (LENGTH OF dict_obj KEYS)
+    IF flag_empty == 0x0 THEN
+        RETURN False
+    ELSE
+        SET mode_state TO "start"
+        SET iter_index TO 0
+        SET key_list TO dict_obj KEYS
+        WHILE iter_index < LENGTH OF key_list
+            SET current_key TO key_list.at(iter_index)
+            
+            SWITCH (TRUE)
+                CASE (NOT current_key INSTANCE_OF STRING):
+                    mode_state = "mixed"
+                    BREAK WHILE
+                CASE (mode_state == "start"):
+                    IF current_key == current_key TO UPPERCASE THEN
+                        mode_state = "upper"
+                    ELSE IF current_key == current_key TO LOWERCASE THEN
+                        mode_state = "lower"
+                    ELSE
+                        BREAK WHILE
+                    END IF
+                CASE ((mode_state == "upper" AND NOT current_key == current_key TO UPPERCASE) 
+                      OR (mode_state == "lower" AND NOT current_key == current_key TO LOWERCASE)):
+                    mode_state = "mixed"
+                    BREAK WHILE
+                DEFAULT:
+                    BREAK WHILE
+            END SWITCH
+            
+            SET iter_index TO iter_index + 1
+        END WHILE
+        
+        SET result_flag TO (mode_state == "upper") OR (mode_state == "lower")
+        RETURN result_flag
+    END IF
+END FUNCTION

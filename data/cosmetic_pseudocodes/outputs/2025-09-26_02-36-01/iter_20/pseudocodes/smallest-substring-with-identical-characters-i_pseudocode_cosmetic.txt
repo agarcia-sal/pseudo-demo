@@ -1,0 +1,87 @@
+CLASS Solution  
+    FUNCTION minLength(s parameter, numOps parameter)  
+        FUNCTION longest_uniform_substring(s parameter)  
+            FUNCTION equal_chars(a parameter, b parameter)  
+                RETURN (a EQUALS b)  
+            END FUNCTION  
+            
+            SET max_consecutive TO 0  
+            SET streak_count TO 1  
+            
+            SET idx TO 1  
+            WHILE idx LESS THAN LENGTH(s)  
+                IF equal_chars(s[idx], s[idx - 1])  
+                    SET streak_count TO streak_count PLUS 1  
+                ELSE  
+                    IF max_consecutive LESS THAN streak_count  
+                        SET max_consecutive TO streak_count  
+                    END IF  
+                    SET streak_count TO 1  
+                END IF  
+                SET idx TO idx PLUS 1  
+            END WHILE  
+            
+            IF max_consecutive GREATER THAN streak_count  
+                RETURN max_consecutive  
+            ELSE  
+                RETURN streak_count  
+            END IF  
+        END FUNCTION  
+        
+        FUNCTION bitcount(x parameter)  
+            SET count_accumulator TO 0  
+            SET temp_value TO x  
+            WHILE temp_value GREATER THAN 0  
+                SET count_accumulator TO count_accumulator PLUS (temp_value BITWISE_AND 1)  
+                SET temp_value TO temp_value RIGHT_SHIFT 1  
+            END WHILE  
+            RETURN count_accumulator  
+        END FUNCTION  
+        
+        SET minimal_length TO LENGTH(s)  
+        SET upper_limit TO 1 LEFT_SHIFT LENGTH(s)  
+        
+        REPEAT  
+            SET counter TO 0  
+            LOOP  
+                EXIT WHEN counter GREATER_OR_EQUAL upper_limit  
+                
+                IF bitcount(counter) GREATER_THAN numOps  
+                    SET counter TO counter PLUS 1  
+                    CONTINUE  
+                END IF  
+                
+                SET array_s TO []  
+                SET pos TO 0  
+                WHILE pos LESS_THAN LENGTH(s)  
+                    APPEND s[pos] TO array_s  
+                    SET pos TO pos PLUS 1  
+                END WHILE  
+                
+                SET flip_pos TO 0  
+                LOOP  
+                    EXIT WHEN flip_pos GREATER_OR_EQUAL LENGTH(s)  
+                    SET mask TO 1 LEFT_SHIFT flip_pos  
+                    IF (counter BITWISE_AND mask) NOT_EQUALS 0  
+                        IF array_s[flip_pos] EQUALS '0'  
+                            SET array_s[flip_pos] TO '1'  
+                        ELSE  
+                            SET array_s[flip_pos] TO '0'  
+                        END IF  
+                    END IF  
+                    SET flip_pos TO flip_pos PLUS 1  
+                END LOOP  
+                
+                SET candidate TO longest_uniform_substring(array_s)  
+                IF minimal_length GREATER_THAN candidate  
+                    SET minimal_length TO candidate  
+                END IF  
+                
+                SET counter TO counter PLUS 1  
+            END LOOP  
+            BREAK  
+        UNTIL FALSE  
+        
+        RETURN minimal_length  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+        DEFINE knightSteps AS list containing pairs (+2,+1), (+2,−1), (−2,+1), (−2,−1), (+1,+2), (+1,−2), (−1,+2), (−1,−2)
+        INITIALIZE pawnsSet AS empty set
+        INITIALIZE i TO 0
+        WHILE i LESS THAN LENGTH(positions)
+            SET posTuple TO (positions[i][0], positions[i][1])
+            INSERT posTuple INTO pawnsSet
+            SET i TO i PLUS 1
+        END WHILE
+        SET totalPawns TO SIZE of pawnsSet
+
+        FUNCTION dp(x, y, mask, isAlice)
+            IF mask EQUALS 0 THEN RETURN 0
+            IF isAlice THEN maxMinVal ASSIGN 0 ELSE maxMinVal ASSIGN +∞ END IF
+
+            SET idx TO 0
+            WHILE idx LESS THAN totalPawns
+                SET bitMask TO 1 LEFT-SHIFTED BY idx
+                IF (mask BITWISE-AND bitMask) NOT EQUALS 0 THEN
+                    SET pawnX TO positions[idx][0]
+                    SET pawnY TO positions[idx][1]
+                    INITIALIZE bfsQueue TO list containing (x, y, 0)
+                    INITIALIZE visitedCells TO empty set
+                    INSERT (x, y) INTO visitedCells
+                    SET reached TO FALSE
+
+                    WHILE LENGTH OF bfsQueue GREATER THAN 0 AND NOT reached
+                        REMOVE first FROM bfsQueue INTO currX, currY, currSteps
+                        IF currX EQUALS pawnX AND currY EQUALS pawnY THEN
+                            SET reached TO TRUE
+                            BREAK
+                        END IF
+
+                        FOR each step IN knightSteps
+                            SET nextX TO currX PLUS step[0]
+                            SET nextY TO currY PLUS step[1]
+                            IF nextX GREATER OR EQUAL 0 AND nextX LESS THAN 50 AND nextY GREATER OR EQUAL 0 AND nextY LESS THAN 50 THEN
+                                IF (nextX, nextY) NOT IN visitedCells THEN
+                                    INSERT (nextX, nextY) INTO visitedCells
+                                    APPEND (nextX, nextY, currSteps PLUS 1) TO bfsQueue
+                                END IF
+                            END IF
+                        END FOR
+                    END WHILE
+
+                    IF reached THEN
+                        SET updatedMask TO mask XOR bitMask
+                        SET nextTurn TO NOT isAlice
+                        SET candidateVal TO currSteps PLUS dp(pawnX, pawnY, updatedMask, nextTurn)
+
+                        IF isAlice THEN
+                            IF maxMinVal LESS THAN candidateVal THEN maxMinVal ASSIGN candidateVal END IF
+                        ELSE
+                            IF maxMinVal GREATER THAN candidateVal THEN maxMinVal ASSIGN candidateVal END IF
+                        END IF
+                    END IF
+                END IF
+                SET idx TO idx PLUS 1
+            END WHILE
+
+            RETURN maxMinVal
+        END FUNCTION
+
+        SET fullMask TO (1 LEFT-SHIFTED BY totalPawns) MINUS 1
+        RETURN dp(kx, ky, fullMask, TRUE)
+    END FUNCTION
+END CLASS

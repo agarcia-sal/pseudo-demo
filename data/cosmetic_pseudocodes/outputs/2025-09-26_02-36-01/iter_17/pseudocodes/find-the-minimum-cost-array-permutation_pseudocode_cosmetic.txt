@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION findPermutation(nums)
+        FUNCTION dfs(currentMask, lastVal)
+            IF currentMask = (1 << LENGTH(nums)) - 1 THEN
+                RETURN ABS(lastVal - nums[0])
+            ELSE
+                VAR minimumDistance := +∞
+                VAR index := 0
+                WHILE TRUE
+                    IF index >= LENGTH(nums) THEN
+                        BREAK
+                    END IF
+                    IF ((currentMask >> index) & 1) = 0 THEN
+                        VAR trial := ABS(lastVal - nums[index]) + dfs(currentMask | (1 << index), index)
+                        IF trial < minimumDistance THEN
+                            minimumDistance := trial
+                        END IF
+                    END IF
+                    index := index + 1
+                END WHILE
+                RETURN minimumDistance
+            END IF
+        END FUNCTION
+
+        FUNCTION g(accumMask, previousIndex)
+            ans.APPEND(previousIndex)
+            IF accumMask = (1 << LENGTH(nums)) - 1 THEN
+                RETURN
+            ELSE
+                VAR target := dfs(accumMask, previousIndex)
+                VAR i := 0
+                LOOP
+                    EXIT WHEN i = LENGTH(nums)
+                    IF ((accumMask >> i) & 1) = 0 THEN
+                        VAR val := ABS(previousIndex - nums[i]) + dfs(accumMask | (1 << i), i)
+                        IF val = target THEN
+                            g(accumMask | (1 << i), i)
+                            BREAK
+                        END IF
+                    END IF
+                    i := i + 1
+                END LOOP
+            END IF
+        END FUNCTION
+
+        VAR lengthNums := LENGTH(nums)
+        VAR ans := []
+        g(1 << 0, 0)
+        RETURN ans
+    END FUNCTION
+END CLASS

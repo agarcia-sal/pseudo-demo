@@ -1,0 +1,60 @@
+```pseudocode
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+        DEFINE graph AS list
+        FOR i FROM 0 TO LENGTH(nums) - 1 DO
+            INSERT empty list AT END OF graph
+        END FOR
+
+        FOR EACH triple (alpha, beta, omega) IN edges DO
+            INSERT (beta, omega) AT END OF graph[alpha]
+            INSERT (alpha, omega) AT END OF graph[beta]
+        END FOR
+
+        FUNCTION dfs(delta, gamma, sigma, eta)
+            DECLARE maxLen REFERENCE TO maxLength
+            DECLARE minCount REFERENCE TO minNodes
+
+            IF nums[delta] EXISTS IN lastSeenDepth THEN
+                SET priorDepth TO lastSeenDepth[nums[delta]]
+            ELSE
+                SET priorDepth TO 0
+            END IF
+
+            SET lastSeenDepth[nums[delta]] TO eta
+
+            IF sigma < priorDepth THEN
+                SET sigma TO priorDepth
+            END IF
+
+            SET currentLength TO prefix[-1] - prefix[sigma]
+            SET currentNodes TO eta - sigma
+
+            IF currentLength > maxLen OR (currentLength = maxLen AND currentNodes < minCount) THEN
+                SET maxLen TO currentLength
+                SET minCount TO currentNodes
+            END IF
+
+            FOR EACH pair (kappa, lambda) IN graph[delta] DO
+                IF kappa = gamma THEN
+                    CONTINUE
+                END IF
+                APPEND prefix[-1] + lambda TO prefix
+                CALL dfs(kappa, delta, sigma, eta + 1)
+                REMOVE LAST ELEMENT FROM prefix
+            END FOR
+
+            SET lastSeenDepth[nums[delta]] TO priorDepth
+        END FUNCTION
+
+        SET maxLength TO 0
+        SET minNodes TO 1
+        SET prefix TO [0]
+        SET lastSeenDepth TO EMPTY DICTIONARY
+
+        CALL dfs(0, -1, 0, 1)
+
+        RETURN [maxLength, minNodes]
+    END FUNCTION
+END CLASS
+```

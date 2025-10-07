@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION validSubstringCount(word1, word2)
+        IMPORT collections.Counter AS CounterUtil
+
+        DECLARE freqMap AS CounterUtil(word2)
+        DECLARE winMap AS CounterUtil()
+        DECLARE totalNeeded AS 0
+        DECLARE matched AS 0
+        DECLARE startIdx AS 0
+        DECLARE resultCount AS 0
+        DECLARE pos AS 0
+
+        LOOP
+            IF pos >= LENGTH(word1) THEN
+                BREAK
+            END IF
+
+            SET currentChar TO word1[pos]
+            SET winMap[currentChar] TO (winMap[currentChar] + 1)
+
+            IF ((freqMap[currentChar] IS DEFINED) AND (winMap[currentChar] = freqMap[currentChar])) THEN
+                SET matched TO (matched + 1)
+            END IF
+
+            WHILE (matched = totalNeeded) AND ((pos + 1 - startIdx) >= LENGTH(word2))
+                SET resultCount TO (resultCount + (LENGTH(word1) - pos))
+
+                SET leftChar TO word1[startIdx]
+                SET winMap[leftChar] TO (winMap[leftChar] - 1)
+
+                IF ((freqMap[leftChar] IS DEFINED) AND (winMap[leftChar] < freqMap[leftChar])) THEN
+                    SET matched TO (matched - 1)
+                END IF
+
+                SET startIdx TO (startIdx + 1)
+            END WHILE
+
+            SET pos TO (pos + 1)
+        END LOOP
+
+        SET totalNeeded TO LENGTH(freqMap)
+        RETURN resultCount
+    END FUNCTION
+END CLASS

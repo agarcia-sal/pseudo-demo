@@ -1,0 +1,150 @@
+CLASS Solution  
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer  
+        PROCEDURE buildFactorials(limit integer, accList list, idx integer)  
+            IF idx GREATER THAN limit THEN  
+                RETURN accList  
+            ELSE  
+                SET prevVal TO ( IF idx EQUALS zero THEN 1 ELSE idx MULTIPLIED BY accList AT index idx MINUS one )  
+                CALL buildFactorials limit, accList APPEND prevVal, idx PLUS one  
+            END IF  
+        END PROCEDURE  
+
+        FUNCTION factorialList(size integer) RETURNS list  
+            RETURN buildFactorials(size, [1], 1)  
+        END FUNCTION  
+
+        FUNCTION freqCount(txt string) RETURNS map  
+            FUNCTION helper(i integer, m map) RETURNS map  
+                IF i LESS THAN zero THEN  
+                    RETURN m  
+                ELSE  
+                    SET ch TO txt AT index i  
+                    IF ch IN m THEN  
+                        SET updatedCount TO m AT key ch PLUS one  
+                    ELSE  
+                        SET updatedCount TO 1  
+                    END IF  
+                    SET newMap TO COPY OF m  
+                    SET newMap AT key ch TO updatedCount  
+                    RETURN helper(i MINUS one, newMap)  
+                END IF  
+            END FUNCTION  
+            RETURN helper(LENGTH OF txt MINUS one, empty map)  
+        END FUNCTION  
+
+        SET factorials TO factorialList(n)  
+
+        SET resultSum TO 0  
+
+        SET visitedSet TO empty set  
+
+        SET halfBase TO 1  
+        REPEAT n MINUS one DIVIDED BY two TIMES  
+            SET halfBase TO halfBase MULTIPLIED BY 10  
+        END REPEAT  
+
+        FUNCTION reverseString(s string) RETURNS string  
+            FUNCTION revHelper(i integer, acc string) RETURNS string  
+                IF i LESS THAN zero THEN  
+                    RETURN acc  
+                ELSE  
+                    RETURN revHelper(i MINUS one, CONCATENATE acc WITH s AT index i)  
+                END IF  
+            END FUNCTION  
+            RETURN revHelper(LENGTH OF s MINUS one, "")  
+        END FUNCTION  
+
+        FUNCTION substringFrom(s string, startIdx integer) RETURNS string  
+            FUNCTION subHelper(i integer, acc string) RETURNS string  
+                IF i GREATER THAN LENGTH OF s MINUS one THEN  
+                    RETURN acc  
+                ELSE  
+                    RETURN subHelper(i PLUS one, CONCATENATE acc WITH s AT index i)  
+                END IF  
+            END FUNCTION  
+            RETURN subHelper(startIdx, "")  
+        END FUNCTION  
+
+        FUNCTION sortStringAscending(inputStr string) RETURNS string  
+            SET charsList TO []  
+            FOR idx FROM 0 TO LENGTH OF inputStr MINUS one  
+                APPEND inputStr AT index idx TO charsList  
+            END FOR  
+            FOR pass FROM LENGTH OF charsList MINUS one DOWNTO 1 STEP -1  
+                FOR pos FROM 0 TO pass MINUS one  
+                    IF charsList AT pos GREATER THAN charsList AT pos PLUS one THEN  
+                        SET tempChar TO charsList AT pos  
+                        SET charsList AT pos TO charsList AT pos PLUS one  
+                        SET charsList AT pos PLUS one TO tempChar  
+                    END IF  
+                END FOR  
+            END FOR  
+            SET sortedStr TO ""  
+            FOR chIdx FROM 0 TO LENGTH OF charsList MINUS one  
+                SET sortedStr TO CONCATENATE sortedStr WITH charsList AT chIdx  
+            END FOR  
+            RETURN sortedStr  
+        END FUNCTION  
+
+        FUNCTION dividesWithoutRemainder(num integer, divisor integer) RETURNS boolean  
+            RETURN (num MINUS (num DIVIDED BY divisor MULTIPLIED BY divisor)) EQUALS 0  
+        END FUNCTION  
+
+        FUNCTION calculateRes(freqMap map, totalLen integer, factorialList list) RETURNS integer  
+            IF ('0' IN freqMap) AND (freqMap AT key '0' GREATER THAN zero) THEN  
+                SET zeroCount TO freqMap AT key '0'  
+                SET initialVal TO (totalLen MINUS zeroCount) MULTIPLIED BY factorialList AT index totalLen MINUS one  
+            ELSE  
+                SET initialVal TO factorialList AT index totalLen  
+            END IF  
+            FUNCTION divideAll(factors list, val integer) RETURNS integer  
+                IF LENGTH OF factors EQUALS 0 THEN  
+                    RETURN val  
+                ELSE  
+                    SET head TO factors AT index 0  
+                    SET tail TO SUBLIST of factors FROM index 1 TO end  
+                    RETURN divideAll(tail, val DIVIDED BY factorialList AT index head)  
+                END IF  
+            END FUNCTION  
+            SET freqValuesList TO []  
+            FOR key IN freqMap KEYS  
+                APPEND freqMap AT key TO freqValuesList  
+            END FOR  
+            RETURN divideAll(freqValuesList, initialVal)  
+        END FUNCTION  
+
+        FUNCTION buildPalindrome(num integer) RETURNS string  
+            SET stringNum TO STRING OF num  
+            SET revStr TO reverseString(stringNum)  
+            SET extraPart TO substringFrom(revStr, n MODULO 2)  
+            RETURN stringNum CONCATENATED WITH extraPart  
+        END FUNCTION  
+
+        FUNCTION iterateAndAccumulate(current integer, maxVal integer, accum integer, visited set) RETURNS integer  
+            IF current GREATER THAN maxVal THEN  
+                RETURN accum  
+            ELSE  
+                SET palindromeCandidate TO buildPalindrome(current)  
+                IF NOT dividesWithoutRemainder(TO_INTEGER(palindromeCandidate), k) THEN  
+                    RETURN iterateAndAccumulate(current PLUS one, maxVal, accum, visited)  
+                END IF  
+                SET sortedForm TO sortStringAscending(palindromeCandidate)  
+                IF sortedForm IN visited THEN  
+                    RETURN iterateAndAccumulate(current PLUS one, maxVal, accum, visited)  
+                ELSE  
+                    SET newVisited TO COPY OF visited  
+                    ADD sortedForm TO newVisited  
+                    SET frequencyMap TO freqCount(sortedForm)  
+                    SET resVal TO calculateRes(frequencyMap, n, factorials)  
+                    RETURN iterateAndAccumulate(current PLUS one, maxVal, accum PLUS resVal, newVisited)  
+                END IF  
+            END IF  
+        END FUNCTION  
+
+        SET maxRange TO HALFBase MULTIPLIED BY 10 MINUS 1  
+
+        SET finalAnswer TO iterateAndAccumulate(halfBase, maxRange, resultSum, visitedSet)  
+
+        RETURN finalAnswer  
+    END FUNCTION  
+END CLASS

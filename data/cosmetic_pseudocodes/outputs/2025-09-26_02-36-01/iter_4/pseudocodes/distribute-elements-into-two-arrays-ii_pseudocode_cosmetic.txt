@@ -1,0 +1,109 @@
+CLASS Solution
+    FUNCTION resultArray(nums)
+        DECLARE groupA AS new list
+        DECLARE groupB AS new list
+        DECLARE sortedGroupA AS new list
+        DECLARE sortedGroupB AS new list
+
+        ADD nums[0] INTO groupA
+        ADD nums[1] INTO groupB
+        ADD nums[0] INTO sortedGroupA
+        ADD nums[1] INTO sortedGroupB
+
+        FUNCTION greaterCount(array, value)
+            DECLARE insertPosition AS 0
+            DECLARE leftIndex AS 0
+            DECLARE rightIndex AS LENGTH(array)
+            WHILE leftIndex < rightIndex
+                DECLARE midIndex AS (leftIndex + rightIndex) DIVIDED BY 2
+                IF array[midIndex] <= value THEN
+                    SET leftIndex TO midIndex + 1
+                ELSE
+                    SET rightIndex TO midIndex
+                END IF
+            END WHILE
+            SET insertPosition TO leftIndex
+            RETURN LENGTH(array) - insertPosition
+        END FUNCTION
+
+        DECLARE idx AS 2
+        WHILE idx <= LENGTH(nums) - 1
+            DECLARE currentVal AS nums[idx]
+            DECLARE countA AS greaterCount(sortedGroupA, currentVal)
+            DECLARE countB AS greaterCount(sortedGroupB, currentVal)
+
+            IF countA > countB THEN
+                ADD currentVal TO groupA
+                DECLARE insertIdxA AS 0
+                DECLARE l AS 0
+                DECLARE r AS LENGTH(sortedGroupA)
+                WHILE l < r
+                    DECLARE m AS (l + r) DIVIDED BY 2
+                    IF sortedGroupA[m] < currentVal THEN
+                        SET l TO m + 1
+                    ELSE
+                        SET r TO m
+                    END IF
+                END WHILE
+                SET insertIdxA TO l
+                INSERT currentVal INTO sortedGroupA AT insertIdxA
+            ELSE IF countA < countB THEN
+                ADD currentVal TO groupB
+                DECLARE insertIdxB AS 0
+                DECLARE low AS 0
+                DECLARE high AS LENGTH(sortedGroupB)
+                WHILE low < high
+                    DECLARE mid AS (low + high) DIVIDED BY 2
+                    IF sortedGroupB[mid] < currentVal THEN
+                        SET low TO mid + 1
+                    ELSE
+                        SET high TO mid
+                    END IF
+                END WHILE
+                SET insertIdxB TO low
+                INSERT currentVal INTO sortedGroupB AT insertIdxB
+            ELSE
+                IF LENGTH(groupA) <= LENGTH(groupB) THEN
+                    ADD currentVal TO groupA
+                    DECLARE insIdxA AS 0
+                    DECLARE l2 AS 0
+                    DECLARE r2 AS LENGTH(sortedGroupA)
+                    WHILE l2 < r2
+                        DECLARE m2 AS (l2 + r2) DIVIDED BY 2
+                        IF sortedGroupA[m2] < currentVal THEN
+                            SET l2 TO m2 + 1
+                        ELSE
+                            SET r2 TO m2
+                        END IF
+                    END WHILE
+                    SET insIdxA TO l2
+                    INSERT currentVal INTO sortedGroupA AT insIdxA
+                ELSE
+                    ADD currentVal TO groupB
+                    DECLARE insIdxB AS 0
+                    DECLARE lw AS 0
+                    DECLARE hg AS LENGTH(sortedGroupB)
+                    WHILE lw < hg
+                        DECLARE md AS (lw + hg) DIVIDED BY 2
+                        IF sortedGroupB[md] < currentVal THEN
+                            SET lw TO md + 1
+                        ELSE
+                            SET hg TO md
+                        END IF
+                    END WHILE
+                    SET insIdxB TO lw
+                    INSERT currentVal INTO sortedGroupB AT insIdxB
+                END IF
+            END IF
+
+            SET idx TO idx + 1
+        END WHILE
+
+        DECLARE combinedList AS new list
+        SET combinedList TO groupA
+        FOR EACH element IN groupB
+            ADD element TO combinedList
+        END FOR
+        RETURN combinedList
+    END FUNCTION
+END CLASS

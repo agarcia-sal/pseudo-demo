@@ -1,0 +1,28 @@
+```
+FUNCTION get_row(matrix, key)
+    FUNCTION collect_positions(row_pos, col_pos, accum)
+        IF row_pos >= SIZE(matrix) THEN
+            RETURN accum
+        ELSE
+            FUNCTION process_cols(col_pos_inner, accum_inner)
+                IF col_pos_inner >= SIZE(matrix AT row_pos) THEN
+                    RETURN accum_inner
+                ELSE
+                    LET accum_updated = IF (matrix AT row_pos AT col_pos_inner) = key THEN
+                                            ADD (row_pos, col_pos_inner) TO accum_inner
+                                        ELSE
+                                            accum_inner
+                    RETURN process_cols(col_pos_inner + 1, accum_updated)
+                ENDIF
+            END FUNCTION
+            LET accum_after_cols = process_cols(0, accum)
+            RETURN collect_positions(row_pos + 1, col_pos, accum_after_cols)
+        ENDIF
+    END FUNCTION
+
+    LET collected_coords = collect_positions(0, 0, [])
+    LET ordered_coords_desc = SORT collected_coords BY ELEMENT AT 1 IN DESCENDING ORDER
+    LET ordered_coords = SORT ordered_coords_desc BY ELEMENT AT 0 IN ASCENDING ORDER
+    RETURN ordered_coords
+END FUNCTION
+```

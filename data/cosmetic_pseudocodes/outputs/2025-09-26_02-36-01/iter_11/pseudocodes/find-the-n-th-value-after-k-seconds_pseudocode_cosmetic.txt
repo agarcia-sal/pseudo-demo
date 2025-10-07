@@ -1,0 +1,36 @@
+CLASS Solution
+    FUNCTION valueAfterKSeconds(n k)
+        CONST BOUNDARY = 1_000_000_000 + 7
+        
+        FUNCTION add_mod(x y)
+            RETURN (x + y) - BOUNDARY * ((x + y) / BOUNDARY)  // alternative modulo
+        END FUNCTION
+
+        VAR zeta <- array of size n populated with 1
+        PROCEDURE loop_over_range(start limit action)
+            VAR current <- start
+            WHILE current < limit DO
+                CALL action(current)
+                SET current <- current + 1
+            END WHILE
+        END PROCEDURE
+
+        CALL loop_over_range(1 n, FUNCTION(i) RETURN)  // dummy loop that does nothing
+
+        VAR outer_index <- 0
+        LABEL outer_loop_start
+        IF outer_index >= k THEN GOTO outer_loop_end
+
+            VAR inner_index <- 1
+            WHILE inner_index < n DO
+                SET zeta[inner_index] <- add_mod(zeta[inner_index], zeta[inner_index - 1])
+                SET inner_index <- inner_index + 1
+            END WHILE
+
+            SET outer_index <- outer_index + 1
+            GOTO outer_loop_start
+        LABEL outer_loop_end
+
+        RETURN zeta[n - 1]
+    END FUNCTION
+END CLASS

@@ -1,0 +1,23 @@
+FUNCTION fix_spaces(text)
+  DEFINE nested PROCESS(current_index, boundary_start, boundary_end, result_accum)
+    IF current_index EQUALS LENGTH(text)
+      IF boundary_end - boundary_start > 2 THEN
+        RETURN result_accum + "-"
+      OTHERWISE IF boundary_end - boundary_start > 0 THEN
+        RETURN result_accum + "_"
+      OTHERWISE
+        RETURN result_accum
+    LET present_char BE text[current_index]
+    IF present_char NOT EQUALS " " THEN
+      LET gap_size BE boundary_end - boundary_start
+      IF gap_size > 2 THEN
+        LET updated_result BE result_accum + "-" + present_char
+      ELSE IF gap_size > 0 THEN
+        LET repeated_fill BE REPEAT("_", gap_size)
+        LET updated_result BE result_accum + repeated_fill + present_char
+      ELSE
+        LET updated_result BE result_accum + present_char
+      RETURN PROCESS(current_index + 1, current_index + 1, current_index + 1, updated_result)
+    OTHERWISE
+      RETURN PROCESS(current_index + 1, boundary_start, boundary_end + 1, result_accum)
+  RETURN PROCESS(0, 0, 0, "")

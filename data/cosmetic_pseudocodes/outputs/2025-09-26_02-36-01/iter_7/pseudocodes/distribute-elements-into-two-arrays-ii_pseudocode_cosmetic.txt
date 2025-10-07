@@ -1,0 +1,61 @@
+CLASS Solution  
+    FUNCTION resultArray(nums)  
+        DEFINE ZERO AS 1 - 1  
+        DEFINE ONE AS ZERO + 1  
+        DEFINE TWO AS ONE + ONE  
+        DEFINE LENGTH_NUMS AS LENGTH OF nums  
+        
+        SET listA TO [nums[ZERO]]  
+        SET listB TO [nums[ONE]]  
+        SET sortedA TO [nums[ZERO]]  
+        SET sortedB TO [nums[ONE]]  
+        
+        FUNCTION greaterCount(arr, val)  
+            DEFINE FUNCTION binarySearchRight(array, target, left, right)  
+                IF left GREATER THAN OR EQUAL TO right THEN  
+                    RETURN left  
+                ELSE  
+                    SET mid TO left + ((right - left) DIV 2)  
+                    IF target LESS THAN array[mid] THEN  
+                        RETURN binarySearchRight(array, target, left, mid)  
+                    ELSE  
+                        RETURN binarySearchRight(array, target, mid + 1, right)  
+                    END IF  
+                END IF  
+            END FUNCTION  
+            
+            SET insertionPos TO binarySearchRight(arr, val, ZERO, LENGTH OF arr)  
+            RETURN (LENGTH OF arr) - insertionPos  
+        END FUNCTION  
+        
+        SET index TO TWO  
+        WHILE index LESS THAN LENGTH_NUMS DO  
+            SET currentVal TO nums[index]  
+            SET valCountA TO greaterCount(sortedA, currentVal)  
+            SET valCountB TO greaterCount(sortedB, currentVal)  
+            
+            IF valCountA GREATER THAN valCountB THEN  
+                APPEND currentVal TO listA  
+                SET insertPosA TO binarySearchRight(sortedA, currentVal, ZERO, LENGTH OF sortedA)  
+                INSERT currentVal INTO sortedA AT insertPosA  
+            ELSE IF valCountB GREATER THAN valCountA THEN  
+                APPEND currentVal TO listB  
+                SET insertPosB TO binarySearchRight(sortedB, currentVal, ZERO, LENGTH OF sortedB)  
+                INSERT currentVal INTO sortedB AT insertPosB  
+            ELSE  
+                IF LENGTH OF listA LESS THAN OR EQUAL TO LENGTH OF listB THEN  
+                    APPEND currentVal TO listA  
+                    SET insertPosA TO binarySearchRight(sortedA, currentVal, ZERO, LENGTH OF sortedA)  
+                    INSERT currentVal INTO sortedA AT insertPosA  
+                ELSE  
+                    APPEND currentVal TO listB  
+                    SET insertPosB TO binarySearchRight(sortedB, currentVal, ZERO, LENGTH OF sortedB)  
+                    INSERT currentVal INTO sortedB AT insertPosB  
+                END IF  
+            END IF  
+            SET index TO index + 1  
+        END WHILE  
+        
+        RETURN listA + listB  
+    END FUNCTION  
+END CLASS

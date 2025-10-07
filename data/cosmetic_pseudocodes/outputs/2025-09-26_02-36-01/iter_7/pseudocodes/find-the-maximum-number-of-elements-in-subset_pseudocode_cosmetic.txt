@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION maximumLength(nums)
+        LET freqMap BE an empty mapping from element to count
+        FOR idx FROM 0 TO (length of nums) - 1 DO
+            LET currentElem BE nums[idx]
+            IF currentElem EXISTS IN freqMap THEN
+                SET freqMap[currentElem] TO freqMap[currentElem] + 1
+            ELSE
+                SET freqMap[currentElem] TO 1
+            END IF
+        END FOR
+
+        LET memo DP BE an empty mapping from element to integer
+
+        FUNCTION recurHelper(k)
+            IF k NOT IN freqMap THEN
+                RETURN 0
+            ELSE
+                IF freqMap[k] < 2 THEN
+                    IF freqMap[k] >= 1 THEN
+                        RETURN 1
+                    ELSE
+                        RETURN 0
+                    END IF
+                END IF
+            END IF
+
+            IF k IN memo DP THEN
+                RETURN memo DP[k]
+            END IF
+
+            LET sqrVal BE k * k
+            LET rVal BE recurHelper(sqrVal) + 2
+            SET memo DP[k] TO rVal
+            RETURN rVal
+        END FUNCTION
+
+        LET resultMax BE 1
+        LET keys LIST BE an empty list
+        FOR key IN freqMap DO
+            APPEND key TO keys LIST
+        END FOR
+
+        LET idxRev BE length of keys LIST - 1
+        WHILE idxRev >= 0 DO
+            LET elementVal BE keys LIST[idxRev]
+            IF elementVal = 1 THEN
+                LET freqVal BE freqMap[elementVal]
+                LET remainderVal BE freqVal MOD (1 + 1)
+                LET subtractionVal BE remainderVal * 2
+                LET candidateLen BE freqVal - 1 - subtractionVal
+                IF resultMax < candidateLen THEN
+                    SET resultMax TO candidateLen
+                END IF
+            ELSE
+                LET candidateLen2 BE recurHelper(elementVal)
+                IF resultMax < candidateLen2 THEN
+                    SET resultMax TO candidateLen2
+                END IF
+            END IF
+            DECREMENT idxRev BY 1
+        END WHILE
+
+        RETURN resultMax
+    END FUNCTION
+END CLASS

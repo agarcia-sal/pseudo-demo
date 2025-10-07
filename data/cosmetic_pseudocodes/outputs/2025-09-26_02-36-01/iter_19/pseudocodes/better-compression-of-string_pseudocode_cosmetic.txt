@@ -1,0 +1,55 @@
+CLASS Solution  
+  FUNCTION betterCompression(compressed)  
+    DEFINE FUNCTION toDigit(c)  
+      RETURN (ASC(c) - ASC("0"))  
+    END FUNCTION
+
+    SET accumulator TO EMPTY DICTIONARY WITH DEFAULT VALUE 0
+    SET tempHolder TO ""
+    SET countHolder TO 0
+    SET idx TO 0
+
+    WHILE idx < LENGTH(compressed) DO
+      SET currentSymbol TO compressed[idx]
+      IF ( (currentSymbol >= "A" AND currentSymbol <= "Z") OR (currentSymbol >= "a" AND currentSymbol <= "z") ) THEN
+        IF tempHolder <> "" THEN
+          SET accumulator[tempHolder] TO accumulator[tempHolder] + countHolder
+        END IF
+        SET tempHolder TO currentSymbol
+        SET countHolder TO 0
+      ELSE
+        SET partialSum TO (countHolder * 10)
+        SET countHolder TO partialSum + toDigit(currentSymbol)
+      END IF
+      SET idx TO idx + 1
+    END WHILE
+
+    IF tempHolder <> "" THEN
+      SET accumulator[tempHolder] TO accumulator[tempHolder] + countHolder
+    END IF
+
+    SET resultSegments TO EMPTY LIST
+    SET sortedKeys TO SORTED LIST OF KEYS(accumulator)
+    SET position TO 0
+
+    FUNCTION buildSegment(keyChar)  
+      RETURN keyChar + STRING(accumulator[keyChar])  
+    END FUNCTION
+
+    REPEAT
+      IF position >= LENGTH(sortedKeys) THEN
+        EXIT REPEAT
+      END IF
+
+      APPEND buildSegment(sortedKeys[position]) TO resultSegments
+      SET position TO position + 1
+    UNTIL FALSE
+
+    SET finalResult TO ""
+    FOR EACH segment IN resultSegments DO
+      SET finalResult TO finalResult + segment
+    END FOR
+
+    RETURN finalResult
+  END FUNCTION
+END CLASS

@@ -1,0 +1,44 @@
+FUNCTION file_name_check(original_file)
+  SET allowed_endings := {'dll', 'exe', 'txt'}
+
+  DEFINE FUNCTION has_max_digits(subject, limit)
+    SET accumulator := 0
+    SET position := 0
+
+    WHILE position < LENGTH(subject)
+      IF subject[position] IS_DIGIT
+        accumulator := accumulator + 1
+        IF accumulator > limit
+          EXECUTE BREAK
+        END IF
+      END IF
+      position := position + 1
+    END WHILE
+
+    EXECUTE accumulator <= limit
+  END FUNCTION
+
+  SET components := SPLIT(original_file BY '.')
+
+  IF (LENGTH(components) != 2) 
+    EXECUTE RETURN 'No'
+  END IF
+
+  IF NOT (components[1] IN allowed_endings)
+    EXECUTE RETURN 'No'
+  END IF
+
+  IF NOT (LENGTH( components[0] ) > 0 )
+    EXECUTE RETURN 'No'
+  END IF
+
+  IF NOT (LOWERCASE( components[0][0] ) >= 'a' AND LOWERCASE( components[0][0] ) <= 'z')
+    EXECUTE RETURN 'No'
+  END IF
+
+  IF NOT has_max_digits(components[0], 3)
+    EXECUTE RETURN 'No'
+  END IF
+
+  EXECUTE RETURN 'Yes'
+END FUNCTION

@@ -1,0 +1,96 @@
+CLASS Solution  
+    FUNCTION maxTargetNodes(edges1, edges2)  
+        DECLARE adjDictOne = default dict with list default  
+        DECLARE adjDictTwo = default dict with list default  
+  
+        REPEAT indefinitelyIndex1 IN range length of edges1  
+            DECLARE firstNode = edges1[indefinitelyIndex1][0]  
+            DECLARE secondNode = edges1[indefinitelyIndex1][1]  
+            adjDictOne[firstNode].append(secondNode)  
+            adjDictOne[secondNode].append(firstNode)  
+        END REPEAT  
+  
+        REPEAT indefiniteIndex2 FROM 0 TO length of edges2 MINUS 1  
+            DECLARE nodeOne = edges2[indefiniteIndex2][0]  
+            DECLARE nodeTwo = edges2[indefiniteIndex2][1]  
+            adjDictTwo[nodeOne].append(nodeTwo)  
+            adjDictTwo[nodeTwo].append(nodeOne)  
+        END REPEAT  
+  
+        DECLARE countOne = COUNT keys IN adjDictOne  
+        DECLARE countTwo = COUNT keys IN adjDictTwo  
+  
+        FUNCTION bfs(treeGraph, originNode)  
+            DECLARE counterEven = 0  
+            DECLARE counterOdd = 0  
+            DECLARE processingQueue = deque containing (originNode, 0)  
+            DECLARE setVisited = SET containing originNode  
+  
+            WHILE LENGTH(processingQueue) GREATER THAN 0  
+                DECLARE currentNode, currentDistance  
+                EXTRACT first element of processingQueue INTO currentNode, currentDistance  
+  
+                IF (currentDistance MOD 2) EQUALS 0 THEN  
+                    SET counterEven = counterEven + 1  
+                ELSE  
+                    SET counterOdd = counterOdd + 1  
+                END IF  
+  
+                FOR each adjacentNode IN treeGraph[currentNode]  
+                    IF adjacentNode NOT IN setVisited THEN  
+                        setVisited.ADD(adjacentNode)  
+                        processingQueue.APPEND((adjacentNode, currentDistance + 1))  
+                    END IF  
+                END FOR  
+            END WHILE  
+  
+            RETURN (counterEven, counterOdd)  
+        END FUNCTION  
+  
+        DECLARE firstBfsResults = empty list  
+        DECLARE indexIter1 = 0  
+        WHILE indexIter1 < countOne  
+            firstBfsResults.APPEND(bfs(adjDictOne, indexIter1))  
+            indexIter1 = indexIter1 + 1  
+        END WHILE  
+  
+        DECLARE secondBfsResults = []  
+        DECLARE indexIter2 = 0  
+        WHILE indexIter2 LESS THAN countTwo  
+            secondBfsResults.APPEND(bfs(adjDictTwo, indexIter2))  
+            indexIter2 = indexIter2 + 1  
+        END WHILE  
+  
+        DECLARE outputList = list([])  
+  
+        DECLARE outerIndex = 0  
+        WHILE outerIndex < countOne  
+            DECLARE (evenValOne, oddValOne) = firstBfsResults[outerIndex]  
+            DECLARE highestTargets = 0  
+  
+            DECLARE innerIndex = 0  
+            WHILE innerIndex LESS THAN countTwo  
+                DECLARE evenValTwoLocal, oddValTwoLocal  
+                SET (evenValTwoLocal, oddValTwoLocal) = secondBfsResults[innerIndex]  
+  
+                DECLARE candidateTargets = 0  
+                IF (outerIndex = innerIndex) OR ((outerIndex MOD 2) = (innerIndex MOD 2)) THEN  
+                    SET candidateTargets = evenValTwoLocal  
+                ELSE  
+                    SET candidateTargets = oddValTwoLocal  
+                END IF  
+  
+                IF candidateTargets > highestTargets THEN  
+                    highestTargets = candidateTargets  
+                END IF  
+  
+                innerIndex = innerIndex + 1  
+            END WHILE  
+  
+            outputList.APPEND(evenValOne + highestTargets)  
+            outerIndex = outerIndex + 1  
+        END WHILE  
+  
+        RETURN outputList  
+    END FUNCTION  
+END CLASS

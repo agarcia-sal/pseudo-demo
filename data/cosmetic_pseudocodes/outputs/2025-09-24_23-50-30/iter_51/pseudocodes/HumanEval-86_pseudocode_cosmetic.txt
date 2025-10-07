@@ -1,0 +1,84 @@
+```
+FUNCTION anti_shuffle(str_input)
+    SET tmp_words TO []
+    FOR idx IN RANGE(0, LENGTH(str_input) - 1 + 1)
+        IF str_input[idx] = " " OR idx = LENGTH(str_input) - 1 THEN
+            SET start_pos TO 0
+            SET words_collection TO []
+            CALL extract_words(idx, start_pos, str_input, words_collection)
+            SET tmp_words TO words_collection
+            BREAK
+        END IF
+    END FOR
+    IF tmp_words = [] THEN
+        SET tmp_words TO [str_input]
+    END IF
+
+    RETURN assemble_sorted(tmp_words)
+
+
+FUNCTION extract_words(curr_idx, start_pos, full_str, acc_words)
+    IF curr_idx > LENGTH(full_str) THEN
+        RETURN
+    END IF
+    SET next_space_idx TO find_space_from(full_str, curr_idx)
+    IF next_space_idx < 0 THEN
+        SET word_piece TO substring(full_str, curr_idx, LENGTH(full_str) - curr_idx)
+        APPEND word_piece TO acc_words
+        RETURN
+    ELSE
+        SET word_piece TO substring(full_str, curr_idx, next_space_idx - curr_idx)
+        APPEND word_piece TO acc_words
+        CALL extract_words(next_space_idx + 1, start_pos, full_str, acc_words)
+    END IF
+
+
+FUNCTION find_space_from(txt, start_idx)
+    FOR scan_idx IN RANGE(start_idx, LENGTH(txt) - 1 + 1)
+        IF txt[scan_idx] = " " THEN
+            RETURN scan_idx
+        END IF
+    END FOR
+    RETURN -1
+
+
+FUNCTION assemble_sorted(word_collection)
+    IF LENGTH(word_collection) = 0 THEN
+        RETURN ""
+    ELSE
+        RETURN join_map(word_collection, 0, [])
+    END IF
+
+
+FUNCTION join_map(words_list, ptr, acc_sorted_words)
+    IF ptr = LENGTH(words_list) THEN
+        RETURN join(acc_sorted_words, " ")
+    ELSE
+        SET current_word TO words_list[ptr]
+        SET sorted_chars_list TO recursive_sort_chars(split_to_chars(current_word), [])
+        SET sorted_word_str TO join(sorted_chars_list, "")
+        CALL join_map(words_list, ptr + 1, acc_sorted_words + [sorted_word_str])
+    END IF
+
+
+FUNCTION split_to_chars(wrd)
+    RETURN [wrd[i] FOR i IN RANGE(0, LENGTH(wrd) - 1 + 1)]
+
+
+FUNCTION recursive_sort_chars(char_list, acc_sorted)
+    IF LENGTH(char_list) = 0 THEN
+        RETURN acc_sorted
+    ELSE
+        SET min_char TO char_list[0]
+        SET rem_chars TO []
+        FOR c IN char_list
+            IF c < min_char THEN
+                SET rem_chars TO rem_chars + [min_char]
+                SET min_char TO c
+            ELSE
+                SET rem_chars TO rem_chars + [c]
+            END IF
+        END FOR
+        RETURN recursive_sort_chars(rem_chars, acc_sorted + [min_char])
+    END IF
+```

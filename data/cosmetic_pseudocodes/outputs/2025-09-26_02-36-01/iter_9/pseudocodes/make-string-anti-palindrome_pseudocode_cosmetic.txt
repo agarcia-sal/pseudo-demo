@@ -1,0 +1,78 @@
+CLASS Solution  
+    FUNCTION makeAntiPalindrome(s)  
+        FUNCTION swapElements(arr, idx1, idx2)  
+            SET tmp TO arr[idx1]  
+            SET arr[idx1] TO arr[idx2]  
+            SET arr[idx2] TO tmp  
+        END FUNCTION
+
+        FUNCTION isEqual(a, b)  
+            RETURN (NOT (a NOT EQUALS b))  
+        END FUNCTION
+        
+        FUNCTION strJoin(charList)  
+            SET resultStr TO ""  
+            SET pos TO 0  
+            WHILE pos LESS THAN LENGTH(charList)  
+                SET resultStr TO resultStr + charList[pos]  
+                SET pos TO pos + 1  
+            END WHILE  
+            RETURN resultStr  
+        END FUNCTION
+
+        PROCEDURE incrementRef(ref)  
+            SET ref TO ref + 1  
+            RETURN ref  
+        END PROCEDURE
+        
+        SET charArray TO s  
+        CALL charArray sort ascending  
+        SET lengthVal TO LENGTH(charArray)  
+        SET midIndex TO lengthVal DIV 2  
+
+        IF isEqual(charArray[midIndex], charArray[midIndex - 1]) THEN  
+            SET tempI TO midIndex  
+            
+            WHILE (tempI LESS THAN lengthVal) AND isEqual(charArray[tempI], charArray[tempI - 1]) DO  
+                SET tempI TO incrementRef(tempI)  
+            END WHILE
+
+            SET tempJ TO midIndex
+
+            WHILE (tempJ LESS THAN lengthVal) AND isEqual(charArray[tempJ], charArray[lengthVal - tempJ - 1]) DO  
+                IF tempI GREATER THAN OR EQUAL TO lengthVal THEN  
+                    RETURN "-1"  
+                END IF
+
+                CALL swapElements(charArray, tempI, tempJ)  
+
+                SET tempI TO incrementRef(tempI)  
+                SET tempJ TO incrementRef(tempJ)  
+            END WHILE  
+        END IF
+
+        SET outerCount TO 0  
+        WHILE outerCount LESS THAN (midIndex) DO  
+            IF isEqual(charArray[outerCount], charArray[lengthVal - outerCount - 1]) THEN  
+                SET wasSwapped TO false  
+                SET innerCount TO midIndex
+
+                WHILE innerCount LESS THAN lengthVal DO  
+                    IF (charArray[innerCount] NOT EQUALS charArray[outerCount]) AND (charArray[innerCount] NOT EQUALS charArray[lengthVal - outerCount - 1]) THEN  
+                        CALL swapElements(charArray, innerCount, outerCount)  
+                        SET wasSwapped TO true  
+                        BREAK  
+                    END IF  
+                    SET innerCount TO innerCount + 1  
+                END WHILE
+
+                IF NOT wasSwapped THEN  
+                    RETURN "-1"  
+                END IF  
+            END IF
+            SET outerCount TO outerCount + 1  
+        END WHILE
+
+        RETURN strJoin(charArray)  
+    END FUNCTION  
+END CLASS

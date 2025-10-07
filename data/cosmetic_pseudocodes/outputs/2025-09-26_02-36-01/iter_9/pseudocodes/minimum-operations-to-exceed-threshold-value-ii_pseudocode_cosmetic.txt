@@ -1,0 +1,111 @@
+CLASS Solution
+    FUNCTION minOperations(epsilon parameter, tau parameter)
+        PROCEDURE customHeapify(arr)
+            DECLARE len AS INTEGER
+            SET len TO LENGTH(arr)
+            DECLARE start AS INTEGER
+            SET start TO (len DIV 2) - 1
+            REPEAT
+                IF start LESS THAN 0 THEN
+                    EXIT PROCEDURE
+                END IF
+                CALL siftDown(arr, start, len - 1)
+                DECREMENT start BY 1
+            UNTIL FALSE
+        END PROCEDURE
+
+        PROCEDURE siftDown(arr, root, end)
+            DECLARE child AS INTEGER
+            DECLARE swapIdx AS INTEGER
+            SET swapIdx TO root
+            LOOP
+                SET child TO (2 * swapIdx) + 1
+                IF child GREATER THAN end THEN
+                    BREAK
+                END IF
+                IF arr[child] LESS THAN arr[swapIdx] THEN
+                    SET swapIdx TO child
+                END IF
+                IF (child + 1) LESS THAN OR EQUAL TO end AND arr[child + 1] LESS THAN arr[swapIdx] THEN
+                    SET swapIdx TO child + 1
+                END IF
+                IF swapIdx EQUALS root THEN
+                    BREAK
+                END IF
+                SWAP arr[root], arr[swapIdx]
+                SET root TO swapIdx
+            END LOOP
+        END PROCEDURE
+
+        PROCEDURE customHeappop(heapArr)
+            IF LENGTH(heapArr) EQUALS 0 THEN
+                RETURN NULL
+            END IF
+            SET minElem TO heapArr[0]
+            SET endElem TO heapArr[LENGTH(heapArr) - 1]
+            REMOVE last element from heapArr
+            IF LENGTH(heapArr) GREATER THAN 0 THEN
+                SET heapArr[0] TO endElem
+                CALL siftDown(heapArr, 0, LENGTH(heapArr) - 1)
+            END IF
+            RETURN minElem
+        END PROCEDURE
+
+        PROCEDURE customHeappush(heapArr, val)
+            APPEND val TO heapArr
+            DECLARE index AS INTEGER
+            SET index TO LENGTH(heapArr) - 1
+            DECLARE parent AS INTEGER
+            LOOP
+                IF index LESS THAN OR EQUAL TO 0 THEN
+                    BREAK
+                END IF
+                SET parent TO (index - 1) DIV 2
+                IF heapArr[parent] LESS THAN OR EQUAL TO heapArr[index] THEN
+                    BREAK
+                END IF
+                SWAP heapArr[parent], heapArr[index]
+                SET index TO parent
+            END LOOP
+        END PROCEDURE
+
+        CALL customHeapify(epsilon)
+        DECLARE tally AS INTEGER
+        SET tally TO 0
+
+        DECLARE conditionCheck AS BOOLEAN
+        SET conditionCheck TO TRUE
+        WHILE conditionCheck
+            IF LENGTH(epsilon) GREATER THAN 1 THEN
+                IF epsilon[0] LESS THAN tau THEN
+                    SET conditionCheck TO TRUE
+                ELSE
+                    SET conditionCheck TO FALSE
+                END IF
+            ELSE
+                SET conditionCheck TO FALSE
+            END IF
+
+            IF conditionCheck EQUALS FALSE THEN
+                BREAK
+            END IF
+
+            DECLARE firstElem AS INTEGER
+            DECLARE secondElem AS INTEGER
+            SET firstElem TO customHeappop(epsilon)
+            SET secondElem TO customHeappop(epsilon)
+
+            DECLARE calcVal AS INTEGER
+            IF firstElem LESS THAN secondElem THEN
+                SET calcVal TO (firstElem * 2) + secondElem
+            ELSE
+                SET calcVal TO (secondElem * 2) + firstElem
+            END IF
+
+            CALL customHeappush(epsilon, calcVal)
+            SET tally TO tally + 1
+        END WHILE
+
+        RETURN tally
+    END FUNCTION
+END CLASS

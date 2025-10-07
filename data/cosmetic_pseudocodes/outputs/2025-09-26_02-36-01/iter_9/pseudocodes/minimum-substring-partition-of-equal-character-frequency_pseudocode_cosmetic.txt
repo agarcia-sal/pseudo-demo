@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION minimumSubstringsInPartition(s)
+        
+        FUNCTION calculateMinimumPartitions(pos)
+            FUNCTION decrementFrequency(m, k)
+                IF k IN m THEN
+                    m[k] = m[k] - 1
+                    IF m[k] = 0 THEN
+                        REMOVE k FROM m
+                    END IF
+                END IF
+            END FUNCTION
+
+            FUNCTION incrementFrequency(m, k)
+                IF k NOT IN m THEN
+                    m[k] = 1
+                ELSE
+                    m[k] = m[k] + 1
+                END IF
+            END FUNCTION
+
+            IF pos >= LENGTH(s) THEN
+                RETURN 0
+            END IF
+            
+            DEFINE charCounts AS NEW MAP DEFAULTING 0
+            DEFINE countFrequencies AS NEW MAP DEFAULTING 0
+            DEFINE minimumValue AS LENGTH(s) - pos
+
+            DEFINE loopIndex AS pos
+            WHILE loopIndex <= LENGTH(s) - 1
+                DEFINE currChar AS s[loopIndex]
+
+                IF currChar IN charCounts AND charCounts[currChar] != 0 THEN
+                    CALL decrementFrequency(countFrequencies, charCounts[currChar])
+                END IF
+                
+                charCounts[currChar] = charCounts[currChar] + 1
+                CALL incrementFrequency(countFrequencies, charCounts[currChar])
+
+                IF LENGTH(countFrequencies) = 1 THEN
+                    DEFINE candidate AS 1 + calculateMinimumPartitions(loopIndex + 1)
+                    IF candidate < minimumValue THEN
+                        minimumValue = candidate
+                    END IF
+                END IF
+
+                loopIndex = loopIndex + 1
+            END WHILE
+
+            RETURN minimumValue
+        END FUNCTION
+
+        DEFINE lengthS AS LENGTH(s)
+        RETURN calculateMinimumPartitions(0)
+    END FUNCTION
+END CLASS

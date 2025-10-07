@@ -1,0 +1,14 @@
+from math import sqrt
+
+def factorize(n: int) -> list[int]:
+    fact = []
+    i = 2
+    while i <= int(sqrt(n) + 1):
+        if n % i == 0:
+            fact.append(i)
+            n //= i
+        else:
+            i += 1
+    if n > 1:
+        fact.append(n)
+    return fact

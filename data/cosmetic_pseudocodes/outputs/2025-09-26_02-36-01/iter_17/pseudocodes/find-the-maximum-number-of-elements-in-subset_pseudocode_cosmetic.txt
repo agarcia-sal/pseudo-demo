@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION maximumLength(nums)
+        SET freq TO empty map
+        INDEX idx TO 0
+        WHILE idx < LENGTH(nums)
+            IF freq CONTAINS_KEY nums[idx] THEN
+                SET freq[nums[idx]] = freq[nums[idx]] + 1
+            ELSE
+                SET freq[nums[idx]] = 1
+            END IF
+            SET idx = idx + 1
+        END WHILE
+
+        SET cache TO empty map
+
+        FUNCTION helper(val)
+            IF NOT freq CONTAINS_KEY val OR freq[val] < 2 THEN
+                IF freq CONTAINS_KEY val AND freq[val] >= 1 THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            IF cache CONTAINS_KEY val THEN
+                RETURN cache[val]
+            END IF
+
+            SET sq TO val * val
+            SET cache[val] = helper(sq) + 2
+            RETURN cache[val]
+        END FUNCTION
+
+        SET max_len TO 1
+
+        SET keys_list TO EMPTY LIST
+        FOR EACH k IN freq KEYS
+            APPEND k TO keys_list
+        END FOR
+
+        SET i TO 0
+        SET length_keys TO LENGTH(keys_list)
+
+        REPEAT
+            EXIT WHEN i >= length_keys
+            SET current_num TO keys_list[i]
+
+            IF current_num == 1 THEN
+                SET count_one TO freq[current_num]
+                SET tmp TO count_one - 1 - ((count_one MOD 2) * 2)
+                IF max_len < tmp THEN
+                    SET max_len = tmp
+                END IF
+            ELSE
+                SET val_helper TO helper(current_num)
+                IF max_len < val_helper THEN
+                    SET max_len = val_helper
+                END IF
+            END IF
+
+            SET i = i + 1
+        UNTIL FALSE
+
+        RETURN max_len
+    END FUNCTION
+END CLASS

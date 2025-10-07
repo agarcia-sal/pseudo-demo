@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION maxSubstringLength(s)
+        FUNCTION countChars(str)
+            SET freqMap TO an empty map
+            SET idx TO 0
+            WHILE idx < LENGTH(str)
+                SET ch TO str[idx]
+                IF ch IN freqMap THEN
+                    SET freqMap[ch] TO freqMap[ch] + (1 * 1)
+                ELSE
+                    SET freqMap[ch] TO 0 + 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN freqMap
+        END FUNCTION
+
+        SET totalFrequencies TO countChars(s)
+        SET resultLength TO -1
+        SET startIdx TO 0
+
+        REPEAT
+            SET runningFreq TO an empty map
+            FUNCTION checkCoverage(freqA, freqB)
+                FUNCTION keysList(map)
+                    SET cursor TO 0
+                    SET keysArr TO []
+                    FOR key IN map
+                        keysArr.APPEND(key)
+                    END FOR
+                    RETURN keysArr
+                END FUNCTION
+
+                SET keySet TO keysList(freqA)
+                SET pos TO 0
+                WHILE pos < LENGTH(keySet)
+                    SET k TO keySet[pos]
+                    IF NOT (freqA[k] >= freqB[k]) THEN
+                        RETURN false
+                    END IF
+                    SET pos TO pos + 1
+                END WHILE
+                RETURN true
+            END FUNCTION
+
+            FUNCTION keyCount(map)
+                SET countVar TO 0
+                FOR _ IN map
+                    SET countVar TO countVar + 1
+                END FOR
+                RETURN countVar
+            END FUNCTION
+
+            SET endIdx TO startIdx
+            WHILE endIdx < LENGTH(s)
+                SET currentChar TO s[endIdx]
+                IF currentChar IN runningFreq THEN
+                    SET runningFreq[currentChar] TO runningFreq[currentChar] + 1
+                ELSE
+                    SET runningFreq[currentChar] TO 1
+                END IF
+
+                SET fullCoverage TO checkCoverage(runningFreq, totalFrequencies)
+
+                IF fullCoverage == true AND keyCount(runningFreq) < keyCount(totalFrequencies) THEN
+                    IF resultLength < (endIdx - startIdx + 1) THEN
+                        SET resultLength TO (endIdx - startIdx + 1)
+                    END IF
+                END IF
+                SET endIdx TO endIdx + 1
+            END WHILE
+            SET startIdx TO startIdx + 1
+        UNTIL startIdx >= LENGTH(s)
+        RETURN resultLength
+    END FUNCTION
+END CLASS

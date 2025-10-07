@@ -1,0 +1,118 @@
+CLASS TreeNode  
+	FUNCTION __init__( self, val = 0, left = None, right = None )  
+		BIND self.val TO val   
+		BIND self.left TO left  
+		BIND self.right TO right  
+	END FUNCTION  
+END CLASS  
+
+FUNCTION tree_node( values )  
+	DEFINE forward_deque()  
+		LET elements = values  
+		LET position = 1  
+		LET buffer = [ ]  
+		APPEND BUFFER with elements[0]  
+		RETURN { pop: () -> remove first of buffer , push: (v) -> append v to buffer , empty: () -> length of buffer equals zero , length: () -> length of buffer }  
+	END DEFINE  
+
+	IF values == [] THEN RETURN None END IF  
+
+	LET root TO TreeNode(values[0])  
+	LET index TO 1  
+	LET container TO new deque  
+	CALL container.push(root)  
+
+	DEFINE try_push_child( node, idx )  
+		IF (idx < len(values)) AND (values[idx] != None) THEN  
+			LET kid TO TreeNode(values[idx])  
+			IF idx % 2 != 0 THEN  
+				SET node.left TO kid  
+			ELSE  
+				SET node.right TO kid  
+			END IF  
+			CALL container.push(kid)  
+			RETURN 1  
+		ELSE  
+			RETURN 0  
+		END IF  
+	END DEFINE  
+
+	WHILE container.empty() == False DO  
+		LET curr TO container.pop()  
+		LET changed TO try_push_child(curr, index)  
+		SET index TO index + changed  
+
+		LET changed_right TO try_push_child(curr, index)  
+		SET index TO index + changed_right  
+	END WHILE  
+	RETURN root  
+END FUNCTION  
+
+FUNCTION is_same_tree( p, q )  
+	FUNCTION mutually_null(a, b)  
+		RETURN (a == None) AND (b == None)  
+	END FUNCTION  
+
+	FUNCTION exactly_one_null(a, b)  
+		RETURN (a == None) XOR (b == None)  
+	END FUNCTION  
+
+	IF mutually_null(p, q) THEN RETURN True END IF  
+
+	IF exactly_one_null(p, q) THEN RETURN False END IF  
+
+	IF (p.val != q.val) THEN RETURN False END IF  
+
+	RETURN is_same_tree(p.left, q.left) AND is_same_tree(p.right, q.right)  
+END FUNCTION  
+
+CLASS Solution  
+	FUNCTION minimumLevel( self, root )  
+		IF root == None THEN RETURN 0 END IF  
+
+		LET q TO new deque  
+		CALL q.append(root)  
+
+		LET best_level TO 1  
+		LET best_sum TO +∞  
+		LET current_depth TO 1  
+
+		DEFINE take_front( dq )  
+			RETURN dq.popleft()  
+		END DEFINE  
+
+		DEFINE has_children( node )  
+			RETURN (node.left != None) OR (node.right != None)  
+		END DEFINE  
+
+		WHILE (length(q) > 0) DO  
+			LET accum TO 0  
+			LET level_size TO length(q)  
+
+			DEFINE recurse_process( count, acc )  
+				IF count == 0 THEN RETURN acc END IF  
+				LET n TO take_front(q)  
+				SET acc TO acc + n.val  
+
+				IF n.left != None THEN  
+					CALL q.append(n.left)  
+				END IF  
+				IF n.right != None THEN  
+					CALL q.append(n.right)  
+				END IF  
+
+				RETURN recurse_process(count - 1 , acc)  
+			END DEFINE  
+
+			SET accum TO recurse_process(level_size, 0)  
+
+			IF accum < best_sum THEN  
+				SET best_sum TO accum  
+				SET best_level TO current_depth  
+			END IF  
+
+			SET current_depth TO current_depth + 1  
+		END WHILE  
+		RETURN best_level  
+	END FUNCTION  
+END CLASS

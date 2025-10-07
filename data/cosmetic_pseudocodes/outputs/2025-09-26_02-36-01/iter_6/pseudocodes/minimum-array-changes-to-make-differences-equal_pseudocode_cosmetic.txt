@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION minChanges(nums k)
+        DEFINE FUNCTION compute_prefix_sums(arr)
+            LET acc = list containing single element 0
+            LET idx = 0
+            WHILE idx < LENGTH(arr)
+                LET curr_val = arr[idx]
+                LET new_val = acc[LENGTH(acc) - 1] + curr_val
+                APPEND new_val TO acc
+                idx = idx + 1
+            END WHILE
+            RETURN acc
+        END FUNCTION
+
+        LET delta = [0 for _ in range((k + 2))]
+        LET total = LENGTH(nums)
+        LET pos = 0
+
+        LOOP
+            IF pos >= (total // 2) THEN
+                BREAK
+            END IF
+
+            LET elem1 = nums[pos]
+            LET elem2 = nums[(-1 - pos)]
+            LET a_temp = elem1
+            LET b_temp = elem2
+
+            IF NOT (a_temp <= b_temp) THEN
+                LET swap_temp = a_temp
+                a_temp = b_temp
+                b_temp = swap_temp
+            END IF
+
+            delta[0] = delta[0] + 1
+            delta[(b_temp - a_temp)] = delta[(b_temp - a_temp)] - 1
+            delta[(b_temp - a_temp + 1)] = delta[(b_temp - a_temp + 1)] + 1
+
+            LET max_val = b_temp
+            LET diff_val = k - a_temp
+            LET idx1 = max_val + diff_val + 1
+            LET idx2 = max_val + diff_val + 2
+
+            delta[idx1] = delta[idx1] - 1
+            delta[idx2] = delta[idx2] + 1
+
+            pos = pos + 1
+        END LOOP
+
+        LET prefix_sums = compute_prefix_sums(delta)
+        LET minimal = prefix_sums[0]
+        LET iter_idx = 0
+
+        WHILE iter_idx < LENGTH(prefix_sums)
+            IF prefix_sums[iter_idx] < minimal THEN
+                minimal = prefix_sums[iter_idx]
+            END IF
+            iter_idx = iter_idx + 1
+        END WHILE
+
+        RETURN minimal
+    END FUNCTION
+END CLASS

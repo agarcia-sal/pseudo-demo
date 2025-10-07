@@ -1,0 +1,97 @@
+CLASS Solution
+	FUNCTION smallestNumber(num, t)
+		SET p, q, r TO SELF._getPrimeCount(t)
+		IF r = FALSE THEN RETURN "-1"
+
+		SET u TO SELF._getFactorCount(p)
+		IF SUM OF ALL VALUES IN u > LENGTH(num) THEN
+			RETURN CONCATENATION OF EACH KEY IN u REPEATED u[key] TIMES
+		END IF
+
+		SET v TO EMPTY Counter
+		FUNCTION accumulateFactorCounts INDEX idx
+			IF idx >= LENGTH(num) THEN RETURN
+			SET n TO INTEGER VALUE OF num[idx]
+			SET v TO v + FACTOR_COUNTS(n)
+			accumulateFactorCounts(idx + 1)
+		END FUNCTION
+		accumulateFactorCounts(0)
+
+		FUNCTION findFirstZeroIndex idx defaultidx
+			IF idx >= LENGTH(num) THEN RETURN defaultidx
+			IF num[idx] = '0' THEN RETURN idx
+			RETURN findFirstZeroIndex(idx + 1, defaultidx)
+		END FUNCTION
+		SET w TO findFirstZeroIndex(0, LENGTH(num))
+
+		IF w = LENGTH(num) AND p <= v THEN
+			RETURN num
+		END IF
+
+		FUNCTION loopDescending idx
+			IF idx < 0 THEN RETURN NULL
+			SET x TO INTEGER VALUE OF num[idx]
+			SET v TO v - FACTOR_COUNTS(x)
+			SET y TO LENGTH(num) - 1 - idx
+
+			IF idx <= w THEN
+				FUNCTION innerLoop candidate
+					IF candidate > 9 THEN RETURN NULL
+					SET z TO SELF._getFactorCount(p - v - FACTOR_COUNTS(candidate))
+					IF SUM OF ALL VALUES IN z <= y THEN
+						SET aa TO y - SUM OF ALL VALUES IN z
+						RETURN CONCAT(SUBSTRING(num, 0, idx), TO_STRING(candidate), REPEAT_CHAR('1', aa), CONCATENATE EACH KEY IN z REPEATED z[key] TIMES)
+					END IF
+					RETURN innerLoop(candidate + 1)
+				END FUNCTION
+				SET ab TO innerLoop(x + 1)
+				IF ab != NULL THEN RETURN ab
+			END IF
+
+			RETURN loopDescending(idx - 1)
+		END FUNCTION
+
+		SET ac TO loopDescending(LENGTH(num) - 1)
+		IF ac != NULL THEN RETURN ac
+
+		SET u TO SELF._getFactorCount(p)
+		RETURN REPEAT_CHAR('1', LENGTH(num) + 1 - SUM OF ALL VALUES IN u) + CONCATENATE EACH KEY IN u REPEATED u[key] TIMES
+	END FUNCTION
+
+	FUNCTION _getPrimeCount(t)
+		SET ad TO EMPTY Counter
+		FOR ae IN [2, 3, 5, 7]
+			WHILE t MOD ae = 0
+				SET t TO t / ae
+				SET ad[ae] TO ad.GetValueOrDefault(ae, 0) + 1
+			END WHILE
+		END FOR
+		RETURN ad, (t = 1)
+	END FUNCTION
+
+	FUNCTION _getFactorCount(count)
+		SET af TO DIVMOD(count[2], 3)
+		SET ag TO DIVMOD(count[3], 2)
+		SET ah TO DIVMOD(af[1], 2)
+		SET ai, aj TO 0, 0
+		IF ah[0] = 1 AND ag[1] = 1
+			SET ah TO (0, 0)
+			SET ai TO 1
+		END IF
+		IF ag[1] = 1 AND ah[0] = 1
+			SET ah TO (0, 0)
+			SET ai TO 1
+			SET aj TO 1
+		END IF
+		RETURN Counter({
+			"2": ah[1],
+			"3": ag[1] - aj,
+			"4": ah[0] - aj,
+			"5": count.GetValueOrDefault(5, 0),
+			"6": ai,
+			"7": count.GetValueOrDefault(7, 0),
+			"8": af[0],
+			"9": ag[0]
+		})
+	END FUNCTION
+END CLASS

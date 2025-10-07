@@ -1,0 +1,45 @@
+```
+FUNCTION check_dict_case(dict_obj)
+	tuples_seq := CONVERT dict_obj KEYS TO LIST
+
+	IF LENGTH(tuples_seq) = 0 THEN
+		RETURN False
+	END IF
+
+	state_flag := "start"
+
+	FUNCTION iterate_keys(position)
+		IF position = LENGTH(tuples_seq) THEN
+			RETURN
+		END IF
+
+		current_k := tuples_seq[position]
+
+		IF TYPEOF(current_k) != STRING THEN
+			state_flag := "mixed"
+			RETURN
+		END IF
+
+		IF state_flag = "start" THEN
+			IF current_k = UPPERCASE(current_k) THEN
+				state_flag := "upper"
+			ELSEIF current_k = LOWERCASE(current_k) THEN
+				state_flag := "lower"
+			ELSE
+				RETURN
+			END IF
+		ELSEIF (state_flag = "upper" AND current_k != UPPERCASE(current_k)) OR (state_flag = "lower" AND current_k != LOWERCASE(current_k)) THEN
+			state_flag := "mixed"
+			RETURN
+		ELSE
+			RETURN
+		END IF
+
+		iterate_keys(position + 1)
+	END FUNCTION
+
+	iterate_keys(0)
+
+	RETURN (state_flag = "upper") OR (state_flag = "lower")
+END FUNCTION
+```

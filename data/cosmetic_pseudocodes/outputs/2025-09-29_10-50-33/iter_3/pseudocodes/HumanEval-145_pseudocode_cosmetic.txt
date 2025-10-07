@@ -1,0 +1,46 @@
+FUNCTION order_by_points(collection_of_values)
+  FUNCTION digits_sum(value)
+    SET polarity TO 1
+    WHILE value < 0 DO
+      SET value TO 0 - value
+      SET polarity TO 0 - polarity
+      BREAK
+    END WHILE
+    SET digits_array TO EMPTY LIST
+    SET temp_value TO value
+    WHILE temp_value > 0 USE
+      APPEND (temp_value MOD 10) TO digits_array
+      SET temp_value TO temp_value DIV 10
+    OTHERWISE
+      IF temp_value = 0 THEN
+        APPEND 0 TO digits_array
+      END IF
+    END WHILE
+    SET digits_array[ LENGTH(digits_array) - LENGTH(digits_array) ] TO digits_array[0] * polarity
+    SET total_sum TO 0
+    SET cursor TO 0
+    WHILE cursor < LENGTH(digits_array) DO
+      SET total_sum TO total_sum + digits_array[cursor]
+      SET cursor TO cursor + 1
+    END WHILE
+    RETURN total_sum
+  END FUNCTION
+
+  FUNCTION comparator(a, b)
+    RETURN digits_sum(a) < digits_sum(b)
+  END FUNCTION
+
+  SET index_i TO 1
+  WHILE index_i < LENGTH(collection_of_values) DO
+    SET index_j TO index_i
+    WHILE index_j > 0 AND comparator(collection_of_values[index_j], collection_of_values[index_j - 1]) DO
+      SET temp_holder TO collection_of_values[index_j]
+      SET collection_of_values[index_j] TO collection_of_values[index_j - 1]
+      SET collection_of_values[index_j - 1] TO temp_holder
+      SET index_j TO index_j - 1
+    END WHILE
+    SET index_i TO index_i + 1
+  END WHILE
+
+  RETURN collection_of_values
+END FUNCTION

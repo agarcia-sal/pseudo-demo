@@ -1,0 +1,162 @@
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        DEFINE FUNCTION countCharacters(inputStr)
+            DECLARE dictResult AS empty dictionary
+            DECLARE idxCounter AS 0
+            DECLARE lenInput AS length of inputStr
+            WHILE idxCounter < lenInput
+                DECLARE curCh AS character at position idxCounter in inputStr
+                IF curCh IS IN dictResult THEN
+                    SET dictResult[curCh] TO dictResult[curCh] + 1
+                ELSE
+                    SET dictResult[curCh] TO 1
+                END IF
+                SET idxCounter TO idxCounter + 1
+            END WHILE
+            RETURN dictResult
+        END FUNCTION
+
+        DECLARE freqMap AS countCharacters(s)
+
+        DEFINE PROCEDURE removeEntryIfExists(dictRef, keyVal)
+            IF keyVal IS IN dictRef THEN
+                DELETE dictRef[keyVal]
+            END IF
+        END PROCEDURE
+        CALL removeEntryIfExists(freqMap, '?')
+
+        DEFINE FUNCTION gatherIndices(strIn, targetChar)
+            DECLARE acc AS empty list
+            DECLARE pos AS 0
+            DECLARE lenStr AS length of strIn
+            WHILE pos < lenStr
+                IF character at pos in strIn EQUALS targetChar THEN
+                    APPEND pos TO acc
+                END IF
+                SET pos TO pos + 1
+            END WHILE
+            RETURN acc
+        END FUNCTION
+
+        DECLARE qmPositions AS gatherIndices(s, '?')
+
+        DEFINE FUNCTION rangeChars(chStart, chEnd)
+            DECLARE results AS empty list
+            DECLARE codeStart AS code of chStart
+            DECLARE codeEnd AS code of chEnd
+            DECLARE curCode AS codeStart
+            WHILE curCode <= codeEnd
+                APPEND character of curCode TO results
+                SET curCode TO curCode + 1
+            END WHILE
+            RETURN results
+        END FUNCTION
+
+        DECLARE alphabetSet AS rangeChars('a', 'z')
+
+        DECLARE replacementsList AS empty list
+
+        DEFINE FUNCTION safeGetCount(dMap, keyVal)
+            IF keyVal IS IN dMap THEN
+                RETURN dMap[keyVal]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        DEFINE PROCEDURE incrementCount(dMap, keyVal)
+            SET dMap[keyVal] TO safeGetCount(dMap, keyVal) + 1
+        END PROCEDURE
+
+        DEFINE FUNCTION findMinChar(countDict, charsSeq)
+            DECLARE minimalCount AS positive infinity
+            DECLARE smallestChar AS nothing
+            DECLARE currentCharPos AS 0
+            DECLARE totalChars AS length of charsSeq
+            WHILE currentCharPos < totalChars
+                DECLARE testChar AS character at currentCharPos in charsSeq
+                DECLARE currentCount AS safeGetCount(countDict, testChar)
+                IF currentCount < minimalCount THEN
+                    SET minimalCount TO currentCount
+                    SET smallestChar TO testChar
+                END IF
+                SET currentCharPos TO currentCharPos + 1
+            END WHILE
+            RETURN smallestChar
+        END FUNCTION
+
+        DEFINE PROCEDURE addReplacementForPositions(posList, countDict, alphSeq, repList)
+            DECLARE posIdx AS 0
+            DECLARE posLen AS length of posList
+            WHILE posIdx < posLen
+                DECLARE selectedChar AS findMinChar(countDict, alphSeq)
+                APPEND selectedChar TO repList
+                CALL incrementCount(countDict, selectedChar)
+                SET posIdx TO posIdx + 1
+            END WHILE
+        END PROCEDURE
+        
+        CALL addReplacementForPositions(qmPositions, freqMap, alphabetSet, replacementsList)
+
+        DEFINE FUNCTION sortLex(inputList)
+            DECLARE sortedOut AS inputList
+            DECLARE i AS 0
+            DECLARE n AS length of sortedOut
+            REPEAT
+                SET changed TO false
+                SET i TO 0
+                WHILE i < n - 1
+                    IF character code at i in sortedOut > character code at i + 1 in sortedOut THEN
+                        DECLARE tempSwap AS sortedOut[i]
+                        SET sortedOut[i] TO sortedOut[i + 1]
+                        SET sortedOut[i + 1] TO tempSwap
+                        SET changed TO true
+                    END IF
+                    SET i TO i + 1
+                END WHILE
+            UNTIL NOT changed
+            RETURN sortedOut
+        END FUNCTION
+
+        SET replacementsList TO sortLex(replacementsList)
+
+        DEFINE FUNCTION stringToList(strSource)
+            DECLARE outputList AS empty list
+            DECLARE idxChar AS 0
+            DECLARE lenStr AS length of strSource
+            WHILE idxChar < lenStr
+                APPEND character at idxChar in strSource TO outputList
+                SET idxChar TO idxChar + 1
+            END WHILE
+            RETURN outputList
+        END FUNCTION
+
+        DECLARE mutableChars AS stringToList(s)
+
+        DEFINE PROCEDURE replaceAtPositions(indicesList, valsList, targetList)
+            DECLARE cnt AS 0
+            DECLARE lengthVals AS length of valsList
+            WHILE cnt < lengthVals
+                DECLARE posRepl AS indicesList[cnt]
+                SET targetList[posRepl] TO valsList[cnt]
+                SET cnt TO cnt + 1
+            END WHILE
+        END PROCEDURE
+
+        CALL replaceAtPositions(qmPositions, replacementsList, mutableChars)
+
+        DEFINE FUNCTION listToString(charList)
+            DECLARE outStr AS empty string
+            DECLARE idx AS 0
+            DECLARE lenList AS length of charList
+            WHILE idx < lenList
+                SET outStr TO outStr + charList[idx]
+                SET idx TO idx + 1
+            END WHILE
+            RETURN outStr
+        END FUNCTION
+
+        RETURN listToString(mutableChars)
+
+    END FUNCTION
+END CLASS

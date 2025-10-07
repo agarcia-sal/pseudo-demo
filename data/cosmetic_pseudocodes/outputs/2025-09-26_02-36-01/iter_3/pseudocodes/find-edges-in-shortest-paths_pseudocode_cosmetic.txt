@@ -1,0 +1,69 @@
+CLASS Solution
+    FUNCTION findAnswer(n, edges)
+      INITIALIZE adjacency_map AS empty dictionary with default empty lists
+      SET idx TO 0
+      LOOP WHILE idx LESS THAN LENGTH(edges)
+        DESTRUCTURE edges[idx] INTO start_node, end_node, weight_val
+        adjacency_map[start_node] = adjacency_map[start_node] + [(end_node, weight_val)]
+        adjacency_map[end_node] = adjacency_map[end_node] + [(start_node, weight_val)]
+        SET idx TO idx + 1
+      END LOOP
+
+      INITIALIZE distances AS list of size n filled with a very large number
+      ASSIGN distances[0] = 0
+      INITIALIZE min_heap AS [(0, 0)]
+
+      REPEAT
+        EXIT LOOP IF LENGTH(min_heap) EQUALS 0
+        EXTRACT pair (cost, node) with minimal first element from min_heap and REMOVE it
+        IF cost GREATER THAN distances[node] THEN
+          SKIP  to next iteration
+        END IF
+        INITIALIZE nbr_index TO 0
+        LOOP WHILE nbr_index LESS THAN LENGTH(adjacency_map[node])
+          ASSIGN adjacent, wgt TO adjacency_map[node][nbr_index]
+          ASSIGN total_cost AS cost PLUS wgt
+          IF total_cost LESS THAN distances[adjacent] THEN
+            ASSIGN distances[adjacent] = total_cost
+            INSERT (total_cost, adjacent) INTO min_heap MAINTAINING heap_property
+          END IF
+          INCREMENT nbr_index BY 1
+        END LOOP
+      UNTIL FALSE
+
+      INITIALIZE critical_edges AS empty set
+      INITIALIZE to_visit AS [(n MINUS 1, distances[n MINUS 1])]
+      INITIALIZE seen_nodes AS list of length n filled with False
+
+      LOOP WHILE LENGTH(to_visit) GREATER THAN 0
+        REMOVE last element FROM to_visit AND UNPACK AS current_node, current_distance
+        IF seen_nodes[current_node] IS True THEN
+          CONTINUE LOOP
+        END IF
+        ASSIGN seen_nodes[current_node] = True
+        SET neighbor_idx TO 0
+        LOOP WHILE neighbor_idx LESS THAN LENGTH(adjacency_map[current_node])
+          UNPACK adjacency_map[current_node][neighbor_idx] INTO neighbor_node, edge_weight
+          IF current_distance EQUALS distances[neighbor_node] PLUS edge_weight THEN
+            ASSIGN smaller TO current_node IF current_node LESS THAN neighbor_node ELSE neighbor_node
+            ASSIGN bigger TO current_node IF current_node GREATER THAN neighbor_node ELSE neighbor_node
+            ADD (smaller, bigger) TO critical_edges
+            APPEND (neighbor_node, distances[neighbor_node]) TO to_visit
+          END IF
+          INCREMENT neighbor_idx BY 1
+        END LOOP
+      END LOOP
+
+      INITIALIZE result_list AS empty list
+      SET edge_counter TO 0
+      LOOP WHILE edge_counter LESS THAN LENGTH(edges)
+        UNPACK edges[edge_counter] INTO node_a, node_b, _
+        ASSIGN low_node TO node_a IF node_a LESS THAN node_b ELSE node_b
+        ASSIGN high_node TO node_a IF node_a GREATER THAN node_b ELSE node_b
+        APPEND (low_node, high_node) IN critical_edges TO result_list
+        INCREMENT edge_counter BY 1
+      END LOOP
+
+      RETURN result_list
+    END FUNCTION
+END CLASS

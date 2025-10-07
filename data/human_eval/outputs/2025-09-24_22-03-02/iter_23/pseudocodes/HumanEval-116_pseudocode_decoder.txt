@@ -1,0 +1,44 @@
+FUNCTION sort_array(arr)
+    SET sorted_arr BY CALL sorted WITH ARGUMENT arr
+    SET n BY CALL LENGTH WITH ARGUMENT sorted_arr
+    SET result AS LIST WITH ELEMENTS EMPTY
+    FOR i FROM 0 TO n MINUS 1
+        SET min_index EQUALS i
+        FOR j FROM i PLUS 1 TO n MINUS 1
+            SET count_ones_min BY CALL COUNT_ONES WITH ARGUMENT sorted_arr AT min_index
+            SET count_ones_j BY CALL COUNT_ONES WITH ARGUMENT sorted_arr AT j
+            IF count_ones_j LESS THAN count_ones_min THEN
+                SET min_index EQUALS j
+            ELSE IF count_ones_j EQUALS count_ones_min THEN
+                IF sorted_arr AT j LESS THAN sorted_arr AT min_index THEN
+                    SET min_index EQUALS j
+                END IF
+            END IF
+        END FOR
+        IF min_index NOT EQUALS i THEN
+            SET temp EQUALS sorted_arr AT i
+            SET sorted_arr AT i EQUALS sorted_arr AT min_index
+            SET sorted_arr AT min_index EQUALS temp
+        END IF
+    END FOR
+    SET result EQUALS sorted_arr
+    RETURN result
+
+FUNCTION COUNT_ONES(x)
+    SET binary_string AS LIST WITH ELEMENTS EMPTY
+    SET n BY CALL ABSOLUTE VALUE WITH ARGUMENT x
+    IF n EQUALS 0 THEN
+        RETURN 0
+    END IF
+    WHILE n GREATER THAN 0
+        SET remainder EQUALS n MODULO 2
+        CALL APPEND remainder TO binary_string
+        SET n EQUALS n DIVIDE BY 2
+    END WHILE
+    SET count EQUALS 0
+    FOR i FROM 0 TO CALL LENGTH WITH ARGUMENT binary_string MINUS 1
+        IF binary_string AT i EQUALS 1 THEN
+            INCREMENT count BY 1
+        END IF
+    END FOR
+    RETURN count

@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION maximumSumSubsequence(nums, queries)
+        CONST ALPHA := 1_000_000_000 + 1
+        CONST BETA := LEN(nums)
+        VAR phi_arr <- ARRAY OF ZEROS LENGTH BETA
+        VAR omega_arr <- ARRAY OF ZEROS LENGTH BETA
+        VAR zeta <- 0
+        VAR xi <- 0
+        VAR eta <- 0
+        
+        FUNCTION max_val(u, v)
+            VAR res_1 <- u
+            VAR res_2 <- v
+            IF res_2 > res_1 THEN
+                RETURN res_2
+            ELSE
+                RETURN res_1
+            END IF
+        END FUNCTION
+        
+        SET phi_arr[0] TO
+            ( IF 0 > 0 THEN 0 ELSE 0 END IF ) + max_val(0, nums[0]) - 0
+        SET omega_arr[0] := 0
+        
+        VAR idx_outer <- 1
+        WHILE idx_outer < BETA DO
+            VAR a1 <- max_val(0, omega_arr[idx_outer-1])
+            VAR a2 <- a1 + nums[idx_outer]
+            phi_arr[idx_outer] <- a2
+            omega_arr[idx_outer] <- max_val(omega_arr[idx_outer-1], phi_arr[idx_outer-1])
+            idx_outer <- idx_outer + 1
+        END WHILE
+        
+        VAR total_result <- 0
+        
+        FUNCTION update_pos(pos: INTEGER, val: INTEGER)
+            VAR pos_var1 <- pos
+            VAR val_var1 <- val
+            nums[pos_var1] <- val_var1
+            IF pos_var1 = 0 THEN
+                phi_arr[pos_var1] <- max_val(0, nums[pos_var1])
+                omega_arr[pos_var1] <- 0
+            ELSE
+                VAR tmp1 <- max_val(0, omega_arr[pos_var1 - 1])
+                phi_arr[pos_var1] <- tmp1 + nums[pos_var1]
+                omega_arr[pos_var1] <- max_val(omega_arr[pos_var1 - 1], phi_arr[pos_var1 - 1])
+            END IF
+        END FUNCTION
+        
+        FOR EACH (pos_q, val_q) IN queries DO
+            CALL update_pos(pos_q, val_q)
+            
+            VAR idx_inner <- pos_q + 1
+            WHILE idx_inner < BETA DO
+                VAR val_phi_prev <- phi_arr[idx_inner - 1]
+                VAR val_omega_prev <- omega_arr[idx_inner - 1]
+                VAR comp1 <- max_val(0, val_omega_prev)
+                VAR step_phi <- comp1 + nums[idx_inner]
+                phi_arr[idx_inner] <- step_phi
+                omega_arr[idx_inner] <- max_val(val_omega_prev, val_phi_prev)
+                idx_inner <- idx_inner + 1
+            END WHILE
+            
+            VAR last_phi <- phi_arr[BETA - 1]
+            VAR last_omega <- omega_arr[BETA - 1]
+            total_result <- (total_result + max_val(last_phi, last_omega)) MOD ALPHA
+        END FOR
+        
+        RETURN total_result
+    END FUNCTION
+END CLASS

@@ -1,0 +1,89 @@
+CLASS Solution  
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer  
+        SET p TO LENGTH OF image  
+        SET q TO LENGTH OF element at position zero of image  
+        SET arr TO a LIST OF p ELEMENTS EACH a LIST OF q ELEMENTS EACH initialized TO 0  
+        SET freq TO a LIST OF p ELEMENTS EACH a LIST OF q ELEMENTS EACH initialized TO 0  
+        
+        FUNCTION check_region(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE boolean  
+            SET u TO a  
+            WHILE u LESS THAN a PLUS 3  
+                SET v TO b  
+                WHILE v LESS THAN b PLUS 3  
+                    SET deltas TO LIST OF PAIRS: (-1,0), (1,0), (0,-1), (0,1)  
+                    SET idx TO 0  
+                    REPEAT  
+                        EXIT WHEN idx EQUALS LENGTH OF deltas  
+                        SET dx, dy TO element at position idx of deltas  
+                        SET cur_x TO u PLUS dx  
+                        SET cur_y TO v PLUS dy  
+                        IF cur_x GREATER THAN OR EQUAL TO 0 AND cur_x LESS THAN a PLUS 3 AND cur_y GREATER THAN OR EQUAL TO 0 AND cur_y LESS THAN b PLUS 3 THEN  
+                            IF ABS(element at position u of image at position v MINUS element at position cur_x of image at position cur_y) GREATER THAN threshold THEN  
+                                RETURN False  
+                            END IF  
+                        END IF  
+                        SET idx TO idx PLUS 1  
+                    UNTIL FALSE  
+                    SET v TO v PLUS 1  
+                END WHILE  
+                SET u TO u PLUS 1  
+            END WHILE  
+            RETURN True  
+        END FUNCTION  
+        
+        FUNCTION avg_calc(c WITH TYPE integer d WITH TYPE integer) WITH RETURN TYPE integer  
+            SET sum_val TO 0  
+            SET m_idx TO c  
+            WHILE m_idx LESS THAN c PLUS 3  
+                SET n_idx TO d  
+                WHILE n_idx LESS THAN d PLUS 3  
+                    SET sum_val TO sum_val PLUS element at position m_idx of image at position n_idx  
+                    SET n_idx TO n_idx PLUS 1  
+                END WHILE  
+                SET m_idx TO m_idx PLUS 1  
+            END WHILE  
+            SET avg_out TO sum_val DIVIDED BY 9  
+            RETURN avg_out  
+        END FUNCTION  
+        
+        SET outer_i TO 0  
+        REPEAT  
+            IF outer_i GREATER THAN OR EQUAL TO p MINUS 2 THEN BREAK END IF  
+            SET outer_j TO 0  
+            REPEAT  
+                IF outer_j GREATER THAN OR EQUAL TO q MINUS 2 THEN BREAK END IF  
+                IF check_region(outer_i outer_j) EQUALS True THEN  
+                    SET av TO avg_calc(outer_i outer_j)  
+                    SET inner_x TO outer_i  
+                    WHILE inner_x LESS THAN outer_i PLUS 3  
+                        SET inner_y TO outer_j  
+                        WHILE inner_y LESS THAN outer_j PLUS 3  
+                            SET element at position inner_x of arr at position inner_y TO element at position inner_x of arr at position inner_y PLUS av  
+                            SET element at position inner_x of freq at position inner_y TO element at position inner_x of freq at position inner_y PLUS 1  
+                            SET inner_y TO inner_y PLUS 1  
+                        END WHILE  
+                        SET inner_x TO inner_x PLUS 1  
+                    END WHILE  
+                END IF  
+                SET outer_j TO outer_j PLUS 1  
+            UNTIL FALSE  
+            SET outer_i TO outer_i PLUS 1  
+        UNTIL FALSE  
+        
+        SET idx_i TO 0  
+        WHILE idx_i LESS THAN p  
+            SET idx_j TO 0  
+            WHILE idx_j LESS THAN q  
+                IF element at position idx_i of freq at position idx_j GREATER THAN 0 THEN  
+                    SET element at position idx_i of arr at position idx_j TO element at position idx_i of arr at position idx_j DIVIDED BY element at position idx_i of freq at position idx_j  
+                ELSE  
+                    SET element at position idx_i of arr at position idx_j TO element at position idx_i of image at position idx_j  
+                END IF  
+                SET idx_j TO idx_j PLUS 1  
+            END WHILE  
+            SET idx_i TO idx_i PLUS 1  
+        END WHILE  
+        
+        RETURN arr  
+    END FUNCTION  
+END CLASS

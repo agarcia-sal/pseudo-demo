@@ -1,0 +1,77 @@
+CLASS Solution
+    FUNCTION countOfPairs(n parameter, x parameter, y parameter) RETURNS list of integer
+        SET counts TO an array with n elements all initialized as zero
+        
+        FUNCTION bfs(origin parameter)
+            SET visitedFlags TO an array of n PLUS 1 elements all set to False
+            SET distToNodes TO an array of n PLUS 1 zeros
+            SET nodesToVisit TO a double-ended queue initialized with origin
+            SET visitedFlags[origin] TO True
+            
+            DEFINE FUNCTION processNeighbors(currentNode parameter)
+                IF currentNode GREATER THAN OR EQUAL TO 1 AND currentNode LESS THAN OR EQUAL TO n THEN
+                    PASS
+                ELSE
+                    RETURN
+                END IF
+                FOR adjacentNode IN [currentNode MINUS 1, currentNode PLUS 1]
+                    IF adjacentNode GREATER THAN OR EQUAL TO 1 AND adjacentNode LESS THAN OR EQUAL TO n THEN
+                        IF NOT visitedFlags[adjacentNode] THEN
+                            SET visitedFlags[adjacentNode] TO True
+                            SET distToNodes[adjacentNode] TO distToNodes[currentNode] PLUS 1
+                            APPEND adjacentNode TO nodesToVisit
+                        END IF
+                    END IF
+                END FOR
+            END FUNCTION
+            
+            DEFINE FUNCTION bfsRecursion()
+                IF nodesToVisit IS EMPTY THEN
+                    RETURN
+                END IF
+                SET currNode TO POP the leftmost element from nodesToVisit
+                
+                CALL processNeighbors(currNode)
+                
+                IF currNode EQUALS x THEN
+                    IF NOT visitedFlags[y] THEN
+                        SET visitedFlags[y] TO True
+                        SET distToNodes[y] TO distToNodes[currNode] PLUS 1
+                        APPEND y TO nodesToVisit
+                    END IF
+                END IF
+                
+                IF currNode EQUALS y THEN
+                    IF NOT visitedFlags[x] THEN
+                        SET visitedFlags[x] TO True
+                        SET distToNodes[x] TO distToNodes[currNode] PLUS 1
+                        APPEND x TO nodesToVisit
+                    END IF
+                END IF
+                
+                CALL bfsRecursion()
+            END FUNCTION
+            
+            CALL bfsRecursion()
+            
+            SET idx TO 1
+            WHILE idx LESS THAN OR EQUAL TO n
+                IF distToNodes[idx] GREATER THAN 0 THEN
+                    SET updateIndex TO distToNodes[idx] MINUS 1
+                    SET counts[updateIndex] TO counts[updateIndex] PLUS 1
+                END IF
+                SET idx TO idx PLUS 1
+            END WHILE
+            
+        END FUNCTION
+        
+        SET counter TO 1
+        WHILE counter LESS THAN OR EQUAL TO n
+            CALL bfs(counter)
+            SET counter TO counter PLUS 1
+        END WHILE
+        
+        SET finalResult TO counts
+        RETURN finalResult
+    END FUNCTION
+END CLASS

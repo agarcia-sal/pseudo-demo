@@ -1,0 +1,79 @@
+CLASS Solution  
+    FUNCTION countOfPairs(nums)  
+        CONST P = 1000000000 + 7  
+        LET a = LENGTH(nums)  
+        LET b = MAXIMUM(nums)  
+        
+        PROCEDURE init3DArray(x, y, z)  
+            IF x = 0 THEN RETURN [] END IF  
+            LET arr = []  
+            LET idx1 = 0  
+            WHILE idx1 < x DO  
+                LET layer = []  
+                LET idx2 = 0  
+                WHILE idx2 < y DO  
+                    LET row = []  
+                    LET idx3 = 0  
+                    WHILE idx3 < z DO  
+                        APPEND row WITH 0  
+                        idx3 = idx3 + 1  
+                    END WHILE  
+                    APPEND layer WITH row  
+                    idx2 = idx2 + 1  
+                END WHILE  
+                APPEND arr WITH layer  
+                idx1 = idx1 + 1  
+            END WHILE  
+            RETURN arr  
+        END PROCEDURE  
+        
+        LET qwe = init3DArray(a + 1, b + 1, b + 1)  
+        
+        LET idxA = 0  
+        REPEAT  
+            IF idxA > nums[0] THEN BREAK END IF  
+            qwe[1][idxA][nums[0] - idxA] = 1  
+            idxA = idxA + 1  
+        UNTIL FALSE  
+        
+        LET idxI = 2  
+        WHILE idxI <= a DO  
+            LET idxJ = 0  
+            WHILE idxJ <= nums[idxI - 1] DO  
+                LET idxK = 0  
+                WHILE idxK <= nums[idxI - 1] DO  
+                    IF (idxJ + idxK) = nums[idxI - 1] THEN  
+                        LET prevJ = 0  
+                        WHILE prevJ <= idxJ DO  
+                            LET prevK = idxK  
+                            WHILE prevK <= b DO  
+                                LET temp = (qwe[idxI][idxJ][idxK] + qwe[idxI - 1][prevJ][prevK])  
+                                qwe[idxI][idxJ][idxK] = temp MOD P   
+                                prevK = prevK + 1  
+                            END WHILE  
+                            prevJ = prevJ + 1  
+                        END WHILE  
+                    END IF  
+                    idxK = idxK + 1  
+                END WHILE  
+                idxJ = idxJ + 1  
+            END WHILE  
+            idxI = idxI + 1  
+        END WHILE  
+        
+        LET total = 0  
+        LET idxM = 0  
+        REPEAT  
+            IF idxM > b THEN BREAK END IF  
+            LET idxN = 0  
+            REPEAT  
+                IF idxN > b THEN BREAK END IF  
+                total = (total + qwe[a][idxM][idxN]) MOD P  
+                idxN = idxN + 1  
+            UNTIL FALSE  
+            idxM = idxM + 1  
+        UNTIL FALSE  
+        
+        RETURN total  
+    END FUNCTION  
+END CLASS

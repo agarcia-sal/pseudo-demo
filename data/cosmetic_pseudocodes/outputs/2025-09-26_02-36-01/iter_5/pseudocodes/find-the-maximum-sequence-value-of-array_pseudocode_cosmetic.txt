@@ -1,0 +1,64 @@
+CLASS Solution
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER
+        SET limit TO (1 SHIFT_LEFT 7)
+        SET lengthNums TO LENGTH(nums)
+        DEFINE dp AS ARRAY OF BOOLEAN WITH DIMENSIONS lengthNums + 1, k + 2, limit INITIALIZED TO FALSE
+        SET dp[0][0][0] TO TRUE
+
+        FUNCTION recForward(index CURRENT_INTEGER, count CURRENT_INTEGER, mask CURRENT_INTEGER)
+            IF index EQUALS lengthNums THEN RETURN
+            SET dp[index + 1][count][mask] TO dp[index + 1][count][mask] OR dp[index][count][mask]
+            SET alteredMask TO mask BITWISE_OR nums[index]
+            SET dp[index + 1][count + 1][alteredMask] TO dp[index + 1][count + 1][alteredMask] OR dp[index][count][mask]
+            recForward(index + 1, count, mask)
+        END FUNCTION
+
+        FOR i FROM 0 TO k DO
+            FOR j FROM 0 TO limit - 1 DO
+                recForward(0, i, j)
+            END FOR
+        END FOR
+
+        DEFINE dg AS ARRAY OF BOOLEAN WITH DIMENSIONS lengthNums + 1, k + 2, limit INITIALIZED TO FALSE
+        SET dg[lengthNums][0][0] TO TRUE
+
+        FUNCTION recBackward(idx CURRENT_INTEGER, countB CURRENT_INTEGER, bits CURRENT_INTEGER)
+            IF idx EQUALS 0 THEN RETURN
+            SET dg[idx - 1][countB][bits] TO dg[idx - 1][countB][bits] OR dg[idx][countB][bits]
+            SET newBits TO bits BITWISE_OR nums[idx - 1]
+            SET dg[idx - 1][countB + 1][newBits] TO dg[idx - 1][countB + 1][newBits] OR dg[idx][countB][bits]
+            recBackward(idx - 1, countB, bits)
+        END FUNCTION
+
+        FOR a FROM 0 TO k DO
+            FOR b FROM 0 TO limit - 1 DO
+                recBackward(lengthNums, a, b)
+            END FOR
+        END FOR
+
+        SET answer TO 0
+        SET start TO k
+        SET endIndex TO lengthNums - k
+
+        FUNCTION getMaxRes(leftCount CURRENT_INTEGER)
+            IF leftCount GREATER_THAN endIndex THEN RETURN
+            FOR leftMask FROM 0 TO limit - 1 DO
+                IF dp[leftCount][k][leftMask] THEN
+                    FOR rightMask FROM 0 TO limit - 1 DO
+                        IF dg[leftCount][k][rightMask] THEN
+                            SET candidate TO leftMask XOR rightMask
+                            IF candidate GREATER_THAN answer THEN
+                                SET answer TO candidate
+                            END IF
+                        END IF
+                    END FOR
+                END IF
+            END FOR
+            getMaxRes(leftCount + 1)
+        END FUNCTION
+
+        CALL getMaxRes(start)
+
+        RETURN answer
+    END FUNCTION
+END CLASS

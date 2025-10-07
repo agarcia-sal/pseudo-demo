@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+        VAR length_nums := LENGTH(nums)
+        VAR length_changes := LENGTH(changeIndices)
+        
+        FUNCTION can_mark_by_second(k)
+            VAR last_seen := ARRAY_OF_SIZE(length_nums, FILLED_WITH(-1))
+            VAR index := 0
+            WHILE index < k
+                VAR position := changeIndices[index] - 1
+                last_seen[position] = index
+                index = index + 1
+            END WHILE
+            
+            VAR required_total := 0
+            FOR idx FROM 0 TO length_nums - 1
+                required_total = required_total + nums[idx]
+            END FOR
+            
+            VAR decrement_pool := 0
+            VAR marked_set := EMPTY_SET
+            VAR step := 0
+            WHILE step < k
+                VAR current_pos := changeIndices[step] - 1
+                IF current_pos NOT_IN marked_set THEN
+                    IF last_seen[current_pos] == step THEN
+                        IF nums[current_pos] <= decrement_pool THEN
+                            decrement_pool = decrement_pool - nums[current_pos]
+                            marked_set = marked_set UNION {current_pos}
+                        ELSE
+                            RETURN False
+                        END IF
+                    ELSE
+                        decrement_pool = decrement_pool + 1
+                    END IF
+                ELSE
+                    decrement_pool = decrement_pool + 1
+                END IF
+                step = step + 1
+            END WHILE
+            
+            RETURN SIZE(marked_set) == length_nums
+        END FUNCTION
+        
+        VAR low := 0
+        VAR high := length_changes + 1
+        WHILE low < high
+            VAR middle := low + INTEGER_DIVIDE(high - low, 2)
+            IF can_mark_by_second(middle) THEN
+                high = middle
+            ELSE
+                low = low + 1
+            END IF
+        END WHILE
+        
+        IF low <= length_changes THEN
+            RETURN low
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

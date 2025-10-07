@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION minOrAfterOperations(nums k)
+        FUNCTION canAchieve(target_or k)
+            SET sentinel TO -1
+            SET count_ops TO 0
+
+            FUNCTION helper(index current_val count_ops)
+                IF current_val = sentinel THEN
+                    SET next_val TO nums[index]
+                ELSE
+                    SET next_val TO current_val BAND nums[index]
+                END IF
+
+                IF (next_val BAND target_or) = 0 THEN
+                    SET next_val TO sentinel
+                ELSE
+                    SET count_ops TO count_ops + 1
+                    IF count_ops > k THEN
+                        RETURN false
+                    END IF
+                END IF
+
+                IF index + 1 = LENGTH(nums) THEN
+                    RETURN true
+                ELSE
+                    RETURN helper(index + 1 next_val count_ops)
+                END IF
+            END FUNCTION
+
+            RETURN helper(0 sentinel 0)
+        END FUNCTION
+
+        SET upper_limit TO (1 << 30) - 1
+        SET result TO upper_limit
+
+        SET bit_index TO 0
+        WHILE bit_index < 30 DO
+            SET mask TO 1 << bit_index
+            IF (result BAND mask) != 0 THEN
+                SET attempt TO helperCanAchieve(result mask k)
+                FUNCTION helperCanAchieve(res mask k)
+                    RETURN canAchieve((BNOT res) BXOR mask k)
+                END FUNCTION
+                IF helperCanAchieve(result mask k) THEN
+                    SET result TO result BAND (BNOT mask)
+                END IF
+            END IF
+            SET bit_index TO bit_index + 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

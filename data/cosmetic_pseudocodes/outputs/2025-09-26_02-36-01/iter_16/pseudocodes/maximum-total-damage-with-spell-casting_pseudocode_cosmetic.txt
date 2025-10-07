@@ -1,0 +1,69 @@
+CLASS Solution
+     FUNCTION maximumTotalDamage(power)
+        SET p0 TO empty mapping
+        FOR i0 FROM 0 TO LENGTH(power) - 1
+          SET v0 TO power[i0]
+          IF v0 IN p0 THEN
+            SET p0[v0] TO p0[v0] + 1
+          ELSE
+            SET p0[v0] TO 1
+          END IF
+        END FOR
+
+        SET keys0 TO []
+        FOR k0 IN p0
+          APPEND k0 TO keys0
+        END FOR
+        SET sorted_keys0 TO []
+        WHILE LENGTH(keys0) > 0
+          SET min_val0 TO keys0[0]
+          FOR x0 IN keys0
+            IF x0 < min_val0 THEN SET min_val0 TO x0
+          END FOR
+          APPEND min_val0 TO sorted_keys0
+          REMOVE min_val0 FROM keys0
+        END WHILE
+
+        SET dp0 TO empty mapping
+        SET m0 TO LENGTH(sorted_keys0)
+        SET idx0 TO 0
+        WHILE idx0 < m0
+          SET curr0 TO sorted_keys0[idx0]
+
+          IF idx0 > 0 THEN
+            IF sorted_keys0[idx0 - 1] IN dp0 THEN
+              SET ex0 TO dp0[sorted_keys0[idx0 - 1]]
+            ELSE
+              SET ex0 TO 0
+            END IF
+          ELSE
+            SET ex0 TO 0
+          END IF
+
+          SET inc0 TO curr0 * p0[curr0]
+
+          SET j0 TO idx0 - 1
+          WHILE j0 >= 0 AND sorted_keys0[j0] >= curr0 - 2
+            SET j0 TO j0 - 1
+          END WHILE
+
+          IF j0 >= 0 AND sorted_keys0[j0] IN dp0 THEN
+            SET inc0 TO inc0 + dp0[sorted_keys0[j0]]
+          END IF
+
+          IF inc0 > ex0 THEN
+            SET dp0[curr0] TO inc0
+          ELSE
+            SET dp0[curr0] TO ex0
+          END IF
+
+          SET idx0 TO idx0 + 1
+        END WHILE
+
+        SET res0 TO 0
+        FOR val0 IN dp0
+          IF dp0[val0] > res0 THEN SET res0 TO dp0[val0]
+        END FOR
+        RETURN res0
+     END FUNCTION
+END CLASS

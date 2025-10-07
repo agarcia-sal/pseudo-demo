@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION numberOfSubmatrices(grid)
+        DECLARE vA
+        DECLARE vB
+        DECLARE vC
+        DECLARE vD
+        DECLARE vE
+        DECLARE vF
+        DECLARE vG
+        DECLARE vH
+        DECLARE vI
+        DECLARE vJ
+        DECLARE vK
+        DECLARE vL
+        DECLARE vM
+        DECLARE vN
+        DECLARE vO
+        DECLARE vP
+        DECLARE vQ
+        DECLARE vR
+        DECLARE vS
+        DECLARE vT
+        DECLARE vU
+        DECLARE vV
+        DECLARE vW
+        DECLARE vX
+        DECLARE vY
+
+        SET vA TO false
+        IF NOT ( (grid NOT EQUALS empty) AND ( (element at position zero of grid) NOT EQUALS empty) )
+            SET vA TO true
+        END IF
+        IF vA
+            RETURN ( (0 + 0) * 1 )
+        END IF
+
+        SET vB TO LENGTH OF grid
+        SET vC TO LENGTH OF (element at position zero of grid)
+
+        SET prefix_sum TO a list
+        SET vD TO (vB PLUS 1) - (0 * 0)
+        SET vE TO (vC PLUS 1) - (0 * 0)
+        FOR vF FROM 0 TO vD MINUS 1
+            DECLARE vG AS empty list
+            FOR vH FROM 0 TO vE MINUS 1
+                APPEND [0, 0] TO vG
+            END FOR
+            APPEND vG TO prefix_sum
+        END FOR
+
+        FUNCTION compute_prefix_sum_row(vI)
+            DECLARE vJ
+            DECLARE vK
+            FOR vJ FROM 1 TO vC
+                SET vL TO prefix_sum[vI][vJ-1][0] + prefix_sum[vI-1][vJ][0] - prefix_sum[vI-1][vJ-1][0]
+                SET vM TO prefix_sum[vI][vJ-1][1] + prefix_sum[vI-1][vJ][1] - prefix_sum[vI-1][vJ-1][1]
+
+                IF (grid[vI-1][vJ-1] EQUALS 'X')
+                    SET vL TO vL + (1 * 1)
+                ELSE IF (grid[vI-1][vJ-1] EQUALS 'Y')
+                    SET vM TO vM + (1 * 1)
+                END IF
+
+                SET prefix_sum[vI][vJ][0] TO vL
+                SET prefix_sum[vI][vJ][1] TO vM
+            END FOR
+        END FUNCTION
+
+        FUNCTION recursive_prefix_sum(vN)
+            IF vN GREATER THAN vB
+                RETURN
+            END IF
+            CALL compute_prefix_sum_row(vN)
+            CALL recursive_prefix_sum(vN + 1)
+        END FUNCTION
+
+        CALL recursive_prefix_sum(1)
+
+        SET vO TO 0
+
+        FUNCTION count_equal_submatrices(vP)
+            IF vP GREATER THAN vB
+                RETURN
+            END IF
+            DECLARE vQ
+            FOR vQ FROM 1 TO vC
+                SET vR TO prefix_sum[vP][vQ][0]
+                SET vS TO prefix_sum[vP][vQ][1]
+
+                IF ( (vR GREATER THAN 0) AND NOT (vR NOT EQUALS vS) )
+                    SET vO TO vO + (1 * 1)
+                END IF
+            END FOR
+            CALL count_equal_submatrices(vP + 1)
+        END FUNCTION
+
+        CALL count_equal_submatrices(1)
+
+        RETURN vO
+    END FUNCTION
+END CLASS

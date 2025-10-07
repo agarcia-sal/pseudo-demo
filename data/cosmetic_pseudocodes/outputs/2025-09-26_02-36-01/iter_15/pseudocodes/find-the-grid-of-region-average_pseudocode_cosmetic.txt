@@ -1,0 +1,87 @@
+```pseudocode
+CLASS Solution
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+        SET s001 TO LENGTH OF image
+        SET s002 TO LENGTH OF element at position zero of image
+        SET s003 TO a LIST containing s001 ELEMENTS EACH of a LIST containing s002 ELEMENTS EACH set TO 0
+        SET s004 TO a LIST containing s001 ELEMENTS EACH of a LIST containing s002 ELEMENTS EACH set TO 0
+
+        FUNCTION is_valid_region(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE boolean
+            SET s005 TO LIST OF PAIRS: (0, -1), (0, 1), (-1, 0), (1, 0)
+            SET s006 TO x
+            WHILE s006 LESS THAN x + 3
+                SET s007 TO y
+                REPEAT
+                    FOR EACH pair dx, dy IN s005
+                        SET s008 TO s006 + dx
+                        SET s009 TO s007 + dy
+                        IF (0 <= s008 < x + 3) AND (0 <= s009 < y + 3)
+                            IF ABS(image[s006][s007] - image[s008][s009]) > threshold
+                                RETURN False
+                            END IF
+                        END IF
+                    END FOR
+                    SET s007 TO s007 + 1
+                    IF s007 >= y + 3 THEN BREAK
+                END REPEAT
+                SET s006 TO s006 + 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        FUNCTION calculate_average(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE integer
+            SET s010 TO 0
+            SET s011 TO 0
+            WHILE s011 < 3
+                SET s012 TO 0
+                WHILE s012 < 3
+                    SET s010 TO s010 + image[x + s011][y + s012]
+                    SET s012 TO s012 + 1
+                END WHILE
+                SET s011 TO s011 + 1
+            END WHILE
+            RETURN s010 DIVIDED BY 9
+        END FUNCTION
+
+        SET s013 TO 0
+        WHILE s013 <= s001 - 3
+            SET s014 TO 0
+            WHILE s014 <= s002 - 3
+                IF is_valid_region(s013, s014)
+                    SET s015 TO calculate_average(s013, s014)
+                    SET s016 TO 0
+                    REPEAT
+                        IF s016 >= 3 THEN BREAK
+                        SET s017 TO 0
+                        REPEAT
+                            IF s017 >= 3 THEN BREAK
+                            SET s003[s013 + s016][s014 + s017] TO s003[s013 + s016][s014 + s017] + s015
+                            SET s004[s013 + s016][s014 + s017] TO s004[s013 + s016][s014 + s017] + 1
+                            SET s017 TO s017 + 1
+                        END REPEAT
+                        SET s016 TO s016 + 1
+                    END REPEAT
+                END IF
+                SET s014 TO s014 + 1
+            END WHILE
+            SET s013 TO s013 + 1
+        END WHILE
+
+        SET s018 TO 0
+        WHILE s018 < s001
+            SET s019 TO 0
+            WHILE s019 < s002
+                IF s004[s018][s019] > 0
+                    SET s003[s018][s019] TO s003[s018][s019] DIVIDED BY s004[s018][s019]
+                ELSE
+                    SET s003[s018][s019] TO image[s018][s019]
+                END IF
+                SET s019 TO s019 + 1
+            END WHILE
+            SET s018 TO s018 + 1
+        END WHILE
+
+        RETURN s003
+    END FUNCTION
+END CLASS
+```

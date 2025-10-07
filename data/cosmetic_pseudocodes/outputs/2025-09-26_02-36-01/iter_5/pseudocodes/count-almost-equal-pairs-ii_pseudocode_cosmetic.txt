@@ -1,0 +1,92 @@
+CLASS Solution  
+    FUNCTION countPairs(nums)  
+        FUNCTION helperSwap(arr, idx1, idx2)  
+            SET tmpVal TO arr[idx1]  
+            SET arr[idx1] TO arr[idx2]  
+            SET arr[idx2] TO tmpVal  
+        END FUNCTION  
+
+        CALL method TO sort nums IN PLACE  
+
+        SET totalCount TO zero  
+        SET frequencyMap TO a default dictionary THAT RETURNS zero FOR ANY missing key  
+
+        FUNCTION computeVis(index, maxIndex, currArr, visited)  
+            IF index >= maxIndex THEN  
+                RETURN  
+            END IF  
+
+            FUNCTION innerLoop(i, j, arrRef, setRef, lengthVal)  
+                IF i < 0 THEN  
+                    RETURN  
+                END IF  
+                CALL helperSwap(arrRef, i, j)  
+                SET combinedNumStr TO ""  
+                FOR each ch IN arrRef DO  
+                    SET combinedNumStr TO combinedNumStr + ch  
+                END FOR  
+                SET combinedNumVal TO integer value OF combinedNumStr  
+                ADD combinedNumVal TO setRef  
+
+                FUNCTION nestedLoops(startQ, limitQ, startP, limitP, arrayRef, setRefInner)  
+                    IF startQ > limitQ THEN  
+                        RETURN  
+                    END IF  
+                    IF startP >= limitP THEN  
+                        CALL nestedLoops(startQ + 1, limitQ, startQ + 1, limitP, arrayRef, setRefInner)  
+                        RETURN  
+                    END IF  
+                    CALL helperSwap(arrayRef, startP, startQ)  
+                    SET tmpConcat TO ""  
+                    FOR elemCh IN arrayRef DO  
+                        SET tmpConcat TO tmpConcat + elemCh  
+                    END FOR  
+                    SET intValTmp TO integer value OF tmpConcat  
+                    ADD intValTmp TO setRefInner  
+                    CALL helperSwap(arrayRef, startP, startQ)  
+
+                    CALL nestedLoops(startQ, limitQ, startP + 1, limitP, arrayRef, setRefInner)  
+                END FUNCTION  
+
+                CALL nestedLoops(i + 1, maxIndex - 1, i + 1, maxIndex - 1, arrRef, setRef)  
+
+                CALL helperSwap(arrRef, i, j)  
+
+                innerLoop(i - 1, j, arrRef, setRef, maxIndex)  
+            END FUNCTION  
+
+            innerLoop(index - 1, index, currArr, visited, maxIndex)  
+            CALL computeVis(index + 1, maxIndex, currArr, visited)  
+        END FUNCTION  
+
+        FUNCTION processNumber(originalNum)  
+            SET visitedSet TO a new empty set  
+            SET stringifiedNum TO the list OF characters IN string representation OF originalNum  
+            SET lengthVal TO the length OF stringifiedNum  
+
+            CALL computeVis(zero, lengthVal, stringifiedNum, visitedSet)  
+
+            RETURN visitedSet  
+        END FUNCTION  
+
+        FUNCTION iterateNumbers(pos, numbersList, freqDict, acc)  
+            IF pos >= length OF numbersList THEN  
+                RETURN acc  
+            END IF  
+
+            SET currentNumber TO numbersList[pos]  
+            SET visitedNums TO processNumber(currentNumber)  
+            SET interimSum TO zero  
+            FOR each val IN visitedNums DO  
+                SET interimSum TO interimSum + freqDict[val]  
+            END FOR  
+            SET acc TO acc + interimSum  
+            SET freqDict[currentNumber] TO freqDict[currentNumber] + 1  
+
+            RETURN iterateNumbers(pos + 1, numbersList, freqDict, acc)  
+        END FUNCTION  
+
+        SET result TO iterateNumbers(zero, nums, frequencyMap, zero)  
+        RETURN result  
+    END FUNCTION  
+END CLASS

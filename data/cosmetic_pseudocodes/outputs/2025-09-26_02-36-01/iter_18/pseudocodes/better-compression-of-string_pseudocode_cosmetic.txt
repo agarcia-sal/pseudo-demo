@@ -1,0 +1,88 @@
+```pseudocode
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+        
+        FUNCTION accumulateCounts(sourceStr, idx, accDict, prevKey, prevVal)
+            IF idx > LENGTH(sourceStr) THEN
+                IF prevKey != "" THEN
+                    accDict[prevKey] ← accDict[prevKey] + prevVal
+                END IF
+                RETURN accDict
+            ELSE
+                SET ch ← sourceStr[idx]
+                IF (ch >= "A" AND ch <= "Z") OR (ch >= "a" AND ch <= "z") THEN
+                    IF prevKey != "" THEN
+                        accDict[prevKey] ← accDict[prevKey] + prevVal
+                    END IF
+                    RETURN accumulateCounts(sourceStr, idx + 1, accDict, ch, 0)
+                ELSE
+                    SET newVal ← prevVal * (5 + 5) + (ch - "0")
+                    RETURN accumulateCounts(sourceStr, idx + 1, accDict, prevKey, newVal)
+                END IF
+            END IF
+        END FUNCTION
+        
+        FUNCTION builtInKeysSorted(dct)
+            SET keyList ← EMPTY LIST
+            FOR key IN dct
+                APPEND key TO keyList
+            END FOR
+            SET sortedList ← []
+            WHILE LENGTH(keyList) > 0 DO
+                SET minChar ← keyList[1]
+                FOR c IN keyList
+                    IF c < minChar THEN
+                        SET minChar ← c
+                    END IF
+                END FOR
+                APPEND minChar TO sortedList
+                REMOVE first occurrence of minChar FROM keyList
+            END WHILE
+            RETURN sortedList
+        END FUNCTION
+
+        FUNCTION stringifyNumber(num)
+            IF num == 0 THEN
+                RETURN "0"
+            END IF
+
+            SET charsOut ← EMPTY LIST
+            SET n ← num
+            WHILE n > 0 DO
+                SET rem ← n - ((n / 10) * 10)
+                SET digitChar ← CHAR(rem + 48)
+                INSERT digitChar AT BEGINNING of charsOut
+                SET n ← n / 10
+            END WHILE
+
+            SET outStr ← ""
+            FOR c IN charsOut
+                outStr ← outStr + c
+            END FOR
+
+            RETURN outStr
+        END FUNCTION
+
+        SET countsDictionary ← DICTIONARY with default 0 values
+        SET accumulated ← accumulateCounts(compressed, 1, countsDictionary, "", 0)
+
+        SET partsList ← []
+        SET sortedKeys ← builtInKeysSorted(accumulated)
+        SET idxK ← 1
+        WHILE idxK <= LENGTH(sortedKeys) DO
+            SET letter ← sortedKeys[idxK]
+            SET val ← accumulated[letter]
+            SET strVal ← stringifyNumber(val)
+            APPEND letter + strVal TO partsList
+            SET idxK ← idxK + 1
+        END WHILE
+
+        SET outputString ← ""
+        FOR element IN partsList
+            outputString ← outputString + element
+        END FOR
+
+        RETURN outputString
+    END FUNCTION
+END CLASS
+```

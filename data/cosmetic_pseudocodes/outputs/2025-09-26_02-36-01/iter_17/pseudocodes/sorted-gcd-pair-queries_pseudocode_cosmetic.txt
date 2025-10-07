@@ -1,0 +1,43 @@
+CLASS Solution  
+    FUNCTION gcdValues(nums, queries)  
+        SET delta TO 0  
+        SET helper1 TO 0  
+        SET alpha TO 0  
+        SET peak TO 0  
+        SET occur TO NEW counter object WITH elements nums  
+        SET peak TO MAXIMUM ELEMENT IN nums  
+        SET tally TO LIST OF ZEROS WITH LENGTH peak PLUS 1  
+        SET helper2 TO peak  
+        WHILE helper2 IS GREATER THAN OR EQUAL TO 1  
+            SET alpha TO 0  
+            SET beta TO helper2  
+            REPEAT  
+                SET delta TO delta + occur[beta]  
+                SET tally[helper2] TO tally[helper2] - tally[beta]  
+                SET beta TO beta + helper2  
+            UNTIL beta GREATER THAN peak  
+            SET helper1 TO (delta * (delta - 1)) / 2  
+            SET tally[helper2] TO tally[helper2] + helper1  
+            helper2 = helper2 - 1  
+        END WHILE  
+        SET prefix_accumulation TO LIST WITH 0 AT START  
+        FOR EACH eta IN tally  
+            SET prefix_accumulation TO prefix_accumulation + [ LAST(prefix_accumulation) + eta ]  
+        END FOR  
+        SET output_list TO EMPTY LIST  
+        FOR EACH query_element IN queries DO  
+            SET low TO 0  
+            SET high TO LENGTH(prefix_accumulation) - 1  
+            WHILE low LESS THAN high  
+                SET mid TO (low + high) DIVIDED BY 2  
+                IF prefix_accumulation[mid] LESS THAN OR EQUAL TO query_element THEN  
+                    SET low TO mid + 1  
+                ELSE  
+                    SET high TO mid  
+                END IF  
+            END WHILE  
+            APPEND low TO output_list  
+        END FOR  
+        RETURN output_list  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,13 @@
+def is_palindrome(string: str) -> bool:
+    return string == string[::-1]
+
+def make_palindrome(string: str) -> str:
+    if string == "":
+        return ""
+    beginning_of_suffix = 0
+    while not is_palindrome(string[beginning_of_suffix:]):
+        beginning_of_suffix += 1
+    prefix = ""
+    for index in range(beginning_of_suffix):
+        prefix = string[index] + prefix
+    return string + prefix

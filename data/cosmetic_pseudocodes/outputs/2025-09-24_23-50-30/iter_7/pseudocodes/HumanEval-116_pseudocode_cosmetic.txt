@@ -1,0 +1,59 @@
+```
+FUNCTION sort_array(numbersCollection)
+    FUNCTION countOnes(binaryString, index, onesTotal)
+        IF index < LENGTH(binaryString)
+            LET currentChar = binaryString[index]
+            RETURN countOnes(binaryString, index + 1, onesTotal + (1 * (currentChar = '1')))
+        ENDIF
+        RETURN onesTotal
+    END FUNCTION
+
+    LET primarySorted = []
+    FOR EACH number IN numbersCollection
+        APPEND number TO primarySorted
+    END FOR
+
+    LET n = LENGTH(primarySorted)
+    FOR i FROM 0 TO n - 2
+        FOR j FROM 0 TO n - 2 - i
+            IF primarySorted[j + 1] - primarySorted[j] < 0
+                LET temp = primarySorted[j]
+                primarySorted[j] = primarySorted[j + 1]
+                primarySorted[j + 1] = temp
+            ENDIF
+        END FOR
+    END FOR
+
+    LET secondarySorted = []
+    LET indices = []
+    FOR k FROM 0 TO LENGTH(primarySorted) - 1
+        APPEND k TO indices
+    END FOR
+
+    LET m = LENGTH(indices)
+    FOR x FROM 0 TO m - 2
+        FOR y FROM 0 TO m - 2 - x
+            LET leftCount = countOnes(SUBSTRING(TO_BINARY_STRING(primarySorted[indices[y]]), 2), 0, 0)
+            LET rightCount = countOnes(SUBSTRING(TO_BINARY_STRING(primarySorted[indices[y+1]]), 2), 0, 0)
+            IF rightCount - leftCount < 0
+                LET swapTemp = indices[y]
+                indices[y] = indices[y + 1]
+                indices[y + 1] = swapTemp
+            ENDIF
+            IF leftCount = rightCount
+                IF primarySorted[indices[y]] - primarySorted[indices[y + 1]] > 0
+                    LET swapTemp = indices[y]
+                    indices[y] = indices[y + 1]
+                    indices[y + 1] = swapTemp
+                ENDIF
+            ENDIF
+        END FOR
+    END FOR
+
+    FOR eachPos IN indices
+        APPEND primarySorted[eachPos] TO secondarySorted
+    END FOR
+
+    RETURN secondarySorted
+END FUNCTION
+```

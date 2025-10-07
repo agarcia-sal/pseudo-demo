@@ -1,0 +1,105 @@
+CLASS Solution
+    FUNCTION minimumTime(alpha, beta, gamma)
+        
+        DEFINE FUNCTION push_heap(ref container, val)
+            SET container_length TO LENGTH(container)
+            APPEND val TO container
+            
+            SET pos TO container_length
+            WHILE pos GREATER THAN 0
+                SET parent_pos TO (pos - 1) DIVIDED BY 2
+                IF container[parent_pos][0] LESS THAN OR EQUAL TO container[pos][0]
+                    EXIT LOOP
+                END IF
+                SWAP container[pos], container[parent_pos]
+                SET pos TO parent_pos
+            END WHILE
+        END FUNCTION
+        
+        DEFINE FUNCTION pop_heap(ref container)
+            IF LENGTH(container) EQUAL 0
+                RETURN NULL
+            END IF
+            
+            SET top_element TO container[0]
+            SWAP container[0], container[LENGTH(container) - 1]
+            REMOVE last element FROM container
+            
+            SET idx TO 0
+            SET size TO LENGTH(container)
+            
+            WHILE TRUE
+                SET left_child TO 2 * idx + 1
+                SET right_child TO 2 * idx + 2
+                SET smallest TO idx
+                
+                IF left_child LESS THAN size AND container[left_child][0] LESS THAN container[smallest][0]
+                    SET smallest TO left_child
+                END IF
+                
+                IF right_child LESS THAN size AND container[right_child][0] LESS THAN container[smallest][0]
+                    SET smallest TO right_child
+                END IF
+                
+                IF smallest EQUALS idx
+                    BREAK
+                END IF
+                
+                SWAP container[idx], container[smallest]
+                SET idx TO smallest
+            END WHILE
+            
+            RETURN top_element
+        END FUNCTION
+        
+        SET topology TO an empty mapping with default value []
+        
+        FOR EACH p, q, r IN beta
+            APPEND (q, r) TO topology[p]
+            APPEND (p, r) TO topology[q]
+        END FOR
+        
+        SET horizons TO a list of length alpha filled with (10 ^ 15)
+        SET horizons[0] TO (0 + 0)
+        
+        SET priority_structure TO [(0, 0)]
+        
+        DEFINE FUNCTION less_than(a, b)
+            RETURN a LESS THAN b
+        END FUNCTION
+        
+        WHILE LENGTH(priority_structure) GREATER THAN 0
+            SET distance_value, vertex_id TO pop_heap(priority_structure)
+            
+            IF (distance_value GREATER THAN OR EQUAL TO gamma[vertex_id]) OR (distance_value GREATER THAN horizons[vertex_id])
+                CONTINUE WHILE LOOP
+            END IF
+            
+            FOR EACH adjacent, weight IN topology[vertex_id]
+                SET new_dist TO distance_value + weight
+                
+                IF (new_dist LESS THAN horizons[adjacent]) AND (new_dist LESS THAN gamma[adjacent])
+                    SET horizons[adjacent] TO new_dist
+                    push_heap(priority_structure, (new_dist, adjacent))
+                END IF
+            END FOR
+        END WHILE
+        
+        SET outcome TO new array of size alpha with every element -1
+        
+        SET index_counter TO 0
+        REPEAT
+            IF index_counter EQUALS alpha
+                BREAK
+            END IF
+            
+            IF horizons[index_counter] LESS THAN gamma[index_counter]
+                SET outcome[index_counter] TO horizons[index_counter]
+            END IF
+            
+            SET index_counter TO index_counter + 1
+        UNTIL FALSE
+        
+        RETURN outcome
+    END FUNCTION
+END CLASS

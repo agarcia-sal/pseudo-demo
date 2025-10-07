@@ -1,0 +1,81 @@
+CLASS Solution
+	Function findPattern(board, pattern)
+		 rowsCount ← LENGTH(board)
+		columnsCount ← LENGTH(board[0])
+		   patternRows ← LENGTH(pattern)
+	    patternColumns ← LENGTH(pattern[0])
+
+		Function matches(rowIndex, colIndex)
+			mapCharToNum ← new mapping
+			mapNumToChar ← new mapping
+
+			 helperCheck ← function(x, y)
+			   pVal ← pattern[x][y]
+			    bVal ← board[rowIndex + x][colIndex + y]
+
+					IsDigit← function(char)
+						return (char ≥ '0') AND (char ≤ '9')
+					end function
+
+				    if IsDigit(pVal) then
+					      if TO_INTEGER(pVal) ≠ bVal then
+						      return False
+					      end if
+				    else
+					   if mapCharToNum CONTAINS pVal then
+						   if mapCharToNum[pVal] ≠ bVal then
+							   return False
+						   end if
+					   else
+						   if mapNumToChar CONTAINS bVal then
+							   return False
+						   end if
+						   mapCharToNum[pVal] ← bVal
+						   mapNumToChar[bVal] ← pVal
+					   end if
+				    end if
+			    end function
+
+			Function traverse(x)
+				IF x = patternRows THEN
+					RETURN True
+				END IF
+
+				Function traverseCols(y)
+					IF y = patternColumns THEN
+						RETURN traverse(x + 1)
+					END IF
+					IF NOT helperCheck(x, y) THEN
+						RETURN False
+					END IF
+					RETURN traverseCols(y + 1)
+				END Function
+				RETURN traverseCols(0)
+			END Function
+
+			RETURN traverse(0)
+		END Function
+
+		Function scanRows(r)
+			IF r = rowsCount - patternRows + 1 THEN
+				RETURN [-1, -1]
+			END IF
+
+			Function scanCols(c)
+				IF c = columnsCount - patternColumns + 1 THEN
+					RETURN scanRows(r + 1)
+				END IF
+
+				IF matches(r, c) THEN
+					RETURN [r, c]
+				END IF
+
+				RETURN scanCols(c + 1)
+			END Function
+
+			RETURN scanCols(0)
+		END Function
+
+		RETURN scanRows(0)
+	END Function
+END CLASS

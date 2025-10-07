@@ -1,0 +1,40 @@
+```
+FUNCTION sort_array(sequence_of_numbers)
+  FUNCTION calc_ones(binary_string, index, tally)
+    IF index = LENGTH(binary_string) THEN 
+      RETURN tally
+    ELSE
+      RETURN calc_ones(binary_string, index + 1,
+                       tally + (IF SUBSTRING(binary_string, index, 1) = '1' THEN 1 ELSE 0))
+    END IF
+  END FUNCTION
+
+  FUNCTION key_function(n)
+    RETURN calc_ones(BINARY_REPRESENTATION(n)[3..], 1, 0)
+  END FUNCTION
+
+  PROCEDURE recursive_sort(input_list, accumulator)
+    IF input_list = [] THEN 
+      RETURN accumulator
+    ELSE
+      LET min_element = input_list[1]
+      LET rest = input_list[2..]
+      LET (less, equal, greater) = ([], [min_element], [])
+      FOR EACH item IN rest DO
+        IF item < min_element THEN
+          less := less + [item]
+        ELSE IF item = min_element THEN
+          equal := equal + [item]
+        ELSE
+          greater := greater + [item]
+        END IF
+      END FOR
+      RETURN recursive_sort(less, accumulator) + equal + recursive_sort(greater, [])
+    END IF
+  END PROCEDURE
+
+  LET temp_sorted = recursive_sort(sequence_of_numbers, [])
+  LET final_sorted = recursive_sort(temp_sorted, [])
+  RETURN final_sorted
+END FUNCTION
+```

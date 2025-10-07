@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION maxScore(grid)
+        FUNCTION minimum(a, b)
+            IF a < b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        FUNCTION maximum(a, b)
+            IF a > b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        VARIABLE alpha ASSIGN LENGTH(grid)
+        VARIABLE beta ASSIGN LENGTH(grid[0])
+        VARIABLE omega ASSIGN []
+        VARIABLE kappa ASSIGN 0
+        VARIABLE psi ASSIGN 0
+        VARIABLE tau ASSIGN 0
+        VARIABLE zeta ASSIGN 0
+
+        REPEAT
+            SET psi TO 0
+            WHILE psi < beta
+                APPEND [∞] TO omega
+                SET psi TO psi + 1
+            END WHILE
+            SET kappa TO kappa + 1
+        UNTIL kappa = alpha
+
+        SET omega[0][0] TO grid[0][0]
+        SET psi TO 1
+        WHILE psi < beta
+            SET omega[0][psi] TO minimum(omega[0][psi - 1], grid[0][psi])
+            SET psi TO psi + 1
+        END WHILE
+
+        SET kappa TO 1
+        WHILE kappa < alpha
+            SET omega[kappa][0] TO minimum(omega[kappa - 1][0], grid[kappa][0])
+            SET kappa TO kappa + 1
+        END WHILE
+
+        SET tau TO 1
+
+        FUNCTION inner_loop(i, j, maxVal)
+            IF j = beta THEN
+                RETURN maxVal
+            ELSE
+                SET omega[j][i] TO minimum(omega[j][i - 1], omega[j - 1][i])
+                SET zeta TO grid[j][i] - omega[j][i]
+                SET maxVal TO maximum(maxVal, zeta)
+                RETURN inner_loop(i, j + 1, maxVal)
+            END IF
+        END FUNCTION
+
+        FUNCTION outer_loop(i, maxVal)
+            IF i = alpha THEN
+                RETURN maxVal
+            ELSE
+                SET tempMax TO inner_loop(i, 1, maxVal)
+                RETURN outer_loop(i + 1, tempMax)
+            END IF
+        END FUNCTION
+
+        RETURN outer_loop(1, -∞)
+    END FUNCTION
+END CLASS

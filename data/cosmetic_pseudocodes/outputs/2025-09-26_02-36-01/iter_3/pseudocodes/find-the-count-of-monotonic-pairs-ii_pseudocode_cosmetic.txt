@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        LET modulus BE 1000000000 PLUS 7
+        LET length_nums BE SIZE OF nums
+        LET highest_val BE MAX ELEMENT IN nums
+
+        DECLARE dp_array AS ARRAY OF SIZE (length_nums PLUS 1) EACH CONTAINING ARRAY OF SIZE (highest_val PLUS 1) EACH CONTAINING ARRAY OF SIZE (highest_val PLUS 1)
+        INITIALIZE dp_array WITH 0
+
+        LET initial_num BE nums[0]
+        LET idx_j BE 0
+        WHILE idx_j LESS THAN OR EQUAL TO initial_num
+            dp_array[1][idx_j][initial_num MINUS idx_j] ASSIGN 1
+            idx_j INCREMENT BY 1
+        END WHILE
+
+        LET idx_i BE 2
+        WHILE idx_i LESS THAN OR EQUAL TO length_nums
+            LET current_value BE nums[idx_i MINUS 1]
+            LET idx_j_inner BE 0
+            WHILE idx_j_inner LESS THAN OR EQUAL TO current_value
+                LET idx_k_inner BE 0
+                WHILE idx_k_inner LESS THAN OR EQUAL TO current_value
+                    IF (idx_j_inner PLUS idx_k_inner) IS EQUAL TO current_value THEN
+                        LET prev_j_idx BE 0
+                        WHILE prev_j_idx LESS THAN OR EQUAL TO idx_j_inner
+                            LET prev_k_idx BE idx_k_inner
+                            WHILE prev_k_idx LESS THAN OR EQUAL TO highest_val
+                                dp_array[idx_i][idx_j_inner][idx_k_inner] PLUS_EQUALS dp_array[idx_i MINUS 1][prev_j_idx][prev_k_idx]
+                                dp_array[idx_i][idx_j_inner][idx_k_inner] ASSIGN dp_array[idx_i][idx_j_inner][idx_k_inner] MOD modulus
+                                prev_k_idx INCREMENT BY 1
+                            END WHILE
+                            prev_j_idx INCREMENT BY 1
+                        END WHILE
+                    END IF
+                    idx_k_inner INCREMENT BY 1
+                END WHILE
+                idx_j_inner INCREMENT BY 1
+            END WHILE
+            idx_i INCREMENT BY 1
+        END WHILE
+
+        LET total_result BE 0
+        LET final_j BE 0
+        WHILE final_j LESS THAN OR EQUAL TO highest_val
+            LET final_k BE 0
+            WHILE final_k LESS THAN OR EQUAL TO highest_val
+                total_result PLUS_EQUALS dp_array[length_nums][final_j][final_k]
+                total_result ASSIGN total_result MOD modulus
+                final_k INCREMENT BY 1
+            END WHILE
+            final_j INCREMENT BY 1
+        END WHILE
+
+        RETURN total_result
+    END FUNCTION
+END CLASS

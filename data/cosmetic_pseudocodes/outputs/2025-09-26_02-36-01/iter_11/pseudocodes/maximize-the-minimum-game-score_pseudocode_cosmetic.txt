@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION maxScore(points, m)
+        FUNCTION isPossible(minVal, m)
+            SET alpha TO 0
+            SET beta TO 0
+
+            FUNCTION ceilDiv(a, b)
+                SET result TO (a + b - 1) DIV b
+                RETURN result
+            END FUNCTION
+
+            SET idx TO 0
+            REPEAT
+                SET curr TO points[idx]
+                SET calc TO ceilDiv(minVal + curr - 1, curr)
+                IF (calc - beta) < 0 THEN
+                    SET diff TO 0
+                ELSE
+                    SET diff TO calc - beta
+                END IF
+                IF diff > 0 THEN
+                    SET alpha TO alpha + (2 * diff - 1)
+                    SET beta TO diff - 1
+                ELSE
+                    IF (idx + 1) < LENGTH(points) THEN
+                        SET alpha TO alpha + 1
+                        SET beta TO 0
+                    END IF
+                END IF
+                IF alpha > m THEN
+                    RETURN False
+                END IF
+                SET idx TO idx + 1
+            UNTIL idx >= LENGTH(points)
+
+            RETURN True
+        END FUNCTION
+
+        SET lowerBound TO 0
+        SET upperBound TO (((m + 1) DIV 2) * points[0]) + 1
+
+        FUNCTION binarySearch(l, r)
+            IF l < r THEN
+                SET median TO (l + r + 1) DIV 2
+                IF isPossible(median, m) THEN
+                    RETURN binarySearch(median, r)
+                ELSE
+                    RETURN binarySearch(l, median - 1)
+                END IF
+            ELSE
+                RETURN l
+            END IF
+        END FUNCTION
+
+        RETURN binarySearch(lowerBound, upperBound)
+    END FUNCTION
+END CLASS

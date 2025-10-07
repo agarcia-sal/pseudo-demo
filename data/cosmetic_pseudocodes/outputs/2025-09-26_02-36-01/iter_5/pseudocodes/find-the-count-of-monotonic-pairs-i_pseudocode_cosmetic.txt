@@ -1,0 +1,112 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        SET moduloSum TO 10^9 PLUS 7
+        SET length_nums TO LENGTH OF nums
+        SET highest_val TO MAXIMUM OF nums
+
+        FUNCTION initializeDP(index, limit_j, limit_k)
+            IF index EQUALS length_nums THEN
+                RETURN []
+            ELSE
+                FUNCTION constructRow(j_index)
+                    IF j_index EQUALS (limit_j PLUS 1) THEN
+                        RETURN []
+                    ELSE
+                        FUNCTION constructCol(k_index)
+                            IF k_index EQUALS (limit_k PLUS 1) THEN
+                                RETURN []
+                            ELSE
+                                RETURN 0 CONCATENATE WITH constructCol(k_index PLUS 1)
+                            END IF
+                        END FUNCTION
+                        RETURN constructCol(0) CONCATENATE WITH constructRow(j_index PLUS 1)
+                    END IF
+                END FUNCTION
+                RETURN constructRow(0) CONCATENATE WITH initializeDP(index PLUS 1, limit_j, limit_k)
+            END IF
+        END FUNCTION
+
+        SET dp TO initializeDP(0, highest_val, highest_val)
+
+        FUNCTION assignBaseCases(pos)
+            IF pos GREATER THAN OR EQUAL TO 1 THEN
+                RETURN
+            END IF
+            FUNCTION baseLoop(j_val)
+                IF j_val GREATER THAN nums[0] THEN
+                    RETURN
+                ELSE
+                    SET complementary_k TO nums[0] MINUS j_val
+                    SET dp[0][j_val][complementary_k] TO 1
+                    baseLoop(j_val PLUS 1)
+                END IF
+            END FUNCTION
+            baseLoop(0)
+        END FUNCTION
+
+        assignBaseCases(0)
+        
+        FUNCTION fillDP(i)
+            IF i EQUALS length_nums THEN
+                RETURN
+            ELSE
+                FUNCTION loopJ(j_curr)
+                    IF j_curr GREATER THAN nums[i] THEN
+                        RETURN
+                    ELSE
+                        SET current_k TO nums[i] MINUS j_curr
+                        FUNCTION loopJPrev(j_prev_curr)
+                            IF j_prev_curr GREATER THAN j_curr THEN
+                                RETURN
+                            ELSE
+                                FUNCTION loopKPrev(k_prev_curr)
+                                    IF k_prev_curr GREATER THAN highest_val THEN
+                                        RETURN
+                                    ELSE
+                                        SET dp[i][j_curr][current_k] TO (dp[i][j_curr][current_k] PLUS dp[i MINUS 1][j_prev_curr][k_prev_curr]) MODULO moduloSum
+                                        loopKPrev(k_prev_curr PLUS 1)
+                                    END IF
+                                END FUNCTION
+                                loopKPrev(current_k)
+                                loopJPrev(j_prev_curr PLUS 1)
+                            END IF
+                        END FUNCTION
+                        loopJPrev(0)
+                        loopJ(j_curr PLUS 1)
+                    END IF
+                END FUNCTION
+                loopJ(0)
+                fillDP(i PLUS 1)
+            END IF
+        END FUNCTION
+
+        fillDP(1)
+
+        SET accumulator TO 0
+
+        FUNCTION collectResult(j_idx)
+            IF j_idx GREATER THAN highest_val THEN
+                RETURN
+            ELSE
+                FUNCTION innerCollect(k_idx)
+                    IF k_idx GREATER THAN highest_val THEN
+                        RETURN
+                    ELSE
+                        SET sum_jk TO j_idx PLUS k_idx
+                        IF sum_jk EQUALS nums[length_nums MINUS 1] THEN
+                            SET accumulator TO (accumulator PLUS dp[length_nums MINUS 1][j_idx][k_idx]) MODULO moduloSum
+                        END IF
+                        innerCollect(k_idx PLUS 1)
+                    END IF
+                END FUNCTION
+                innerCollect(0)
+                collectResult(j_idx PLUS 1)
+            END IF
+        END FUNCTION
+
+        collectResult(0)
+
+        SET finalAnswer TO accumulator
+        RETURN finalAnswer
+    END FUNCTION
+END CLASS

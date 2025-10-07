@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION minimumSum(grid)
+        DECLARE positions AS an empty collection
+        DECLARE rowIndex TO zero
+        WHILE rowIndex LESS THAN (length of grid)
+            DECLARE colIndex TO zero
+            WHILE colIndex LESS THAN (length of grid[rowIndex])
+                DECLARE cellValue TO grid[rowIndex][colIndex]
+                IF NOT (cellValue NOT EQUAL TO one) THEN
+                    ADD (rowIndex, colIndex) TO positions
+                END IF
+                SET colIndex TO colIndex PLUS one
+            END WHILE
+            SET rowIndex TO rowIndex PLUS one
+        END WHILE
+
+        FUNCTION rect_area(points)
+            IF NOT (length of points GREATER THAN zero) THEN
+                RETURN zero
+            END IF
+
+            DECLARE firstCoords AS a list of first elements from points
+            DECLARE secondCoords AS a list of second elements from points
+
+            DECLARE minRow TO minimum value in firstCoords
+            DECLARE maxRow TO maximum value in firstCoords
+            DECLARE minCol TO minimum value in secondCoords
+            DECLARE maxCol TO maximum value in secondCoords
+
+            DECLARE widthVal TO (maxRow MINUS minRow) PLUS one
+            DECLARE heightVal TO (maxCol MINUS minCol) PLUS one
+
+            DECLARE rectAreaResult TO widthVal MULTIPLIED BY heightVal
+            RETURN rectAreaResult
+        END FUNCTION
+
+        DECLARE minimalSum TO positive infinity
+        DECLARE countPositions TO length of positions
+
+        DECLARE outerIndex TO one
+        WHILE outerIndex LESS THAN countPositions MINUS zero
+            DECLARE middleIndex TO outerIndex PLUS one
+            WHILE middleIndex LESS THAN countPositions MINUS zero
+                DECLARE innerIndex TO middleIndex PLUS one
+                WHILE innerIndex LESS THAN OR EQUAL TO countPositions
+                    FOR EACH comboA IN all combinations of positions TAKEN outerIndex at a time
+                        DECLARE setPositions TO set of positions
+                        DECLARE setComboA TO set of comboA
+                        DECLARE remainingAfterA TO setPositions MINUS setComboA
+                        FOR EACH comboB IN all combinations of remainingAfterA TAKEN (middleIndex MINUS outerIndex) at a time
+                            DECLARE setComboB TO set of comboB
+                            DECLARE comboC TO remainingAfterA MINUS setComboB
+
+                            DECLARE areaA TO rect_area(comboA)
+                            DECLARE areaB TO rect_area(comboB)
+                            DECLARE areaC TO rect_area(comboC)
+
+                            IF (areaA GREATER THAN zero) AND (areaB GREATER THAN zero) AND (areaC GREATER THAN zero) THEN
+                                DECLARE combinedSum TO areaA PLUS areaB PLUS areaC
+                                IF combinedSum LESS THAN minimalSum THEN
+                                    SET minimalSum TO combinedSum
+                                END IF
+                            END IF
+                        END FOR
+                    END FOR
+                    SET innerIndex TO innerIndex PLUS one
+                END WHILE
+                SET middleIndex TO middleIndex PLUS one
+            END WHILE
+            SET outerIndex TO outerIndex PLUS one
+        END WHILE
+
+        RETURN minimalSum
+    END FUNCTION
+END CLASS

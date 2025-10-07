@@ -1,0 +1,105 @@
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        DEFINE FUNCTION build_min_heap(A)
+            LET n <-- LENGTH(A)
+            DEFINE FUNCTION sift(i)
+                LET smallest <-- i
+                LET leftc <-- 2 * i + 1
+                LET rightc <-- 2 * i + 2
+                IF leftc < n AND A[leftc][0] < A[smallest][0] THEN
+                    LET smallest <-- leftc
+                END IF
+                IF rightc < n AND A[rightc][0] < A[smallest][0] THEN
+                    LET smallest <-- rightc
+                END IF
+                IF smallest != i THEN
+                    LET tmp_a <-- A[i]
+                    LET A[i] <-- A[smallest]
+                    LET A[smallest] <-- tmp_a
+                    CALL sift(smallest)
+                END IF
+            END FUNCTION
+            LET start <-- (n DIV 2) - 1
+            WHILE start >= 0
+                CALL sift(start)
+                LET start <-- start - 1
+            END WHILE
+        END FUNCTION
+
+        DEFINE FUNCTION pop_min_heap(H)
+            LET res <-- H[0]
+            LET last_idx <-- LENGTH(H) - 1
+            LET H[0] <-- H[last_idx]
+            DELETE H[last_idx]
+            LET i <-- 0
+            LET size <-- LENGTH(H)
+            WHILE TRUE
+                LET leftc <-- 2 * i + 1
+                LET rightc <-- 2 * i + 2
+                LET smallest <-- i
+                IF leftc < size AND H[leftc][0] < H[smallest][0] THEN
+                    LET smallest <-- leftc
+                END IF
+                IF rightc < size AND H[rightc][0] < H[smallest][0] THEN
+                    LET smallest <-- rightc
+                END IF
+                IF smallest = i THEN
+                    BREAK
+                END IF
+                LET tmp_b <-- H[i]
+                LET H[i] <-- H[smallest]
+                LET H[smallest] <-- tmp_b
+                LET i <-- smallest
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        LET aggregator_list <-- []
+        LET iterator_index <-- 0
+        WHILE iterator_index < LENGTH(nums)
+            LET aggregator_list[iterator_index] <-- [nums[iterator_index], iterator_index]
+            LET iterator_index <-- iterator_index + 1
+        END WHILE
+
+        CALL build_min_heap(aggregator_list)
+
+        LET markers_set <-- {}
+        LET sum_accumulator <-- 0
+        LET counter_j <-- 0
+        WHILE counter_j < LENGTH(nums)
+            LET sum_accumulator <-- sum_accumulator + nums[counter_j]
+            LET counter_j <-- counter_j + 1
+        END WHILE
+
+        LET accumulation_result <-- []
+
+        LET cursor_p <-- 0
+        WHILE cursor_p < LENGTH(queries)
+            LET q_index <-- queries[cursor_p][0]
+            LET q_k <-- queries[cursor_p][1]
+
+            IF NOT q_index IN markers_set THEN
+                SET markers_set[q_index] = TRUE
+                LET sum_accumulator <-- sum_accumulator - nums[q_index]
+            END IF
+
+            LET subcount_c <-- 0
+            WHILE subcount_c < q_k AND LENGTH(aggregator_list) > 0
+                LET val_idx_pair <-- pop_min_heap(aggregator_list)
+                LET val_e <-- val_idx_pair[0]
+                LET idx_e <-- val_idx_pair[1]
+
+                IF NOT idx_e IN markers_set THEN
+                    SET markers_set[idx_e] = TRUE
+                    LET sum_accumulator <-- sum_accumulator - val_e
+                    LET subcount_c <-- subcount_c + 1
+                END IF
+            END WHILE
+
+            APPEND sum_accumulator TO accumulation_result
+            LET cursor_p <-- cursor_p + 1
+        END WHILE
+
+        RETURN accumulation_result
+    END FUNCTION
+END CLASS

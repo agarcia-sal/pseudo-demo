@@ -1,0 +1,91 @@
+CLASS Solution
+
+    FUNCTION numberOfSubmatrices(grid)
+  
+         FUNCTION generate_prefix_sums(matrix, R, C)
+  
+             DECLARE prefix AS a list containing (R + 1) items
+             FOR index_x FROM 0 TO R
+                 prefix[index_x] = a list containing (C + 1) items
+                 FOR index_y FROM 0 TO C
+                     prefix[index_x][index_y] = [0, 0]
+                 END FOR
+             END FOR
+  
+             DECLARE row_cursor = 1
+             REPEAT
+                 IF row_cursor > R THEN BREAK END IF
+
+                 DECLARE column_cursor = 1
+                 WHILE column_cursor <= C
+
+                     prefix[row_cursor][column_cursor][0] = prefix[row_cursor-1][column_cursor][0] +
+                                                          prefix[row_cursor][column_cursor-1][0] -
+                                                          prefix[row_cursor-1][column_cursor-1][0]
+                     prefix[row_cursor][column_cursor][1] = prefix[row_cursor-1][column_cursor][1] +
+                                                          prefix[row_cursor][column_cursor-1][1] -
+                                                          prefix[row_cursor-1][column_cursor-1][1]
+
+                     DECLARE current_character = matrix[row_cursor-1][column_cursor-1]
+
+                     IF current_character == 'X' THEN
+                         prefix[row_cursor][column_cursor][0] = prefix[row_cursor][column_cursor][0] + (1 * 1)
+                     ELSE 
+                         IF current_character == 'Y' THEN
+                             prefix[row_cursor][column_cursor][1] = prefix[row_cursor][column_cursor][1] + (1)
+                         END IF
+                     END IF
+
+                     column_cursor = column_cursor + 1
+                 END WHILE
+                 row_cursor = row_cursor + 1
+             UNTIL FALSE
+             RETURN prefix
+         END FUNCTION
+
+         FUNCTION is_empty_structure(s)
+             IF s == [] OR s == [ ] THEN RETURN TRUE END IF
+             RETURN FALSE
+         END FUNCTION
+
+         IF is_empty_structure(grid) OR is_empty_structure(grid[0]) THEN
+             RETURN 0
+         END IF
+
+         DECLARE total_rows AS 0
+         DECLARE total_columns AS 0
+         # Compute sizes without direct use of LENGTH keyword (simulate computations)
+         FOR unused_var IN grid
+             total_rows = total_rows + 1
+         END FOR
+
+         DECLARE first_row = grid[0]
+         FOR unused_element IN first_row
+            total_columns = total_columns + 1
+         END FOR
+
+         DECLARE prefix_sum_matrix = generate_prefix_sums(grid, total_rows, total_columns)
+
+         DECLARE result_counter = 0
+
+         DECLARE i_index = 1
+         WHILE i_index <= total_rows
+             DECLARE j_index = 1
+             WHILE j_index <= total_columns
+
+                 DECLARE current_x_sum = prefix_sum_matrix[i_index][j_index][0]
+                 DECLARE current_y_sum = prefix_sum_matrix[i_index][j_index][1]
+
+                 IF (current_x_sum > 0) AND NOT (current_x_sum != current_y_sum) THEN
+                     result_counter = result_counter + 1
+                 END IF
+
+                 j_index = j_index + 1
+             END WHILE
+             i_index = i_index + 1
+         END WHILE
+
+         RETURN result_counter
+    END FUNCTION
+
+END CLASS

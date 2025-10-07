@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION numberOfSubmatrices(grid)
+        IF grid IS empty OR grid[0] IS empty THEN
+            RETURN 0
+        END IF
+
+        LET total_rows = LENGTH(grid)
+        LET total_cols = LENGTH(grid[0])
+
+        DEFINE prefix_sum AS ARRAY OF SIZE (total_rows + 1) x (total_cols + 1)
+        FOR r FROM 0 TO total_rows DO
+            INITIALIZE prefix_sum[r] AS ARRAY OF total_cols + 1 ELEMENTS EACH CONTAINING [0, 0]
+        END FOR
+
+        FOR row FROM 1 TO total_rows DO
+            FOR col FROM 1 TO total_cols DO
+                LET prev_left = prefix_sum[row][col - 1]
+                LET prev_up = prefix_sum[row - 1][col]
+                LET prev_diag = prefix_sum[row - 1][col - 1]
+
+                LET prefix_sum[row][col][0] = prev_left[0] + prev_up[0] - prev_diag[0]
+                LET prefix_sum[row][col][1] = prev_left[1] + prev_up[1] - prev_diag[1]
+
+                LET current_char = grid[row - 1][col - 1]
+                IF current_char == 'X' THEN
+                    prefix_sum[row][col][0] = prefix_sum[row][col][0] + 1
+                ELSE IF current_char == 'Y' THEN
+                    prefix_sum[row][col][1] = prefix_sum[row][col][1] + 1
+                END IF
+            END FOR
+        END FOR
+
+        SET count = 0
+        FOR r FROM 1 TO total_rows DO
+            FOR c FROM 1 TO total_cols DO
+                LET num_x = prefix_sum[r][c][0]
+                LET num_y = prefix_sum[r][c][1]
+
+                IF num_x > 0 AND num_x == num_y THEN
+                    count = count + 1
+                END IF
+            END FOR
+        END FOR
+
+        RETURN count
+    END FUNCTION
+END CLASS

@@ -1,0 +1,93 @@
+CLASS Solution
+    FUNCTION subsequencePairCount(nums)
+        DEFINE CONSTANT M AS 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 + 7
+        
+        FUNCTION computeGCD(a, b)
+            DEFINE stackA AS a
+            DEFINE stackB AS b
+            WHILE stackB NOT EQUAL TO 0 DO
+                SET tempVar TO stackB
+                SET stackB TO stackA MOD stackB
+                SET stackA TO tempVar
+            END WHILE
+            RETURN stackA
+        END FUNCTION
+        
+        DEFINE maxElement AS 0
+        SET indexTracker TO 0
+        WHILE indexTracker < LENGTH(nums)
+            IF nums[indexTracker] > maxElement THEN
+                SET maxElement TO nums[indexTracker]
+            END IF
+            SET indexTracker TO indexTracker + 1
+        END WHILE
+        
+        DEFINE countsMatrix AS []
+        SET rowIndex TO 0
+        WHILE rowIndex <= maxElement
+            DEFINE newRow AS []
+            SET colIndex TO 0
+            WHILE colIndex <= maxElement
+                APPEND 0 TO newRow
+                SET colIndex TO colIndex + 1
+            END WHILE
+            APPEND newRow TO countsMatrix
+            SET rowIndex TO rowIndex + 1
+        END WHILE
+        SET countsMatrix[0][0] TO 1
+        
+        FUNCTION updateCounts(currentCounts, currentNumber)
+            DEFINE updatedCounts AS []
+            DEFINE i AS 0
+            WHILE i <= maxElement
+                DEFINE rowTemp AS []
+                DEFINE j AS 0
+                WHILE j <= maxElement
+                    APPEND 0 TO rowTemp
+                    SET j TO j + 1
+                END WHILE
+                APPEND rowTemp TO updatedCounts
+                SET i TO i + 1
+            END WHILE
+            
+            DEFINE outerIdx AS 0
+            WHILE outerIdx <= maxElement
+                DEFINE innerIdx AS 0
+                WHILE innerIdx <= maxElement
+                    SET updatedCounts[outerIdx][innerIdx] TO updatedCounts[outerIdx][innerIdx] + currentCounts[outerIdx][innerIdx]
+                    SET updatedCounts[outerIdx][innerIdx] TO updatedCounts[outerIdx][innerIdx] MOD M
+                    
+                    DEFINE gcdWithNum1 AS computeGCD(outerIdx, currentNumber)
+                    SET updatedCounts[gcdWithNum1][innerIdx] TO updatedCounts[gcdWithNum1][innerIdx] + currentCounts[outerIdx][innerIdx]
+                    SET updatedCounts[gcdWithNum1][innerIdx] TO updatedCounts[gcdWithNum1][innerIdx] MOD M
+                    
+                    DEFINE gcdWithNum2 AS computeGCD(innerIdx, currentNumber)
+                    SET updatedCounts[outerIdx][gcdWithNum2] TO updatedCounts[outerIdx][gcdWithNum2] + currentCounts[outerIdx][innerIdx]
+                    SET updatedCounts[outerIdx][gcdWithNum2] TO updatedCounts[outerIdx][gcdWithNum2] MOD M
+                    
+                    SET innerIdx TO innerIdx + 1
+                END WHILE
+                SET outerIdx TO outerIdx + 1
+            END WHILE
+            
+            RETURN updatedCounts
+        END FUNCTION
+        
+        DEFINE iteratorPos AS 0
+        WHILE iteratorPos < LENGTH(nums)
+            SET countsMatrix TO updateCounts(countsMatrix, nums[iteratorPos])
+            SET iteratorPos TO iteratorPos + 1
+        END WHILE
+        
+        DEFINE finalSum AS 0
+        DEFINE counter AS 1
+        WHILE counter <= maxElement
+            SET finalSum TO finalSum + countsMatrix[counter][counter]
+            SET counter TO counter + 1
+        END WHILE
+        
+        SET finalSum TO finalSum MOD M
+        
+        RETURN finalSum
+    END FUNCTION
+END CLASS

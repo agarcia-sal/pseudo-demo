@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer
+        FUNCTION nxt(a a AS integer b b AS integer) RETURNS integer
+            IF ((a BITWISE-AND 1) XOR b) = 1 THEN
+                RETURN a + 1
+            ELSE
+                RETURN a + 2
+            END IF
+        END FUNCTION
+
+        SET p TO LENGTH OF nums1
+        SET q TO LENGTH OF nums2
+        SET dp TO A LIST OF p + 1 ROWS EACH CONTAINING q + 1 ZEROS
+
+        SET u TO 1
+        WHILE u <= p DO
+            SET val TO nums1[u]
+            SET dp[u][0] TO nxt(dp[u - 1][0], val)
+            SET u TO u + 1
+        END WHILE
+
+        SET v TO 1
+        WHILE v <= q DO
+            SET val2 TO nums2[v]
+            SET dp[0][v] TO nxt(dp[0][v - 1], val2)
+            SET v TO v + 1
+        END WHILE
+
+        DEFINE FUNCTION minOfTwo(x x AS integer y y AS integer) RETURNS integer
+            IF x < y THEN
+                RETURN x
+            ELSE
+                RETURN y
+            END IF
+        END FUNCTION
+
+        SET i_outer TO 1
+        WHILE i_outer <= p DO
+            SET xx TO nums1[i_outer]
+            SET j_inner TO 1
+            WHILE j_inner <= q DO
+                SET yy TO nums2[j_inner]
+                SET option1 TO nxt(dp[i_outer - 1][j_inner], xx)
+                SET option2 TO nxt(dp[i_outer][j_inner - 1], yy)
+                SET dp[i_outer][j_inner] TO minOfTwo(option1, option2)
+                SET j_inner TO j_inner + 1
+            END WHILE
+            SET i_outer TO i_outer + 1
+        END WHILE
+
+        RETURN dp[p][q]
+    END FUNCTION
+END CLASS

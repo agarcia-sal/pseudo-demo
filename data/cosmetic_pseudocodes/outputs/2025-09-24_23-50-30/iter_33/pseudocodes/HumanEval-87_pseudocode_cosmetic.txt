@@ -1,0 +1,41 @@
+```
+FUNCTION get_row(matrix, key)
+    FUNCTION scan_rows(i, acc)
+        IF i >= LENGTH(matrix)
+            RETURN acc
+        ELSE
+            FUNCTION scan_columns(j, inner_acc)
+                IF j >= LENGTH(matrix[i])
+                    RETURN inner_acc
+                ELSE
+                    LET updated_acc =
+                        IF matrix[i][j] == key
+                            APPEND (i, j) TO inner_acc
+                        ELSE
+                            inner_acc
+                    RETURN scan_columns(j + 1, updated_acc)
+            LET partial = scan_columns(0, acc)
+            RETURN scan_rows(i + 1, partial)
+    LET collected = scan_rows(0, [])
+    LET grouped = DICTIONARY()  // key: row number, value: LIST of columns
+    FOR EACH (r, c) IN collected
+        IF r NOT IN grouped
+            grouped[r] = []
+        APPEND c TO grouped[r]
+    LET result = []
+    FOR EACH row_key IN SORTED KEYS OF grouped ASCENDING
+        LET sorted_cols = grouped[row_key]
+        // Insert columns sorted descending
+        LET sorted_rev_cols = []
+        FUNCTION insert_desc(lst, val)
+            IF lst IS EMPTY OR val >= lst[0]
+                RETURN [val] + lst
+            ELSE
+                RETURN [lst[0]] + insert_desc(lst[1:], val)
+        FOR EACH col_val IN sorted_cols
+            sorted_rev_cols = insert_desc(sorted_rev_cols, col_val)
+        FOR EACH col_val IN sorted_rev_cols
+            APPEND (row_key, col_val) TO result
+    RETURN result
+END FUNCTION
+```

@@ -1,0 +1,7 @@
+def rolling_max(nums):
+    max_val = None
+    res = []
+    for n in nums:
+        max_val = n if max_val is None else max(max_val, n)
+        res.append(max_val)
+    return res

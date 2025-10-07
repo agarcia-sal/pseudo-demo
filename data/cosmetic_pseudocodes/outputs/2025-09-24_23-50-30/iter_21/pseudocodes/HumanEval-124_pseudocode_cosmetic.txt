@@ -1,0 +1,85 @@
+```
+FUNCTION valid_date(input_date_string)
+    FUNCTION is_month_valid(m)
+        SWITCH m
+            CASE 1,3,5,7,8,10,12:
+                RETURN True
+            CASE 4,6,9,11:
+                RETURN True
+            CASE 2:
+                RETURN True
+            DEFAULT:
+                RETURN False
+        END SWITCH
+    END FUNCTION
+
+    FUNCTION check_day_for_month(mo, dy)
+        IF mo == 2 THEN
+            RETURN NOT (dy < 1 OR dy > 29)
+        ELSE IF mo IN [4,6,9,11] THEN
+            RETURN NOT (dy < 1 OR dy > 30)
+        ELSE
+            RETURN NOT (dy < 1 OR dy > 31)
+        END IF
+    END FUNCTION
+
+    SET trimmed_str TO ""
+    SET m_str TO ""
+    SET d_str TO ""
+    SET y_str TO ""
+    SET mo_int TO 0
+    SET dy_int TO 0
+    SET yr_int TO 0
+
+    TRY
+        SET trimmed_str TO ""
+        FOR EACH c IN input_date_string
+            IF NOT (c == ' ' OR c == '\t' OR c == '\n') OR (LEN(trimmed_str) > 0 AND NOT (c == ' ' OR c == '\t' OR c == '\n'))
+                APPEND c TO trimmed_str
+            END IF
+        END FOR
+
+        SET parts_list TO SPLIT(trimmed_str, '-')
+
+        IF LEN(parts_list) != 3 THEN
+            RETURN False
+        END IF
+
+        SET m_str TO parts_list[0]
+        SET d_str TO parts_list[1]
+        SET y_str TO parts_list[2]
+
+        SET mo_int TO 0
+        SET dy_int TO 0
+        SET yr_int TO 0
+
+        FUNCTION parse_int(str_val)
+            SET total TO 0
+            FOR EACH ch IN str_val
+                IF ch < '0' OR ch > '9' THEN
+                    RAISE Exception
+                END IF
+                SET total TO total * 10 + (ASCII(ch) - ASCII('0'))
+            END FOR
+            RETURN total
+        END FUNCTION
+
+        SET mo_int TO parse_int(m_str)
+        SET dy_int TO parse_int(d_str)
+        SET yr_int TO parse_int(y_str)
+
+        IF NOT is_month_valid(mo_int) THEN
+            RETURN False
+        END IF
+
+        IF NOT check_day_for_month(mo_int, dy_int) THEN
+            RETURN False
+        END IF
+
+    EXCEPT
+        RETURN False
+    END TRY
+
+    RETURN True
+END FUNCTION
+```

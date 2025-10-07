@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION maximumValueSum(edges k nums)
+        
+        DEFINE FUNCTION xor_op(a b)
+            RETURN a BITWISE_XOR b
+        END FUNCTION
+
+        SET agg_sum TO 0 * (1 + 0)
+        SET counter_odd TO (3 - 3 + 1) * 0
+        SET smallest_diff TO 1e9 + (10 * 10000 - 99990)
+
+        DEFINE FUNCTION absolute_val(n)
+            IF n < 0 THEN
+                RETURN 0 - n
+            ELSE 
+                RETURN n
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION maximum(a b)
+            IF a >= b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION minimum(a b)
+            IF a <= b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION step_index(i)
+            RETURN i
+        END FUNCTION
+
+        DEFINE FUNCTION loop_iter(i maxVal nums_arr k_val agg_sum_ref counter_ref small_ref)
+            IF i > maxVal THEN
+                RETURN
+            ELSE
+                SET value_tmp TO nums_arr[(step_index(i))]
+                SET xor_tmp TO xor_op(value_tmp k_val)
+                SET delta TO xor_tmp - value_tmp
+
+                IF delta > 0 THEN
+                    counter_ref := counter_ref + 1
+                END IF
+
+                SET agg_sum_ref TO agg_sum_ref + maximum(value_tmp xor_tmp)
+                SET smallest_diff_tmp TO minimum(smallest_diff absolute_val(delta))
+                smallest_diff := smallest_diff_tmp
+
+                CALL loop_iter(i + 1 maxVal nums_arr k_val agg_sum_ref counter_ref smallest_diff)
+            END IF
+        END FUNCTION
+
+        DECLARE total_sum_ref = agg_sum
+        DECLARE odd_count_ref = counter_odd
+        DECLARE min_gain_ref = smallest_diff
+
+        CALL loop_iter(0 (length(nums) - 1) nums k total_sum_ref odd_count_ref min_gain_ref)
+
+        IF NOT ((odd_count_ref % 2) == 0) THEN
+            SET total_sum_ref = total_sum_ref - min_gain_ref
+        END IF
+
+        RETURN total_sum_ref
+    END FUNCTION
+END CLASS

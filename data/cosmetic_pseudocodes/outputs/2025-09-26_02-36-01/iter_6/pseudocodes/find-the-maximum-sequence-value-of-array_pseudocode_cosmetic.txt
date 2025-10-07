@@ -1,0 +1,74 @@
+CLASS Solution  
+    FUNCTION maxValue(nums LIST OF INTEGER oldScrew) RETURNS INTEGER  
+        SET outerCircle TO 2 TIMES (2 * 2 * 2 * 2 * 2 * 2)  
+        SET insideForest TO LENGTH OF nums  
+        SET deltaGraph TO A 3-D ARRAY OF BOOLEAN WITH SIZE (insideForest + 1) BY (oldScrew + 2) BY outerCircle INITIALIZED TO FALSE  
+        SET deltaGraph[0][0][0] TO TRUE  
+        SET PROCEDURE updateF(i, j, x)  
+            SET tmpA TO deltaGraph[i + 1][j][x] OR deltaGraph[i][j][x]  
+            SET deltaGraph[i + 1][j][x] TO tmpA  
+            SET combinedBit TO x BITWISE_OR nums[i]  
+            SET tmpB TO deltaGraph[i + 1][j + 1][combinedBit] OR deltaGraph[i][j][x]  
+            SET deltaGraph[i + 1][j + 1][combinedBit] TO tmpB  
+        END PROCEDURE  
+        SET iLoop TO 0  
+        WHILE iLoop LESS_THAN insideForest  
+            SET jLoop TO 0  
+            WHILE jLoop LESS_OR_EQUALS oldScrew  
+                SET xLoop TO outerCircle - 1  
+                REPEAT  
+                    CALL updateF(iLoop, jLoop, xLoop)  
+                    DECREMENT xLoop BY 1  
+                UNTIL xLoop LESS_THAN 0  
+                INCREMENT jLoop BY 1  
+            END WHILE  
+            INCREMENT iLoop BY 1  
+        END WHILE  
+        SET forwardMatrix TO A 3-D ARRAY OF BOOLEAN WITH SIZE (insideForest + 1) BY (oldScrew + 2) BY outerCircle INITIALIZED TO FALSE  
+        SET forwardMatrix[insideForest][0][0] TO TRUE  
+        SET PROCEDURE updateG(i, j, y)  
+            SET tmpC TO forwardMatrix[i - 1][j][y] OR forwardMatrix[i][j][y]  
+            SET forwardMatrix[i - 1][j][y] TO tmpC  
+            SET combinedBit2 TO y BITWISE_OR nums[i - 1]  
+            SET tmpD TO forwardMatrix[i - 1][j + 1][combinedBit2] OR forwardMatrix[i][j][y]  
+            SET forwardMatrix[i - 1][j + 1][combinedBit2] TO tmpD  
+        END PROCEDURE  
+        SET iCursor TO insideForest  
+        REPEAT  
+            SET jCursor TO 0  
+            WHILE jCursor LESS_OR_EQUALS oldScrew  
+                SET yCursor TO outerCircle - 1  
+                WHILE yCursor GREATER_OR_EQUALS 0  
+                    CALL updateG(iCursor, jCursor, yCursor)  
+                    DECREMENT yCursor BY 1  
+                END WHILE  
+                INCREMENT jCursor BY 1  
+            END WHILE  
+            DECREMENT iCursor BY 1  
+        UNTIL iCursor LESS_THAN 1  
+        SET resultVal TO 0  
+        SET procI TO oldScrew  
+        MAIN_LOOP:  
+        WHILE procI LESS_OR_EQUALS insideForest - oldScrew  
+            SET procX TO 0  
+            WHILE procX LESS_THAN outerCircle  
+                IF deltaGraph[procI][oldScrew][procX] EQUALS TRUE THEN  
+                    SET procY TO 0  
+                    INNER_LOOP:  
+                    WHILE procY LESS_THAN outerCircle  
+                        IF forwardMatrix[procI][oldScrew][procY] EQUALS TRUE THEN  
+                            SET xorVal TO procX BITWISE_XOR procY  
+                            IF xorVal GREATER_THAN resultVal THEN  
+                                SET resultVal TO xorVal  
+                            END IF  
+                        END IF  
+                        INCREMENT procY BY 1  
+                    END WHILE  
+                END IF  
+                INCREMENT procX BY 1  
+            END WHILE  
+            INCREMENT procI BY 1  
+        END WHILE  
+        RETURN resultVal  
+    END FUNCTION  
+END CLASS

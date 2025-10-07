@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION minimumPushes(word)
+        FUNCTION tallyCharacters(inputString)
+            DECLARE accumulator MAP FROM CHAR TO INT
+            DECLARE traversalIndex TO 0
+            WHILE traversalIndex < LENGTH(inputString)
+                DECLARE currentChar TO SUBSTRING(inputString, traversalIndex, 1)
+                IF NOT (currentChar IN accumulator)
+                    SET accumulator[currentChar] TO 0
+                END IF
+                SET accumulator[currentChar] TO accumulator[currentChar] + 1
+                SET traversalIndex TO traversalIndex + 1
+            END WHILE
+            RETURN accumulator
+        END FUNCTION
+
+        DECLARE frequencyMap TO CALL tallyCharacters(word)
+
+        DECLARE countsList TO EMPTY LIST
+        FOR EACH key IN frequencyMap
+            APPEND frequencyMap[key] TO countsList
+        END FOR
+
+        FUNCTION descendSort(numbersList)
+            DECLARE n TO LENGTH(numbersList)
+            REPEAT
+                SET swapped TO false
+                FOR index FROM 0 TO n - 2
+                    IF numbersList[index] < numbersList[index + 1]
+                        DECLARE tempVal TO numbersList[index]
+                        SET numbersList[index] TO numbersList[index + 1]
+                        SET numbersList[index + 1] TO tempVal
+                        SET swapped TO true
+                    END IF
+                END FOR
+                SET n TO n - 1
+            UNTIL NOT swapped
+            RETURN numbersList
+        END FUNCTION
+
+        SET sortedCounts TO CALL descendSort(countsList)
+
+        DECLARE accumulatedPushes TO 0
+        DECLARE pressNumber TO 1
+        DECLARE assignedKeys TO 0
+        DECLARE pointer TO 0
+
+        WHILE pointer < LENGTH(sortedCounts)
+            SET accumulatedPushes TO accumulatedPushes + sortedCounts[pointer] * pressNumber
+            SET assignedKeys TO assignedKeys + 1
+            IF assignedKeys = 8
+                SET assignedKeys TO 0
+                SET pressNumber TO pressNumber + 1
+            END IF
+            SET pointer TO pointer + 1
+        END WHILE
+
+        RETURN accumulatedPushes
+    END FUNCTION
+END CLASS

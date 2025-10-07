@@ -1,0 +1,28 @@
+```
+FUNCTION parse_music(music_string)
+	TYPE note_collection IS ARRAY OF STRING
+	VAR sequence_stack IS LIST OF STRING INIT EMPTY
+	VAR index_counter IS NUMBER INIT 0
+	VAR duration_map IS DICTIONARY OF NUMBER INIT EMPTY
+	VAR result_stack IS LIST OF NUMBER INIT EMPTY
+
+	SET duration_map TO DICTIONARY WITH KEYS 'o|', 'o', '.|' AND VALUES 2, 4, 1 RESPECTIVELY
+
+	FUNCTION parse_stack(sc: note_collection, idx: NUMBER, acc: LIST OF NUMBER) RETURNS LIST OF NUMBER
+		IF idx >= LENGTH(sc) THEN RETURN acc END IF
+		VAR current_note IS STRING ASSIGN sc[idx]
+		VAR value_to_add IS NUMBER ASSIGN 0
+		SWITCH TRUE
+		CASE NOT (current_note = '')
+			value_to_add := duration_map[current_note]
+		CASE ELSE
+			value_to_add := 0
+		END SWITCH
+		IF value_to_add > 0 THEN acc := acc + [value_to_add] END IF
+		RETURN parse_stack(sc, idx + 1, acc)
+	END FUNCTION
+
+	sequence_stack := SPLIT music_string BY ' '
+	RETURN parse_stack(sequence_stack, 0, result_stack)
+END FUNCTION
+```

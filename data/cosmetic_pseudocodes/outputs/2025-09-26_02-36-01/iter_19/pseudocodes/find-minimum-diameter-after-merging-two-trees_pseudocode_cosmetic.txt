@@ -1,0 +1,114 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+        SET alpha TO LENGTH OF graph
+        SET omega TO a list of Boolean values false repeated alpha times
+        SET beta TO a new deque initialized with the tuple (start, 0)
+        SET omega[start] TO true
+        SET gamma TO start
+        SET delta TO 0
+
+        DEFINE FUNCTION pop_left(q)
+            RETURN q.remove_first()
+        END FUNCTION
+
+        DEFINE FUNCTION push_right(q, elem)
+            q.add_last(elem)
+        END FUNCTION
+
+        WHILE LENGTH OF beta > 0
+            SET (kappa, lambda) TO pop_left(beta)
+            IF delta < lambda THEN
+                SET delta TO lambda
+                SET gamma TO kappa
+            END IF
+
+            FOR each sigma IN graph[kappa]
+                IF NOT omega[sigma] THEN
+                    SET omega[sigma] TO true
+                    push_right(beta, (sigma, lambda + 1))
+                END IF
+            END FOR
+        END WHILE
+
+        RETURN gamma, delta
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        SET psi TO 0
+        SET chi, _ TO bfs(graph, psi)
+        _, phi TO bfs(graph, chi)
+        RETURN phi
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+        SET rho TO LENGTH OF graph
+        SET tau TO list of false Booleans of length rho
+        SET upsilon TO new deque with (node, 0) as initial element
+        SET tau[node] TO true
+        SET xi TO 0
+
+        FUNCTION dequeue_front(d)
+            RETURN d.remove_first()
+        END FUNCTION
+
+        REPEAT
+            IF LENGTH OF upsilon == 0 THEN BREAK END IF
+            SET (omicron, pi) TO dequeue_front(upsilon)
+            IF pi > xi THEN
+                SET xi TO pi
+            END IF
+            FOR each sigma IN graph[omicron]
+                IF NOT tau[sigma] THEN
+                    SET tau[sigma] TO true
+                    upsilon.add_last((sigma, pi + 1))
+                END IF
+            END FOR
+        UNTIL FALSE
+
+        RETURN xi
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        SET eta TO LENGTH OF edges1 + 1
+        SET theta TO LENGTH OF edges2 + 1
+
+        SET lambda1 TO list of empty lists repeated eta times
+        SET lambda2 TO list of empty lists repeated theta times
+
+        FOR each (a, b) IN edges1
+            lambda1[a].add_last(b)
+            lambda1[b].add_last(a)
+        END FOR
+
+        FOR each (c, d) IN edges2
+            lambda2[c].add_last(d)
+            lambda2[d].add_last(c)
+        END FOR
+
+        SET diam1 TO tree_diameter(lambda1)
+        SET diam2 TO tree_diameter(lambda2)
+
+        SET maxPath1 TO empty list
+        FOR i FROM 0 TO eta - 1
+            maxPath1.add_last(maximum_path_length_from_node(lambda1, i))
+        END FOR
+
+        SET maxPath2 TO empty list
+        FOR j FROM 0 TO theta - 1
+            maxPath2.add_last(maximum_path_length_from_node(lambda2, j))
+        END FOR
+
+        SET pi TO positive infinity
+
+        FOR u FROM 0 TO eta - 1
+            FOR v FROM 0 TO theta - 1
+                SET candidate TO diam1
+                IF candidate < diam2 THEN SET candidate TO diam2 END IF
+                SET candidate TO candidate > (maxPath1[u] + maxPath2[v] + 1) ? candidate : (maxPath1[u] + maxPath2[v] + 1)
+                IF candidate < pi THEN SET pi TO candidate END IF
+            END FOR
+        END FOR
+
+        RETURN pi
+    END FUNCTION
+END CLASS

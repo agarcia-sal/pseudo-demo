@@ -1,0 +1,46 @@
+```
+FUNCTION separate_paren_groups(string_of_parentheses)
+    SET queue_segments TO new queue
+    SET buffer_chars TO new queue
+    SET depth_counter TO 0
+
+    FUNCTION process_characters(index)
+        IF index >= LENGTH(string_of_parentheses) THEN
+            RETURN
+        END IF
+
+        SET current_char TO string_of_parentheses[index]
+
+        SWITCH TRUE
+            CASE current_char = '(':
+                depth_counter ← depth_counter + 1
+                ENQUEUE buffer_chars WITH current_char
+                BREAK
+
+            CASE current_char = ')':
+                depth_counter ← depth_counter - 1
+                ENQUEUE buffer_chars WITH current_char
+                IF depth_counter = 0 THEN
+                    SET segment_string TO CONCATENATE_ALL(buffer_chars)
+                    ENQUEUE queue_segments WITH segment_string
+                    CLEAR buffer_chars
+                END IF
+                BREAK
+
+            DEFAULT:
+                BREAK
+        END SWITCH
+
+        CALL process_characters(index + 1)
+    END FUNCTION
+
+    CALL process_characters(0)
+
+    SET result_list TO EMPTY LIST
+    WHILE NOT IS_EMPTY(queue_segments)
+        APPEND DEQUEUE(queue_segments) TO result_list
+    END WHILE
+
+    RETURN result_list
+END FUNCTION
+```

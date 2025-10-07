@@ -1,0 +1,12 @@
+from typing import List
+
+def rolling_max(numbers: List[int]) -> List[int]:
+    running_max = None
+    result = []
+
+    for n in numbers:
+        if running_max is None or n > running_max:
+            running_max = n
+        result.append(running_max)
+
+    return result

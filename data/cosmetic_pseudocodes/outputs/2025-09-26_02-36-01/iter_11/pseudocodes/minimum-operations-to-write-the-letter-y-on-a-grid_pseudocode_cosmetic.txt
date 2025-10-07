@@ -1,0 +1,84 @@
+CLASS Solution
+        FUNCTION minimumOperationsToWriteY(grid)
+          LET alpha ← LENGTH(grid)
+          LET omega ← FLOOR_DIVIDE(alpha, 2)
+          LET sigmaSet ← EMPTY SET
+          
+          LET zeta ← 0
+          WHILE TRUE
+            IF NOT (zeta <= omega) THEN BREAK
+            ADD (zeta, zeta) TO sigmaSet
+            zeta ← zeta + 1
+          END WHILE
+          
+          LET chi ← 0
+          REPEAT
+            ADD (chi, alpha - chi - 1) TO sigmaSet
+            chi ← chi + 1
+          UNTIL NOT (chi <= omega)
+          
+          DEFINE FUNCTION insertRowTheta(kappa)
+            IF kappa > alpha - 1 THEN RETURN
+            ADD (kappa, omega) TO sigmaSet
+            CALL insertRowTheta(kappa + 1)
+          END FUNCTION
+          CALL insertRowTheta(omega)
+          
+          FUNCTION countValues(cells, matrix)
+            LET freqMap ← EMPTY MAP DEFAULT 0
+            LET idx ← 0
+            WHILE idx < LENGTH(cells)
+              LET r ← cells[idx][0]
+              LET c ← cells[idx][1]
+              LET val ← matrix[r][c]
+              freqMap[val] ← freqMap[val] + 1
+              idx ← idx + 1
+            END WHILE
+            RETURN freqMap
+          END FUNCTION
+          
+          LET rho ← countValues(sigmaSet, grid)
+          
+          LET complementPositions ← EMPTY LIST
+          LET p ← 0
+          WHILE p < alpha
+            LET q ← 0
+            WHILE q < alpha
+              IF (p, q) NOT IN sigmaSet THEN
+                APPEND (p, q) TO complementPositions
+              END IF
+              q ← q + 1
+            END WHILE
+            p ← p + 1
+          END WHILE
+          
+          LET tau ← countValues(complementPositions, grid)
+          
+          LET psi ← +∞
+          
+          FOR a FROM 0 TO 2 DO
+            FOR b FROM 0 TO 2 DO
+              IF a != b THEN
+                LET sumRho ← 0
+                LET keyRho ← a
+                LET keyTau ← b
+                FOR k IN [0,1,2]
+                  sumRho ← sumRho + (IF rho[k] EXISTS THEN rho[k] ELSE 0)
+                END FOR
+                
+                LET sumTau ← 0
+                FOR k IN [0,1,2]
+                  sumTau ← sumTau + (IF tau[k] EXISTS THEN tau[k] ELSE 0)
+                END FOR
+                
+                LET op ← (sumRho - (IF rho[keyRho] EXISTS THEN rho[keyRho] ELSE 0)) + (sumTau - (IF tau[keyTau] EXISTS THEN tau[keyTau] ELSE 0))
+                IF op < psi THEN
+                  psi ← op
+                END IF
+              END IF
+            END FOR
+          END FOR
+          
+          RETURN psi
+        END FUNCTION
+END CLASS

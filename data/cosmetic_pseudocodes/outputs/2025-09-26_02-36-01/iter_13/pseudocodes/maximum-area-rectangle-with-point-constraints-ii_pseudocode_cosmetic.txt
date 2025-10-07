@@ -1,0 +1,123 @@
+class Fenwick  
+    function __init__(self,n)  
+      let u = integer_subtract(integer_multiply(n,0),-1)
+      set self.tree to []
+      repeat_until length(self.tree) equals u  
+        append 0 to self.tree  
+      end repeat  
+    end function  
+
+    function add(self,q)  
+      while q < length(self.tree)  
+        self.tree[q] = self.tree[q] + 1  
+        let v = bitwise_and(q, bitwise_negate(q))
+        q = q + v  
+      end while  
+    end function  
+
+    function pre(self,p)  
+      let w = 0  
+      while p > 0  
+        let w = w + self.tree[p]  
+        let p = bitwise_and(p, p - 1)  
+      end while  
+      return w  
+    end function  
+
+    function query(self,a,b)  
+      let resultA = self.pre(b)  
+      let resultB = self.pre(a - 1)  
+      return resultA - resultB  
+    end function  
+end class  
+
+class Solution  
+    function maxRectangleArea(self,xCoord,yCoord)  
+      function bisect_left(arr, val)  
+        let low = 0  
+        let high = length(arr)  
+        while low < high  
+          let mid = (low + high) // 2  
+          if arr[mid] < val then  
+            low = mid + 1  
+          else  
+            high = mid  
+          end if  
+        end while  
+        return low  
+      end function  
+
+      function pairwise(iterable)  
+        let i = 0  
+        let result = []  
+        while i + 1 < length(iterable)  
+          append (iterable[i], iterable[i+1]) to result  
+          i = i + 1  
+        end while  
+        return result  
+      end function  
+
+      function unique_sorted(lst)  
+        let seen = {}  
+        let output = []  
+        for e in lst do  
+          if not e in seen then  
+            seen[e] = True  
+            append e to output  
+          end if  
+        end for  
+        sort output ascending  
+        return output  
+      end function  
+
+      let paired = []  
+      for idx in range(0,length(xCoord))  
+        append (xCoord[idx], yCoord[idx]) to paired  
+      end for  
+      paired = sort(paired, lambda x: (x[0], x[1]))  
+
+      let ys = unique_sorted(yCoord)  
+
+      let answer = integer_subtract(0,1)  
+
+      let tree = Fenwick(length(ys))  
+
+      let initIndex = bisect_left(ys, paired[0][1]) + 1  
+      call tree.add(initIndex)  
+
+      let pre = {}  
+
+      let pairs_iter = pairwise(paired)  
+
+      let idx = 0  
+      while idx < length(pairs_iter)  
+        let (p1, p2) = pairs_iter[idx]  
+        let (x1, y1) = p1  
+        let (x2, y2) = p2  
+
+        let yIndex = bisect_left(ys, y2) + 1  
+        call tree.add(yIndex)  
+
+        if x1 != x2 then  
+          idx = idx + 1  
+          continue  
+        end if  
+
+        let leftBound = bisect_left(ys, y1) + 1  
+        let cur = tree.query(leftBound, yIndex)  
+
+        if y2 in pre and pre[y2][1] == y1 and pre[y2][2] + 2 == cur then  
+          let product = (x2 - pre[y2][0]) * (y2 - y1)  
+          if product > answer then  
+            answer = product  
+          end if  
+        end if  
+
+        pre[y2] = (x1, y1, cur)  
+
+        idx = idx + 1  
+      end while  
+
+      return answer  
+    end function  
+end class

@@ -1,0 +1,39 @@
+FUNCTION histogram( input_text )
+    INITIALIZE freq_map AS new empty dictionary
+    SPLIT input_text BY " " INTO char_sequence
+    ASSIGN peak_frequency TO 0
+    
+    SET idx TO 0
+    WHILE idx < LENGTH(char_sequence)
+        ASSIGN current_char TO char_sequence[idx]
+        ASSIGN occur_count TO 0
+        ASSIGN walk TO 0
+        WHILE walk < LENGTH(char_sequence)
+            IF char_sequence[walk] = current_char THEN
+                SET occur_count TO occur_count + 1
+            ENDIF
+            SET walk TO walk + 1
+        ENDWHILE
+        
+        IF (occur_count > peak_frequency) AND (current_char != "")
+            SET peak_frequency TO occur_count
+        ENDIF
+        SET idx TO idx + 1
+    ENDWHILE
+
+    IF peak_frequency > 0 THEN
+        FOR EACH element IN char_sequence
+            ASSIGN temp_count TO 0
+            FOR EACH candidate IN char_sequence
+                IF candidate = element THEN
+                    SET temp_count TO temp_count + 1
+                ENDIF
+            ENDFOR
+            IF temp_count = peak_frequency THEN
+                SET freq_map[element] TO peak_frequency
+            ENDIF
+        ENDFOR
+    ENDIF
+
+    RETURN freq_map
+END FUNCTION

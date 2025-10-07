@@ -1,0 +1,78 @@
+CLASS Solution
+    FUNCTION maxMoves(x_start, y_start, locs)
+  
+        SET shifts TO [(1, 2), (1, -2), (-1, 2), (-1, -2), (2, 1), (2, -1), (-2, 1), (-2, -1)]
+        SET pawn_set TO empty set
+        FOR pos IN locs DO
+            ADD (pos[0], pos[1]) TO pawn_set
+        END FOR
+        SET total_pawns TO SIZE of pawn_set
+
+        FUNCTION search(cur_x, cur_y, state_mask, alice_turn)
+            IF state_mask = 0 THEN
+                RETURN 0
+            END IF
+
+            IF alice_turn THEN
+                SET result_value TO 0
+            ELSE
+                SET result_value TO +∞
+            END IF
+
+            SET idx TO 0
+            WHILE idx < total_pawns DO
+                IF (state_mask BITAND (1 << idx)) != 0 THEN
+                    SET tgt_x TO locs[idx][0]
+                    SET tgt_y TO locs[idx][1]
+
+                    SET bfs_queue TO [(cur_x, cur_y, 0)]
+                    SET visited_coords TO empty set
+                    ADD (cur_x, cur_y) TO visited_coords
+
+                    SET found_flag TO False
+                    REPEAT
+                        IF LENGTH of bfs_queue = 0 THEN
+                            BREAK
+                        END IF
+                        REMOVE first element from bfs_queue INTO (curr_x, curr_y, dist)
+                        IF curr_x = tgt_x AND curr_y = tgt_y THEN
+                            SET found_flag TO True
+                            BREAK
+                        END IF
+
+                        FOR shift IN shifts DO
+                            SET nxt_x TO curr_x + shift[0]
+                            SET nxt_y TO curr_y + shift[1]
+
+                            IF 0 <= nxt_x < 50 AND 0 <= nxt_y < 50 THEN
+                                IF NOT (nxt_x, nxt_y) IN visited_coords THEN
+                                    ADD (nxt_x, nxt_y) TO visited_coords
+                                    APPEND (nxt_x, nxt_y, dist + 1) TO bfs_queue
+                                END IF
+                            END IF
+                        END FOR
+                    UNTIL False
+
+                    IF found_flag THEN
+                        SET updated_mask TO state_mask XOR (1 << idx)
+                        SET next_val TO dist + search(tgt_x, tgt_y, updated_mask, NOT alice_turn)
+                        IF alice_turn THEN
+                            IF result_value < next_val THEN
+                                SET result_value TO next_val
+                            END IF
+                        ELSE
+                            IF result_value > next_val THEN
+                                SET result_value TO next_val
+                            END IF
+                        END IF
+                    END IF
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN result_value
+        END FUNCTION
+
+        SET full_mask TO (1 << total_pawns) - 1
+        RETURN search(x_start, y_start, full_mask, TRUE)
+    END FUNCTION
+END CLASS

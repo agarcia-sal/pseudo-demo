@@ -1,0 +1,54 @@
+```
+FUNCTION get_row(a, b)
+    FUNCTION inner_loop(x, y, z)
+        IF y < LENGTH(a[x])
+            LET cond_var = (a[x][y] # b)
+            IF NOT(cond_var)
+                LET temp_list = [(x, y)]
+            ELSE
+                LET temp_list = []
+            END IF
+            RETURN temp_list + inner_loop(x, y + 1, z)
+        ELSE
+            RETURN []
+        END IF
+    END FUNCTION
+
+    FUNCTION outer_loop(p)
+        IF p < LENGTH(a)
+            RETURN inner_loop(p, 0, []) + outer_loop(p + 1)
+        ELSE
+            RETURN []
+        END IF
+    END FUNCTION
+
+    LET coords_unsorted = outer_loop(0)
+
+    FUNCTION sort_by_first(lst)
+        IF lst == []
+            RETURN []
+        ELSE
+            LET pivot = lst[0]
+            LET less = [e FOR e IN lst IF e[0] < pivot[0]]
+            LET equal = [e FOR e IN lst IF e[0] == pivot[0]]
+            LET greater = [e FOR e IN lst IF e[0] > pivot[0]]
+            RETURN sort_by_first(less) + equal + sort_by_first(greater)
+        END IF
+    END FUNCTION
+
+    FUNCTION sort_by_second_desc(lst)
+        IF lst == []
+            RETURN []
+        ELSE
+            LET pivot = lst[0]
+            LET less_eq = [e FOR e IN lst IF e[1] >= pivot[1]]
+            LET greater = [e FOR e IN lst IF e[1] < pivot[1]]
+            RETURN less_eq + sort_by_second_desc(greater)
+        END IF
+    END FUNCTION
+
+    LET coords_sorted_first = sort_by_first(coords_unsorted)
+    LET coords_sorted_final = sort_by_second_desc(coords_sorted_first)
+    RETURN coords_sorted_final
+END FUNCTION
+```

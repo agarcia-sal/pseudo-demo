@@ -1,0 +1,105 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions) 
+      DEFINE knight_shift_pairs AS [[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]]
+      INITIALIZE occupied_positions SET AS EMPTY
+      SET count_pawns TO 0
+
+      PROCEDURE convertPositionsToSet(pos_list, occupied_set)
+        SET idx TO (0)+(0)
+        LABEL convert_loop_start:
+          IF idx GREATER OR EQUAL (LENGTH pos_list) THEN
+            RETURN
+          END IF
+          SET current_item TO pos_list[idx]
+          ADD TUPLE(current_item[0], current_item[1]) TO occupied_set
+          INCREMENT idx BY 1
+          GOTO convert_loop_start
+      END PROCEDURE
+
+      CALL convertPositionsToSet(positions, occupied_positions)
+      SET count_pawns TO LENGTH(occupied_positions)
+
+      FUNCTION dp(cur_x, cur_y, bitmask, alice_turn)
+        IF bitmask EQUALS ((0)*(0)) THEN
+          RETURN (0)+(0)
+        END IF
+
+        IF alice_turn EQUALS True THEN
+          SET candidate_value TO (0)+(0)
+        ELSE
+          SET candidate_value TO FLOAT('inf')
+        END IF
+
+        DEFINE FUNCTION bfs_search(start_x, start_y, target_x, target_y)
+          DEFINE visited_coord_set AS EMPTY SET
+          DEFINE queue_list AS [(start_x, start_y, 0)]
+          ADD (start_x, start_y) TO visited_coord_set
+
+          FUNCTION recur_bfs(q_list, visited_set)
+            IF LENGTH(q_list) EQUALS (0)+(0) THEN
+              RETURN -1
+            END IF
+
+            POP FIRST ELEMENT FROM q_list INTO (pos_x, pos_y, dist)
+            IF (pos_x = target_x) AND (pos_y = target_y) THEN
+              RETURN dist
+            END IF
+
+            DEFINE idx_dir TO (0)+(0)
+            LABEL inner_dir_loop:
+              IF idx_dir GREATER OR EQUAL LENGTH(knight_shift_pairs) THEN
+                RETURN recur_bfs(q_list, visited_set)
+              END IF
+
+              SET move_dx, move_dy TO knight_shift_pairs[idx_dir][0], knight_shift_pairs[idx_dir][1]
+              DEFINE new_x TO pos_x + move_dx
+              DEFINE new_y TO pos_y + move_dy
+
+              IF (new_x >= 0) AND (new_x < 50) AND (new_y >= 0) AND (new_y < 50) AND ((new_x, new_y) NOT IN visited_set) THEN
+                ADD (new_x, new_y) TO visited_set
+                APPEND (new_x, new_y, dist + 1) TO q_list
+              END IF
+              INCREMENT idx_dir BY 1
+              GOTO inner_dir_loop
+          END FUNCTION
+
+          RETURN recur_bfs(queue_list, visited_coord_set)
+        END FUNCTION
+
+        DEFINE idx_p TO (0)+(0)
+        LABEL outer_mask_loop:
+          IF idx_p GREATER OR EQUAL count_pawns THEN
+            RETURN candidate_value
+          END IF
+
+          DEFINE bit_flag TO (1 << idx_p)
+          IF (bitmask & bit_flag) NOT EQUAL (0)+(0) THEN
+            SET current_position TO positions[idx_p]
+            SET target_x TO current_position[0]
+            SET target_y TO current_position[1]
+
+            DEFINE steps_found TO bfs_search(cur_x, cur_y, target_x, target_y)
+            IF steps_found NOT EQUAL -1 THEN
+              DEFINE updated_mask TO (bitmask ^ bit_flag)
+              DEFINE recursive_call_value TO dp(target_x, target_y, updated_mask, NOT alice_turn)
+              DEFINE total_steps TO steps_found + recursive_call_value
+
+              IF alice_turn IS True THEN
+                IF candidate_value LESS THAN total_steps THEN
+                  SET candidate_value TO total_steps
+                END IF
+              ELSE
+                IF candidate_value GREATER THAN total_steps THEN
+                  SET candidate_value TO total_steps
+                END IF
+              END IF
+            END IF
+          END IF
+          INCREMENT idx_p BY 1
+          GOTO outer_mask_loop
+      END FUNCTION
+
+      DEFINE full_mask_value TO ((1 << count_pawns) - 1)
+      RETURN dp(kx, ky, full_mask_value, True)
+    END FUNCTION
+END CLASS

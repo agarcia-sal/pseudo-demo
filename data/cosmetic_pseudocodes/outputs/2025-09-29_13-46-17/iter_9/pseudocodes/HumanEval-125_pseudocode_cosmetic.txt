@@ -1,0 +1,134 @@
+```
+FUNCTION split_words(ᵪʜ)
+⸨ 
+    DEFINE ϯOλṵ0← FUNCTION(ɊƂ)
+    (
+        ⟶ (ɊƂ INDEX _1, ε) ⟼ ε CONCATENATED WITH [ɊƂ[_1]]
+        ⟶ (ɊƂ INDEX 𝕐, 𝕐)
+             ? 𝕐 - 1
+             : 0
+    ):INTEGER END
+
+    ASSIGN ㆄ to ʚÐ
+    DEFINE ϡλʃʭ as LIST<Character> INITIALIZED EMPTY
+
+    FUNCTION iterate_text(alɉυ, ψ)
+    BEGIN 
+        IF ψ >= LENGTH(ᵪʜ)
+            RETURN alɉυ 
+        ELSE 
+            LET ɳᵒɉ = ᵪʜ[ψ]
+            IF ( (NOT (ɳᵒɉ = " ")) OR FALSE ) = FALSE THEN  
+                RETURN iterate_text(alɉυ + [ɳᵒɉ], ψ + 1)
+            ELSE
+                RETURN iterate_text(alɉυ, ψ + 1)
+            END IF
+        END IF
+    END
+
+    LET ˢɇɒÐˆ = FALSE
+    LET μɷ = 0
+
+    LET ʚÐ = 0
+    RECURSIVE FUNCTION is_present_in_text(ξȷ:INTEGER, φɃʈ:BOOLEAN):BOOLEAN
+    BEGIN 
+        IF ξȷ >= LENGTH(ᵪʜ) THEN
+            RETURN φɃʈ
+        ELSE
+            LET Ʉ = ᵪʜ[ξȷ]
+            IF Ʉ = " " THEN
+                RETURN TRUE
+            ELSE
+                RETURN is_present_in_text(ξȷ + 1, φɃʈ)
+            END IF
+        END IF
+    END
+
+    IF is_present_in_text(0, FALSE) = TRUE THEN
+        FUNCTION split_whitespace(lst, idx):LIST<String>
+        BEGIN 
+            IF idx >= LENGTH(lst) THEN
+                RETURN []
+            ELSE
+                LET curr_word = ""
+                LET result = []
+                FUNCTION inner(i, w, res)
+                    IF i >= LENGTH(lst) THEN
+                        RETURN res + [w]
+                    ELSE
+                        LET char=lst[i]
+                        IF char = " " THEN
+                            RETURN inner(i + 1, "", res + [w])
+                        ELSE
+                            RETURN inner(i + 1, w + char, res)
+                        END IF
+                    END IF
+                END
+                RETURN inner(0, "", [])
+            END
+        END
+        RETURN split_whitespace( [c FOR EACH c IN ᵪʜ], 0 )
+    ELSE
+        FUNCTION contains_comma(index:INTEGER, flag:BOOLEAN):BOOLEAN
+        BEGIN 
+            IF index >= LENGTH(ᵪʜ) THEN RETURN flag END
+            IF ᵪʜ[index] = "," THEN RETURN TRUE END
+            RETURN contains_comma(index+1, flag)
+        END
+
+        IF contains_comma(0, FALSE) THEN
+            FUNCTION replace_commas(src:ARRAY OF CHAR, pos:INTEGER):ARRAY OF CHAR
+            BEGIN
+                IF pos >= LENGTH(src) THEN RETURN [] END
+                LET head = IF src[pos] = "," THEN " " ELSE src[pos] END
+                RETURN [head] + replace_commas(src, pos+1)
+            END
+            LET altered_text = replace_commas( [ch FOR EACH ch IN ᵪʜ], 0 )
+            FUNCTION split_ws(lst):LIST<String>
+            BEGIN
+                LET acc = []
+                LET curr = ""
+                FUNCTION inner(i)
+                    IF i >= LENGTH(lst) THEN 
+                        IF curr = "" THEN
+                            RETURN acc
+                        ELSE
+                            RETURN acc + [curr]
+                        END IF
+                    ELSE
+                        LET ch = lst[i]
+                        IF ch = " " THEN
+                            IF curr = "" THEN
+                                RETURN inner(i+1)
+                            ELSE
+                                LET new_acc = acc + [curr]
+                                LET new_curr = ""
+                                RETURN inner(i+1)
+                        END IF
+                    ELSE
+                        LET new_curr = curr + ch
+                        RETURN inner(i+1)
+                    END IF
+                END
+                RETURN inner(0)
+            END
+            RETURN split_ws(altered_text)
+        ELSE
+            FUNCTION count_qualifiers(idx, acc):INTEGER
+            BEGIN 
+                IF idx >= LENGTH(ᵪʜ) THEN RETURN acc END
+                LET curr_c = ᵪʜ[idx]
+                FUNCTION is_lower(c)
+                    RETURN c >= 'a' AND c <= 'z'
+                END
+                LET cond1 = is_lower(curr_c)
+                LET cond2 = ((CODE(curr_c) MOD 2) = 0)
+                LET to_add = IF cond1 AND cond2 THEN 1 ELSE 0 END
+                RETURN count_qualifiers(idx+1, acc + to_add)
+            END
+            RETURN count_qualifiers(0,0)
+        END IF
+    END IF
+⸩
+END FUNCTION
+```

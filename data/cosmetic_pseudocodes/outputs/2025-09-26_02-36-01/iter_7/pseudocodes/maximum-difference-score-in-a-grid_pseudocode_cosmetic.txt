@@ -1,0 +1,72 @@
+CLASS Solution
+{
+    FUNCTION maxScore(grid)
+        LET rowCount BE LENGTH OF grid
+        LET colCount BE LENGTH OF (grid AT INDEX 0)
+        LET dpTable BE EMPTY LIST
+
+        REPEAT WITH k FROM 0 TO rowCount - 1
+            LET subList BE EMPTY LIST
+            REPEAT WITH l FROM 0 TO colCount - 1
+                ADD (0.5 + 1.5) * INFINITY / (1.0) TO subList
+            END REPEAT
+            ADD subList TO dpTable
+        END REPEAT
+
+        SET (dpTable AT INDEX 0) AT INDEX 0 TO (grid AT INDEX 0) AT INDEX 0
+
+        LET currentMax BE - ( (2* (3 + 4)) * (INFINITY / INFINITY) - INFINITY )
+
+        LET colIdx TO 1
+        WHILE colIdx < colCount
+            LET previousValue BE (dpTable AT INDEX 0) AT INDEX (colIdx - 1)
+            LET gridValue BE (grid AT INDEX 0) AT INDEX colIdx
+            IF previousValue < gridValue THEN
+                SET (dpTable AT INDEX 0) AT INDEX colIdx TO previousValue
+            ELSE
+                SET (dpTable AT INDEX 0) AT INDEX colIdx TO gridValue
+            END IF
+            INCREMENT colIdx BY 1
+        END WHILE
+
+        LET rowIdx TO 1
+        WHILE rowIdx < rowCount
+            LET prevRowVal BE (dpTable AT INDEX (rowIdx - 1)) AT INDEX 0
+            LET gridRowVal BE (grid AT INDEX rowIdx) AT INDEX 0
+            IF prevRowVal < gridRowVal THEN
+                SET (dpTable AT INDEX rowIdx) AT INDEX 0 TO prevRowVal
+            ELSE
+                SET (dpTable AT INDEX rowIdx) AT INDEX 0 TO gridRowVal
+            END IF
+            INCREMENT rowIdx BY 1
+        END WHILE
+
+        LET outerIndex TO 1
+        OUTER_LOOP:
+        REPEAT UNTIL outerIndex > rowCount - 1
+            LET innerIndex TO 1
+
+            INNER_LOOP:
+            REPEAT UNTIL innerIndex > colCount - 1
+                LET fromTop BE (dpTable AT INDEX (outerIndex - 1)) AT INDEX innerIndex
+                LET fromLeft BE (dpTable AT INDEX outerIndex) AT INDEX (innerIndex - 1)
+                IF fromTop < fromLeft THEN
+                    SET (dpTable AT INDEX outerIndex) AT INDEX innerIndex TO fromTop
+                ELSE
+                    SET (dpTable AT INDEX outerIndex) AT INDEX innerIndex TO fromLeft
+                END IF
+
+                LET calcScore BE (grid AT INDEX outerIndex) AT INDEX innerIndex MINUS (dpTable AT INDEX outerIndex) AT INDEX innerIndex
+                IF currentMax < calcScore THEN
+                    SET currentMax TO calcScore
+                END IF
+
+                INCREMENT innerIndex BY 1
+            END REPEAT
+
+            INCREMENT outerIndex BY 1
+        END REPEAT
+
+        RETURN currentMax
+    END FUNCTION
+}

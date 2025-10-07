@@ -1,0 +1,51 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minValidStrings(words, target)
+        DEFINE function buildPrefixes(lst)
+            DEFINE function prefixHelper(strVal, idx, accSet)
+                IF idx <= 0 THEN
+                    RETURN accSet
+                ELSE
+                    LET newPrefix = substring(strVal, 1, idx)
+                    RETURN prefixHelper(strVal, idx - 1, union(accSet, {newPrefix}))
+                END IF
+            END FUNCTION
+
+            RETURN foldLeft(lst, {}, (setAcc, w) => prefixHelper(w, length(w), setAcc))
+        END FUNCTION
+
+        LET prefixCollection = buildPrefixes(words)
+        LET lengthTarget = length(target)
+        LET dpArray = createList(lengthTarget + 1, +∞)
+        ASSIGN dpArray[0] = 0
+
+        FUNCTION updateDP(index)
+            IF index > lengthTarget THEN
+                RETURN
+            ELSE
+                LET k = 1
+                WHILE k <= index DO
+                    LET substringCandidate = substring(target, k, index)
+                    IF contains(prefixCollection, substringCandidate) THEN
+                        LET currentVal = dpArray[index]
+                        LET candidateVal = dpArray[k - 1] + 1
+                        IF candidateVal < currentVal THEN
+                            ASSIGN dpArray[index] = candidateVal
+                        END IF
+                    END IF
+                    INCREMENT k BY 1
+                END WHILE
+                CALL updateDP(index + 1)
+            END IF
+        END FUNCTION
+
+        CALL updateDP(1)
+
+        IF dpArray[lengthTarget] != +∞ THEN
+            RETURN dpArray[lengthTarget]
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS
+```

@@ -1,0 +1,41 @@
+CLASS Solution
+    FUNCTION countCompleteDayPairs WITH parameter delta
+        DEFINE FUNCTION _modulo_twentyfour WITH parameter x
+            RETURN (x + 24) - ((x + 24) / 24) * 24
+        END FUNCTION
+        
+        SET gamma TO 0
+        SET omega TO an empty mapping that returns 0 for missing keys
+        
+        DEFINE FUNCTION _increment_val WITH parameters key, map_ref
+            SET temp_val TO 0
+            IF key IN map_ref THEN
+                SET temp_val TO map_ref[key]
+            END IF
+            SET map_ref[key] TO temp_val + 1
+        END FUNCTION
+        
+        DEFINE FUNCTION _get_val WITH parameters key, map_ref
+            IF key IN map_ref THEN
+                RETURN map_ref[key]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+        
+        DEFINE FUNCTION _process_index WITH parameter idx
+            IF idx >= LENGTH delta THEN
+                RETURN
+            ELSE
+                SET residual TO _modulo_twentyfour(delta[idx])
+                SET complement_val TO _modulo_twentyfour(24 - residual)
+                SET gamma TO gamma + _get_val(complement_val, omega)
+                _increment_val(residual, omega)
+                _process_index(idx + 1)
+            END IF
+        END FUNCTION
+        
+        CALL _process_index(0)
+        RETURN gamma
+    END FUNCTION
+END CLASS

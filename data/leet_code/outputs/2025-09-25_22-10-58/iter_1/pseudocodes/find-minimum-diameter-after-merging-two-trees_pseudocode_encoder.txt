@@ -1,0 +1,102 @@
+CLASS Solution  
+    FUNCTION bfs(graph, start)  
+        SET n TO the LENGTH OF graph  
+        SET visited TO a list of Boolean false values with length n  
+        SET queue TO a new deque containing a tuple of start and zero  
+        SET the element at position start of visited TO true  
+        SET farthest_node TO start  
+        SET max_distance TO zero  
+        
+        WHILE the LENGTH OF queue IS GREATER THAN zero  
+            REMOVE the element from the left of queue AND ASSIGN TO node AND distance  
+            IF distance IS GREATER THAN max_distance  
+                SET max_distance TO distance  
+                SET farthest_node TO node  
+            END IF  
+            
+            FOR each neighbor IN the element at position node of graph  
+                IF the element at position neighbor of visited IS false  
+                    SET the element at position neighbor of visited TO true  
+                    APPEND a tuple of neighbor AND distance PLUS one TO queue  
+                END IF  
+            END FOR  
+        END WHILE  
+        
+        RETURN farthest_node AND max_distance  
+    END FUNCTION  
+      
+    FUNCTION tree_diameter(graph)  
+        SET start_node TO zero  
+        SET farthest_node AND an unused_variable TO the result of calling bfs with graph AND start_node  
+        SET an unused_variable AND diameter TO the result of calling bfs with graph AND farthest_node  
+        RETURN diameter  
+    END FUNCTION  
+      
+    FUNCTION maximum_path_length_from_node(graph, node)  
+        SET n TO the LENGTH OF graph  
+        SET visited TO a list of Boolean false values with length n  
+        SET queue TO a new deque containing a tuple of node AND zero  
+        SET the element at position node of visited TO true  
+        SET max_distance TO zero  
+        
+        WHILE the LENGTH OF queue IS GREATER THAN zero  
+            REMOVE the element from the left of queue AND ASSIGN TO node AND distance  
+            IF distance IS GREATER THAN max_distance  
+                SET max_distance TO distance  
+            END IF  
+            
+            FOR each neighbor IN the element at position node of graph  
+                IF the element at position neighbor of visited IS false  
+                    SET the element at position neighbor of visited TO true  
+                    APPEND a tuple of neighbor AND distance PLUS one TO queue  
+                END IF  
+            END FOR  
+        END WHILE  
+        
+        RETURN max_distance  
+    END FUNCTION  
+      
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)  
+        SET n TO the LENGTH OF edges1 PLUS one  
+        SET m TO the LENGTH OF edges2 PLUS one  
+        
+        SET graph1 TO a list of empty lists with length n  
+        SET graph2 TO a list of empty lists with length m  
+        
+        FOR each tuple u AND v IN edges1  
+            APPEND v TO the element at position u of graph1  
+            APPEND u TO the element at position v of graph1  
+        END FOR  
+        
+        FOR each tuple u AND v IN edges2  
+            APPEND v TO the element at position u of graph2  
+            APPEND u TO the element at position v of graph2  
+        END FOR  
+        
+        SET diameter1 TO the result of calling tree_diameter with graph1  
+        SET diameter2 TO the result of calling tree_diameter with graph2  
+        
+        SET longest_path_from_each_node1 TO an empty list  
+        FOR i FROM zero TO n MINUS one  
+            APPEND the result of calling maximum_path_length_from_node with graph1 AND i TO longest_path_from_each_node1  
+        END FOR  
+        
+        SET longest_path_from_each_node2 TO an empty list  
+        FOR i FROM zero TO m MINUS one  
+            APPEND the result of calling maximum_path_length_from_node with graph2 AND i TO longest_path_from_each_node2  
+        END FOR  
+        
+        SET min_diameter TO positive infinity  
+        
+        FOR u FROM zero TO n MINUS one  
+            FOR v FROM zero TO m MINUS one  
+                SET new_diameter TO the maximum of diameter1 AND diameter2 AND the element at position u of longest_path_from_each_node1 PLUS the element at position v of longest_path_from_each_node2 PLUS one  
+                IF new_diameter IS LESS THAN min_diameter  
+                    SET min_diameter TO new_diameter  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        RETURN min_diameter  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,80 @@
+CLASS Solution  
+    FUNCTION shortestDistanceAfterQueries(n, queries)  
+        
+        FUNCTION insertEdge(g, x, y)  
+            APPEND (y, 1) TO g[x]  
+        END FUNCTION
+        
+        FUNCTION popMin(p, container)  
+            SET minIndex TO 0  
+            FOR idx FROM 1 TO LENGTH(container) - 1  
+                IF container[idx][0] < container[minIndex][0]  
+                    SET minIndex TO idx  
+                END IF  
+            END FOR  
+            SET value TO container[minIndex]  
+            REMOVE value FROM container  
+            RETURN value  
+        END FUNCTION
+        
+        FUNCTION pushHeap(p, container, entry)  
+            APPEND entry TO container  
+        END FUNCTION
+        
+        SET graph TO empty map  
+        SET idx TO 0  
+        WHILE idx <= n - 1  
+            SET graph[idx] TO empty list  
+            SET idx TO idx + 1  
+        END WHILE  
+        
+        SET iterIndex TO 0  
+        REPEAT  
+            IF iterIndex > n - 2 THEN  
+                BREAK  
+            END IF  
+            CALL insertEdge(graph, iterIndex, iterIndex + 1)  
+            SET iterIndex TO iterIndex + 1  
+        UNTIL FALSE  
+        
+        FUNCTION dijkstra()  
+            SET distances TO empty list  
+            WHILE LENGTH(distances) < n  
+                APPEND +∞ TO distances  
+            END WHILE  
+            SET distances[0] TO 0  
+            
+            SET priorityQueue TO list containing (0, 0)  
+            
+            WHILE LENGTH(priorityQueue) > 0  
+                (curDist, curNode) ← popMin(priorityQueue, priorityQueue)  
+                
+                IF curDist > distances[curNode]  
+                    CONTINUE  
+                END IF  
+                
+                FOR each edge WITHIN graph[curNode]  
+                    SET (neighborNode, edgeWeight) TO edge  
+                    SET proposedDist TO curDist + edgeWeight  
+                    
+                    IF proposedDist < distances[neighborNode]  
+                        SET distances[neighborNode] TO proposedDist  
+                        CALL pushHeap(priorityQueue, priorityQueue, (proposedDist, neighborNode))  
+                    END IF  
+                END FOR  
+            END WHILE  
+            
+            RETURN distances[n - 1]  
+        END FUNCTION
+        
+        SET outputList TO empty list  
+        
+        FOR each pair IN queries  
+            (source, weight) ← pair  
+            CALL insertEdge(graph, source, weight)  
+            APPEND dijkstra() TO outputList  
+        END FOR
+        
+        RETURN outputList  
+    END FUNCTION  
+END CLASS

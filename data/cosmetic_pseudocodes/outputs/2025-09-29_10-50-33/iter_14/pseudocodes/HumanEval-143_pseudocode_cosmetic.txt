@@ -1,0 +1,49 @@
+FUNCTION words_in_sentence(sentence)
+  DECLARE collected_elements AS tuple ← ()
+  
+  FUNCTION check_divisor(target_str, divisor_candidate, indicator)
+    IF divisor_candidate GREATER_OR_EQUAL LENGTH(target_str)
+      EXECUTE RETURN indicator
+    ELSEIF (LENGTH(target_str) MOD divisor_candidate) IS_ZERO
+      INVOKE RETURN 1
+    ELSE
+      INVOKE check_divisor(target_str, divisor_candidate + 1, indicator)
+    ENDIF
+  END FUNCTION  
+  
+  FUNCTION evaluate_word(token)
+    DECLARE signal AS integer ← 0
+    IF LENGTH(token) IS_EQUAL_TO 1
+      SET signal TO 1
+    ELSE
+      SET signal TO check_divisor(token, 2, 0)
+    ENDIF
+    IF (signal IS_EQUAL_TO 0) OR (LENGTH(token) IS_EQUAL_TO 2)
+      RETURN_TOKEN token
+    ELSE
+      RETURN_TOKEN ""
+    ENDIF
+  END FUNCTION
+  
+  DECLARE idx AS integer ← 1
+  DECLARE words_array AS list ← SPLIT(sentence, " ")
+  WHILE idx LESS_OR_EQUAL LENGTH(words_array)
+    DECLARE term AS string ← evaluate_word(words_array[idx])
+    IF LENGTH(term) GREATER_THAN 0
+      SET collected_elements ← collected_elements + (term,)
+    ENDIF
+    SET idx ← idx + 1
+  ENDWHILE
+  
+  DECLARE output_string AS string ← ""
+  IF LENGTH(collected_elements) GREATER_THAN 0
+    FOR pos FROM 1 TO LENGTH(collected_elements)
+      SET output_string ← output_string + collected_elements[pos]
+      IF pos LESS_THAN LENGTH(collected_elements)
+        SET output_string ← output_string + " "
+      ENDIF
+    ENDFOR
+  ENDIF
+  
+  EXECUTE RETURN output_string
+END FUNCTION

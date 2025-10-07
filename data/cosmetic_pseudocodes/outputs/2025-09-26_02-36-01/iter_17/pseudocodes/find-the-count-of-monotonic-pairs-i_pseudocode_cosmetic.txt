@@ -1,0 +1,81 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        CONST moduloValue := 10^9 + 7
+        VAR lengthNums := LENGTH(nums)
+        VAR highest := nums[0]
+        VAR indexCounter := 1
+        WHILE indexCounter < lengthNums DO
+            IF nums[indexCounter] > highest THEN
+                highest := nums[indexCounter]
+            END IF
+            indexCounter := indexCounter + 1
+        END WHILE
+
+        VAR table := NEW LIST[lengthNums]
+        VAR xIdx := 0
+        WHILE xIdx < lengthNums DO
+            table[xIdx] := NEW LIST[highest + 1]
+            VAR yIdx := 0
+            WHILE yIdx <= highest DO
+                table[xIdx][yIdx] := NEW LIST[highest + 1]
+                VAR zIdx := 0
+                WHILE zIdx <= highest DO
+                    table[xIdx][yIdx][zIdx] := 0
+                    zIdx := zIdx + 1
+                END WHILE
+                yIdx := yIdx + 1
+            END WHILE
+            xIdx := xIdx + 1
+        END WHILE
+
+        VAR iterationJ := 0
+        REPEAT
+            IF iterationJ > nums[0] THEN BREAK END IF
+            VAR iterationK := nums[0] - iterationJ
+            table[0][iterationJ][iterationK] := 1
+            iterationJ := iterationJ + 1
+        UNTIL FALSE
+
+        VAR currentIndex := 1
+        WHILE currentIndex < lengthNums DO
+            VAR outerJ := 0
+            WHILE outerJ <= nums[currentIndex] DO
+                VAR outerK := nums[currentIndex] - outerJ
+
+                VAR innerJ := 0
+                WHILE innerJ <= outerJ DO
+                    VAR innerK := outerK
+                    WHILE innerK <= highest DO
+                        table[currentIndex][outerJ][outerK] := table[currentIndex][outerJ][outerK] + table[currentIndex - 1][innerJ][innerK]
+                        IF table[currentIndex][outerJ][outerK] >= moduloValue THEN
+                            table[currentIndex][outerJ][outerK] := table[currentIndex][outerJ][outerK] - moduloValue
+                        END IF
+                        innerK := innerK + 1
+                    END WHILE
+                    innerJ := innerJ + 1
+                END WHILE
+
+                outerJ := outerJ + 1
+            END WHILE
+            currentIndex := currentIndex + 1
+        END WHILE
+
+        VAR accumulator := 0
+        VAR sumJ := 0
+        WHILE sumJ <= highest DO
+            VAR sumK := 0
+            WHILE sumK <= highest DO
+                IF (sumJ + sumK) = nums[lengthNums - 1] THEN
+                    accumulator := accumulator + table[lengthNums - 1][sumJ][sumK]
+                    IF accumulator >= moduloValue THEN
+                        accumulator := accumulator - moduloValue
+                    END IF
+                END IF
+                sumK := sumK + 1
+            END WHILE
+            sumJ := sumJ + 1
+        END WHILE
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

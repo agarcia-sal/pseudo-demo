@@ -1,0 +1,49 @@
+CLASS Solution  
+    FUNCTION canReachCorner(xCorner yCorner circles)  
+        FUNCTION in_circle(x y cx cy r)  
+            RETURN the quantity of the difference of x MINUS cx MULTIPLIED BY the difference of x MINUS cx PLUS the quantity of the difference of y MINUS cy MULTIPLIED BY the difference of y MINUS cy LESS THAN OR EQUAL TO r MULTIPLIED BY r  
+        END FUNCTION  
+
+        FUNCTION cross_left_top(cx cy r)  
+            SET condition_a TO the absolute value of cx LESS THAN OR EQUAL TO r AND zero LESS THAN OR EQUAL TO cy AND cy LESS THAN OR EQUAL TO yCorner  
+            SET condition_b TO the absolute value of the difference of cy MINUS yCorner LESS THAN OR EQUAL TO r AND zero LESS THAN OR EQUAL TO cx AND cx LESS THAN OR EQUAL TO xCorner  
+            RETURN condition_a OR condition_b  
+        END FUNCTION  
+
+        FUNCTION cross_right_bottom(cx cy r)  
+            SET condition_a TO the absolute value of the difference of cx MINUS xCorner LESS THAN OR EQUAL TO r AND zero LESS THAN OR EQUAL TO cy AND cy LESS THAN OR EQUAL TO yCorner  
+            SET condition_b TO the absolute value of cy LESS THAN OR EQUAL TO r AND zero LESS THAN OR EQUAL TO cx AND cx LESS THAN OR EQUAL TO xCorner  
+            RETURN condition_a OR condition_b  
+        END FUNCTION  
+
+        FUNCTION dfs(i)  
+            SET x1 TO element at position zero of circles at position i  
+            SET y1 TO element at position one of circles at position i  
+            SET r1 TO element at position two of circles at position i  
+            IF cross_right_bottom(x1 y1 r1)  
+                RETURN True  
+            END IF  
+            SET element at position i of vis TO True  
+            FOR each index j AND tuple containing x2 y2 r2 IN enumeration of circles  
+                IF element at position j of vis EQUALS True OR the quantity of the difference of x1 MINUS x2 MULTIPLIED BY the difference of x1 MINUS x2 PLUS the quantity of the difference of y1 MINUS y2 MULTIPLIED BY the difference of y1 MINUS y2 GREATER THAN (r1 PLUS r2) MULTIPLIED BY (r1 PLUS r2)  
+                    CONTINUE TO next iteration  
+                END IF  
+                IF the product of x1 MULTIPLIED BY r2 PLUS the product of x2 MULTIPLIED BY r1 LESS THAN the sum of r1 PLUS r2 MULTIPLIED BY xCorner AND the product of y1 MULTIPLIED BY r2 PLUS the product of y2 MULTIPLIED BY r1 LESS THAN the sum of r1 PLUS r2 MULTIPLIED BY yCorner AND dfs(j)  
+                    RETURN True  
+                END IF  
+            END FOR  
+            RETURN False  
+        END FUNCTION  
+
+        SET vis TO a list of False repeated the LENGTH OF circles times  
+        FOR each index i AND tuple containing x y r IN enumeration of circles  
+            IF in_circle(zero zero x y r) OR in_circle(xCorner yCorner x y r)  
+                RETURN False  
+            END IF  
+            IF the element at position i of vis EQUALS False AND cross_left_top(x y r) AND dfs(i)  
+                RETURN False  
+            END IF  
+        END FOR  
+        RETURN True  
+    END FUNCTION  
+END CLASS

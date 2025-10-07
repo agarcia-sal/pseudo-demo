@@ -1,0 +1,48 @@
+CLASS Solution  
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer  
+        
+        FUNCTION nxt(a a AS integer b b AS integer) RETURNS integer  
+            IF ((a BITWISE_AND (1 BITWISE_XOR b)) EQUALS 1) THEN  
+                RETURN a PLUS 1  
+            ELSE  
+                RETURN a PLUS 2  
+            END IF  
+        END FUNCTION  
+
+        LET length1 BE LENGTH(nums1)  
+        LET length2 BE LENGTH(nums2)  
+        LET dp BE a list WITH (length1 PLUS 1) elements, EACH element BE a list WITH (length2 PLUS 1) zeros  
+
+        LET counter1 BE 1  
+        WHILE counter1 LESS_EQUAL length1 DO  
+            LET val1 BE nums1[counter1]  
+            LET prev_val BE dp[counter1 MINUS 1][0]  
+            dp[counter1][0] = nxt(prev_val, val1)  
+            counter1 = counter1 PLUS 1  
+        END WHILE  
+
+        LET counter2 BE 1  
+        WHILE counter2 LESS_EQUAL length2 DO  
+            LET val2 BE nums2[counter2]  
+            LET prev_val2 BE dp[0][counter2 MINUS 1]  
+            dp[0][counter2] = nxt(prev_val2, val2)  
+            counter2 = counter2 PLUS 1  
+        END WHILE  
+
+        LET i BE 1  
+        WHILE i LESS_EQUAL length1 DO  
+            LET val_i BE nums1[i]  
+            LET j BE 1  
+            WHILE j LESS_EQUAL length2 DO  
+                LET val_j BE nums2[j]  
+                LET option1 BE nxt(dp[i MINUS 1][j], val_i)  
+                LET option2 BE nxt(dp[i][j MINUS 1], val_j)  
+                dp[i][j] = IF option1 LESS_THAN option2 THEN option1 ELSE option2 END IF  
+                j = j PLUS 1  
+            END WHILE  
+            i = i PLUS 1  
+        END WHILE  
+
+        RETURN dp[length1][length2]  
+    END FUNCTION  
+END CLASS

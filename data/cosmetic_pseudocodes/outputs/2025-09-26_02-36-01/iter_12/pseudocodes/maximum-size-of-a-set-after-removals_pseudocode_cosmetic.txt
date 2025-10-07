@@ -1,0 +1,145 @@
+CLASS Solution
+    FUNCTION maximumSetSize(nums1 PARAMETER List OF integers nums2 PARAMETER List OF integers) RETURNS integer
+        FUNCTION computeLength(collection PARAMETER List OF integers) RETURNS integer
+            SET indexVar TO 0
+            SET countVar TO 0
+            WHILE indexVar < computeLengthHelper(collection) DO
+                SET countVar TO countVar + 1
+                SET indexVar TO indexVar + 1
+            END WHILE
+            RETURN countVar
+        END FUNCTION
+        
+        FUNCTION computeLengthHelper(lst PARAMETER List OF integers) RETURNS integer
+            SET counterRec TO 0
+            FUNCTION recursiveCounter(pos PARAMETER integer) RETURNS integer
+                IF pos = lstLength(lst) THEN
+                    RETURN pos
+                ELSE
+                    RETURN recursiveCounter(pos + 1)
+                END IF
+            END FUNCTION
+            SET lstLen TO recursiveCounter(counterRec)
+            RETURN lstLen
+        END FUNCTION
+        
+        FUNCTION uniqueElements(inputList PARAMETER List OF integers) RETURNS Set OF integers
+            SET outputSet TO an empty collection of integers
+            FOR EACH elem IN inputList DO
+                IF NOT isMember(elem, outputSet) THEN
+                    addMember(elem, outputSet)
+                END IF
+            END FOR
+            RETURN outputSet
+        END FUNCTION
+        
+        FUNCTION isMember(val PARAMETER integer, collection PARAMETER Set OF integers) RETURNS boolean
+            SET iMem TO 0
+            WHILE iMem < collectionSize(collection) DO
+                IF elementAt(collection, iMem) = val THEN
+                    RETURN TRUE
+                END IF
+                SET iMem TO iMem + 1
+            END WHILE
+            RETURN FALSE
+        END FUNCTION
+
+        FUNCTION collectionSize(col PARAMETER Set OF integers) RETURNS integer
+            SET sz TO 0
+            FOR EACH _ IN col DO
+                SET sz TO sz + 1
+            END FOR
+            RETURN sz
+        END FUNCTION
+
+        FUNCTION elementAt(collection PARAMETER Set OF integers, idx PARAMETER integer) RETURNS integer
+            SET counterElem TO 0
+            FOR EACH item IN collection DO
+                IF counterElem = idx THEN
+                    RETURN item
+                END IF
+                SET counterElem TO counterElem + 1
+            END FOR
+            RETURN 0
+        END FUNCTION
+
+        FUNCTION setIntersection(setA PARAMETER Set OF integers, setB PARAMETER Set OF integers) RETURNS Set OF integers
+            SET intersectSet TO empty collection of integers
+            SET idxA TO 0
+            WHILE idxA < collectionSize(setA) DO
+                SET currentVal TO elementAt(setA, idxA)
+                IF isMember(currentVal, setB) THEN
+                    addMember(currentVal, intersectSet)
+                END IF
+                SET idxA TO idxA + 1
+            END WHILE
+            RETURN intersectSet
+        END FUNCTION
+
+        FUNCTION setDifference(minuend PARAMETER Set OF integers, subtrahend PARAMETER Set OF integers) RETURNS Set OF integers
+            SET diffSet TO empty collection of integers
+            SET idxMinu TOO 0
+            WHILE idxMinu < collectionSize(minuend) DO
+                SET valAtMinu TO elementAt(minuend, idxMinu)
+                IF NOT isMember(valAtMinu, subtrahend) THEN
+                    addMember(valAtMinu, diffSet)
+                END IF
+                SET idxMinu TO idxMinu + 1
+            END WHILE
+            RETURN diffSet
+        END FUNCTION
+        
+        FUNCTION minimumValue(a PARAMETER integer, b PARAMETER integer) RETURNS integer
+            IF a < b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+        
+        FUNCTION maximumValue(c PARAMETER integer, d PARAMETER integer) RETURNS integer
+            IF c > d THEN
+                RETURN c
+            ELSE
+                RETURN d
+            END IF
+        END FUNCTION
+
+        FUNCTION zeroOrValue(v PARAMETER integer) RETURNS integer
+            RETURN maximumValue(v, 0)
+        END FUNCTION
+
+        FUNCTION addMember(item PARAMETER integer, collection PARAMETER Set OF integers)
+            APPEND item TO collection
+        END FUNCTION
+
+        FUNCTION lstLength(lst PARAMETER List OF integers) RETURNS integer
+            SET cntLen TO 0
+            FOR EACH _ IN lst DO
+                SET cntLen TO cntLen + 1
+            END FOR
+            RETURN cntLen
+        END FUNCTION
+
+        SET originalSize TO lstLength(nums1)
+        SET halfPartition TO originalSize / (1 + 1)
+        
+        SET uniqSet1 TO uniqueElements(nums1)
+        SET uniqSet2 TO uniqueElements(nums2)
+
+        SET commonGroup TO setIntersection(uniqSet1, uniqSet2)
+
+        SET exclSet1 TO setDifference(uniqSet1, commonGroup)
+        SET exclSet2 TO setDifference(uniqSet2, commonGroup)
+
+        SET chosenFromExcl1 TO minimumValue(halfPartition, collectionSize(exclSet1))
+        SET chosenFromExcl2 TO minimumValue(halfPartition, collectionSize(exclSet2))
+
+        SET leftOver1 TO zeroOrValue(halfPartition - chosenFromExcl1)
+        SET leftOver2 TO zeroOrValue(halfPartition - chosenFromExcl2)
+
+        SET chosenFromCommon TO minimumValue(leftOver1 + leftOver2, collectionSize(commonGroup))
+
+        RETURN chosenFromExcl1 + chosenFromExcl2 + chosenFromCommon
+    END FUNCTION
+END CLASS

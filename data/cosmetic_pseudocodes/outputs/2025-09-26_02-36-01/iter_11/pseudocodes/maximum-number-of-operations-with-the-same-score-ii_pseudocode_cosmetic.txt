@@ -1,0 +1,33 @@
+CLASS Solution
+    FUNCTION maxOperations(nums)
+        FUNCTION helper(x, y, threshold, cache)
+            IF NOT (x < y)
+                RETURN 0
+            END IF
+            IF (x, y, threshold) IN cache
+                RETURN cache[(x, y, threshold)]
+            END IF
+            SET best_count TO 0
+            IF (nums[x] + nums[x + 1]) = threshold
+                SET candidate1 TO 1 + helper(x + 2, y, threshold, cache)
+                IF candidate1 > best_count THEN best_count = candidate1 END IF
+            END IF
+            IF (nums[y] + nums[y - 1]) = threshold
+                SET candidate2 TO 1 + helper(x, y - 2, threshold, cache)
+                IF candidate2 > best_count THEN best_count = candidate2 END IF
+            END IF
+            IF (nums[x] + nums[y]) = threshold
+                SET candidate3 TO 1 + helper(x + 1, y - 1, threshold, cache)
+                IF candidate3 > best_count THEN best_count = candidate3 END IF
+            END IF
+            SET cache[(x, y, threshold)] = best_count
+            RETURN best_count
+        END FUNCTION
+
+        SET start_1 = 1 + helper(2, LENGTH(nums) - 1, nums[0] + nums[1], DICTIONARY())
+        SET start_2 = 1 + helper(0, LENGTH(nums) - 3, nums[LENGTH(nums) - 2] + nums[LENGTH(nums) - 1], DICTIONARY())
+        SET start_3 = 1 + helper(1, LENGTH(nums) - 2, nums[0] + nums[LENGTH(nums) - 1], DICTIONARY())
+
+        RETURN MAXIMUM OF start_1, start_2, start_3
+    END FUNCTION
+END CLASS

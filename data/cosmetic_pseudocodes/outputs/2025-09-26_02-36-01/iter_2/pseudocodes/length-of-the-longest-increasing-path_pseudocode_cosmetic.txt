@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION maxPathLength(points, index)
+        LET pivotX := points[index][0]
+        LET pivotY := points[index][1]
+        
+        LET lesserSide := []
+        LET i := 0
+        WHILE i < LENGTH(points)
+            LET currentPoint := points[i]
+            LET currX := currentPoint[0]
+            LET currY := currentPoint[1]
+            IF currX < pivotX AND currY < pivotY THEN
+                lesserSide.APPEND((currX, currY))
+            END IF
+            SET i := i + 1
+        END WHILE
+        
+        LET greaterSide := []
+        LET j := 0
+        WHILE j < LENGTH(points)
+            LET current := points[j]
+            LET px := current[0]
+            LET py := current[1]
+            IF NOT (px <= pivotX OR py <= pivotY) THEN
+                greaterSide.APPEND((px, py))
+            END IF
+            SET j := j + 1
+        END WHILE
+        
+        LET leftLen := self._lengthOfLIS(lesserSide)
+        LET rightLen := self._lengthOfLIS(greaterSide)
+        
+        RETURN 1 + leftLen + rightLen
+    END FUNCTION
+
+    FUNCTION _lengthOfLIS(coords)
+        LET sortedCoords := SORTED(coords, KEY = (a) -> (a[0], -a[1]))
+        LET subsequence := []
+        LET idx := 0
+        WHILE idx < LENGTH(sortedCoords)
+            LET currentY := sortedCoords[idx][1]
+            IF LENGTH(subsequence) = 0 OR subsequence[-1] < currentY THEN
+                subsequence.APPEND(currentY)
+            ELSE
+                LET replacePos := bisect_left(subsequence, currentY)
+                subsequence[replacePos] := currentY
+            END IF
+            SET idx := idx + 1
+        END WHILE
+        RETURN LENGTH(subsequence)
+    END FUNCTION
+END CLASS

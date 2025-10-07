@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+        SET maximum_difference TO -1.0 / 0.0
+        SET chars TO ['0', '1', '2', '3', '4']
+        SET pairs TO empty list
+        FOR i FROM 0 TO LENGTH(chars) - 1
+            FOR j FROM 0 TO LENGTH(chars) - 1
+                IF i IS NOT EQUAL TO j THEN
+                    APPEND (chars[i], chars[j]) TO pairs
+                END IF
+            END FOR
+        END FOR
+
+        FOR EACH (x, y) IN pairs
+            SET minimal_diff_map TO map WITH default value +1.0 / 0.0
+            SET prefix_count_x TO [0]
+            SET prefix_count_y TO [0]
+            SET start_idx TO 0
+            SET index TO 0
+
+            WHILE index < LENGTH(s)
+                SET current_char TO s[index]
+                SET increment_x TO 0
+                IF current_char EQUALS x THEN
+                    SET increment_x TO 1
+                END IF
+
+                SET increment_y TO 0
+                IF current_char EQUALS y THEN
+                    SET increment_y TO 1
+                END IF
+
+                APPEND (prefix_count_x[-1] + increment_x) TO prefix_count_x
+                APPEND (prefix_count_y[-1] + increment_y) TO prefix_count_y
+
+                WHILE index - start_idx + 1 >= k AND prefix_count_x[start_idx] < prefix_count_x[-1] AND prefix_count_y[start_idx] < prefix_count_y[-1]
+                    SET parity_key TO (prefix_count_x[start_idx] MOD 2, prefix_count_y[start_idx] MOD 2)
+                    SET candidate_value TO prefix_count_x[start_idx] - prefix_count_y[start_idx]
+                    SET minimal_diff_map[parity_key] TO MIN(minimal_diff_map[parity_key], candidate_value)
+                    INCREMENT start_idx BY 1
+                END WHILE
+
+                SET current_parity_key TO ((prefix_count_x[-1] - 1) MOD 2, prefix_count_y[-1] MOD 2)
+                SET current_diff TO prefix_count_x[-1] - prefix_count_y[-1] - minimal_diff_map[current_parity_key]
+                SET maximum_difference TO MAX(maximum_difference, current_diff)
+                INCREMENT index BY 1
+            END WHILE
+        END FOR
+
+        RETURN maximum_difference
+    END FUNCTION
+END CLASS

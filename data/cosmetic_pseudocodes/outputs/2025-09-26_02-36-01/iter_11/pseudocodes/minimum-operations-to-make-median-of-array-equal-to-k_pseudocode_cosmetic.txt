@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION minOperationsToMakeMedianK(nums k)
+        FUNCTION helperSort(list)
+            SET idxA TO 0
+            SET idxB TO LENGTH OF list MINUS 1
+            REPEAT
+                SET swapped TO false
+                FOR tempX FROM idxA TO idxB EXCLUSIVE
+                    IF list[tempX] GREATER THAN list[tempX + 1]
+                        SET tempV TO list[tempX]
+                        SET list[tempX] TO list[tempX + 1]
+                        SET list[tempX + 1] TO tempV
+                        SET swapped TO true
+                    END IF
+                END FOR
+                DECREMENT idxB BY 1
+                IF NOT swapped THEN
+                    BREAK
+                END IF
+            UNTIL false
+        END FUNCTION
+
+        CALL helperSort(nums)
+
+        SET lenVal TO LENGTH OF nums
+        SET midPos TO INTEGER_DIVIDE(lenVal BY 2)
+
+        IF nums[midPos] EQUALS k THEN
+            RETURN 0
+        END IF
+
+        SET resultCount TO 0
+
+        IF nums[midPos] LESS THAN k THEN
+            FUNCTION climbUp(i accum)
+                IF i GREATER THAN OR EQUAL TO lenVal THEN
+                    RETURN accum
+                END IF
+                IF nums[i] GREATER THAN OR EQUAL TO k THEN
+                    RETURN accum
+                END IF
+                SET delta TO k MINUS nums[i]
+                RETURN climbUp(i + 1, accum + delta)
+            END FUNCTION
+            SET resultCount TO climbUp(midPos 0)
+        ELSE
+            FUNCTION climbDown(j accum)
+                IF j LESS THAN 0 THEN
+                    RETURN accum
+                END IF
+                IF nums[j] LESS THAN OR EQUAL TO k THEN
+                    RETURN accum
+                END IF
+                SET diff TO nums[j] MINUS k
+                RETURN climbDown(j - 1, accum + diff)
+            END FUNCTION
+            SET resultCount TO climbDown(midPos 0)
+        END IF
+
+        RETURN resultCount
+    END FUNCTION
+END CLASS

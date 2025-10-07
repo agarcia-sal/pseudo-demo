@@ -1,0 +1,177 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+        SET lenGraph TO 0
+        FOR each _ in graph
+            SET lenGraph TO lenGraph + 1
+        END FOR
+        SET flagArray TO []
+        SET idxCounter TO 0
+        WHILE idxCounter < lenGraph
+            APPEND false TO flagArray
+            SET idxCounter TO idxCounter + 1
+        END WHILE
+        SET queueDeq TO [(start, 0)]
+        SET flagArray[start] TO true
+        SET farNode TO start
+        SET maxDist TO 0
+
+        WHILE TRUE
+            IF queueDeq IS []
+                BREAK
+            END IF
+            REMOVE_FIRST queueDeq AND ASSIGN TO currentPair
+            SET currentNode TO currentPair[0]
+            SET currentDistance TO currentPair[1]
+
+            IF currentDistance > maxDist
+                SET maxDist TO currentDistance
+                SET farNode TO currentNode
+            END IF
+
+            SET neighborsList TO graph[currentNode]
+            SET indexNeighbor TO 0
+            WHILE indexNeighbor < LENGTH(neighborsList)
+                SET nb TO neighborsList[indexNeighbor]
+                IF flagArray[nb] = false
+                    SET flagArray[nb] TO true
+                    APPEND (nb, currentDistance + 1) TO queueDeq
+                END IF
+                SET indexNeighbor TO indexNeighbor + 1
+            END WHILE
+        END WHILE
+
+        RETURN farNode, maxDist
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        SET initialNode TO 0
+        SET tempNode, _ TO bfs(graph, initialNode)
+        SET _, maxDiameter TO bfs(graph, tempNode)
+        RETURN maxDiameter
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+        SET totalNodes TO 0
+        FOR each _ in graph
+            SET totalNodes TO totalNodes + 1
+        END FOR
+        SET visitedMarks TO []
+        SET counterMark TO 0
+        WHILE counterMark < totalNodes
+            APPEND false TO visitedMarks
+            SET counterMark TO counterMark + 1
+        END WHILE
+        SET deqList TO [(node, 0)]
+        SET visitedMarks[node] TO true
+        SET distanceMax TO 0
+
+        WHILE TRUE
+            IF deqList IS EMPTY
+                BREAK
+            END IF
+            REMOVE_FIRST deqList AND ASSIGN TO pairNodeDist
+            SET currNode TO pairNodeDist[0]
+            SET currDist TO pairNodeDist[1]
+
+            IF currDist > distanceMax
+                SET distanceMax TO currDist
+            END IF
+
+            SET nbrs TO graph[currNode]
+            SET idxNbr TO 0
+            WHILE idxNbr < LENGTH(nbrs)
+                SET adj TO nbrs[idxNbr]
+                IF visitedMarks[adj] = false
+                    SET visitedMarks[adj] TO true
+                    APPEND (adj, currDist + 1) TO deqList
+                END IF
+                SET idxNbr TO idxNbr + 1
+            END WHILE
+        END WHILE
+
+        RETURN distanceMax
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        SET length1 TO 0
+        FOR each _ in edges1
+            SET length1 TO length1 + 1
+        END FOR
+        SET sizeN TO length1 + 1
+        SET length2 TO 0
+        FOR each _ in edges2
+            SET length2 TO length2 + 1
+        END FOR
+        SET sizeM TO length2 + 1
+
+        SET graphOne TO []
+        SET i1 TO 0
+        WHILE i1 < sizeN
+            APPEND [] TO graphOne
+            SET i1 TO i1 + 1
+        END WHILE
+
+        SET graphTwo TO []
+        SET i2 TO 0
+        WHILE i2 < sizeM
+            APPEND [] TO graphTwo
+            SET i2 TO i2 + 1
+        END WHILE
+
+        SET idxE TO 0
+        WHILE idxE < length1
+            SET pairE TO edges1[idxE]
+            SET uN TO pairE[0]
+            SET vN TO pairE[1]
+            APPEND vN TO graphOne[uN]
+            APPEND uN TO graphOne[vN]
+            SET idxE TO idxE + 1
+        END WHILE
+
+        SET idxF TO 0
+        WHILE idxF < length2
+            SET pairF TO edges2[idxF]
+            SET uM TO pairF[0]
+            SET vM TO pairF[1]
+            APPEND vM TO graphTwo[uM]
+            APPEND uM TO graphTwo[vM]
+            SET idxF TO idxF + 1
+        END WHILE
+
+        SET diamOne TO tree_diameter(graphOne)
+        SET diamTwo TO tree_diameter(graphTwo)
+
+        SET longestPathOne TO []
+        SET c1 TO 0
+        WHILE c1 < sizeN
+            APPEND maximum_path_length_from_node(graphOne, c1) TO longestPathOne
+            SET c1 TO c1 + 1
+        END WHILE
+
+        SET longestPathTwo TO []
+        SET c2 TO 0
+        WHILE c2 < sizeM
+            APPEND maximum_path_length_from_node(graphTwo, c2) TO longestPathTwo
+            SET c2 TO c2 + 1
+        END WHILE
+
+        SET minDiamVal TO +∞
+        SET posU TO 0
+        WHILE posU < sizeN
+            SET posV TO 0
+            WHILE posV < sizeM
+                SET candidateDiam TO longestPathOne[posU] + longestPathTwo[posV] + 1
+                IF diamOne > candidateDiam OR diamTwo > candidateDiam
+                    SET candidateDiam TO MAX(diamOne, diamTwo)
+                END IF
+                IF candidateDiam < minDiamVal
+                    SET minDiamVal TO candidateDiam
+                END IF
+                SET posV TO posV + 1
+            END WHILE
+            SET posU TO posU + 1
+        END WHILE
+
+        RETURN minDiamVal
+    END FUNCTION
+END CLASS

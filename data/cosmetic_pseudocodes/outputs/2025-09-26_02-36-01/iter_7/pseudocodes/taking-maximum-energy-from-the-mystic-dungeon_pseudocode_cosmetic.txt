@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION maximumEnergy(energy, k)
+        CONST TOTAL_COUNT ← LENGTH(energy)
+        LIST accumulator ← CREATE_LIST_OF_SIZE(TOTAL_COUNT, 0)
+        SET accumulator[TOTAL_COUNT - 1] ← energy[TOTAL_COUNT - 1]
+
+        VAR highest_value ← accumulator[TOTAL_COUNT - 1]
+        INITIALIZE queue ← DEQUE_WITH_ELEMENTS([TOTAL_COUNT - 1])
+
+        PROCEDURE processIndex(idx)
+            LOOP
+                IF NOT EMPTY(queue) AND (queue.FRONT() - idx) >= k THEN
+                    queue.POP_FRONT()
+                ELSE
+                    BREAK
+                END IF
+            END LOOP
+
+            SET next_value ← energy[idx] + accumulator[queue.FRONT()]
+            SET accumulator[idx] ← next_value
+
+            IF highest_value < next_value THEN
+                SET highest_value ← next_value
+            END IF
+
+            LOOP
+                IF EMPTY(queue) OR accumulator[idx] < accumulator[queue.BACK()] THEN
+                    BREAK
+                ELSE
+                    queue.POP_BACK()
+                END IF
+            END LOOP
+
+            queue.PUSH_BACK(idx)
+        END PROCEDURE
+
+        VAR index ← TOTAL_COUNT - 2
+        LOOP
+            IF index < 0 THEN EXIT LOOP END IF
+            processIndex(index)
+            SET index ← index - 1
+        END LOOP
+
+        RETURN highest_value
+    END FUNCTION
+END CLASS

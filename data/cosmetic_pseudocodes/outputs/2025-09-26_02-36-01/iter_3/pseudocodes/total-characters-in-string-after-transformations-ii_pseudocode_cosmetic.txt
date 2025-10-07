@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+      LET MODULUS BE (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+
+      LET transform_matrix BE a 26x26 grid filled with zeroes
+      LET outer_idx BE 0
+      WHILE outer_idx <= 25
+        LET inner_idx BE 0
+        LET limit BE nums[outer_idx] - 1
+        WHILE inner_idx <= limit
+          LET row_pos BE outer_idx
+          LET col_pos BE (outer_idx + inner_idx + 1) % 26
+          transform_matrix[row_pos][col_pos] = transform_matrix[row_pos][col_pos] + 1
+          inner_idx = inner_idx + 1
+        END WHILE
+        outer_idx = outer_idx + 1
+      END WHILE
+
+      FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+        LET rows BE 26
+        LET cols BE 26
+        LET r BE 0
+        LET c BE 0
+        LET k_index BE 0
+        LET product_sum_matrix BE a 26x26 grid initialized with zeroes
+        WHILE r < rows
+          c = 0
+          WHILE c < cols
+            k_index = 0
+            WHILE k_index < 26
+              LET add_val BE (A[r][k_index] * B[k_index][c]) % MODULUS
+              LET updated_val BE (product_sum_matrix[r][c] + add_val) % MODULUS
+              product_sum_matrix[r][c] = updated_val
+              k_index = k_index + 1
+            END WHILE
+            c = c + 1
+          END WHILE
+          r = r + 1
+        END WHILE
+        RETURN product_sum_matrix
+      END FUNCTION
+
+      FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+        LET identity_matrix BE a 26x26 grid where each element is 0
+        LET idx BE 0
+        WHILE idx < 26
+          LET jdx BE 0
+          WHILE jdx < 26
+            identity_matrix[idx][jdx] = 0
+            jdx = jdx + 1
+          END WHILE
+          identity_matrix[idx][idx] = 1
+          idx = idx + 1
+        END WHILE
+
+        LET result_matrix BE identity_matrix
+        LET base_matrix BE matrix
+        LET exponent BE power
+
+        WHILE exponent > 0
+          IF (exponent & 1) = 1 THEN
+            result_matrix = matrix_multiply(result_matrix, base_matrix)
+          END IF
+          base_matrix = matrix_multiply(base_matrix, base_matrix)
+          exponent = exponent // 2
+        END WHILE
+        RETURN result_matrix
+      END FUNCTION
+
+      LET exponentiated_matrix BE matrix_power(transform_matrix, t)
+
+      LET counts_array BE an array of 26 zero integers
+      LET position_index BE 0
+      WHILE position_index < LENGTH(s)
+        LET symbol_char BE s[position_index]
+        LET calculated_index BE ORD(symbol_char) - ORD('a')
+        counts_array[calculated_index] = counts_array[calculated_index] + 1
+        position_index = position_index + 1
+      END WHILE
+
+      LET final_counts BE an array of 26 zeros
+      LET left_idx BE 0
+      WHILE left_idx <= 25
+        LET right_idx BE 0
+        WHILE right_idx <= 25
+          final_counts[right_idx] = (final_counts[right_idx] + counts_array[left_idx] * exponentiated_matrix[left_idx][right_idx]) % MODULUS
+          right_idx = right_idx + 1
+        END WHILE
+        left_idx = left_idx + 1
+      END WHILE
+
+      LET answer_sum BE 0
+      LET idx_total BE 0
+      WHILE idx_total <= 25
+        answer_sum = (answer_sum + final_counts[idx_total]) % MODULUS
+        idx_total = idx_total + 1
+      END WHILE
+
+      RETURN answer_sum
+    END FUNCTION
+END CLASS

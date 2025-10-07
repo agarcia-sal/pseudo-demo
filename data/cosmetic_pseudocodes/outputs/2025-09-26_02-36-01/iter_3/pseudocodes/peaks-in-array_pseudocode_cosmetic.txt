@@ -1,0 +1,111 @@
+CLASS Solution  
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER  
+        FUNCTION is_peak(idx INTEGER) RETURNS BOOLEAN  
+            LET left_neighbor = nums[idx - 1]  
+            LET current_val = nums[idx]  
+            LET right_neighbor = nums[idx + 1]  
+            LET cond1 = current_val > left_neighbor  
+            LET cond2 = current_val > right_neighbor  
+            RETURN cond1 AND cond2  
+        END FUNCTION  
+        
+        peaks ← []  
+        idx ← 1  
+        WHILE idx <= (LENGTH(nums) - 2)  
+            IF is_peak(idx) THEN  
+                APPEND idx TO peaks  
+            END IF  
+            idx ← idx + 1  
+        END WHILE  
+        
+        output ← []  
+        FOR query_item IN queries  
+            IF query_item[0] = 1 THEN  
+                li_val ← query_item[1]  
+                ri_val ← query_item[2]  
+                left_pos ← 0  
+                right_pos ← 0  
+                // Find left insertion position for li_val + 1  
+                LET left_target = li_val + 1  
+                left_pos ← 0  
+                FOR i IN RANGE(0, LENGTH(peaks))  
+                    IF peaks[i] >= left_target THEN  
+                        left_pos ← i  
+                        BREAK  
+                    END IF  
+                END FOR  
+                IF left_pos = 0 AND (LENGTH(peaks) > 0) AND (peaks[0] < left_target) THEN  
+                    left_pos ← LENGTH(peaks)  
+                END IF  
+                // Find right insertion position for ri_val  
+                right_target ← ri_val  
+                right_pos ← LENGTH(peaks)  
+                FOR j FROM LENGTH(peaks)-1 DOWNTO 0 STEP -1  
+                    IF peaks[j] <= right_target THEN  
+                        right_pos ← j + 1  
+                        BREAK  
+                    END IF  
+                END FOR  
+                APPEND (right_pos - left_pos) TO output  
+            ELSE  
+                ind ← query_item[1]  
+                val_repl ← query_item[2]  
+                original_val ← nums[ind]  
+                IF original_val = val_repl THEN  
+                    CONTINUE  
+                END IF  
+                nums[ind] ← val_repl  
+                start_idx ← ind - 1  
+                IF start_idx < 1 THEN  
+                    start_idx ← 1  
+                END IF  
+                end_idx ← ind + 1  
+                IF end_idx > LENGTH(nums) - 2 THEN  
+                    end_idx ← LENGTH(nums) - 2  
+                END IF  
+                s_idx ← start_idx  
+                WHILE s_idx <= end_idx  
+                    peak_status ← is_peak(s_idx)  
+                    found_index ← -1  
+                    l ← 0  
+                    r ← LENGTH(peaks) - 1  
+                    WHILE l <= r  
+                        mid ← (l + r) \ 2  
+                        IF peaks[mid] = s_idx THEN  
+                            found_index ← mid  
+                            BREAK  
+                        ELSE IF peaks[mid] < s_idx THEN  
+                            l ← mid + 1  
+                        ELSE  
+                            r ← mid - 1  
+                        END IF  
+                    END WHILE  
+                    IF peak_status THEN  
+                        IF found_index = -1 THEN  
+                            insert_pos ← 0  
+                            l ← 0  
+                            r ← LENGTH(peaks)  
+                            WHILE l < r  
+                                mid ← (l + r) \ 2  
+                                IF peaks[mid] < s_idx THEN  
+                                    l ← mid + 1  
+                                ELSE  
+                                    r ← mid  
+                                END IF  
+                            END WHILE  
+                            insert_pos ← l  
+                            peaks ← peaks[0:insert_pos] + [s_idx] + peaks[insert_pos:]  
+                        END IF  
+                    ELSE  
+                        IF found_index <> -1 THEN  
+                            peaks ← peaks[0:found_index] + peaks[(found_index + 1):]  
+                        END IF  
+                    END IF  
+                    s_idx ← s_idx + 1  
+                END WHILE  
+            END IF  
+        END FOR  
+        
+        RETURN output  
+    END FUNCTION  
+END CLASS

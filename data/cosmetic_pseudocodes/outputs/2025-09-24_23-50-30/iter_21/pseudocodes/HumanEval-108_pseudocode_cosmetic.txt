@@ -1,0 +1,74 @@
+```
+FUNCTION count_nums(array_of_integers)
+    FUNCTION digits_sum(integer_value)
+        IF NOT (integer_value < 0)
+            GOTO positive_label
+        END IF
+        SET integer_value TO 0 - integer_value
+
+        LABEL positive_label
+        SET digits_str TO STRINGIFY(integer_value)
+        
+        FUNCTION convert_str_to_list_of_ints(string_val, idx)
+            IF idx EQUALS LENGTH(string_val)
+                RETURN EMPTY LIST
+            ELSE
+                RETURN [INTEGER(string_val[idx])] + convert_str_to_list_of_ints(string_val, idx + 1)
+            END IF
+        END FUNCTION
+
+        SET list_of_digits TO convert_str_to_list_of_ints(digits_str, 0)
+
+        IF integer_value IS 0
+            RETURN 0
+        END IF
+
+        IF array_of_integers[0] < 0
+            SET list_of_digits[0] TO 0 - list_of_digits[0]
+        END IF
+
+        FUNCTION sum_list(numbers, idx, accumulator)
+            IF idx EQUALS LENGTH(numbers)
+                RETURN accumulator
+            ELSE
+                RETURN sum_list(numbers, idx + 1, accumulator + numbers[idx])
+            END IF
+        END FUNCTION
+
+        RETURN sum_list(list_of_digits, 0, 0)
+    END FUNCTION
+
+    FUNCTION map_function(funct, lst, idx)
+        IF idx EQUALS LENGTH(lst)
+            RETURN EMPTY LIST
+        ELSE
+            RETURN [funct(lst[idx])] + map_function(funct, lst, idx + 1)
+        END IF
+    END FUNCTION
+
+    SET intermediate_results TO map_function(digits_sum, array_of_integers, 0)
+
+    FUNCTION filter_positive(lst, idx, accumulator)
+        IF idx EQUALS LENGTH(lst)
+            RETURN accumulator
+        ELSE
+            IF lst[idx] > 0
+                SET accumulator TO accumulator + [lst[idx]]
+            END IF
+            RETURN filter_positive(lst, idx + 1, accumulator)
+        END IF
+    END FUNCTION
+
+    SET positive_elements TO filter_positive(intermediate_results, 0, [])
+
+    FUNCTION length_of(lst, idx)
+        IF idx EQUALS LENGTH(lst)
+            RETURN 0
+        ELSE
+            RETURN 1 + length_of(lst, idx + 1)
+        END IF
+    END FUNCTION
+
+    RETURN length_of(positive_elements, 0)
+END FUNCTION
+```

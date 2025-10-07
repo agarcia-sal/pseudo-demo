@@ -1,0 +1,30 @@
+```
+FUNCTION check_dict_case(input_map)
+    MATCH LENGTH(SET OF KEYS(input_map))
+        CASE 0 THEN RETURN False
+    END MATCH
+
+    DEFINE FUNCTION traverse(keys_list, idx, mode)
+        IF idx >= LENGTH(keys_list) THEN RETURN (mode = "upper") OR (mode = "lower")
+
+        DEFINE curr_key := ITEM_AT(keys_list, idx)
+
+        IF TYPE_OF(curr_key) != STRING THEN RETURN False
+
+        CASE mode
+            OF "start":
+                IF ALL_CHARS_UPPER(curr_key) THEN RETURN traverse(keys_list, idx + 1, "upper")
+                ELSE IF ALL_CHARS_LOWER(curr_key) THEN RETURN traverse(keys_list, idx + 1, "lower")
+                ELSE RETURN False
+            OF "upper":
+                RETURN IF ALL_CHARS_UPPER(curr_key) THEN traverse(keys_list, idx + 1, "upper") ELSE False
+            OF "lower":
+                RETURN IF ALL_CHARS_LOWER(curr_key) THEN traverse(keys_list, idx + 1, "lower") ELSE False
+            OTHERWISE:
+                RETURN False
+        END CASE
+    END FUNCTION
+
+    RETURN traverse(LIST_OF_KEYS(input_map), 0, "start")
+END FUNCTION
+```

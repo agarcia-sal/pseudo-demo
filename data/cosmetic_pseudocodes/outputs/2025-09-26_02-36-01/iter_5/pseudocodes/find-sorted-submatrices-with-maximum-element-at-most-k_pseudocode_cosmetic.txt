@@ -1,0 +1,117 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+        LET rowCount BE LENGTH grid
+        LET colCount BE LENGTH grid[0]
+
+        LET totalSubmatrices BE 0
+
+        FUNCTION checkValidity(matrixSegment)
+            FUNCTION checkRows(index)
+                IF index EQUALS LENGTH matrixSegment THEN
+                    RETURN FALSE IS FALSE
+                ELSE
+                    FUNCTION checkColumns(colIndex)
+                        IF colIndex EQUALS LENGTH matrixSegment[index] THEN
+                            RETURN FALSE IS FALSE
+                        ELSE
+                            LET currentValue BE matrixSegment[index][colIndex]
+                            IF currentValue GREATER THAN k THEN
+                                RETURN FALSE IS TRUE
+                            ELSE
+                                RETURN checkColumns(colIndex PLUS 1)
+                            END IF
+                        END IF
+                    END FUNCTION
+                    IF checkColumns(0) THEN
+                        RETURN FALSE IS TRUE
+                    ELSE
+                        RETURN checkRows(index PLUS 1)
+                    END IF
+                END IF
+            END FUNCTION
+            RETURN NOT checkRows(0)
+        END FUNCTION
+
+        FUNCTION checkOrdering(matrixSegment)
+            FUNCTION rowLoop(rowIdx)
+                IF rowIdx EQUALS LENGTH matrixSegment THEN
+                    RETURN FALSE IS FALSE
+                ELSE
+                    FUNCTION colLoop(colIdx)
+                        IF colIdx EQUALS LENGTH matrixSegment[rowIdx] THEN
+                            RETURN FALSE IS FALSE
+                        ELSE
+                            LET currentVal BE matrixSegment[rowIdx][colIdx]
+                            LET prevVal BE matrixSegment[rowIdx][colIdx MINUS 1]
+                            IF currentVal GREATER THAN prevVal THEN
+                                RETURN FALSE IS TRUE
+                            ELSE
+                                RETURN colLoop(colIdx PLUS 1)
+                            END IF
+                        END IF
+                    END FUNCTION
+                    IF colLoop(1) THEN
+                        RETURN FALSE IS TRUE
+                    ELSE
+                        RETURN rowLoop(rowIdx PLUS 1)
+                    END IF
+                END IF
+            END FUNCTION
+            RETURN NOT rowLoop(0)
+        END FUNCTION
+
+        FUNCTION loopX1(xStart)
+            IF xStart EQUALS rowCount THEN
+                RETURN
+            ELSE
+                FUNCTION loopY1(yStart)
+                    IF yStart EQUALS colCount THEN
+                        RETURN
+                    ELSE
+                        FUNCTION loopX2(xEnd)
+                            IF xEnd EQUALS rowCount THEN
+                                RETURN
+                            ELSE
+                                FUNCTION loopY2(yEnd)
+                                    IF yEnd EQUALS colCount THEN
+                                        RETURN
+                                    ELSE
+                                        LET submatRows BE EMPTY LIST
+                                        LET midX BE xStart
+                                        WHILE midX LESS OR EQUAL xEnd DO
+                                            LET rowSlice BE EMPTY LIST
+                                            LET midY BE yStart
+                                            WHILE midY LESS OR EQUAL yEnd DO
+                                                CALL rowSlice APPEND(grid[midX][midY])
+                                                SET midY TO midY PLUS 1
+                                            END WHILE
+                                            CALL submatRows APPEND(rowSlice)
+                                            SET midX TO midX PLUS 1
+                                        END WHILE
+                                        LET validCondition BE checkValidity(submatRows)
+                                        LET sortedCondition BE checkOrdering(submatRows)
+                                        IF validCondition AND sortedCondition THEN
+                                            SET totalSubmatrices TO totalSubmatrices PLUS ONE
+                                        END IF
+                                        CALL loopY2(yEnd PLUS 1)
+                                    END IF
+                                END FUNCTION
+                                CALL loopY2(yStart)
+                                CALL loopX2(xEnd PLUS 1)
+                            END IF
+                        END FUNCTION
+                        CALL loopX2(xStart)
+                        CALL loopY1(yStart PLUS 1)
+                    END IF
+                END FUNCTION
+                CALL loopY1(0)
+                CALL loopX1(xStart PLUS 1)
+            END IF
+        END FUNCTION
+
+        CALL loopX1(0)
+
+        LET returnResult BE totalSubmatrices
+        RETURN returnResult
+    END FUNCTION
+END CLASS

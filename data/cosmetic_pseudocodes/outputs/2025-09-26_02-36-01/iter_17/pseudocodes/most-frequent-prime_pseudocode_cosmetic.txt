@@ -1,0 +1,87 @@
+FUNCTION is_prime(n)  
+    IF NOT (n > 1) THEN  
+        RETURN false  
+    END IF  
+
+    IF (n <= 3) THEN  
+        RETURN true  
+    END IF  
+
+    IF (n MOD 2 = 0) OR (n MOD 3 = 0) THEN  
+        RETURN false  
+    END IF  
+
+    SET u TO 5  
+    REPEAT  
+        IF (u * u) > n THEN  
+            EXIT REPEAT  
+        END IF  
+
+        IF (n MOD u = 0) OR (n MOD (u + 2) = 0) THEN  
+            RETURN false  
+        END IF  
+
+        SET u TO u + 6  
+    UNTIL FALSE  
+
+    RETURN true  
+END FUNCTION  
+
+CLASS Solution  
+    FUNCTION mostFrequentPrime(mat)  
+        SET a TO LENGTH(mat)  
+        SET b TO LENGTH(mat[0])  
+        SET moves TO [(-1,0), (-1,1), (0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1)]  
+        SET tally AS empty map from number to integer  
+
+        FUNCTION explore(p, q, s, t, val)  
+            BEGIN  
+                SET r TO p + s  
+                SET w TO q + t  
+
+                IF (0 <= r) AND (r < a) AND (0 <= w) AND (w < b) THEN  
+                    SET cur TO (val * 10) + mat[r][w]  
+
+                    IF (cur > 10) AND is_prime(cur) THEN  
+                        IF NOT (cur IN tally) THEN  
+                            SET tally[cur] TO 0  
+                        END IF  
+                        SET tally[cur] TO tally[cur] + 1  
+                    END IF  
+
+                    CALL explore(r, w, s, t, cur)  
+                END IF  
+            END  
+        END FUNCTION  
+
+        SET x TO 0  
+        WHILE x < a DO  
+            SET y TO 0  
+            WHILE y < b DO  
+                FOR EACH dir IN moves DO  
+                    CALL explore(x, y, dir[0], dir[1], mat[x][y])  
+                END FOR  
+                SET y TO y + 1  
+            END WHILE  
+            SET x TO x + 1  
+        END WHILE  
+
+        IF LENGTH(tally) = 0 THEN  
+            RETURN -1  
+        END IF  
+
+        SET best_prime TO NULL  
+        SET best_count TO -1  
+
+        FOR EACH key IN tally DO  
+            IF tally[key] > best_count THEN  
+                SET best_count TO tally[key]  
+                SET best_prime TO key  
+            ELSE IF (tally[key] = best_count) AND (key > best_prime) THEN  
+                SET best_prime TO key  
+            END IF  
+        END FOR  
+
+        RETURN best_prime  
+    END FUNCTION  
+END CLASS

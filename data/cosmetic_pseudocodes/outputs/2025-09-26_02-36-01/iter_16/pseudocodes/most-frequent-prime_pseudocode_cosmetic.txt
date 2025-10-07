@@ -1,0 +1,74 @@
+FUNCTION is_prime(p)  
+    IF NOT (p > 1)  
+        RETURN false  
+    END IF  
+    IF (p - 2) < 2 AND p >= 2  
+        RETURN true  
+    END IF  
+    IF ((p % 2) == 0) OR ((p % 3) == 0)  
+        RETURN false  
+    END IF  
+    SET q TO 5  
+    SET exit_flag TO false  
+    WHILE NOT exit_flag  
+        IF (q * q) > p  
+            SET exit_flag TO true  
+        ELSE  
+            IF ((p % q) == 0) OR ((p % (q + 2)) == 0)  
+                RETURN false  
+            END IF  
+            SET q TO q + 6  
+        END IF  
+    END WHILE  
+    RETURN true  
+END FUNCTION  
+
+CLASS Solution  
+    FUNCTION mostFrequentPrime(matrix)  
+        SET maxRow TO LENGTH(matrix)  
+        SET maxCol TO LENGTH(matrix[0])  
+        SET steps TO [(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1)]  
+        SET counter TO EMPTY_MAP  
+  
+        FUNCTION recur_walk(a,b,dx,dy,num)  
+            SET c TO a + dx  
+            SET d TO b + dy  
+            IF (c >= 0) AND (c < maxRow) AND (d >= 0) AND (d < maxCol)  
+                SET n_val TO (num * 10) + matrix[c][d]  
+                IF n_val > 10 AND is_prime(n_val)  
+                    IF n_val IN counter  
+                        SET counter[n_val] TO counter[n_val] + 1  
+                    ELSE  
+                        SET counter[n_val] TO 1  
+                    END IF  
+                END IF  
+                CALL recur_walk(c,d,dx,dy,n_val)  
+            END IF  
+        END FUNCTION  
+  
+        SET r TO 0  
+        WHILE r < maxRow  
+            SET s TO 0  
+            WHILE s < maxCol  
+                FOR EACH (dx,dy) IN steps  
+                    CALL recur_walk(r,s,dx,dy,matrix[r][s])  
+                END FOR  
+                SET s TO s + 1  
+            END WHILE  
+            SET r TO r + 1  
+        END WHILE  
+  
+        IF SIZE(counter) == 0  
+            RETURN -1  
+        END IF  
+        SET best_prime TO NULL  
+        SET best_count TO -1  
+        FOR key IN counter  
+            IF counter[key] > best_count OR (counter[key] == best_count AND key > best_prime)  
+                SET best_count TO counter[key]  
+                SET best_prime TO key  
+            END IF  
+        END FOR  
+        RETURN best_prime  
+    END FUNCTION  
+END CLASS

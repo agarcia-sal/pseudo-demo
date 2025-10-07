@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION countNonDecreasingSubarrays(nums k)
+        SET length_of_nums TO LENGTH OF nums
+
+        FUNCTION canMakeNonDecreasing(start_segment segment_len)
+            SET penalty TO 0
+            SET highest_value TO nums[start_segment]
+            SET index_counter TO 1
+
+            WHILE index_counter < segment_len
+                SET current_element TO nums[start_segment + index_counter]
+                IF current_element < highest_value
+                    SET increment_value TO highest_value - current_element
+                    penalty += increment_value
+                END IF
+                IF highest_value < current_element
+                    SET highest_value TO current_element
+                END IF
+                IF penalty > k
+                    RETURN False
+                END IF
+                index_counter += 1
+            END WHILE
+
+            RETURN True
+        END FUNCTION
+
+        SET total_possible_subarrays TO length_of_nums * ((length_of_nums + 1) / 2)
+        SET count_invalid_subarrays TO 0
+
+        SET main_index TO 0
+        WHILE main_index < length_of_nums
+            SET lower_bound TO 1
+            SET upper_bound TO length_of_nums - main_index
+
+            WHILE lower_bound <= upper_bound
+                SET midpoint TO (lower_bound + upper_bound) // 2
+                IF canMakeNonDecreasing(main_index midpoint) == True
+                    SET lower_bound TO midpoint + 1
+                ELSE
+                    SET upper_bound TO midpoint - 1
+                END IF
+            END WHILE
+
+            count_invalid_subarrays += length_of_nums - main_index - upper_bound
+            main_index += 1
+        END WHILE
+
+        RETURN total_possible_subarrays - count_invalid_subarrays
+    END FUNCTION
+END CLASS

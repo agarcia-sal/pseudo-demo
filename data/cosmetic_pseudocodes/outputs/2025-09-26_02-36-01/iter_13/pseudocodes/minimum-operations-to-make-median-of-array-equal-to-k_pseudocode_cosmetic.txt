@@ -1,0 +1,83 @@
+CLASS Solution
+	FUNCTION minOperationsToMakeMedianK(nums k)
+		PROC HeapSort(arr)
+			PROC SiftDown(start end)
+				SET root TO start
+				REPEAT
+					SET child TO 2 * root + 1
+					IF child > end THEN
+						RETURN
+					END IF
+					IF child + 1 <= end AND arr[child] < arr[child + 1] THEN
+						SET child TO child + 1
+					END IF
+					IF arr[root] < arr[child] THEN
+						SET tmp TO arr[root]
+						SET arr[root] TO arr[child]
+						SET arr[child] TO tmp
+						SET root TO child
+					ELSE
+						RETURN
+					END IF
+				UNTIL FALSE
+			END PROC
+			SET size TO LENGTH(arr)
+			SET i TO (size DIV 2) - 1
+			WHILE i >= 0
+				CALL SiftDown(i size - 1)
+				SET i TO i - 1
+			END WHILE
+			SET j TO size - 1
+			WHILE j > 0
+				SET tmp TO arr[0]
+				SET arr[0] TO arr[j]
+				SET arr[j] TO tmp
+				CALL SiftDown(0 j - 1)
+				SET j TO j - 1
+			END WHILE
+		END PROC
+
+		CALL HeapSort(nums)
+
+		SET total_length TO LENGTH(nums)
+		SET mid_pos TO total_length DIV 2
+
+		IF NOT (nums[mid_pos] <> k)
+			RETURN 0
+		END IF
+
+		SET total_ops TO 0
+
+		PROC IncreaseWhileLessThanK(idx)
+			IF idx >= total_length THEN
+				RETURN 0
+			END IF
+			IF nums[idx] >= k THEN
+				RETURN 0
+			END IF
+			SET diff TO k - nums[idx]
+			SET total_ops_inner TO diff + IncreaseWhileLessThanK(idx + 1)
+			RETURN total_ops_inner
+		END PROC
+
+		PROC DecreaseWhileGreaterThanK(idx)
+			IF idx < 0 THEN
+				RETURN 0
+			END IF
+			IF nums[idx] <= k THEN
+				RETURN 0
+			END IF
+			SET diff TO nums[idx] - k
+			SET total_ops_inner TO diff + DecreaseWhileGreaterThanK(idx - 1)
+			RETURN total_ops_inner
+		END PROC
+
+		IF nums[mid_pos] < k
+			SET total_ops TO IncreaseWhileLessThanK(mid_pos)
+		ELSE
+			SET total_ops TO DecreaseWhileGreaterThanK(mid_pos)
+		END IF
+
+		RETURN total_ops
+	END FUNCTION
+END CLASS

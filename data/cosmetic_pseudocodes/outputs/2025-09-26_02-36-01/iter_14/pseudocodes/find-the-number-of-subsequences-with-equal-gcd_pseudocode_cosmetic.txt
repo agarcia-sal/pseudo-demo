@@ -1,0 +1,79 @@
+```
+CLASS Solution
+    FUNCTION subsequencePairCount(nums)
+      SET constantModulus TO 1_000_000_007
+      SET highestValue TO 0
+      FOR each elementValue IN nums
+          IF elementValue GREATER THAN highestValue THEN
+            SET highestValue TO elementValue
+          END IF
+      END FOR
+
+      SET countMatrix TO a list WITH (highestValue + 1) SUBLISTS each FILLED WITH zeros LENGTH (highestValue + 1)
+      SET countMatrix[0][0] TO 1
+
+      FUNCTION calculateGCD(a, b)
+          WHILE b NOT EQUAL TO 0
+              SET tempVar TO b
+              SET b TO a MODULO b
+              SET a TO tempVar
+          END WHILE
+          RETURN a
+      END FUNCTION
+
+      FUNCTION doIncrementAndModulo(targetList, i, j, incrementBy, modVal)
+          SET targetList[i][j] TO (targetList[i][j] + incrementBy) MODULO modVal
+      END FUNCTION
+
+      FUNCTION generateEmptyMatrix(dim1, dim2)
+          SET outputList TO empty list
+          SET idx1 TO 0
+          REPEAT
+              IF idx1 GREATER THAN (dim1 - 1) THEN BREAK
+              SET innerList TO empty list
+              SET idx2 TO 0
+              REPEAT
+                  IF idx2 GREATER THAN (dim2 - 1) THEN BREAK
+                  APPEND 0 TO innerList
+                  SET idx2 TO idx2 + 1
+              END REPEAT
+              APPEND innerList TO outputList
+              SET idx1 TO idx1 + 1
+          END REPEAT
+          RETURN outputList
+      END FUNCTION
+
+      SET outerIndex TO 0
+      REPEAT
+          IF outerIndex GREATER THAN LENGTH(nums) - 1 THEN BREAK
+          SET currentNum TO nums[outerIndex]
+          SET temporaryMatrix TO generateEmptyMatrix(highestValue + 1, highestValue + 1)
+          SET rowIdx TO 0
+          WHILE rowIdx LESS THAN= highestValue
+              SET colIdx TO 0
+              WHILE colIdx LESS THAN= highestValue
+                  CALL doIncrementAndModulo(temporaryMatrix, rowIdx, colIdx, countMatrix[rowIdx][colIdx], constantModulus)
+                  SET gcdX TO calculateGCD(rowIdx, currentNum)
+                  CALL doIncrementAndModulo(temporaryMatrix, gcdX, colIdx, countMatrix[rowIdx][colIdx], constantModulus)
+                  SET gcdY TO calculateGCD(colIdx, currentNum)
+                  CALL doIncrementAndModulo(temporaryMatrix, rowIdx, gcdY, countMatrix[rowIdx][colIdx], constantModulus)
+                  SET colIdx TO colIdx + 1
+              END WHILE
+              SET rowIdx TO rowIdx + 1
+          END WHILE
+          SET countMatrix TO temporaryMatrix
+          SET outerIndex TO outerIndex + 1
+      END REPEAT
+
+      SET accumulator TO 0
+      SET indexG TO 1
+      WHILE indexG LESS THAN= highestValue
+          SET accumulator TO accumulator + countMatrix[indexG][indexG]
+          SET indexG TO indexG + 1
+      END WHILE
+
+      SET accumulator TO accumulator MODULO constantModulus
+      RETURN accumulator
+    END FUNCTION
+END CLASS
+```

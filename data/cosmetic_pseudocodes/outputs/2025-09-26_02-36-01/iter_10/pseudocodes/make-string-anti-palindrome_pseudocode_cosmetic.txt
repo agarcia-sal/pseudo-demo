@@ -1,0 +1,105 @@
+CLASS Solution
+    FUNCTION makeAntiPalindrome(s)
+        PROCEDURE sortAscending(a)
+            PROCEDURE swapElements(x, y)
+                TEMP := a[x]
+                a[x] := a[y]
+                a[y] := TEMP
+            END PROCEDURE
+            LENGTH_A := length(a)
+            INDEX_1 := 0
+            WHILE INDEX_1 < LENGTH_A - 1
+                INDEX_2 := 0
+                WHILE INDEX_2 < LENGTH_A - INDEX_1 - 1
+                    IF NOT (a[INDEX_2] <= a[INDEX_2 + 1])
+                        CALL swapElements(INDEX_2, INDEX_2 + 1)
+                    END IF
+                    INDEX_2 := INDEX_2 + 1
+                END WHILE
+                INDEX_1 := INDEX_1 + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE joinChars(lst)
+            RESULT := ""
+            IDX := 0
+            LEN_LST := length(lst)
+            WHILE IDX < LEN_LST
+                RESULT := RESULT + lst[IDX]
+                IDX := IDX + 1
+            END WHILE
+            RETURN RESULT
+        END PROCEDURE
+
+        FUNCTION elementsEqual(e1, e2)
+            RETURN (NOT (e1 <> e2))
+        END FUNCTION
+
+        FUNCTION isCharDiff(c1, c2)
+            RETURN (c1 <> c2)
+        END FUNCTION
+
+        VARIABLE charList := []
+        VARIABLE strLength := length(s)
+        VARIABLE halfLen := 0
+        VARIABLE iterA := 0
+        VARIABLE iterB := 0
+        VARIABLE flagSwap := false
+        VARIABLE iterC := 0
+        VARIABLE iterD := 0
+
+        FOR iterA := 0 TO strLength - 1
+            charList[iterA] := s[iterA]
+        END FOR
+
+        CALL sortAscending(charList)
+
+        strLength := length(charList)
+        halfLen := strLength / 2
+        halfLen := halfLen // integer division
+
+        IF elementsEqual(charList[halfLen], charList[halfLen - 1])
+            iterC := halfLen
+            WHILE (iterC < strLength) AND elementsEqual(charList[iterC], charList[iterC - 1])
+                iterC := iterC + 1
+            END WHILE
+
+            iterD := halfLen
+            WHILE (iterD < strLength) AND elementsEqual(charList[iterD], charList[strLength - iterD - 1])
+                IF iterC >= strLength
+                    RETURN "-1"
+                END IF
+                TEMP := charList[iterC]
+                charList[iterC] := charList[iterD]
+                charList[iterD] := TEMP
+                iterC := iterC + 1
+                iterD := iterD + 1
+            END WHILE
+        END IF
+
+        iterA := 0
+        WHILE iterA < halfLen
+            IF elementsEqual(charList[iterA], charList[strLength - iterA - 1])
+                flagSwap := false
+                iterB := halfLen
+                WHILE iterB < strLength
+                    IF isCharDiff(charList[iterB], charList[iterA]) AND isCharDiff(charList[iterB], charList[strLength - iterA - 1])
+                        TEMP := charList[iterB]
+                        charList[iterB] := charList[iterA]
+                        charList[iterA] := TEMP
+                        flagSwap := true
+                        EXIT
+                    END IF
+                    iterB := iterB + 1
+                END WHILE
+
+                IF NOT flagSwap
+                    RETURN "-1"
+                END IF
+            END IF
+            iterA := iterA + 1
+        END WHILE
+
+        RETURN joinChars(charList)
+    END FUNCTION
+END CLASS

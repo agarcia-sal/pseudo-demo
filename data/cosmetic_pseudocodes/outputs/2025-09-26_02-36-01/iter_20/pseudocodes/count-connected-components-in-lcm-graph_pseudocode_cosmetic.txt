@@ -1,0 +1,90 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+        DECLARE map_parent AS empty mapping  
+        DECLARE map_rank AS empty mapping  
+        DECLARE index_counter AS 0  
+
+        WHILE index_counter < n DO  
+            SET map_parent[index_counter] TO index_counter  
+            SET map_rank[index_counter] TO 0  
+            SET index_counter TO index_counter + 1  
+        END WHILE  
+
+        SET self.parent TO map_parent  
+        SET self.rank TO map_rank  
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+        FUNCTION recurse(y)  
+            DECLARE temp_val  
+            IF self.parent[y] != y THEN  
+                SET temp_val TO recurse(self.parent[y])  
+                SET self.parent[y] TO temp_val  
+            END IF  
+            RETURN self.parent[y]  
+        END FUNCTION  
+
+        RETURN recurse(x)  
+    END FUNCTION  
+
+    FUNCTION union_set(self, u, v)  
+        DECLARE rep_u  
+        DECLARE rep_v  
+        DECLARE swapper  
+
+        SET rep_u TO self.find(u)  
+        SET rep_v TO self.find(v)  
+
+        IF rep_u != rep_v THEN  
+            IF self.rank[rep_u] < self.rank[rep_v] THEN  
+                SET swapper TO rep_u  
+                SET rep_u TO rep_v  
+                SET rep_v TO swapper  
+            END IF  
+
+            SET self.parent[rep_v] TO rep_u  
+
+            IF self.rank[rep_u] == self.rank[rep_v] THEN  
+                SET old_rank TO self.rank[rep_u]  
+                SET self.rank[rep_u] TO old_rank + (1 * 1)  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+        DECLARE instance_dsu AS DSU(threshold + 1)  
+        DECLARE num_item  
+        DECLARE multiplier  
+        DECLARE current_val  
+
+        FOR EACH num_item IN nums DO  
+            SET multiplier TO 2  
+            WHILE multiplier * num_item <= threshold DO  
+                SET current_val TO multiplier * num_item  
+                CALL instance_dsu.union_set(num_item, current_val)  
+                SET multiplier TO multiplier + 1  
+            END WHILE  
+        END FOR  
+
+        DECLARE set_unique AS empty set  
+        DECLARE iter_num  
+
+        DECLARE index_iter AS 0  
+        DECLARE total_len AS LENGTH(nums)  
+
+        REPEAT  
+            SET iter_num TO nums[index_iter]  
+            IF iter_num <= threshold THEN  
+                SET parent_val TO instance_dsu.find(iter_num)  
+                ADD parent_val TO set_unique  
+            ELSE  
+                ADD iter_num TO set_unique  
+            END IF  
+            SET index_iter TO index_iter + 1  
+        UNTIL index_iter >= total_len  
+
+        RETURN LENGTH(set_unique)  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,54 @@
+```
+FUNCTION anti_shuffle(reference_str)
+    SET tokens TO []
+    SET position TO 1
+    WHILE position ≤ LENGTH(reference_str)
+        SET start_pos TO position
+        WHILE position ≤ LENGTH(reference_str) AND SUBSTRING(reference_str, position, 1) ≠ " "
+            SET position TO position + 1
+        END WHILE
+        APPEND SUBSTRING(reference_str, start_pos, position - start_pos) TO tokens
+        SET position TO position + 1
+    END WHILE
+
+    FUNCTION reorder_word(chars_list)
+        IF LENGTH(chars_list) ≤ 1 THEN
+            RETURN chars_list
+        ELSE
+            SET pivot TO chars_list[1]
+            SET less_sorted TO reorder_word(FILTER(chars_list, LAMBDA x: x < pivot))
+            SET equal_chars TO FILTER(chars_list, LAMBDA x: x = pivot)
+            SET greater_sorted TO reorder_word(FILTER(chars_list, LAMBDA x: x > pivot))
+            RETURN CONCATENATE(less_sorted, equal_chars, greater_sorted)
+        END IF
+    END FUNCTION
+
+    SET result_words TO []
+    FOR index FROM 0 TO LENGTH(tokens) - 1
+        SET letters TO []
+        FOR pos FROM 1 TO LENGTH(tokens[index])
+            APPEND SUBSTRING(tokens[index], pos, 1) TO letters
+        END FOR
+
+        SET rearranged_letters TO reorder_word(letters)
+
+        SET rebuilt_word TO ""
+        FOR each letter IN rearranged_letters
+            SET rebuilt_word TO rebuilt_word + letter
+        END FOR
+
+        APPEND rebuilt_word TO result_words
+    END FOR
+
+    SET output TO ""
+    FOR i FROM 0 TO LENGTH(result_words) - 1
+        IF i = 0 THEN
+            SET output TO result_words[i]
+        ELSE
+            SET output TO output + " " + result_words[i]
+        END IF
+    END FOR
+
+    RETURN output
+END FUNCTION
+```

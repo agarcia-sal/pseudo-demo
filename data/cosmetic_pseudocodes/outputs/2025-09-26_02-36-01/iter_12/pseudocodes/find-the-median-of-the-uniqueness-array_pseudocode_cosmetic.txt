@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION medianOfUniquenessArray(nums)
+        FUNCTION tallyUpTo(limit)
+            FUNCTION increaseKey(mapRef, keyVal)
+                IF keyVal NOT IN mapRef
+                    mapRef[keyVal] = 1
+                ELSE
+                    mapRef[keyVal] = mapRef[keyVal] + 1
+                END IF
+            END FUNCTION
+
+            FUNCTION decreaseKey(mapRef, keyVal)
+                IF keyVal IN mapRef
+                    mapRef[keyVal] = mapRef[keyVal] - 1
+                    IF mapRef[keyVal] = 0
+                        REMOVE keyVal FROM mapRef
+                    END IF
+                END IF
+            END FUNCTION
+
+            VAR segmentCount = 0
+            VAR windowStart = 0
+            VAR freqMap = EMPTY MAP
+            VAR uniqueItems = 0
+
+            PROCEDURE iterateRight(index)
+                IF NOT (index < LENGTH(nums)) RETURN
+                IF freqMap[nums[index]] IS UNDEFINED OR freqMap[nums[index]] = 0
+                    uniqueItems = uniqueItems + 1
+                END IF
+                increaseKey(freqMap, nums[index])
+
+                WHILE uniqueItems > limit
+                    decreaseKey(freqMap, nums[windowStart])
+                    IF freqMap[nums[windowStart]] IS UNDEFINED
+                        uniqueItems = uniqueItems - 1
+                    END IF
+                    windowStart = windowStart + 1
+                END WHILE
+
+                segmentCount = segmentCount + (index - windowStart + 1)
+                iterateRight(index + 1)
+            END PROCEDURE
+
+            iterateRight(0)
+            RETURN segmentCount
+        END FUNCTION
+
+        VAR lengthNums = LENGTH(nums)
+        VAR totalSubs = (lengthNums * (lengthNums + 1)) / 2
+        VAR targetMedianPos = (totalSubs + 1) / 2
+        VAR left = 1
+        VAR right = lengthNums
+
+        PROCEDURE binarySearch()
+            VAR midVal
+            WHILE left < right
+                midVal = left + INTEGER_DIVIDE(right - left, 2)
+                IF tallyUpTo(midVal) < targetMedianPos
+                    left = midVal + 1
+                ELSE
+                    right = midVal
+                END IF
+            END WHILE
+        END PROCEDURE
+
+        binarySearch()
+        RETURN left
+    END FUNCTION
+END CLASS

@@ -1,0 +1,87 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, n)  
+        LET length_plus_one BE n PLUS 1  
+        LET zero_filled_list BE list containing zeros repeated length_plus_one times  
+        SET self.tree TO zero_filled_list  
+    END FUNCTION  
+
+    FUNCTION add(self, i)  
+        WHILE i IS LESS THAN len(self.tree)  
+            LET self_tree_at_i BE self.tree[i]  
+            LET self_tree_at_i_new BE self_tree_at_i PLUS 1  
+            SET self.tree[i] TO self_tree_at_i_new  
+            LET neg_i BE (-i)  
+            LET mask BE i BITWISE-AND neg_i  
+            SET i TO i PLUS mask  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION pre(self, i)  
+        LET accumulator BE 0  
+        WHILE i GREATER THAN 0  
+            LET accumulator_increment BE self.tree[i]  
+            LET accumulator_updated BE accumulator PLUS accumulator_increment  
+            SET accumulator TO accumulator_updated  
+            LET i_new BE i BITWISE-AND (i MINUS 1)  
+            SET i TO i_new  
+        END WHILE  
+        RETURN accumulator  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        LET prefix_r BE self.pre(r)  
+        LET prefix_l_minus_one BE self.pre(l MINUS 1)  
+        LET difference BE prefix_r MINUS prefix_l_minus_one  
+        RETURN difference  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+        LET zipped_pairs BE list of tuples (xCoord[index], yCoord[index]) for index in range length of xCoord  
+        SORT zipped_pairs in ascending order by first, then second element  
+        LET unique_sorted_ys BE sorted list of elements in set of yCoord  
+        LET max_area_so_far BE (-1)  
+        LET fenwicks_length BE length of unique_sorted_ys  
+        LET fenwick_tree_instance BE new Fenwick(fenwicks_length)  
+        LET first_point_y_index_raw BE bisect_left(unique_sorted_ys, zipped_pairs[0][1])  
+        LET first_point_y_index ONE-BASED BE first_point_y_index_raw PLUS 1  
+        CALL fenwick_tree_instance.add(first_point_y_index)  
+        LET pre_map BE empty dictionary  
+        LET total_points BE length of zipped_pairs  
+        LET idx BE 0  
+        WHILE idx LESS THAN total_points MINUS 1  
+            LET tuple_curr BE zipped_pairs[idx]  
+            LET tuple_next BE zipped_pairs[idx PLUS 1]  
+            LET (curr_x, curr_y) BE tuple_curr  
+            LET (next_x, next_y) BE tuple_next  
+            LET next_y_pos_raw BE bisect_left(unique_sorted_ys, next_y)  
+            LET next_y_pos BE next_y_pos_raw PLUS 1  
+            CALL fenwick_tree_instance.add(next_y_pos)  
+            IF curr_x IS NOT EQUAL TO next_x  
+                SET idx TO idx PLUS 1  
+                CONTINUE  
+            END IF  
+            LET curr_y_pos_raw BE bisect_left(unique_sorted_ys, curr_y)  
+            LET curr_y_pos (one-based) BE curr_y_pos_raw PLUS 1  
+            LET current_query_value BE fenwick_tree_instance.query(curr_y_pos, next_y_pos)  
+            IF next_y IN pre_map  
+                LET stored_tuple BE pre_map[next_y]  
+                LET (stored_x, stored_y, stored_val) BE stored_tuple  
+                LET condition1 BE (stored_y IS curr_y)  
+                LET condition2 BE ((stored_val PLUS 2) IS current_query_value)  
+                IF condition1 AND condition2  
+                    LET candidate_area BE (next_x MINUS stored_x) TIMES (next_y MINUS curr_y)  
+                    LET max_area_so_far_new BE max_area_so_far  
+                    IF candidate_area GREATER THAN max_area_so_far  
+                        SET max_area_so_far_new TO candidate_area  
+                    END IF  
+                    SET max_area_so_far TO max_area_so_far_new  
+                END IF  
+            END IF  
+            SET pre_map[next_y] TO tuple (curr_x, curr_y, current_query_value)  
+            SET idx TO idx PLUS 1  
+        END WHILE  
+        RETURN max_area_so_far  
+    END FUNCTION  
+END CLASS

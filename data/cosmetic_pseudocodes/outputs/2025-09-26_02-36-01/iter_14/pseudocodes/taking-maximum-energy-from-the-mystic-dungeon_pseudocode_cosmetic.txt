@@ -1,0 +1,36 @@
+CLASS Solution
+    FUNCTION maximumEnergy(energy, k)
+  SET L TO LENGTH OF energy
+  DEFINE dp_list AS LIST FILLED WITH 0 OF LENGTH L
+  ASSIGN dp_list AT INDEX (L - 1) TO energy AT INDEX (L - 1)
+  SET top_energy TO dp_list AT INDEX (L - 1)
+  CREATE index_queue AS DEQUE WITH ELEMENTS [L - 1]
+
+  DEFINE processIndex(current_idx)
+    WHILE index_queue IS NOT EMPTY AND ((index_queue AT INDEX 0) - current_idx) >= k
+      REMOVE from LEFT of index_queue
+    END WHILE
+
+    ASSIGN dp_value AS energy AT INDEX current_idx PLUS dp_list AT INDEX (index_queue AT INDEX 0)
+    ASSIGN dp_list AT INDEX current_idx TO dp_value
+
+    IF top_energy < dp_value THEN
+      ASSIGN top_energy TO dp_value
+    END IF
+
+    WHILE index_queue IS NOT EMPTY AND dp_value >= dp_list AT INDEX (index_queue AT LAST INDEX)
+      REMOVE from RIGHT of index_queue
+    END WHILE
+
+    ADD current_idx TO RIGHT END of index_queue
+  END FUNCTION
+
+  DECLARE iterator_idx = L - 2
+  WHILE iterator_idx >= 0
+    CALL processIndex(iterator_idx)
+    ASSIGN iterator_idx TO iterator_idx - 1
+  END WHILE
+
+  RETURN top_energy
+END FUNCTION
+END CLASS

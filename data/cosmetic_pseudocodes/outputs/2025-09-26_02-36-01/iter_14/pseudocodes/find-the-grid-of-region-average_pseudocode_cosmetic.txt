@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+        FUNCTION region_check(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE boolean
+            SET delta_pairs TO [(-1,0),(1,0),(0,-1),(0,1)]
+            SET p TO a
+            WHILE p LESS THAN a PLUS 3
+                SET q TO b
+                WHILE q LESS THAN b PLUS 3
+                    SET idx TO 0
+                    WHILE idx LESS THAN LENGTH OF delta_pairs
+                        SET offset_x TO delta_pairs[idx][0]
+                        SET offset_y TO delta_pairs[idx][1]
+                        SET nx TO p PLUS offset_x
+                        SET ny TO q PLUS offset_y
+                        IF (nx GREATER THAN OR EQUAL TO 0) AND (nx LESS THAN a PLUS 3) AND (ny GREATER THAN OR EQUAL TO 0) AND (ny LESS THAN b PLUS 3) THEN
+                            IF NOT (ABS(image[p][q] MINUS image[nx][ny]) LESS THAN OR EQUAL TO threshold) THEN RETURN False
+                            END IF
+                        END IF
+                        SET idx TO idx PLUS 1
+                    END WHILE
+                    SET q TO q PLUS 1
+                END WHILE
+                SET p TO p PLUS 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        FUNCTION avg_calc(r WITH TYPE integer s WITH TYPE integer) WITH RETURN TYPE integer
+            SET sum_val TO 0
+            SET u TO r
+            REPEAT
+                SET v TO s
+                REPEAT
+                    SET sum_val TO sum_val PLUS image[u][v]
+                    SET v TO v PLUS 1
+                UNTIL v EQUALS s PLUS 3
+                SET u TO u PLUS 1
+            UNTIL u EQUALS r PLUS 3
+            RETURN sum_val DIVIDED BY 9
+        END FUNCTION
+
+        SET rows TO LENGTH OF image
+        SET cols TO LENGTH OF image[0]
+
+        SET result TO []
+        SET count_arr TO []
+        SET idx1 TO 0
+        WHILE idx1 LESS THAN rows
+            SET inner1 TO []
+            SET inner2 TO []
+            SET idx2 TO 0
+            WHILE idx2 LESS THAN cols
+                inner1 APPEND 0
+                inner2 APPEND 0
+                SET idx2 TO idx2 PLUS 1
+            END WHILE
+            result APPEND inner1
+            count_arr APPEND inner2
+            SET idx1 TO idx1 PLUS 1
+        END WHILE
+
+        SET m1 TO 0
+        WHILE m1 LESS THAN rows MINUS 2
+            SET n1 TO 0
+            WHILE n1 LESS THAN cols MINUS 2
+                IF region_check(m1 n1) THEN
+                    SET val_avg TO avg_calc(m1 n1)
+                    SET x1 TO m1
+                    WHILE x1 LESS THAN m1 PLUS 3
+                        SET y1 TO n1
+                        WHILE y1 LESS THAN n1 PLUS 3
+                            SET result[x1][y1] TO result[x1][y1] PLUS val_avg
+                            SET count_arr[x1][y1] TO count_arr[x1][y1] PLUS 1
+                            SET y1 TO y1 PLUS 1
+                        END WHILE
+                        SET x1 TO x1 PLUS 1
+                    END WHILE
+                END IF
+                SET n1 TO n1 PLUS 1
+            END WHILE
+            SET m1 TO m1 PLUS 1
+        END WHILE
+
+        SET p1 TO 0
+        WHILE p1 LESS THAN rows
+            SET q1 TO 0
+            WHILE q1 LESS THAN cols
+                IF NOT (count_arr[p1][q1] EQUALS 0) THEN
+                    SET result[p1][q1] TO result[p1][q1] DIVIDED BY count_arr[p1][q1]
+                ELSE
+                    SET result[p1][q1] TO image[p1][q1]
+                END IF
+                SET q1 TO q1 PLUS 1
+            END WHILE
+            SET p1 TO p1 PLUS 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

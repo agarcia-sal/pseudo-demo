@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION numberOfSubarrays(nums)
+        FUNCTION custom_maximum(arr)
+            SET p TO arr[0]
+            SET q TO 1
+            WHILE q < LENGTH(arr)
+                IF arr[q] > p THEN
+                    SET p TO arr[q]
+                END IF
+                SET q TO q + 1
+            END WHILE
+            RETURN p
+        END FUNCTION
+
+        FUNCTION insert_into_dict(dct, key, val)
+            IF NOT (key IN dct) THEN
+                SET dct[key] TO EMPTY LIST
+            END IF
+            CALL dct[key].append(val)
+        END FUNCTION
+
+        SET alpha TO EMPTY DICTIONARY
+        SET beta TO 0
+
+        SET idx1 TO 0
+        WHILE idx1 < LENGTH(nums)
+            CALL insert_into_dict(alpha, nums[idx1], idx1)
+            SET idx1 TO idx1 + 1
+        END WHILE
+
+        FOR EACH gamma IN alpha.values()
+            SET n TO LENGTH(gamma)
+            FUNCTION inner_loop(x)
+                IF x >= n THEN
+                    RETURN
+                ELSE
+                    FUNCTION inner_j(y)
+                        IF y >= n THEN
+                            RETURN
+                        END IF
+                        SET delta TO EMPTY LIST
+                        SET zeta TO gamma[x]
+                        SET eta TO gamma[y]
+                        SET k TO zeta
+                        WHILE k <= eta
+                            APPEND nums[k] TO delta
+                            SET k TO k + 1
+                        END WHILE
+                        IF custom_maximum(delta) = nums[zeta] THEN
+                            SET beta TO beta + 1
+                        END IF
+                        CALL inner_j(y + 1)
+                    END FUNCTION
+                    CALL inner_j(x)
+                    CALL inner_loop(x + 1)
+                END IF
+            END FUNCTION
+            CALL inner_loop(0)
+        END FOR
+
+        RETURN beta
+    END FUNCTION
+END CLASS

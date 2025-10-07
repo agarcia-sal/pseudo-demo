@@ -1,0 +1,40 @@
+CLASS Solution
+    FUNCTION findMaximumNumber(k, x)
+        FUNCTION count_set_bits(n, pos)
+            DECLARE total AS 0
+            DECLARE segment_length AS 1
+            MULTIPLY segment_length BY 2 TO THE POWER OF pos
+            DECLARE completed_segments AS n DIV segment_length
+            DECLARE half_segments AS completed_segments DIV 2
+            INCREMENT total BY half_segments MULTIPLIED BY segment_length
+            IF completed_segments MOD 2 NOT EQUAL TO 0 THEN
+                DECLARE remainder_length AS n MOD segment_length
+                INCREMENT total BY remainder_length PLUS 1
+            END IF
+            RETURN total
+        END FUNCTION
+
+        FUNCTION accumulated_price(n)
+            DECLARE cost AS 0
+            DECLARE counter AS 1
+            WHILE (2 ^ (counter * x - 1)) <= n DO
+                DECLARE bit_position AS counter * x - 1
+                INCREMENT cost BY count_set_bits(n, bit_position)
+                INCREMENT counter BY 1
+            END WHILE
+            RETURN cost
+        END FUNCTION
+
+        DECLARE left_bound AS 1
+        DECLARE right_bound AS 2 ^ 60
+        WHILE left_bound <= right_bound DO
+            DECLARE midpoint AS left_bound + ((right_bound - left_bound) DIV 2)
+            IF accumulated_price(midpoint) <= k THEN
+                ASSIGN left_bound TO midpoint + 1
+            ELSE
+                ASSIGN right_bound TO midpoint - 1
+            END IF
+        END WHILE
+        RETURN right_bound
+    END FUNCTION
+END CLASS

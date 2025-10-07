@@ -1,0 +1,67 @@
+cLASS Solution  
+  FUNCTION maxTotalReward(rewardValues)  
+      
+      FUNCTION bitShiftLeft(base, exp)  
+          IF exp = 0 THEN  
+              RETURN 1  
+          ELSE  
+              RETURN 2 * bitShiftLeft(base, exp - 1)  
+          END IF  
+      END FUNCTION  
+      
+      FUNCTION bitCount(num)  
+          SET counter TO 0  
+          SET tempNum TO num  
+          WHILE tempNum > 0 DO  
+              SET flag TO tempNum AND 1  
+              SET counter TO counter + flag  
+              SET tempNum TO tempNum DIV 2  
+          END WHILE  
+          RETURN counter  
+      END FUNCTION  
+      
+      PROCEDURE insertSortedSet(collection, element)  
+          IF collection IS EMPTY THEN  
+              APPEND element TO collection  
+              RETURN  
+          END IF  
+          SET i TO 0  
+          WHILE i < LENGTH(collection) AND collection[i] < element DO  
+              SET i TO i + 1  
+          END WHILE  
+          IF i = LENGTH(collection) OR collection[i] <> element THEN  
+              INSERT element INTO collection AT i  
+          END IF  
+      END PROCEDURE  
+      
+      SET uniqueSorted TO EMPTY LIST  
+      SET idx TO 0  
+      WHILE idx < LENGTH(rewardValues) DO  
+          CALL insertSortedSet(uniqueSorted, rewardValues[idx])  
+          SET idx TO idx + 1  
+      END WHILE  
+      
+      SET accumulated TO 1  
+      SET j TO 0  
+      WHILE j < LENGTH(uniqueSorted) DO  
+          SET shiftedOne TO bitShiftLeft(2, uniqueSorted[j])  
+          SET mask TO shiftedOne - 1  
+          SET bitwiseOp TO accumulated AND mask  
+          SET accumulated TO accumulated OR (bitwiseOp SHIFT_LEFT uniqueSorted[j])  
+          SET j TO j + 1  
+      END WHILE  
+      
+      FUNCTION bitLength(value)  
+          SET lengthCount TO 0  
+          SET valCopy TO value  
+          WHILE valCopy > 0 DO  
+              SET valCopy TO valCopy DIV 2  
+              SET lengthCount TO lengthCount + 1  
+          END WHILE  
+          RETURN lengthCount  
+      END FUNCTION  
+      
+      SET resultLength TO bitLength(accumulated) - 1  
+      RETURN resultLength  
+  END FUNCTION  
+END cLASS

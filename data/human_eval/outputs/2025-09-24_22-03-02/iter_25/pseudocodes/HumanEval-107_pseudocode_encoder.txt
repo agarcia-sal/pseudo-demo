@@ -1,0 +1,39 @@
+FUNCTION even_odd_palindrome(n INTEGER) RETURNS TUPLE OF INTEGER, INTEGER
+    FUNCTION is_palindrome(m INTEGER) RETURNS BOOLEAN
+        SET str_m TO EMPTY LIST OF CHARACTERS
+        SET num_string TO CALL str WITH ARGUMENT m
+        FOR index FROM 0 TO LENGTH OF num_string MINUS 1 DO
+            APPEND CHARACTER AT POSITION index OF num_string TO str_m
+        END FOR
+        SET reversed_str_m TO EMPTY LIST OF CHARACTERS
+        FOR reverse_index FROM LENGTH OF str_m MINUS 1 DOWNTO 0 DO
+            APPEND ELEMENT AT POSITION reverse_index OF str_m TO reversed_str_m
+        END FOR
+        IF LENGTH OF str_m EQUALS LENGTH OF reversed_str_m THEN
+            SET is_equal TO TRUE
+            FOR compare_index FROM 0 TO LENGTH OF str_m MINUS 1 DO
+                IF ELEMENT AT POSITION compare_index OF str_m NOT EQUAL TO ELEMENT AT POSITION compare_index OF reversed_str_m THEN
+                    SET is_equal TO FALSE
+                    BREAK
+                END IF
+            END FOR
+            RETURN is_equal
+        ELSE
+            RETURN FALSE
+        END IF
+    END FUNCTION
+
+    SET even_palindrome_count TO 0
+    SET odd_palindrome_count TO 0
+
+    FOR i FROM 1 TO n DO
+        SET is_i_palindrome TO CALL is_palindrome WITH ARGUMENT i
+        IF (i MODULO 2 EQUALS 1) AND is_i_palindrome THEN
+            SET odd_palindrome_count TO odd_palindrome_count PLUS 1
+        ELSE IF (i MODULO 2 EQUALS 0) AND is_i_palindrome THEN
+            SET even_palindrome_count TO even_palindrome_count PLUS 1
+        END IF
+    END FOR
+
+    RETURN TUPLE WITH ELEMENTS even_palindrome_count, odd_palindrome_count
+END FUNCTION

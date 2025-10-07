@@ -1,0 +1,29 @@
+```
+FUNCTION get_row(two_dimensional_list, target_integer)
+    DEFINE FUNCTION scan_columns(row, col = 0, found = [])
+        IF col IS EQUAL TO LENGTH OF row THEN
+            RETURN found
+        END IF
+        IF row AT col IS EQUAL TO target_integer THEN
+            found APPEND col
+        END IF
+        RETURN scan_columns(row, col + 1, found)
+    END FUNCTION
+
+    DEFINE FUNCTION scan_rows(matrix, r = 0, accum = [])
+        IF r IS EQUAL TO LENGTH OF matrix THEN
+            RETURN accum
+        END IF
+        LET matched_cols BE scan_columns(matrix AT r)
+        FOR c IN matched_cols
+            accum APPEND TUPLE(r, c)
+        END FOR
+        RETURN scan_rows(matrix, r + 1, accum)
+    END FUNCTION
+
+    LET position_pairs BE scan_rows(two_dimensional_list)
+    LET by_row_asc BE SORT position_pairs USING (a, b) => a FIRST_ELEMENT <= b FIRST_ELEMENT
+    LET fully_sorted BE SORT by_row_asc USING (a, b) => a SECOND_ELEMENT >= b SECOND_ELEMENT
+    RETURN fully_sorted
+END FUNCTION
+```

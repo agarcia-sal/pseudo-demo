@@ -1,0 +1,107 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+ self.mod = mod  
+ self.h = list of zeros with length LENGTH(s) + 1  
+ self.p = list of ones with length LENGTH(s) + 1  
+    FUNCTION loop_var(x, y)  
+      IF x > y  
+        RETURN  
+      END IF  
+      LET z = (self.h[x - 1] * base) + UNICODE code point of s[x - 1]  
+      LET u = z - (z DIV mod) * mod  
+      SET self.h[x] TO u  
+      LET w = (self.p[x - 1] * base) - ((self.p[x - 1] * base) DIV mod)* mod  
+      SET self.p[x] TO w  
+      CALL loop_var(x + 1, y)  
+    END FUNCTION  
+ CALL loop_var(1, LENGTH(s))  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+      LET diff = self.h[r] - (self.h[l - 1] * self.p[r - l + 1])  
+      LET res = diff - ((diff DIV self.mod) * self.mod)  
+      RETURN res  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+      SET n TO LENGTH(s)  
+      SET g TO list of empty lists with length n  
+      FUNCTION build_graph(idx)  
+        IF idx >= n  
+          RETURN  
+        END IF  
+        FUNCTION inner_build(j)  
+          IF j >= n  
+            RETURN  
+          END IF  
+          LET pi = parent[j]  
+          IF idx = pi  
+            APPEND j TO g[idx]  
+          END IF  
+          CALL inner_build(j + 1)  
+        END FUNCTION  
+        CALL inner_build(0)  
+        CALL build_graph(idx + 1)  
+      END FUNCTION  
+      CALL build_graph(0)  
+
+      SET dfsStr TO empty list  
+      SET pos TO empty dictionary  
+
+      FUNCTION dfs(i)  
+        LET l = LENGTH(dfsStr) + 1  
+        FUNCTION visit_children(k)  
+          IF k >= LENGTH(g[i])  
+            RETURN  
+          END IF  
+          LET child = g[i][k]  
+          CALL dfs(child)  
+          CALL visit_children(k + 1)  
+        END FUNCTION  
+        CALL visit_children(0)  
+        APPEND s[i] TO dfsStr  
+        LET r = LENGTH(dfsStr)  
+        SET pos[i] TO PAIR l AND r  
+      END FUNCTION  
+      CALL dfs(0)  
+
+      LET base = 33331  
+      LET mod = 998244353  
+      LET h1 = new Hashing WITH dfsStr base mod  
+      LET revStr = empty list  
+      FUNCTION reverse_append(idx)  
+        IF idx < 0  
+          RETURN  
+        END IF  
+        APPEND dfsStr[idx] TO revStr  
+        CALL reverse_append(idx - 1)  
+      END FUNCTION  
+      CALL reverse_append(LENGTH(dfsStr) - 1)  
+      LET h2 = new Hashing WITH revStr base mod  
+
+      LET ans = empty list  
+      FUNCTION process_index(t)  
+        IF t >= n  
+          RETURN  
+        END IF  
+        LET l = pos[t].first  
+        LET r = pos[t].second  
+        LET length = (r - l) + 1  
+        LET mid = length DIV 2  
+        LET k_mod_2_is_zero = (length - 2 * mid) = 0  
+        IF NOT k_mod_2_is_zero  
+          LET v1 = h1.query(l, l + mid - 1)  
+          LET v2 = h2.query(n - r + 1, (n - r + 1) + mid - 1)  
+        ELSE  
+          LET v1 = h1.query(l, l + mid - 1)  
+          LET v2 = h2.query(n - r + 1, (n - r + 1) + mid - 1)  
+        END IF  
+        APPEND (v1 = v2) TO ans  
+        CALL process_index(t + 1)  
+      END FUNCTION  
+      CALL process_index(0)  
+      RETURN ans  
+    END FUNCTION  
+END CLASS

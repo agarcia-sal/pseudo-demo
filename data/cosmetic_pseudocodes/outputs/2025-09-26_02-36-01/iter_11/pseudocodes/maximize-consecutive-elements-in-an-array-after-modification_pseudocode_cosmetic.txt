@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION maxSelectedElements(nums)
+        SET output TO 0
+        SET cache TO new empty dictionary
+
+        PROCEDURE computeValue(key)
+            IF key EXISTS IN cache THEN
+                RETURN cache[key]
+            ELSE
+                RETURN 0
+            ENDIF
+        END PROCEDURE
+
+        PROCEDURE maxOfThree(a, b, c)
+            IF a >= b THEN
+                IF a >= c THEN
+                    RETURN a
+                ELSE
+                    RETURN c
+                ENDIF
+            ELSE
+                IF b >= c THEN
+                    RETURN b
+                ELSE
+                    RETURN c
+                ENDIF
+            ENDIF
+        END PROCEDURE
+
+        PROCEDURE iterate(index, arr)
+            IF index > LENGTH(arr) THEN
+                RETURN
+            ENDIF
+            SET currentNum TO arr[index]
+            SET val1 TO computeValue(currentNum + 1) + 1
+            cache[currentNum + 1] = val1
+            SET val2 TO computeValue(currentNum - 1) + 1
+            cache[currentNum] = val2
+            output = maxOfThree(output, cache[currentNum], cache[currentNum + 1])
+            iterate(index + 1, arr)
+        END PROCEDURE
+
+        SET sortedNums TO []
+        FOR i FROM 1 TO LENGTH(nums)
+            SET pos TO i
+            SET j TO i + 1
+            WHILE j <= LENGTH(nums)
+                IF nums[pos] > nums[j] THEN
+                    pos = j
+                ENDIF
+                j = j + 1
+            ENDWHILE
+            APPEND nums[pos] TO sortedNums
+        ENDFOR
+
+        iterate(1, sortedNums)
+        RETURN output
+    END FUNCTION
+END CLASS

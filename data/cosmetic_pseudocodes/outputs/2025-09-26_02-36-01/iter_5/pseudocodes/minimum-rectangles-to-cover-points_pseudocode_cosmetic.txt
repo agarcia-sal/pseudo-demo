@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION minRectanglesToCoverPoints(coords, width)
+        DEFINE sortPoints(arr)
+            IF LENGTH(arr) < 2 THEN
+                RETURN arr
+            END IF
+            LET midIndex BE LENGTH(arr) DIVIDED BY 2
+            LET leftPart BE sortPoints(arr[0 TO midIndex - 1])
+            LET rightPart BE sortPoints(arr[midIndex TO LENGTH(arr) - 1])
+            RETURN mergeSorted(leftPart, rightPart)
+        END FUNCTION
+
+        DEFINE mergeSorted(leftArr, rightArr)
+            LET mergedResult BE EMPTY LIST
+            LET leftIdx BE 0
+            LET rightIdx BE 0
+            WHILE leftIdx LESS THAN LENGTH(leftArr) AND rightIdx LESS THAN LENGTH(rightArr)
+                IF leftArr[leftIdx][0] LESS THAN OR EQUAL TO rightArr[rightIdx][0] THEN
+                    APPEND leftArr[leftIdx] TO mergedResult
+                    SET leftIdx TO leftIdx PLUS ONE
+                ELSE
+                    APPEND rightArr[rightIdx] TO mergedResult
+                    SET rightIdx TO rightIdx PLUS ONE
+                END IF
+            END WHILE
+            WHILE leftIdx LESS THAN LENGTH(leftArr)
+                APPEND leftArr[leftIdx] TO mergedResult
+                SET leftIdx TO leftIdx PLUS ONE
+            END WHILE
+            WHILE rightIdx LESS THAN LENGTH(rightArr)
+                APPEND rightArr[rightIdx] TO mergedResult
+                SET rightIdx TO rightIdx PLUS ONE
+            END WHILE
+            RETURN mergedResult
+        END FUNCTION
+
+        LET sortedCoords BE sortPoints(coords)
+        LET totalRectangles BE 0
+        LET limitX BE - 1
+        DEFINE processPoints(index, limitXVal, rectCount)
+            IF index EQUALS LENGTH(sortedCoords) THEN
+                RETURN rectCount
+            END IF
+            LET ptX BE sortedCoords[index][0]
+            LET ptY BE sortedCoords[index][1]
+            LET updatedLimitX BE limitXVal
+            LET updatedRectCount BE rectCount
+            IF ptX GREATER THAN updatedLimitX THEN
+                SET updatedLimitX TO ptX PLUS width
+                SET updatedRectCount TO updatedRectCount PLUS 1
+            END IF
+            RETURN processPoints(index PLUS 1, updatedLimitX, updatedRectCount)
+        END FUNCTION
+
+        LET result TO processPoints(0, limitX, totalRectangles)
+        RETURN result
+    END FUNCTION
+END CLASS

@@ -1,0 +1,110 @@
+CLASS Solution  
+    FUNCTION minCostGoodCaption(caption)  
+      DEFINE LEN(s) AS  
+        SET c TO 0  
+        FOR each _ IN s DO  
+          SET c TO c + 1  
+        END FOR  
+        RETURN c  
+      END DEFINE  
+
+      DEFINE TO_LIST(s) AS  
+        SET res TO []  
+        SET idx TO 0  
+        WHILE idx < LEN(s)  
+          APPEND s[idx] TO res  
+          SET idx TO idx + 1  
+        END WHILE  
+        RETURN res  
+      END DEFINE  
+
+      DEFINE CHAR_NEXT(ch) AS
+        IF ch = "a" THEN RETURN "b"  
+        ELSE IF ch = "z" THEN RETURN "y"  
+        ELSE  
+          RETURN CHAR_FROM_CODE(CHAR_CODE(ch) + 1)  
+        END IF  
+      END DEFINE  
+
+      DEFINE CHAR_CODE(ch) AS
+        SET codestr TO "abcdefghijklmnopqrstuvwxyz"  
+        SET p TO 0  
+        WHILE p < LEN(codestr)  
+          IF codestr[p] = ch THEN RETURN p + 97 END IF  
+          SET p TO p + 1  
+        END WHILE  
+        RETURN 0  
+      END DEFINE  
+
+      DEFINE CHAR_FROM_CODE(code) AS
+        SET alphabet TO "abcdefghijklmnopqrstuvwxyz"  
+        RETURN alphabet[code - 97]  
+      END DEFINE  
+
+      SET __length TO LEN(caption)  
+      IF __length < 3  
+        RETURN ""  
+      END IF  
+
+      SET __chars TO TO_LIST(caption)  
+      SET __pos TO 0  
+
+      WHILE __pos < __length  
+        SET __segmentStart TO __pos  
+
+        WHILE (__pos < __length) AND (__chars[__pos] = __chars[__segmentStart])  
+          SET __pos TO __pos + 1  
+        END WHILE  
+
+        SET __segmentLen TO __pos - __segmentStart  
+
+        IF __segmentLen < 3 THEN  
+          IF (__segmentStart > 0) AND (__chars[__segmentStart - 1] = __chars[__segmentStart]) THEN  
+            SET __chars[__segmentStart - 1] TO __chars[__segmentStart]  
+            SET __segmentStart TO __segmentStart - 1  
+            SET __segmentLen TO __segmentLen + 1  
+          END IF  
+
+          IF (__pos < __length) AND (__chars[__pos - 1] = __chars[__pos]) THEN  
+            SET __chars[__pos] TO __chars[__pos - 1]  
+            SET __pos TO __pos + 1  
+            SET __segmentLen TO __segmentLen + 1  
+          END IF  
+
+          IF __segmentLen < 3 THEN  
+            IF __segmentStart > 0 THEN  
+              SET __replacement TO __chars[__segmentStart - 1]  
+            ELSE  
+              SET __replacement TO __chars[__pos]  
+            END IF  
+
+            IF __replacement = "a" THEN  
+              SET __replacement TO "b"  
+            ELSE IF __replacement = "z" THEN  
+              SET __replacement TO "y"  
+            ELSE  
+              SET __replacement TO CHAR_NEXT(__replacement)  
+            END IF  
+
+            SET __index TO __segmentStart  
+            WHILE __index < (__segmentStart + __segmentLen)  
+              SET __chars[__index] TO __replacement  
+              SET __index TO __index + 1  
+            END WHILE  
+
+            SET __pos TO __segmentStart + __segmentLen  
+          END IF  
+        END IF  
+      END WHILE  
+
+      DEFINE CONCAT_LST(lst) AS  
+        SET __resStr TO ""  
+        FOR __k FROM 0 TO LEN(lst) - 1 DO  
+          SET __resStr TO __resStr + lst[__k]  
+        END FOR  
+        RETURN __resStr  
+      END DEFINE  
+
+      RETURN CONCAT_LST(__chars)  
+    END FUNCTION  
+END CLASS

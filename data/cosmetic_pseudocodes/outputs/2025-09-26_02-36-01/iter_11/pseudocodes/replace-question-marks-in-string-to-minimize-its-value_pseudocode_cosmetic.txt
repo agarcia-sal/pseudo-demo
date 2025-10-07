@@ -1,0 +1,141 @@
+CLASS Solution
+
+    FUNCTION minimizeStringValue(s)
+        DEFINE FUNCTION computeCharCounts(inputString)
+            DEFINE FUNCTION addCountToMap(mapData, keyVal)
+                IF keyVal IN mapData THEN
+                    SET mapData[keyVal] TO mapData[keyVal] + 1
+                ELSE
+                    SET mapData[keyVal] TO 1
+                END IF
+            END FUNCTION
+
+            SET tempMap TO empty map
+            SET idxCounter TO 0
+            WHILE idxCounter LESS THAN length of inputString
+                CALL addCountToMap(tempMap, inputString[idxCounter])
+                INCREMENT idxCounter BY 1
+            END WHILE
+
+            RETURN tempMap
+        END FUNCTION
+
+        SET charAccumulator TO computeCharCounts(s)
+
+        IF '?' IN charAccumulator THEN
+            REMOVE '?' FROM charAccumulator
+        END IF
+
+        SET questionIndices TO empty array
+        SET cursor TO 0
+        DEFINE FUNCTION locateQuestions(str, indices)
+            IF cursor GREATER OR EQUAL length of str THEN
+                RETURN
+            END IF
+            IF str[cursor] EQUALS '?' THEN
+                APPEND cursor TO indices
+            END IF
+            SET cursor TO cursor + 1
+            CALL locateQuestions(str, indices)
+        END FUNCTION
+        CALL locateQuestions(s, questionIndices)
+
+        SET fillerCharacters TO empty collection
+
+        DEFINE FUNCTION lexAlphabet()
+            RETURN ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+                    'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+                    'u', 'v', 'w', 'x', 'y', 'z']
+        END FUNCTION
+
+        DEFINE FUNCTION minCountChar(countMap)
+            SET lowestCount TO maximum possible integer
+            SET candidateChar TO null
+            SET alphaIdx TO 0
+            DEFINE FUNCTION checkCharAtIndex()
+                IF alphaIdx GREATER OR EQUAL length of lexAlphabet() THEN
+                    RETURN
+                END IF
+                SET currentChar TO lexAlphabet()[alphaIdx]
+                SET currentCount TO 0
+                IF currentChar IN countMap THEN
+                    SET currentCount TO countMap[currentChar]
+                END IF
+                IF currentCount LESS THAN lowestCount THEN
+                    SET lowestCount TO currentCount
+                    SET candidateChar TO currentChar
+                END IF
+                SET alphaIdx TO alphaIdx + 1
+                CALL checkCharAtIndex()
+            END FUNCTION
+            CALL checkCharAtIndex()
+            RETURN candidateChar
+        END FUNCTION
+
+        SET posCounter TO 0
+        WHILE posCounter LESS THAN length of questionIndices
+            SET minCharCandidate TO minCountChar(charAccumulator)
+            APPEND minCharCandidate TO fillerCharacters
+            IF minCharCandidate IN charAccumulator THEN
+                SET charAccumulator[minCharCandidate] TO charAccumulator[minCharCandidate] + 1
+            ELSE
+                SET charAccumulator[minCharCandidate] TO 1
+            END IF
+            SET posCounter TO posCounter + 1
+        END WHILE
+
+        DEFINE FUNCTION lexSort(arr)
+            IF length of arr LESS OR EQUAL 1 THEN
+                RETURN arr
+            END IF
+            SET pivot TO arr[0]
+            SET lessSet TO empty list
+            SET greaterSet TO empty list
+            SET i TO 1
+            WHILE i LESS THAN length of arr
+                IF arr[i] LESS THAN pivot THEN
+                    APPEND arr[i] TO lessSet
+                ELSE
+                    APPEND arr[i] TO greaterSet
+                END IF
+                SET i TO i + 1
+            END WHILE
+            RETURN concatenate(lexSort(lessSet), [pivot], lexSort(greaterSet))
+        END FUNCTION
+
+        SET sortedReplacements TO lexSort(fillerCharacters)
+
+        SET charArrayVersion TO empty collection
+        SET indexCounter TO 0
+        REPEAT
+            IF indexCounter GREATER OR EQUAL length of s THEN
+                BREAK
+            END IF
+            APPEND s[indexCounter] TO charArrayVersion
+            SET indexCounter TO indexCounter + 1
+        UNTIL false
+
+        SET updateIndex TO 0
+        WHILE updateIndex LESS THAN length of questionIndices
+            SET targetPos TO questionIndices[updateIndex]
+            SET charArrayVersion[targetPos] TO sortedReplacements[updateIndex]
+            SET updateIndex TO updateIndex + 1
+        END WHILE
+
+        DEFINE FUNCTION joinChars(chars)
+            IF length of chars EQUALS 0 THEN
+                RETURN empty string
+            END IF
+            SET idxJoin TO 1
+            SET accStr TO chars[0]
+            WHILE idxJoin LESS THAN length of chars
+                SET accStr TO accStr + chars[idxJoin]
+                SET idxJoin TO idxJoin + 1
+            END WHILE
+            RETURN accStr
+        END FUNCTION
+
+        RETURN joinChars(charArrayVersion)
+    END FUNCTION
+
+END CLASS

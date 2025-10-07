@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+        ASSIGN length TO LENGTH(nums)
+        DECLARE f AS LIST OF LIST OF zero WITH SIZE length BY length
+        DECLARE g AS LIST OF LIST OF zero WITH SIZE length BY length
+
+        SET index_i TO length MINUS one
+        WHILE index_i GREATER THAN OR EQUAL TO 0
+            f[index_i][index_i] = nums[index_i]
+            g[index_i][index_i] = nums[index_i]
+
+            INITIALIZE index_j TO index_i PLUS one
+            WHILE index_j LESS THAN length
+                LET left_xor TO f[index_i][index_j MINUS one]
+                LET right_xor TO f[index_i PLUS one][index_j]
+                f[index_i][index_j] = left_xor XOR right_xor
+
+                LET candidate1 TO f[index_i][index_j]
+                LET candidate2 TO g[index_i][index_j MINUS one]
+                LET candidate3 TO g[index_i PLUS one][index_j]
+                g[index_i][index_j] = candidate1
+                IF candidate2 GREATER THAN g[index_i][index_j]
+                    SET g[index_i][index_j] TO candidate2
+                END IF
+                IF candidate3 GREATER THAN g[index_i][index_j]
+                    SET g[index_i][index_j] TO candidate3
+                END IF
+
+                INCREMENT index_j BY one
+            END WHILE
+
+            DECREMENT index_i BY one
+        END WHILE
+
+        DECLARE results AS EMPTY LIST
+        INITIALIZE idx TO 0
+        WHILE idx LESS THAN LENGTH(queries)
+            LET current_query TO queries[idx]
+            LET l TO current_query[0]
+            LET r TO current_query[1]
+            APPEND g[l][r] TO results
+            INCREMENT idx BY one
+        END WHILE
+
+        RETURN results
+    END FUNCTION
+END CLASS

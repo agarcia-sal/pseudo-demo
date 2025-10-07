@@ -1,0 +1,147 @@
+CLASS Solution
+	FUNCTION minRunesToAdd(count totalFrom totalTo gems)
+		DEFINE buildAdjacencyMap(asFrom, asTo)
+			SET mapping TO empty mapping of int → list of int
+			DEFINE iterator(i)
+				IF i EQUALS LENGTH(asFrom)
+					RETURN
+				ELSE
+					LET startNode BE asFrom[i]
+					LET endNode BE asTo[i]
+					IF startNode NOT IN mapping THEN mapping[startNode] = empty list
+					IF endNode NOT IN mapping THEN mapping[endNode] = empty list
+					APPEND endNode TO mapping[startNode]
+					RETURN iterator(i PLUS one)
+				END IF
+			END DEFINE
+			CALL iterator(0)
+			RETURN mapping
+		END
+
+		LET forwardEdges BE buildAdjacencyMap(totalFrom, totalTo)
+		LET backwardEdges BE buildAdjacencyMap(totalTo, totalFrom)
+
+		LET indicesList BE list of size count FILLED WITH (-1)
+		LET lowLinkList BE list of size count FILLED WITH 0
+		LET inStackStatus BE list of size count FILLED WITH False
+		LET nodeStack BE empty list
+		LET currentIx BE 0
+		LET stronglyConnectedComponents BE empty list
+
+		DEFINE exploreTarjan(currentNode)
+			SET indicesList[currentNode] TO currentIx
+			SET lowLinkList[currentNode] TO currentIx
+			SET currentIx TO currentIx PLUS one
+			PUSH currentNode ONTO nodeStack
+			SET inStackStatus[currentNode] TO True
+
+			FOR each adjacentNode IN forwardEdges[currentNode]
+				IF indicesList[adjacentNode] EQUALS (-1)
+					CALL exploreTarjan(adjacentNode)
+					SET lowLinkList[currentNode] TO minimum(lowLinkList[currentNode], lowLinkList[adjacentNode])
+				ELSE IF inStackStatus[adjacentNode] IS True
+					SET lowLinkList[currentNode] TO minimum(lowLinkList[currentNode], indicesList[adjacentNode])
+				END IF
+			END FOR
+
+			IF lowLinkList[currentNode] EQUALS indicesList[currentNode]
+				LET componentNodes BE empty list
+				WHILE True
+					LET lastAddedNode BE nodeStack[-1]
+					REMOVE last element FROM nodeStack
+					SET inStackStatus[lastAddedNode] TO False
+					APPEND lastAddedNode TO componentNodes
+					IF lastAddedNode EQUALS currentNode
+						BREAK
+					END IF
+				END WHILE
+				APPEND componentNodes TO stronglyConnectedComponents
+			END IF
+		END
+
+		DEFINE doTarjanOnAllNodes(i)
+			IF i EQUALS count
+				RETURN
+			ELSE
+				IF indicesList[i] EQUALS (-1)
+					CALL exploreTarjan(i)
+				END IF
+				CALL doTarjanOnAllNodes(i PLUS one)
+			END IF
+		END
+		CALL doTarjanOnAllNodes(0)
+
+		LET condGraph BE empty mapping int → list int
+		LET nodeToComponent BE list size count FILLED WITH (-1)
+		LET hasGemInComponent BE list size LENGTH(stronglyConnectedComponents) FILLED WITH False
+		LET componentCounter BE 0
+
+		DEFINE assignComponentFlags(j)
+			IF j EQUALS LENGTH(stronglyConnectedComponents)
+				RETURN
+			ELSE
+				LET currentComponent BE stronglyConnectedComponents[j]
+				FOR each elementNode IN currentComponent
+					SET nodeToComponent[elementNode] TO componentCounter
+					IF elementNode IN gems
+						SET hasGemInComponent[j] TO True
+					END IF
+				END FOR
+				SET componentCounter TO componentCounter PLUS one
+				CALL assignComponentFlags(j PLUS one)
+			END IF
+		END
+		CALL assignComponentFlags(0)
+
+		DEFINE addEdgesBetweenComponents(k)
+			IF k EQUALS LENGTH(totalFrom)
+				RETURN
+			ELSE
+				LET startComp BE nodeToComponent[totalFrom[k]]
+				LET endComp BE nodeToComponent[totalTo[k]]
+				IF startComp NOT EQUAL endComp
+					IF startComp NOT IN condGraph THEN condGraph[startComp] = empty list
+					APPEND endComp TO condGraph[startComp]
+				END IF
+				CALL addEdgesBetweenComponents(k PLUS one)
+			END IF
+		END
+		CALL addEdgesBetweenComponents(0)
+
+		LET inDegreeCounts BE list size LENGTH(stronglyConnectedComponents) FILLED WITH 0
+
+		DEFINE computeInDegrees(m)
+			IF m EQUALS LENGTH(stronglyConnectedComponents)
+				RETURN
+			ELSE
+				LET neighborsList BE (condGraph[m] IF m IN condGraph ELSE empty list)
+				DEFINE incrementNeighborDegrees(p)
+					IF p EQUALS LENGTH(neighborsList)
+						RETURN
+					ELSE
+						SET inDegreeCounts[neighborsList[p]] TO inDegreeCounts[neighborsList[p]] PLUS one
+						CALL incrementNeighborDegrees(p PLUS one)
+					END IF
+				END
+				CALL incrementNeighborDegrees(0)
+				CALL computeInDegrees(m PLUS one)
+			END IF
+		END
+		CALL computeInDegrees(0)
+
+		LET requiredAdds BE 0
+		DEFINE countComponentsWithoutIncoming(q)
+			IF q EQUALS LENGTH(stronglyConnectedComponents)
+				RETURN
+			ELSE
+				IF (inDegreeCounts[q] EQUALS 0) AND (hasGemInComponent[q] IS NOT True)
+					SET requiredAdds TO requiredAdds PLUS one
+				END IF
+				CALL countComponentsWithoutIncoming(q PLUS one)
+			END IF
+		END
+		CALL countComponentsWithoutIncoming(0)
+
+		RETURN requiredAdds
+	END FUNCTION
+END CLASS

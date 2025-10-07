@@ -1,0 +1,105 @@
+CLASS Solution
+    FUNCTION maximumProcessableQueries(nums parameters as list of integers queries parameters as list of integers) RETURNS integer
+
+        FUNCTION process_queries(subseq parameters as list of integers queries parameters as list of integers) RETURNS integer
+            SET alpha TO 0
+            SET beta TO 0
+            REPEAT
+                IF beta IS EQUAL TO LENGTH OF subseq THEN
+                    EXIT LOOP
+                END IF
+                IF subseq[beta] >= queries[alpha] THEN
+                    ADD 1 TO beta
+                END IF
+                ADD 1 TO alpha
+                IF alpha IS EQUAL TO LENGTH OF queries THEN
+                    EXIT LOOP
+                END IF
+            UNTIL FALSE
+            RETURN beta
+        END FUNCTION
+
+        SET omega TO LENGTH OF nums
+        SET psi TO LENGTH OF queries
+        SET delta TO process_queries(nums, queries)
+
+        DEFINE FUNCTION reverse_list(input_list as list of integers) RETURNS list of integers
+            SET reversed_list TO empty list
+            SET index_var TO LENGTH OF input_list - 1
+            WHILE index_var >= 0 DO
+                APPEND input_list[index_var] TO reversed_list
+                SUBTRACT 1 FROM index_var
+            END WHILE
+            RETURN reversed_list
+        END FUNCTION
+
+        DEFINE FUNCTION concatenate_lists(a as list of integers b as list of integers) RETURNS list of integers
+            SET result TO empty list
+            FOR each element in a DO
+                APPEND element TO result
+            END FOR
+            FOR each element in b DO
+                APPEND element TO result
+            END FOR
+            RETURN result
+        END FUNCTION
+
+        FOR epsilon FROM 0; epsilon < omega; epsilon = epsilon + 1
+            SET segment_one TO empty list
+            SET segment_two TO empty list
+            SET idx_inner TO 0
+            WHILE idx_inner < epsilon DO
+                APPEND nums[idx_inner] TO segment_one
+                ADD 1 TO idx_inner
+            END WHILE
+            SET idx_inner TO epsilon
+            SET reversed_suffix TO empty list
+            WHILE idx_inner < omega DO
+                ADD 1 TO idx_inner
+            END WHILE
+            idx_inner = omega - 1
+            WHILE idx_inner >= epsilon DO
+                APPEND nums[idx_inner] TO reversed_suffix
+                SUBTRACT 1 FROM idx_inner
+            END WHILE
+            SET segment_two TO reversed_suffix
+            SET combined TO concatenate_lists(segment_one, segment_two)
+
+            DEFINE FUNCTION sort_asc(arr as list of integers)
+                IF LENGTH OF arr <= 1 THEN RETURN
+                END IF
+                SET pivot TO arr[0]
+                SET left_part TO empty list
+                SET right_part TO empty list
+                FOR it FROM 1 TO LENGTH OF arr - 1 DO
+                    IF arr[it] <= pivot THEN
+                        APPEND arr[it] TO left_part
+                    ELSE
+                        APPEND arr[it] TO right_part
+                    END IF
+                END FOR
+                sort_asc(left_part)
+                sort_asc(right_part)
+                SET idx_merge TO 0
+                FOR el IN left_part DO
+                    arr[idx_merge] = el
+                    ADD 1 TO idx_merge
+                END FOR
+                arr[idx_merge] = pivot
+                ADD 1 TO idx_merge
+                FOR el IN right_part DO
+                    arr[idx_merge] = el
+                    ADD 1 TO idx_merge
+                END FOR
+            END FUNCTION
+
+            CALL sort_asc(combined)
+
+            SET temp_val TO process_queries(combined, queries)
+            IF delta < temp_val THEN
+                SET delta TO temp_val
+            END IF
+        END FOR
+        RETURN delta
+    END FUNCTION
+END CLASS

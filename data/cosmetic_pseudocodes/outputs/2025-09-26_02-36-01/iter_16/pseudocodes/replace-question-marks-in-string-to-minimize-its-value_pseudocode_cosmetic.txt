@@ -1,0 +1,97 @@
+CLASS Solution  
+    FUNCTION minimizeStringValue(s)  
+        IMPORT Counter functionality under alias CountElements  
+        
+        DECLARE tempMap AS CountElements(s)  
+        REMOVE entry with key equal to "?" FROM tempMap IF PRESENT  
+        
+        DECLARE idxCollection AS empty sequence  
+        DECLARE posCounter AS 0  
+        REPEAT  
+            EXIT LOOP WHEN posCounter >= LENGTH(s)  
+            DECLARE currentCh AS s[posCounter]  
+            IF currentCh == "?" THEN  
+                APPEND posCounter TO idxCollection  
+            END IF  
+            posCounter = posCounter + 1  
+        UNTIL FALSE  
+        
+        DECLARE assignedChars AS empty sequence  
+        
+        DECLARE loopPos AS 0  
+        WHILE loopPos < LENGTH(idxCollection) DO  
+            DECLARE minimalCount AS +∞  
+            DECLARE chosenChar AS NULL  
+            
+            DECLARE letterIdx AS 0  
+            REPEAT  
+                EXIT WHEN letterIdx > 25  
+                DECLARE candidateChar AS CHAR(ASCII("a") + letterIdx)  
+                
+                DECLARE currentCount AS 0  
+                IF candidateChar IN tempMap THEN  
+                    currentCount = tempMap[candidateChar]  
+                ELSE  
+                    currentCount = 0  
+                END IF  
+                
+                IF currentCount < minimalCount THEN  
+                    minimalCount = currentCount  
+                    chosenChar = candidateChar  
+                END IF  
+                
+                letterIdx = letterIdx + 1  
+            UNTIL FALSE  
+            
+            APPEND chosenChar TO assignedChars  
+            IF chosenChar IN tempMap THEN  
+                tempMap[chosenChar] = tempMap[chosenChar] + 1  
+            ELSE  
+                tempMap[chosenChar] = 1  
+            END IF  
+            
+            loopPos = loopPos + 1  
+        END WHILE  
+        
+        DECLARE sortedAssignedChars AS assignedChars  
+        DECLARE changed AS TRUE  
+        WHILE changed DO  
+            changed = FALSE  
+            DECLARE i AS 1  
+            WHILE i < LENGTH(sortedAssignedChars) DO  
+                IF sortedAssignedChars[i - 1] > sortedAssignedChars[i] THEN  
+                    DECLARE tempChar AS sortedAssignedChars[i - 1]  
+                    sortedAssignedChars[i - 1] = sortedAssignedChars[i]  
+                    sortedAssignedChars[i] = tempChar  
+                    changed = TRUE  
+                END IF  
+                i = i + 1  
+            END WHILE  
+        END WHILE  
+        
+        DECLARE charArray AS empty sequence  
+        DECLARE j AS 0  
+        REPEAT  
+            EXIT WHEN j >= LENGTH(s)  
+            APPEND s[j] TO charArray  
+            j = j + 1  
+        UNTIL FALSE  
+        
+        DECLARE k AS 0  
+        REPEAT  
+            EXIT WHEN k >= LENGTH(idxCollection)  
+            DECLARE position AS idxCollection[k]  
+            charArray[position] = sortedAssignedChars[k]  
+            k = k + 1  
+        UNTIL FALSE  
+        
+        DECLARE resultString AS EMPTY STRING  
+        DECLARE l AS 0  
+        WHILE l < LENGTH(charArray) DO  
+            resultString = resultString + charArray[l]  
+            l = l + 1  
+        END WHILE  
+        
+        RETURN resultString  
+    END FUNCTION  
+END CLASS

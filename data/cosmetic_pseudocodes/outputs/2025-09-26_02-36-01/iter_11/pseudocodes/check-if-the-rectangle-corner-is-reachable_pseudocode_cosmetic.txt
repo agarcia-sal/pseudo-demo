@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION canReachCorner(xCorner yCorner circles)
+        FUNCTION check_inside_circle(a b c d e)
+            RETURN (a - c) * (a - c) + (b - d) * (b - d) <= e * e
+        END FUNCTION
+
+        FUNCTION touches_left_or_top_edge(p q s)
+            SET cond1 TO (ABS(p) <= s AND 0 <= q AND q <= yCorner)
+            SET cond2 TO (ABS(q - yCorner) <= s AND 0 <= p AND p <= xCorner)
+            RETURN cond1 OR cond2
+        END FUNCTION
+
+        FUNCTION touches_right_or_bottom_edge(p q s)
+            SET cond1 TO (ABS(p - xCorner) <= s AND 0 <= q AND q <= yCorner)
+            SET cond2 TO (ABS(q) <= s AND 0 <= p AND p <= xCorner)
+            RETURN cond1 OR cond2
+        END FUNCTION
+
+        FUNCTION traverse_depth(idx)
+            SET cx TO circles[idx][0]
+            SET cy TO circles[idx][1]
+            SET cr TO circles[idx][2]
+
+            IF touches_right_or_bottom_edge(cx cy cr)
+                RETURN True
+            END IF
+
+            SET vis[idx] TO True
+
+            SET iter_idx TO 0
+            SET count_circles TO LENGTH circles
+            WHILE iter_idx < count_circles
+                SET nx TO circles[iter_idx][0]
+                SET ny TO circles[iter_idx][1]
+                SET nr TO circles[iter_idx][2]
+
+                IF vis[iter_idx] OR (cx - nx)*(cx - nx) + (cy - ny)*(cy - ny) > (cr + nr)*(cr + nr)
+                    SET iter_idx TO iter_idx + 1
+                    CONTINUE
+                END IF
+
+                SET condX TO cx*nr + nx*cr < (cr + nr)*xCorner
+                SET condY TO cy*nr + ny*cr < (cr + nr)*yCorner
+
+                IF condX AND condY AND traverse_depth(iter_idx)
+                    RETURN True
+                END IF
+
+                SET iter_idx TO iter_idx + 1
+            END WHILE
+
+            RETURN False
+        END FUNCTION
+
+        SET vis TO []
+        SET idx1 TO 0
+        SET total TO LENGTH circles
+        WHILE idx1 < total
+            APPEND False TO vis
+            SET idx1 TO idx1 + 1
+        END WHILE
+
+        SET idx2 TO 0
+        SET len_circles TO LENGTH circles
+        WHILE idx2 < len_circles
+            SET cx2 TO circles[idx2][0]
+            SET cy2 TO circles[idx2][1]
+            SET cr2 TO circles[idx2][2]
+
+            IF check_inside_circle(0 0 cx2 cy2 cr2) OR check_inside_circle(xCorner yCorner cx2 cy2 cr2)
+                RETURN False
+            END IF
+
+            IF vis[idx2] = False AND touches_left_or_top_edge(cx2 cy2 cr2) AND traverse_depth(idx2)
+                RETURN False
+            END IF
+
+            SET idx2 TO idx2 + 1
+        END WHILE
+
+        RETURN True
+    END FUNCTION
+END CLASS

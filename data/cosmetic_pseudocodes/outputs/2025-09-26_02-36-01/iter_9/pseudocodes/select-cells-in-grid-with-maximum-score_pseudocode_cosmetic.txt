@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION maxScore(grid)
+        FUNCTION helper(rindex, takenSet, accSum)
+            IF rindex >= SIZEOF(grid) THEN
+                maxSumTemp <- maxSumVal
+                IF accSum > maxSumTemp THEN
+                    maxSumVal <- accSum
+                END IF
+                RETURN
+            END IF
+            CALL helper(rindex + 1, takenSet, accSum)
+            FOR element IN grid[rindex]
+                IF NOT contains(takenSet, element) THEN
+                    insert(takenSet, element)
+                    CALL helper(rindex + 1, takenSet, accSum + element)
+                    remove(takenSet, element)
+                END IF
+            END FOR
+        END FUNCTION
+
+        PROCEDURE insert(setCol, item)
+            setCol[item] <- TRUE
+        END PROCEDURE
+
+        PROCEDURE remove(setCol, item)
+            DELETE setCol[item]
+        END PROCEDURE
+
+        FUNCTION contains(setCol, item)
+            RETURN item IN setCol
+        END FUNCTION
+
+        PROCEDURE sortDescending(arr)
+            PROCEDURE quickSort(start, end)
+                IF start >= end THEN
+                    RETURN
+                END IF
+                pivotIndex <- start
+                leftIdx <- start + 1
+                rightIdx <- end
+                WHILE leftIdx <= rightIdx DO
+                    WHILE leftIdx <= end AND arr[leftIdx] >= arr[pivotIndex] DO
+                        leftIdx <- leftIdx + 1
+                    END WHILE
+                    WHILE rightIdx > start AND arr[rightIdx] <= arr[pivotIndex] DO
+                        rightIdx <- rightIdx - 1
+                    END WHILE
+                    IF leftIdx < rightIdx THEN
+                        tempVal <- arr[leftIdx]
+                        arr[leftIdx] <- arr[rightIdx]
+                        arr[rightIdx] <- tempVal
+                    END IF
+                END WHILE
+                tempVal <- arr[pivotIndex]
+                arr[pivotIndex] <- arr[rightIdx]
+                arr[rightIdx] <- tempVal
+                CALL quickSort(start, rightIdx - 1)
+                CALL quickSort(rightIdx + 1, end)
+            END PROCEDURE
+            CALL quickSort(0, SIZEOF(arr) - 1)
+        END PROCEDURE
+
+        indexVar <- 0
+        WHILE indexVar < SIZEOF(grid) DO
+            CALL sortDescending(grid[indexVar])
+            indexVar <- indexVar + 1
+        END WHILE
+        
+        maxSumVal <- 0
+        CALL helper(0, {}, 0)
+
+        RETURN maxSumVal
+    END FUNCTION
+END CLASS

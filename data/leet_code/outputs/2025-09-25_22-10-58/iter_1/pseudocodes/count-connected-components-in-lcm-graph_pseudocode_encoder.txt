@@ -1,0 +1,52 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+        SET self.parent TO a mapping from each element index in the range from zero TO n MINUS one mapped to itself  
+        SET self.rank TO a mapping from each element index in the range from zero TO n MINUS one mapped to zero  
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+        IF the element at position x of self.parent NOT EQUALS x THEN  
+            SET the element at position x of self.parent TO the result of calling find with the element at position x of self.parent  
+        END IF  
+        RETURN the element at position x of self.parent  
+    END FUNCTION  
+
+    FUNCTION union_set(self, u, v)  
+        SET u TO the result of calling find with u  
+        SET v TO the result of calling find with v  
+        IF u NOT EQUALS v THEN  
+            IF the element at position u of self.rank LESS THAN the element at position v of self.rank THEN  
+                SET temporary variable temp TO u  
+                SET u TO v  
+                SET v TO temp  
+            END IF  
+            SET the element at position v of self.parent TO u  
+            IF the element at position u of self.rank EQUALS the element at position v of self.rank THEN  
+                INCREMENT the element at position u of self.rank BY one  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+        SET dsu TO a new instance of DSU initialized with threshold PLUS one  
+
+        FOR each num IN nums  
+            FOR each j FROM num MULTIPLIED BY two TO threshold FROM num STEPPING BY num  
+                CALL the method union_set of dsu with parameters num and j  
+            END FOR  
+        END FOR  
+
+        SET unique_parents TO an empty set  
+        FOR each num IN nums  
+            IF num LESS THAN OR EQUAL TO threshold THEN  
+                ADD the result of calling find of dsu with num TO unique_parents  
+            ELSE  
+                ADD num TO unique_parents  
+            END IF  
+        END FOR  
+
+        RETURN the size OF unique_parents  
+    END FUNCTION  
+END CLASS

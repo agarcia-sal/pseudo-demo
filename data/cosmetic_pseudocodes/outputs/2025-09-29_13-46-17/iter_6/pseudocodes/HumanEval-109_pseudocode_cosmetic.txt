@@ -1,0 +1,64 @@
+```
+FUNCTION move_one_ball(array_of_integers)
+	var_length = 0
+	WHILE True
+		IF NOT (var_length < LENGTH OF array_of_integers) THEN
+			BREAK
+		END IF
+		var_length = var_length + 1
+	END WHILE
+
+	PURE_recursive_check(TRUE, 0, LENGTH OF array_of_integers, array_of_integers)
+END FUNCTION
+
+FUNCTION PURE_recursive_check(flag, curr_idx, total_len, original_array)
+	WHILE NOT (flag = TRUE) AND (curr_idx < total_len) DO
+		// no operation, just moving on inside loop
+		curr_idx = curr_idx + 1
+	END WHILE
+	
+	IF total_len = 0 THEN
+		RETURN TRUE
+	END IF
+	
+	delta_sorted = SORT(original_array)
+	
+	MIN_FROM_SRC = original_array[0]
+	MIN_POS = 0
+	
+	pos_tracker = 1
+	MAX_SEARCH = LENGTH OF original_array
+	
+	WHILE pos_tracker < MAX_SEARCH DO
+		ELEMENT1 = original_array[pos_tracker]
+		condition1 = NOT (MIN_FROM_SRC <= ELEMENT1)
+		IF condition1 THEN
+			MIN_FROM_SRC = ELEMENT1
+			MIN_POS = pos_tracker
+		END IF
+		pos_tracker = pos_tracker + 1
+	END WHILE
+	
+	FUNCTION rotation_helper(idx_glob, pivot, arr)
+		IF idx_glob < LENGTH OF arr - pivot THEN
+			RETURN arr[idx_glob + pivot]
+		ELSE
+			RETURN arr[idx_glob + pivot - LENGTH OF arr]
+		END IF
+	END FUNCTION
+
+	FUNCTION check_recursive(curr_i, max_i, sorted_arr, rot_arr, acc_flag)
+		IF curr_i = max_i THEN
+			RETURN acc_flag
+		END IF
+		
+		local_flag = acc_flag AND (rotation_helper(curr_i, MIN_POS, original_array) = sorted_arr[curr_i])
+		
+		RETURN check_recursive(curr_i + 1, max_i, sorted_arr, rot_arr, local_flag)
+	END FUNCTION
+
+	RESULT = check_recursive(0, LENGTH OF original_array, delta_sorted, original_array, TRUE)
+	
+	RETURN RESULT
+END FUNCTION
+```

@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION minValidStrings(words, target)
+        DEFINE constructPrefixes(index1, index2, currentWord, accumulated)
+            IF index2 IS GREATER THAN THE LENGTH OF currentWord THEN
+                RETURN accumulated
+            END IF
+
+            SET newPrefix TO accumulated UNION {currentWord[index1 TO index2]}
+            RETURN constructPrefixes(index1, index2 + one, currentWord, newPrefix)
+        END FUNCTION
+
+        DEFINE buildAllPrefixes(listWords, idx, accumulatedSet)
+            IF idx IS GREATER THAN THE LENGTH OF listWords THEN
+                RETURN accumulatedSet
+            END IF
+
+            SET updatedSet TO constructPrefixes(one, one, listWords[idx], accumulatedSet)
+            RETURN buildAllPrefixes(listWords, idx + one, updatedSet)
+        END FUNCTION
+
+        SET allPrefixes TO buildAllPrefixes(words, one, {})
+        SET lenTarget TO 0 + (LENGTH OF target)
+        DEFINE INF AS (10 * (lenTarget + one))
+
+        CREATE dpArray AS ARRAY WITH SIZE (lenTarget + one) FILLED WITH INF
+        SET dpArray[0] TO 0
+
+        DEFINE findMin(indexOuter)
+            IF indexOuter IS GREATER THAN lenTarget THEN
+                RETURN
+            END IF
+
+            DEFINE checkPrefixes(indexInner)
+                IF indexInner IS GREATER THAN indexOuter THEN
+                    RETURN
+                END IF
+
+                SET candidateSubstr TO target[indexInner TO indexOuter]
+                IF candidateSubstr IN allPrefixes THEN
+                    SET prevVal TO dpArray[indexInner - one]
+                    SET dpArray[indexOuter] TO MIN(dpArray[indexOuter], prevVal + one)
+                END IF
+                CALL checkPrefixes(indexInner + one)
+            END FUNCTION
+
+            CALL checkPrefixes(one)
+            CALL findMin(indexOuter + one)
+        END FUNCTION
+
+        CALL findMin(one)
+
+        DEFINE resultValue AS dpArray[lenTarget]
+        DEFINE negativeOne AS 0 - 1
+
+        IF NOT (resultValue EQUAL TO INF) THEN
+            RETURN resultValue
+        ELSE
+            RETURN negativeOne
+        END IF
+    END FUNCTION
+END CLASS

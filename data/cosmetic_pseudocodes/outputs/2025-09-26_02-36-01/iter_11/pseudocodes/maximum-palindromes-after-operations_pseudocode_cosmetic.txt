@@ -1,0 +1,77 @@
+CLASS Solution
+    FUNCTION maxPalindromesAfterOperations(words)
+        PROCEDURE countCharacters(inputList, resultMap)
+            SET idx TO 0
+            WHILE idx < LENGTH(inputList)
+                SET strElem TO inputList[(LENGTH(inputList) - 1) - idx]
+                SET charPos TO 0
+                WHILE charPos < LENGTH(strElem)
+                    SET currChar TO strElem[(LENGTH(strElem) - 1) - charPos]
+                    IF currChar NOT IN resultMap THEN
+                        SET resultMap[currChar] TO 0
+                    END IF
+                    SET resultMap[currChar] TO resultMap[currChar] + 1
+                    SET charPos TO charPos + 1
+                END WHILE
+                SET idx TO idx + 1
+            END WHILE
+        END PROCEDURE
+
+        DEFINE charFreqCounter AS EMPTY MAP
+        CALL countCharacters(words, charFreqCounter)
+
+        SET totalPairsAccum TO 0
+        SET totalSinglesAccum TO 0
+
+        FOR EACH val IN charFreqCounter VALUES DO
+            SET quotientPart TO (val - (val MOD 2)) / 2
+            SET remainderPart TO val - (2 * quotientPart)
+            SET totalPairsAccum TO totalPairsAccum + quotientPart
+            SET totalSinglesAccum TO totalSinglesAccum + remainderPart
+        END FOR
+
+        PROCEDURE compareLengthsAsc(a, b, output)
+            IF LENGTH(a) <= LENGTH(b) THEN
+                SET output[1] TO a
+                SET output[2] TO b
+            ELSE
+                SET output[1] TO b
+                SET output[2] TO a
+            END IF
+        END PROCEDURE
+
+        SET sortedList TO COPY(words)
+        SET madeSwap TO TRUE
+        WHILE madeSwap
+            SET madeSwap TO FALSE
+            SET i TO 0
+            WHILE i < LENGTH(sortedList) - 1
+                SET tmpArr TO ARRAY[2]
+                CALL compareLengthsAsc(sortedList[i], sortedList[i + 1], tmpArr)
+                IF tmpArr[1] != sortedList[i]
+                    SET sortedList[i] TO tmpArr[1]
+                    SET sortedList[i + 1] TO tmpArr[2]
+                    SET madeSwap TO TRUE
+                END IF
+                SET i TO i + 1
+            END WHILE
+        END WHILE
+
+        SET palindromeCountHolder TO 0
+        PROCEDURE processWord(currentWord)
+            SET wordHalfLen TO (LENGTH(currentWord) - (LENGTH(currentWord) MOD 2)) / 2
+            IF totalPairsAccum >= wordHalfLen THEN
+                SET totalPairsAccum TO totalPairsAccum - wordHalfLen
+                SET palindromeCountHolder TO palindromeCountHolder + 1
+            END IF
+        END PROCEDURE
+
+        SET j TO 0
+        WHILE j < LENGTH(sortedList)
+            CALL processWord(sortedList[j])
+            SET j TO j + 1
+        END WHILE
+
+        RETURN palindromeCountHolder
+    END FUNCTION
+END CLASS

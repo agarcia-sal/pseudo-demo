@@ -1,0 +1,79 @@
+CLASS Solution  
+    FUNCTION numberOfSubmatrices(grid)  
+        DEFINE helper(iIndex, jIndex, totalRows, totalCols, prefixMatrix)  
+            IF iIndex > totalRows THEN  
+                RETURN  
+            ELSE IF jIndex > totalCols THEN  
+                CALL helper(iIndex + 1, 1, totalRows, totalCols, prefixMatrix)  
+            ELSE  
+                LET upperLeftX = prefixMatrix[iIndex - 1][jIndex][0]  
+                LET leftX = prefixMatrix[iIndex][jIndex - 1][0]  
+                LET upperLeftXMinus = prefixMatrix[iIndex - 1][jIndex - 1][0]  
+                LET upperLeftY = prefixMatrix[iIndex - 1][jIndex][1]  
+                LET leftY = prefixMatrix[iIndex][jIndex - 1][1]  
+                LET upperLeftYMinus = prefixMatrix[iIndex - 1][jIndex - 1][1]  
+
+                LET gridRow = grid[iIndex - 1]  
+                LET gridValue = gridRow[jIndex - 1]  
+
+                prefixMatrix[iIndex][jIndex][0] = (upperLeftX + leftX - upperLeftXMinus)  
+                prefixMatrix[iIndex][jIndex][1] = (upperLeftY + leftY - upperLeftYMinus)  
+
+                IF gridValue == 'X' THEN  
+                    prefixMatrix[iIndex][jIndex][0] = prefixMatrix[iIndex][jIndex][0] + 1  
+                ELSE IF gridValue == 'Y' THEN  
+                    prefixMatrix[iIndex][jIndex][1] = prefixMatrix[iIndex][jIndex][1] + 1  
+                END IF  
+
+                CALL helper(iIndex, jIndex + 1, totalRows, totalCols, prefixMatrix)  
+            END IF  
+        END FUNCTION  
+
+        IF grid == [] OR (grid[0] == []) THEN  
+            LET resultCount = 0  
+            RETURN resultCount  
+        END IF  
+
+        LET totalRowCount = 0  
+        LET colCount = 0  
+        FOR EACH rowElement IN grid DO  
+            totalRowCount = totalRowCount + 1  
+        END FOR  
+        FOR EACH colElement IN grid[0] DO  
+            colCount = colCount + 1  
+        END FOR  
+
+        LET prefixSumArray = []  
+        DECLARE q = 0  
+        WHILE q < (totalRowCount + 1) DO  
+            LET rowArray = []  
+            DECLARE w = 0  
+            WHILE w < (colCount + 1) DO  
+                rowArray[w] = [0, 0]  
+                w = w + 1  
+            END WHILE  
+            prefixSumArray[q] = rowArray  
+            q = q + 1  
+        END WHILE  
+
+        CALL helper(1, 1, totalRowCount, colCount, prefixSumArray)  
+
+        LET accumulator = 0  
+        LET p = 1  
+        WHILE p <= totalRowCount DO  
+            LET r = 1  
+            WHILE r <= colCount DO  
+                LET xNum = prefixSumArray[p][r][0]  
+                LET yNum = prefixSumArray[p][r][1]  
+                IF (xNum > 0) AND NOT (xNum != yNum) THEN  
+                    accumulator = accumulator + 1  
+                END IF  
+                r = r + 1  
+            END WHILE  
+            p = p + 1  
+        END WHILE  
+
+        LET finalResult = accumulator  
+        RETURN finalResult  
+    END FUNCTION  
+END CLASS

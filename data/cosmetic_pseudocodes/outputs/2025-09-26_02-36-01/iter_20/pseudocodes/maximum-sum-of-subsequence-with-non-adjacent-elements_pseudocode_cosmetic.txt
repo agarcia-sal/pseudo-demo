@@ -1,0 +1,70 @@
+CLASS Solution  
+    FUNCTION maximumSumSubsequence(nums, queries)  
+        FUNCTION computeMaximum(a, b)  
+            IF a GREATER THAN b THEN RETURN a ELSE RETURN b  
+        END FUNCTION  
+        FUNCTION powTenExp(power)  
+            IF power EQUALS 0 THEN RETURN 1  
+            RETURN 10 * powTenExp(power - 1)  
+        END FUNCTION  
+
+        SET constantMod TO (powTenExp(9) + 1)  
+        SET lengthNums TO 0  
+        WHILE TRUE DO  
+            IF lengthNums EQUALS length(nums) THEN EXIT LOOP  
+            SET lengthNums TO lengthNums + 1  
+        END WHILE  
+
+        SET dpOne TO []  
+        SET dpTwo TO []  
+        REPEAT lengthNums TIMES  
+            APPEND 0 TO dpOne  
+            APPEND 0 TO dpTwo  
+        END REPEAT  
+
+        SET dpOne[0] TO computeMaximum(0, nums[0])  
+        SET dpTwo[0] TO 0  
+
+        FUNCTION updateAtIndex(idx, valListOne, valListTwo, sourceList)  
+            IF idx EQUALS 0 THEN  
+                SET valListOne[0] TO computeMaximum(0, sourceList[0])  
+                SET valListTwo[0] TO 0  
+                RETURN  
+            END IF  
+            SET a VAL TO valListTwo[idx - 1]  
+            SET b VAL TO valListOne[idx - 1]  
+            SET valListOne[idx] TO computeMaximum(0, a + sourceList[idx])  
+            SET valListTwo[idx] TO computeMaximum(valListTwo[idx - 1], b)  
+        END FUNCTION  
+
+        FOR idx FROM 1 TO (lengthNums - 1) BY 1 DO  
+            updateAtIndex(idx, dpOne, dpTwo, nums)  
+        END FOR  
+
+        SET accumResult TO 0  
+
+        FUNCTION propagateFrom(startIdx, valListOne, valListTwo, sourceList, limit)  
+            SET currentIdx TO startIdx  
+            WHILE currentIdx LESS THAN limit DO  
+                updateAtIndex(currentIdx, valListOne, valListTwo, sourceList)  
+                SET currentIdx TO currentIdx + 1  
+            END WHILE  
+        END FUNCTION  
+
+        FOR EACH pair IN queries DO  
+            SET position TO pair[0]  
+            SET value TO pair[1]  
+            SET nums[position] TO value  
+
+            updateAtIndex(position, dpOne, dpTwo, nums)  
+            IF position + 1 LESS THAN lengthNums THEN  
+                propagateFrom(position + 1, dpOne, dpTwo, nums, lengthNums)  
+            END IF  
+
+            SET maxEnd TO computeMaximum(dpOne[lengthNums - 1], dpTwo[lengthNums - 1])  
+            SET accumResult TO (accumResult + maxEnd) MODULO constantMod  
+        END FOR  
+
+        RETURN accumResult  
+    END FUNCTION  
+END CLASS

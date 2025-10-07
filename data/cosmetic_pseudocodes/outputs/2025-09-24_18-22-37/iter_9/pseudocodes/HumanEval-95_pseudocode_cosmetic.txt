@@ -1,0 +1,50 @@
+FUNCTION check_dict_case(dict_param)
+    SET key_count TO LENGTH OF dict_param KEYS
+    IF NOT (key_count GREATER THAN 0)
+        RETURN False
+    END IF
+
+    SET current_status TO "start"
+
+    FOR index_var FROM 0 TO key_count MINUS 1
+        SET current_key TO dict_param KEYS AT index_var
+
+        IF NOT (current_key IS INSTANCE OF STRING)
+            SET current_status TO "mixed"
+            BREAK
+        END IF
+
+        SWITCH current_status
+            CASE "start":
+                IF current_key IS ALL UPPERCASE
+                    SET current_status TO "upper"
+                ELSE
+                    IF current_key IS ALL LOWERCASE
+                        SET current_status TO "lower"
+                    ELSE
+                        BREAK
+                    END IF
+                END IF
+                BREAK
+
+            CASE "upper":
+                IF NOT (current_key IS ALL UPPERCASE)
+                    SET current_status TO "mixed"
+                    BREAK
+                ELSE
+                    BREAK
+                END IF
+
+            CASE "lower":
+                IF NOT (current_key IS ALL LOWERCASE)
+                    SET current_status TO "mixed"
+                    BREAK
+                ELSE
+                    BREAK
+                END IF
+        END SWITCH
+    END FOR
+
+    SET result_flag TO (current_status IS "upper") OR (current_status IS "lower")
+    RETURN result_flag
+END FUNCTION

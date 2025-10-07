@@ -1,0 +1,44 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+       FUNCTION step_facer(position, depth_now, depth_max, chars_arr)
+          IF position == LENGTH(chars_arr)
+             RETURN depth_max
+          END IF
+          MATCH chars_arr[position] 
+             CASE '('
+                LET new_depth = depth_now + 1
+                LET next_max = IF depth_max < new_depth THEN new_depth ELSE depth_max
+                RETURN step_facer(position + 1, new_depth, next_max, chars_arr)
+             CASE ELSE
+                RETURN step_facer(position + 1, depth_now - 1, depth_max, chars_arr)
+          END MATCH
+       END FUNCTION
+
+       LET array_hgm = TO_ARRAY(group_string)
+       RETURN step_facer(0, 0, 0, array_hgm)
+    END FUNCTION
+
+    FUNCTION filter_nonempty(lst)
+       IF lst == EMPTY
+          RETURN EMPTY
+       END IF
+       IF lst[0] == ""
+          RETURN filter_nonempty(lst[1..])
+       ELSE 
+          RETURN [lst[0]] + filter_nonempty(lst[1..])
+       END IF
+    END FUNCTION
+
+    FUNCTION map_parse(groups_list)
+       IF groups_list == EMPTY THEN RETURN EMPTY END IF
+       LET first_elem = groups_list[0]
+       LET rest_lst = groups_list[1..]
+       RETURN [parse_paren_group(first_elem)] + map_parse(rest_lst)
+    END FUNCTION
+
+    LET split_arr = SPLIT parentheses_string BY " "
+    LET filtered_arr = filter_nonempty(split_arr)
+    RETURN map_parse(filtered_arr)
+END FUNCTION
+```

@@ -1,0 +1,58 @@
+```pseudocode
+CLASS Solution
+  FUNCTION longestSpecialPath(edges, nums)
+    
+    DECLARE adjacencyLists AS list of empty lists REPEATED length of nums TIMES
+    
+    FOR each tuple (a, b, c) IN edges DO
+      INSERT (b, c) INTO adjacencyLists[a]
+      INSERT (a, c) INTO adjacencyLists[b]
+    END FOR
+    
+    FUNCTION traverse(x, prevNode, boundaryIndex, depthCount)
+      ACCESS maxLength FROM outer scope
+      ACCESS minNodes FROM outer scope
+      
+      LET savedDepth BE lastSeenDepth[nums[x]] IF EXISTS OTHERWISE 0
+      ASSIGN lastSeenDepth[nums[x]] = depthCount
+      
+      IF boundaryIndex < savedDepth THEN
+        boundaryIndex = savedDepth
+      END IF
+      
+      LET segmentLength = prefix[-1] - prefix[boundaryIndex]
+      LET nodeDiff = depthCount - boundaryIndex
+      
+      IF (segmentLength > maxLength) OR (segmentLength = maxLength AND nodeDiff < minNodes) THEN
+        maxLength = segmentLength
+        minNodes = nodeDiff
+      END IF
+      
+      DECLARE i = 1
+      WHILE i <= LENGTH(adjacencyLists[x]) DO
+        LET (neighbor, weightVal) = adjacencyLists[x][i]
+        i = i + 1
+        
+        IF neighbor = prevNode THEN
+          CONTINUE
+        END IF
+        
+        APPEND prefix[-1] + weightVal TO prefix
+        CALL traverse(neighbor, x, boundaryIndex, depthCount + 1)
+        REMOVE LAST ELEMENT FROM prefix
+      END WHILE
+      
+      lastSeenDepth[nums[x]] = savedDepth
+    END FUNCTION
+    
+    maxLength = 0
+    minNodes = 1
+    prefix = [0]
+    lastSeenDepth = {}
+    
+    CALL traverse(0, -1, 0, 1)
+    
+    RETURN [maxLength, minNodes]
+  END FUNCTION
+END CLASS
+```

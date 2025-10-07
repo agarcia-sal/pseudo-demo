@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+
+        FUNCTION update_count(count LIST OF integers num integer add integer)
+            FUNCTION loop_bits(position integer mask_val integer)
+                IF position EQUALS 32 THEN
+                    RETURN
+                ELSE
+                    IF (num BITWISE-AND mask_val) NOT EQUAL 0 THEN
+                        SET count[position] TO count[position] PLUS add
+                    END IF
+                    CALL loop_bits(position PLUS 1, mask_val MULTIPLIED BY 2)
+                END IF
+            END FUNCTION
+            CALL loop_bits(0, 1)
+        END FUNCTION
+
+        FUNCTION compute_current_or(count LIST OF integers) RETURNS integer
+            FUNCTION loop_or(index integer acc integer) RETURNS integer
+                IF index EQUALS 32 THEN
+                    RETURN acc
+                ELSE
+                    IF count[index] GREATER THAN 0 THEN
+                        SET acc TO acc BITWISE-OR (1 LEFT-SHIFTED BY index)
+                    END IF
+                    RETURN loop_or(index PLUS 1, acc)
+                END IF
+            END FUNCTION
+            RETURN loop_or(0, 0)
+        END FUNCTION
+
+        SET len_nums TO LENGTH OF nums
+        SET bit_counts TO a list of 32 zeros
+        SET combined_or TO 0
+        SET start_idx TO 0
+        SET shortest_len TO +INFINITY
+
+        FUNCTION while_loop()
+            IF combined_or GREATER THAN OR EQUAL TO k AND start_idx LESS THAN OR EQUAL TO end_idx THEN
+                IF shortest_len GREATER THAN (end_idx MINUS start_idx PLUS 1) THEN
+                    SET shortest_len TO end_idx MINUS start_idx PLUS 1
+                END IF
+                CALL update_count(bit_counts, nums[start_idx], -1)
+                SET combined_or TO compute_current_or(bit_counts)
+                SET start_idx TO start_idx PLUS 1
+                CALL while_loop()
+            ELSE
+                RETURN
+            END IF
+        END FUNCTION
+
+        SET end_idx TO 0
+        WHILE end_idx LESS THAN len_nums
+            CALL update_count(bit_counts, nums[end_idx], 1)
+            SET combined_or TO combined_or BITWISE-OR nums[end_idx]
+            CALL while_loop()
+            SET end_idx TO end_idx PLUS 1
+        END WHILE
+
+        IF shortest_len EQUALS +INFINITY THEN
+            RETURN -1
+        ELSE
+            RETURN shortest_len
+        END IF
+    END FUNCTION
+END CLASS

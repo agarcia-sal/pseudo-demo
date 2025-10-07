@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION numberOfWays(n integer parameter, x integer parameter, y integer parameter) RETURNS integer
+        SET constant_mod TO 1000000000 PLUS 7
+        DEFINE FUNCTION buildMatrix(rowCount integer, colCount integer) RETURNS list of lists
+            IF rowCount EQUALS 0 THEN RETURN []
+            ELSE
+                SET head TO list of zeros length colCount
+                SET tail TO buildMatrix(rowCount MINUS 1, colCount)
+                RETURN [head] CONCATENATE tail
+            END IF
+        END FUNCTION
+
+        SET table TO buildMatrix(n PLUS 1, x PLUS 1)
+        SET table AT zero AT zero TO 1
+
+        DEFINE FUNCTION outerLoop(current_row integer)
+            IF current_row GREATER THAN n THEN RETURN
+            ELSE
+                DEFINE FUNCTION innerLoop(current_col integer)
+                    IF current_col GREATER THAN x THEN RETURN
+                    ELSE
+                        SET prevRowSameCol TO table AT current_row MINUS 1 AT current_col
+                        SET prevRowPrevCol TO table AT current_row MINUS 1 AT (current_col MINUS 1)
+                        SET left_factor TO (prevRowSameCol MULTIPLIED BY current_col) MODULO constant_mod
+                        SET right_factor TO (prevRowPrevCol MULTIPLIED BY (x MINUS (current_col PLUS (NEGATE 1)))) MODULO constant_mod
+                        SET table AT current_row AT current_col TO (left_factor PLUS right_factor) MODULO constant_mod
+                        INNERLOOP(current_col PLUS 1)
+                    END IF
+                END FUNCTION
+                innerLoop(1)
+                outerLoop(current_row PLUS 1)
+            END IF
+        END FUNCTION
+        outerLoop(1)
+
+        SET result_accumulator TO 0
+        SET power_accumulator TO 1
+
+        DEFINE FUNCTION accumulate(j_counter integer)
+            IF j_counter GREATER THAN x THEN RETURN
+            ELSE
+                SET power_accumulator TO (power_accumulator MULTIPLIED BY y) MODULO constant_mod
+                SET term TO (table AT n AT j_counter) MULTIPLIED BY power_accumulator
+                SET result_accumulator TO (result_accumulator PLUS term) MODULO constant_mod
+                accumulate(j_counter PLUS 1)
+            END IF
+        END FUNCTION
+        accumulate(1)
+
+        SET final_result TO result_accumulator
+        RETURN final_result
+    END FUNCTION
+END CLASS

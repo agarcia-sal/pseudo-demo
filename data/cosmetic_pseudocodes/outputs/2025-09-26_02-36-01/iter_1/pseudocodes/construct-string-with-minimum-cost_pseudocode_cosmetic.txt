@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION minimumCost(target, words, costs)  
+        DECLARE cost_map AS empty dictionary  
+        INDEX i FROM 0 TO LENGTH(words) - 1  
+            LET w = words[i]  
+            LET c = costs[i]  
+            IF w IN cost_map  
+                IF c < cost_map[w]  
+                    cost_map[w] = c  
+                END IF  
+            ELSE  
+                cost_map[w] = c  
+            END IF  
+        END INDEX  
+
+        LET chars = CONVERT target TO list of characters  
+
+        FUNCTION min_cost_to_form_target(pos)  
+            IF pos == LENGTH(chars)  
+                RETURN 0  
+            END IF  
+            
+            LET best_cost = +∞  
+            
+            FOR EACH key, val IN cost_map  
+                LET wlen = LENGTH(key)  
+                IF pos + wlen <= LENGTH(chars) THEN  
+                    LET segment = SUBLIST(chars, pos, pos + wlen)  
+                    IF segment == CONVERT key TO list of characters  
+                        LET rest_cost = min_cost_to_form_target(pos + wlen)  
+                        IF rest_cost != +∞ THEN  
+                            LET total = val + rest_cost  
+                            IF total < best_cost THEN  
+                                best_cost = total  
+                            END IF  
+                        END IF  
+                    END IF  
+                END IF  
+            END FOR  
+            
+            IF best_cost != +∞  
+                RETURN best_cost  
+            ELSE  
+                RETURN +∞  
+            END IF  
+        END FUNCTION  
+
+        LET answer = min_cost_to_form_target(0)  
+        IF answer == +∞  
+            RETURN -1  
+        ELSE  
+            RETURN answer  
+        END IF  
+    END FUNCTION  
+END CLASS

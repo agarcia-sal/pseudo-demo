@@ -1,0 +1,47 @@
+CLASS Solution  
+    FUNCTION longestSpecialPath(edges, nums)  
+        INITIALIZE graph AS array of empty arrays sized length of nums  
+        
+        FOR EACH edge IN edges DO  
+            LET u, v, w BE elements of edge  
+            ADD (v, w) TO graph[u]  
+            ADD (u, w) TO graph[v]  
+        END FOR  
+        
+        DECLARE maxLength = 0  
+        DECLARE minNodes = 1  
+        DECLARE prefix = [0]  
+        DECLARE lastSeenDepth = empty map  
+        
+        FUNCTION dfs(current, parent, leftBound, depth)  
+            LET prevDepth = lastSeenDepth.get(nums[current], 0)  
+            lastSeenDepth[nums[current]] = depth  
+            
+            IF leftBound < prevDepth THEN  
+                leftBound = prevDepth  
+            END IF  
+            
+            LET pathLength = prefix[-1] - prefix[leftBound]  
+            LET pathNodes = depth - leftBound  
+            
+            IF pathLength > maxLength OR (pathLength == maxLength AND pathNodes < minNodes) THEN  
+                maxLength = pathLength  
+                minNodes = pathNodes  
+            END IF  
+            
+            FOR EACH (neighbor, weight) IN graph[current] DO  
+                IF neighbor != parent THEN  
+                    prefix.push(prefix[-1] + weight)  
+                    dfs(neighbor, current, leftBound, depth + 1)  
+                    prefix.pop()  
+                END IF  
+            END FOR  
+            
+            lastSeenDepth[nums[current]] = prevDepth  
+        END FUNCTION  
+        
+        CALL dfs(0, -1, 0, 1)  
+        
+        RETURN [maxLength, minNodes]  
+    END FUNCTION  
+END CLASS

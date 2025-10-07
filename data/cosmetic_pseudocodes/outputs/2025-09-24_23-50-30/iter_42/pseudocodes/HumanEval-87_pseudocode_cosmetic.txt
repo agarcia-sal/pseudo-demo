@@ -1,0 +1,53 @@
+```
+FUNCTION get_row(input_matrix, query_number)
+	VAR result_positions = []
+	VAR outer_idx = 0
+	WHILE outer_idx < LENGTH(input_matrix) DO
+		VAR inner_idx = 0
+		WHILE inner_idx < LENGTH(input_matrix[outer_idx]) DO
+			IF NOT (input_matrix[outer_idx][inner_idx] != query_number) THEN
+				result_positions = result_positions + [(outer_idx, inner_idx)]
+			END IF
+			inner_idx = inner_idx + 1
+		END WHILE
+		outer_idx = outer_idx + 1
+	END WHILE
+	FUNCTION sort_by_column_desc(list_to_sort, accumulator)
+		IF list_to_sort == [] THEN
+			RETURN accumulator
+		END IF
+		VAR pivot = list_to_sort[0]
+		VAR rest = list_to_sort[1:]
+		VAR greater = []
+		VAR lesser_equal = []
+		FOR EACH item IN rest DO
+			IF item[1] > pivot[1] THEN
+				greater = greater + [item]
+			ELSE
+				lesser_equal = lesser_equal + [item]
+			END IF
+		END FOR
+		RETURN sort_by_column_desc(greater, []) + [pivot] + sort_by_column_desc(lesser_equal, []) + accumulator
+	END FUNCTION
+	VAR after_col_sort = sort_by_column_desc(result_positions, [])
+	FUNCTION sort_by_row_asc(positions, acc)
+		IF positions == [] THEN
+			RETURN acc
+		END IF
+		VAR pivot = positions[0]
+		VAR remaining = positions[1:]
+		VAR smaller_equal = []
+		VAR bigger = []
+		FOR EACH element IN remaining DO
+			IF element[0] <= pivot[0] THEN
+				smaller_equal = smaller_equal + [element]
+			ELSE
+				bigger = bigger + [element]
+			END IF
+		END FOR
+		RETURN sort_by_row_asc(smaller_equal, []) + [pivot] + sort_by_row_asc(bigger, []) + acc
+	END FUNCTION
+	VAR fully_sorted = sort_by_row_asc(after_col_sort, [])
+	RETURN fully_sorted
+END FUNCTION
+```

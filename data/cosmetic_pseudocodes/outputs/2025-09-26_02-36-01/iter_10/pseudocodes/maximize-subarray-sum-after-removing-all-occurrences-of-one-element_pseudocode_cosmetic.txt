@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION maxSubarraySum(nums)
+        FUNCTION kadane(arr)
+            FUNCTION internalKadane(index, currentMax, globalMax)
+                IF index GREATER THAN (LENGTH OF arr MINUS 1)
+                    RETURN globalMax
+                ELSE
+                    DECLARE candidate1 AS arr[index]
+                    DECLARE candidate2 AS currentMax PLUS arr[index]
+                    DECLARE newCurrentMax AS 0
+                    IF candidate1 GREATER THAN candidate2
+                        SET newCurrentMax TO candidate1
+                    ELSE
+                        SET newCurrentMax TO candidate2
+                    END IF
+                    DECLARE newGlobalMax AS 0
+                    IF globalMax LESS THAN newCurrentMax
+                        SET newGlobalMax TO newCurrentMax
+                    ELSE
+                        SET newGlobalMax TO globalMax
+                    END IF
+                    RETURN internalKadane(index PLUS 1, newCurrentMax, newGlobalMax)
+                END IF
+            END FUNCTION
+
+            RETURN internalKadane(1, arr[0], arr[0])
+        END FUNCTION
+
+        DECLARE intermediateMaxSum AS kadane(nums)
+        DECLARE uniqueSet AS EMPTY_SET
+        DECLARE i AS 0
+        WHILE i LESS THAN LENGTH OF nums
+            ADD nums[i] TO uniqueSet
+            SET i TO i PLUS 1
+        END WHILE
+
+        DECLARE iterator AS 0
+        DECLARE keyList AS LIST_FROM_SET(uniqueSet)
+        WHILE iterator LESS THAN LENGTH OF keyList
+            DECLARE excludeValue AS keyList[iterator]
+            DECLARE filteredNums AS EMPTY_LIST
+            DECLARE j AS 0
+            WHILE j LESS THAN LENGTH OF nums
+                IF nums[j] NOT EQUALS excludeValue
+                    APPEND nums[j] TO filteredNums
+                END IF
+                SET j TO j PLUS 1
+            END WHILE
+
+            IF LENGTH OF filteredNums GREATER THAN 0
+                DECLARE tempMax AS kadane(filteredNums)
+                IF intermediateMaxSum LESS THAN tempMax
+                    SET intermediateMaxSum TO tempMax
+                END IF
+            END IF
+            SET iterator TO iterator PLUS 1
+        END WHILE
+
+        RETURN intermediateMaxSum
+    END FUNCTION
+END CLASS

@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION maximumSumSubsequence(nums, queries)
+      DEFINE CONST_MOD AS 1_000_000_000 + 1
+      LET LEN_N = LENGTH(nums)
+      LET ARR_DP_SKIP = ARRAY OF SIZE LEN_N FILLED WITH 0
+      LET ARR_DP_TAKE = ARRAY OF SIZE LEN_N FILLED WITH 0
+      ARR_DP_TAKE[0] <- MAX(0, nums[0])
+      ARR_DP_SKIP[0] <- 0
+      LET IDX = 1
+      WHILE IDX < LEN_N DO
+          LET TMP_A = MAX(0, ARR_DP_SKIP[IDX - 1] + nums[IDX])
+          ARR_DP_TAKE[IDX] <- TMP_A
+          LET TMP_B = ARR_DP_SKIP[IDX - 1]
+          LET TMP_C = ARR_DP_TAKE[IDX - 1]
+          IF TMP_B > TMP_C THEN
+              ARR_DP_SKIP[IDX] <- TMP_B
+          ELSE
+              ARR_DP_SKIP[IDX] <- TMP_C
+          END IF
+          IDX <- IDX + 1
+      END WHILE
+      LET TOT_RES = 0
+      LET QI = 0
+      REPEAT
+          IF QI = LENGTH(queries) THEN
+              BREAK
+          END IF
+          LET P, V = queries[QI][0], queries[QI][1]
+          nums[P] <- V
+          IF P = 0 THEN
+              ARR_DP_TAKE[0] <- MAX(0, nums[0])
+              ARR_DP_SKIP[0] <- 0
+          ELSE
+              ARR_DP_TAKE[P] <- MAX(0, ARR_DP_SKIP[P - 1] + nums[P])
+              LET VAL1 = ARR_DP_SKIP[P - 1]
+              LET VAL2 = ARR_DP_TAKE[P - 1]
+              ARR_DP_SKIP[P] <- (VAL1 > VAL2) ? VAL1 : VAL2
+          END IF
+          LET J = P + 1
+          WHILE J < LEN_N DO
+              ARR_DP_TAKE[J] <- MAX(0, ARR_DP_SKIP[J - 1] + nums[J])
+              ARR_DP_SKIP[J] <- (ARR_DP_SKIP[J - 1] > ARR_DP_TAKE[J - 1]) ? ARR_DP_SKIP[J - 1] : ARR_DP_TAKE[J - 1]
+              J <- J + 1
+          END WHILE
+          LET MAX_END = (ARR_DP_TAKE[LEN_N - 1] > ARR_DP_SKIP[LEN_N - 1]) ? ARR_DP_TAKE[LEN_N - 1] : ARR_DP_SKIP[LEN_N - 1]
+          TOT_RES <- (TOT_RES + MAX_END) % CONST_MOD
+          QI <- QI + 1
+      UNTIL FALSE
+      RETURN TOT_RES
+    END FUNCTION
+END CLASS

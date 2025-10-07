@@ -1,0 +1,48 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        DECLARE ci_depth = 0
+        DECLARE mx_depth = 0
+        DECLARE ix = 0
+        DECLARE length_gs = LENGTH(group_string)
+        
+        WHILE ix < length_gs
+            DECLARE sym = SUBSTRING(group_string, ix, 1)
+            SWITCH sym
+                CASE '(':
+                    SET ci_depth = ci_depth + 1
+                    IF (ci_depth > mx_depth) THEN 
+                        SET mx_depth = ci_depth
+                    END IF
+                    BREAK
+                DEFAULT:
+                    SET ci_depth = ci_depth - 1
+            END SWITCH
+            SET ix = ix + 1
+        END WHILE
+        
+        RETURN mx_depth
+    END FUNCTION
+
+    DECLARE split_groups = []
+    DECLARE temp_start = 0
+    DECLARE ps_length = LENGTH(parentheses_string)
+    DECLARE index_ptr = 0
+    
+    WHILE index_ptr <= ps_length
+        IF index_ptr = ps_length OR SUBSTRING(parentheses_string, index_ptr, 1) = ' ' THEN
+            DECLARE candidate_group = SUBSTRING(parentheses_string, temp_start, index_ptr - temp_start)
+            IF LENGTH(candidate_group) > 0 THEN APPEND candidate_group TO split_groups END IF
+            SET temp_start = index_ptr + 1
+        END IF
+        SET index_ptr = index_ptr + 1
+    END WHILE
+
+    DECLARE results = []
+    FOR EACH element in split_groups
+        APPEND parse_paren_group(element) TO results
+    END FOR
+
+    RETURN results
+END FUNCTION
+```

@@ -1,0 +1,61 @@
+CLASS Solution  
+    FUNCTION findAnswer(n, edges)  
+        INITIALIZE adjacency_dict AS empty map with default empty arrays  
+        FOR edge IN edges  
+            LET u BE edge[0]  
+            LET v BE edge[1]  
+            LET w BE edge[2]  
+            ADD (v, w) TO adjacency_dict[u]  
+            ADD (u, w) TO adjacency_dict[v]  
+        END FOR  
+  
+        CREATE distance_list WITH size n FILLED with infinity  
+        ASSIGN distance_list[0] = 0  
+        INITIALIZE min_heap AS list containing (0, 0)  
+  
+        WHILE min_heap IS NOT empty  
+            EXTRACT_MIN (curr_distance, node) FROM min_heap  
+            IF curr_distance > distance_list[node] THEN  
+                CONTINUE  
+            END IF  
+  
+            FOR EACH (neighbor, weight) IN adjacency_dict[node]  
+                LET tentative_distance = curr_distance + weight  
+                IF tentative_distance < distance_list[neighbor] THEN  
+                    ASSIGN distance_list[neighbor] = tentative_distance  
+                    INSERT (tentative_distance, neighbor) INTO min_heap MAINTAINING heap_property  
+                END IF  
+            END FOR  
+        END WHILE  
+  
+        INITIALIZE edge_set AS empty set  
+        INITIALIZE dfs_stack WITH [(n - 1, distance_list[n - 1])]  
+        INITIALIZE seen_list WITH size n FILLED with False  
+  
+        WHILE dfs_stack IS NOT empty  
+            POP (current_node, dist_val) FROM dfs_stack  
+            IF seen_list[current_node] THEN  
+                CONTINUE  
+            END IF  
+            SET seen_list[current_node] = True  
+  
+            FOR EACH (adj_node, adj_weight) IN adjacency_dict[current_node]  
+                IF dist_val == distance_list[adj_node] + adj_weight THEN  
+                    LET edge_tuple = (MIN(current_node, adj_node), MAX(current_node, adj_node))  
+                    ADD edge_tuple TO edge_set  
+                    PUSH (adj_node, distance_list[adj_node]) INTO dfs_stack  
+                END IF  
+            END FOR  
+        END WHILE  
+  
+        INITIALIZE result_list AS empty array  
+        FOR edge IN edges  
+            LET a = edge[0]  
+            LET b = edge[1]  
+            LET normalized_edge = (MIN(a, b), MAX(a, b))  
+            APPEND (normalized_edge IN edge_set) TO result_list  
+        END FOR  
+  
+        RETURN result_list  
+    END FUNCTION  
+END CLASS

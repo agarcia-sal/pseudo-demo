@@ -1,0 +1,115 @@
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        FUNCTION incrementCount(counterMap, key)
+            IF key IN counterMap THEN
+                counterMap[key] = counterMap[key] + 1
+            ELSE
+                counterMap[key] = 1
+            END IF
+        END FUNCTION
+
+        FUNCTION getCountOrZero(container, element)
+            IF element IN container THEN
+                RETURN container[element]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        FUNCTION createCounter(sequence)
+            VAR countMap = {}
+            VAR position = 0
+            WHILE position < LENGTH(sequence)
+                VAR currentElement = sequence[position]
+                IF currentElement IN countMap THEN
+                    countMap[currentElement] = countMap[currentElement] + 1
+                ELSE
+                    countMap[currentElement] = 1
+                END IF
+                position = position + 1
+            END WHILE
+            RETURN countMap
+        END FUNCTION
+
+        VAR frequencyMap = createCounter(s)
+
+        IF '?' IN frequencyMap THEN
+            DELETE frequencyMap['?']
+        END IF
+
+        VAR loopIndex = 0
+        VAR questionPositions = []
+        WHILE loopIndex < LENGTH(s)
+            IF s[loopIndex] = '?'
+                questionPositions = questionPositions + [loopIndex]
+            END IF
+            loopIndex = loopIndex + 1
+        END WHILE
+
+        VAR replacementChars = []
+
+        FUNCTION findMinChar(counts)
+            VAR alphabetIndex = 0
+            VAR leastCount = 9E99
+            VAR currentMinChar = null
+            WHILE alphabetIndex < 26
+                VAR currentChar = CHAR(ASCII('a') + alphabetIndex)
+                VAR currentCount = getCountOrZero(counts, currentChar)
+                IF currentCount < leastCount THEN
+                    leastCount = currentCount
+                    currentMinChar = currentChar
+                END IF
+                alphabetIndex = alphabetIndex + 1
+            END WHILE
+            RETURN currentMinChar
+        END FUNCTION
+
+        VAR positionIndex = 0
+        WHILE positionIndex < LENGTH(questionPositions)
+            VAR selectedChar = findMinChar(frequencyMap)
+            replacementChars = replacementChars + [selectedChar]
+            incrementCount(frequencyMap, selectedChar)
+            positionIndex = positionIndex + 1
+        END WHILE
+
+        FUNCTION lexAscendingSort(arr)
+            VAR i = LENGTH(arr) - 1
+            WHILE i > 0
+                VAR j = 0
+                WHILE j < i
+                    IF arr[j] > arr[j + 1]
+                        VAR tempVal = arr[j]
+                        arr[j] = arr[j + 1]
+                        arr[j + 1] = tempVal
+                    END IF
+                    j = j + 1
+                END WHILE
+                i = i - 1
+            END WHILE
+        END FUNCTION
+
+        lexAscendingSort(replacementChars)
+
+        VAR charArray = []
+        VAR index = 0
+        WHILE index < LENGTH(s)
+            charArray = charArray + [s[index]]
+            index = index + 1
+        END WHILE
+
+        VAR replaceIdx = 0
+        WHILE replaceIdx < LENGTH(questionPositions)
+            charArray[questionPositions[replaceIdx]] = replacementChars[replaceIdx]
+            replaceIdx = replaceIdx + 1
+        END WHILE
+
+        VAR resultString = ""
+        VAR concatIndex = 0
+        WHILE concatIndex < LENGTH(charArray)
+            resultString = resultString + charArray[concatIndex]
+            concatIndex = concatIndex + 1
+        END WHILE
+
+        RETURN resultString
+    END FUNCTION
+END CLASS

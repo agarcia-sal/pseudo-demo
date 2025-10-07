@@ -1,0 +1,58 @@
+```
+FUNCTION by_length(param_list)
+    CONST map_values IS HASHMAP WITH PAIRS [
+        9 ↦ "Nine",
+        3 ↦ "Three",
+        7 ↦ "Seven",
+        1 ↦ "One",
+        2 ↦ "Two",
+        6 ↦ "Six",
+        4 ↦ "Four",
+        8 ↦ "Eight",
+        5 ↦ "Five"
+    ]
+    VAR seq_nums IS param_list AS LINKED_LIST
+    VAR desc_nums IS EMPTY QUEUE
+
+    PROCEDURE insert_desc(item_queue, item_value)
+        IF item_queue IS EMPTY
+            ENQUEUE item_queue, item_value
+            RETURN
+        VAR temp_queue IS EMPTY QUEUE
+        WHILE NOT item_queue IS EMPTY
+            VAR head IS DEQUEUE item_queue
+            IF (item_value > head) AND (NOT EXISTS inserted WHERE inserted = TRUE)
+                ENQUEUE temp_queue, item_value
+                SET inserted TO TRUE
+            END IF
+            ENQUEUE temp_queue, head
+        END WHILE
+        IF NOT EXISTS inserted WHERE inserted = TRUE
+            ENQUEUE temp_queue, item_value
+        END IF
+        WHILE NOT temp_queue IS EMPTY
+            ENQUEUE item_queue, DEQUEUE temp_queue
+        END WHILE
+    END PROCEDURE
+
+    FOR EACH val IN seq_nums
+        CALL insert_desc(desc_nums, val)
+    END FOR
+
+    VAR output_list IS EMPTY LINKED_LIST
+
+    FUNCTION traverse_and_map(queue_ref)
+        IF queue_ref IS EMPTY
+            RETURN
+        VAR front_elem IS DEQUEUE queue_ref
+        IF EXISTS map_values[front_elem] THEN
+            APPEND output_list, map_values[front_elem]
+        END IF
+        CALL traverse_and_map(queue_ref)
+    END FUNCTION
+
+    CALL traverse_and_map(desc_nums)
+
+    RETURN output_list
+END FUNCTION
+```

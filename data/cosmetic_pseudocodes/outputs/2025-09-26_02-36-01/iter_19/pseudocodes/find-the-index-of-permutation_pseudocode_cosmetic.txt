@@ -1,0 +1,40 @@
+CLASS Solution
+	FUNCTION getPermutationIndex(perm)
+		SET totalElements TO LENGTH OF perm
+		SET modulusValue TO 10 ^ 9 + 1
+
+		SET factorials TO LIST WITH totalElements ELEMENTS ALL INITIALIZED TO 1
+		SET counter TO 1
+		WHILE counter < totalElements
+			SET factorials AT counter TO factorials AT (counter - 1) * counter
+			SET counter TO counter + 1
+		END WHILE
+
+		SET availableNums TO LIST OF INTEGERS FROM 1 TO totalElements
+
+		SET resultIndex TO 0
+		SET positionTracker TO 0
+		REPEAT
+			IF positionTracker >= totalElements THEN
+				BREAK
+			END IF
+
+			SET currentValue TO perm AT positionTracker
+			SET foundPosition TO 0
+			FOR loopVar FROM 0 TO LENGTH OF availableNums - 1
+				IF availableNums AT loopVar == currentValue THEN
+					SET foundPosition TO loopVar
+					EXIT FOR
+				END IF
+			END FOR
+
+			SET toAdd TO foundPosition * factorials AT (totalElements - positionTracker - 1)
+			SET resultIndex TO resultIndex + toAdd
+			REMOVE ELEMENT AT foundPosition FROM availableNums
+
+			SET positionTracker TO positionTracker + 1
+		UNTIL FALSE
+
+		RETURN resultIndex MOD modulusValue
+	END FUNCTION
+END CLASS

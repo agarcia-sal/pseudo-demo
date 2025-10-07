@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION maximumProcessableQueries(nums AS list OF integer, queries AS list OF integer) RETURNS integer
+        FUNCTION process_queries(subseq AS list OF integer, queries AS list OF integer) RETURNS integer
+            DECLARE pos AS integer
+            SET pos TO 0
+            DECLARE idx AS integer
+            SET idx TO 0
+            WHILE idx < LENGTH(queries)
+                IF pos = LENGTH(subseq)
+                    EXIT WHILE
+                END IF
+                DECLARE current_element AS integer
+                SET current_element TO subseq[pos]
+                IF current_element >= queries[idx]
+                    SET pos TO pos + 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN pos
+        END FUNCTION
+
+        DECLARE length_nums AS integer
+        SET length_nums TO LENGTH(nums)
+        DECLARE length_queries AS integer
+        SET length_queries TO LENGTH(queries)
+        DECLARE maximum_processed AS integer
+        SET maximum_processed TO process_queries(nums, queries)
+        DECLARE count AS integer
+        SET count TO 0
+        WHILE count < length_nums
+            DECLARE start_sublist AS list OF integer
+            DECLARE end_sublist AS list OF integer
+            DECLARE combined_sublist AS list OF integer
+            SET start_sublist TO EMPTY LIST
+            SET end_sublist TO EMPTY LIST
+            SET combined_sublist TO EMPTY LIST
+
+            DECLARE pointer AS integer
+            SET pointer TO 0
+            WHILE pointer < count
+                APPEND nums[pointer] TO start_sublist
+                SET pointer TO pointer + 1
+            END WHILE
+
+            SET pointer TO length_nums - 1
+            WHILE pointer >= count
+                APPEND nums[pointer] TO end_sublist
+                SET pointer TO pointer - 1
+            END WHILE
+
+            FOR EACH element IN start_sublist
+                APPEND element TO combined_sublist
+            END FOR
+            FOR EACH element IN end_sublist
+                APPEND element TO combined_sublist
+            END FOR
+
+            DECLARE sorted_sublist AS list OF integer
+            SET sorted_sublist TO combined_sublist
+            DECLARE i AS integer
+            DECLARE j AS integer
+            SET i TO 0
+            WHILE i < LENGTH(sorted_sublist) - 1
+                SET j TO i + 1
+                WHILE j < LENGTH(sorted_sublist)
+                    IF sorted_sublist[i] > sorted_sublist[j]
+                        DECLARE temp AS integer
+                        SET temp TO sorted_sublist[i]
+                        SET sorted_sublist[i] TO sorted_sublist[j]
+                        SET sorted_sublist[j] TO temp
+                    END IF
+                    SET j TO j + 1
+                END WHILE
+                SET i TO i + 1
+            END WHILE
+
+            DECLARE processed_count AS integer
+            SET processed_count TO process_queries(sorted_sublist, queries)
+            IF processed_count > maximum_processed
+                SET maximum_processed TO processed_count
+            END IF
+            SET count TO count + 1
+        END WHILE
+        RETURN maximum_processed
+    END FUNCTION
+END CLASS

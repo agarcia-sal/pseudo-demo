@@ -1,0 +1,57 @@
+CLASS Solution
+  FUNCTION minimumArea(grid)
+    DEFINE FUNCTION is_empty_list(L)
+      RETURN (L = [] OR LENGTH(L) = 0)
+    END FUNCTION
+
+    DEFINE FUNCTION get_grid_value(r, c, g)
+      RETURN g[r][c]
+    END FUNCTION
+
+    IF (is_empty_list(grid) OR is_empty_list(grid[0]))
+      RETURN 0
+    END IF
+
+    SET total_rows TO LENGTH(grid)
+    SET total_cols TO LENGTH(grid[0])
+    SET low_row_bound TO +∞
+    SET high_row_bound TO -∞
+    SET low_col_bound TO +∞
+    SET high_col_bound TO -∞
+
+    DEFINE FUNCTION process_cell(r, c, g)
+      IF get_grid_value(r, c, g) = 1 THEN
+        IF low_row_bound > r THEN
+          SET low_row_bound TO r
+        END IF
+        IF high_row_bound < r THEN
+          SET high_row_bound TO r
+        END IF
+        IF low_col_bound > c THEN
+          SET low_col_bound TO c
+        END IF
+        IF high_col_bound < c THEN
+          SET high_col_bound TO c
+        END IF
+      END IF
+    END FUNCTION
+
+    DEFINE FUNCTION row_iterator(row)
+      IF row >= total_rows THEN RETURN END IF
+      DEFINE FUNCTION col_iterator(col)
+        IF col >= total_cols THEN RETURN END IF
+        process_cell(row, col, grid)
+        col_iterator(col + 1)
+      END FUNCTION
+      col_iterator(0)
+      row_iterator(row + 1)
+    END FUNCTION
+
+    row_iterator(0)
+
+    SET rect_height TO (high_row_bound - low_row_bound + 1)
+    SET rect_width TO  (high_col_bound - low_col_bound + 1)
+
+    RETURN rect_height * rect_width
+  END FUNCTION
+END CLASS

@@ -1,0 +1,78 @@
+CLASS Solution
+    FUNCTION getSum(nums)
+        FUNCTION calc(arr)
+            SET m TO LENGTH OF arr
+            SET alpha TO list INITIALIZED WITH m ZEROS
+            SET beta TO list OF LENGTH m FILLED WITH ZEROES
+            FUNCTION makeCounter()
+                RETURN new dict DEFAULTING to 0
+            END FUNCTION
+
+            SET delta TO makeCounter()
+            PROCEDURE forwardPass()
+                SET idx TO 1
+                WHILE idx < m
+                    SET val1 TO arr[idx - 1]
+                    SET currentCount TO delta[val1]
+                    SET delta[val1] TO currentCount + 1
+                    SET alpha[idx] TO delta[val1] - 1
+                    SET idx TO idx + 1
+                END WHILE
+            END PROCEDURE
+            CALL forwardPass()
+
+            SET delta TO makeCounter()
+            PROCEDURE backwardPass()
+                SET idx TO m - 2
+                REPEAT
+                    SET val2 TO arr[idx + 1]
+                    SET delta[val2] TO delta[val2] + 1
+                    SET beta[idx] TO delta[val2]
+                    SET idx TO idx - 1
+                UNTIL idx < 0
+            END PROCEDURE
+            CALL backwardPass()
+
+            SET accumulator TO 0
+            PROCEDURE accumulateSum()
+                SET p TO 0
+                WHILE p < m
+                    SET u TO alpha[p]
+                    SET v TO beta[p]
+                    SET w TO arr[p]
+                    SET term1 TO u + v
+                    SET term2 TO u * v
+                    SET subtotal TO (term1 + term2) * w
+                    SET accumulator TO accumulator + subtotal
+                    SET p TO p + 1
+                END WHILE
+            END PROCEDURE
+            CALL accumulateSum()
+
+            FUNCTION modReduce(value)
+                RETURN value - ( (value / (10^9 + 7)) * (10^9 +7) )
+            END FUNCTION
+
+            RETURN accumulator MOD (10^9 + 7)
+        END FUNCTION
+
+        SET moduloBase TO (10^9) + 7
+        SET firstPass TO calc(nums)
+        FUNCTION reverseList(lst)
+            SET start TO 0
+            SET end TO LENGTH OF lst - 1
+            WHILE start < end
+                SET temp TO lst[start]
+                SET lst[start] TO lst[end]
+                SET lst[end] TO temp
+                SET start TO start + 1
+                SET end TO end - 1
+            END WHILE
+        END FUNCTION
+        CALL reverseList(nums)
+        SET secondPass TO calc(nums)
+
+        SET totalSum TO firstPass + secondPass + SUM OF nums
+        RETURN totalSum MODULO moduloBase
+    END FUNCTION
+END CLASS

@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION subsequencePairCount(nums)
+        DEFINE CONSTANT ONE_BILLION_SEVEN = 1000000000 + 7
+        SET alpha TO -1
+        FOR val IN nums
+            IF val > alpha THEN
+                SET alpha TO val
+            END IF
+        END FOR
+
+        INITIALIZE matrixA AS list of lists of integers, size (alpha + 1) × (alpha + 1), all zeroes
+        SET matrixA[0][0] TO 1
+
+        DEFINE FUNCTION computeGCD(p, q)
+            WHILE q ≠ 0 DO
+                SET tempVal TO p MOD q
+                SET p TO q
+                SET q TO tempVal
+            END WHILE
+            RETURN p
+        END FUNCTION
+
+        FOR each element curr IN nums DO
+            INITIALIZE matrixB AS list of lists of integers, size (alpha + 1) × (alpha + 1), all zeroes
+
+            FOR idxX FROM 0 TO alpha DO
+                FOR idxY FROM 0 TO alpha DO
+                    SET incrementVal TO matrixA[idxX][idxY]
+
+                    ADD incrementVal TO matrixB[idxX][idxY]
+                    SET matrixB[idxX][idxY] TO matrixB[idxX][idxY] MOD ONE_BILLION_SEVEN
+
+                    SET gcdValX TO computeGCD(idxX, curr)
+                    ADD incrementVal TO matrixB[gcdValX][idxY]
+                    SET matrixB[gcdValX][idxY] TO matrixB[gcdValX][idxY] MOD ONE_BILLION_SEVEN
+
+                    SET gcdValY TO computeGCD(idxY, curr)
+                    ADD incrementVal TO matrixB[idxX][gcdValY]
+                    SET matrixB[idxX][gcdValY] TO matrixB[idxX][gcdValY] MOD ONE_BILLION_SEVEN
+                END FOR
+            END FOR
+
+            SET matrixA TO matrixB
+        END FOR
+
+        SET answer TO 0
+        SET indexG TO 1
+        WHILE indexG ≤ alpha DO
+            SET answer TO answer + matrixA[indexG][indexG]
+            SET indexG TO indexG + 1
+        END WHILE
+        SET answer TO answer MOD ONE_BILLION_SEVEN
+
+        RETURN answer
+    END FUNCTION
+END CLASS

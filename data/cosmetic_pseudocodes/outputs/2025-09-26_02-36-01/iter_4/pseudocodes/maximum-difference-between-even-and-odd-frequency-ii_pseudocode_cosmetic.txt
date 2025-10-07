@@ -1,0 +1,64 @@
+CLASS Solution  
+    FUNCTION maxDifference WITH PARAMETERS s k  
+        DECLARE result AS negative infinity  
+        DECLARE pairsList AS EMPTY LIST  
+        DECLARE charsSet AS [‘zero’, ‘one’, ‘two’, ‘three’, ‘four’]  
+        FOR idx1 FROM 0 TO LENGTH(charsSet) MINUS 1  
+            FOR idx2 FROM 0 TO LENGTH(charsSet) MINUS 1  
+                IF charsSet[idx1] NOT EQUAL TO charsSet[idx2] THEN  
+                    ADD (charsSet[idx1], charsSet[idx2]) TO pairsList  
+                END IF  
+            END FOR  
+        END FOR  
+  
+        FOR EACH (charX, charY) IN pairsList  
+            DECLARE minDifferences AS DICTIONARY WITH DEFAULT VALUE positive infinity  
+            DECLARE prefixCountX AS LIST CONTAINING [0]  
+            DECLARE prefixCountY AS LIST CONTAINING [0]  
+            DECLARE leftIndex AS 0  
+            DECLARE index AS 0  
+            WHILE index LESS THAN LENGTH(s)  
+                DECLARE currentChar AS s[index]  
+                DECLARE lastX AS prefixCountX[ LENGTH(prefixCountX) MINUS 1 ]  
+                DECLARE lastY AS prefixCountY[ LENGTH(prefixCountY) MINUS 1 ]  
+  
+                IF currentChar EQUALS charX THEN  
+                    ADD lastX PLUS 1 TO prefixCountX  
+                ELSE  
+                    ADD 0 TO prefixCountX  
+                END IF  
+  
+                IF currentChar EQUALS charY THEN  
+                    ADD lastY PLUS 1 TO prefixCountY  
+                ELSE  
+                    ADD 0 TO prefixCountY  
+                END IF  
+  
+                WHILE (index PLUS 1 MINUS leftIndex) GREATER THAN OR EQUAL TO k  
+                      AND prefixCountX[leftIndex] LESS THAN prefixCountX[LENGTH(prefixCountX) MINUS 1]  
+                      AND prefixCountY[leftIndex] LESS THAN prefixCountY[LENGTH(prefixCountY) MINUS 1] DO  
+  
+                    DECLARE parityKey AS ( (prefixCountX[leftIndex] MODULO 2), (prefixCountY[leftIndex] MODULO 2) )  
+  
+                    DECLARE diffCandidate AS prefixCountX[leftIndex] MINUS prefixCountY[leftIndex]  
+                    IF diffCandidate LESS THAN minDifferences[parityKey] THEN  
+                        SET minDifferences[parityKey] TO diffCandidate  
+                    END IF  
+  
+                    INCREMENT leftIndex BY 1  
+                END WHILE  
+  
+                DECLARE finalParityKey AS ( (1 MINUS (prefixCountX[LENGTH(prefixCountX) MINUS 1] MODULO 2)), (prefixCountY[LENGTH(prefixCountY) MINUS 1] MODULO 2) )  
+                DECLARE currentDiff AS prefixCountX[LENGTH(prefixCountX) MINUS 1] MINUS prefixCountY[LENGTH(prefixCountY) MINUS 1] MINUS minDifferences[finalParityKey]  
+  
+                IF currentDiff GREATER THAN result THEN  
+                    SET result TO currentDiff  
+                END IF  
+  
+                INCREMENT index BY 1  
+            END WHILE  
+        END FOR  
+  
+        RETURN result  
+    END FUNCTION  
+END CLASS

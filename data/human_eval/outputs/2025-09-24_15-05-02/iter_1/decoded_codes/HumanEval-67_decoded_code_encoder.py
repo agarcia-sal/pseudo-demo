@@ -1,0 +1,3 @@
+def fruit_distribution(s, n):
+    nums = [int(x) for x in s.split(' ') if x.isdigit()]
+    return n - sum(nums)

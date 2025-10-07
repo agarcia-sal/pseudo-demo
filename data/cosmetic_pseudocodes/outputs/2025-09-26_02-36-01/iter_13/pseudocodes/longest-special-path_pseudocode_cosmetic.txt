@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+        SET graph TO list created by recursionBuildGraph(0, LENGTH(nums), [])
+
+        DEFINE FUNCTION recursionBuildGraph(index, limit, accumulator)
+            IF index GREATER OR EQUAL limit THEN
+                RETURN accumulator
+            END IF
+            RETURN recursionBuildGraph(index + 1, limit, accumulator + [[]])
+        END FUNCTION
+
+        FOR EACH edgeTriple IN edges
+            LET startVertex TO element at position zero in edgeTriple
+            LET endVertex TO element at position one in edgeTriple
+            LET weightValue TO element at position two in edgeTriple
+            CALL appendEdge(startVertex, endVertex, weightValue, graph)
+            CALL appendEdge(endVertex, startVertex, weightValue, graph)
+        END FOR
+
+        DEFINE FUNCTION appendEdge(sourceIdx, targetIdx, wgt, gph)
+            LET edgeTuple TO [targetIdx, wgt]
+            LET currentAdjacency TO element at position sourceIdx in gph
+            SET element at position sourceIdx in gph TO currentAdjacency + [edgeTuple]
+        END FUNCTION
+
+        DEFINE FUNCTION myDfs(currentNode, previousNode, leftBound, depthLevel)
+            ACCESS maxLen FROM enclosing scope
+            ACCESS minCount FROM enclosing scope
+            ACCESS arrNums FROM enclosing scope
+            ACCESS lastSeen FROM enclosing scope
+            ACCESS prefixSum FROM enclosing scope
+            LET previousDepth TO 0
+            IF arrNums[currentNode] EXISTS AS KEY IN lastSeen THEN
+                SET previousDepth TO lastSeen[arrNums[currentNode]]
+            END IF
+            SET lastSeen[arrNums[currentNode]] TO depthLevel
+
+            IF leftBound < previousDepth THEN
+                SET leftBound TO previousDepth
+            END IF
+
+            LET prefixLength TO element at last position of prefixSum MINUS element at position leftBound of prefixSum
+            LET nodeCount TO depthLevel MINUS leftBound
+
+            IF (prefixLength > maxLen) OR (prefixLength EQUALS maxLen AND nodeCount < minCount) THEN
+                SET maxLen TO prefixLength
+                SET minCount TO nodeCount
+            END IF
+
+            DEFINE FUNCTION dfsIterative(index, neighbors)
+                IF index GREATER OR EQUAL LENGTH(neighbors) THEN
+                    RETURN
+                END IF
+                LET [nextNode, weightVal] TO element at position index in neighbors
+                IF nextNode NOT EQUAL TO previousNode THEN
+                    SET prefixSum TO prefixSum + [element at last position of prefixSum + weightVal]
+                    CALL myDfs(nextNode, currentNode, leftBound, depthLevel + 1)
+                    REMOVE last element from prefixSum
+                END IF
+                CALL dfsIterative(index + 1, neighbors)
+            END FUNCTION
+
+            CALL dfsIterative(0, graph[currentNode])
+            SET lastSeen[arrNums[currentNode]] TO previousDepth
+        END FUNCTION
+
+        SET maxLen TO 0
+        SET minCount TO 1
+        SET prefixSum TO [0]
+        SET lastSeen TO empty dictionary
+        CALL myDfs(0, -1, 0, 1)
+        RETURN [maxLen, minCount]
+    END FUNCTION
+END CLASS

@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION isArraySpecial(nums, queries)
+        DEFINE ZERO_CONST = (1 - 1)
+        DEFINE ONE_CONST = (ZERO_CONST + 1)
+        DEFINE TWO_CONST = (ONE_CONST + ONE_CONST)
+        
+        SET parity_flags TO []
+        SET index_counter TO ZERO_CONST
+        WHILE index_counter < LENGTH(nums)
+            SET current_num TO nums[index_counter]
+            SET mod_result TO current_num - TWO_CONST * (current_num / TWO_CONST)
+            APPEND mod_result TO parity_flags
+            SET index_counter TO index_counter + ONE_CONST
+        END WHILE
+        
+        SET special_prefix TO []
+        SET length_nums TO LENGTH(nums)
+        SET pos_tracker TO ZERO_CONST
+        WHILE pos_tracker < length_nums
+            APPEND ZERO_CONST TO special_prefix
+            SET pos_tracker TO pos_tracker + ONE_CONST
+        END WHILE
+        
+        SET idx_iter TO ONE_CONST
+        WHILE idx_iter < length_nums
+            IF NOT (parity_flags[idx_iter] != parity_flags[idx_iter - ONE_CONST])
+                SET special_prefix[idx_iter] TO special_prefix[idx_iter - ONE_CONST] + ONE_CONST
+            ELSE
+                SET special_prefix[idx_iter] TO special_prefix[idx_iter - ONE_CONST]
+            END IF
+            SET idx_iter TO idx_iter + ONE_CONST
+        END WHILE
+        
+        SET output_collection TO []
+        SET query_idx TO ZERO_CONST
+        SET total_queries TO LENGTH(queries)
+        WHILE query_idx < total_queries
+            SET current_query TO queries[query_idx]
+            SET start_pos TO current_query[ZERO_CONST]
+            SET end_pos TO current_query[ONE_CONST]
+            
+            IF (start_pos - end_pos) * (end_pos - start_pos) == ZERO_CONST
+                APPEND TRUE TO output_collection
+            ELSE
+                SET diff_check TO special_prefix[end_pos] - (IF (start_pos > ZERO_CONST) THEN special_prefix[start_pos - ONE_CONST] ELSE ZERO_CONST)
+                APPEND (diff_check == ZERO_CONST) TO output_collection
+            END IF
+            
+            SET query_idx TO query_idx + ONE_CONST
+        END WHILE
+        
+        RETURN output_collection
+    END FUNCTION
+END CLASS

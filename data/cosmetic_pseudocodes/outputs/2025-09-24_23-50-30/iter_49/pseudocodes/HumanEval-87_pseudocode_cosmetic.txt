@@ -1,0 +1,57 @@
+```
+FUNCTION get_row(matrix, key)
+    FUNCTION recur_outer(idx_outer, acc_outer)
+        IF NOT (idx_outer <= LENGTH(matrix) - 1) THEN
+            RETURN acc_outer
+        ELSE
+            FUNCTION recur_inner(idx_inner, acc_inner)
+                IF idx_inner > LENGTH(matrix[idx_outer]) - 1 THEN
+                    RETURN acc_inner
+                ELSE
+                    acc_inner2 <- IF matrix[idx_outer][idx_inner] = key THEN acc_inner + [(idx_outer, idx_inner)] ELSE acc_inner
+                    RETURN recur_inner(idx_inner + 1, acc_inner2)
+            END FUNCTION
+            updated_acc <- recur_inner(0, acc_outer)
+            RETURN recur_outer(idx_outer + 1, updated_acc)
+    END FUNCTION
+
+    collected_coords <- recur_outer(0, [])
+
+    FUNCTION cmp_first_asc(a, b)
+        RETURN a[0] > b[0]
+    END FUNCTION
+
+    FUNCTION cmp_second_desc(a, b)
+        RETURN a[1] < b[1]
+    END FUNCTION
+
+    temp_sorted <- collected_coords
+    n <- LENGTH(temp_sorted)
+
+    FUNCTION sort_pass(arr, cmp_func, i)
+        IF i >= n THEN
+            RETURN arr
+        ELSE
+            FUNCTION inner_sort(j, arr_inner)
+                IF j >= n - 1 THEN
+                    RETURN arr_inner
+                ELSE
+                    arr_new <- IF cmp_func(arr_inner[j], arr_inner[j+1]) THEN
+                                    LET tmp = arr_inner[j]
+                                    arr_inner[j] = arr_inner[j+1]
+                                    arr_inner[j+1] = tmp
+                                    arr_inner
+                               ELSE
+                                    arr_inner
+                    RETURN inner_sort(j + 1, arr_new)
+            END FUNCTION
+            arr_after_pass <- inner_sort(0, arr)
+            RETURN sort_pass(arr_after_pass, cmp_func, i + 1)
+    END FUNCTION
+
+    first_sorted <- sort_pass(temp_sorted, cmp_second_desc, 0)
+    final_sorted <- sort_pass(first_sorted, cmp_first_asc, 0)
+
+    RETURN final_sorted
+END FUNCTION
+```

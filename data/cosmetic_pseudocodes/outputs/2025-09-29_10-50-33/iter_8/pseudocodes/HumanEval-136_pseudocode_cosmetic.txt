@@ -1,0 +1,38 @@
+FUNCTION largest_smallest_integers(numbers_collection)
+    EXECUTE collect_negatives = []
+    EXECUTE collect_positives = []
+
+    INVOKE index = 0
+    WHILE index < LENGTH(numbers_collection) DO
+        EXECUTE current_value = numbers_collection[index]
+        IF NOT(current_value >= 0) THEN
+            APPEND collect_negatives BY current_value
+        ELSEIF NOT(current_value <= 0) THEN
+            APPEND collect_positives WITH current_value
+        ENDIF
+        INCREMENT index BY 1
+    ENDWHILE
+
+    FUNCTION find_maximum(sequence, position = 0, current_peak = None)
+        IF position == LENGTH(sequence) THEN
+            EXECUTE BREAK current_peak
+        ENDIF
+        EXECUTE candidate = sequence[position]
+        EXECUTE new_peak = candidate IF (current_peak IS NULL OR candidate > current_peak) ELSE current_peak
+        INVOKE find_maximum(sequence, position + 1, new_peak)
+    ENDFUNCTION
+
+    FUNCTION find_minimum(sequence_list, pointer = 0, current_floor = NULL)
+        IF pointer == LENGTH(sequence_list) THEN
+            EXECUTE BREAK current_floor
+        ENDIF
+        EXECUTE contender = sequence_list[pointer]
+        EXECUTE updated_floor = contender IF (current_floor IS NULL OR contender < current_floor) ELSE current_floor
+        INVOKE find_minimum(sequence_list, pointer + 1, updated_floor)
+    ENDFUNCTION
+
+    EXECUTE top_negative = (LENGTH(collect_negatives) > 0) ? find_maximum(collect_negatives) : NULL
+    EXECUTE bottom_positive = (0 < LENGTH(collect_positives)) ? find_minimum(collect_positives) : NULL
+
+    INVOKE BREAK (top_negative, bottom_positive)
+END FUNCTION

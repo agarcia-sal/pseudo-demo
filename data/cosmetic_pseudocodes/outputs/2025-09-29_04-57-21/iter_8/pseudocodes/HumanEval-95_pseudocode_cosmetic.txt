@@ -1,0 +1,42 @@
+```
+FUNCTION check_dict_case(dict_input)
+    IF NOT dict_input KEYS EXISTS OR SIZE(dict_input KEYS) == 0 THEN
+        RETURN False
+    END IF
+
+    SET mode = "start"
+    DECLARE key_iter = dict_input KEYS ITERATOR()
+
+    WHILE TRUE
+        IF NOT key_iter HAS NEXT THEN
+            EXIT WHILE
+        END IF
+
+        SET current_key = key_iter NEXT()
+
+        IF TYPEOF(current_key) != STRING THEN
+            mode = "mixed"
+            BREAK
+        END IF
+
+        IF mode == "start" THEN
+            IF current_key EQUALS current_key TO UPPERCASE() THEN
+                mode = "upper"
+            ELSE IF current_key EQUALS current_key TO LOWERCASE() THEN
+                mode = "lower"
+            ELSE
+                BREAK
+            END IF
+        ELSE
+            IF (mode == "upper" AND current_key != current_key TO UPPERCASE()) OR (mode == "lower" AND current_key != current_key TO LOWERCASE()) THEN
+                mode = "mixed"
+                BREAK
+            ELSE
+                BREAK
+            END IF
+        END IF
+    END WHILE
+
+    RETURN (mode == "upper") OR (mode == "lower")
+END FUNCTION
+```

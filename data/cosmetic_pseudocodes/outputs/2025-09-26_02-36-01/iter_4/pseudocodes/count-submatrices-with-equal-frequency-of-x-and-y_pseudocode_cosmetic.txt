@@ -1,0 +1,65 @@
+CLASS Solution  
+    FUNCTION numberOfSubmatrices(grid)  
+        IF NOT (grid IS NOT empty AND grid[0] IS NOT empty)  
+            RETURN 0  
+        END IF  
+
+        DECLARE total_rows AS LENGTH OF grid  
+        DECLARE total_cols AS LENGTH OF grid[0]  
+
+        DECLARE prefix_sum AS ARRAY OF SIZE (total_rows + 1)  
+        SET index_r TO 0  
+        WHILE index_r <= total_rows  
+            SET prefix_sum[index_r] AS ARRAY OF SIZE (total_cols + 1)  
+            SET index_c TO 0  
+            WHILE index_c <= total_cols  
+                SET prefix_sum[index_r][index_c] AS ARRAY WITH TWO ELEMENTS [0, 0]  
+                INCREMENT index_c BY 1  
+            END WHILE  
+            INCREMENT index_r BY 1  
+        END WHILE  
+
+        DECLARE row_iterator AS 1  
+        WHILE row_iterator <= total_rows  
+            DECLARE col_iterator AS 1  
+            WHILE col_iterator <= total_cols  
+                DECLARE prev_x1 AS prefix_sum[row_iterator][col_iterator - 1][0]  
+                DECLARE prev_x2 AS prefix_sum[row_iterator - 1][col_iterator][0]  
+                DECLARE prev_x3 AS prefix_sum[row_iterator - 1][col_iterator - 1][0]  
+                LET prefix_sum[row_iterator][col_iterator][0] = prev_x1 + prev_x2 - prev_x3  
+
+                DECLARE prev_y1 AS prefix_sum[row_iterator][col_iterator - 1][1]  
+                DECLARE prev_y2 AS prefix_sum[row_iterator - 1][col_iterator][1]  
+                DECLARE prev_y3 AS prefix_sum[row_iterator - 1][col_iterator - 1][1]  
+                LET prefix_sum[row_iterator][col_iterator][1] = prev_y1 + prev_y2 - prev_y3  
+
+                DECLARE current_char AS grid[row_iterator - 1][col_iterator - 1]  
+                IF current_char = 'X' THEN  
+                    LET prefix_sum[row_iterator][col_iterator][0] = prefix_sum[row_iterator][col_iterator][0] + 1  
+                ELSE IF current_char = 'Y' THEN  
+                    LET prefix_sum[row_iterator][col_iterator][1] = prefix_sum[row_iterator][col_iterator][1] + 1  
+                END IF  
+
+                LET col_iterator = col_iterator + 1  
+            END WHILE  
+            LET row_iterator = row_iterator + 1  
+        END WHILE  
+
+        DECLARE total_count AS 0  
+        SET row_cursor TO 1  
+        WHILE row_cursor <= total_rows  
+            SET col_cursor TO 1  
+            WHILE col_cursor <= total_cols  
+                DECLARE count_x AS prefix_sum[row_cursor][col_cursor][0]  
+                DECLARE count_y AS prefix_sum[row_cursor][col_cursor][1]  
+                IF (count_x > 0) AND (count_x = count_y) THEN  
+                    LET total_count = total_count + 1  
+                END IF  
+                SET col_cursor = col_cursor + 1  
+            END WHILE  
+            SET row_cursor = row_cursor + 1  
+        END WHILE  
+
+        RETURN total_count  
+    END FUNCTION  
+END CLASS

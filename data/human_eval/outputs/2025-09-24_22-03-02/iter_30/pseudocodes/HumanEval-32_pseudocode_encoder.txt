@@ -1,0 +1,41 @@
+FUNCTION poly WITH PARAMETERS xs AS LIST, x AS FLOAT
+    SET result TO 0.0
+    SET n TO LENGTH OF xs
+    SET i TO 0
+    WHILE i LESS THAN n
+        SET coeff TO ELEMENT AT INDEX i IN xs
+        SET power TO CALL math.pow WITH ARGUMENTS x, i
+        SET term TO coeff MULTIPLY power
+        SET result TO result PLUS term
+        INCREMENT i BY 1
+    END WHILE
+    RETURN result
+END FUNCTION
+
+FUNCTION find_zero WITH PARAMETER xs AS LIST
+    SET begin TO -1.0
+    SET end TO 1.0
+    SET value_begin TO CALL poly WITH ARGUMENTS xs, begin
+    SET value_end TO CALL poly WITH ARGUMENTS xs, end
+    SET product TO value_begin MULTIPLY value_end
+    WHILE product GREATER THAN 0
+        SET begin TO begin MULTIPLY 2.0
+        SET end TO end MULTIPLY 2.0
+        SET value_begin TO CALL poly WITH ARGUMENTS xs, begin
+        SET value_end TO CALL poly WITH ARGUMENTS xs, end
+        SET product TO value_begin MULTIPLY value_end
+    END WHILE
+    WHILE end MINUS begin GREATER THAN 0.0000000001
+        SET center TO (begin PLUS end) DIVIDE 2.0
+        SET value_center TO CALL poly WITH ARGUMENTS xs, center
+        SET product_center_begin TO value_center MULTIPLY value_begin
+        IF product_center_begin GREATER THAN 0
+            SET begin TO center
+            SET value_begin TO value_center
+        ELSE
+            SET end TO center
+            SET value_end TO value_center
+        END IF
+    END WHILE
+    RETURN begin
+END FUNCTION

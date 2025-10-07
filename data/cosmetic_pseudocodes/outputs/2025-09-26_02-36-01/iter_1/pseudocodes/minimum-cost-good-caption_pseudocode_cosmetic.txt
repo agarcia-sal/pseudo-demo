@@ -1,0 +1,58 @@
+CLASS Solution  
+    FUNCTION minCostGoodCaption(caption)  
+        LET lengthCaption = LENGTH(caption)  
+        IF lengthCaption < 3 THEN  
+            RETURN ""  
+        END IF  
+  
+        LET chars = ARRAY_FROM_STRING(caption)  
+        LET index = 0  
+  
+        WHILE index < lengthCaption DO  
+            LET segmentStart = index  
+            WHILE index < lengthCaption AND chars[index] = chars[segmentStart] DO  
+                index = index + 1  
+            END WHILE  
+  
+            LET segmentLength = index - segmentStart  
+  
+            IF segmentLength < 3 THEN  
+                IF segmentStart > 0 AND chars[segmentStart - 1] = chars[segmentStart] THEN  
+                    chars[segmentStart - 1] = chars[segmentStart]  
+                    segmentStart = segmentStart - 1  
+                    segmentLength = segmentLength + 1  
+                END IF  
+  
+                IF index < lengthCaption AND chars[index - 1] = chars[index] THEN  
+                    chars[index] = chars[index - 1]  
+                    index = index + 1  
+                    segmentLength = segmentLength + 1  
+                END IF  
+  
+                IF segmentLength < 3 THEN  
+                    IF segmentStart > 0 THEN  
+                        LET pivotChar = chars[segmentStart - 1]  
+                    ELSE  
+                        LET pivotChar = chars[index]  
+                    END IF  
+  
+                    IF pivotChar = 'a' THEN  
+                        pivotChar = 'b'  
+                    ELSE IF pivotChar = 'z' THEN  
+                        pivotChar = 'y'  
+                    ELSE  
+                        pivotChar = CHAR_CODE(pivotChar) + 1 AS CHARACTER  
+                    END IF  
+  
+                    FOR pos FROM segmentStart TO segmentStart + segmentLength - 1 DO  
+                        chars[pos] = pivotChar  
+                    END FOR  
+  
+                    index = segmentStart + segmentLength  
+                END IF  
+            END IF  
+        END WHILE  
+  
+        RETURN STRING_JOIN(chars)  
+    END FUNCTION  
+END CLASS

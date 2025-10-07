@@ -1,0 +1,78 @@
+CLASS Solution
+    FUNCTION lastNonEmptyString(s)
+        FUNCTION freqCounter(str)
+            SET idxCounter TO 0
+            DECLARE freqMap AS map from char to integer INITIALIZED empty
+            WHILE idxCounter < LENGTH(str) DO
+                SET symb TO str[idxCounter]
+                IF symb IN freqMap THEN
+                    SET freqMap[symb] TO freqMap[symb] + 1
+                ELSE
+                    SET freqMap[symb] TO 0 + 1
+                END IF
+                SET idxCounter TO idxCounter + 1
+            END WHILE
+            RETURN freqMap
+        END FUNCTION
+
+        FUNCTION determineMaxVal(m)
+            DECLARE vals AS list of integer INITIALIZED empty
+            FOR EACH k IN KEYS(m) DO
+                APPEND m[k] TO vals
+            END FOR
+            IF LENGTH(vals) = 0 THEN
+                RETURN 0
+            END IF
+            SET largest TO vals[0]
+            SET i TO 1
+            WHILE i < LENGTH(vals) DO
+                IF vals[i] > largest THEN
+                    SET largest TO vals[i]
+                END IF
+                SET i TO i + 1
+            END WHILE
+            RETURN largest
+        END FUNCTION
+
+        FUNCTION collectMaxFreqChars(m, target)
+            DECLARE container AS set INITIALIZED empty
+            FOR EACH k IN KEYS(m) DO
+                IF m[k] = target THEN
+                    ADD k TO container
+                END IF
+            END FOR
+            RETURN container
+        END FUNCTION
+
+        FUNCTION lastToFirstConcat(lst)
+            DECLARE resStr TO "" 
+            SET i TO LENGTH(lst) - 1
+            REPEAT
+                SET resStr TO resStr + lst[i]
+                SET i TO i - 1
+            UNTIL i < 0
+            RETURN resStr
+        END FUNCTION
+
+        SET charTally TO freqCounter(s)
+        SET maximumCount TO determineMaxVal(charTally)
+        SET freqMaxChars TO collectMaxFreqChars(charTally, maximumCount)
+        DECLARE collected AS list INITIALIZED empty
+
+        FUNCTION descendIndex(j)
+            IF j < 0 THEN
+                RETURN
+            END IF
+            SET curChar TO s[j]
+            IF curChar IN freqMaxChars THEN
+                APPEND curChar TO collected
+                REMOVE curChar FROM freqMaxChars
+            END IF
+            descendIndex(j - 1)
+        END FUNCTION
+
+        descendIndex(LENGTH(s) - 1)
+
+        RETURN lastToFirstConcat(collected)
+    END FUNCTION
+END CLASS

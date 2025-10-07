@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+        SET length_nums TO LENGTH(nums)
+        SET length_changes TO LENGTH(changeIndices)
+
+        FUNCTION can_mark_by_second(time_limit)
+            SET positions_last TO ARRAY(length_nums, FILL_WITH -1)
+            SET index_counter TO 0
+            WHILE index_counter < time_limit
+                SET idx_adjusted TO changeIndices[index_counter] - 1
+                SET positions_last[idx_adjusted] TO index_counter
+                SET index_counter TO index_counter + 1
+            END WHILE
+
+            SET required_decrements TO 0
+            FOR pos IN 0 TO length_nums - 1
+                SET required_decrements TO required_decrements + nums[pos]
+            END FOR
+
+            SET decrements_remaining TO 0
+            SET marked_set TO EMPTY SET
+            SET step_counter TO 0
+            REPEAT
+                IF NOT step_counter < time_limit THEN BREAK
+                SET target_idx TO changeIndices[step_counter] - 1
+                IF target_idx NOT IN marked_set THEN
+                    IF positions_last[target_idx] == step_counter THEN
+                        IF nums[target_idx] <= decrements_remaining THEN
+                            SET decrements_remaining TO decrements_remaining - nums[target_idx]
+                            ADD target_idx TO marked_set
+                        ELSE
+                            RETURN False
+                        END IF
+                    ELSE
+                        SET decrements_remaining TO decrements_remaining + 1
+                    END IF
+                ELSE
+                    SET decrements_remaining TO decrements_remaining + 1
+                END IF
+                SET step_counter TO step_counter + 1
+            UNTIL FALSE
+
+            RETURN LENGTH(marked_set) == length_nums
+        END FUNCTION
+
+        SET low_bound TO 0
+        SET high_bound TO length_changes + 1
+
+        FUNCTION integer_divide(a, b)
+            RETURN FLOOR(a / b)
+        END FUNCTION
+
+        WHILE low_bound < high_bound DO
+            SET middle TO integer_divide(low_bound + high_bound, 2)
+            IF can_mark_by_second(middle) THEN
+                SET high_bound TO middle
+            ELSE
+                SET low_bound TO low_bound + 1
+            END IF
+        END WHILE
+
+        IF low_bound <= length_changes THEN
+            RETURN low_bound
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

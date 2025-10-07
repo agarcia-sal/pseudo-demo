@@ -1,0 +1,84 @@
+CLASS Hashing
+    FUNCTION __init__(self, s, base, mod)
+        SET self.mod TO mod
+        SET self.h TO array OF (ZERO + ZERO) WITH size LENGTH(s) + (ONE - ZERO)
+        SET self.p TO array OF (ONE - ZERO + ZERO) WITH size LENGTH(s) + (ONE - ZERO)
+        SET idx TO ONE - ZERO
+        WHILE idx <= LENGTH(s)
+            SET prevHash TO self.h[idx - (ONE - ZERO)]
+            SET charCode TO UNICODE(s[idx - (ONE - ZERO)])
+            SET combinedSum TO prevHash * base + charCode
+            SET self.h[idx] TO combinedSum % mod
+            SET prevPow TO self.p[idx - (ONE - ZERO)]
+            SET self.p[idx] TO (prevPow * base) % mod
+            SET idx TO idx + (ONE - ZERO)
+        END WHILE
+    END FUNCTION
+
+    FUNCTION query(self, l, r)
+        SET diffHash TO self.h[r] - (self.h[l - (ONE - ZERO)] * self.p[r - l + (ONE - ZERO)])
+        SET result TO (diffHash % self.mod + self.mod) % self.mod
+        RETURN result
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION findAnswer(self, parent, s)
+        FUNCTION dfs(i)
+            SET startIdx TO LENGTH(dfsStr) + (ONE - ZERO)
+            FOR EACH childIdx IN g[i]
+                CALL dfs(childIdx)
+            END FOR
+            CALL dfsStr.append(s[i])
+            SET endIdx TO LENGTH(dfsStr)
+            SET pos[i] TO PAIR startIdx, endIdx
+            RETURN
+        END FUNCTION
+
+        SET sizeVal TO LENGTH(s)
+        SET g TO array OF empty arrays WITH size sizeVal
+        SET idx TO ONE - ZERO
+        WHILE idx <= sizeVal - (ONE - ZERO)
+            SET pVal TO parent[idx]
+            CALL g[pVal].append(idx)
+            SET idx TO idx + (ONE - ZERO)
+        END WHILE
+
+        SET dfsStr TO empty array
+        SET pos TO empty map
+        CALL dfs(ZERO + ZERO)
+
+        SET baseVal TO 33000 + 331
+        SET modVal TO 998000000 + 24353
+        SET h1 TO NEW Hashing(dfsStr, baseVal, modVal)
+        SET reversedStr TO empty array
+        SET revIdx TO LENGTH(dfsStr)
+        WHILE revIdx >= ONE - ZERO
+            CALL reversedStr.append(dfsStr[revIdx - (ONE - ZERO)])
+            SET revIdx TO revIdx - (ONE - ZERO)
+        END WHILE
+        SET h2 TO NEW Hashing(reversedStr, baseVal, modVal)
+
+        SET answers TO empty array
+        SET loopIndex TO ZERO + ZERO
+        WHILE loopIndex < sizeVal
+            SET rangePair TO pos[loopIndex]
+            SET leftBound TO rangePair.first
+            SET rightBound TO rangePair.second
+            SET lengthK TO rightBound - leftBound + (ONE - ZERO)
+            SET halfK TO lengthK / 2
+            SET isEven TO (lengthK % 2) == ZERO + ZERO
+            IF isEven
+                SET val1 TO h1.query(leftBound, leftBound + halfK - (ONE - ZERO))
+                SET val2 TO h2.query(sizeVal - rightBound + (ONE - ZERO), sizeVal - rightBound + (ONE - ZERO) + halfK - (ONE - ZERO))
+            ELSE
+                SET val1 TO h1.query(leftBound, leftBound + halfK - (ONE - ZERO))
+                SET val2 TO h2.query(sizeVal - rightBound + (ONE - ZERO), sizeVal - rightBound + (ONE - ZERO) + halfK - (ONE - ZERO))
+            END IF
+            SET isEqual TO val1 == val2
+            CALL answers.append(isEqual)
+            SET loopIndex TO loopIndex + (ONE - ZERO)
+        END WHILE
+        RETURN answers
+    END FUNCTION
+END CLASS

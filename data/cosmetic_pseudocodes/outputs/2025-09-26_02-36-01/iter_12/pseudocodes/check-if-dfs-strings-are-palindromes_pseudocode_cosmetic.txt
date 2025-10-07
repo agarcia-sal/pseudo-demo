@@ -1,0 +1,97 @@
+CLASS Hashing
+    FUNCTION __init__(self, s, base, mod)
+        SET self.mod TO mod
+        SET length TO LENGTH OF s
+        SET self.h TO list with (length + 1) elements all zero
+        SET self.p TO list with (length + 1) elements all one
+        FUNCTION compute_hash(index)
+            IF index > length
+                RETURN
+            CALL compute_hash(index + 1)
+            SET prev_hash TO self.h[index - 1]
+            SET char_code TO UNICODE code point of s[index - 1]
+            SET temp1 TO (prev_hash * base) MOD mod
+            SET self.h[index] TO (temp1 + char_code) MOD mod
+            SET self.p[index] TO (self.p[index - 1] * base) MOD mod
+        CALL compute_hash(1)
+    END FUNCTION
+
+    FUNCTION query(self, l, r)
+        SET hash_r TO self.h[r]
+        SET hash_l_minus_1 TO self.h[l - 1]
+        SET pow_len TO self.p[r - l + 1]
+        SET diff TO (hash_r - (hash_l_minus_1 * pow_len)) MOD self.mod
+        IF diff < 0
+            SET diff TO diff + self.mod
+        RETURN diff
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION findAnswer(self, parent, s)
+        SET n TO LENGTH OF s
+        SET graph TO empty list
+        REPEAT n TIMES APPEND empty list TO graph
+        SET idx TO 1
+        FUNCTION build_graph()
+            IF idx >= n
+                RETURN
+            SET u TO parent[idx]
+            APPEND idx TO graph[u]
+            SET idx TO idx + 1
+            CALL build_graph()
+        CALL build_graph()
+
+        SET dfsStr TO empty list
+        SET pos TO empty dictionary
+
+        FUNCTION traverse(node)
+            SET left_bound TO LENGTH OF dfsStr + 1
+            SET children TO graph[node]
+            SET counter TO 0
+            WHILE counter < LENGTH OF children
+                SET child TO children[counter]
+                SET counter TO counter + 1
+                CALL traverse(child)
+            END WHILE
+            APPEND s[node] TO dfsStr
+            SET right_bound TO LENGTH OF dfsStr
+            SET pos[node] TO PAIR left_bound AND right_bound
+        CALL traverse(0)
+
+        SET base TO (33333 + 0) + 0
+        SET mod TO (998244353 - 0)
+        SET hash_forward TO new Hashing(dfsStr, base, mod)
+        SET rev_dfsStr TO empty list
+        SET rev_index TO LENGTH OF dfsStr - 1
+        WHILE rev_index >= 0
+            APPEND dfsStr[rev_index] TO rev_dfsStr
+            SET rev_index TO rev_index - 1
+        END WHILE
+        SET hash_backward TO new Hashing(rev_dfsStr, base, mod)
+        SET result TO empty list
+        SET i TO 0
+        WHILE i < n
+            SET l TO pos[i][0]
+            SET r TO pos[i][1]
+            SET length_substring TO r - l + 1
+            FUNCTION is_even(num)
+                RETURN (num MOD 2) == 0
+            END FUNCTION
+            IF is_even(length_substring)
+                SET mid TO length_substring / 2
+                SET val1 TO hash_forward.query(l, l + mid - 1)
+                SET start_index TO n - r + 1
+                SET val2 TO hash_backward.query(start_index, start_index + mid - 1)
+            ELSE
+                SET mid TO length_substring // 2
+                SET val1 TO hash_forward.query(l, l + mid - 1)
+                SET start_index TO n - r + 1
+                SET val2 TO hash_backward.query(start_index, start_index + mid - 1)
+            END IF
+            APPEND (val1 == val2) TO result
+            SET i TO i + 1
+        END WHILE
+        RETURN result
+    END FUNCTION
+END CLASS

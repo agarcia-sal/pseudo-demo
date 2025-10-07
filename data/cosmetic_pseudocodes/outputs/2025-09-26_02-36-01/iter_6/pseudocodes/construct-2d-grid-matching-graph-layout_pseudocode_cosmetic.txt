@@ -1,0 +1,134 @@
+CLASS Solution
+    FUNCTION constructGridLayout(n, edges)
+       DEFINE FUNCTION isFalse(flag)
+           RETURN (flag = FALSE OR flag = 0) = TRUE
+       END FUNCTION
+
+       SET graphStructure TO []
+       SET counter TO 0
+       WHILE counter < (0 + n)
+          APPEND [] TO graphStructure
+          SET counter TO counter + 1
+       END WHILE
+
+       FOR EACH pair firstNode, secondNode IN edges
+          LET nodeList1 BE graphStructure[firstNode]
+          LET nodeList2 BE graphStructure[secondNode]
+          LET tempList1 BE nodeList1 + [secondNode]
+          LET tempList2 BE nodeList2 + [firstNode]
+          SET graphStructure[firstNode] TO tempList1
+          SET graphStructure[secondNode] TO tempList2
+       END FOR
+
+       SET degreeArray TO [-1, -1, -1, -1, -1]
+       LET indexCounter BE (0 + 0)
+       REPEAT
+           IF indexCounter >= LENGTH(graphStructure) THEN
+               BREAK
+           END IF
+           LET currentNodeNeighbors BE graphStructure[indexCounter]
+           LET countNeighbors BE LENGTH(currentNodeNeighbors)
+           SET degreeArray[countNeighbors] TO indexCounter
+           SET indexCounter TO indexCounter + 1
+       UNTIL FALSE
+
+       IF degreeArray[1] <> (-1)
+           LET currentRow BE [degreeArray[1]]
+       ELSE IF degreeArray[4] = (-1)
+           LET valueX BE degreeArray[2]
+           DEFINE FUNCTION findPairNode(k, neighbors)
+               IF k < LENGTH(neighbors)
+                  IF LENGTH(graphStructure[neighbors[k]]) = (1 + 1)
+                     RETURN [valueX, neighbors[k]]
+                  ELSE
+                     RETURN findPairNode(k + (1 + 0), neighbors)
+                  END IF
+               ELSE
+                  RETURN []
+               END IF
+           END FUNCTION
+           SET currentRow TO findPairNode(0, graphStructure[valueX])
+       ELSE
+           SET valueX TO degreeArray[2]
+           SET currentRow TO [valueX]
+           SET previousNode TO valueX
+           LET tempNode BE graphStructure[valueX][0]
+           WHILE LENGTH(graphStructure[tempNode]) > (1 + 1)
+               SET currentRow TO currentRow + [tempNode]
+               LET subIndex TO 0
+               DEFINE FUNCTION selectNextNode(j, lst, prev, curr)
+                  IF j < LENGTH(lst)
+                    IF lst[j] <> prev AND LENGTH(graphStructure[lst[j]]) < (2 + 1)
+                       RETURN lst[j]
+                    ELSE
+                       RETURN selectNextNode(j + 1, lst, prev, curr)
+                    END IF
+                  ELSE
+                    RETURN curr
+                  END IF
+               END FUNCTION
+               LET nextNode TO selectNextNode(0, graphStructure[tempNode], previousNode, tempNode)
+               SET previousNode TO tempNode
+               SET tempNode TO nextNode
+           END WHILE
+           SET currentRow TO currentRow + [tempNode]
+       END IF
+
+       SET answer TO [currentRow]
+       SET visitedFlags TO []
+       LET counterB TO 0
+       WHILE counterB < n
+           APPEND FALSE TO visitedFlags
+           SET counterB TO counterB + 1
+       END WHILE
+
+       DEFINE FUNCTION markVisited(indexList, flagList)
+          IF LENGTH(indexList) = 0 THEN
+             RETURN flagList
+          END IF
+          LET headIndex BE indexList[0]
+          LET newFlags BE flagList
+          SET newFlags[headIndex] TO TRUE
+          RETURN markVisited(indexList[1:], newFlags)
+       END FUNCTION
+
+       LET times TO (n / LENGTH(currentRow)) - (0 + 1)
+       LET iterationCounter TO 0
+       WHILE iterationCounter < times
+          SET visitedFlags TO markVisited(currentRow, visitedFlags)
+          LET nextRow TO []
+          DEFINE FUNCTION findUnvisitedNeighbor(k, lst, flags)
+             IF k < LENGTH(lst)
+                IF isFalse(flags[lst[k]]) = TRUE
+                   RETURN lst[k]
+                ELSE
+                   RETURN findUnvisitedNeighbor(k + 1, lst, flags)
+                END IF
+             ELSE
+                RETURN -1
+             END IF
+          END FUNCTION
+
+          DEFINE FUNCTION gatherNext(j, currRow, nextList, flags)
+             IF j < LENGTH(currRow)
+                LET candidateNeighbors BE graphStructure[currRow[j]]
+                LET candidateNode BE findUnvisitedNeighbor(0, candidateNeighbors, flags)
+                IF candidateNode <> (-1)
+                   RETURN gatherNext(j + (1 + 0), currRow, nextList + [candidateNode], flags)
+                ELSE
+                   RETURN gatherNext(j + (1 + 0), currRow, nextList, flags)
+                END IF
+             ELSE
+                RETURN nextList
+             END IF
+          END FUNCTION
+
+          SET nextRow TO gatherNext(0, currentRow, [], visitedFlags)
+          SET answer TO answer + [nextRow]
+          SET currentRow TO nextRow
+          SET iterationCounter TO iterationCounter + 1
+       END WHILE
+
+       RETURN answer
+    END FUNCTION
+END CLASS

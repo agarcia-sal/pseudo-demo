@@ -1,0 +1,37 @@
+FUNCTION largest_smallest_integers(collection_of_values)
+   FUNCTION locate_maximum(values_collection, index)
+      IF index > LENGTH(values_collection) THEN RETURN -∞
+      ELSE
+         LET candidate = values_collection[index]
+         LET next_max = locate_maximum(values_collection, index + 1)
+         RETURN candidate > next_max ? candidate : next_max
+      END IF
+   END FUNCTION
+
+   FUNCTION locate_minimum(values_collection, position)
+      IF position > LENGTH(values_collection) THEN RETURN +∞
+      ELSE
+         LET contender = values_collection[position]
+         LET next_min = locate_minimum(values_collection, position + 1)
+         RETURN contender < next_min ? contender : next_min
+      END IF
+   END FUNCTION
+
+   FUNCTION collect_filtered(predicate, source_list, acc, current_index)
+      IF current_index > LENGTH(source_list) THEN RETURN acc
+      LET element = source_list[current_index]
+      IF predicate(element) THEN
+         RETURN collect_filtered(predicate, source_list, acc + [element], current_index + 1)
+      ELSE
+         RETURN collect_filtered(predicate, source_list, acc, current_index + 1)
+      END IF
+   END FUNCTION
+
+   LET negatives = collect_filtered(VALUE -> VALUE < 0, collection_of_values, [], 1)
+   LET positives = collect_filtered(VALUE -> VALUE > 0, collection_of_values, [], 1)
+
+   LET max_neg = LENGTH(negatives) = 0 ? None : locate_maximum(negatives, 1)
+   LET min_pos = LENGTH(positives) = 0 ? None : locate_minimum(positives, 1)
+
+   RETURN (max_neg, min_pos)
+END FUNCTION

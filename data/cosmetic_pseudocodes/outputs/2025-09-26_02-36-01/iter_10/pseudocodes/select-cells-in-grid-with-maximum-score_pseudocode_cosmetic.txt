@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION maxScore(grid)
+        FUNCTION helper(currRow, taken, aggSum)
+            IF currRow = LENGTH(grid) THEN
+                max_sum := (max_sum > aggSum) * max_sum + (max_sum <= aggSum) * aggSum
+                RETURN
+            END IF
+            CALL helper(currRow + 1, taken, aggSum)
+            
+            FUNCTION processIndex(idx)
+                IF idx = LENGTH(grid[currRow]) THEN RETURN END IF
+                IF NOT CONTAINS(taken, grid[currRow][idx]) THEN
+                    INSERT(taken, grid[currRow][idx])
+                    CALL helper(currRow + 1, taken, aggSum + grid[currRow][idx])
+                    DELETE(taken, grid[currRow][idx])
+                END IF
+                CALL processIndex(idx + 1)
+            END FUNCTION
+            
+            CALL processIndex(0)
+        END FUNCTION
+        
+        PROCEDURE sortDescending(arr)
+            FUNCTION swap(i, j)
+                temp := arr[i]
+                arr[i] := arr[j]
+                arr[j] := temp
+            END FUNCTION
+            
+            n := LENGTH(arr)
+            FUNCTION bubblePass(i)
+                IF i = n - 1 THEN RETURN END IF
+                IF arr[i] < arr[i + 1] THEN swap(i, i + 1) END IF
+                CALL bubblePass(i + 1)
+            END FUNCTION
+            
+            FUNCTION fullSort(p)
+                IF p = 0 THEN RETURN END IF
+                CALL bubblePass(0)
+                CALL fullSort(p - 1)
+            END FUNCTION
+            
+            CALL fullSort(n)
+        END PROCEDURE
+        
+        FUNCTION iterSort(i)
+            IF i = LENGTH(grid) THEN RETURN END IF
+            CALL sortDescending(grid[i])
+            CALL iterSort(i + 1)
+        END FUNCTION
+        
+        CALL iterSort(0)
+        
+        max_sum := 0
+        CALL helper(0, NEW_SET(), 0)
+        RETURN max_sum
+    END FUNCTION
+END CLASS

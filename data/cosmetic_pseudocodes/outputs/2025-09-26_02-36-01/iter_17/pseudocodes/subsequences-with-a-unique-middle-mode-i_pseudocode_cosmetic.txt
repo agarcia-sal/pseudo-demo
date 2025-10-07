@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        DEFINE CONST_MODULO ← (10 ^ 9) + 7
+        DEFINE size_nums ← LENGTH(nums)
+        IF size_nums < 5 THEN
+            RETURN 0
+        END IF
+        DEFINE comb_set ← CALL generate_combinations(nums, 5)
+        DEFINE total_count ← 0
+        DEFINE comb_index ← 0
+        WHILE comb_index < LENGTH(comb_set)
+            DEFINE current_subseq ← comb_set[comb_index]
+            DEFINE frequency_map ← CALL map_frequencies(current_subseq)
+            DEFINE median_element ← current_subseq[2]
+            DEFINE median_freq ← frequency_map[median_element]
+            DEFINE verify_unique ← TRUE
+            DEFINE freq_keys ← KEYS(frequency_map)
+            DEFINE key_pos ← 0
+            REPEAT
+                IF key_pos >= LENGTH(freq_keys) THEN
+                    BREAK
+                END IF
+                DEFINE current_key ← freq_keys[key_pos]
+                DEFINE current_freq ← frequency_map[current_key]
+                IF (current_key != median_element) AND (current_freq >= median_freq) THEN
+                    verify_unique ← FALSE
+                    EXIT REPEAT
+                END IF
+                key_pos ← key_pos + 1
+            UNTIL FALSE
+            IF verify_unique THEN
+                total_count ← total_count + 1
+            END IF
+            comb_index ← comb_index + 1
+        END WHILE
+        RETURN total_count MOD CONST_MODULO
+    END FUNCTION
+
+    FUNCTION generate_combinations(collection, select_count)
+        DEFINE result ← EMPTY LIST
+        DEFINE helper ← FUNCTION(index, chosen)
+            IF LENGTH(chosen) = select_count THEN
+                APPEND COPY OF chosen TO result
+                RETURN
+            END IF
+            IF index >= LENGTH(collection) THEN
+                RETURN
+            END IF
+            CALL helper(index + 1, chosen)
+            APPEND collection[index] TO chosen
+            CALL helper(index + 1, chosen)
+            REMOVE LAST ELEMENT FROM chosen
+        END FUNCTION
+        CALL helper(0, EMPTY LIST)
+        RETURN result
+    END FUNCTION
+
+    FUNCTION map_frequencies(array)
+        DEFINE freq_map ← EMPTY MAP
+        DEFINE pos ← 0
+        REPEAT
+            IF pos >= LENGTH(array) THEN
+                BREAK
+            END IF
+            DEFINE element ← array[pos]
+            IF element NOT IN freq_map THEN
+                freq_map[element] ← 1
+            ELSE
+                freq_map[element] ← freq_map[element] + 1
+            END IF
+            pos ← pos + 1
+        UNTIL FALSE
+        RETURN freq_map
+    END FUNCTION
+END CLASS

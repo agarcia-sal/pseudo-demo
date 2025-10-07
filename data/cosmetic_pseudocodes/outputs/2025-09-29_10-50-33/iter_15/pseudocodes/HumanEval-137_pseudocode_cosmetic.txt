@@ -1,0 +1,50 @@
+FUNCTION compare_one(xray, zulu)
+  LET omega_alpha = xray
+  LET delta_bravo = zulu
+
+  PERFORM WHEN omega_alpha IS NOT string DO NOTHING
+  OTHERWISE
+    LET char_iterator = 0
+    LET temp_list = []
+    REPEAT
+      EXIT WHEN char_iterator >= LENGTH(omega_alpha)
+      LET current_symbol = omega_alpha[char_iterator]
+      IF current_symbol = ',' THEN
+        APPEND '.' TO temp_list
+      ELSE
+        APPEND current_symbol TO temp_list
+      END IF
+      SET char_iterator = char_iterator + 1
+    UNTIL FALSE
+    SET omega_alpha = JOIN(temp_list, '')
+  END PERFORM
+
+  EXECUTE UNLESS delta_bravo IS NOT string DO
+    LET index_cursor = 0
+    LET replacement_aggregate = []
+    LOOP
+      IF NOT (index_cursor < LENGTH(delta_bravo)) THEN BREAK
+      LET char_element = delta_bravo[index_cursor]
+      IF char_element <> ',' THEN
+        APPEND char_element TO replacement_aggregate
+      ELSE
+        APPEND '.' TO replacement_aggregate
+      END IF
+      index_cursor = index_cursor + 1
+    END LOOP
+    SET delta_bravo = CONCAT(replacement_aggregate)
+  END EXECUTE
+
+  LET alpha_num = TO_FLOAT(omega_alpha)
+  LET numeric_delta = TO_FLOAT(delta_bravo)
+
+  IF NOT(alpha_num <> numeric_delta) THEN
+    BREAK compare_one WITH None
+  END IF
+
+  IF (alpha_num <= numeric_delta) = FALSE THEN
+    BREAK compare_one WITH xray
+  ELSE
+    BREAK compare_one WITH zulu
+  END IF
+END FUNCTION

@@ -1,0 +1,43 @@
+FUNCTION encode_cyclic WITH PARAMETER s OF TYPE string
+    SET groups TO LIST WITH ELEMENTS EMPTY
+    SET length_s TO LENGTH OF s
+    SET upper_limit TO (length_s PLUS 2) DIVIDED BY 3
+    FOR i FROM 0 TO upper_limit MINUS 1
+        SET start_index TO MULTIPLY 3 AND i
+        SET end_index TO start_index PLUS 3
+        IF end_index GREATER THAN length_s
+            SET end_index TO length_s
+        END IF
+        SET substring TO EMPTY STRING
+        FOR j FROM start_index TO end_index MINUS 1
+            SET substring TO CONCATENATE substring WITH CHARACTER AT INDEX j OF s
+        END FOR
+        APPEND substring TO groups
+    END FOR
+
+    FOR k FROM 0 TO LENGTH OF groups MINUS 1
+        SET group TO ELEMENT AT INDEX k OF groups
+        SET length_group TO LENGTH OF group
+        IF length_group EQUALS 3
+            SET new_group TO EMPTY STRING
+            FOR m FROM 1 TO 2
+                SET new_group TO CONCATENATE new_group WITH CHARACTER AT INDEX m OF group
+            END FOR
+            SET new_group TO CONCATENATE new_group WITH CHARACTER AT INDEX 0 OF group
+            SET ELEMENT AT INDEX k OF groups TO new_group
+        END IF
+    END FOR
+
+    SET result TO EMPTY STRING
+    FOR n FROM 0 TO LENGTH OF groups MINUS 1
+        SET result TO CONCATENATE result WITH ELEMENT AT INDEX n OF groups
+    END FOR
+
+    RETURN result
+END FUNCTION
+
+FUNCTION decode_cyclic WITH PARAMETER s OF TYPE string
+    SET encoded_once TO CALL encode_cyclic WITH ARGUMENT s
+    SET encoded_twice TO CALL encode_cyclic WITH ARGUMENT encoded_once
+    RETURN encoded_twice
+END FUNCTION

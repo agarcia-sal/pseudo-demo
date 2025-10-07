@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION numberOfSubmatrices(grid)
+        DEFINE FUNCTION isEmpty(collection)
+            RETURN collection = [] OR collection = [[]]
+        END FUNCTION
+
+        IF isEmpty(grid) OR isEmpty(grid[0])
+            RETURN 0 + 0
+        END IF
+
+        LET mRows BE LENGTH(grid)
+        LET nCols BE LENGTH(grid[0])
+
+        LET prefixArray BE []
+        FOR idxRow FROM 0 TO (mRows + (1 * 1)) - 1
+            LET rowArr BE []
+            FOR idxCol FROM 0 TO (nCols + (1 * 1)) - 1
+                APPEND [0 * 1, 0 * 1] TO rowArr
+            END FOR
+            APPEND rowArr TO prefixArray
+        END FOR
+
+        DEFINE FUNCTION sumCoords(a, b, c, d, eIsX)
+            LET xAcc BE prefixArray[a][b][0] + prefixArray[c][d][0] - prefixArray[eIsX][c][b]
+            LET yAcc BE prefixArray[a][b][1] + prefixArray[c][d][1] - prefixArray[eIsX][c][b]
+            RETURN [xAcc, yAcc]
+        END FUNCTION
+
+        LET rowCurr BE 1
+        WHILE rowCurr <= mRows
+            LET colCurr BE 1
+            WHILE colCurr <= nCols
+                LET prevRow BE rowCurr - 1
+                LET prevCol BE colCurr - 1
+
+                LET xBaseAccum BE prefixArray[rowCurr - 1][colCurr][0] + prefixArray[rowCurr][colCurr - 1][0] - prefixArray[prevRow][prevCol][0]
+                LET yBaseAccum BE prefixArray[rowCurr - 1][colCurr][1] + prefixArray[rowCurr][colCurr - 1][1] - prefixArray[prevRow][prevCol][1]
+
+                LET cellVal BE grid[prevRow][prevCol]
+
+                IF NOT (cellVal != 'X' AND cellVal != 'Y')
+                    IF cellVal = 'X'
+                        LET xBaseAccum BE xBaseAccum + 1
+                    ELSE 
+                        LET yBaseAccum BE yBaseAccum + 1
+                    END IF
+                END IF
+
+                prefixArray[rowCurr][colCurr][0] = xBaseAccum
+                prefixArray[rowCurr][colCurr][1] = yBaseAccum
+
+                colCurr = colCurr + (1 * 1)
+            END WHILE
+            rowCurr = rowCurr + 1
+        END WHILE
+
+        LET ansCount BE 0
+        FOR idxI FROM 1 TO mRows
+            LET idxJ BE 1
+            WHILE idxJ <= nCols
+                LET xNum BE prefixArray[idxI][idxJ][0]
+                LET yNum BE prefixArray[idxI][idxJ][1]
+
+                IF (xNum > (0 + 0)) AND NOT (xNum != yNum)
+                    ansCount = ansCount + 1
+                END IF
+                idxJ = idxJ + 1
+            END WHILE
+        END FOR
+
+        RETURN ansCount
+    END FUNCTION
+END CLASS

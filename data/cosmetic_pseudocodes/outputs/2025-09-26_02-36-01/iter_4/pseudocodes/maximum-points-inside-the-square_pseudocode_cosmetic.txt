@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION maxPointsInsideSquare(points s)
+        DECLARE total_points AS LENGTH OF s
+        INITIALIZE greatest_points FOUND AS 0
+        
+        SET i_index TO 0
+        WHILE i_index LESS THAN total_points
+            EXTRACT x_coord FROM s AT i_index AT position zero
+            EXTRACT y_coord FROM s AT i_index AT position one
+
+            COMPUTE abs_x AS x_coord IF x_coord >= 0 ELSE -x_coord
+            COMPUTE abs_y AS y_coord IF y_coord >= 0 ELSE -y_coord
+
+            ASSIGN side_limit AS abs_x
+            IF abs_y GREATER THAN side_limit THEN
+                REASSIGN side_limit TO abs_y
+            END IF
+
+            INITIALIZE encountered_tags AS empty map/dictionary
+            DEFINE is_square_valid AS true
+
+            SET j_index TO 0
+            WHILE j_index LESS THAN total_points
+                ASSIGN current_x TO s AT j_index AT position zero
+                ASSIGN current_y TO s AT j_index AT position one
+
+                COMPUTE abs_current_x AS current_x IF current_x >= 0 ELSE -current_x
+                COMPUTE abs_current_y AS current_y IF current_y >= 0 ELSE -current_y
+
+                IF NOT (abs_current_x GREATER THAN side_limit OR abs_current_y GREATER THAN side_limit)
+                    ASSIGN curr_tag TO s AT j_index
+                    IF curr_tag IN encountered_tags
+                        SET is_square_valid TO false
+                        EXIT THE INNER WHILE LOOP
+                    ELSE
+                        SET encountered_tags[curr_tag] TO true
+                    END IF
+                END IF
+
+                INCREMENT j_index BY 1
+            END WHILE
+
+            IF is_square_valid
+                CALCULATE count_tags AS LENGTH OF encountered_tags
+                IF count_tags GREATER THAN greatest_points FOUND
+                    SET greatest_points FOUND TO count_tags
+                END IF
+            END IF
+
+            INCREMENT i_index BY 1
+        END WHILE
+
+        RETURN greatest_points FOUND
+    END FUNCTION
+END CLASS

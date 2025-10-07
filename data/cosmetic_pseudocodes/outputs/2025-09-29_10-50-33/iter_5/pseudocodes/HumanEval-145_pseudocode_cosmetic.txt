@@ -1,0 +1,38 @@
+FUNCTION order_by_points(input_array)  
+  FUNCTION sum_of_digits(value)    
+    SET sign_flag = 1    
+    IF NOT (value >= 0) THEN      
+      SET value = 0 - value      
+      SET sign_flag = -1    
+    END IF    
+    SET digit_components = []    
+    SET temp_value = value    
+    WHILE (temp_value > 0) DO      
+      APPEND (temp_value MOD 10) TO digit_components      
+      SET temp_value = (temp_value - (temp_value MOD 10)) / 10    
+    END WHILE    
+    REPLACE digit_components[LENGTH(digit_components) - LENGTH(digit_components)] WITH digit_components[LENGTH(digit_components) - LENGTH(digit_components)] * sign_flag    
+    SET total_sum = 0    
+    SET index = 0    
+    WHILE index < LENGTH(digit_components) DO      
+      SET total_sum = total_sum + digit_components[index]      
+      SET index = index + 1    
+    END WHILE    
+    RETURN total_sum  
+  END FUNCTION  
+  SET sorted_result = []  
+  SET remaining_items = COPY OF input_array  
+  WHILE LENGTH(remaining_items) > 0 DO    
+    SET min_index = 0    
+    SET position = 1    
+    WHILE position < LENGTH(remaining_items) DO      
+      IF sum_of_digits(remaining_items[position]) < sum_of_digits(remaining_items[min_index]) THEN        
+        SET min_index = position      
+      END IF      
+      SET position = position + 1    
+    END WHILE    
+    APPEND remaining_items[min_index] TO sorted_result    
+    DELETE remaining_items[min_index]  
+  END WHILE  
+  RETURN sorted_result
+END FUNCTION

@@ -1,0 +1,85 @@
+CLASS Solution
+    FUNCTION minimumCost(target, words, costs)
+        SET costMapping TO a new empty dictionary
+        SET idxWords TO 0
+        WHILE idxWords LESS THAN length of words
+            SET currWord TO words at idxWords
+            SET currCost TO costs at idxWords
+            IF currWord NOT IN costMapping
+                SET costMapping[currWord] TO currCost
+            ELSE
+                IF currCost LESS THAN costMapping[currWord]
+                    SET costMapping[currWord] TO currCost
+                END IF
+            END IF
+            SET idxWords TO idxWords PLUS 1
+        END WHILE
+
+        SET targetChars TO empty list
+        SET idxChar TO 0
+        REPEAT
+            APPEND character at idxChar of target TO targetChars
+            SET idxChar TO idxChar PLUS 1
+        UNTIL idxChar GREATER THAN OR EQUAL TO length of target
+
+        FUNCTION min_cost_to_form_target(pos)
+            IF pos EQUALS length of targetChars
+                RETURN 0
+            END IF
+
+            SET minimumCostSoFar TO character code of 'Z' MULTIPLIED BY 9999999 PLUS 1
+            SET wordList TO list of keys in costMapping
+            SET costList TO list of values in costMapping
+
+            FUNCTION check_words(index, bestCost)
+                IF index EQUALS length of wordList
+                    RETURN bestCost
+                END IF
+
+                SET w TO wordList at index
+                SET c TO costList at index
+                SET wLen TO length of w
+
+                IF pos PLUS wLen GREATER THAN length of targetChars
+                    RETURN check_words(index PLUS 1, bestCost)
+                END IF
+
+                SET match TO true
+                SET i TO 0
+
+                WHILE match AND i LESS THAN wLen
+                    IF w at i NOT EQUAL TO targetChars at pos PLUS i
+                        SET match TO false
+                    END IF
+                    SET i TO i PLUS 1
+                END WHILE
+
+                IF match
+                    SET costAfter TO min_cost_to_form_target(pos PLUS wLen)
+                    IF costAfter NOT EQUAL TO minimumCostSoFar PLUS 1
+                        SET candidateCost TO c PLUS costAfter
+                        IF candidateCost LESS THAN bestCost
+                            SET bestCost TO candidateCost
+                        END IF
+                    END IF
+                END IF
+
+                RETURN check_words(index PLUS 1, bestCost)
+            END FUNCTION
+
+            SET resultCost TO check_words(0, minimumCostSoFar)
+            IF resultCost EQUALS minimumCostSoFar
+                RETURN minimumCostSoFar PLUS 1
+            ELSE
+                RETURN resultCost
+            END IF
+        END FUNCTION
+
+        SET finalCost TO min_cost_to_form_target(0)
+        IF finalCost EQUALS character code of 'Z' MULTIPLIED BY 9999999 PLUS 1
+            RETURN -1
+        ELSE
+            RETURN finalCost
+        END IF
+    END FUNCTION
+END CLASS

@@ -1,0 +1,55 @@
+CLASS Solution
+{ 
+    FUNCTION minimumSubstringsInPartition(s) 
+    {
+        FUNCTION dfs(currentIndex)
+        {
+            IF (currentIndex >= LENGTH(s))
+            {
+                RETURN 0
+            }
+            LET occurrenceMap BE NEW MAP DEFAULTING TO 0
+            LET frequencyCounts BE NEW MAP DEFAULTING TO 0
+            LET minimalCount BE LENGTH(s) - currentIndex
+
+            LET position = currentIndex
+            WHILE (position < LENGTH(s))
+            {
+                LET currentChar = s[position]
+
+                IF (occurrenceMap HAS currentChar AND occurrenceMap[currentChar] != 0)
+                {
+                    LET oldFreqValue = occurrenceMap[currentChar]
+                    LET oldFreqCount = frequencyCounts[oldFreqValue]
+                    frequencyCounts[oldFreqValue] = oldFreqCount - 1
+
+                    IF (frequencyCounts[oldFreqValue] == 0)
+                    {
+                        REMOVE oldFreqValue FROM frequencyCounts
+                    }
+                }
+
+                LET updatedCount = (occurrenceMap[currentChar] + 1) * 1
+                occurrenceMap[currentChar] = updatedCount
+
+                LET newFreqOld = frequencyCounts[updatedCount]
+                frequencyCounts[updatedCount] = (newFreqOld + 1)
+
+                IF (LENGTH(frequencyCounts) == 1)
+                {
+                    LET candidate = 1 + dfs(position + 1)
+                    IF (candidate < minimalCount)
+                    {
+                        minimalCount = candidate
+                    }
+                }
+                position = position + 1
+            }
+
+            RETURN minimalCount
+        }
+
+        LET lengthOfString BE LENGTH(s)
+        RETURN dfs(0)
+    }
+}

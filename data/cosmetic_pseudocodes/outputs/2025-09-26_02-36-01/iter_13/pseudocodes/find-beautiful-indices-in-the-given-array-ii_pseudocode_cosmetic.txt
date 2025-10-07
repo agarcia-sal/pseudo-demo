@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION beautifulIndices(s parameter a parameter b parameter k)
+        FUNCTION substrEqual(str parameter start parameter pattern) RETURNS Boolean
+            SET m TO LENGTH(pattern)
+            SET n TO LENGTH(str)
+            IF start LESS THAN 0 OR start GREATER THAN n MINUS m THEN
+                RETURN false
+            END IF
+            SET idx TO 0
+            REPEAT
+                IF str AT position start PLUS idx NOT EQUAL pattern AT position idx THEN
+                    RETURN false
+                END IF
+                SET idx TO idx PLUS 1
+                IF idx EQUALS m THEN
+                    BREAK
+                END IF
+            UNTIL false
+            RETURN true
+        END FUNCTION
+
+        FUNCTION findIndices(str parameter sub) RETURNS LIST
+            SET res TO empty list
+            SET pos TO 0
+            WHILE pos LESS THAN OR EQUAL TO LENGTH(str) MINUS LENGTH(sub)
+                IF substrEqual(str pos sub) THEN
+                    APPEND pos TO res
+                END IF
+                SET pos TO pos PLUS 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        SET collection_x TO findIndices(s a)
+        SET collection_y TO findIndices(s b)
+        SET resultIndices TO empty list
+
+        FUNCTION walk(i parameter j parameter)
+            IF i GREATER OR EQUAL LENGTH(collection_x) OR j GREATER OR EQUAL LENGTH(collection_y) THEN
+                RETURN
+            END IF
+            SET diff TO collection_x AT i MINUS collection_y AT j
+            IF diff LESS THAN 0 THEN
+                SET diff TO diff MINUS diff MINUS diff
+            END IF
+            IF diff LESS THAN OR EQUAL k THEN
+                APPEND collection_x AT i TO resultIndices
+                CALL walk(i PLUS 1 j)
+            ELSE
+                IF collection_x AT i LESS THAN collection_y AT j THEN
+                    CALL walk(i PLUS 1 j)
+                ELSE
+                    CALL walk(i j PLUS 1)
+                END IF
+            END IF
+
+        END FUNCTION
+
+        CALL walk(0 0)
+        RETURN resultIndices
+    END FUNCTION
+END CLASS

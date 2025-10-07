@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        IMPORT Counter AS count_elements
+
+        DECLARE char_frequencies AS count_elements(s)
+        IF char_frequencies CONTAINS '?' THEN
+            DELETE '?' FROM char_frequencies
+        END IF
+
+        DECLARE positions_of_questions AS list()
+        DECLARE idx AS zero
+        WHILE idx LESS THAN length of s DO
+            DECLARE current_char AS s AT idx
+            IF current_char EQUALS '?' THEN
+                ADD idx TO positions_of_questions
+            END IF
+            INCREMENT idx BY one
+        END WHILE
+
+        DECLARE chars_to_replace AS list()
+
+        DECLARE question_index AS zero
+        WHILE question_index LESS THAN length of positions_of_questions DO
+            DECLARE least_count AS infinity
+            DECLARE chosen_letter AS null
+            DECLARE letter_code AS character code of 'a'
+            WHILE letter_code LESS OR EQUAL TO character code of 'z' DO
+                DECLARE letter AS character represented by letter_code
+                DECLARE count_value AS 0
+                IF letter EXISTS IN char_frequencies THEN
+                    SET count_value TO char_frequencies[letter]
+                END IF
+
+                IF count_value LESS THAN least_count THEN
+                    SET least_count TO count_value
+                    SET chosen_letter TO letter
+                END IF
+                INCREMENT letter_code BY one
+            END WHILE
+            ADD chosen_letter TO chars_to_replace
+            IF chosen_letter EXISTS IN char_frequencies THEN
+                INCREMENT char_frequencies[chosen_letter] BY one
+            ELSE
+                ASSIGN char_frequencies[chosen_letter] TO one
+            END IF
+            INCREMENT question_index BY one
+        END WHILE
+
+        SORT chars_to_replace ASCENDING
+
+        DECLARE s_as_list AS list of characters from s
+
+        DECLARE replace_idx AS zero
+        WHILE replace_idx LESS THAN length of positions_of_questions DO
+            DECLARE pos AS positions_of_questions AT replace_idx
+            DECLARE replacement_char AS chars_to_replace AT replace_idx
+            SET s_as_list[pos] TO replacement_char
+            INCREMENT replace_idx BY one
+        END WHILE
+
+        DECLARE result_string AS empty string
+        DECLARE join_index AS zero
+        WHILE join_index LESS THAN length of s_as_list DO
+            SET result_string TO result_string PLUS s_as_list AT join_index
+            INCREMENT join_index BY one
+        END WHILE
+
+        RETURN result_string
+    END FUNCTION
+END CLASS

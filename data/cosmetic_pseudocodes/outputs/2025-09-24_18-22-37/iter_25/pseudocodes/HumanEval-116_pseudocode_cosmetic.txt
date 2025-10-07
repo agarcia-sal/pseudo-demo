@@ -1,0 +1,54 @@
+FUNCTION sort_array(sequence_of_numbers)  
+    DECLARE intermediate_ordered_list  
+    DECLARE binary_ones_keyed_list  
+    DECLARE temporary_binary_string  
+    DECLARE bit_count  
+    DECLARE current_element  
+  
+    intermediate_ordered_list = copy of sequence_of_numbers  
+  
+    // First, sort numerically in ascending order  
+    FOR i FROM 0 TO LENGTH(intermediate_ordered_list) - 1  
+        FOR j FROM i + 1 TO LENGTH(intermediate_ordered_list) - 1  
+            IF intermediate_ordered_list[i] > intermediate_ordered_list[j] THEN  
+                SET temporary_binary_string = intermediate_ordered_list[i]  
+                SET intermediate_ordered_list[i] = intermediate_ordered_list[j]  
+                SET intermediate_ordered_list[j] = temporary_binary_string  
+            END IF  
+        END FOR  
+    END FOR  
+  
+    // Now, sort based on count of '1's in binary form, preserving previous order on ties  
+    FOR p FROM 0 TO LENGTH(intermediate_ordered_list) - 2  
+        FOR q FROM p + 1 TO LENGTH(intermediate_ordered_list) - 1  
+            SET current_element = intermediate_ordered_list[q]  
+            SET temporary_binary_string = convert current_element to binary string (including '0b' prefix)  
+            SET bit_count = 0  
+  
+            FOR r FROM 3 TO LENGTH(temporary_binary_string)   // starting after '0b'  
+                IF temporary_binary_string[r] == '1' THEN  
+                    INCREMENT bit_count by 1  
+                END IF  
+            END FOR  
+  
+            SET current_element = intermediate_ordered_list[p]  
+            SET temporary_binary_string = convert current_element to binary string (including '0b' prefix)  
+            DECLARE previous_bit_count = 0  
+  
+            FOR s FROM 3 TO LENGTH(temporary_binary_string)  
+                IF temporary_binary_string[s] == '1' THEN  
+                    INCREMENT previous_bit_count by 1  
+                END IF  
+            END FOR  
+  
+            IF bit_count < previous_bit_count THEN  
+                SET temporary_binary_string = intermediate_ordered_list[p]  
+                SET intermediate_ordered_list[p] = intermediate_ordered_list[q]  
+                SET intermediate_ordered_list[q] = temporary_binary_string  
+            END IF  
+        END FOR  
+    END FOR  
+  
+    binary_ones_keyed_list = intermediate_ordered_list  
+    RETURN binary_ones_keyed_list  
+END FUNCTION

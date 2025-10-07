@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION maxPalindromesAfterOperations(words)
+        SET wIndex TO 1
+        SET combined_string TO ""
+        WHILE wIndex <= LENGTH(words)
+            SET combined_string TO combined_string + words[wIndex]
+            SET wIndex TO wIndex + 1
+        END WHILE
+        SET charCounter TO EMPTY_MAP
+        SET cPos TO 1
+        WHILE cPos <= LENGTH(combined_string)
+            IF cPos IN charCounter
+                SET charCounter[combined_string[cPos]] TO charCounter[combined_string[cPos]] + 1
+            ELSE
+                SET charCounter[combined_string[cPos]] TO 1
+            END IF
+            SET cPos TO cPos + 1
+        END WHILE
+
+        SET pCount TO 0
+        SET sCount TO 0
+        SET keyList TO KEYS(charCounter)
+        SET keyIndex TO 1
+        WHILE keyIndex <= LENGTH(keyList)
+            SET currentChar TO keyList[keyIndex]
+            SET freq TO charCounter[currentChar]
+            SET halfPairs TO (freq - (freq MOD 2)) / 2
+            SET remainderSingle TO freq MOD 2
+            SET pCount TO pCount + halfPairs
+            SET sCount TO sCount + remainderSingle
+            SET keyIndex TO keyIndex + 1
+        END WHILE
+
+        SET sortedWords TO EMPTY_LIST
+        SET origLen TO LENGTH(words)
+        SET iterIndex TO 1
+        WHILE iterIndex <= origLen
+            SET insertPos TO LENGTH(sortedWords) + 1
+            WHILE insertPos > 1 AND LENGTH(words[iterIndex]) < LENGTH(sortedWords[insertPos - 1])
+                SET insertPos TO insertPos - 1
+            END WHILE
+            SET j TO LENGTH(sortedWords)
+            WHILE j >= insertPos
+                SET sortedWords[j + 1] TO sortedWords[j]
+                SET j TO j - 1
+            END WHILE
+            SET sortedWords[insertPos] TO words[iterIndex]
+            SET iterIndex TO iterIndex + 1
+        END WHILE
+
+        SET palindromeCount TO 0
+        SET wordPos TO 1
+        WHILE wordPos <= LENGTH(sortedWords)
+            SET currentLen TO LENGTH(sortedWords[wordPos])
+            SET halfLenFloor TO (currentLen - (currentLen MOD 2)) / 2
+            IF halfLenFloor <= pCount
+                SET pCount TO pCount - halfLenFloor
+                SET palindromeCount TO palindromeCount + 1
+            END IF
+            SET wordPos TO wordPos + 1
+        END WHILE
+
+        RETURN palindromeCount
+    END FUNCTION
+END CLASS

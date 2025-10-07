@@ -1,0 +1,78 @@
+CLASS Solution
+	FUNCTION countOfPairs(nums)
+		CONST baseValue ← 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 + 7
+		LET lengthVar ← LENGTH OF nums
+		LET largestNumber ← -1
+		FUNCTION findMax(arr, idx, currentMax)
+			IF idx > lengthVar - 1 THEN RETURN currentMax END IF
+			IF arr[idx] > currentMax THEN
+				RETURN findMax(arr, idx + 1, arr[idx])
+			ELSE
+				RETURN findMax(arr, idx + 1, currentMax)
+			END IF
+		END FUNCTION
+		largestNumber ← findMax(nums, 0, -1)
+		FUNCTION buildTripleList(dim1, dim2, dim3)
+			IF dim1 = 0 THEN RETURN [] END IF
+			RETURN buildTripleList(dim1 - 1, dim2, dim3) + [buildMatrix(dim2, dim3)]
+		END FUNCTION
+		FUNCTION buildMatrix(rows, cols)
+			IF rows = 0 THEN RETURN [] END IF
+			RETURN buildMatrix(rows - 1, cols) + [buildRow(cols)]
+		END FUNCTION
+		FUNCTION buildRow(size)
+			IF size = 0 THEN RETURN [] END IF
+			RETURN buildRow(size - 1) + [0]
+		END FUNCTION
+		LET dpMatrix ← buildTripleList(lengthVar, largestNumber + 1, largestNumber + 1)
+		FUNCTION updateDpAt(i, j, k, val)
+			LET currentValue ← dpMatrix[i][j][k]
+			dpMatrix[i][j][k] ← (currentValue + val) MOD baseValue
+		END FUNCTION
+		FUNCTION initFirstRow(jVal)
+			IF jVal < 0 THEN RETURN END IF
+			LET kVal ← nums[0] - jVal
+			dpMatrix[0][jVal][kVal] ← 1
+			initFirstRow(jVal - 1)
+		END FUNCTION
+		initFirstRow(nums[0])
+		FUNCTION processInnerLoops(iIdx, jVal)
+			IF jVal > nums[iIdx] THEN RETURN END IF
+			LET kVal ← nums[iIdx] - jVal
+			FUNCTION loopJPrev(jPrev)
+				IF jPrev > jVal THEN RETURN END IF
+				FUNCTION loopKPrev(kPrev)
+					IF kPrev > largestNumber THEN RETURN END IF
+					LET addVal ← dpMatrix[iIdx-1][jPrev][kPrev]
+					updateDpAt(iIdx, jVal, kVal, addVal)
+					loopKPrev(kPrev + 1)
+				END FUNCTION
+				loopKPrev(kVal)
+				loopJPrev(jPrev + 1)
+			END FUNCTION
+			loopJPrev(0)
+			processInnerLoops(iIdx, jVal + 1)
+		END FUNCTION
+		FUNCTION processOuterLoops(iIdx)
+			IF iIdx > lengthVar - 1 THEN RETURN END IF
+			processInnerLoops(iIdx, 0)
+			processOuterLoops(iIdx +1)
+		END FUNCTION
+		processOuterLoops(1)
+		LET accumulation ← 0
+		FUNCTION sumAt(jPos)
+			IF jPos > largestNumber THEN RETURN END IF
+			FUNCTION sumInner(kPos)
+				IF kPos > largestNumber THEN RETURN END IF
+				IF (jPos + kPos) = nums[lengthVar - 1] THEN
+					accumulation ← (accumulation + dpMatrix[lengthVar - 1][jPos][kPos]) MOD baseValue
+				END IF
+				sumInner(kPos + 1)
+			END FUNCTION
+			sumInner(0)
+			sumAt(jPos + 1)
+		END FUNCTION
+		sumAt(0)
+		RETURN accumulation
+	END FUNCTION
+END CLASS

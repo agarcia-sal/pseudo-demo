@@ -1,0 +1,74 @@
+CLASS Solution
+	FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+		SET length_s TO LENGTH OF s
+		SET zeros_prefix TO LIST OF 0 REPEATED length_s PLUS 1 TIMES
+		SET ones_prefix TO LIST OF 0 REPEATED length_s PLUS 1 TIMES
+
+		SET index_counter TO 0
+		WHILE index_counter LESS THAN length_s
+			SET zeros_prefix_element_pos TO zeros_prefix AT index_counter PLUS 1
+			SET zeros_prefix_element_prev TO zeros_prefix AT index_counter
+			SET char_at_pos TO s AT index_counter
+			IF char_at_pos EQUALS '0'
+				SET zeros_prefix_element_pos TO zeros_prefix_element_prev PLUS 1
+			ELSE
+				SET zeros_prefix_element_pos TO zeros_prefix_element_prev
+			END IF
+			SET zeros_prefix AT index_counter PLUS 1 TO zeros_prefix_element_pos
+
+			SET ones_prefix_element_pos TO ones_prefix AT index_counter PLUS 1
+			SET ones_prefix_element_prev TO ones_prefix AT index_counter
+			IF char_at_pos EQUALS '1'
+				SET ones_prefix_element_pos TO ones_prefix_element_prev PLUS 1
+			ELSE
+				SET ones_prefix_element_pos TO ones_prefix_element_prev
+			END IF
+			SET ones_prefix AT index_counter PLUS 1 TO ones_prefix_element_pos
+			INCREMENT index_counter BY 1
+		END WHILE
+
+		FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER
+			SET total_count TO 0
+
+			SET outer_start TO l
+			WHILE outer_start LESS THAN OR EQUAL TO r
+				SET binary_left TO outer_start
+				SET binary_right TO r PLUS 1
+
+				WHILE binary_left LESS THAN binary_right
+					SET mean_val TO (binary_left PLUS binary_right) DIVIDED BY 2
+					SET zeros_in_range TO zeros_prefix AT mean_val PLUS 1 MINUS zeros_prefix AT outer_start
+					SET ones_in_range TO ones_prefix AT mean_val PLUS 1 MINUS ones_prefix AT outer_start
+
+					IF zeros_in_range LESS THAN OR EQUAL TO k OR ones_in_range LESS THAN OR EQUAL TO k
+						SET binary_left TO mean_val PLUS 1
+					ELSE
+						SET binary_right TO mean_val
+					END IF
+				END WHILE
+
+				SET max_end_index TO binary_left MINUS 1
+				IF max_end_index GREATER THAN OR EQUAL TO outer_start
+					SET total_count TO total_count PLUS (max_end_index MINUS outer_start PLUS 1)
+				END IF
+
+				INCREMENT outer_start BY 1
+			END WHILE
+
+			RETURN total_count
+		END FUNCTION
+
+		SET accumulation TO EMPTY LIST
+		SET query_index TO 0
+		WHILE query_index LESS THAN LENGTH OF queries
+			SET current_pair TO queries AT query_index
+			SET left_bound TO current_pair AT 0
+			SET right_bound TO current_pair AT 1
+			SET accumulation_element TO count_valid_substrings WITH PARAMETERS left_bound AND right_bound
+			APPEND accumulation_element TO accumulation
+			INCREMENT query_index BY 1
+		END WHILE
+
+		RETURN accumulation
+	END FUNCTION
+END CLASS

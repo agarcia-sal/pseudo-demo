@@ -1,0 +1,89 @@
+class DSU
+    function __init__(self, n)
+        define function init_recursion(i)
+            if i > n - 1 then return
+            self.parent[i] <- i
+            self.rank[i] <- 0
+            init_recursion(i + 1)
+        end function
+        init_recursion(0)
+    end function
+
+    function find(self, x)
+        define recursive finder(y)
+            if not (self.parent[y] == y) then
+                temp_val <- finder(self.parent[y])
+                self.parent[y] <- temp_val
+            end if
+            return self.parent[y]
+        end function
+        return finder(x)
+    end function
+
+    function union_set(self, u, v)
+        u_inner <- self.find(u)
+        v_inner <- self.find(v)
+        if u_inner != v_inner then
+            if self.rank[u_inner] < self.rank[v_inner] then
+                swapped <- u_inner
+                u_inner <- v_inner
+                v_inner <- swapped
+            end if
+            self.parent[v_inner] <- u_inner
+            if self.rank[u_inner] == self.rank[v_inner] then
+                self.rank[u_inner] <- self.rank[u_inner] + 1
+            end if
+        end if
+    end function
+end class
+
+class Solution
+    function countComponents(self, nums, threshold)
+        define function multiply_seq(val, limit, step)
+            result_list <- empty list
+            current <- val + val
+            define tail_recursion(c)
+                if c > limit then return
+                result_list.append(c)
+                tail_recursion(c + step)
+            end function
+            tail_recursion(current)
+            return result_list
+        end function
+
+        dsu <- DSU(threshold + 1)
+
+        define recursive_outer(i)
+            if i > length(nums) - 1 then return
+            num <- nums[i]
+            multiples <- multiply_seq(num, threshold, num)
+            define iterative(j)
+                idx <- 0
+                while idx < length(multiples)
+                    self_union_left <- num
+                    self_union_right <- multiples[idx]
+                    dsu.union_set(self_union_left, self_union_right)
+                    idx <- idx + 1
+                end while
+            end function
+            iterative(0)
+            recursive_outer(i + 1)
+        end function
+        recursive_outer(0)
+
+        unique_parents <- set()
+        define for_set(i)
+            if i >= length(nums) then return
+            cur_num <- nums[i]
+            if not (cur_num > threshold) then
+                unique_parents.add(dsu.find(cur_num))
+            else
+                unique_parents.add(cur_num)
+            end if
+            for_set(i + 1)
+        end function
+        for_set(0)
+
+        return size(unique_parents)
+    end function
+end class

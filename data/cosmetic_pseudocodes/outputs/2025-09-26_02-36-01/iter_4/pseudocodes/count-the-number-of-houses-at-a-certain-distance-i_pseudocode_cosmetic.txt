@@ -1,0 +1,57 @@
+CLASS Solution  
+    FUNCTION countOfPairs(n parameter, x parameter, y parameter) RETURNS list of integer  
+        DECLARE outputList EQUAL TO an array consisting of n zeroes indexed from one to n  
+
+        FUNCTION bfs(start parameter)  
+            DECLARE seen AS an array of n plus one False values indexed from zero to n  
+            DECLARE distArray AS an array of n plus one zeroes indexed from zero to n  
+            DECLARE dequeContainer AS a dequeue initialized with start as the only element  
+            SET seen[start] TO True  
+            
+            WHILE dequeContainer contains elements  
+                SET node TO dequeue the first element from dequeContainer  
+                
+                DECLARE adjacents AS array [node minus one, node plus one]  
+                DECLARE idx TO 0  
+                WHILE idx less than length of adjacents  
+                    DECLARE neighbor AS adjacents[idx]  
+                    IF neighbor greater or equal to 1 AND neighbor less or equal to n AND seen[neighbor] EQUALS False THEN  
+                        SET seen[neighbor] TO True  
+                        SET distArray[neighbor] TO distArray[node] plus 1  
+                        enqueue neighbor INTO dequeContainer at back  
+                    END IF  
+                    SET idx TO idx plus 1  
+                END WHILE  
+                
+                IF node EQUALS x AND seen[y] EQUALS False THEN  
+                    SET seen[y] TO True  
+                    SET distArray[y] TO distArray[node] plus 1  
+                    enqueue y INTO dequeContainer at back  
+                END IF  
+                
+                IF node EQUALS y AND seen[x] EQUALS False THEN  
+                    SET seen[x] TO True  
+                    SET distArray[x] TO distArray[node] plus 1  
+                    enqueue x INTO dequeContainer at back  
+                END IF  
+            END WHILE  
+            
+            SET position TO 1  
+            WHILE position less or equal to n  
+                IF distArray[position] GREATER THAN zero THEN  
+                    SET index TO distArray[position] minus 1  
+                    SET outputList[index] TO outputList[index] plus 1  
+                END IF  
+                SET position TO position plus 1  
+            END WHILE  
+        END FUNCTION  
+
+        DECLARE counter TO 1  
+        WHILE counter less or equal to n  
+            CALL bfs WITH counter  
+            SET counter TO counter plus 1  
+        END WHILE  
+
+        RETURN outputList  
+    END FUNCTION  
+END CLASS

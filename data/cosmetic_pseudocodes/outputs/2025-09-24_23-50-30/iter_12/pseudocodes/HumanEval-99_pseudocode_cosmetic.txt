@@ -1,0 +1,34 @@
+```
+FUNCTION closest_integer(value)
+    IMPORT ceil, floor FROM math
+
+    FUNCTION strip_trailing_zeros(str_val)
+        IF str_val CONTAINS '.' AND (COUNT OF '.' IN str_val) = 1 THEN
+            FUNCTION recur_trim(s)
+                IF LAST CHARACTER OF s IS '0' THEN
+                    RETURN recur_trim(ALL CHARACTERS OF s EXCEPT THE LAST ONE)
+                ELSE
+                    RETURN s
+                END IF
+            END FUNCTION
+            RETURN recur_trim(str_val)
+        ELSE
+            RETURN str_val
+        END IF
+    END FUNCTION
+
+    SET trimmed_value TO strip_trailing_zeros(value)
+    SET float_num TO FLOAT CONVERSION OF trimmed_value
+
+    SELECT
+        CASE (LENGTH OF trimmed_value > 0) AND (LAST TWO CHARACTERS OF trimmed_value EQUAL TO '.5'):
+            SET integer_result TO (IF float_num > 0 THEN ceil(float_num) ELSE floor(float_num))
+        CASE (LENGTH OF trimmed_value > 0):
+            SET integer_result TO ROUND float_num TO INTEGER
+        DEFAULT:
+            SET integer_result TO 0
+    END SELECT
+
+    RETURN integer_result
+END FUNCTION
+```

@@ -1,0 +1,88 @@
+CLASS Solution
+    FUNCTION maximumScore(grid)
+        LET size ASSIGN THE LENGTH OF grid
+        LET sumGrid ASSIGN A 2D ARRAY OF DIMENSIONS (size BY (size PLUS 1)) FILLED WITH 0
+        LET priorChosen ASSIGN AN ARRAY OF LENGTH (size PLUS 1) FILLED WITH 0
+        LET priorPassed ASSIGN AN ARRAY OF LENGTH (size PLUS 1) FILLED WITH 0
+
+        LET colIndex ASSIGN 0
+        WHILE colIndex LESS THAN size
+            LET rowIndex ASSIGN 0
+            WHILE rowIndex LESS THAN size
+                sumGrid[colIndex][rowIndex PLUS 1] ASSIGN sumGrid[colIndex][rowIndex] PLUS grid[rowIndex][colIndex]
+                rowIndex INCREMENT BY 1
+            END WHILE
+            colIndex INCREMENT BY 1
+        END WHILE
+
+        LET column ASSIGN 1
+        WHILE column LESS THAN size
+            LET chosenCurrent ASSIGN AN ARRAY OF LENGTH (size PLUS 1) FILLED WITH 0
+            LET skippedCurrent ASSIGN AN ARRAY OF LENGTH (size PLUS 1) FILLED WITH 0
+
+            LET currentPos ASSIGN 0
+            WHILE currentPos LESS THAN size PLUS 1
+                LET previousPos ASSIGN 0
+                WHILE previousPos LESS THAN size PLUS 1
+                    IF currentPos GREATER THAN previousPos THEN
+                        LET val1 ASSIGN sumGrid[column MINUS 1][currentPos]
+                        LET val2 ASSIGN sumGrid[column MINUS 1][previousPos]
+                        LET intervalScore ASSIGN val1 MINUS val2
+
+                        LET oldChosen ASSIGN chosenCurrent[currentPos]
+                        LET candidateChosen ASSIGN priorPassed[previousPos] PLUS intervalScore
+                        IF candidateChosen GREATER THAN oldChosen THEN
+                            chosenCurrent[currentPos] ASSIGN candidateChosen
+                        ELSE
+                            chosenCurrent[currentPos] ASSIGN oldChosen
+                        END IF
+
+                        LET oldSkipped ASSIGN skippedCurrent[currentPos]
+                        LET candidateSkipped ASSIGN priorPassed[previousPos] PLUS intervalScore
+                        IF candidateSkipped GREATER THAN oldSkipped THEN
+                            skippedCurrent[currentPos] ASSIGN candidateSkipped
+                        ELSE
+                            skippedCurrent[currentPos] ASSIGN oldSkipped
+                        END IF
+                    ELSE
+                        LET val3 ASSIGN sumGrid[column][previousPos]
+                        LET val4 ASSIGN sumGrid[column][currentPos]
+                        LET diffScore ASSIGN val3 MINUS val4
+
+                        LET oldChosen2 ASSIGN chosenCurrent[currentPos]
+                        LET candidateChosen2 ASSIGN priorChosen[previousPos] PLUS diffScore
+                        IF candidateChosen2 GREATER THAN oldChosen2 THEN
+                            chosenCurrent[currentPos] ASSIGN candidateChosen2
+                        ELSE
+                            chosenCurrent[currentPos] ASSIGN oldChosen2
+                        END IF
+
+                        LET oldSkipped2 ASSIGN skippedCurrent[currentPos]
+                        LET candidateSkipped2 ASSIGN priorChosen[previousPos]
+                        IF candidateSkipped2 GREATER THAN oldSkipped2 THEN
+                            skippedCurrent[currentPos] ASSIGN candidateSkipped2
+                        ELSE
+                            skippedCurrent[currentPos] ASSIGN oldSkipped2
+                        END IF
+                    END IF
+                    previousPos INCREMENT BY 1
+                END WHILE
+                currentPos INCREMENT BY 1
+            END WHILE
+            priorChosen ASSIGN chosenCurrent
+            priorPassed ASSIGN skippedCurrent
+            column INCREMENT BY 1
+        END WHILE
+
+        LET maximumValue ASSIGN 0
+        LET pos ASSIGN 0
+        WHILE pos LESS THAN size PLUS 1
+            IF priorChosen[pos] GREATER THAN maximumValue THEN
+                maximumValue ASSIGN priorChosen[pos]
+            END IF
+            pos INCREMENT BY 1
+        END WHILE
+
+        RETURN maximumValue
+    END FUNCTION
+END CLASS

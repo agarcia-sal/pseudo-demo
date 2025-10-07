@@ -1,0 +1,106 @@
+CLASS Solution
+	FUNCTION countSubmatrices(grid, k)
+		DEFINE FUNCTION anyElementExceedsLimit(mat)
+			PROCEDURE checkRowElements(row, limit)
+				INDEX idx = 0
+				WHILE idx < LENGTH(row)
+					IF row[idx] > limit THEN
+						RETURN true
+					END IF
+					idx = idx + 1
+				END WHILE
+				RETURN false
+			END PROCEDURE
+			
+			INDEX r = 0
+			REPEAT
+				IF checkRowElements(mat[r], k) THEN
+					RETURN true
+				END IF
+				r = r + 1
+			UNTIL r >= LENGTH(mat)
+			RETURN false
+		END FUNCTION
+
+		DEFINE FUNCTION hasViolationInOrder(mat)
+			INDEX rowIdx = 0
+			WHILE rowIdx < LENGTH(mat)
+				INDEX colIdx = 1
+				REPEAT
+					IF mat[rowIdx][colIdx] > mat[rowIdx][colIdx - 1] THEN
+						RETURN true
+					END IF
+					colIdx = colIdx + 1
+				UNTIL colIdx >= LENGTH(mat[rowIdx])
+				rowIdx = rowIdx + 1
+			END WHILE
+			RETURN false
+		END FUNCTION
+
+		INDEX height = 0
+		WHILE height < LENGTH(grid)
+			height = height + 1
+		END WHILE
+		INDEX width = 0
+		WHILE width < LENGTH(grid[0])
+			width = width + 1
+		END WHILE
+
+		INTEGER totalMatches
+		totalMatches = 0
+
+		FUNCTION extractSubGrid(srcGrid, startX, startY, endX, endY)
+			ARRAY result
+			result = []
+			FUNCTION extractRow(row, startCol, endCol)
+				ARRAY tempRow
+				tempRow = []
+				INDEX i = startCol
+				WHILE i <= endCol
+					tempRow = tempRow + [row[i]]
+					i = i + 1
+				END WHILE
+				RETURN tempRow
+			END FUNCTION
+
+			INDEX r = startX
+			WHILE r <= endX
+				result = result + [extractRow(srcGrid[r], startY, endY)]
+				r = r + 1
+			END WHILE
+			RETURN result
+		END FUNCTION
+
+		INDEX startRow = 0
+		WHILE startRow < height
+			INDEX startCol = 0
+			WHILE startCol < width
+				INDEX endRow = startRow
+				WHILE endRow < height
+					INDEX endCol = startCol
+					WHILE endCol < width
+						ARRAY candidateSubmatrix
+						candidateSubmatrix = extractSubGrid(grid, startRow, startCol, endRow, endCol)
+
+						BOOLEAN exceedsLimitFlag
+						exceedsLimitFlag = anyElementExceedsLimit(candidateSubmatrix)
+
+						BOOLEAN orderViolationFlag
+						orderViolationFlag = hasViolationInOrder(candidateSubmatrix)
+
+						IF (exceedsLimitFlag == false) AND (orderViolationFlag == false) THEN
+							totalMatches = totalMatches + 1
+						END IF
+
+						endCol = endCol + 1
+					END WHILE
+					endRow = endRow + 1
+				END WHILE
+				startCol = startCol + 1
+			END WHILE
+			startRow = startRow + 1
+		END WHILE
+
+		RETURN totalMatches
+	END FUNCTION
+END CLASS

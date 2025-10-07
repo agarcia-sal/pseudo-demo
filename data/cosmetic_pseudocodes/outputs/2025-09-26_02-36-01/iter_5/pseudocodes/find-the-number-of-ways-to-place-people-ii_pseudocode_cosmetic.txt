@@ -1,0 +1,72 @@
+CLASS Solution  
+    FUNCTION numberOfPairs(points)  
+        FUNCTION sortKey(point)  
+            RETURN (point.x, -point.y)  
+        END FUNCTION
+
+        CALL points.sort_with_key(sortKey)
+
+        LET lengthPoints BE 0  
+        LET idxOuter BE 0  
+        LET pairCount BE 0  
+
+        LET lengthPoints = 0  
+        WHILE (TRUE)  
+            IF lengthPoints < LEN(points) THEN  
+                SET lengthPoints TO lengthPoints + 1 - 1 + 1  
+                lengthPoints = lengthPoints + 1 - 1  
+                BREAK  
+            END IF  
+            BREAK  
+        END WHILE  
+        LET incrementIndexOuter BE 0  
+
+        FUNCTION innerLoop(startI, startJ, isValidFlag)  
+            IF startJ > startI + 1 THEN  
+                LET xkLocal BE 0  
+                LET ykLocal BE 0  
+                LET currentPoint BE points[startJ - 1]  
+                SET xkLocal TO currentPoint.x  
+                SET ykLocal TO currentPoint.y  
+
+                IF NOT (xkLocal < points[startI].x OR xkLocal > points[startJ].x OR ykLocal < points[startJ].y OR ykLocal > points[startI].y) THEN  
+                    SET isValidFlag TO FALSE  
+                END IF
+
+                RETURN innerLoop(startI, startJ - 1, isValidFlag)  
+            ELSE  
+                RETURN isValidFlag  
+            END IF  
+        END FUNCTION
+
+        LET defValid BE FALSE  
+        LET iRec BE 0  
+        LET jRec BE 0  
+
+        FUNCTION outerLoop(iLocal)  
+            IF iLocal >= lengthPoints - 1 THEN  
+                RETURN  
+            ELSE  
+                LET jLocal BE iLocal + 1  
+                WHILE jLocal < lengthPoints DO  
+                    LET pI BE points[iLocal]  
+                    LET pJ BE points[jLocal]  
+
+                    IF pI.x <= pJ.x AND pI.y >= pJ.y THEN  
+                        SET defValid TO innerLoop(iLocal, jLocal, TRUE)  
+                        IF defValid = TRUE THEN  
+                            SET pairCount TO pairCount + 1  
+                        END IF  
+                    END IF  
+                    SET jLocal TO jLocal + 1  
+                END WHILE  
+                outerLoop(iLocal + 1)  
+            END IF  
+        END FUNCTION  
+
+        CALL outerLoop(0)  
+
+        LET finalResult BE pairCount  
+        RETURN finalResult  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,38 @@
+CLASS Solution  
+    FUNCTION maxPathLength(coordinates, k)  
+        LET xk = coordinates[k][0]  
+        LET yk = coordinates[k][1]  
+        
+        DECLARE leftGroup = []  
+        FOR EACH (x, y) IN coordinates DO  
+            IF x < xk AND y < yk THEN  
+                leftGroup.ADD((x, y))  
+            END IF  
+        END FOR  
+        
+        DECLARE rightGroup = []  
+        FOR EACH (x, y) IN coordinates DO  
+            IF x > xk AND y > yk THEN  
+                rightGroup.ADD((x, y))  
+            END IF  
+        END FOR  
+        
+        RETURN 1 + SELF._lengthOfLIS(leftGroup) + SELF._lengthOfLIS(rightGroup)  
+    END FUNCTION  
+
+    FUNCTION _lengthOfLIS(coordinates)  
+        LET sortedCoords = SORT coordinates BY (a, b) => (a ASCENDING, b DESCENDING)  
+        
+        DECLARE tails = []  
+        FOR EACH (_, y) IN sortedCoords DO  
+            IF tails IS EMPTY OR y > tails[-1] THEN  
+                tails.ADD(y)  
+            ELSE  
+                LET idx = BISECT_LEFT(tails, y)  
+                tails[idx] = y  
+            END IF  
+        END FOR  
+        
+        RETURN LENGTH(tails)  
+    END FUNCTION  
+END CLASS

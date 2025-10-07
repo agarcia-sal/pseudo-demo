@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION minimumTime(n, edges, disappear)
+        PROCEDURE push_min_heap(h, val)
+            APPEND val TO h
+            SET idx TO LENGTH(h) MINUS 1
+            WHILE idx GREATER THAN 0
+                SET parent_idx TO (idx MINUS 1) DIVIDED BY 2
+                IF h[parent_idx][0] LESS THAN OR EQUAL TO h[idx][0]
+                    BREAK
+                END IF
+                SWAP h[parent_idx] AND h[idx]
+                SET idx TO parent_idx
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE pop_min_heap(h)
+            SET last_idx TO LENGTH(h) MINUS 1
+            SWAP h[0] AND h[last_idx]
+            REMOVE AND STORE last element of h IN val
+            SET idx TO 0
+            WHILE TRUE
+                SET left_idx TO 2 TIMES idx PLUS 1
+                SET right_idx TO 2 TIMES idx PLUS 2
+                SET smallest TO idx
+                IF left_idx LESS THAN LENGTH(h) AND h[left_idx][0] LESS THAN h[smallest][0]
+                    SET smallest TO left_idx
+                END IF
+                IF right_idx LESS THAN LENGTH(h) AND h[right_idx][0] LESS THAN h[smallest][0]
+                    SET smallest TO right_idx
+                END IF
+                IF smallest EQUALS idx
+                    BREAK
+                END IF
+                SWAP h[idx] AND h[smallest]
+                SET idx TO smallest
+            END WHILE
+            RETURN val
+        END PROCEDURE
+
+        SET adj_map TO empty mapping defaulting to empty list
+        FOR EACH a, b, c IN edges
+            APPEND (b, c) TO adj_map[a]
+            APPEND (a, c) TO adj_map[b]
+        END FOR
+
+        SET inf_val TO (10 TIMES 10 TIMES 10 TIMES 10) TIMES (10 TIMES 10 TIMES 10 TIMES 10)
+        SET dist_arr TO a list with length n filled with inf_val
+        SET dist_arr[0] TO 0
+
+        SET heap_arr TO empty list
+        CALL push_min_heap(heap_arr, (0, 0))
+
+        LABEL outer_loop_start
+        WHILE LENGTH(heap_arr) GREATER THAN 0
+            SET (cur_dist, cur_node) TO pop_min_heap(heap_arr)
+            IF cur_dist GREATER THAN OR EQUAL TO disappear[cur_node]
+                CONTINUE outer_loop_start
+            END IF
+            IF cur_dist GREATER THAN dist_arr[cur_node]
+                CONTINUE outer_loop_start
+            END IF
+
+            FOR EACH nbr, lng IN adj_map[cur_node]
+                SET cum_dist TO cur_dist PLUS lng
+                IF (cum_dist LESS THAN dist_arr[nbr]) AND (cum_dist LESS THAN disappear[nbr])
+                    SET dist_arr[nbr] TO cum_dist
+                    CALL push_min_heap(heap_arr, (cum_dist, nbr))
+                END IF
+            END FOR
+        END WHILE
+
+        SET out_arr TO list length n filled with -1
+        SET idx_var TO 0
+        LABEL result_fill_loop
+        WHILE idx_var LESS THAN n
+            IF dist_arr[idx_var] LESS THAN disappear[idx_var]
+                SET out_arr[idx_var] TO dist_arr[idx_var]
+            END IF
+            SET idx_var TO idx_var PLUS 1
+        END WHILE
+
+        RETURN out_arr
+    END FUNCTION
+END CLASS

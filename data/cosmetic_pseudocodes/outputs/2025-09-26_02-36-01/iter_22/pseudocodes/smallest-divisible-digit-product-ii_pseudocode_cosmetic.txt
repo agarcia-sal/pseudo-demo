@@ -1,0 +1,127 @@
+CLASS Solution
+
+    FUNCTION smallestNumber(num, t)
+        SET vX TO t
+        SET hY TO self._getPrimeCount(vX)
+        SET gB TO hY[0]
+        SET zz TO hY[1]
+        IF zz = FALSE THEN
+            RETURN "-1"
+        END IF
+
+        SET eW TO self._getFactorCount(gB)
+        SET rP TO 0
+        FOR EACH qM IN eW VALUES
+            SET rP TO rP + qM
+        END FOR
+        IF rP > LENGTH(num) THEN
+            SET qJ TO ""
+            FOR EACH mi, nh IN eW
+                SET qJ TO qJ + STRING(mi) * nh
+            END FOR
+            RETURN qJ
+        END IF
+
+        SET mR TO 0
+        SET cE TO COUNTER()
+        FOR EACH ci IN num
+            SET nK TO INTEGER(ci)
+            SET fU TO self._getFactorCount(COUNTER({ci:1}))
+            FOR EACH aa IN fU VALUES
+                SET mR TO mR + aa
+            END FOR
+        END FOR
+
+        SET ak TO 0
+        WHILE ak < LENGTH(num) AND SUBSTRING(num, ak, ak+1) != "0"
+            SET ak TO ak + 1
+        END WHILE
+        IF ak = LENGTH(num) AND (SUM(gB.VALUES) <= mR) THEN
+            RETURN num
+        END IF
+
+        SET iv TO LENGTH(num) - 1
+        WHILE iv >= 0
+            SET vN TO INTEGER(num[iv])
+            SET mR TO mR - (SUM(self._getFactorCount(COUNTER({num[iv]:1})).VALUES))
+            SET bV TO LENGTH(num) - 1 - iv
+            IF iv <= ak THEN
+                SET yL TO vN + 1
+                WHILE yL <= 9
+                    SET mn TO self._getFactorCount(gB - COUNTER(self._getFactorCount(COUNTER({num[iv]:1}))) - self._getFactorCount(COUNTER({STRING(yL):1})))
+                    IF (SUM(mn.VALUES)) <= bV THEN
+                        SET fy TO bV - SUM(mn.VALUES)
+                        SET gx TO SUBSTRING(num, 0, iv)
+                        SET sz TO STRING(yL) + ("1" * fy)
+                        SET pv TO ""
+                        FOR EACH fg, hw IN mn
+                            SET pv TO pv + STRING(fg) * hw
+                        END FOR
+                        RETURN gx + sz + pv
+                    END IF
+                    SET yL TO yL + 1
+                END WHILE
+            END IF
+            SET iv TO iv - 1
+        END WHILE
+
+        SET qA TO self._getFactorCount(gB)
+        SET ic TO LENGTH(num) + 1 - (SUM(qA.VALUES))
+        SET nn TO ("1" * ic)
+        SET qt TO ""
+        FOR EACH zr, wl IN qA
+            SET qt TO qt + STRING(zr) * wl
+        END FOR
+        RETURN nn + qt
+    END FUNCTION
+
+    FUNCTION _getPrimeCount(t)
+        SET hm TO COUNTER()
+        SET pf TO [2, 3, 5, 7]
+        SET yq TO t
+        FOR EACH xT IN pf
+            WHILE (yq MOD xT) = 0
+                SET yq TO yq / xT
+                SET hm[xT] TO hm.GET(xT, 0) + 1
+            END WHILE
+        END FOR
+        RETURN (hm, yq = 1)
+    END FUNCTION
+
+    FUNCTION _getFactorCount(count)
+        SET vy TO count.GET(2, 0)
+        SET pf TO QUOTIENT(vy, 3)
+        SET bx TO REMAINDER(vy, 3)
+        SET sl TO count.GET(3, 0)
+        SET ur TO QUOTIENT(sl, 2)
+        SET af TO REMAINDER(sl, 2)
+        SET xy TO QUOTIENT(bx, 2)
+        SET ow TO REMAINDER(bx, 2)
+        SET uh TO 0
+        SET pa TO 0
+        IF ow = 1 AND af = 1
+            SET ow TO 0
+            SET af TO 0
+            SET uh TO 1
+        ELSE
+            SET uh TO 0
+        END IF
+        IF af = 1 AND xy = 1
+            SET ow TO 1
+            SET uh TO 1
+            SET af TO 0
+            SET xy TO 0
+        END IF
+        RETURN COUNTER({
+            "2": ow,
+            "3": af,
+            "4": xy,
+            "5": count.GET(5, 0),
+            "6": uh,
+            "7": count.GET(7, 0),
+            "8": pf,
+            "9": ur
+        })
+    END FUNCTION
+
+END CLASS

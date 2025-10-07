@@ -1,0 +1,48 @@
+CLASS Solution
+    FUNCTION beautifulIndices(s parameter x parameter y parameter z)
+        DEFINE FUNCTION findIndices(strParam, pattern, pos, acc)
+            IF pos GREATER THAN length(strParam) MINUS length(pattern) THEN
+                RETURN acc
+            END IF
+            DEFINE sliceStart = pos
+            DEFINE sliceEnd = pos PLUS length(pattern) MINUS 1
+            DEFINE isMatch = FALSE
+            IF substring(strParam, sliceStart, sliceEnd) EQUALS pattern THEN
+                isMatch = TRUE
+            END IF
+            IF isMatch THEN
+                SET newAcc TO acc CONCATENATED WITH [pos]
+            ELSE
+                SET newAcc TO acc
+            END IF
+            RETURN findIndices(strParam, pattern, pos PLUS one, newAcc)
+        END FUNCTION
+        
+        SET firstIndices TO findIndices(s, x, 0, empty list)
+        SET secondIndices TO findIndices(s, y, 0, empty list)
+        
+        DEFINE FUNCTION mergeLists(listOne, listTwo, idxOne, idxTwo, kVal, resultList)
+            IF idxOne GREATER OR EQUAL length(listOne) OR idxTwo GREATER OR EQUAL length(listTwo) THEN
+                RETURN resultList
+            END IF
+            DEFINE firstVal = element at idxOne of listOne
+            DEFINE secondVal = element at idxTwo of listTwo
+            DEFINE diff = firstVal MINUS secondVal
+            IF diff LESS THAN zero THEN
+                SET absDiff = 0 MINUS diff
+            ELSE
+                SET absDiff = diff
+            END IF
+            IF absDiff LESS THAN OR EQUAL TO z THEN
+                RETURN mergeLists(listOne, listTwo, idxOne PLUS one, idxTwo, z, resultList CONCATENATED WITH [firstVal])
+            ELSE IF firstVal LESS THAN secondVal THEN
+                RETURN mergeLists(listOne, listTwo, idxOne PLUS one, idxTwo, z, resultList)
+            ELSE
+                RETURN mergeLists(listOne, listTwo, idxOne, idxTwo PLUS one, z, resultList)
+            END IF
+        END FUNCTION
+        
+        SET finalIndices TO mergeLists(firstIndices, secondIndices, 0, 0, z, empty list)
+        RETURN finalIndices
+    END FUNCTION
+END CLASS

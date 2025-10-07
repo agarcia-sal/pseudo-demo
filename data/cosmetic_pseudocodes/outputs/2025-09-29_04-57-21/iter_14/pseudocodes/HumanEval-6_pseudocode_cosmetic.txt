@@ -1,0 +1,41 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        DECLARE tracker_depth AS INTEGER = 0
+        DECLARE peak_depth AS INTEGER = 0
+        DECLARE pos AS INTEGER = 0
+
+        WHILE pos < LENGTH(group_string)
+            DECLARE symbol AS CHARACTER = SUBSTRING(group_string, pos, 1)
+            IF symbol == '(' THEN
+                tracker_depth = tracker_depth + 1
+                IF peak_depth < tracker_depth THEN
+                    peak_depth = tracker_depth
+                END IF
+            ELSE
+                tracker_depth = tracker_depth + (-1)
+            END IF
+            pos = pos + 1
+        END WHILE
+        RETURN peak_depth
+    END FUNCTION
+
+    DECLARE cluster_list AS LIST = []
+    DECLARE start_idx AS INTEGER = 0
+    DECLARE idx AS INTEGER = 0
+    DECLARE input_len AS INTEGER = LENGTH(parentheses_string)
+
+    WHILE idx <= input_len
+        IF idx == input_len OR SUBSTRING(parentheses_string, idx, 1) == ' ' THEN
+            DECLARE segment AS STRING = SUBSTRING(parentheses_string, start_idx, idx - start_idx)
+            IF LENGTH(segment) > 0 THEN
+                APPEND parse_paren_group(segment) TO cluster_list
+            END IF
+            start_idx = idx + 1
+        END IF
+        idx = idx + 1
+    END WHILE
+
+    RETURN cluster_list
+END FUNCTION
+```

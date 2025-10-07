@@ -1,0 +1,76 @@
+```
+FUNCTION anti_shuffle(input_string)
+	def partitioned_tokens = map_to_array(create_map_from_split(input_string))
+	
+	DEFINE map_to_array(mapping)
+		INDEX = 0
+		LENGTH = size(mapping)
+		out_arr = empty_array()
+		WHILE INDEX < LENGTH
+			out_arr = append(out_arr, get_key_value_pair(mapping, INDEX).value)
+			INDEX = INDEX + 1
+		END WHILE
+		RETURN out_arr
+	END DEFINE
+	
+	DEFINE create_map_from_split(str)
+		splitted = split_by_delim(str, ' ')
+		mapped_result = create_empty_map()
+		POS = 0
+		FOR chunk IN splitted
+			mapped_result[POS] = chunk
+			POS = POS + 1
+		END FOR
+		RETURN mapped_result
+	END DEFINE
+	
+	DEFINE sort_chars_in_token(s)
+		chars = convert_to_char_array(s)
+		-- recursive ascending sort using insertion sort
+		DEFINE sort_recursive(list, n)
+			IF n <= 1
+				RETURN list
+			END IF
+			list = sort_recursive(list, n-1)
+			key = list[n-1]
+			j = n - 2
+			WHILE j >= 0 AND ascii_val(list[j]) > ascii_val(key)
+				list[j+1] = list[j]
+				j = j - 1
+			END WHILE
+			list[j+1] = key
+			RETURN list
+		END DEFINE
+		return convert_array_to_string(sort_recursive(chars, size(chars)))
+	END DEFINE
+	
+	DEFINE recursive_map_process(arr, idx, acc)
+		IF idx >= size(arr)
+			RETURN acc
+		END IF
+		transformed_item = sort_chars_in_token(arr[idx])
+		new_acc = append(acc, transformed_item)
+		RETURN recursive_map_process(arr, idx + 1, new_acc)
+	END DEFINE
+	
+	ordered_words_collection = recursive_map_process(partitioned_tokens, 0, empty_array())
+	
+	DEFINE join_with_spaces(word_list)
+		LENGTH = size(word_list)
+		INDEX = 0
+		accum = ''
+		WHILE INDEX < LENGTH
+			IF accum == ''
+				accum = word_list[INDEX]
+			ELSE
+				accum = accum + ' ' + word_list[INDEX]
+			END IF
+			INDEX = INDEX + 1
+		END WHILE
+		RETURN accum
+	END DEFINE
+	
+	final_string = join_with_spaces(ordered_words_collection)
+	RETURN final_string
+END FUNCTION
+```

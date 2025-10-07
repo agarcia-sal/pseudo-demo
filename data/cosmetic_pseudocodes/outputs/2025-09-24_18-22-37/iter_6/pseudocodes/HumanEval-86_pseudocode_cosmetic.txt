@@ -1,0 +1,58 @@
+FUNCTION anti_shuffle(original_text)
+  DECLARE words_collection AS LIST
+  DECLARE reordered_words AS LIST
+  SET words_collection := SPLIT original_text BY " "
+  SET reordered_words := EMPTY LIST
+
+  DECLARE current_index AS INTEGER
+  SET current_index := 0
+  WHILE current_index < LENGTH(words_collection)
+    DECLARE single_word AS STRING
+    SET single_word := words_collection[current_index]
+
+    DECLARE letters_array AS LIST
+    SET letters_array := SPLIT single_word INTO CHARACTERS
+
+    DECLARE temp_index1, temp_index2 AS INTEGER
+    SET temp_index1 := 1
+    WHILE temp_index1 < LENGTH(letters_array)
+      SET temp_index2 := 0
+      WHILE temp_index2 < LENGTH(letters_array) - temp_index1
+        IF letters_array[temp_index2] > letters_array[temp_index2 + 1] THEN
+          DECLARE temp_char AS CHAR
+          SET temp_char := letters_array[temp_index2]
+          SET letters_array[temp_index2] := letters_array[temp_index2 + 1]
+          SET letters_array[temp_index2 + 1] := temp_char
+        END IF
+        SET temp_index2 := temp_index2 + 1
+      END WHILE
+      SET temp_index1 := temp_index1 + 1
+    END WHILE
+
+    DECLARE reconstructed_word AS STRING
+    SET reconstructed_word := EMPTY STRING
+    DECLARE letter_counter AS INTEGER
+    SET letter_counter := 0
+    WHILE letter_counter < LENGTH(letters_array)
+      SET reconstructed_word := reconstructed_word + letters_array[letter_counter]
+      SET letter_counter := letter_counter + 1
+    END WHILE
+
+    APPEND reconstructed_word TO reordered_words
+    SET current_index := current_index + 1
+  END WHILE
+
+  DECLARE final_output AS STRING
+  DECLARE join_index AS INTEGER
+  SET final_output := EMPTY STRING
+  SET join_index := 0
+  WHILE join_index < LENGTH(reordered_words)
+    SET final_output := final_output + reordered_words[join_index]
+    IF join_index < LENGTH(reordered_words) - 1 THEN
+      SET final_output := final_output + " "
+    END IF
+    SET join_index := join_index + 1
+  END WHILE
+
+  RETURN final_output
+END FUNCTION

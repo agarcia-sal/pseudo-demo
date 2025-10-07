@@ -1,0 +1,97 @@
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+    DEFINE FUNCTION countOccurrences(inputString)
+    DEFINE local mapOccurrences AS EMPTY MAP
+    SET cursor TO 0
+    WHILE cursor < LENGTH(inputString)
+        SET currentChar TO inputString[cursor]
+        IF currentChar IN mapOccurrences THEN
+            mapOccurrences[currentChar] = mapOccurrences[currentChar] + 1
+        ELSE
+            mapOccurrences[currentChar] = 1
+        END IF
+        INCREMENT cursor BY 1
+    END WHILE
+    RETURN mapOccurrences
+    END FUNCTION
+
+    DECLARE occurrenceMap AS MAP = countOccurrences(s)
+    IF ' ? ' IN occurrenceMap THEN
+        DELETE occurrenceMap['?']
+    END IF
+
+DECLARE placeholders AS LIST = EMPTY LIST
+DECLARE indexPointer AS INTEGER = 0
+WHILE indexPointer < LENGTH(s)
+    DECLARE currentSymbol AS CHARACTER = s[indexPointer]
+    IF currentSymbol == '?'
+        APPEND indexPointer TO placeholders
+    END IF
+    SET indexPointer = indexPointer + 1
+END WHILE
+
+DECLARE replacements AS LIST = EMPTY LIST
+DECLARE placeholderCounter AS INTEGER = 0
+WHILE placeholderCounter < LENGTH(placeholders)
+    DECLARE smallestFrequency AS INTEGER = MAX_INTEGER
+    DECLARE smallestLetter AS CHARACTER = NULL
+    DECLARE characterCode AS INTEGER = ASC('a')
+    WHILE characterCode <= ASC('z')
+        DECLARE letter AS CHARACTER = CHR(characterCode)
+        DECLARE frequency AS INTEGER = 0
+        IF letter IN occurrenceMap THEN
+            SET frequency = occurrenceMap[letter]
+        ELSE
+            SET frequency = 0
+        END IF
+        IF frequency < smallestFrequency THEN
+            SET smallestFrequency = frequency
+            SET smallestLetter = letter
+        END IF
+        characterCode = characterCode + 1
+    END WHILE
+    APPEND smallestLetter TO replacements
+    IF smallestLetter IN occurrenceMap THEN
+        occurrenceMap[smallestLetter] = occurrenceMap[smallestLetter] + 1
+    ELSE
+        occurrenceMap[smallestLetter] = 1
+    END IF
+    placeholderCounter = placeholderCounter + 1
+END WHILE
+
+DEFINE swap(listToSort, i, j)
+    DECLARE tempVar AS = listToSort[i]
+    SET listToSort[i] = listToSort[j]
+    SET listToSort[j] = tempVar
+END FUNCTION
+
+DECLARE sortedFlag AS BOOLEAN = FALSE
+WHILE NOT sortedFlag
+    SET sortedFlag = TRUE
+    DECLARE idxVar AS INTEGER = 0
+    WHILE idxVar < LENGTH(replacements) - 1
+        IF replacements[idxVar] > replacements[idxVar + 1]
+            swap(replacements, idxVar, idxVar + 1)
+            SET sortedFlag = FALSE
+        END IF
+        idxVar = idxVar + 1
+    END WHILE
+END WHILE
+
+DECLARE resultChars AS LIST = SPLIT_STRING_INTO_LIST(s)
+DECLARE iterIdx AS INTEGER = 0
+WHILE iterIdx < LENGTH(placeholders)
+    resultChars[placeholders[iterIdx]] = replacements[iterIdx]
+    iterIdx = iterIdx + 1
+END WHILE
+
+DECLARE outputString AS STRING = EMPTY_STRING
+DECLARE outIdx AS INTEGER = 0
+WHILE outIdx < LENGTH(resultChars)
+    SET outputString = CONCATENATE(outputString, resultChars[outIdx])
+    outIdx = outIdx + 1
+END WHILE
+
+RETURN outputString
+    END FUNCTION
+END CLASS

@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION maxUpgrades(count LIST OF INTEGER upgrade LIST OF INTEGER sell LIST OF INTEGER money LIST OF INTEGER) RETURNS LIST OF INTEGER
+        DECLARE results AS LIST OF INTEGER
+        ASSIGN results TO new empty list
+
+        DECLARE idx INTEGER
+        ASSIGN idx TO 0
+        WHILE idx <= (LENGTH(count) - (1 + 0))
+            DECLARE current_units INTEGER = count[idx]
+            DECLARE price_upgrade INTEGER = upgrade[idx]
+            DECLARE value_sell INTEGER = sell[idx]
+            DECLARE fund_initial INTEGER = money[idx]
+            DECLARE best_upgrade INTEGER = 0
+            DECLARE temp_fund INTEGER = fund_initial
+
+            PROCEDURE ExploreSell( sell_iter INTEGER )
+                IF NOT (sell_iter <= current_units) THEN RETURN END IF
+
+                DECLARE num_left INTEGER = current_units - sell_iter
+                DECLARE cash_from_sale INTEGER = sell_iter * value_sell
+                DECLARE total_cash INTEGER = temp_fund + cash_from_sale
+
+                DECLARE upgrades_possible INTEGER = INTEGER_DIVIDE(total_cash, price_upgrade)
+
+                IF upgrades_possible > num_left THEN
+                    upgrades_possible = num_left
+                END IF
+
+                IF upgrades_possible > best_upgrade THEN
+                    best_upgrade = upgrades_possible
+                END IF
+
+                ExploreSell(sell_iter + 1)
+            END PROCEDURE
+
+            CALL ExploreSell(0)
+
+            APPEND best_upgrade TO results
+            idx = idx + 1
+        END WHILE
+
+        RETURN results
+    END FUNCTION
+END CLASS

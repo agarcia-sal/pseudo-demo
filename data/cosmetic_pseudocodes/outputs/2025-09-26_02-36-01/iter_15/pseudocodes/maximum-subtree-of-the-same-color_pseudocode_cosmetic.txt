@@ -1,0 +1,50 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+        INITIALIZE adjacencyMap TO empty mapping with default empty list
+        SET idxA TO 0
+        WHILE idxA < LENGTH(edges)
+            LET (firstNode, secondNode) BE edges[idxA]
+            APPEND secondNode TO adjacencyMap[firstNode]
+            APPEND firstNode TO adjacencyMap[secondNode]
+            idxA = idxA + 1
+        END WHILE
+
+        LET maxSize TO 1
+
+        FUNCTION dfs WITH PARAMETERS currNode prevNode
+            LET countSameColorSubtree TO 1
+            LET isUniformColorChildren TO true
+            LET idxB TO 0
+            WHILE idxB < LENGTH(adjacencyMap[currNode])
+                LET neighborNode TO adjacencyMap[currNode][idxB]
+                IF NOT (neighborNode = prevNode) THEN
+                    LET subtreeSize TO dfs(neighborNode, currNode)
+                    IF NOT (subtreeSize != 0) THEN
+                        isUniformColorChildren = false
+                    ELSE IF colors[neighborNode] = colors[currNode] THEN
+                        LET tempVal TO countSameColorSubtree + subtreeSize
+                        countSameColorSubtree = tempVal
+                    ELSE
+                        isUniformColorChildren = false
+                    END IF
+                END IF
+                idxB = idxB + 1
+            END WHILE
+
+            IF isUniformColorChildren THEN
+                IF maxSize < countSameColorSubtree THEN
+                    maxSize = countSameColorSubtree
+                END IF
+                RETURN countSameColorSubtree
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        LET startIdx TO 0 - 1
+        CALL dfs(0, startIdx)
+        RETURN maxSize
+    END FUNCTION
+END CLASS
+```

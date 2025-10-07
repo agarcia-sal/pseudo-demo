@@ -1,0 +1,121 @@
+CLASS Solution
+    FUNCTION canReachCorner(xCorner yCorner circles)
+        FUNCTION in_circle(x y cx cy r)
+            SET dx TO x - cx
+            SET dy TO y - cy
+            SET dist_sq TO dx * dx + dy * dy
+            SET r_sq TO r * r
+            IF dist_sq <= r_sq THEN
+                RETURN TRUE
+            ELSE
+                RETURN FALSE
+            END IF
+        END FUNCTION
+
+        FUNCTION cross_left_top(cx cy r)
+            SET abs_cx TO cx
+            IF abs_cx < 0 THEN
+                SET abs_cx TO 0 - abs_cx
+            END IF
+            SET condA TO (abs_cx <= r) AND (0 <= cy) AND (cy <= yCorner)
+            SET abs_diff_cy TO cy - yCorner
+            IF abs_diff_cy < 0 THEN
+                SET abs_diff_cy TO 0 - abs_diff_cy
+            END IF
+            SET condB TO (abs_diff_cy <= r) AND (0 <= cx) AND (cx <= xCorner)
+            IF condA OR condB THEN
+                RETURN TRUE
+            END IF
+            RETURN FALSE
+        END FUNCTION
+
+        FUNCTION cross_right_bottom(cx cy r)
+            SET diff_cx TO cx - xCorner
+            IF diff_cx < 0 THEN
+                SET diff_cx TO 0 - diff_cx
+            END IF
+            SET condA TO (diff_cx <= r) AND (0 <= cy) AND (cy <= yCorner)
+            SET abs_cy TO cy
+            IF abs_cy < 0 THEN
+                SET abs_cy TO 0 - abs_cy
+            END IF
+            SET condB TO (abs_cy <= r) AND (0 <= cx) AND (cx <= xCorner)
+            IF condA OR condB THEN
+                RETURN TRUE
+            END IF
+            RETURN FALSE
+        END FUNCTION
+
+        FUNCTION dfs(index)
+            SET cx1 TO circles[index][0]
+            SET cy1 TO circles[index][1]
+            SET rad1 TO circles[index][2]
+            IF cross_right_bottom(cx1 cy1 rad1) THEN
+                RETURN TRUE
+            END IF
+            vis[index] = TRUE
+
+            FUNCTION iterate_j(j_val)
+                IF j_val >= LENGTH(circles) THEN
+                    RETURN FALSE
+                END IF
+                SET cx2 TO circles[j_val][0]
+                SET cy2 TO circles[j_val][1]
+                SET rad2 TO circles[j_val][2]
+
+                IF vis[j_val] = TRUE THEN
+                    RETURN iterate_j(j_val + 1)
+                END IF
+
+                SET delta_x TO cx1 - cx2
+                SET delta_y TO cy1 - cy2
+                SET dist_sq TO (delta_x * delta_x) + (delta_y * delta_y)
+                SET sum_rad TO rad1 + rad2
+                SET sum_rad_sq TO sum_rad * sum_rad
+
+                IF dist_sq > sum_rad_sq THEN
+                    RETURN iterate_j(j_val + 1)
+                END IF
+
+                SET lhs_x TO (cx1 * rad2) + (cx2 * rad1)
+                SET rhs_x TO (rad1 + rad2) * xCorner
+                SET lhs_y TO (cy1 * rad2) + (cy2 * rad1)
+                SET rhs_y TO (rad1 + rad2) * yCorner
+
+                IF (lhs_x < rhs_x) AND (lhs_y < rhs_y) THEN
+                    IF dfs(j_val) THEN
+                        RETURN TRUE
+                    END IF
+                END IF
+
+                RETURN iterate_j(j_val + 1)
+            END FUNCTION
+
+            RETURN iterate_j(0)
+        END FUNCTION
+
+        SET vis TO new LIST initialised with FALSE repeated LENGTH(circles)
+        
+        FUNCTION loop_i(i_val)
+            IF i_val >= LENGTH(circles) THEN
+                RETURN TRUE
+            END IF
+
+            SET cx TO circles[i_val][0]
+            SET cy TO circles[i_val][1]
+            SET rad TO circles[i_val][2]
+
+            IF in_circle(0 0 cx cy rad) OR in_circle(xCorner yCorner cx cy rad) THEN
+                RETURN FALSE
+            END IF
+
+            IF (vis[i_val] = FALSE) AND cross_left_top(cx cy rad) AND dfs(i_val) THEN
+                RETURN FALSE
+            END IF
+
+            RETURN loop_i(i_val + 1)
+        END FUNCTION
+
+        RETURN loop_i(0)
+    END FUNCTION
+END CLASS

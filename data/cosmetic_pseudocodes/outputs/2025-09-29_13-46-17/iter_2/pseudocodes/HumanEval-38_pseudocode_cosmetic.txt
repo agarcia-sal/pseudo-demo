@@ -1,0 +1,36 @@
+```
+FUNCTION encode_cyclic(input_string)
+   LET segment_list BE []
+
+   FUNCTION build_segments(i, limit)
+      IF i > limit THEN RETURN
+      LET start_pos BE 3 * i
+      LET end_pos BE IF (start_pos + 3) < LENGTH(input_string) THEN (start_pos + 3) ELSE LENGTH(input_string)
+      APPEND SUBSTRING(input_string, start_pos, end_pos) TO segment_list
+      CALL build_segments(i + 1, limit)
+   END FUNCTION
+
+   CALL build_segments(0, ((LENGTH(input_string) + 2) DIV 3) - 1)
+
+   LET result_list BE []
+   INDEX_LOOP: FOR idx IN 0 TO LENGTH(segment_list) - 1 STEP 1 DO
+      LET seg = segment_list[idx]
+      IF NOT (LENGTH(seg) != 3) THEN
+         LET rearranged = CONCAT(SUBSTRING(seg, 1, LENGTH(seg) - 1), seg[0])
+         APPEND rearranged TO result_list
+      ELSE
+         APPEND seg TO result_list
+   END FOR
+
+   LET output_string BE ""
+   FOR each_string IN result_list DO
+      output_string = output_string + each_string
+   END FOR
+
+   RETURN output_string
+END FUNCTION
+
+FUNCTION decode_cyclic(input_string)
+   RETURN encode_cyclic(encode_cyclic(input_string))
+END FUNCTION
+```

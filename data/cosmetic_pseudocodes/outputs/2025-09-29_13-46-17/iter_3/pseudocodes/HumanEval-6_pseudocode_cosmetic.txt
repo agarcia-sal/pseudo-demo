@@ -1,0 +1,36 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(groupString)
+        FUNCTION evaluateDepth(index, depth, maxDepth)
+            IF index = LENGTH(groupString) THEN
+                RETURN maxDepth
+            END IF
+
+            SET char TO SUBSTRING(groupString, index, 1)
+            IF char = '(' THEN
+                SET newDepth TO depth + 1
+                SET newMax TO (maxDepth >= newDepth) ? maxDepth : newDepth
+                RETURN evaluateDepth(index + 1, newDepth, newMax)
+            ELSE
+                RETURN evaluateDepth(index + 1, depth - 1, maxDepth)
+            END IF
+        END FUNCTION
+
+        RETURN evaluateDepth(0, 0, 0)
+    END FUNCTION
+
+    FUNCTION isNonEmpty(str)
+        RETURN str <> ""
+    END FUNCTION
+
+    SET splitGroups TO SPLIT(parentheses_string, " ")
+    SET resultList TO []
+    FOR EACH groupElement IN splitGroups
+        IF isNonEmpty(groupElement) THEN
+            APPEND parse_paren_group(groupElement) TO resultList
+        END IF
+    END FOR
+
+    RETURN resultList
+END FUNCTION
+```

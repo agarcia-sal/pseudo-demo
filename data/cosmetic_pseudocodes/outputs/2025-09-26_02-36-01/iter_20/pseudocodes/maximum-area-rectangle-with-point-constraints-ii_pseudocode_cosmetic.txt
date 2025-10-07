@@ -1,0 +1,111 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, n)  
+          SET self.tree TO an array of zeros with length (n + 1)  
+    END FUNCTION  
+
+    FUNCTION add(self, i)  
+          FUNCTION _apply_update(idx)  
+                IF idx LESS THAN LENGTH OF self.tree THEN  
+                      SET self.tree[idx] TO self.tree[idx] + 1  
+                      CALL _apply_update(idx + (idx BITWISE_AND (-idx)))  
+                END IF  
+          END FUNCTION  
+          CALL _apply_update(i)  
+    END FUNCTION  
+
+    FUNCTION pre(self, i)  
+          FUNCTION _accumulate(idx, total)  
+                IF idx GREATER THAN 0 THEN  
+                      RETURN _accumulate(idx BITWISE_AND (idx - 1), total + self.tree[idx])  
+                ELSE  
+                      RETURN total  
+                END IF  
+          END FUNCTION  
+          RETURN _accumulate(i, 0)  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+          SET temporaryA TO self.pre(r)  
+          SET temporaryB TO self.pre(l - 1)  
+          RETURN temporaryA - temporaryB  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+          FUNCTION _sorted_pairs(xs, ys)  
+                SET acc TO empty list  
+                SET idx TO 0  
+                WHILE idx LESS THAN LENGTH OF xs DO  
+                      APPEND (xs[idx], ys[idx]) TO acc  
+                      SET idx TO idx + 1  
+                END WHILE  
+                RETURN sorted acc  
+          END FUNCTION  
+
+          FUNCTION _unique_sorted(values)  
+                SET result TO empty list  
+                FOR EACH v IN sorted values DO  
+                      IF LENGTH OF result EQUALS 0 OR result[-1] NOT EQUAL v THEN  
+                            APPEND v TO result  
+                      END IF  
+                END FOR  
+                RETURN result  
+          END FUNCTION  
+
+          FUNCTION _bisect_left(arr, val)  
+                SET low TO 0  
+                SET high TO LENGTH OF arr  
+                WHILE low LESS THAN high DO  
+                      SET mid TO (low + high) // 2  
+                      IF arr[mid] LESS THAN val THEN  
+                            SET low TO mid + 1  
+                      ELSE  
+                            SET high TO mid  
+                      END IF  
+                END WHILE  
+                RETURN low  
+          END FUNCTION  
+
+          SET points TO _sorted_pairs(xCoord, yCoord)  
+          SET ys TO _unique_sorted(yCoord)  
+          SET ans TO (-1)  
+          LET tree BE Fenwick(LENGTH OF ys)  
+          CALL tree.add(_bisect_left(ys, points[0][1]) + 1)  
+
+          SET pre TO empty dictionary  
+
+          FUNCTION _pairwise(lst)  
+                SET i TO 0  
+                WHILE i LESS THAN LENGTH OF lst - 1 DO  
+                      YIELD (lst[i], lst[i + 1])  
+                      SET i TO i + 1  
+                END WHILE  
+          END FUNCTION  
+
+          FOR EACH pairA, pairB IN _pairwise(points) DO  
+                SET x1, y1 TO pairA[0], pairA[1]  
+                SET x2, y2 TO pairB[0], pairB[1]  
+
+                SET y TO _bisect_left(ys, y2) + 1  
+                CALL tree.add(y)  
+
+                IF x1 IS NOT EQUAL TO x2 THEN  
+                      CONTINUE  
+                END IF  
+
+                SET cur TO tree.query(_bisect_left(ys, y1) + 1, y)  
+
+                IF y2 IN pre AND pre[y2][1] IS y1 AND pre[y2][2] + 2 IS cur THEN  
+                      SET candidate TO (x2 - pre[y2][0]) * (y2 - y1)  
+                      IF candidate GREATER THAN ans THEN  
+                            SET ans TO candidate  
+                      END IF  
+                END IF  
+
+                SET pre[y2] TO (x1, y1, cur)  
+          END FOR  
+
+          RETURN ans  
+    END FUNCTION  
+END CLASS

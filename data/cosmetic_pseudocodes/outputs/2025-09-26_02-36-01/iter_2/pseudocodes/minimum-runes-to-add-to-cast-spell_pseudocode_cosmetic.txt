@@ -1,0 +1,130 @@
+CLASS Solution  
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)  
+        DECLARE adjList AS new mapping FROM integer TO list of integers INITIALIZED empty  
+        DECLARE revAdjList AS new mapping FROM integer TO list of integers INITIALIZED empty  
+
+        SET idx TO 0  
+        DECLARE stackList AS empty list  
+        DECLARE discovered AS list of size n FILLED WITH -1  
+        DECLARE lowLink AS list of size n FILLED WITH 0  
+        DECLARE inStack AS list of size n FILLED WITH FALSE  
+        DECLARE stronglyConnectedComponents AS empty list  
+
+        SET srcIndex TO 0  
+        WHILE srcIndex < LENGTH(flowFrom)  
+            SET startNode TO flowFrom[srcIndex]  
+            SET endNode TO flowTo[srcIndex]  
+
+            IF startNode NOT IN adjList THEN  
+                adjList[startNode] = empty list  
+            END IF  
+            APPEND endNode TO adjList[startNode]  
+
+            IF endNode NOT IN revAdjList THEN  
+                revAdjList[endNode] = empty list  
+            END IF  
+            APPEND startNode TO revAdjList[endNode]  
+
+            SET srcIndex TO srcIndex + 1  
+        END WHILE  
+
+        FUNCTION tarjan(currentNode)  
+            SET discovered[currentNode] TO idx  
+            SET lowLink[currentNode] TO idx  
+            SET idx TO idx + 1  
+            APPEND currentNode TO stackList  
+            SET inStack[currentNode] TO TRUE  
+
+            DECLARE adjIter AS 0  
+            DECLARE neighbors AS adjList[currentNode] IF currentNode IN adjList ELSE empty list  
+            WHILE adjIter < LENGTH(neighbors)  
+                SET nextNode TO neighbors[adjIter]  
+                IF discovered[nextNode] == -1 THEN  
+                    CALL tarjan(nextNode)  
+                    IF lowLink[nextNode] < lowLink[currentNode] THEN  
+                        SET lowLink[currentNode] TO lowLink[nextNode]  
+                    END IF  
+                ELSEIF inStack[nextNode] == TRUE THEN  
+                    IF discovered[nextNode] < lowLink[currentNode] THEN  
+                        SET lowLink[currentNode] TO discovered[nextNode]  
+                    END IF  
+                END IF  
+                SET adjIter TO adjIter + 1  
+            END WHILE  
+
+            IF lowLink[currentNode] == discovered[currentNode] THEN  
+                DECLARE component AS empty list  
+                LOOP  
+                    REMOVE lastElement FROM stackList AND ASSIGN TO popped  
+                    SET inStack[popped] TO FALSE  
+                    APPEND popped TO component  
+                    IF popped == currentNode THEN  
+                        BREAK  
+                    END IF  
+                END LOOP  
+                APPEND component TO stronglyConnectedComponents  
+            END IF  
+        END FUNCTION  
+
+        DECLARE count AS 0  
+        WHILE count < n  
+            IF discovered[count] == -1 THEN  
+                CALL tarjan(count)  
+            END IF  
+            SET count TO count + 1  
+        END WHILE  
+
+        DECLARE sccMapping AS list of size n FILLED WITH -1  
+        DECLARE sccHasCrystal AS list of size LENGTH(stronglyConnectedComponents) FILLED WITH FALSE  
+        DECLARE derivedGraph AS new mapping FROM integer TO list of integers INITIALIZED empty  
+
+        DECLARE sccIndexIter AS 0  
+        FOR EACH comp IN stronglyConnectedComponents DO  
+            FOR EACH element IN comp DO  
+                SET sccMapping[element] TO sccIndexIter  
+                IF element IN crystals THEN  
+                    SET sccHasCrystal[sccIndexIter] TO TRUE  
+                END IF  
+            END FOR  
+            SET sccIndexIter TO sccIndexIter + 1  
+        END FOR  
+
+        DECLARE edgeIdx AS 0  
+        WHILE edgeIdx < LENGTH(flowFrom)  
+            SET nodeU TO flowFrom[edgeIdx]  
+            SET nodeV TO flowTo[edgeIdx]  
+            SET sourceSCC TO sccMapping[nodeU]  
+            SET targetSCC TO sccMapping[nodeV]  
+            IF sourceSCC != targetSCC THEN  
+                IF sourceSCC NOT IN derivedGraph THEN  
+                    derivedGraph[sourceSCC] = empty list  
+                END IF  
+                APPEND targetSCC TO derivedGraph[sourceSCC]  
+            END IF  
+            SET edgeIdx TO edgeIdx + 1  
+        END WHILE  
+
+        DECLARE incomingDegree AS list of size LENGTH(stronglyConnectedComponents) FILLED WITH 0  
+        DECLARE sccIdx AS 0  
+        WHILE sccIdx < LENGTH(stronglyConnectedComponents)  
+            DECLARE adjNodes AS derivedGraph[sccIdx] IF sccIdx IN derivedGraph ELSE empty list  
+            DECLARE adjPos AS 0  
+            WHILE adjPos < LENGTH(adjNodes)  
+                SET incomingDegree[adjNodes[adjPos]] TO incomingDegree[adjNodes[adjPos]] + 1  
+                SET adjPos TO adjPos + 1  
+            END WHILE  
+            SET sccIdx TO sccIdx + 1  
+        END WHILE  
+
+        DECLARE neededRuns AS 0  
+        DECLARE sccToCheck AS 0  
+        WHILE sccToCheck < LENGTH(stronglyConnectedComponents)  
+            IF incomingDegree[sccToCheck] == 0 AND sccHasCrystal[sccToCheck] == FALSE THEN  
+                SET neededRuns TO neededRuns + 1  
+            END IF  
+            SET sccToCheck TO sccToCheck + 1  
+        END WHILE  
+
+        RETURN neededRuns  
+    END FUNCTION  
+END CLASS

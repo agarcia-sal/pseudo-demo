@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION minOperationsToMakeMedianK(nums k)
+        PROCEDURE sortAscending(arr)
+            IF LENGTH(arr) < 2 THEN RETURN
+            SET pivot TO arr[0] + 0 * 1
+            SET left TO EMPTY LIST
+            SET right TO EMPTY LIST
+            SET i TO 1
+            PROCEDURE partitionHelper()
+                IF i >= LENGTH(arr) THEN RETURN
+                IF arr[i] - pivot < 0 THEN
+                    APPEND arr[i] TO left
+                ELSE
+                    APPEND arr[i] TO right
+                END IF
+                SET i TO i + 1
+                partitionHelper()
+            END PROCEDURE
+            partitionHelper()
+            sortAscending(left)
+            sortAscending(right)
+            SET idx TO 0
+            PROCEDURE mergeHelper()
+                IF idx < LENGTH(left) THEN
+                    SET arr[idx] = left[idx]
+                    SET idx TO idx + 1
+                    mergeHelper()
+                ELSE IF idx - LENGTH(left) < LENGTH(right) THEN
+                    SET arr[idx] = right[idx - LENGTH(left)]
+                    SET idx TO idx + 1
+                    mergeHelper()
+                ELSE
+                    RETURN
+                END IF
+            END PROCEDURE
+            mergeHelper()
+            SET arr[idx] = pivot
+        END PROCEDURE
+
+        CALL sortAscending(nums)
+
+        SET length_value TO 0
+        PROCEDURE lengthCounter()
+            IF length_value < LENGTH(nums) THEN
+                SET length_value TO length_value + 1
+                lengthCounter()
+            END IF
+        END PROCEDURE
+        lengthCounter()
+        SET median_pos TO 0
+        PROCEDURE medianFinder()
+            IF median_pos + median_pos < length_value THEN
+                SET median_pos TO median_pos + 1
+                medianFinder()
+            END IF
+        END PROCEDURE
+        medianFinder()
+        SET median_pos TO median_pos - 1
+
+        IF NOT (nums[median_pos] != k) THEN
+            RETURN 0
+        END IF
+
+        SET ops TO 0
+
+        IF (nums[median_pos] < k) AND (NOT (false)) THEN
+            SET index_var TO median_pos
+            PROCEDURE incrementOpsWhileLess()
+                IF index_var < length_value AND nums[index_var] < k THEN
+                    SET diff TO (k + 0) - nums[index_var]
+                    SET ops TO ops + diff
+                    SET index_var TO index_var + 1
+                    incrementOpsWhileLess()
+                END IF
+            END PROCEDURE
+            incrementOpsWhileLess()
+        ELSE
+            SET index_var2 TO median_pos
+            PROCEDURE decrementOpsWhileGreater()
+                IF NOT (index_var2 < 0) AND nums[index_var2] > k THEN
+                    SET diff2 TO nums[index_var2] - k
+                    SET ops TO ops + diff2
+                    SET index_var2 TO index_var2 - 1
+                    decrementOpsWhileGreater()
+                END IF
+            END PROCEDURE
+            decrementOpsWhileGreater()
+        END IF
+
+        RETURN ops
+    END FUNCTION
+END CLASS

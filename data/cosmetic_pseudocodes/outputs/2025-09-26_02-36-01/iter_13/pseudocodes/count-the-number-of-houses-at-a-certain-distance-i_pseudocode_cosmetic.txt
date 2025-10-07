@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION countOfPairs(n parameter, x parameter, y parameter) RETURNS list of integer
+        SET output TO a list initialized with zeroes repeated n times
+
+        FUNCTION breadth_first_search(origin parameter)
+            SET discovered TO a boolean list of length (n PLUS one) filled with False
+            SET levels TO a zero-filled list of length (n PLUS one)
+            SET line TO a list containing only origin
+
+            SET discovered at index origin TO True
+
+            REPEAT
+                IF line is empty THEN
+                    EXIT REPEAT
+                END IF
+                SET active TO line at index zero
+                REMOVE element at index zero FROM line
+
+                PROCEDURE process_neighbor(destination parameter)
+                    IF destination GREATER THAN OR EQUAL TO one AND destination LESS THAN OR EQUAL TO n AND discovered at destination IS False THEN
+                        SET discovered at destination TO True
+                        SET levels at destination TO levels at active PLUS one
+                        APPEND destination TO line
+                    END IF
+                END PROCEDURE
+
+                CALL process_neighbor WITH (active MINUS one)
+                CALL process_neighbor WITH (active PLUS one)
+
+                IF active EQUALS x AND discovered at y IS False THEN
+                    SET discovered at y TO True
+                    SET levels at y TO levels at active PLUS one
+                    APPEND y TO line
+                END IF
+
+                IF active EQUALS y AND discovered at x IS False THEN
+                    SET discovered at x TO True
+                    SET levels at x TO levels at active PLUS one
+                    APPEND x TO line
+                END IF
+            UNTIL False
+
+            FUNCTION increment_result_by_distance(index parameter)
+                IF levels at index GREATER THAN zero THEN
+                    SET idx TO levels at index MINUS one
+                    SET output at idx TO output at idx PLUS one
+                END IF
+            END FUNCTION
+
+            FOR iterator FROM one TO n
+                CALL increment_result_by_distance WITH iterator
+            END FOR
+        END FUNCTION
+
+        FUNCTION loop_bfs(counter parameter)
+            IF counter GREATER THAN n THEN
+                RETURN
+            END IF
+            CALL breadth_first_search WITH counter
+            CALL loop_bfs WITH counter PLUS one
+        END FUNCTION
+
+        CALL loop_bfs WITH one
+
+        RETURN output
+    END FUNCTION
+END CLASS

@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        CONST MOD ← (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+
+        VAR totalAns ← 0
+        VAR mapL ← EMPTY MAP OF ELEMENT TO INT
+        VAR mapR ← EMPTY MAP OF ELEMENT TO INT
+        FOR x IN nums DO
+            IF x NOT IN mapR THEN
+                mapR[x] ← 0
+            END IF
+            mapR[x] ← mapR[x] + 1
+        END FOR
+
+        FUNCTION comb2(x)
+            RETURN (x * (x - 1)) / 2
+        END FUNCTION
+
+        VAR val1 ← 0
+        VAR val2 ← 0
+        VAR val3 ← 0
+        VAR val4 ← 0
+        VAR val5 ← 0
+
+        FOR idx IN 0 TO LENGTH(nums) - 1 DO
+            BLOCK
+                VAR cur ← nums[idx]
+
+                VAR t1 ← mapL[cur]
+                VAR t2 ← mapR[cur]
+
+                VAR termA ← val1 + (t1 * (-1 * (t2 * t2 + (t2 - 1) * (t2 - 1))))
+                val1 ← termA
+
+                VAR termB ← val2 + (-1 * (t1 * t1))
+                val2 ← termB
+
+                VAR termC ← val4 + ((-1 * (t2 * t2)) + ((t2 - 1) * (t2 - 1)))
+                val4 ← termC
+
+                VAR termD ← val5 + (-1 * t1)
+                val5 ← termD
+
+                mapR[cur] ← mapR[cur] - 1
+
+                VAR leftSz ← idx
+                VAR rightSz ← LENGTH(nums) - idx - 1
+
+                VAR c1 ← comb2(leftSz)
+                VAR c2 ← comb2(rightSz)
+                VAR c3 ← comb2(leftSz - mapL[cur])
+                VAR c4 ← comb2(rightSz - mapR[cur])
+
+                totalAns ← totalAns + (c1 * c2)
+                totalAns ← totalAns - (c3 * c4)
+
+                VAR val1x ← val1 - (t1 * (t2 * t2))
+                VAR val2x ← val2 - (t2 * (t1 * t1))
+                VAR val3x ← val3 - (t1 * t1)
+                VAR val4x ← val4 - (t2 * t2)
+                VAR val5x ← val5 - (t1 * t2)
+                VAR val6 ← leftSz - t1
+                VAR val7 ← rightSz - t2
+
+                totalAns ← totalAns - (val5x * t1 * (rightSz - t2)) + (val1x * (-1 * t1))
+                totalAns ← totalAns - (val5x * t2 * (leftSz - t1)) + (val2x * (-1 * t2))
+                totalAns ← totalAns - ((val3x - val6) * t2 * (rightSz - t2) / 2)
+                totalAns ← totalAns - ((val4x - val7) * t1 * (leftSz - t1) / 2)
+
+                totalAns ← totalAns % MOD
+
+                val1 ← val1 + (t2 * t2)
+                val2 ← val2 + (t2 * (-1 * (t1 * t1)) + ((t1 + 1) * (t1 + 1)))
+                val3 ← val3 + ((-1 * (t1 * t1)) + ((t1 + 1) * (t1 + 1)))
+                val5 ← val5 + t2
+
+                mapL[cur] ← t1 + 1
+            END BLOCK
+        END FOR
+
+        RETURN totalAns
+    END FUNCTION
+END CLASS

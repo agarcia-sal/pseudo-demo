@@ -1,0 +1,56 @@
+FUNCTION check_dict_case(pseudoParam)
+    DECLARE transientFlag AS STRING
+    DECLARE indexPointer AS INTEGER
+    DECLARE iteratorVar AS STRING
+    DECLARE totalKeys AS INTEGER
+    DECLARE currentKey AS ANY
+
+    SET totalKeys TO LENGTH OF pseudoParam KEYS
+
+    IF totalKeys EQUALS 0
+        RETURN False
+    ELSE
+        SET transientFlag TO "start"
+        SET indexPointer TO 0
+        WHILE indexPointer < totalKeys
+            SET currentKey TO pseudoParam KEYS AT indexPointer
+
+            IF NOT (currentKey IS INSTANCE OF STRING)
+                SET transientFlag TO "mixed"
+                BREAK
+            END IF
+
+            IF transientFlag IS "start"
+                IF currentKey IS ALL UPPERCASE
+                    SET transientFlag TO "upper"
+                ELSE
+                    IF currentKey IS ALL LOWERCASE
+                        SET transientFlag TO "lower"
+                    ELSE
+                        BREAK
+                    END IF
+                END IF
+            ELSE
+                IF (transientFlag IS "upper" AND NOT currentKey IS ALL UPPERCASE) OR (transientFlag IS "lower" AND NOT currentKey IS ALL LOWERCASE)
+                    SET transientFlag TO "mixed"
+                    BREAK
+                ELSE
+                    BREAK
+                END IF
+            END IF
+
+            SET indexPointer TO indexPointer + 1
+        END WHILE
+    END IF
+
+    DECLARE returnVal AS BOOLEAN
+    IF transientFlag IS "upper"
+        SET returnVal TO True
+    ELSE IF transientFlag IS "lower"
+        SET returnVal TO True
+    ELSE
+        SET returnVal TO False
+    END IF
+
+    RETURN returnVal
+END FUNCTION

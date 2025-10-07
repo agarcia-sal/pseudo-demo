@@ -1,0 +1,33 @@
+from typing import List
+
+def parse_nested_parens(paren_string: str) -> List[int]:
+    def parse_paren_group(s: str) -> int:
+        depth = 0
+        max_depth = 0
+        index = 0
+        while index < len(s):
+            c = s[index]
+            if c == "(":
+                depth += 1
+                if depth > max_depth:
+                    max_depth = depth
+            else:
+                depth -= 1
+            index += 1
+        return max_depth
+
+    result = []
+    temp_string = ""
+    index = 0
+    length = len(paren_string)
+    while index < length:
+        if paren_string[index] == " ":
+            if temp_string != "":
+                result.append(parse_paren_group(temp_string))
+                temp_string = ""
+        else:
+            temp_string += paren_string[index]
+        index += 1
+    if temp_string != "":
+        result.append(parse_paren_group(temp_string))
+    return result

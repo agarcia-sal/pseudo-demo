@@ -1,0 +1,65 @@
+```
+FUNCTION sort_array(input_sequence)
+    DEFINE FUNCTION count_ones(binary_str, pos, acc)
+        IF pos < LENGTH(binary_str)
+            IF binary_str[pos] = '1'
+                RETURN count_ones(binary_str, pos + 1, acc + 1)
+            ELSE
+                RETURN count_ones(binary_str, pos + 1, acc)
+        ELSE
+            RETURN acc
+    END FUNCTION
+
+    SET temp_array TO []
+    SET idx TO 0
+    WHILE idx < LENGTH(input_sequence)
+        APPEND input_sequence[idx] TO temp_array
+        SET idx TO idx + 1
+    END WHILE
+
+    // Bubble sort by decimal ascending
+    SET n TO LENGTH(temp_array)
+    SET swapped TO TRUE
+    WHILE swapped
+        SET swapped TO FALSE
+        SET j TO 0
+        WHILE j < n - 1
+            IF temp_array[j] > temp_array[j + 1]
+                SET temp_value TO temp_array[j]
+                SET temp_array[j] TO temp_array[j + 1]
+                SET temp_array[j + 1] TO temp_value
+                SET swapped TO TRUE
+            END IF
+            SET j TO j + 1
+        END WHILE
+        SET n TO n - 1
+    END WHILE
+
+    SET result_array TO []
+    FOR each_element IN temp_array
+        SET bin_str TO BINARY_REPR(each_element)
+        // Skip '0b'
+        SET sum_ones TO count_ones(bin_str, 2, 0)
+        APPEND (each_element, sum_ones) TO result_array
+    END FOR
+
+    // Sort by count of ones ascending, stable
+    SET k TO LENGTH(result_array)
+    FOR i FROM 0 TO k - 2
+        FOR j FROM 0 TO k - i - 2
+            IF result_array[j][1] > result_array[j + 1][1]
+                SET temp_pair TO result_array[j]
+                SET result_array[j] TO result_array[j + 1]
+                SET result_array[j + 1] TO temp_pair
+            END IF
+        END FOR
+    END FOR
+
+    SET output_array TO []
+    FOR pair IN result_array
+        APPEND pair[0] TO output_array
+    END FOR
+
+    RETURN output_array
+END FUNCTION
+```

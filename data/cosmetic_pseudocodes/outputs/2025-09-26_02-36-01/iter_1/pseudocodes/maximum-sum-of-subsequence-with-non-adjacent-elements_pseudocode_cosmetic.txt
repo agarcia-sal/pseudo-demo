@@ -1,0 +1,41 @@
+CLASS Solution  
+    FUNCTION maximumSumSubsequence(nums, queries)  
+        CONSTANT MODULUS ← 10^9 + 1  
+        LENGTH ← LENGTH OF nums  
+        
+        CREATE dpSelected AS an ARRAY OF LENGTH sets initialized to 0  
+        CREATE dpIgnored AS an ARRAY OF LENGTH sets initialized to 0  
+        
+        dpSelected[0] ← MAX(0, nums[0])  
+        dpIgnored[0] ← 0  
+        
+        FOR i FROM 1 TO LENGTH - 1 DO  
+            dpSelected[i] ← MAX(0, dpIgnored[i - 1] + nums[i])  
+            dpIgnored[i] ← MAX(dpIgnored[i - 1], dpSelected[i - 1])  
+        END FOR  
+        
+        resultAccumulator ← 0  
+        
+        FOR EACH (position, newValue) IN queries DO  
+            nums[position] ← newValue  
+            
+            IF position == 0 THEN  
+                dpSelected[position] ← MAX(0, nums[position])  
+                dpIgnored[position] ← 0  
+            ELSE  
+                dpSelected[position] ← MAX(0, dpIgnored[position - 1] + nums[position])  
+                dpIgnored[position] ← MAX(dpIgnored[position - 1], dpSelected[position - 1])  
+            END IF  
+            
+            FOR index FROM position + 1 TO LENGTH - 1 DO  
+                dpSelected[index] ← MAX(0, dpIgnored[index - 1] + nums[index])  
+                dpIgnored[index] ← MAX(dpIgnored[index - 1], dpSelected[index - 1])  
+            END FOR  
+            
+            maxAtEnd ← MAX(dpSelected[LENGTH - 1], dpIgnored[LENGTH - 1])  
+            resultAccumulator ← (resultAccumulator + maxAtEnd) MOD MODULUS  
+        END FOR  
+        
+        RETURN resultAccumulator  
+    END FUNCTION  
+END CLASS

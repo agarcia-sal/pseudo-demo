@@ -1,0 +1,37 @@
+CLASS Solution  
+    FUNCTION numberOfWays(n integer parameter, x integer parameter, y integer parameter) RETURNS integer  
+        ASSIGN moduloValue := 10^9 + 7  
+        
+        DECLARE dp AS array WITH LENGTH n + 1 FILLED WITH arrays OF LENGTH x + 1 FILLED WITH 0  
+        dp[0][0] := 1  
+        
+        SET outerIndex := 1  
+        WHILE outerIndex <= n DO  
+            SET innerIndex := 1  
+            WHILE innerIndex <= x DO  
+                SET prev_i := outerIndex - 1  
+                SET prev_j := innerIndex  
+                SET prev_j_minus_one := innerIndex - 1  
+                SET leftTerm := dp[prev_i][prev_j] * prev_j  
+                
+                SET rightTermFactor := x - (innerIndex - 1) - 1  
+                SET rightTerm := dp[prev_i][prev_j_minus_one] * rightTermFactor
+                
+                SET dp[outerIndex][innerIndex] := (leftTerm + rightTerm) % moduloValue  
+                INNER_LOOP_CONTINUE: innerIndex := innerIndex + 1  
+            END WHILE  
+            OUTER_LOOP_CONTINUE: outerIndex := outerIndex + 1  
+        END WHILE  
+        
+        SET result := 0  
+        SET powerAcc := 1  
+        
+        FOR index FROM 1 TO x DO  
+            powerAcc := (powerAcc * y) MOD moduloValue  
+            tempVal := dp[n][index] * powerAcc  
+            result := (result + tempVal) MOD moduloValue  
+        END FOR  
+        
+        RETURN result  
+    END FUNCTION  
+END CLASS

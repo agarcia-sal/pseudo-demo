@@ -1,0 +1,33 @@
+```
+FUNCTION fruit_distribution(input_string, count_of_fruits)
+    SET collected_values TO []
+    DEFINE PROCESS_ELEMENTS(elements_list, index, acc)
+        IF index EQUALS LENGTH(elements_list)
+            RETURN acc
+        ELSE
+            SET current_element TO elements_list[index]
+            SET updated_acc TO acc
+            SWITCH
+                CASE current_element CONTAINS ONLY DIGITS:
+                    SET updated_acc TO acc + [INTEGER(current_element)]
+                    BREAK
+                DEFAULT:
+                    BREAK
+            END SWITCH
+            RETURN PROCESS_ELEMENTS(elements_list, index + 1, updated_acc)
+    END DEFINE
+
+    SET split_elements TO SPLIT input_string BY ' '
+    SET collected_values TO PROCESS_ELEMENTS(split_elements, 0, [])
+    SET total_collected TO 0
+    DEFINE ACCUMULATE_SUM(values_list, position)
+        IF position EQUALS LENGTH(values_list)
+            RETURN 0
+        ELSE
+            RETURN values_list[position] + ACCUMULATE_SUM(values_list, position + 1)
+    END DEFINE
+    SET total_collected TO ACCUMULATE_SUM(collected_values, 0)
+
+    RETURN (count_of_fruits - total_collected)
+END FUNCTION
+```

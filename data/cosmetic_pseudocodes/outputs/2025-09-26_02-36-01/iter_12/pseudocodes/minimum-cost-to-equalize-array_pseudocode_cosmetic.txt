@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION minCostToEqualizeArray(nums cost1 cost2)
+        CONST MOD_CONST := (10^9) + 7
+        VAR lengthNums := 0
+        VAR minElem := 0
+        VAR maxElem := 0
+        VAR sumElems := 0
+        VAR i := 0
+
+        lengthNums := 0
+        WHILE i < LENGTH(nums) DO
+            lengthNums := lengthNums + 1
+            i := i + 1
+        END WHILE
+
+        minElem := nums[0]
+        maxElem := nums[0]
+        i := 1
+        WHILE i < lengthNums DO
+            IF nums[i] < minElem THEN
+                minElem := nums[i]
+            END IF
+            IF nums[i] > maxElem THEN
+                maxElem := nums[i]
+            END IF
+            i := i + 1
+        END WHILE
+
+        sumElems := 0
+        i := 0
+        REPEAT
+            sumElems := sumElems + nums[i]
+            i := i + 1
+        UNTIL i >= lengthNums
+
+        VAR shortcutCheck := (cost1 * 2) <= cost2
+        IF shortcutCheck OR lengthNums < 3 THEN
+            VAR totalDiff := (maxElem * lengthNums) - sumElems
+            RETURN ((cost1 * totalDiff) % MOD_CONST)
+        END IF
+
+        FUNCTION getMinCost(target)
+            VAR gapMax := target - minElem
+            VAR totalGapCalc := (target * lengthNums) - sumElems
+            VAR pairCount := 0
+            VAR minPairValue := 0
+
+            IF totalGapCalc / 2 < totalGapCalc - gapMax THEN
+                minPairValue := totalGapCalc / 2
+            ELSE
+                minPairValue := totalGapCalc - gapMax
+            END IF
+
+            pairCount := minPairValue
+
+            VAR costCalc := (cost1 * totalGapCalc) - (2 * cost1 * pairCount) + (cost2 * pairCount)
+            RETURN costCalc
+        END FUNCTION
+
+        VAR result := getMinCost(maxElem)
+        VAR currentTarget := maxElem + 1
+        WHILE currentTarget < (2 * maxElem) DO
+            VAR candidateCost := getMinCost(currentTarget)
+            IF candidateCost < result THEN
+                result := candidateCost
+            END IF
+            currentTarget := currentTarget + 1
+        END WHILE
+
+        VAR adjustedResult := result % MOD_CONST
+        RETURN adjustedResult
+    END FUNCTION
+END CLASS

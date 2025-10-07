@@ -1,0 +1,75 @@
+CLASS Solution
+	FUNCTION kthCharacter(k param_k INTEGER, operations param_operations LIST OF INTEGER) RETURNS STRING
+		DEFINE FUNC multiplyByTwo(x INTEGER) RETURNS INTEGER
+			RETURN x + x
+		END FUNC
+
+		DEFINE FUNC divideByTwo(x INTEGER) RETURNS INTEGER
+			RETURN x / 2
+		END FUNC
+
+		DEFINE FUNC nextChar(c CHARACTER) RETURNS CHARACTER
+			IF c = 'z' OR c = 'Z'
+				RETURN 'a'
+			ELSE
+				RETURN CHARACTER(ASCII(c) + 1)
+			END IF
+		END FUNC
+
+		DEFINE FUNCTION buildOpsList(ops LIST OF INTEGER, source LIST OF INTEGER, idx INTEGER) RETURNS LIST OF INTEGER
+			IF idx = LENGTH(source)
+				RETURN ops
+			END IF
+			DEFINE newOps LIST OF INTEGER
+			SET newOps TO ops
+			APPEND source[idx] TO newOps
+			RETURN buildOpsList(newOps, source, idx + 1)
+		END FUNCTION
+
+		DEFINE PROCEDURE updateLengthForOps(ops LIST OF INTEGER, len INTEGER, idx INTEGER, resRef REFERENCE TO INTEGER)
+			IF idx = LENGTH(ops)
+				resRef <- len
+				RETURN
+			END IF
+			DEFINE currentOp INTEGER
+			SET currentOp TO ops[idx]
+			DEFINE newLen INTEGER
+			SET newLen TO multiplyByTwo(len)
+			updateLengthForOps(ops, newLen, idx + 1, resRef)
+		END PROCEDURE
+
+		DEFINE FUNCTION kthCharRecursive(idx INTEGER, k INTEGER, len INTEGER, ops LIST OF INTEGER, c CHARACTER) RETURNS CHARACTER
+			IF idx < 0
+				RETURN c
+			END IF
+			DEFINE half INTEGER
+			SET half TO divideByTwo(len)
+			IF k <= half
+				RETURN kthCharRecursive(idx - 1, k, half, ops, c)
+			ELSE
+				DEFINE newK INTEGER
+				SET newK TO k - half
+				DEFINE newLen INTEGER
+				SET newLen TO half
+				DEFINE updatedC CHARACTER
+				IF ops[idx] = 1
+					SET updatedC TO nextChar(c)
+				ELSE
+					SET updatedC TO c
+				END IF
+				RETURN kthCharRecursive(idx - 1, newK, newLen, ops, updatedC)
+			END IF
+		END FUNCTION
+
+		DEFINE internalOps LIST OF INTEGER
+		SET internalOps TO buildOpsList([], param_operations, 0)
+
+		DEFINE totalLength INTEGER
+		CALL updateLengthForOps(internalOps, 1, 0, totalLength)
+
+		DEFINE initialChar CHARACTER
+		SET initialChar TO 'a'
+
+		RETURN kthCharRecursive(LENGTH(internalOps) - 1, param_k, totalLength, internalOps, initialChar)
+	END FUNCTION
+END CLASS

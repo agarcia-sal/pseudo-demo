@@ -1,0 +1,59 @@
+```
+FUNCTION poly(list_of_coefficients, point)
+    FUNCTION ƄƢ₥(𝔽, 𝑞, 𝒳, ᵥ)
+        IF 𝒳 IS EMPTY THEN
+⨮         RETURN 𝔽
+        ELSE
+⨮         LET (𝖈𝖔𝖊, ι) ← HEAD(𝒳)
+⨮         LET 𝔽 ← 𝔽 + 𝖈𝖔𝖊 * REC_POW(𝑞, ι)
+⨮         RETURN ƄƢ₥(𝔽, 𝑞, TAIL(𝒳), ᵥ)
+        END IF
+    END FUNCTION
+
+    FUNCTION REC_POW(𝒙, 𝓷)
+        IF 𝓷 EQUALS 0 THEN
+⨮         RETURN 1
+        ELSE
+⨮         RETURN 𝒙 * REC_POW(𝒙, 𝓷 - 1)
+        END IF
+    END FUNCTION
+
+    RETURN ƄƢ₥(0, point, ZIP(list_of_coefficients, RANGE(0, LENGTH(list_of_coefficients) - 1)), 0)
+END FUNCTION
+
+
+FUNCTION find_zero(list_of_coefficients)
+    FUNCTION SHIFT_IF_SAME_SIGN(α, β)
+        DECLARE ρ ← poly(list_of_coefficients, α) * poly(list_of_coefficients, β)
+        IF NOT (ρ ≤ 0) THEN
+⨮         RETURN SHIFT_IF_SAME_SIGN(α * 2.0, β * 2.0)
+        ELSE
+⨮         RETURN (α, β)
+        END IF
+    END FUNCTION
+
+    FUNCTION BISSECT(κ, λ)
+        LET 𝜺 ← 1e-10
+
+        FUNCTION HELPER(𝚌τ, 𝚋τ)
+            LET δ ← 𝚌τ - 𝚋τ
+            IF δ ≤ 𝜺 THEN
+⨮             RETURN 𝚋τ
+            ELSE
+⨮             LET 𝚍₁ ← (𝚌τ + 𝚋τ) / 2.0
+⨮             LET Π ← poly(list_of_coefficients, 𝚍₁) * poly(list_of_coefficients, 𝚋τ)
+⨮             IF Π ≤ 0 THEN
+⨮⨮             RETURN HELPER(𝚌τ, 𝚍₁)
+⨮             ELSE
+⨮⨮             RETURN HELPER(𝚍₁, 𝚋τ)
+⨮             END IF
+            END IF
+        END FUNCTION
+
+        RETURN HELPER(κ, λ)
+    END FUNCTION
+
+    LET (▦, ✗) ← SHIFT_IF_SAME_SIGN(-1.0, 1.0)
+    RETURN BISSECT(▦, ✗)
+END FUNCTION
+```

@@ -1,0 +1,45 @@
+```
+FUNCTION minPath(grid, k)
+n := LENGTH(grid)
+u := n * n + 1
+
+PROCEDURE iterate_col_idx(row_idx, col_idx)
+    IF col_idx = n THEN RETURN
+    IF grid[row_idx][col_idx] = 1 THEN
+        adj_values := DICTIONARY()
+        IF NOT (row_idx = 0) THEN adj_values["up"] := grid[row_idx - 1][col_idx]
+        IF col_idx <> 0 THEN adj_values["left"] := grid[row_idx][col_idx - 1]
+        IF row_idx <> n - 1 THEN adj_values["down"] := grid[row_idx + 1][col_idx]
+        IF col_idx <> n - 1 THEN adj_values["right"] := grid[row_idx][col_idx + 1]
+        min_adj := NULL
+        FOR key IN adj_values KEYS DO
+            IF min_adj IS NULL OR adj_values[key] < min_adj THEN min_adj := adj_values[key]
+        END FOR
+        u := min_adj
+    END IF
+    iterate_col_idx(row_idx, col_idx + 1)
+END PROCEDURE
+
+PROCEDURE iterate_row_idx(row_idx)
+    IF row_idx = n THEN RETURN
+    iterate_col_idx(row_idx, 0)
+    iterate_row_idx(row_idx + 1)
+END PROCEDURE
+
+iterate_row_idx(0)
+
+result := ARRAY()
+index := 0
+WHILE index < k DO
+    IF index DIV 2 * 2 = index THEN
+        value_to_append := 1
+    ELSE
+        value_to_append := u
+    END IF
+    APPEND value_to_append TO result
+    index := index + 1
+END WHILE
+
+RETURN result
+END FUNCTION
+```

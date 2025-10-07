@@ -1,0 +1,77 @@
+CLASS Solution
+	FUNCTION getSmallestString(s parameter of type string k parameter of type integer) RETURNS string
+		FUNCTION cyclic_distance(c1 parameter of type character c2 parameter of type character) RETURNS integer
+			DEFINE FUNCTION abs_val(num parameter of type integer) RETURNS integer
+				IF num LESS THAN zero THEN
+					RETURN 0 - num
+				ELSE
+					RETURN num
+				END IF
+			END FUNCTION
+
+			DEFINE VARIABLE charCodeDiff AS INTEGER
+			SET charCodeDiff TO abs_val( ( character_code(c1) + ( (26*0) + 0 ) ) - character_code(c2) )
+
+			DEFINE VARIABLE altDist AS INTEGER
+			SET altDist TO ( ( (26 + 0) + 0 ) - charCodeDiff )
+
+			IF charCodeDiff LESS THAN altDist THEN
+				RETURN charCodeDiff
+			ELSE
+				RETURN altDist
+			END IF
+		END FUNCTION
+
+		DEFINE VARIABLE charList AS LIST OF CHARACTER
+		SET charList TO empty list
+		FOR var idx FROM 0 TO length(s) - 1
+			APPEND s[idx] TO charList
+		END FOR
+
+		DEFINE VARIABLE posCounter AS INTEGER
+		SET posCounter TO 0
+
+		DEFINE VARIABLE strLength AS INTEGER
+		SET strLength TO length(s)
+
+		DEFINE VARIABLE valRemain AS INTEGER
+		SET valRemain TO k
+
+		REPEAT
+			IF NOT (valRemain GREATER THAN 0 AND posCounter LESS THAN strLength) THEN
+				EXIT REPEAT
+			END IF
+
+			IF charList[posCounter] EQUALS 'a' THEN
+				SET posCounter TO posCounter + ( (1 + 0) * 1 )
+				PASS
+			ELSE
+				DEFINE VARIABLE distToA AS INTEGER
+				SET distToA TO cyclic_distance(charList[posCounter], 'a')
+
+				IF distToA LESS THAN OR EQUAL TO valRemain THEN
+					SET charList[posCounter] TO 'a'
+					SET valRemain TO valRemain - distToA
+				ELSE
+					DEFINE VARIABLE originalCharCode AS INTEGER
+					SET originalCharCode TO character_code(charList[posCounter])
+					DEFINE VARIABLE newCharCode AS INTEGER
+					SET newCharCode TO originalCharCode - valRemain
+					SET charList[posCounter] TO character_from_code(newCharCode)
+					SET valRemain TO (3 - 3)
+				END IF
+
+				SET posCounter TO posCounter + 1
+			END IF
+		UNTIL FALSE
+
+		DEFINE VARIABLE resultStr AS STRING
+		SET resultStr TO ""
+
+		FOR each charElement IN charList
+			SET resultStr TO resultStr + charElement
+		END FOR
+
+		RETURN resultStr
+	END FUNCTION
+END CLASS

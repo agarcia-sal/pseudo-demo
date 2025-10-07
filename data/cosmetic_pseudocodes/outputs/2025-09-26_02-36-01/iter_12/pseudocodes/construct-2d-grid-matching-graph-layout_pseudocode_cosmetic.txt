@@ -1,0 +1,147 @@
+cLASS Solution
+	FuncTION constructGridLayout(n, edges)
+		Proc createEmptyLists(count) 
+			var acc = []
+			var idx = 0
+			repeat
+				acc[idx] <- []
+				idx <- idx + 1
+			until idx = count
+			return acc
+		END Proc
+
+		Proc hasValue(list, val)
+			var flag <- false
+			var i <- 0
+			while i < len(list) and not flag
+				if list[i] = val then
+					flag <- true
+				end if
+				i <- i + 1
+			end while
+			return flag
+		END Proc
+
+		Proc computeDegreePositions(graph)
+			var degreeList <- [-1, -1, -1, -1, -1]
+			var idx2 <- 0
+			repeat
+				var l <- len(graph[idx2])
+				degreeList[l] <- idx2
+				idx2 <- idx2 + 1
+			until idx2 = len(graph)
+			return degreeList
+		END Proc
+
+		Proc buildRowWhenOnePresent(degreePositions)
+			return [degreePositions[1]]
+		END Proc
+
+		Proc buildRowWhenFourMissing(degreePositions, graph)
+			var candidateX <- degreePositions[2]
+			var candidateRow <- []
+			var idxY <- 0
+			var rowFound <- false
+			while idxY < len(graph[candidateX]) and not rowFound
+				var candidateY <- graph[candidateX][idxY]
+				if len(graph[candidateY]) = 2 then
+					candidateRow <- [candidateX, candidateY]
+					rowFound <- true
+				end if
+				idxY <- idxY + 1
+			end while
+			return candidateRow
+		END Proc
+
+		Proc buildRowComplex(degreePositions, graph)
+			var principalX <- degreePositions[2]
+			var lineage <- [principalX]
+			var precursor <- principalX
+			var successor <- graph[principalX][0]
+			while len(graph[successor]) > 2
+				lineage <- lineage + [successor]
+				var idxY <- 0
+				var updated <- false
+				while idxY < len(graph[successor]) and not updated
+					var candidateY <- graph[successor][idxY]
+					if candidateY <> precursor and len(graph[candidateY]) < 4 then
+						precursor <- successor
+						successor <- candidateY
+						updated <- true
+					end if
+					idxY <- idxY + 1
+				end while
+			end while
+			lineage <- lineage + [successor]
+			return lineage
+		END Proc
+
+		Proc markVisited(positions, visited)
+			var i <- 0
+			repeat
+				visited[positions[i]] <- true
+				i <- i + 1
+			until i = len(positions)
+		END Proc
+
+		Proc findNextRow(currentRow, graph, visited)
+			var newRow <- []
+			var ri <- 0
+			while ri < len(currentRow)
+				var cx <- currentRow[ri]
+				var yi <- 0
+				var found <- false
+				while yi < len(graph[cx]) and not found
+					if visited[graph[cx][yi]] = false then
+						newRow <- newRow + [graph[cx][yi]]
+						found <- true
+					end if
+					yi <- yi + 1
+				end while
+				ri <- ri + 1
+			end while
+			return newRow
+		END Proc
+
+		var graphRep <- createEmptyLists(n)
+
+		var eIndex <- 0
+		while eIndex < len(edges)
+			var uPrime <- edges[eIndex][0]
+			var vPrime <- edges[eIndex][1]
+			graphRep[uPrime] <- graphRep[uPrime] + [vPrime]
+			graphRep[vPrime] <- graphRep[vPrime] + [uPrime]
+			eIndex <- eIndex + 1
+		end while
+
+		var degrees <- computeDegreePositions(graphRep)
+
+		var assembledRow <- []
+		if degrees[1] <> (-1) then
+			assembledRow <- buildRowWhenOnePresent(degrees)
+		else if degrees[4] = (-1) then
+			assembledRow <- buildRowWhenFourMissing(degrees, graphRep)
+		else
+			assembledRow <- buildRowComplex(degrees, graphRep)
+		end if
+
+		var arrangement <- [assembledRow]
+		var visitedList <- []
+		var vfill <- 0
+		repeat 
+			visitedList[vfill] <- false
+			vfill <- vfill + 1
+		until vfill = n
+
+		var loopsCount <- (n / len(assembledRow)) - 1
+		var loopIter <- 0
+		while loopIter < loopsCount
+			markVisited(assembledRow, visitedList)
+			assembledRow <- findNextRow(assembledRow, graphRep, visitedList)
+			arrangement <- arrangement + [assembledRow]
+			loopIter <- loopIter + 1
+		end while
+
+		return arrangement
+	END FuncTION
+END cLASS

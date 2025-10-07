@@ -1,0 +1,56 @@
+CLASS Solution
+  FUNCTION maximumTotalDamage(power)
+    DEFINE FUNCTION get_maximum_of_map(map_collection)
+      INITIALIZE max_tracker TO -∞
+      FOR EACH key IN map_collection
+        IF map_collection[key] > max_tracker THEN
+          SET max_tracker TO map_collection[key]
+        END IF
+      END FOR
+      RETURN max_tracker
+    END FUNCTION
+
+    SET tally TO empty mapping
+    FOR item IN power
+      IF item IS NOT IN tally THEN
+        SET tally[item] TO 1
+      ELSE
+        SET tally[item] TO tally[item] + 1
+      END IF
+    END FOR
+
+    SET keys_sorted TO a list of keys of tally sorted ascending
+
+    SET record TO empty mapping
+
+    DEFINE FUNCTION compute_dp(pos)
+      IF pos < 0 THEN
+        RETURN 0
+      END IF
+
+      IF pos IS IN record THEN
+        RETURN record[pos]
+      END IF
+
+      SET current_val TO keys_sorted[pos]
+      SET omit_cur TO compute_dp(pos - 1)
+
+      SET inc_cur TO current_val * tally[current_val]
+
+      SET scan_index TO pos - 1
+      WHILE scan_index >= 0 AND keys_sorted[scan_index] >= current_val - 2
+        SET scan_index TO scan_index - 1
+      END WHILE
+
+      IF scan_index >= 0 THEN
+        SET inc_cur TO inc_cur + compute_dp(scan_index)
+      END IF
+
+      SET chosen_val TO (inc_cur >= omit_cur) AND inc_cur OR omit_cur
+      SET record[pos] TO chosen_val
+      RETURN chosen_val
+    END FUNCTION
+
+    RETURN compute_dp(length(keys_sorted) - 1)
+  END FUNCTION
+END CLASS

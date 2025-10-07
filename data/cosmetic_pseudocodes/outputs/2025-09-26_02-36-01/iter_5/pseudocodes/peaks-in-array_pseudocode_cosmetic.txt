@@ -1,0 +1,123 @@
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION is_peak(position INTEGER) RETURNS BOOLEAN
+            SET left_neighbor TO nums[position - 1]
+            SET current_value TO nums[position]
+            SET right_neighbor TO nums[position + 1]
+            SET condition_left TO NOT (left_neighbor >= current_value)
+            SET condition_right TO current_value > right_neighbor
+            SET peak_status TO condition_left AND condition_right
+            RETURN peak_status
+        END FUNCTION
+
+        FUNCTION binary_left_insert(collection LIST OF INTEGER, target INTEGER) RETURNS INTEGER
+            SET low TO 0
+            SET high TO LENGTH OF collection
+            WHILE low < high DO
+                SET mid TO (low + high) DIVIDED BY 2
+                IF collection[mid] < target THEN
+                    SET low TO mid + 1
+                ELSE
+                    SET high TO mid
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        FUNCTION binary_right_insert(collection LIST OF INTEGER, target INTEGER) RETURNS INTEGER
+            SET low TO 0
+            SET high TO LENGTH OF collection
+            WHILE low < high DO
+                SET mid TO (low + high) DIVIDED BY 2
+                IF target < collection[mid] THEN
+                    SET high TO mid
+                ELSE
+                    SET low TO mid + 1
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        FUNCTION insert_in_sorted_list(sorted_list LIST OF INTEGER, value INTEGER)
+            SET pos TO binary_left_insert(sorted_list, value)
+            INSERT value INTO sorted_list AT pos
+        END FUNCTION
+
+        FUNCTION remove_from_sorted_list(sorted_list LIST OF INTEGER, value INTEGER)
+            SET pos TO binary_left_insert(sorted_list, value)
+            IF pos < LENGTH OF sorted_list AND sorted_list[pos] = value THEN
+                REMOVE element at pos FROM sorted_list
+            END IF
+        END FUNCTION
+
+        FUNCTION is_in_sorted_list(sorted_list LIST OF INTEGER, value INTEGER) RETURNS BOOLEAN
+            SET pos TO binary_left_insert(sorted_list, value)
+            IF pos < LENGTH OF sorted_list AND sorted_list[pos] = value THEN
+                RETURN true
+            ELSE
+                RETURN false
+            END IF
+        END FUNCTION
+
+        FUNCTION process_indices(start_idx INTEGER, end_idx INTEGER, peaks_list LIST OF INTEGER)
+            IF start_idx > end_idx THEN
+                RETURN
+            ELSE
+                SET current_idx TO start_idx
+                IF is_peak(current_idx) THEN
+                    IF NOT is_in_sorted_list(peaks_list, current_idx) THEN
+                        insert_in_sorted_list(peaks_list, current_idx)
+                    END IF
+                ELSE 
+                    IF is_in_sorted_list(peaks_list, current_idx) THEN
+                        remove_from_sorted_list(peaks_list, current_idx)
+                    END IF
+                END IF
+                CALL process_indices(current_idx + 1, end_idx, peaks_list)
+            END IF
+        END FUNCTION
+
+        SET peak_positions TO empty list
+
+        RECURSIVE FUNCTION initialize_peaks(current INTEGER)
+            IF current > LENGTH OF nums - 2 THEN
+                RETURN
+            ELSE
+                IF is_peak(current) THEN
+                    append current TO peak_positions
+                END IF
+                CALL initialize_peaks(current + 1)
+            END IF
+        END FUNCTION
+        CALL initialize_peaks(1)
+
+        SET answers TO empty list
+        SET query_idx TO 0
+        WHILE query_idx < LENGTH OF queries
+            SET individual_query TO queries[query_idx]
+            SET operation_type TO individual_query[0]
+            IF operation_type = 1 THEN
+                SET left_val TO individual_query[1]
+                SET right_val TO individual_query[2]
+                SET left_pos TO binary_left_insert(peak_positions, left_val + 1)
+                SET right_pos TO binary_right_insert(peak_positions, right_val) - 1
+                SET count_diff TO right_pos - left_pos
+                append count_diff TO answers
+            ELSE
+                SET update_idx TO individual_query[1]
+                SET update_val TO individual_query[2]
+                IF nums[update_idx] = update_val THEN
+                    # No update needed; do nothing
+                ELSE
+                    SET nums[update_idx] TO update_val
+                    SET begin_range TO MAX(1, update_idx - 1)
+                    SET end_range TO MIN(LENGTH OF nums - 2, update_idx + 1)
+                    CALL process_indices(begin_range, end_range, peak_positions)
+                END IF
+            END IF
+            SET query_idx TO query_idx + 1
+        END WHILE
+
+        RETURN answers
+    END FUNCTION
+END CLASS

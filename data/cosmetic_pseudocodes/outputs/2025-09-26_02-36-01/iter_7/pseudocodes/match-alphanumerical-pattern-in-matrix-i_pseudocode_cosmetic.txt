@@ -1,0 +1,85 @@
+CLASS Solution
+{
+  FUNCTION findPattern(board, pattern)
+  {
+    CONSTANT ZERO = 0
+    CONSTANT ONE = 1
+
+    SET total_rows TO LENGTH(board)
+    SET total_cols TO LENGTH(board[ZERO])
+    SET pattern_rows TO LENGTH(pattern)
+    SET pattern_cols TO LENGTH(pattern[ZERO])
+
+    FUNCTION matches(row_start, col_start)
+    {
+      SET char_to_digit_map TO DICTIONARY()
+      SET digit_to_char_map TO DICTIONARY()
+
+      SET i TO ZERO
+      WHILE i < pattern_rows
+      {
+        SET j TO ZERO
+        WHILE j < pattern_cols
+        {
+          SET pattern_char TO pattern[i][j]
+          SET board_digit TO board[row_start + i][col_start + j]
+
+          IF (pattern_char >= '0' AND pattern_char <= '9')
+          {
+            IF (TO_INTEGER(pattern_char) != board_digit)
+            {
+              RETURN FALSE
+            }
+          }
+          ELSE
+          {
+            IF (char_to_digit_map.CONTAINS_KEY(pattern_char))
+            {
+              IF (char_to_digit_map[pattern_char] != board_digit)
+              {
+                RETURN FALSE
+              }
+            }
+            ELSE
+            {
+              IF (digit_to_char_map.CONTAINS_KEY(board_digit))
+              {
+                RETURN FALSE
+              }
+              ELSE
+              {
+                char_to_digit_map[pattern_char] = board_digit
+                digit_to_char_map[board_digit] = pattern_char
+              }
+            }
+          }
+
+          j = j + ONE
+        }
+
+        i = i + ONE
+      }
+
+      RETURN TRUE
+    }
+
+    SET row_index TO ZERO
+    OUTER_LOOP:
+    WHILE row_index <= total_rows - pattern_rows
+    {
+      SET col_index TO ZERO
+      INNER_LOOP:
+      WHILE col_index <= total_cols - pattern_cols
+      {
+        IF matches(row_index, col_index) == TRUE
+        {
+          RETURN [row_index, col_index]
+        }
+        col_index = col_index + ONE
+      }
+      row_index = row_index + ONE
+    }
+
+    RETURN [-1, -1]
+  }
+}

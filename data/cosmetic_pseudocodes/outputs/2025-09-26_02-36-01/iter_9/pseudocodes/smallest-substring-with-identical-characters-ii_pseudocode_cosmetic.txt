@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION minLength(s parameter representing a string, numOps parameter representing an integer) RETURNS integer
+
+        FUNCTION check(m parameter representing an integer) RETURNS boolean
+            FUNCTION isLastIndex(idx parameter representing integer) RETURNS boolean
+                RETURN (idx = LENGTH(s) - 1)
+            END FUNCTION
+
+            FUNCTION charsDiffer(idx parameter representing integer) RETURNS boolean
+                RETURN (s[idx] ≠ s[idx + 1])
+            END FUNCTION
+
+            VAR counter := 0
+            VAR segmentLen := 0
+            VAR pos := 0
+
+            PROCEDURE processSegment()
+                VAR additions := (segmentLen DIV m) + 1
+                counter := counter + additions
+            END PROCEDURE
+
+            WHILE pos < LENGTH(s) DO
+                segmentLen := segmentLen + 1
+
+                IF isLastIndex(pos) OR charsDiffer(pos) THEN
+                    processSegment()
+                    IF counter > numOps THEN
+                        RETURN false
+                    END IF
+                    segmentLen := 0
+                END IF
+
+                pos := pos + 1
+            END WHILE
+
+            RETURN (counter ≤ numOps)
+        END FUNCTION
+
+        VAR lengthS := LENGTH(s)
+        VAR low := 1
+        VAR high := lengthS
+
+        FUNCTION midPoint(a parameter representing integer, b parameter representing integer) RETURNS integer
+            RETURN a + ((b - a) DIV 2)
+        END FUNCTION
+
+        REPEAT
+            VAR mid := midPoint(low, high)
+
+            IF check(mid) THEN
+                high := mid
+            ELSE
+                low := mid + 1
+            END IF
+
+        UNTIL low ≥ high
+
+        RETURN low
+    END FUNCTION
+END CLASS

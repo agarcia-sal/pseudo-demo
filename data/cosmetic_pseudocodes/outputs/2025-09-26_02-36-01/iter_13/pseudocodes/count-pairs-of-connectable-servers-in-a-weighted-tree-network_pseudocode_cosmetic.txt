@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)
+      SET graph TO a new mapping with default empty list for each key
+      PROCEDURE addEdges(edgeList, graphMap)
+        REPEAT index FROM 1 TO LENGTH(edgeList)
+          LET x, y, z BE unpack edgeList AT index
+          CALL insertPair(graphMap, x, y, z)
+          CALL insertPair(graphMap, y, x, z)
+        UNTIL index > LENGTH(edgeList)
+      END PROCEDURE
+
+      PROCEDURE insertPair(gm, a, b, c)
+        LET tmpList BE gm[a]
+        SET gm[a] TO tmpList concatenated WITH [(b, c)]
+      END PROCEDURE
+
+      CALL addEdges(edges, graph)
+      LET nodeCount BE SIZE OF graph
+      LET outputArray BE ARRAY FILLED WITH 0 OF LENGTH nodeCount
+
+      FUNCTION dfs(currentNode, parentNode, distAcc, collectedPath)
+        LET divisibleCondition BE (distAcc MOD signalSpeed) EQUALS 0
+        IF divisibleCondition THEN
+          APPEND currentNode TO collectedPath
+        END IF
+        LET accumulator BE 0
+
+        FUNCTION recurNeighbors(idx)
+          IF idx > LENGTH(graph[currentNode]) THEN
+            RETURN 0
+          END IF
+          LET neigh, wgt BE graph[currentNode][idx]
+          IF neigh NOT EQUALS parentNode THEN
+            LET callResult BE dfs(neigh, currentNode, distAcc + wgt, collectedPath)
+            RETURN callResult + recurNeighbors(idx + 1)
+          ELSE
+            RETURN recurNeighbors(idx + 1)
+          END IF
+        END FUNCTION
+
+        SET accumulator TO recurNeighbors(1)
+
+        IF divisibleCondition THEN
+          RETURN accumulator + 1
+        ELSE
+          RETURN accumulator
+        END IF
+      END FUNCTION
+
+      FUNCTION count_pairs_through_c(centerNode)
+        LET allPaths BE EMPTY LIST
+
+        PROCEDURE gatherPathsList(idx)
+          IF idx > LENGTH(graph[centerNode]) THEN RETURN END IF
+          LET nbr, wgt BE graph[centerNode][idx]
+          LET singlePath BE EMPTY LIST
+          CALL dfs(nbr, centerNode, wgt, singlePath)
+          APPEND singlePath TO allPaths
+          CALL gatherPathsList(idx + 1)
+        END PROCEDURE
+
+        CALL gatherPathsList(1)
+        LET pairsCount BE 0
+        LET pathNum BE LENGTH(allPaths)
+
+        PROCEDURE pairwiseSum(i, j)
+          IF i >= pathNum THEN RETURN END IF
+          IF j >= pathNum THEN CALL pairwiseSum(i + 1, i + 2) RETURN END IF
+          SET pairsCount TO pairsCount + (LENGTH(allPaths[i]) * LENGTH(allPaths[j]))
+          CALL pairwiseSum(i, j + 1)
+        END PROCEDURE
+
+        CALL pairwiseSum(0, 1)
+        RETURN pairsCount
+      END FUNCTION
+
+      PROCEDURE assignResults(index)
+        IF index >= nodeCount THEN RETURN END IF
+        SET outputArray[index] TO count_pairs_through_c(index)
+        CALL assignResults(index + 1)
+      END PROCEDURE
+
+      CALL assignResults(0)
+      RETURN outputArray
+    END FUNCTION
+END CLASS

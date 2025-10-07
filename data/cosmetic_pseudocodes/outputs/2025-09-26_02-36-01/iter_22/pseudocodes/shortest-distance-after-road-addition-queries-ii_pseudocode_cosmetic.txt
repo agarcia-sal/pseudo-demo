@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION shortestDistanceAfterQueries(n, queries)
+        SET adjacency_map TO dictionary mapping integers from 0 to n - 1 TO empty lists
+        SET index_counter TO 0
+        WHILE index_counter <= n - 2 DO
+            INSERT (index_counter + 1, 1) AT END OF adjacency_map[index_counter]
+            SET index_counter TO index_counter + 1
+        END WHILE
+
+        FUNCTION dijkstra()
+            SET distances TO list of length n with all values as (1 / 0)
+            SET distances[0] TO 0
+            SET priority_queue TO [(0, 0)]
+
+            PROCEDURE sift_down()
+                WHILE priority_queue IS NOT EMPTY DO
+                    SET current_tuple TO priority_queue[0]
+                    SWAP priority_queue[0] WITH priority_queue[-1]
+                    REMOVE last element FROM priority_queue INTO candidate
+                    SET heap_size TO LENGTH(priority_queue)
+                    SET position TO 0
+
+                    WHILE (position * 2 + 1) < heap_size DO
+                        SET left_child TO position * 2 + 1
+                        SET right_child TO left_child + 1
+                        SET smallest_child TO left_child
+                        IF right_child < heap_size AND priority_queue[right_child][0] < priority_queue[left_child][0] THEN
+                            SET smallest_child TO right_child
+                        END IF
+                        IF priority_queue[smallest_child][0] < priority_queue[position][0] THEN
+                            SWAP priority_queue[position] WITH priority_queue[smallest_child]
+                            SET position TO smallest_child
+                        ELSE
+                            BREAK
+                        END IF
+                    END WHILE
+                END WHILE
+                RETURN current_tuple
+            END PROCEDURE
+
+            FUNCTION pop_min()
+                RETURN sift_down()
+            END FUNCTION
+
+            PROCEDURE push_heap(item)
+                APPEND item TO priority_queue
+                SET idx TO LENGTH(priority_queue) - 1
+                WHILE idx > 0 DO
+                    SET parent_idx TO (idx - 1) // 2
+                    IF priority_queue[idx][0] < priority_queue[parent_idx][0] THEN
+                        SWAP priority_queue[idx] WITH priority_queue[parent_idx]
+                        SET idx TO parent_idx
+                    ELSE
+                        BREAK
+                    END IF
+                END WHILE
+            END PROCEDURE
+
+            WHILE LENGTH(priority_queue) > 0 DO
+                SET current_pair TO pop_min()
+                SET current_dist TO current_pair[0]
+                SET current_vertex TO current_pair[1]
+
+                IF distances[current_vertex] < current_dist THEN
+                    CONTINUE
+                END IF
+
+                FOR each connection IN adjacency_map[current_vertex] DO
+                    SET neighbor, edge_cost TO connection[0], connection[1]
+                    SET tentative_distance TO current_dist + edge_cost
+                    IF tentative_distance < distances[neighbor] THEN
+                        SET distances[neighbor] TO tentative_distance
+                        CALL push_heap((tentative_distance, neighbor))
+                    END IF
+                END FOR
+            END WHILE
+
+            RETURN distances[n - 1]
+        END FUNCTION
+
+        SET accumulated_results TO empty list
+        FOR each query_pair IN queries DO
+            SET first_node, edge_value TO query_pair[0], query_pair[1]
+            INSERT (edge_value, 1) AT END OF adjacency_map[first_node]
+            SET query_result TO dijkstra()
+            INSERT query_result AT END OF accumulated_results
+        END FOR
+
+        RETURN accumulated_results
+    END FUNCTION
+END CLASS

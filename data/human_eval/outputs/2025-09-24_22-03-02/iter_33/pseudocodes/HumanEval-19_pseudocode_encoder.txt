@@ -1,0 +1,48 @@
+FUNCTION sort_numbers WITH PARAMETER numbers OF TYPE str RETURNING str
+    SET value_map TO DICTIONARY WITH ELEMENTS
+        'zero' EQUALS 0,
+        'one' EQUALS 1,
+        'two' EQUALS 2,
+        'three' EQUALS 3,
+        'four' EQUALS 4,
+        'five' EQUALS 5,
+        'six' EQUALS 6,
+        'seven' EQUALS 7,
+        'eight' EQUALS 8,
+        'nine' EQUALS 9
+
+    SET split_list TO CALL method split ON numbers WITH ARGUMENTS ' '
+
+    SET filtered_list TO LIST WITH ELEMENTS EMPTY
+
+    FOR index FROM 0 TO LENGTH OF split_list MINUS 1
+        IF split_list AT index NOT EQUAL TO EMPTY STRING
+            APPEND split_list AT index TO filtered_list
+        END IF
+    END FOR
+
+    SET n TO LENGTH OF filtered_list
+
+    FOR i FROM 0 TO n MINUS 2
+        FOR j FROM 0 TO n MINUS 2 MINUS i
+            SET first_value TO value_map AT filtered_list AT j
+            SET second_value TO value_map AT filtered_list AT j PLUS 1
+            IF first_value GREATER THAN second_value
+                SET temp TO filtered_list AT j
+                SET filtered_list AT j TO filtered_list AT j PLUS 1
+                SET filtered_list AT j PLUS 1 TO temp
+            END IF
+        END FOR
+    END FOR
+
+    SET result_string TO EMPTY STRING
+
+    FOR k FROM 0 TO n MINUS 1
+        SET result_string TO result_string CONCATENATE filtered_list AT k
+        IF k LESS THAN n MINUS 1
+            SET result_string TO result_string CONCATENATE ' '
+        END IF
+    END FOR
+
+    RETURN result_string
+END FUNCTION

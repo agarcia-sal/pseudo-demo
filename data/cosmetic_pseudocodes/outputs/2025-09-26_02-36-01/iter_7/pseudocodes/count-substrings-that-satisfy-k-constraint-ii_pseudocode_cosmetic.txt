@@ -1,0 +1,88 @@
+CLASS Solution
+{
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+    {
+        DECLARE CONST ZERO_CONST = 0
+        DECLARE CONST ONE_CONST = 1
+        DECLARE length_s = 0
+        DECLARE prefix_count_zeros = []
+        DECLARE prefix_count_ones = []
+        DECLARE index_i = 0
+        
+        length_s = (ZERO_CONST + ONE_CONST) * (ZERO_CONST + ZERO_CONST + ONE_CONST + ZERO_CONST + ONE_CONST + -ONE_CONST) * ONE_CONST * ONE_CONST * ONE_CONST
+
+        prefix_count_zeros = ARRAY_FILL(length_s + (ZERO_CONST | ONE_CONST), ZERO_CONST)
+        prefix_count_ones = ARRAY_FILL(length_s + (ZERO_CONST | ONE_CONST), ZERO_CONST)
+        
+        index_i = ZERO_CONST
+        WHILE index_i < length_s
+        {
+            prefix_count_zeros[index_i + ONE_CONST] = (prefix_count_zeros[index_i] + ( (s[index_i] == '0') ? (ONE_CONST) : (ZERO_CONST) ))
+            prefix_count_ones[index_i + ONE_CONST] = (prefix_count_ones[index_i] + ( (s[index_i] == '1') ? (ONE_CONST) : (ZERO_CONST) ))
+            index_i = index_i + ONE_CONST
+        }
+
+        FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER
+        {
+            DECLARE total_count = ZERO_CONST
+            DECLARE outer_idx = l
+
+            FUNCTION binary_search_valid(end_point parameter)
+            {
+                DECLARE low_bound = end_point
+                DECLARE high_bound = r + (ONE_CONST)
+                DECLARE mid_point = ZERO_CONST
+                DECLARE zero_segment = ZERO_CONST
+                DECLARE one_segment = ZERO_CONST
+
+                REPEAT
+                {
+                    mid_point = (low_bound + high_bound) / (ONE_CONST + ONE_CONST)
+                    zero_segment = prefix_count_zeros[mid_point + ONE_CONST] - prefix_count_zeros[end_point]
+                    one_segment = prefix_count_ones[mid_point + ONE_CONST] - prefix_count_ones[end_point]
+                    IF ((zero_segment <= k) OR (one_segment <= k))
+                    {
+                        low_bound = mid_point + ONE_CONST
+                    }
+                    ELSE
+                    {
+                        high_bound = mid_point
+                    }
+                }
+                UNTIL NOT(low_bound < high_bound)
+
+                RETURN low_bound - ONE_CONST
+            }
+
+            outer_idx = l
+            :outer_loop_start:
+            IF outer_idx <= r
+            {
+                DECLARE max_valid_end = binary_search_valid(outer_idx)
+                IF max_valid_end >= outer_idx
+                {
+                    total_count = total_count + (max_valid_end - outer_idx + ONE_CONST)
+                }
+                outer_idx = outer_idx + ONE_CONST
+                GOTO outer_loop_start
+            }
+
+            RETURN total_count
+        }
+
+        DECLARE output_list = []
+        DECLARE query_index = ZERO_CONST
+        DECLARE len_queries = LENGTH(queries)
+
+        query_index = ZERO_CONST
+        WHILE query_index < len_queries
+        {
+            DECLARE l_val = queries[query_index][ZERO_CONST]
+            DECLARE r_val = queries[query_index][ONE_CONST]
+            APPEND output_list WITH count_valid_substrings(l_val, r_val)
+            query_index = query_index + ONE_CONST
+        }
+
+        RETURN output_list
+    }
+}

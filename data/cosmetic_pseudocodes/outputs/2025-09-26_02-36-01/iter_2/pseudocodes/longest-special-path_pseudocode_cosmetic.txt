@@ -1,0 +1,51 @@
+CLASS Solution  
+    FUNCTION longestSpecialPath(edges, nums)  
+        SET adjacency TO list created by repeating empty list LENGTH(nums) times  
+        
+        INDEX idx TO 0  
+        WHILE idx LESS THAN LENGTH(edges)  
+            LET a, b, c BE ELEMENTS OF edges AT idx  
+            ADD (b, c) TO adjacency[a]  
+            ADD (a, c) TO adjacency[b]  
+            INCREMENT idx BY 1  
+        END WHILE  
+        
+        FUNCTION dfs(node, parent, leftLim, depth)  
+            FETCH maxLen FROM outer scope  
+            FETCH minCount FROM outer scope  
+            
+            LET prevDepthSeen BE GET lastSeenDepth[nums[node]] DEFAULT 0  
+            SET lastSeenDepth[nums[node]] TO depth  
+            
+            IF leftLim LESS THAN prevDepthSeen THEN  
+                SET leftLim TO prevDepthSeen  
+            END IF  
+            
+            LET currentLength BE prefix[LAST_INDEX(prefix)] MINUS prefix[leftLim]  
+            LET nodeCount BE depth MINUS leftLim  
+            
+            IF currentLength GREATER THAN maxLen OR (currentLength EQUALS maxLen AND nodeCount LESS THAN minCount) THEN  
+                SET maxLen TO currentLength  
+                SET minCount TO nodeCount  
+            END IF  
+            
+            FOR EACH (adjNode, weight) IN adjacency[node]  
+                IF adjNode EQUALS parent THEN  
+                    CONTINUE  
+                END IF  
+                ADD prefix[LAST_INDEX(prefix)] PLUS weight TO prefix  
+                CALL dfs(adjNode, node, leftLim, depth PLUS 1)  
+                REMOVE LAST ELEMENT FROM prefix  
+            END FOR  
+            
+            RESTORE lastSeenDepth[nums[node]] TO prevDepthSeen  
+        END FUNCTION  
+        
+        SET maxLen TO 0  
+        SET minCount TO 1  
+        SET prefix TO [0]  
+        SET lastSeenDepth TO EMPTY_DICTIONARY  
+        CALL dfs(0, -1, 0, 1)  
+        RETURN [maxLen, minCount]  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,73 @@
+CLASS Solution  
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER  
+        DECLARE limit AS 1 LEFT SHIFTED BY 7  
+        DECLARE length AS THE COUNT OF nums  
+        DECLARE dp AS A 3D ARRAY FILLED WITH FALSE OF SIZE (length PLUS 1) BY (k PLUS 2) BY limit  
+        ASSIGN TRUE TO dp[0][0][0]  
+        
+        SET idx TO 0  
+        WHILE idx LESS THAN length  
+            SET count TO 0  
+            WHILE count LESS THAN OR EQUAL TO k  
+                SET mask TO 0  
+                WHILE mask LESS THAN limit  
+                    DECLARE keep_prev AS dp[idx][count][mask]  
+                    dp[idx PLUS 1][count][mask] = dp[idx PLUS 1][count][mask] OR keep_prev  
+                    
+                    DECLARE new_mask AS mask BITWISE_OR nums[idx]  
+                    dp[idx PLUS 1][count PLUS 1][new_mask] = dp[idx PLUS 1][count PLUS 1][new_mask] OR keep_prev  
+                    
+                    INCREMENT mask BY 1  
+                END WHILE  
+                INCREMENT count BY 1  
+            END WHILE  
+            INCREMENT idx BY 1  
+        END WHILE  
+        
+        DECLARE dp_rev AS A 3D ARRAY FILLED WITH FALSE OF SIZE (length PLUS 1) BY (k PLUS 2) BY limit  
+        ASSIGN TRUE TO dp_rev[length][0][0]  
+        
+        SET i_rev TO length  
+        WHILE i_rev GREATER THAN 0  
+            SET c_rev TO 0  
+            WHILE c_rev LESS THAN OR EQUAL TO k  
+                SET m_rev TO 0  
+                WHILE m_rev LESS THAN limit  
+                    DECLARE carry_prev AS dp_rev[i_rev][c_rev][m_rev]  
+                    dp_rev[i_rev MINUS 1][c_rev][m_rev] = dp_rev[i_rev MINUS 1][c_rev][m_rev] OR carry_prev  
+                    
+                    DECLARE updated_mask AS m_rev BITWISE_OR nums[i_rev MINUS 1]  
+                    dp_rev[i_rev MINUS 1][c_rev PLUS 1][updated_mask] = dp_rev[i_rev MINUS 1][c_rev PLUS 1][updated_mask] OR carry_prev  
+                    
+                    m_rev = m_rev PLUS 1  
+                END WHILE  
+                c_rev = c_rev PLUS 1  
+            END WHILE  
+            i_rev = i_rev MINUS 1  
+        END WHILE  
+        
+        DECLARE answer AS 0  
+        SET pos TO k  
+        WHILE pos LESS THAN OR EQUAL TO length MINUS k  
+            SET a_mask TO 0  
+            WHILE a_mask LESS THAN limit  
+                IF dp[pos][k][a_mask] EQUALS TRUE THEN
+                    SET b_mask TO 0  
+                    WHILE b_mask LESS THAN limit  
+                        IF dp_rev[pos][k][b_mask] EQUALS TRUE THEN
+                            DECLARE candidate AS a_mask BITWISE_XOR b_mask  
+                            IF candidate GREATER THAN answer THEN
+                                answer = candidate  
+                            END IF  
+                        END IF  
+                        b_mask = b_mask PLUS 1  
+                    END WHILE  
+                END IF  
+                a_mask = a_mask PLUS 1  
+            END WHILE  
+            pos = pos PLUS 1  
+        END WHILE  
+        
+        RETURN answer  
+    END FUNCTION  
+END CLASS

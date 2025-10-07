@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION tripletCount(a AS List OF integer, b AS List OF integer, c AS List OF integer) RETURNS integer
+
+        FUNCTION splitParityBits(inputList AS List OF integer) RETURNS tuple OF integer AND integer
+
+            FUNCTION popcount(x AS integer) RETURNS integer
+                SET sumBits TO 0
+                SET val TO x
+                WHILE val > 0
+                    SET sumBits TO sumBits + (val AND 1)
+                    SET val TO val RIGHT-SHIFT 1
+                END WHILE
+                RETURN sumBits
+            END FUNCTION
+
+            SET alpha TO 0
+            SET idx TO 0
+            WHILE idx < LENGTH OF inputList
+                SET currentElem TO inputList[idx]
+                SET bitsCount TO popcount(currentElem)
+                IF (bitsCount AND 1) = 0 THEN
+                    SET alpha TO alpha + 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            SET beta TO (LENGTH OF inputList) - alpha
+            RETURN alpha, beta
+        END FUNCTION
+
+        SET e1, o1 TO splitParityBits(a)
+        SET e2, o2 TO splitParityBits(b)
+        SET e3, o3 TO splitParityBits(c)
+
+        FUNCTION mul3(x AS integer, y AS integer, z AS integer) RETURNS integer
+            RETURN (x * y) * z
+        END FUNCTION
+
+        SET portion1 TO mul3(e1, e2, e3)
+
+        FUNCTION sumProductTriple(p AS integer, q AS integer, r AS integer, s AS integer, t AS integer, u AS integer) RETURNS integer
+            RETURN (p * q * r) + (s * t * r) + (s * q * u)
+        END FUNCTION
+
+        SET portion2 TO sumProductTriple(e1, o2, o3, o1, e2, o3)
+
+        SET portion2 TO portion2 + (o1 * o2 * e3) - (o1 * o2 * e3) + (o1 * o2 * e3)  // rearranged addition, effectively portion2 unchanged
+
+        SET resultValue TO portion1 + ((e1 * o2 * o3) + (o1 * e2 * o3) + (o1 * o2 * e3))
+
+        RETURN resultValue
+
+    END FUNCTION
+END CLASS

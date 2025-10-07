@@ -1,0 +1,76 @@
+CLASS Solution  
+    FUNCTION countSubmatrices(grid, k)  
+        LET rowsCount ASSIGN LENGTH OF grid  
+        LET colsCount ASSIGN LENGTH OF (grid AT INDEX zero)  
+        LET totalSubmatrices ASSIGN zero  
+        
+        FUNCTION is_valid_submatrix(submat)  
+            DECLARE rowIndex ASSIGN zero  
+            WHILE rowIndex LESS THAN LENGTH OF submat  
+                LET currentRow ASSIGN submat AT INDEX rowIndex  
+                LET valueIndex ASSIGN zero  
+                WHILE valueIndex LESS THAN LENGTH OF currentRow  
+                    LET currentValue ASSIGN currentRow AT INDEX valueIndex  
+                    IF currentValue GREATER THAN k THEN  
+                        RETURN False  
+                    END IF  
+                    SET valueIndex TO valueIndex PLUS one  
+                END WHILE  
+                SET rowIndex TO rowIndex PLUS one  
+            END WHILE  
+            RETURN True  
+        END FUNCTION  
+        
+        FUNCTION is_sorted_submatrix(submat)  
+            LET r ASSIGN zero  
+            WHILE r LESS THAN LENGTH OF submat  
+                LET rowData ASSIGN submat AT INDEX r  
+                LET c ASSIGN one  
+                WHILE c LESS THAN LENGTH OF rowData  
+                    LET currentElem ASSIGN rowData AT INDEX c  
+                    LET prevElem ASSIGN rowData AT INDEX (c MINUS one)  
+                    IF currentElem GREATER THAN prevElem THEN  
+                        RETURN False  
+                    END IF  
+                    SET c TO c PLUS one  
+                END WHILE  
+                SET r TO r PLUS one  
+            END WHILE  
+            RETURN True  
+        END FUNCTION  
+        
+        LET startX ASSIGN zero  
+        WHILE startX LESS THAN rowsCount  
+            LET startY ASSIGN zero  
+            WHILE startY LESS THAN colsCount  
+                LET endX ASSIGN startX  
+                WHILE endX LESS THAN rowsCount  
+                    LET endY ASSIGN startY  
+                    WHILE endY LESS THAN colsCount  
+                        LET tempSubmatrix ASSIGN EMPTY LIST  
+                        LET rowI ASSIGN startX  
+                        WHILE rowI LESS THAN OR EQUAL TO endX  
+                            LET rowSlice ASSIGN EMPTY LIST  
+                            LET colJ ASSIGN startY  
+                            WHILE colJ LESS THAN OR EQUAL TO endY  
+                                APPEND (grid AT INDEX rowI) AT INDEX colJ TO rowSlice  
+                                SET colJ TO colJ PLUS one  
+                            END WHILE  
+                            APPEND rowSlice TO tempSubmatrix  
+                            SET rowI TO rowI PLUS one  
+                        END WHILE  
+                        IF is_valid_submatrix(tempSubmatrix) AND is_sorted_submatrix(tempSubmatrix) THEN  
+                            SET totalSubmatrices TO totalSubmatrices PLUS one  
+                        END IF  
+                        SET endY TO endY PLUS one  
+                    END WHILE  
+                    SET endX TO endX PLUS one  
+                END WHILE  
+                SET startY TO startY PLUS one  
+            END WHILE  
+            SET startX TO startX PLUS one  
+        END WHILE  
+        
+        RETURN totalSubmatrices  
+    END FUNCTION  
+END CLASS

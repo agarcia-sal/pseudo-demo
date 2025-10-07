@@ -1,0 +1,41 @@
+FUNCTION get_row(data_matrix, search_value)
+    SET result_points TO EMPTY LIST
+    SET outer_idx TO 0
+    WHILE outer_idx <= (LENGTH(data_matrix) - 1)
+        SET inner_idx TO 0
+        WHILE inner_idx <= (LENGTH(data_matrix.at(outer_idx)) - 1)
+            SET current_val TO data_matrix.at(outer_idx).at(inner_idx)
+            IF (current_val = search_value)
+                SET point_tuple TO (outer_idx, inner_idx)
+                APPEND point_tuple TO result_points
+            END IF
+            SET inner_idx TO inner_idx + 1
+        END WHILE
+        SET outer_idx TO outer_idx + 1
+    END WHILE
+    SET temp_points TO result_points
+    SET sorted_by_col_desc TO EMPTY LIST
+    SET sorted_by_row_asc TO EMPTY LIST
+
+    SET idx_col_sort TO 0
+    WHILE idx_col_sort < LENGTH(temp_points)
+        SET insert_pos_col TO 0
+        WHILE (insert_pos_col < LENGTH(sorted_by_col_desc)) AND (sorted_by_col_desc.at(insert_pos_col).at(1) >= temp_points.at(idx_col_sort).at(1))
+            SET insert_pos_col TO insert_pos_col + 1
+        END WHILE
+        INSERT temp_points.at(idx_col_sort) AT sorted_by_col_desc AT insert_pos_col
+        SET idx_col_sort TO idx_col_sort + 1
+    END WHILE
+
+    SET idx_row_sort TO 0
+    WHILE idx_row_sort < LENGTH(sorted_by_col_desc)
+        SET insert_pos_row TO 0
+        WHILE (insert_pos_row < LENGTH(sorted_by_row_asc)) AND (sorted_by_row_asc.at(insert_pos_row).at(0) <= sorted_by_col_desc.at(idx_row_sort).at(0))
+            SET insert_pos_row TO insert_pos_row + 1
+        END WHILE
+        INSERT sorted_by_col_desc.at(idx_row_sort) AT sorted_by_row_asc AT insert_pos_row
+        SET idx_row_sort TO idx_row_sort + 1
+    END WHILE
+
+    RETURN sorted_by_row_asc
+END FUNCTION

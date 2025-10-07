@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION minimumPushes(word)
+        FUNCTION countCharacters(text)
+            DECLARE mapCharCounts AS empty map
+            FOR idx FROM 1 TO LENGTH(text)
+                DECLARE currentChar AS SUBSTRING(text, idx, idx)
+                IF currentChar IN mapCharCounts THEN
+                    SET mapCharCounts[currentChar] TO mapCharCounts[currentChar] + 1
+                ELSE
+                    SET mapCharCounts[currentChar] TO 1
+                END IF
+            END FOR
+            RETURN mapCharCounts
+        END FUNCTION
+
+        DECLARE mapToSort AS countCharacters(word)
+        DECLARE listCounts AS EMPTY LIST
+        FOR EACH key IN mapToSort
+            APPEND mapToSort[key] TO listCounts
+        END FOR
+
+        DECLARE listSortedCounts AS EMPTY LIST
+        WHILE LENGTH(listCounts) > 0
+            DECLARE maxVal AS listCounts[1]
+            DECLARE maxIndex AS 1
+            FOR pos FROM 2 TO LENGTH(listCounts)
+                IF listCounts[pos] > maxVal THEN
+                    SET maxVal TO listCounts[pos]
+                    SET maxIndex TO pos
+                END IF
+            END FOR
+            APPEND maxVal TO listSortedCounts
+            REMOVE listCounts[maxIndex]
+        END WHILE
+
+        DECLARE sumPushes AS 0
+        DECLARE pressLevel AS 1
+        DECLARE assignedCount AS 0
+
+        DECLARE indexCounter AS 1
+        WHILE indexCounter <= LENGTH(listSortedCounts)
+            SET sumPushes TO sumPushes + (listSortedCounts[indexCounter] * pressLevel)
+            SET assignedCount TO assignedCount + 1
+            IF assignedCount == 8 THEN
+                SET assignedCount TO 0
+                SET pressLevel TO pressLevel + 1
+            END IF
+            SET indexCounter TO indexCounter + 1
+        END WHILE
+
+        RETURN sumPushes
+    END FUNCTION
+END CLASS

@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION numberOfPermutations(n, requirements)
+        CONSTANT M := (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+        VARIABLE mapReq := empty dictionary
+        VARIABLE p := 0
+        WHILE p < LENGTH(requirements) DO
+            VARIABLE k := requirements[p][0]
+            VARIABLE v := requirements[p][1]
+            SET mapReq[k] = v
+            SET p = p + 1
+        END WHILE
+
+        FUNCTION count_permutations(L, inv, used)
+            IF L = n THEN
+                VARIABLE target := IF (mapReq CONTAINS KEY n - 1) THEN mapReq[n - 1] ELSE 0
+                IF inv = target THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            IF L > 0 THEN
+                VARIABLE expected := IF (mapReq CONTAINS KEY L - 1) THEN mapReq[L - 1] ELSE inv
+                IF inv <> expected THEN
+                    RETURN 0
+                END IF
+            END IF
+
+            VARIABLE aggregate := 0
+            VARIABLE i := 0
+            WHILE i <= n - 1 DO
+                VARIABLE mask := 1 << i
+                IF (used & mask) = 0 THEN
+                    VARIABLE newly := inv
+                    VARIABLE j := i + 1
+                    WHILE j <= n - 1 DO
+                        VARIABLE maskj := 1 << j
+                        IF (used & maskj) <> 0 THEN
+                            SET newly = newly + 1
+                        END IF
+                        SET j = j + 1
+                    END WHILE
+                    SET aggregate = (aggregate + count_permutations(L + 1, newly, used | mask)) % M
+                END IF
+                SET i = i + 1
+            END WHILE
+            RETURN aggregate
+        END FUNCTION
+
+        RETURN count_permutations(0, 0, 0)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,97 @@
+CLASS Solution  
+    FUNCTION constructGridLayout(n, edges)  
+        DECLARE adjacency AS list of n empty lists  
+        DECLARE idx AS 0  
+        WHILE idx LESS THAN length of edges  
+            LET u TO edges at position idx at zero-indexed element  
+            LET v TO edges at position idx at first element  
+            APPEND v TO adjacency element at position u  
+            APPEND u TO adjacency element at position v  
+            INCREMENT idx BY one  
+        END WHILE  
+
+        DECLARE deg AS list of size five FILLED WITH -1  
+        LET position_to_insert AS 0  
+        WHILE position_to_insert LESS THAN n  
+            LET ys TO adjacency element at position position_to_insert  
+            LET length_ys TO length of ys  
+            ASSIGN deg element at position length_ys TO position_to_insert  
+            INCREMENT position_to_insert BY one  
+        END WHILE  
+
+        IF deg element at position 1 NOT EQUAL TO -1 THEN  
+            LET row TO list with single element deg element at position 1  
+        ELSE IF deg element at position 4 EQUAL TO -1 THEN  
+            LET candidate_x TO deg element at position 2  
+            LET found_row SET TO empty list  
+            LET neighbor_idx SET TO 0  
+            WHILE neighbor_idx LESS THAN length of adjacency element at position candidate_x  
+                LET neighbor_y TO adjacency element at position candidate_x element at position neighbor_idx  
+                IF length of adjacency element at position neighbor_y EQUALS 2 THEN  
+                    LET found_row TO list containing candidate_x and neighbor_y  
+                    BREAK out of this WHILE  
+                END IF  
+                INCREMENT neighbor_idx BY one  
+            END WHILE  
+            LET row TO found_row  
+        ELSE  
+            LET start_x TO deg element at position 2  
+            LET row TO list containing start_x  
+            LET previous_node TO start_x  
+            LET neighbors_of_start TO adjacency element at position start_x  
+            LET first_neighbor TO neighbors_of_start element at position 0  
+            LET current_node TO first_neighbor  
+
+            WHILE length of adjacency element at position current_node GREATER THAN 2  
+                APPEND current_node TO row  
+                LET neighbor_check_index TO 0  
+                WHILE neighbor_check_index LESS THAN length of adjacency element at position current_node  
+                    LET neighbor_candidate TO adjacency element at position current_node at position neighbor_check_index  
+                    IF neighbor_candidate NOT EQUAL TO previous_node AND length of adjacency element at position neighbor_candidate LESS THAN 4 THEN  
+                        LET previous_node TO current_node  
+                        LET current_node TO neighbor_candidate  
+                        BREAK out of inner WHILE  
+                    END IF  
+                    INCREMENT neighbor_check_index BY one  
+                END WHILE  
+            END WHILE  
+            APPEND current_node TO row  
+        END IF  
+
+        LET answer TO list containing row  
+        LET visited TO list of size n FILLED WITH false  
+        LET iterations_count TO (n DIVIDED BY length of row) MINUS 1  
+        LET iter_idx TO 0  
+        WHILE iter_idx LESS THAN iterations_count  
+            LET element_idx TO 0  
+            WHILE element_idx LESS THAN length of row  
+                LET current_element TO row element at position element_idx  
+                ASSIGN visited element at position current_element TO true  
+                INCREMENT element_idx BY one  
+            END WHILE  
+
+            LET next_row TO empty list  
+            LET row_element_index TO 0  
+            WHILE row_element_index LESS THAN length of row  
+                LET current_x TO row element at position row_element_index  
+                LET adjacency_list TO adjacency element at position current_x  
+                LET adjacency_idx TO 0  
+                WHILE adjacency_idx LESS THAN length of adjacency_list  
+                    LET neighbor_y TO adjacency_list element at position adjacency_idx  
+                    IF visited element at position neighbor_y EQUALS false THEN  
+                        APPEND neighbor_y TO next_row  
+                        BREAK out of adjacency WHILE  
+                    END IF  
+                    INCREMENT adjacency_idx BY one  
+                END WHILE  
+                INCREMENT row_element_index BY one  
+            END WHILE  
+
+            APPEND next_row TO answer  
+            LET row TO next_row  
+            INCREMENT iter_idx BY one  
+        END WHILE  
+
+        RETURN answer  
+    END FUNCTION  
+END CLASS

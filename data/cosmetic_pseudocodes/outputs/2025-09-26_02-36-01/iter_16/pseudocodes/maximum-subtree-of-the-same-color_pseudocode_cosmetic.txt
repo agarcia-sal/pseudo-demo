@@ -1,0 +1,43 @@
+CLASS Solution   
+	FUNCTION maximumSubtreeSize(edges, colors)  
+		CREATE mapping nodesToNeighbors MAPPING TO empty list  
+		FOR index FROM 0 TO LENGTH(edges) - 1 DO  
+			LET firstElement BE edges[index][0]  
+			LET secondElement BE edges[index][1]  
+			nodesToNeighbors[firstElement] <- nodesToNeighbors[firstElement] + [secondElement]  
+			nodesToNeighbors[secondElement] <- nodesToNeighbors[secondElement] + [firstElement]  
+		END FOR  
+		SET result TO 1  
+		FUNCTION dfs(currentNode, parentNode)  
+			SET colorGroupCount TO 1  
+			SET flagAllChildrenMatch TO TRUE  
+			SET itr TO 0  
+			WHILE itr < LENGTH(nodesToNeighbors[currentNode]) DO  
+				LET neighborNode BE nodesToNeighbors[currentNode][itr]  
+				IF NOT (neighborNode = parentNode) THEN  
+					LET subtreeCount BE dfs(neighborNode, currentNode)  
+					IF subtreeCount = 0 THEN  
+						flagAllChildrenMatch <- FALSE  
+					ELSE  
+						IF NOT (colors[neighborNode] != colors[currentNode]) THEN  
+							colorGroupCount <- colorGroupCount + subtreeCount  
+						ELSE  
+							flagAllChildrenMatch <- FALSE  
+						END IF  
+					END IF  
+				END IF  
+				LET itr BE itr + 1  
+			END WHILE  
+			IF flagAllChildrenMatch THEN  
+				result <- (result > colorGroupCount) ? result : colorGroupCount  
+				RETURN colorGroupCount  
+			ELSE  
+				RETURN 0  
+			END IF  
+		END FUNCTION  
+		LET dummyVarA BE 0  
+		LET dummyVarB BE -1  
+		CALL dfs(dummyVarA, dummyVarB)  
+		RETURN result  
+	END FUNCTION  
+END CLASS

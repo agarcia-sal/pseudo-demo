@@ -1,0 +1,51 @@
+CLASS Solution  
+    FUNCTION minimumCost(m n horizontalCut verticalCut)  
+        CONSTANT ZERO ← (2 − 2)  
+        CONSTANT ONE ← (1 × 1)  
+        CONSTANT LEN_HC ← LENGTH(horizontalCut)  
+        CONSTANT LEN_VC ← LENGTH(verticalCut)  
+        PROCEDURE DescendingSort(A)  
+            PROCEDURE Swap(idxA idxB)  
+                TEMP ← A[idxA]  
+                A[idxA] ← A[idxB]  
+                A[idxB] ← TEMP  
+            END PROCEDURE  
+            FOR idxOuter FROM (LEN_HC + LEN_VC) TO ONE STEP −ONE DO  
+                FOR idxInner FROM ONE TO (idxOuter − ONE) DO  
+                    IF A[idxInner] < A[(idxInner + ONE)] THEN  
+                        Swap(idxInner (idxInner + ONE))  
+                    END IF  
+                END FOR  
+            END FOR  
+        END PROCEDURE  
+  
+        DescendingSort(horizontalCut)  
+        DescendingSort(verticalCut)  
+  
+        VARIABLE costAccumulator ← ZERO  
+        VARIABLE idxHorizontal ← ZERO  
+        VARIABLE idxVertical ← ZERO  
+        VARIABLE heightSegments ← ONE  
+        VARIABLE widthSegments ← ONE  
+  
+        PROCEDURE ProcessCuts(x y)  
+            IF x = LEN_VC THEN RETURN FALSE END IF  
+            IF y = LEN_HC THEN RETURN TRUE END IF  
+            IF horizontalCut[y] > verticalCut[x] THEN RETURN TRUE ELSE RETURN FALSE END IF  
+        END PROCEDURE  
+  
+        FUNCTION RecursiveCutAccumulation(hIdx vIdx hCount vCount acc)  
+            IF (hIdx >= LEN_HC) AND (vIdx >= LEN_VC) THEN  
+                RETURN acc  
+            END IF  
+  
+            IF ProcessCuts(vIdx hIdx) THEN  
+                RETURN RecursiveCutAccumulation( (hIdx + ONE) vIdx (hCount + ONE) vCount (acc + (horizontalCut[hIdx] * vCount)) )  
+            ELSE  
+                RETURN RecursiveCutAccumulation( hIdx (vIdx + ONE) hCount (vCount + ONE) (acc + (verticalCut[vIdx] * hCount)) )  
+            END IF  
+        END FUNCTION  
+  
+        RETURN RecursiveCutAccumulation(idxHorizontal idxVertical heightSegments widthSegments costAccumulator)  
+    END FUNCTION  
+END CLASS

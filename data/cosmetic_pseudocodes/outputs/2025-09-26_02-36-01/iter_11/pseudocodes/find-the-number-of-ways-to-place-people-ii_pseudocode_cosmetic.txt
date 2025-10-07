@@ -1,0 +1,69 @@
+CLASS Solution
+    FUNCTION numberOfPairs(points)
+        PROCEDURE sortPointsByCoords(arr)
+            PROCEDURE swap(a, b)
+                TEMP := arr[a]
+                arr[a] := arr[b]
+                arr[b] := TEMP
+            END PROCEDURE
+
+            SET indexA TO 0
+            REPEAT
+                SET indexB TO indexA + 1
+                WHILE indexB < LENGTH(arr)
+                    SET cond1 TO (arr[indexA].x > arr[indexB].x)
+                    SET cond2 TO (arr[indexA].x = arr[indexB].x) AND (arr[indexA].y < arr[indexB].y)
+                    IF cond1 OR cond2
+                        CALL swap(indexA, indexB)
+                    END IF
+                    SET indexB TO indexB + 1
+                END WHILE
+                SET indexA TO indexA + 1
+            UNTIL indexA >= LENGTH(arr) - 1
+        END PROCEDURE
+
+        CALL sortPointsByCoords(points)
+
+        SET alpha TO LENGTH(points)
+        SET beta TO 0
+
+        PROCEDURE checkInnerCondition(startIdx, endIdx, xStart, xEnd, yStart, yEnd)
+            SET gamma TO startIdx + 1
+            SET statusFlag TO True
+            WHILE gamma < endIdx
+                SET tmpX TO points[gamma].x
+                SET tmpY TO points[gamma].y
+                SET condX TO (xStart <= tmpX) AND (tmpX <= xEnd)
+                SET condY TO (yEnd <= tmpY) AND (tmpY <= yStart)
+                IF condX AND condY
+                    SET statusFlag TO False
+                    RETURN statusFlag
+                END IF
+                SET gamma TO gamma + 1
+            END WHILE
+            RETURN statusFlag
+        END PROCEDURE
+
+        SET outerIndex TO 0
+        WHILE outerIndex < alpha - 1
+            SET innerIndex TO outerIndex + 1
+            WHILE innerIndex < alpha
+                SET valX1 TO points[outerIndex].x
+                SET valY1 TO points[outerIndex].y
+                SET valX2 TO points[innerIndex].x
+                SET valY2 TO points[innerIndex].y
+                SET condOuterX TO (valX1 <= valX2)
+                SET condOuterY TO (valY1 >= valY2)
+                IF condOuterX AND condOuterY
+                    IF checkInnerCondition(outerIndex, innerIndex, valX1, valX2, valY1, valY2)
+                        SET beta TO beta + 1
+                    END IF
+                END IF
+                SET innerIndex TO innerIndex + 1
+            END WHILE
+            SET outerIndex TO outerIndex + 1
+        END WHILE
+
+        RETURN beta
+    END FUNCTION
+END CLASS

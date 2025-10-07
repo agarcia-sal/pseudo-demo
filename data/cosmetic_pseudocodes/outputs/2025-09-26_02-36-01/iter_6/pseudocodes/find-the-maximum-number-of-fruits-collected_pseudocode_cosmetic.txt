@@ -1,0 +1,108 @@
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+  LET length_fruits BE THE LENGTH OF fruits
+
+  LET vectorA BE THE COLLECTION OF PAIRS [(1, 1), (1, 0)]
+  LET vectorB BE THE COLLECTION OF PAIRS [(1, 0), (1, -1), (1, 1)]
+  LET vectorC BE THE COLLECTION OF PAIRS [(-1, 1), (0, 1), (1, 1)]
+
+  LET cacheMap BE AN EMPTY MAPPING
+
+  FUNCTION dp(alphaX, alphaY, betaX, betaY, gammaX, gammaY)
+    IF NOT (0 <= alphaX AND alphaX < length_fruits) THEN
+      RETURN - (1 * (10 ^ 9) + 7)
+    END IF
+    IF NOT (0 <= alphaY AND alphaY < length_fruits) THEN
+      RETURN - (1 * (10 ^ 9) + 7)
+    END IF
+    IF NOT (0 <= betaX AND betaX < length_fruits) THEN
+      RETURN - (1 * (10 ^ 9) + 7)
+    END IF
+    IF NOT (0 <= betaY AND betaY < length_fruits) THEN
+      RETURN - (1 * (10 ^ 9) + 7)
+    END IF
+    IF NOT (0 <= gammaX AND gammaX < length_fruits) THEN
+      RETURN - (1 * (10 ^ 9) + 7)
+    END IF
+    IF NOT (0 <= gammaY AND gammaY < length_fruits) THEN
+      RETURN - (1 * (10 ^ 9) + 7)
+    END IF
+
+    LET terminalCond BE (alphaX == alphaY AND alphaY == betaX AND betaX == betaY AND betaY == gammaX AND gammaX == gammaY AND gammaY == length_fruits - (1))
+    IF terminalCond THEN
+      RETURN fruits[length_fruits - (1)][length_fruits - (1)]
+    END IF
+
+    LET keyTuple BE (alphaX, alphaY, betaX, betaY, gammaX, gammaY)
+    IF keyTuple EXISTS IN cacheMap THEN
+      RETURN cacheMap[keyTuple]
+    END IF
+
+    LET gatheredFruits BE fruits[alphaX][alphaY]
+
+    IF ((alphaX == betaX AND alphaY == betaY) OR (alphaX == gammaX AND alphaY == gammaY)) THEN
+      LET gatheredFruitsTemp BE 0
+      SET gatheredFruits TO gatheredFruitsTemp
+    END IF
+
+    IF betaX == gammaX AND betaY == gammaY THEN
+      LET gatheredFruitsUpdated BE gatheredFruits + fruits[betaX][betaY]
+      SET gatheredFruits TO gatheredFruitsUpdated
+    ELSE
+      LET accum1 BE gatheredFruits + fruits[betaX][betaY]
+      LET accum2 BE accum1 + fruits[gammaX][gammaY]
+      SET gatheredFruits TO accum2
+    END IF
+
+    LET bestFruits BE - (1 * (10 ^ 9) + 7)
+
+    FUNCTION helperLoop1(i)
+      IF i > LENGTH OF vectorA - (1) THEN
+        RETURN bestFruits
+      END IF
+
+      LET move1X BE vectorA[i][0]
+      LET move1Y BE vectorA[i][1]
+
+      FUNCTION helperLoop2(j)
+        IF j > LENGTH OF vectorB - (1) THEN
+          RETURN helperLoop1(i + (1))
+        END IF
+
+        LET move2X BE vectorB[j][0]
+        LET move2Y BE vectorB[j][1]
+
+        FUNCTION helperLoop3(k)
+          IF k > LENGTH OF vectorC - (1) THEN
+            RETURN helperLoop2(j + (1))
+          END IF
+
+          LET move3X BE vectorC[k][0]
+          LET move3Y BE vectorC[k][1]
+
+          LET candidateValue BE dp(alphaX + move1X, alphaY + move1Y, betaX + move2X, betaY + move2Y, gammaX + move3X, gammaY + move3Y)
+
+          IF candidateValue > bestFruits THEN
+            LET updatedBest BE candidateValue
+            SET bestFruits TO updatedBest
+          END IF
+
+          RETURN helperLoop3(k + (1))
+        END FUNCTION
+
+        RETURN helperLoop3(0)
+      END FUNCTION
+
+      RETURN helperLoop2(0)
+    END FUNCTION
+
+    LET maximumFruits BE helperLoop1(0)
+
+    LET cacheSum BE gatheredFruits + maximumFruits
+    SET cacheMap[keyTuple] TO cacheSum
+    RETURN cacheSum
+  END FUNCTION
+
+  RETURN dp(0, 0, 0, length_fruits - (1), length_fruits - (1), 0)
+END FUNCTION
+END CLASS

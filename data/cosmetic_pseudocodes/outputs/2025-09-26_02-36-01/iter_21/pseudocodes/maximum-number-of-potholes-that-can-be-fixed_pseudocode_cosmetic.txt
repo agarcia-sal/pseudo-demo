@@ -1,0 +1,87 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        SET o TO 0
+        SET e TO 0
+        FUNCTION p(r) RETURNS LIST OF STRING
+            SET q TO empty list
+            SET s TO empty string
+            SET t TO 0
+            REPEAT
+                IF t GREATER THAN OR EQUAL TO LENGTH(r) THEN
+                    ADD s TO q
+                    BREAK
+                ELSE
+                    IF r[t] EQUALS '.' THEN
+                        ADD s TO q
+                        SET s TO empty string
+                    ELSE
+                        SET s TO s + r[t]
+                    END IF
+                END IF
+                SET t TO t + 1
+            UNTIL FALSE
+            RETURN q
+        END FUNCTION
+        FUNCTION MT(a LIST OF STRING) RETURNS LIST OF STRING
+            IF LENGTH(a) LESS THAN OR EQUAL TO 1 THEN
+                RETURN a
+            ELSE
+                SET mid TO LENGTH(a) / 2
+                SET left TO MT(SUBLIST(a,0,mid))
+                SET right TO MT(SUBLIST(a,mid,LENGTH(a)))
+                SET merged TO empty list
+                SET i TO 0
+                SET j TO 0
+                WHILE i LESS THAN LENGTH(left) OR j LESS THAN LENGTH(right) DO
+                    IF i GREATER THAN OR EQUAL TO LENGTH(left) THEN
+                        ADD right[j] TO merged
+                        SET j TO j + 1
+                    ELSEIF j GREATER THAN OR EQUAL TO LENGTH(right) THEN
+                        ADD left[i] TO merged
+                        SET i TO i + 1
+                    ELSE
+                        IF LENGTH(left[i]) LESS THAN LENGTH(right[j]) THEN
+                            ADD left[i] TO merged
+                            SET i TO i + 1
+                        ELSE
+                            ADD right[j] TO merged
+                            SET j TO j + 1
+                        END IF
+                    END IF
+                END WHILE
+                RETURN merged
+            END IF
+        END FUNCTION
+
+        SET v TO p(road)
+        SET w TO MT(v)
+
+        SET y TO 0
+        SET z TO 0
+        WHILE z LESS THAN LENGTH(w) DO
+            SET segment TO w[z]
+            IF segment EQUALS '' OR segment EQUALS "" THEN
+                SET z TO z + 1
+                CONTINUE
+            END IF
+            SET u TO LENGTH(segment)
+            SET cost TO u + (1)
+            IF budget GREATER THAN OR EQUAL TO cost THEN
+                SET y TO y + u
+                SET budget TO budget - cost
+            ELSE
+                WHILE u GREATER THAN 0 AND budget GREATER THAN 0 DO
+                    SET cost TO u + (1)
+                    IF budget GREATER THAN OR EQUAL TO cost THEN
+                        SET y TO y + u
+                        SET budget TO budget - cost
+                        EXIT
+                    END IF
+                    SET u TO u - 1
+                END WHILE
+            END IF
+            SET z TO z + 1
+        END WHILE
+        RETURN y
+    END FUNCTION
+END CLASS

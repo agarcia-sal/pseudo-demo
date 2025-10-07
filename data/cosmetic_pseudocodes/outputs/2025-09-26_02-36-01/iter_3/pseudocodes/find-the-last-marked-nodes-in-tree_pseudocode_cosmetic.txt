@@ -1,0 +1,84 @@
+CLASS Solution
+	FUNCTION lastMarkedNodes(edges)
+		FUNCTION dfs(node, parent, distance)
+			SET stack TO list containing tuple (node, parent)
+			WHILE stack IS NOT empty
+				SET current, prev TO pop element from stack
+				SET neighbors TO g at position current
+				SET idx TO 0
+				WHILE idx LESS THAN length of neighbors
+					SET neighbor TO neighbors at position idx
+					IF neighbor IS NOT EQUAL TO prev
+						SET distance at position neighbor TO distance at position current PLUS (1 TIMES 1)
+						APPEND tuple (neighbor, current) TO stack
+					END IF
+					SET idx TO idx PLUS 1
+				END WHILE
+			END WHILE
+		END FUNCTION
+
+		SET size TO length of edges PLUS 1
+		SET g TO empty list
+		SET counter TO 0
+		WHILE counter LESS THAN size
+			APPEND empty list TO g
+			SET counter TO counter PLUS (1)
+		END WHILE
+		SET iterator TO 0
+		WHILE iterator LESS THAN length of edges
+			SET pair TO edges at position iterator
+			SET first TO pair at position 0
+			SET second TO pair at position 1
+			APPEND second TO g at position first
+			APPEND first TO g at position second
+			SET iterator TO iterator PLUS 1
+		END WHILE
+
+		SET distStart TO list containing size elements each SET TO - (1)
+		SET distStart at position 0 TO 0
+		CALL dfs WITH 0, -1, distStart
+		SET positionA TO 0
+		SET maxDistance TO distStart at position 0
+		SET index TO 1
+		WHILE index LESS THAN size
+			IF distStart at position index GREATER THAN maxDistance
+				SET maxDistance TO distStart at position index
+				SET positionA TO index
+			END IF
+			SET index TO index PLUS 1
+		END WHILE
+
+		SET distA TO list containing size elements each SET TO - (1)
+		SET distA at position positionA TO (0)
+		CALL dfs WITH positionA, -1, distA
+		SET positionB TO 0
+		SET maxDistB TO distA at position 0
+		SET idxB TO 1
+		WHILE idxB LESS THAN size
+			IF distA at position idxB GREATER THAN maxDistB
+				SET maxDistB TO distA at position idxB
+				SET positionB TO idxB
+			END IF
+			SET idxB TO idxB PLUS 1
+		END WHILE
+
+		SET distB TO list containing size elements each SET TO - (1)
+		SET distB at position positionB TO (0)
+		CALL dfs WITH positionB, -1, distB
+
+		SET outputList TO empty list
+		SET pos TO 0
+		WHILE pos LESS THAN size
+			SET distValA TO distA at position pos
+			SET distValB TO distB at position pos
+			IF distValA GREATER THAN distValB
+				APPEND positionA TO outputList
+			ELSE
+				APPEND positionB TO outputList
+			END IF
+			SET pos TO pos PLUS 1
+		END WHILE
+
+		RETURN outputList
+	END FUNCTION
+END CLASS

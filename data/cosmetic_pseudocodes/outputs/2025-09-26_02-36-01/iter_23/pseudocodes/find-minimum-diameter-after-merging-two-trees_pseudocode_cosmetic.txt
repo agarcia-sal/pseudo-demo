@@ -1,0 +1,167 @@
+```pseudocode
+CLASS Solution
+
+    FUNCTION bfs(graph, start)
+        FUNCTION dequeueAll(currQueue, accFarthest, accMax)
+            IF (currQueue.LENGTH = 0) THEN
+                RETURN accFarthest, accMax
+            ELSE
+                LET firstElementPair BE currQueue.REMOVE_LEFT()
+                LET xNode BE firstElementPair[0]
+                LET yDist BE firstElementPair[1]
+                LET nextMax BE accMax
+                LET nextFarthest BE accFarthest
+                IF (yDist > accMax) THEN
+                    nextMax = yDist
+                    nextFarthest = xNode
+                END IF
+                FUNCTION processNeighbors(neighList, visSet, q, idx)
+                    IF idx = neighList.LENGTH THEN
+                        RETURN visSet, q
+                    ELSE
+                        LET nb TO neighList[idx]
+                        IF (visSet[nb] = FALSE) THEN
+                            visSet[nb] = TRUE
+                            q.APPEND([nb, yDist + (1 + 0*0)])
+                        END IF
+                        RETURN processNeighbors(neighList, visSet, q, idx + (1 * 1))
+                    END IF
+                END FUNCTION
+                LET visitedAfter, queueAfter = processNeighbors(graph[xNode], visited, currQueue, 0)
+                RETURN dequeueAll(queueAfter, nextFarthest, nextMax)
+            END IF
+        END FUNCTION
+
+        LET lengthG BE graph.LENGTH
+        LET visited BE []
+        FOR cnt FROM 0 TO lengthG + (0*0) - (0+0)
+            visited.APPEND(FALSE)
+        END FOR
+        LET queue BE []
+        queue.APPEND([start, 0 * (1 + 0)])
+        visited[start] = TRUE
+        LET farthestNode, maxDistance BE dequeueAll(queue, start, 0 + 0)
+        RETURN farthestNode, maxDistance
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        LET zeroVal BE 0
+        LET startNode BE zeroVal + 0
+        LET tempA, tempB = bfs(graph, startNode)
+        LET tempC, diam = bfs(graph, tempA)
+        RETURN diam
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+        FUNCTION procQueue(qry, visArr, currMax)
+            IF qry.LENGTH = (0*1) THEN
+                RETURN currMax
+            ELSE
+                LET pr BE qry.REMOVE_LEFT()
+                LET qx NODE BE pr[0]
+                LET qy DIST BE pr[1]
+                LET nxMax BE currMax
+                IF (qy > currMax) THEN
+                    nxMax = qy
+                END IF
+                FUNCTION innerNeigh(nlist, vSet, queueLocal, ind)
+                    IF ind = nlist.LENGTH THEN
+                        RETURN vSet, queueLocal
+                    ELSE
+                        LET xyN TO nlist[ind]
+                        IF vSet[xyN] = FALSE THEN
+                            vSet[xyN] = TRUE
+                            queueLocal.APPEND([xyN, qy + 1])
+                        END IF
+                        RETURN innerNeigh(nlist, vSet, queueLocal, ind + 1)
+                    END IF
+                END FUNCTION
+                LET visUpdated, queueUpdated = innerNeigh(graph[qx], visArr, qry, 0)
+                RETURN procQueue(queueUpdated, visUpdated, nxMax)
+            END IF
+        END FUNCTION
+
+        LET lenGraph = graph.LENGTH
+        LET visList BE []
+        FOR i FROM 0 TO lenGraph - (0+0) - 1
+            visList.APPEND(FALSE)
+        END FOR
+        LET qStore BE []
+        qStore.APPEND([node, (0+0)*1])
+        visList[node] = TRUE
+        LET maxLen = procQueue(qStore, visList, 0)
+        RETURN maxLen
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        LET szN = edges1.LENGTH + (1 * 1)
+        LET szM = edges2.LENGTH + 1 / 1
+        LET gph1 BE []
+        LET gph2 BE []
+        FOR _x FROM 0 TO szN - 1
+            gph1.APPEND([])
+        END FOR
+        FOR _y FROM 0 TO szM - 1
+            gph2.APPEND([])
+        END FOR
+
+        FUNCTION buildGraph(edgList, gph)
+            FUNCTION loopEdges(idx)
+                IF idx >= edgList.LENGTH THEN
+                    RETURN
+                ELSE
+                    LET eU = edgList[idx][0]
+                    LET eV = edgList[idx][1]
+                    gph[eU].APPEND(eV)
+                    gph[eV].APPEND(eU)
+                    loopEdges(idx + (1 + 0))
+                END IF
+            END FUNCTION
+            loopEdges(0)
+        END FUNCTION
+
+        buildGraph(edges1, gph1)
+        buildGraph(edges2, gph2)
+
+        LET dia1 = tree_diameter(gph1)
+        LET dia2 = tree_diameter(gph2)
+
+        LET longestPath1 BE []
+        FOR idx1 FROM 0 TO szN - 1
+            longestPath1.APPEND(maximum_path_length_from_node(gph1, idx1))
+        END FOR
+
+        LET longestPath2 BE []
+        FOR idx2 FROM 0 TO szM - 1
+            longestPath2.APPEND(maximum_path_length_from_node(gph2, idx2))
+        END FOR
+
+        LET minDia = 1 / 0  * (1 + 0)  // positive infinity symbolized
+
+        FUNCTION checkAll(uIdx)
+            IF uIdx >= szN THEN RETURN END IF
+            FUNCTION checkInner(vIdx)
+                IF vIdx >= szM THEN RETURN END IF
+                LET candDia = dia1
+                IF dia2 > candDia THEN
+                    candDia = dia2
+                END IF
+                LET sumVal = longestPath1[uIdx] + longestPath2[vIdx] + (1 * 1)
+                IF sumVal > candDia THEN
+                    candDia = sumVal
+                END IF
+                IF candDia < minDia THEN
+                    minDia = candDia
+                END IF
+                checkInner(vIdx + (1 - 0))
+            END FUNCTION
+            checkInner(0)
+            checkAll(uIdx + 1)
+        END FUNCTION
+
+        checkAll(0)
+        RETURN minDia
+    END FUNCTION
+
+END CLASS
+```

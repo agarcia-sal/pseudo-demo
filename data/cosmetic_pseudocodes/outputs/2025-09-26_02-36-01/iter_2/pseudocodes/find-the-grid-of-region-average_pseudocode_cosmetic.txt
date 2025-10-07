@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+        LET rowCount BE LENGTH OF image
+        LET colCount BE LENGTH OF image AT 0
+        LET outputMatrix BE A NEW LIST WITH rowCount ELEMENTS EACH BEING A LIST OF colCount ZEROS
+        LET frequencyMatrix BE A NEW LIST WITH rowCount ELEMENTS EACH BEING A LIST OF colCount ZEROS
+
+        FUNCTION is_valid_region(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE boolean
+            LET dxdyPairs BE LIST OF PAIRS: (-1,0), (1,0), (0,-1), (0,1)
+            LET rowEnd BE x PLUS 3
+            LET colEnd BE y PLUS 3
+            LET rowIdx BE x
+            WHILE rowIdx LESS THAN rowEnd
+                LET colIdx BE y
+                WHILE colIdx LESS THAN colEnd
+                    FOR EACH offsetPair IN dxdyPairs
+                        LET neighborX BE rowIdx PLUS offsetPair.first
+                        LET neighborY BE colIdx PLUS offsetPair.second
+                        IF neighborX GREATER THAN OR EQUAL TO 0 AND neighborX LESS THAN rowEnd AND neighborY GREATER THAN OR EQUAL TO 0 AND neighborY LESS THAN colEnd THEN
+                            LET diffValue BE image[rowIdx][colIdx] MINUS image[neighborX][neighborY]
+                            IF (diffValue LESS THAN 0 ? -diffValue : diffValue) GREATER THAN threshold THEN
+                                RETURN False
+                            END IF
+                        END IF
+                    END FOR
+                    SET colIdx TO colIdx PLUS 1
+                END WHILE
+                INCREMENT rowIdx BY 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        FUNCTION calculate_average(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE integer
+            LET sumValue BE 0
+            LET endX BE x PLUS 3
+            LET endY BE y PLUS 3
+            FOR rowIter FROM x TO endX MINUS 1 STEP 1
+                FOR colIter FROM y TO endY MINUS 1 STEP 1
+                    LET currentPixel BE image[rowIter][colIter]
+                    LET sumValue BE sumValue PLUS currentPixel
+                END FOR
+            END FOR
+            LET averagePixel BE sumValue DIVIDED BY 9
+            RETURN averagePixel
+        END FUNCTION
+
+        LET mainRowIdx BE 0
+        WHILE mainRowIdx LESS THAN rowCount MINUS 2
+            LET mainColIdx BE 0
+            WHILE mainColIdx LESS THAN colCount MINUS 2
+                IF is_valid_region(mainRowIdx, mainColIdx) IS True THEN
+                    LET regionAvg BE calculate_average(mainRowIdx, mainColIdx)
+                    LET fillRow BE mainRowIdx
+                    WHILE fillRow LESS THAN mainRowIdx PLUS 3
+                        LET fillCol BE mainColIdx
+                        WHILE fillCol LESS THAN mainColIdx PLUS 3
+                            LET outputMatrixAtPosition BE outputMatrix[fillRow][fillCol]
+                            LET frequencyMatrixAtPosition BE frequencyMatrix[fillRow][fillCol]
+                            outputMatrix[fillRow][fillCol] = outputMatrixAtPosition PLUS regionAvg
+                            frequencyMatrix[fillRow][fillCol] = frequencyMatrixAtPosition PLUS 1
+                            SET fillCol TO fillCol PLUS 1
+                        END WHILE
+                        INCREMENT fillRow BY 1
+                    END WHILE
+                END IF
+                SET mainColIdx TO mainColIdx PLUS 1
+            END WHILE
+            INCREMENT mainRowIdx BY 1
+        END WHILE
+
+        FOR rIndex IN RANGE 0 TO rowCount MINUS 1
+            FOR cIndex IN RANGE 0 TO colCount MINUS 1
+                LET freqVal BE frequencyMatrix[rIndex][cIndex]
+                IF freqVal GREATER THAN 0 THEN
+                    LET sumVal BE outputMatrix[rIndex][cIndex]
+                    LET normalizedVal BE sumVal DIVIDED BY freqVal
+                    outputMatrix[rIndex][cIndex] = normalizedVal
+                ELSE
+                    outputMatrix[rIndex][cIndex] = image[rIndex][cIndex]
+                END IF
+            END FOR
+        END FOR
+
+        RETURN outputMatrix
+    END FUNCTION
+END CLASS

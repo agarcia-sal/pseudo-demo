@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION minOperations(initial parameter TO string, target parameter TO string) RETURNS integer
+        PROCEDURE computeEquals(a parameter TO char, b parameter TO char) RETURNS boolean
+            RETURN (NOT (a NOT_EQUALS b))
+        END PROCEDURE
+
+        SET alpha TO LENGTH(initial)
+        SET beta TO LENGTH(target)
+        SET table TO []
+        SET row_counter TO 0
+
+        WHILE row_counter < alpha + 1
+            SET column_list TO []
+            SET col_counter TO 0
+            REPEAT
+                IF NOT (col_counter >= beta + 1) THEN
+                    CALL column_list.APPEND(0)
+                END IF
+                SET col_counter TO col_counter + 1
+            UNTIL col_counter >= beta + 1
+            CALL table.APPEND(column_list)
+            SET row_counter TO row_counter + 1
+        END WHILE
+
+        SET maximum_lcs TO 0
+        PROCEDURE increaseByOne(value parameter TO integer) RETURNS integer
+            RETURN value + 1
+        END PROCEDURE
+
+        PROCEDURE lessThan(a parameter TO integer, b parameter TO integer) RETURNS boolean
+            RETURN a < b
+        END PROCEDURE
+
+        PROCEDURE extractInitialChar(index parameter TO integer) RETURNS char
+            RETURN initial[index - 1]
+        END PROCEDURE
+
+        PROCEDURE extractTargetChar(index parameter TO integer) RETURNS char
+            RETURN target[index - 1]
+        END PROCEDURE
+
+        FUNCTION iterate_i(index_i parameter TO integer) RETURNS integer
+            IF index_i > alpha THEN
+                RETURN index_i
+            ELSE
+                PROCEDURE iterate_j(index_j parameter TO integer) RETURNS integer
+                    IF index_j > beta THEN
+                        RETURN index_j
+                    ELSE
+                        IF computeEquals(extractInitialChar(index_i), extractTargetChar(index_j)) THEN
+                            SET previous_value TO table[index_i - 1][index_j - 1]
+                            SET current_value TO previous_value + 1
+                            SET table[index_i][index_j] TO current_value
+                            IF lessThan(maximum_lcs, current_value) THEN
+                                SET maximum_lcs TO current_value
+                            END IF
+                        END IF
+                        RETURN iterate_j(index_j + 1)
+                    END IF
+                END PROCEDURE
+                CALL iterate_j(1)
+                RETURN iterate_i(index_i + 1)
+            END IF
+        END FUNCTION
+
+        CALL iterate_i(1)
+
+        PROCEDURE multiplyByTwo(value parameter TO integer) RETURNS integer
+            RETURN value * 2
+        END PROCEDURE
+
+        PROCEDURE subtractValues(a parameter TO integer, b parameter TO integer) RETURNS integer
+            RETURN a - b
+        END PROCEDURE
+
+        SET sum_len TO alpha + beta
+        SET doubled_max_lcs TO multiplyByTwo(maximum_lcs)
+        SET result TO subtractValues(sum_len, doubled_max_lcs)
+
+        RETURN result
+    END FUNCTION
+END CLASS

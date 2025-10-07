@@ -1,0 +1,46 @@
+```
+FUNCTION poly(list_of_coefficients, point)
+    FUNCTION power_accumulate(counter, acc)
+        IF counter EQUALS LENGTH(list_of_coefficients)
+            RETURN acc
+        END IF
+        LET coeff_element BE list_of_coefficients[counter]
+        LET updated_acc BE acc + coeff_element * point^counter
+        RETURN power_accumulate(counter + 1, updated_acc)
+    END FUNCTION
+    RETURN power_accumulate(0, 0)
+END FUNCTION
+
+FUNCTION find_zero(list_of_coefficients)
+    LET alpha = -1.0
+    LET omega = 1.0
+
+    FUNCTION expand_bounds(a, b)
+        LET eval_a = poly(list_of_coefficients, a)
+        LET eval_b = poly(list_of_coefficients, b)
+        IF (eval_a * eval_b) > 0
+            RETURN expand_bounds(a * 2.0, b * 2.0)
+        END IF
+        RETURN (a, b)
+    END FUNCTION
+
+    LET (lower_bound, upper_bound) = expand_bounds(alpha, omega)
+
+    FUNCTION bisect(low, high)
+        LET delta = high - low
+        IF NOT (delta > 1e-10)
+            RETURN low
+        END IF
+        LET mid = (low + high) / 2.0
+        LET eval_mid = poly(list_of_coefficients, mid)
+        LET eval_low = poly(list_of_coefficients, low)
+        IF (eval_mid * eval_low) > 0
+            RETURN bisect(mid, high)
+        ELSE
+            RETURN bisect(low, mid)
+        END IF
+    END FUNCTION
+
+    RETURN bisect(lower_bound, upper_bound)
+END FUNCTION
+```

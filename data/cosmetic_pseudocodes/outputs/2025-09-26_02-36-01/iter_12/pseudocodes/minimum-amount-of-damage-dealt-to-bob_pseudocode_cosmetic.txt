@@ -1,0 +1,82 @@
+CLASS Enemy
+    FUNCTION __init__(self, damage, timeTakenDown)
+        self.damage = damage
+        self.timeTakenDown = timeTakenDown
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION minDamage(self, power, damage, health)
+        FUNCTION helper_divide_ceil(a, b)
+            IF (a MOD b) == 0 THEN
+                RETURN (a DIV b)
+            ELSE
+                RETURN (a DIV b) + 1
+            END IF
+        END FUNCTION
+
+        FUNCTION helper_sort(enlist)
+            FUNCTION partition(array, low, high)
+                pivot_val = array[high]
+                i_counter = low - 1
+                INDEX_LOOP:
+                FOR j_index FROM low TO high - 1
+                    IF (array[j_index].damage * pivot_val.timeTakenDown) > (pivot_val.damage * array[j_index].timeTakenDown) THEN
+                        SET i_counter TO i_counter + 1
+                        TEMP_SWAP = array[i_counter]
+                        array[i_counter] = array[j_index]
+                        array[j_index] = TEMP_SWAP
+                    END IF
+                END FOR
+                TEMP_SWAP = array[i_counter + 1]
+                array[i_counter + 1] = array[high]
+                array[high] = TEMP_SWAP
+                RETURN i_counter + 1
+            END FUNCTION
+
+            FUNCTION quicksort(arr, low, high)
+                IF low < high THEN
+                    part_index = partition(arr, low, high)
+                    quicksort(arr, low, part_index - 1)
+                    quicksort(arr, part_index + 1, high)
+                END IF
+            END FUNCTION
+
+            quicksort(enlist, 0, LENGTH(enlist) - 1)
+        END FUNCTION
+
+        result_acc = 0
+        sum_dmg_acc = 0
+        ACCUMULATOR_LOOP:
+        SET idx_temp TO 0
+        WHILE idx_temp < LENGTH(damage)
+            sum_dmg_acc = sum_dmg_acc + damage[idx_temp]
+            idx_temp = idx_temp + 1
+        END WHILE
+
+        enemy_container = []
+        IDX_CREATION:
+        SET iterator_walker TO 0
+        WHILE iterator_walker < LENGTH(damage)
+            d_val = damage[iterator_walker]
+            h_val = health[iterator_walker]
+            total_time = helper_divide_ceil(h_val + power - 1, power)
+            new_enemy = Enemy(d_val, total_time)
+            enemy_container APPEND new_enemy
+            iterator_walker = iterator_walker + 1
+        END WHILE
+
+        helper_sort(enemy_container)
+
+        ENEMY_ACCUMULATION:
+        SET scan_index TO 0
+        WHILE scan_index < LENGTH(enemy_container)
+            ENEMY_OBJ = enemy_container[scan_index]
+            result_acc = result_acc + sum_dmg_acc * ENEMY_OBJ.timeTakenDown
+            sum_dmg_acc = sum_dmg_acc - ENEMY_OBJ.damage
+            scan_index = scan_index + 1
+        END WHILE
+
+        RETURN result_acc
+    END FUNCTION
+END CLASS

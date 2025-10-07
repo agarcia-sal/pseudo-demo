@@ -1,0 +1,70 @@
+```
+FUNCTION sort_numbers(alphanumeric_string)
+    SET numeral_dictionary TO MAP CONTAINING
+        'zero' AS KEY MAPPED TO 0 AS VALUE,
+        'one' AS KEY MAPPED TO 1 AS VALUE,
+        'two' AS KEY MAPPED TO 2 AS VALUE,
+        'three' AS KEY MAPPED TO 3 AS VALUE,
+        'four' AS KEY MAPPED TO 4 AS VALUE,
+        'five' AS KEY MAPPED TO 5 AS VALUE,
+        'six' AS KEY MAPPED TO 6 AS VALUE,
+        'seven' AS KEY MAPPED TO 7 AS VALUE,
+        'eight' AS KEY MAPPED TO 8 AS VALUE,
+        'nine' AS KEY MAPPED TO 9 AS VALUE
+    SET fragmented_list TO EMPTY LIST
+    DEFINE RECURSIVE FUNCTION extract_words(pos, acc)
+        IF pos < LENGTH OF alphanumeric_string THEN
+            SET current_char TO CHARACTER AT alphanumeric_string[pos]
+            IF current_char ≠ ' ' THEN
+                CALL extract_words(pos + 1, acc + current_char)
+            ELSE IF LENGTH OF acc > 0 THEN
+                RETURN LIST CONCATENATION OF [acc] AND extract_words(pos + 1, '')
+            ELSE
+                RETURN extract_words(pos + 1, '')
+            END IF
+        ELSE IF LENGTH OF acc > 0 THEN
+            RETURN [acc]
+        ELSE
+            RETURN []
+        END IF
+    END FUNCTION
+    SET fragmented_list TO extract_words(0, '')
+    DEFINE FUNCTION compare_elements(x, y)
+        IF numeral_dictionary[x] < numeral_dictionary[y] THEN
+            RETURN -1
+        ELSE IF numeral_dictionary[x] > numeral_dictionary[y] THEN
+            RETURN 1
+        ELSE
+            RETURN 0
+        END IF
+    END FUNCTION
+    SET ordered_list TO fragmented_list
+    SET index_counter TO 0
+    DEFINE FUNCTION insertion_sort(lst)
+        IF index_counter >= LENGTH OF lst - 1 THEN
+            RETURN lst
+        ELSE
+            SET key_element TO lst[index_counter + 1]
+            SET position TO index_counter
+            WHILE position >= 0 AND compare_elements(lst[position], key_element) > 0 DO
+                SET lst[position + 1] TO lst[position]
+                SET position TO position - 1
+            END WHILE
+            SET lst[position + 1] TO key_element
+            SET index_counter TO index_counter + 1
+            RETURN insertion_sort(lst)
+        END IF
+    END FUNCTION
+    SET ordered_list TO insertion_sort(ordered_list)
+    DEFINE FUNCTION join_with_space(elements)
+        IF LENGTH OF elements = 0 THEN
+            RETURN ''
+        ELSE IF LENGTH OF elements = 1 THEN
+            RETURN elements[0]
+        ELSE
+            RETURN elements[0] + ' ' + join_with_space(SUBLIST OF elements FROM 1 TO END)
+        END IF
+    END FUNCTION
+    RETURN join_with_space(ordered_list)
+END FUNCTION
+```

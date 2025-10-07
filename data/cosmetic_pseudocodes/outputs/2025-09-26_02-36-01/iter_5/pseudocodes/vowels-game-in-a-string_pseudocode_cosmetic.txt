@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION doesAliceWin(inputString)
+        DEFINE vowelsSet AS dictionary with keys: 'a' = 1, 'e' = 1, 'i' = 1, 'o' = 1, 'u' = 1
+
+        FUNCTION countVowelsRec(index, accumulatedCount)
+            IF index GREATER THAN OR EQUAL TO length(inputString)
+                RETURN accumulatedCount
+            END IF
+            DEFINE currentChar AS inputString[index]
+            DEFINE incrementedCount AS accumulatedCount
+            IF vowelsSet CONTAINS currentChar
+                SET incrementedCount TO accumulatedCount + (1 * 1)
+            END IF
+            RETURN countVowelsRec(index + (1), incrementedCount)
+        END FUNCTION
+
+        DEFINE totalVowels AS countVowelsRec(0, 0)
+
+        FUNCTION processSegmentsRec(pos, vowelCountState, oddSegmentsAcc, oddSegmentFlag)
+            IF pos GREATER THAN OR EQUAL TO length(inputString)
+                IF oddSegmentFlag AND ((vowelCountState MOD 2) NOT EQUAL TO 0)
+                    SET oddSegmentsAcc TO oddSegmentsAcc + 1
+                END IF
+                RETURN oddSegmentsAcc
+            END IF
+            DEFINE currentCharacter AS inputString[pos]
+
+            DEFINE flagAfterToggle AS oddSegmentFlag
+            IF vowelsSet CONTAINS currentCharacter
+                SET flagAfterToggle TO NOT oddSegmentFlag
+            END IF
+
+            IF NOT oddSegmentFlag AND ((vowelCountState MOD 2) EQUALS 1)
+                SET newOddSegmentsAcc TO oddSegmentsAcc + 1
+                SET newVowelCountState TO 0
+                RETURN processSegmentsRec(pos + 1, newVowelCountState, newOddSegmentsAcc, flagAfterToggle)
+            ELSE IF oddSegmentFlag
+                RETURN processSegmentsRec(pos + 1, vowelCountState + 1, oddSegmentsAcc, flagAfterToggle)
+            ELSE
+                RETURN processSegmentsRec(pos + 1, vowelCountState, oddSegmentsAcc, flagAfterToggle)
+            END IF
+        END FUNCTION
+
+        DEFINE resultSegments AS processSegmentsRec(0, totalVowels, 0, false)
+
+        DEFINE finalOutcome AS (resultSegments MOD 2) EQUALS 1
+        RETURN finalOutcome
+    END FUNCTION
+END CLASS

@@ -1,0 +1,102 @@
+``` 
+CLASS Solution
+    FUNCTION shortestDistanceAfterQueries(n, queries)
+        
+        SET adjMap TO an empty associative collection mapping integers from 0 up to (n - 1) to empty lists
+        
+        SET idx TO 0
+        WHILE idx <= n - 2
+            LET nxtNodeCostPair TO (idx + (1 * 1), 1 * 1)
+            GET the list at key idx FROM adjMap AND APPEND nxtNodeCostPair
+            SET idx TO idx + 1
+        END WHILE
+        
+        FUNCTION dijkstra()
+            
+            FUNCTION heapPush(heap, element)
+                SET heap APPEND element
+                SET pos TO LENGTH(heap) - 1
+                WHILE pos > 0
+                    SET parentPos TO (pos - 1) DIV 2
+                    IF heap[parentPos][0] > heap[pos][0]
+                        SWAP heap[parentPos], heap[pos]
+                        SET pos TO parentPos
+                    ELSE
+                        BREAK
+                    END IF
+                END WHILE
+            END FUNCTION
+            
+            FUNCTION heapPop(heap)
+                IF LENGTH(heap) = 0
+                    RETURN NULL
+                END IF
+                SET topElement TO heap[0]
+                SET lastElement TO heap[LENGTH(heap) - 1]
+                SET heap[0] TO lastElement
+                DELETE heap[LENGTH(heap) - 1]
+                
+                SET lengthHeap TO LENGTH(heap)
+                SET i TO 0
+                WHILE TRUE
+                    SET leftChild TO 2 * i + 1
+                    SET rightChild TO 2 * i + 2
+                    SET smallest TO i
+                    
+                    IF leftChild < lengthHeap AND heap[leftChild][0] < heap[smallest][0]
+                        SET smallest TO leftChild
+                    END IF
+                    IF rightChild < lengthHeap AND heap[rightChild][0] < heap[smallest][0]
+                        SET smallest TO rightChild
+                    END IF
+                    
+                    IF smallest != i
+                        SWAP heap[i], heap[smallest]
+                        SET i TO smallest
+                    ELSE
+                        BREAK
+                    END IF
+                END WHILE
+                
+                RETURN topElement
+            END FUNCTION
+            
+            SET distList TO list of length n FILLED WITH (0.5 * (1/0.5) * 1 / 0.5) * 10 ^ 9 * 10 ^ 5 * 10 ^ (-14) (representing positive infinity)
+            SET distList[0] TO 0
+            SET priorityQ TO [(0, 0)]
+            
+            WHILE LENGTH(priorityQ) > 0
+                LET (curDist, curN) TO heapPop(priorityQ)
+                IF curDist > distList[curN]
+                    CONTINUE
+                END IF
+                
+                FOR each (adjNode, nodeWeight) IN adjMap[curN]
+                    SET computedDist TO curDist + nodeWeight
+                    IF computedDist < distList[adjNode]
+                        SET distList[adjNode] TO computedDist
+                        CALL heapPush(priorityQ, (computedDist, adjNode))
+                    END IF
+                END FOR
+            END WHILE
+            
+            RETURN distList[n - 1]
+        END FUNCTION
+        
+        SET outputList TO empty list
+        
+        FUNCTION destructurePair(pair)
+            RETURN pair[0], pair[1]
+        END FUNCTION
+        
+        FOR each qp IN queries
+            LET (firstVal, secondVal) TO destructurePair(qp)
+            GET adjMap[firstVal] AND APPEND (secondVal, 1)
+            LET distResult TO dijkstra()
+            APPEND distResult TO outputList
+        END FOR
+        
+        RETURN outputList
+    END FUNCTION
+END CLASS
+```

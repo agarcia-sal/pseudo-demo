@@ -1,0 +1,81 @@
+CLASS Solution  
+	FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER  
+		DEFINE Limit AS (1 + 1) RAISED TO THE 7  
+		LET CountNums BE LENGTH OF nums  
+		DECLARE State DP1 AS 3D ARRAY OF BOOLEAN WITH DIMENSIONS (CountNums + (1), k + (2), Limit) INITIALIZED TO FALSE  
+		SET State[0][0][0] TO TRUE  
+		
+		DEFINE IndexI AS 0  
+		WHILE IndexI < CountNums  
+			DEFINE IndexJ AS 0  
+			repeat  
+				IF IndexJ > k THEN exit repeat  
+				DEFINE IndexX AS 0  
+				repeat  
+					IF IndexX >= Limit THEN exit repeat  
+					LET temp1 BE State[IndexI][IndexJ][IndexX]  
+					SET State[IndexI + (1)][IndexJ][IndexX] TO State[IndexI + (1)][IndexJ][IndexX] OR temp1  
+					
+					LET mergedBits BE IndexX BITWISE_OR nums[IndexI]  
+					SET State[IndexI + (1)][IndexJ + (1)][mergedBits] TO TRUE OR State[IndexI][IndexJ][IndexX]  
+					
+					IndexX = IndexX + 1  
+				until false  
+				IndexJ = IndexJ + 1  
+			until false  
+			IndexI = IndexI + 1  
+		end while  
+		
+		DECLARE State2 DP2 AS 3D ARRAY OF BOOLEAN WITH DIMENSIONS (CountNums + (1), k + (2), Limit) INITIALIZED TO FALSE  
+		SET State2[CountNums][0][0] TO TRUE  
+		
+		DEFINE ReverseI AS CountNums  
+		REPEAT  
+			IF ReverseI <= 0 THEN exit repeat  
+			DEFINE ReverseJ AS 0  
+			REPEAT  
+				IF ReverseJ > k THEN exit repeat  
+				DEFINE ReverseY AS 0  
+				REPEAT  
+					IF ReverseY >= Limit THEN exit repeat  
+					LET backupVal BE State2[ReverseI][ReverseJ][ReverseY]  
+					SET State2[ReverseI - (1)][ReverseJ][ReverseY] TO State2[ReverseI - (1)][ReverseJ][ReverseY] OR backupVal  
+					
+					LET combinedBits BE ReverseY BITWISE_OR nums[ReverseI - (1)]  
+					SET State2[ReverseI - (1)][ReverseJ + (1)][combinedBits] TO TRUE OR State2[ReverseI][ReverseJ][ReverseY]  
+					
+					ReverseY = ReverseY + 1  
+				UNTIL false  
+				ReverseJ = ReverseJ + 1  
+			UNTIL false  
+			ReverseI = ReverseI - 1  
+		UNTIL false  
+		
+		LET answer BE 0  
+		DEFINE CurrentI AS k  
+		repeat  
+			IF CurrentI > CountNums - k THEN exit repeat  
+			DEFINE CurrentX AS 0  
+			repeat  
+				IF CurrentX >= Limit THEN exit repeat  
+				IF State[CurrentI][k][CurrentX] == TRUE THEN  
+					DEFINE CurrentY AS 0  
+					repeat  
+						IF CurrentY >= Limit THEN exit repeat  
+						IF State2[CurrentI][k][CurrentY] == TRUE THEN  
+							LET candidate BE CurrentX BITWISE_XOR CurrentY  
+							IF answer < candidate THEN  
+								SET answer TO candidate  
+							END IF  
+						END IF  
+						CurrentY = CurrentY + 1  
+					until false  
+				END IF  
+				CurrentX = CurrentX + 1  
+			until false  
+			CurrentI = CurrentI + 1  
+		until false  
+		
+		RETURN answer  
+	END FUNCTION  
+END CLASS

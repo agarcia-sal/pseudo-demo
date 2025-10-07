@@ -1,0 +1,59 @@
+CLASS Solution  
+    FUNCTION subsequencesWithMiddleMode(nums)  
+        CONST MODULO = 1000000007  
+        VARIABLE answer = 0  
+        VARIABLE prefixCount = an empty map with default 0  
+        VARIABLE suffixCount = a frequency map of nums  
+
+        FUNCTION combinationTwo(x)  
+            RETURN (x * (x - 1)) DIVIDED BY 2  
+        END FUNCTION
+
+        VARIABLE prefixSuffixSum = 0  
+        VARIABLE suffixPrefixProduct = 0  
+        VARIABLE prefixSquareSum = 0  
+        VARIABLE suffixSquareSum = sum of squares of values in suffixCount  
+        VARIABLE prefixSuffixSumBasic = 0  
+
+        FOR index FROM 0 TO LENGTH(nums) - 1 DO  
+            VARIABLE current = nums[index]  
+
+            prefixSuffixSum += prefixCount[current] * ( - (suffixCount[current] ^ 2) + ((suffixCount[current] - 1) ^ 2))  
+            suffixPrefixProduct += - (prefixCount[current] ^ 2)  
+            suffixSquareSum += - (suffixCount[current] ^ 2) + ((suffixCount[current] - 1) ^ 2)  
+            prefixSuffixSumBasic += - prefixCount[current]  
+
+            suffixCount[current] = suffixCount[current] - 1  
+
+            VARIABLE leftLength = index  
+            VARIABLE rightLength = LENGTH(nums) - index - 1  
+
+            answer += combinationTwo(leftLength) * combinationTwo(rightLength)  
+            answer -= combinationTwo(leftLength - prefixCount[current]) * combinationTwo(rightLength - suffixCount[current])  
+
+            VARIABLE psSumAdjusted = prefixSuffixSum - prefixCount[current] * (suffixCount[current] ^ 2)  
+            VARIABLE spProductAdjusted = suffixPrefixProduct - suffixCount[current] * (prefixCount[current] ^ 2)  
+            VARIABLE prefixSquareAdjusted = prefixSquareSum - (prefixCount[current] ^ 2)  
+            VARIABLE suffixSquareAdjusted = suffixSquareSum - (suffixCount[current] ^ 2)  
+            VARIABLE psBasicAdjusted = prefixSuffixSumBasic - prefixCount[current] * suffixCount[current]  
+            VARIABLE prefixRemain = leftLength - prefixCount[current]  
+            VARIABLE suffixRemain = rightLength - suffixCount[current]  
+
+            answer -= psBasicAdjusted * prefixCount[current] * (rightLength - suffixCount[current]) + psSumAdjusted * (- prefixCount[current])  
+            answer -= psBasicAdjusted * suffixCount[current] * (leftLength - prefixCount[current]) + spProductAdjusted * (- suffixCount[current])  
+            answer -= (prefixSquareAdjusted - prefixRemain) * suffixCount[current] * (rightLength - suffixCount[current]) DIVIDED BY 2  
+            answer -= (suffixSquareAdjusted - suffixRemain) * prefixCount[current] * (leftLength - prefixCount[current]) DIVIDED BY 2  
+
+            answer = answer MODULO MODULO  
+
+            prefixSuffixSum += suffixCount[current] ^ 2  
+            suffixPrefixProduct += suffixCount[current] * ( - (prefixCount[current] ^ 2) + (prefixCount[current] + 1) ^ 2)  
+            prefixSquareSum += - (prefixCount[current] ^ 2) + (prefixCount[current] + 1) ^ 2  
+            prefixSuffixSumBasic += suffixCount[current]  
+
+            prefixCount[current] = prefixCount[current] + 1  
+        END FOR  
+
+        RETURN answer  
+    END FUNCTION  
+END CLASS

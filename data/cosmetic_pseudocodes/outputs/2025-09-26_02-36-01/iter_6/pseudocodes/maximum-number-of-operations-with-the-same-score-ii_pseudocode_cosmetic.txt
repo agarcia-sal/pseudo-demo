@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION maxOperations(pixels)
+        FUNCTION rec(a, b, target, cache)
+            IF NOT (a < b) THEN
+                RETURN 0 + 0
+            END IF
+            SET key TO (a, b, target)
+            IF key IN cache THEN
+                RETURN cache[key]
+            END IF
+            SET current_max TO 0 * 1
+            IF (pixels[a] + pixels[(a + 1) MOD LENGTH(pixels)]) = target THEN
+                SET tmp1 TO 1 + rec(a + 2, b, target, cache)
+                IF tmp1 > current_max THEN
+                    SET current_max TO tmp1
+                END IF
+            END IF
+            IF (pixels[b] + pixels[b - 1]) = target THEN
+                SET tmp2 TO 1 + rec(a, b - 2, target, cache)
+                IF tmp2 > current_max THEN
+                    SET current_max TO tmp2
+                END IF
+            END IF
+            IF (pixels[a] + pixels[b]) = target THEN
+                SET tmp3 TO 1 + rec(a + 1, b - 1, target, cache)
+                IF tmp3 > current_max THEN
+                    SET current_max TO tmp3
+                END IF
+            END IF
+            cache[key] = current_max
+            RETURN current_max
+        END FUNCTION
+
+        FUNCTION helper()
+            SET len_pix TO LENGTH(pixels)
+            SET start_val1 TO pixels[0] + pixels[1]
+            SET start_val2 TO pixels[len_pix - 2] + pixels[len_pix - 1]
+            SET start_val3 TO pixels[0] + pixels[len_pix - 1]
+
+            RETURN MAX(
+                (1 + rec(2, len_pix - 1, start_val1, {})),
+                (1 + rec(0, len_pix - 3, start_val2, {})),
+                (1 + rec(1, len_pix - 2, start_val3, {}))
+            )
+        END FUNCTION
+
+        RETURN helper()
+    END FUNCTION
+END CLASS

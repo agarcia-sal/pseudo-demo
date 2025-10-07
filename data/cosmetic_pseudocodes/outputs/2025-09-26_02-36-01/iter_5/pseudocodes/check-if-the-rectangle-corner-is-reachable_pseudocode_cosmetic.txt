@@ -1,0 +1,114 @@
+CLASS Solution  
+    FUNCTION canReachCorner(xCorner yCorner circles)  
+        FUNCTION in_circle(xParam yParam cxParam cyParam radiusParam)  
+            SET deltaX TO xParam - cxParam  
+            SET deltaY TO yParam - cyParam  
+            SET distSquared TO (deltaX * deltaX) + (deltaY * deltaY)  
+            SET radiusSquared TO radiusParam * radiusParam  
+            RETURN distSquared <= radiusSquared  
+        END FUNCTION  
+
+        FUNCTION cross_left_top(cxParam cyParam radiusParam)  
+            SET condA TO (abs(cxParam) <= radiusParam) AND (0 <= cyParam) AND (cyParam <= yCorner)  
+            SET diffYCorner TO abs(cyParam - yCorner)  
+            SET condB TO (diffYCorner <= radiusParam) AND (0 <= cxParam) AND (cxParam <= xCorner)  
+            RETURN condA OR condB  
+        END FUNCTION  
+
+        FUNCTION cross_right_bottom(cxParam cyParam radiusParam)  
+            SET diffXCorner TO abs(cxParam - xCorner)  
+            SET condA TO (diffXCorner <= radiusParam) AND (0 <= cyParam) AND (cyParam <= yCorner)  
+            SET condB TO (abs(cyParam) <= radiusParam) AND (0 <= cxParam) AND (cxParam <= xCorner)  
+            RETURN condA OR condB  
+        END FUNCTION  
+
+        FUNCTION dfs(indexCircle)  
+            SET circleInfo TO circles[indexCircle]  
+            SET posX TO circleInfo[0]  
+            SET posY TO circleInfo[1]  
+            SET rad TO circleInfo[2]  
+
+            IF cross_right_bottom(posX posY rad) THEN  
+                RETURN True  
+            END IF  
+
+            SET vis[indexCircle] TO True  
+
+            FUNCTION recur(jList currentJ)  
+                IF currentJ = LENGTH(circles) THEN  
+                    RETURN False  
+                END IF  
+
+                SET otherCircle TO circles[currentJ]  
+                SET oX TO otherCircle[0]  
+                SET oY TO otherCircle[1]  
+                SET oR TO otherCircle[2]  
+
+                IF vis[currentJ] = True THEN  
+                    RETURN recur(jList currentJ + 1)  
+                END IF  
+
+                SET distX TO posX - oX  
+                SET distY TO posY - oY  
+                SET distSumSquared TO (distX * distX) + (distY * distY)  
+                SET radiusSum TO rad + oR  
+                SET radiusSumSquared TO radiusSum * radiusSum  
+
+                IF distSumSquared > radiusSumSquared THEN  
+                    RETURN recur(jList currentJ + 1)  
+                END IF  
+
+                SET lhsX TO (posX * oR) + (oX * rad)  
+                SET rhsX TO radiusSum * xCorner  
+                SET lhsY TO (posY * oR) + (oY * rad)  
+                SET rhsY TO radiusSum * yCorner  
+
+                IF (lhsX < rhsX) AND (lhsY < rhsY) THEN  
+                    IF dfs(currentJ) THEN  
+                        RETURN True  
+                    ELSE  
+                        RETURN recur(jList currentJ + 1)  
+                    END IF  
+                ELSE  
+                    RETURN recur(jList currentJ + 1)  
+                END IF  
+            END FUNCTION  
+
+            RETURN recur(jList 0)  
+        END FUNCTION  
+
+        SET vis TO []  
+        FUNCTION init_vis(counter)  
+            IF counter = LENGTH(circles) THEN  
+                RETURN  
+            END IF  
+            APPEND False TO vis  
+            init_vis(counter + 1)  
+        END FUNCTION  
+        init_vis(0)  
+
+        FUNCTION loop_circles(iInstance)  
+            IF iInstance = LENGTH(circles) THEN  
+                RETURN True  
+            END IF  
+
+            SET circleElement TO circles[iInstance]  
+            SET cX TO circleElement[0]  
+            SET cY TO circleElement[1]  
+            SET cR TO circleElement[2]  
+
+            IF in_circle(0 0 cX cY cR) OR in_circle(xCorner yCorner cX cY cR) THEN  
+                RETURN False  
+            END IF  
+
+            IF (vis[iInstance] = False) AND cross_left_top(cX cY cR) AND dfs(iInstance) THEN  
+                RETURN False  
+            END IF  
+
+            RETURN loop_circles(iInstance + 1)  
+        END FUNCTION  
+
+        SET result TO loop_circles(0)  
+        RETURN result  
+    END FUNCTION  
+END CLASS

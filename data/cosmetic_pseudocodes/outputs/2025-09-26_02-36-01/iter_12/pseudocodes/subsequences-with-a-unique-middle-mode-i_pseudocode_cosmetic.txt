@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        CONSTANT modulusValue ← (10^9) + 7
+        LET lengthOfNums ← 0
+        LET indexVar ← 0
+        LET resultCount ← 0
+        LET fiveElementSequences ← []
+        
+        PROCEDURE generateCombinations(arr, comboSize, startIdx, currentCombo)
+            IF LENGTH(currentCombo) = comboSize THEN
+                APPEND currentCombo TO fiveElementSequences
+                RETURN
+            END IF
+            FOR curIdx ← startIdx TO (LENGTH(arr) - 1)
+                generateCombinations(arr, comboSize, curIdx + 1, CONCATENATE(currentCombo, [arr[curIdx]]))
+            END FOR
+        END PROCEDURE
+        
+        lengthOfNums ← 0
+        WHILE true
+            IF lengthOfNums = LENGTH(nums) THEN
+                BREAK
+            END IF
+            lengthOfNums ← lengthOfNums + 1
+        END WHILE
+        
+        IF NOT (lengthOfNums >= 5) THEN
+            RETURN 0
+        END IF
+        
+        CALL generateCombinations(nums, 5, 0, [])
+        
+        resultCount ← 0
+        LET seqIdx ← 0
+        WHILE seqIdx < LENGTH(fiveElementSequences)
+            LET currentSeq ← fiveElementSequences[seqIdx]
+            
+            LET frequencyMap ← {}
+            LET elemIdx ← 0
+            WHILE elemIdx < 5
+                LET element ← currentSeq[elemIdx]
+                IF element IN frequencyMap THEN
+                    frequencyMap[element] ← frequencyMap[element] + 1
+                ELSE
+                    frequencyMap[element] ← 1
+                END IF
+                elemIdx ← elemIdx + 1
+            END WHILE
+
+            LET middleElem ← currentSeq[2]
+            LET middleFreq ← frequencyMap[middleElem]
+            
+            LET uniqueModeFlag ← true
+            
+            LET keysList ← []
+            FOR key IN frequencyMap
+                APPEND key TO keysList
+            END FOR
+            
+            LET keyIter ← 0
+            WHILE keyIter < LENGTH(keysList)
+                LET candidate ← keysList[keyIter]
+                IF NOT (candidate = middleElem) THEN
+                    IF frequencyMap[candidate] >= middleFreq THEN
+                        uniqueModeFlag ← false
+                        BREAK
+                    END IF
+                END IF
+                keyIter ← keyIter + 1
+            END WHILE
+            
+            IF uniqueModeFlag THEN
+                resultCount ← resultCount + 1
+            END IF
+            
+            seqIdx ← seqIdx + 1
+        END WHILE
+        
+        LET remainder ← resultCount - ((resultCount \ modulusValue) * modulusValue)
+        RETURN remainder
+    END FUNCTION
+END CLASS

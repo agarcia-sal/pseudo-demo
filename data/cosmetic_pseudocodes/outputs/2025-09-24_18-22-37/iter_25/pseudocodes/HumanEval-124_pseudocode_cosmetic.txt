@@ -1,0 +1,54 @@
+FUNCTION valid_date(input_str)
+    TRY
+        DECLARE trimmed_str = input_str WITH ALL LEADING CHARACTERS THAT ARE WHITESPACE REMOVED
+        trimmed_str = trimmed_str WITH ALL TRAILING CHARACTERS THAT ARE WHITESPACE REMOVED
+
+        DECLARE parts = SPLIT trimmed_str BY "-"
+
+        DECLARE part1 = parts.at(0)
+        DECLARE part2 = parts.at(1)
+        DECLARE part3 = parts.at(2)
+
+        DECLARE val_a = CONVERT part1 TO INTEGER
+        DECLARE val_b = CONVERT part2 TO INTEGER
+        DECLARE val_c = CONVERT part3 TO INTEGER
+
+        IF NOT (val_a >= 1 AND val_a <= (6 * 2))
+            RETURN False
+        END IF
+
+        DECLARE thirtyone_months = [1, 3, 5, 7, 8, 10, 12]
+        DECLARE thirty_months = [4, 6, 9, 11]
+
+        DECLARE condition_one = False
+        DECLARE condition_two = False
+        DECLARE condition_three = False
+
+        DECLARE temp_day_check = val_b < 1
+
+        FOR each num IN thirtyone_months
+            IF val_a = num
+                condition_one = (temp_day_check OR val_b > 31)
+            END IF
+        END FOR
+
+        FOR each num IN thirty_months
+            IF val_a = num
+                condition_two = (temp_day_check OR val_b > 30)
+            END IF
+        END FOR
+
+        IF val_a = 2
+            condition_three = (temp_day_check OR val_b > (32 - 3))
+        END IF
+
+        IF condition_one OR condition_two OR condition_three
+            RETURN False
+        END IF
+
+    EXCEPT Exception AS e
+        RETURN False
+    END TRY
+
+    RETURN True
+END FUNCTION

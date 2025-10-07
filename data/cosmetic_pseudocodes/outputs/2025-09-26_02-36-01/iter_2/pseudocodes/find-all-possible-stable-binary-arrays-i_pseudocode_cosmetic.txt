@@ -1,0 +1,32 @@
+CLASS Solution
+    FUNCTION numberOfStableArrays(zero, one, limit)
+        LET MOD_CONST BE (1 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+
+        FUNCTION dp(rem_zeros, rem_ones, prev_char, run_len)
+            IF rem_zeros = 0 AND rem_ones = 0 THEN
+                RETURN 1
+            END IF
+            IF rem_zeros < 0 OR rem_ones < 0 THEN
+                RETURN 0
+            END IF
+
+            SET acc TO 0
+
+            IF NOT (prev_char = 0 AND run_len >= limit) THEN
+                LET next_run_length BE IF prev_char = 0 THEN run_len + 1 ELSE 1 ENDIF
+                LET val FROM dp(rem_zeros - 1, rem_ones, 0, next_run_length)
+                SET acc TO (acc + val) MOD MOD_CONST
+            END IF
+
+            IF NOT (prev_char = 1 AND run_len >= limit) THEN
+                LET next_run_length BE IF prev_char = 1 THEN run_len + 1 ELSE 1 ENDIF
+                LET val FROM dp(rem_zeros, rem_ones - 1, 1, next_run_length)
+                SET acc TO (acc + val) MOD MOD_CONST
+            END IF
+
+            RETURN acc
+        END FUNCTION
+
+        RETURN dp(zero, one, -1, 0)
+    END FUNCTION
+END CLASS

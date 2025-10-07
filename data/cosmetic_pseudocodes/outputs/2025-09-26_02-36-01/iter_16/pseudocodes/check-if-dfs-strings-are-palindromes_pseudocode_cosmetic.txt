@@ -1,0 +1,90 @@
+CLASS Hashing
+    FUNCTION __init__(self, s, base, mod)
+        SET self.mod TO mod
+        SET self.h TO array filled with 0 for each index from 0 TO LENGTH OF s
+        SET self.p TO array filled with 1 for each index from 0 TO LENGTH OF s
+        SET x TO 1
+        WHILE x <= LENGTH OF s
+            SET prevHash TO self.h[x - 1]
+            SET chCode TO UNICODE code point of s[x - 1]
+            SET mul TO (prevHash TIMES base)
+            SET sumVal TO mul PLUS chCode
+            SET self.h[x] TO sumVal MODULO mod
+            SET self.p[x] TO (self.p[x - 1] TIMES base) MODULO mod
+            INCREMENT x BY 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION query(self, l, r)
+        SET diff TO self.h[r] MINUS (self.h[l - 1] TIMES self.p[r - l + 1])
+        SET result TO diff MODULO self.mod
+        IF result < 0 THEN
+            SET result TO result PLUS self.mod
+        END IF
+        RETURN result
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION findAnswer(self, parent, s)
+        SET n TO LENGTH OF s
+        SET g TO empty array with n elements, each an empty array
+        SET idx TO 1
+        WHILE idx < n
+            SET pIdx TO parent[idx]
+            CALL g[pIdx].APPEND(idx)
+            INCREMENT idx BY 1
+        END WHILE
+
+        SET dfsStr TO empty array
+        SET pos TO empty map
+
+        FUNCTION dfs(i)
+            SET startPos TO LENGTH OF dfsStr PLUS 1
+            FOR EACH child IN g[i]
+                CALL dfs(child)
+            END FOR
+            CALL dfsStr.APPEND(s[i])
+            SET endPos TO LENGTH OF dfsStr
+            SET pos[i] TO PAIR(startPos, endPos)
+        END FUNCTION
+
+        CALL dfs(0)
+
+        SET baseVal TO 33331
+        SET modVal TO 998244353
+        SET h1 TO NEW Hashing WITH (dfsStr, baseVal, modVal)
+        SET reversedDfsStr TO empty array
+        SET revIdx TO LENGTH OF dfsStr DOWNTO 1
+        WHILE revIdx >= 1
+            CALL reversedDfsStr.APPEND(dfsStr[revIdx - 1])
+            DECREMENT revIdx BY 1
+        END WHILE
+        SET h2 TO NEW Hashing WITH (reversedDfsStr, baseVal, modVal)
+
+        SET answerList TO empty array
+        SET posIdx TO 0
+        WHILE posIdx < n
+            SET interval TO pos[posIdx]
+            SET leftBound TO interval.first
+            SET rightBound TO interval.second
+            SET lengthVal TO rightBound MINUS leftBound PLUS 1
+            IF ((lengthVal MOD 2) EQUALS 0) THEN
+                SET firstHalfHash TO h1.query(leftBound, leftBound + (lengthVal / 2) - 1)
+                SET secondHalfHash TO h2.query(
+                    (n - rightBound + 1),
+                    (n - rightBound + 1) + (lengthVal / 2) - 1
+                )
+            ELSE
+                SET firstHalfHash TO h1.query(leftBound, leftBound + (lengthVal // 2) - 1)
+                SET secondHalfHash TO h2.query(
+                    (n - rightBound + 1),
+                    (n - rightBound + 1) + (lengthVal // 2) - 1
+                )
+            END IF
+            CALL answerList.APPEND(firstHalfHash EQUALS secondHalfHash)
+            INCREMENT posIdx BY 1
+        END WHILE
+        RETURN answerList
+    END FUNCTION
+END CLASS

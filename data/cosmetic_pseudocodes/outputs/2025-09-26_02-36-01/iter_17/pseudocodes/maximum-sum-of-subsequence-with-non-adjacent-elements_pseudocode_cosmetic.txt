@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION maximumSumSubsequence(nums, queries)
+        CONST P = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+        LET lengthVar = LENGTH(nums)
+        LET includedArrays = ARRAY OF LENGTH lengthVar WITH EACH ELEMENT SET TO 0
+        LET excludedArrays = ARRAY OF LENGTH lengthVar WITH EACH ELEMENT SET TO 0
+
+        includedArrays[0] = IF 0 > nums[0] THEN 0 ELSE nums[0] ENDIF
+        excludedArrays[0] = 0
+
+        LET counter = 1
+        WHILE counter < lengthVar
+            includedArrays[counter] = IF 0 > excludedArrays[counter - 1] + nums[counter] THEN 0 ELSE excludedArrays[counter - 1] + nums[counter] ENDIF
+            excludedArrays[counter] = IF excludedArrays[counter - 1] > includedArrays[counter - 1] THEN excludedArrays[counter - 1] ELSE includedArrays[counter - 1] ENDIF
+            counter = counter + 1
+        END WHILE
+
+        LET aggregateResult = 0
+
+        LET queryIndex = 0
+        REPEAT
+            IF queryIndex >= LENGTH(queries) THEN
+                BREAK
+            ENDIF
+
+            LET position, newValue = queries[queryIndex][0], queries[queryIndex][1]
+            nums[position] = newValue
+
+            IF position == 0 THEN
+                includedArrays[position] = IF 0 > nums[position] THEN 0 ELSE nums[position] ENDIF
+                excludedArrays[position] = 0
+            ELSE
+                includedArrays[position] = IF 0 > (excludedArrays[position - 1] + nums[position]) THEN 0 ELSE excludedArrays[position - 1] + nums[position] ENDIF
+                excludedArrays[position] = IF excludedArrays[position - 1] > includedArrays[position - 1] THEN excludedArrays[position - 1] ELSE includedArrays[position - 1] ENDIF
+            ENDIF
+
+            LET iPos = position + 1
+            WHILE iPos < lengthVar
+                includedArrays[iPos] = IF 0 > (excludedArrays[iPos - 1] + nums[iPos]) THEN 0 ELSE excludedArrays[iPos - 1] + nums[iPos] ENDIF
+                excludedArrays[iPos] = IF excludedArrays[iPos - 1] > includedArrays[iPos - 1] THEN excludedArrays[iPos - 1] ELSE includedArrays[iPos - 1] ENDIF
+                iPos = iPos + 1
+            END WHILE
+
+            LET maxAtEnd = IF includedArrays[lengthVar - 1] > excludedArrays[lengthVar - 1] THEN includedArrays[lengthVar - 1] ELSE excludedArrays[lengthVar - 1] ENDIF
+            aggregateResult = (aggregateResult + maxAtEnd) % P
+
+            queryIndex = queryIndex + 1
+        UNTIL FALSE
+
+        RETURN aggregateResult
+    END FUNCTION
+END CLASS

@@ -1,0 +1,97 @@
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        DEFINE FUNCTION findMinChar(freqMap, letters, idx, currentMinCount, currentMinChar)
+            IF idx GREATER_OR_EQUAL length(letters) THEN
+                RETURN currentMinChar
+            ELSE
+                SET letter TO letters[idx]
+                SET letterFreq TO 0
+                IF letter IN freqMap THEN
+                    SET letterFreq TO freqMap[letter]
+                END IF
+
+                IF letterFreq LESS_THAN currentMinCount THEN
+                    RETURN findMinChar(freqMap, letters, idx + 1, letterFreq, letter)
+                ELSE
+                    RETURN findMinChar(freqMap, letters, idx + 1, currentMinCount, currentMinChar)
+                END IF
+            END IF
+        END FUNCTION
+
+        SET freq TO empty map
+        FOR each ch IN s DO
+            IF ch NOT_EQUALS '?' THEN
+                IF ch IN freq THEN
+                    SET freq[ch] TO freq[ch] + 1
+                ELSE
+                    SET freq[ch] TO 1
+                END IF
+            END IF
+        END FOR
+
+        SET questionMarkPositions TO empty list
+        SET positionCounter TO 0
+        WHILE positionCounter LESS_THAN length(s) DO
+            IF s[positionCounter] EQUALS '?' THEN
+                SET questionMarkPositions TO questionMarkPositions + [positionCounter]
+            END IF
+            SET positionCounter TO positionCounter + 1
+        END WHILE
+
+        SET replacements TO empty list
+        SET alphabet TO list containing letters from 'a' through 'z'
+        SET qIndex TO 0
+        WHILE qIndex LESS_THAN length(questionMarkPositions) DO
+            SET candidate TO findMinChar(freq, alphabet, 0, length(s) + length(s), null)
+            SET replacements TO replacements + [candidate]
+
+            IF candidate IN freq THEN
+                SET freq[candidate] TO freq[candidate] + 1
+            ELSE
+                SET freq[candidate] TO 1
+            END IF
+            SET qIndex TO qIndex + 1
+        END WHILE
+
+        DEFINE FUNCTION insertionSort(arr)
+            SET i TO 1
+            WHILE i LESS_THAN length(arr) DO
+                SET key TO arr[i]
+                SET j TO i - 1
+                WHILE j GREATER_OR_EQUAL 0 AND arr[j] GREATER_THAN key DO
+                    SET arr[j + 1] TO arr[j]
+                    SET j TO j - 1
+                END WHILE
+                SET arr[j + 1] TO key
+                SET i TO i + 1
+            END WHILE
+            RETURN arr
+        END FUNCTION
+
+        SET sortedReplacements TO insertionSort(replacements)
+
+        SET characters TO empty list
+        SET idxChar TO 0
+        WHILE idxChar LESS_THAN length(s) DO
+            SET characters TO characters + [s[idxChar]]
+            SET idxChar TO idxChar + 1
+        END WHILE
+
+        SET pIndex TO 0
+        WHILE pIndex LESS_THAN length(questionMarkPositions) AND pIndex LESS_THAN length(sortedReplacements) DO
+            SET pos TO questionMarkPositions[pIndex]
+            SET repChar TO sortedReplacements[pIndex]
+            SET characters[pos] TO repChar
+            SET pIndex TO pIndex + 1
+        END WHILE
+
+        SET resultString TO empty string
+        SET k TO 0
+        WHILE k LESS_THAN length(characters) DO
+            SET resultString TO resultString + characters[k]
+            SET k TO k + 1
+        END WHILE
+
+        RETURN resultString
+    END FUNCTION
+END CLASS

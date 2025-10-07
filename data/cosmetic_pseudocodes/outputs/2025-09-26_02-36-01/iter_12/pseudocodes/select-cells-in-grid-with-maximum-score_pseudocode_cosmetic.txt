@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION maxScore(grid)
+        FUNCTION explore(index, chosen, total)
+            IF index GREATER_OR_EQUAL TO grid.LENGTH THEN
+                SET highest TO (highest MAX total)
+                RETURN
+            END IF
+
+            CALL explore(index + (1), chosen, total)
+
+            SET iterator TO 0
+            WHILE iterator LESS_THAN grid[index].LENGTH DO
+                SET element TO grid[index][iterator]
+                IF NOT contains(chosen, element) THEN
+                    addElement(chosen, element)
+                    CALL explore(index + 1, chosen, total + element)
+                    removeElement(chosen, element)
+                END IF
+                SET iterator TO iterator + 1
+            END WHILE
+        END FUNCTION
+
+        FUNCTION contains(setCollection, value)
+            FOR EACH item IN setCollection DO
+                IF item EQUALS value THEN RETURN TRUE
+            END FOR
+            RETURN FALSE
+        END FUNCTION
+
+        FUNCTION addElement(setCollection, value)
+            setCollection.APPEND(value)
+        END FUNCTION
+
+        FUNCTION removeElement(setCollection, value)
+            SET tempList TO EMPTY LIST
+            FOR EACH element IN setCollection DO
+                IF element NOT_EQUALS value THEN
+                    tempList.APPEND(element)
+                END IF
+            END FOR
+            CLEAR setCollection
+            FOR EACH element IN tempList DO
+                setCollection.APPEND(element)
+            END FOR
+        END FUNCTION
+
+        FUNCTION sortDescending(arr)
+            IF arr.LENGTH LESS_THAN_OR_EQUAL 1 THEN RETURN END IF
+            FOR i FROM 0 TO arr.LENGTH - 1 DO
+                FOR j FROM 0 TO arr.LENGTH - i - 2 DO
+                    IF arr[j] LESS_THAN arr[j + 1] THEN
+                        SET temp TO arr[j]
+                        arr[j] = arr[j + 1]
+                        arr[j + 1] = temp
+                    END IF
+                END FOR
+            END FOR
+        END FUNCTION
+
+        SET i TO 0
+        WHILE i LESS_THAN grid.LENGTH DO
+            CALL sortDescending(grid[i])
+            SET i TO i + 1
+        END WHILE
+
+        SET highest TO 0
+        CALL explore(0, EMPTY LIST, 0)
+        RETURN highest
+    END FUNCTION
+END CLASS

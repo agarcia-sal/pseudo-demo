@@ -1,0 +1,63 @@
+CLASS Solution  
+    FUNCTION minOperations(initial parameter TO string, target parameter TO string) RETURNS integer  
+        FUNCTION cpyLen(s parameter TO string) RETURNS integer  
+            SET cnt TO 0  
+            WHILE (TRUE) DO  
+                IF s[cnt] IS UNDEFINED THEN  
+                    EXIT WHILE  
+                END IF  
+                SET cnt TO cnt PLUS 1  
+            END WHILE  
+            RETURN cnt  
+        END FUNCTION  
+
+        FUNCTION eqChars(a parameter TO string, indexA parameter TO integer, b parameter TO string, indexB parameter TO integer) RETURNS boolean  
+            RETURN NOT (a[indexA] NOT_EQUALS b[indexB])  
+        END FUNCTION  
+
+        FUNCTION zeroMatrix(rows parameter TO integer, cols parameter TO integer) RETURNS list OF list OF integer  
+            SET res TO EMPTY LIST  
+            SET rowIdx TO 0  
+            WHILE rowIdx NOT_EQUALS rows DO  
+                SET colIdx TO 0  
+                SET row TO EMPTY LIST  
+                REPEAT  
+                    IF colIdx EQUALS cols THEN  
+                        BREAK  
+                    END IF  
+                    APPEND 0 TO row  
+                    SET colIdx TO colIdx PLUS 1  
+                UNTIL FALSE  
+                APPEND row TO res  
+                SET rowIdx TO rowIdx PLUS 1  
+            END WHILE  
+            RETURN res  
+        END FUNCTION  
+
+        SET len_init TO cpyLen(initial)  
+        SET len_target TO cpyLen(target)  
+        SET dpArr TO zeroMatrix(len_init PLUS 1, len_target PLUS 1)  
+        SET maxCount TO 0  
+
+        FUNCTION innerLoop(j parameter TO integer, i parameter TO integer)  
+            IF eqChars(initial, i MINUS 1, target, j MINUS 1) THEN  
+                SET dpArr[i][j] TO dpArr[i MINUS 1][j MINUS 1] PLUS 1  
+                IF maxCount LESS_THAN dpArr[i][j] THEN  
+                    SET maxCount TO dpArr[i][j]  
+                END IF  
+            END IF  
+        END FUNCTION  
+
+        SET idx_i TO 1  
+        WHILE idx_i NOT_EQUALS (len_init PLUS 1) DO  
+            SET idx_j TO 1  
+            WHILE idx_j NOT_EQUALS (len_target PLUS 1) DO  
+                CALL innerLoop(idx_j, idx_i)  
+                SET idx_j TO idx_j PLUS 1  
+            END WHILE  
+            SET idx_i TO idx_i PLUS 1  
+        END WHILE  
+
+        RETURN (len_init PLUS len_target) MINUS (2 MULTIPLIED BY maxCount)  
+    END FUNCTION  
+END CLASS

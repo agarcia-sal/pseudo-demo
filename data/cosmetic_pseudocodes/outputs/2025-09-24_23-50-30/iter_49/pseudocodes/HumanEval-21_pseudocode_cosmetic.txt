@@ -1,0 +1,34 @@
+```
+FUNCTION rescale_to_unit(collection_of_values)
+    FUNCTION compute_range(current_min, current_max, remaining_values)
+        IF remaining_values IS EMPTY THEN
+            RETURN (current_min, current_max)
+        ELSE
+            SET head_value TO FIRST ELEMENT OF remaining_values
+            SET tail_values TO ALL BUT FIRST ELEMENT OF remaining_values
+            SET new_min TO IF head_value < current_min THEN head_value ELSE current_min
+            SET new_max TO IF head_value > current_max THEN head_value ELSE current_max
+            RETURN compute_range(new_min, new_max, tail_values)
+        END IF
+    END FUNCTION
+
+    SET initial_value TO FIRST ELEMENT OF collection_of_values
+    SET min_max_pair TO compute_range(initial_value, initial_value, collection_of_values WITHOUT FIRST ELEMENT)
+    SET minimum_value TO min_max_pair[0]
+    SET maximum_value TO min_max_pair[1]
+    SET denom TO maximum_value - minimum_value
+
+    FUNCTION normalize_values(accumulator, remaining_values)
+        IF remaining_values IS EMPTY THEN
+            RETURN accumulator
+        ELSE
+            SET head_value TO FIRST ELEMENT OF remaining_values
+            SET tail_values TO ALL BUT FIRST ELEMENT OF remaining_values
+            SET normalized_value TO (head_value + (-minimum_value)) / denom
+            RETURN normalize_values(accumulator + [normalized_value], tail_values)
+        END IF
+    END FUNCTION
+
+    RETURN normalize_values([], collection_of_values)
+END FUNCTION
+```

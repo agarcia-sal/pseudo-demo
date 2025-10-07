@@ -1,0 +1,94 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, size)  
+        SET self.parent TO empty list  
+        SET self.rank TO empty list  
+        SET idx TO 0  
+        WHILE idx LESS THAN size  
+            APPEND idx TO self.parent  
+            APPEND 0 TO self.rank  
+            INCREMENT idx BY 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION find(self, u)  
+        FUNCTION recurFind(x)  
+            IF self.parent[x] EQUALS x THEN  
+                RETURN x  
+            ELSE  
+                SET temp TO recurFind(self.parent[x])  
+                SET self.parent[x] TO temp  
+                RETURN temp  
+            END IF  
+        END FUNCTION  
+        RETURN recurFind(u)  
+    END FUNCTION
+
+    FUNCTION union(self, u, v)  
+        SET ru TO self.find(u)  
+        SET rv TO self.find(v)  
+        IF ru NOT EQUALS rv THEN  
+            IF self.rank[ru] GT self.rank[rv] THEN  
+                SET self.parent[rv] TO ru  
+            ELSE  
+                IF self.rank[ru] LT self.rank[rv] THEN  
+                    SET self.parent[ru] TO rv  
+                ELSE  
+                    SET self.parent[rv] TO ru  
+                    SET self.rank[ru] TO self.rank[ru] PLUS 1  
+                END IF  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maximizeSumOfWeights(self, edges, k)  
+        FUNCTION sortDescendingByThird(lst)  
+            IF lst IS EMPTY OR (LENGTH of lst) EQUALS 1 THEN  
+                RETURN lst  
+            ELSE  
+                SET pivot TO lst[0]  
+                SET leftPart TO empty list  
+                SET rightPart TO empty list  
+                SET i TO 1  
+                WHILE i LESS THAN LENGTH of lst  
+                    IF lst[i][2] GT pivot[2] THEN  
+                        APPEND lst[i] TO leftPart  
+                    ELSE  
+                        APPEND lst[i] TO rightPart  
+                    END IF  
+                    INCREMENT i BY 1  
+                END WHILE  
+                RETURN sortDescendingByThird(leftPart) PLUS [pivot] PLUS sortDescendingByThird(rightPart)  
+            END IF  
+        END FUNCTION  
+
+        SET NPLUSONE TO (LENGTH of edges) PLUS 1  
+        SET deg TO list of zeros with length NPLUSONE  
+        SET UFinstance TO new UnionFind with argument NPLUSONE  
+        SET edgesSorted TO sortDescendingByThird(edges)  
+
+        SET accSum TO 0  
+
+        FUNCTION processEdges(lst,pos)  
+            IF pos EQUALS LENGTH of lst THEN  
+                RETURN  
+            ELSE  
+                SET edgeVal TO lst[pos]  
+                SET x1 TO edgeVal[0]  
+                SET x2 TO edgeVal[1]  
+                SET x3 TO edgeVal[2]  
+                IF (deg[x1] LT k) AND (deg[x2] LT k) AND (UFinstance.find(x1) NOT EQUALS UFinstance.find(x2)) THEN  
+                    CALL UFinstance.union(x1,x2)  
+                    SET deg[x1] TO deg[x1] PLUS 1  
+                    SET deg[x2] TO deg[x2] PLUS 1  
+                    SET accSum TO accSum PLUS x3  
+                END IF  
+                CALL processEdges(lst,pos PLUS 1)  
+            END IF  
+        END FUNCTION  
+
+        CALL processEdges(edgesSorted,0)  
+        RETURN accSum  
+    END FUNCTION  
+END CLASS

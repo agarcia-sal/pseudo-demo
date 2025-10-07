@@ -1,0 +1,56 @@
+FUNCTION sorted_list_sum(string_collection)
+  PROCEDURE reorder_inplace(collection)
+    INDEX position := 0
+    LOOP
+      IF position >= LENGTH collection THEN BREAK
+      INDEX seeker := position + 1
+      LOOP
+        IF seeker >= LENGTH collection THEN BREAK
+        IF collection[seeker] < collection[position] THEN
+          TEMPORARY holder := collection[position]
+          collection[position] := collection[seeker]
+          collection[seeker] := holder
+        END IF
+        seeker := seeker + 1
+      END LOOP
+      position := position + 1
+    END LOOP
+  END PROCEDURE
+
+  CALL reorder_inplace WITH collection=string_collection
+
+  LIST filtered_strings := []
+  INDEX checker := 0
+
+  LOOP
+    IF checker >= LENGTH string_collection THEN BREAK
+    IF (NOT ((LENGTH string_collection[checker] MOD 2) = 1)) THEN
+      filtered_strings := filtered_strings + [string_collection[checker]]
+    END IF
+    checker := checker + 1
+  END LOOP
+
+  PROCEDURE sort_by_length_asc(collection)
+    PROCEDURE swap(i, j)
+      TEMPORARY temp_item := collection[i]
+      collection[i] := collection[j]
+      collection[j] := temp_item
+    END PROCEDURE
+
+    INDEX outer := 0
+    LOOP
+      IF outer >= LENGTH collection THEN BREAK
+      INDEX inner := outer + 1
+      LOOP
+        IF inner >= LENGTH collection THEN BREAK
+        IF LENGTH collection[inner] < LENGTH collection[outer] THEN swap(outer, inner)
+        inner := inner + 1
+      END LOOP
+      outer := outer + 1
+    END LOOP
+  END PROCEDURE
+
+  CALL sort_by_length_asc WITH collection=filtered_strings
+
+  EXECUTE RETURN filtered_strings
+END FUNCTION

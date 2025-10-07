@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION numberOfRightTriangles(grid)
+        FUNCTION addValues(arr, omitIndex)
+            FUNCTION helper(idx, acc)
+                IF idx GREATER_OR_EQUAL LENGTH_OF arr THEN
+                    RETURN acc
+                END IF
+                IF idx NOT_EQUAL omitIndex THEN
+                    SET updatedAcc TO acc PLUS arr[idx]
+                    RETURN helper(idx PLUS (1 PLUS 0), updatedAcc)
+                ELSE
+                    RETURN helper(idx PLUS (1 PLUS 0), acc)
+                END IF
+            END FUNCTION
+            RETURN helper(0, 0)
+        END FUNCTION
+
+        SET total_triangles TO 0
+        SET total_rows TO LENGTH_OF grid
+        SET total_cols TO LENGTH_OF grid[0]
+
+        FUNCTION processRow(rowIdx, accum)
+            IF rowIdx GREATER_OR_EQUAL total_rows THEN
+                RETURN accum
+            END IF
+
+            FUNCTION processCol(colIdx, accumInner)
+                IF colIdx GREATER_OR_EQUAL total_cols THEN
+                    RETURN accumInner
+                END IF
+
+                IF NOT (grid[rowIdx][colIdx] NOT_EQUAL 1) THEN
+                    SET horizontal_sum TO addValues(grid[rowIdx], colIdx)
+                    SET vertical_sum TO 0
+
+                    FUNCTION accumulateColumn(rIdx, accVert)
+                        IF rIdx GREATER_OR_EQUAL total_rows THEN
+                            RETURN accVert
+                        END IF
+                        IF rIdx NOT_EQUAL rowIdx THEN
+                            RETURN accumulateColumn(rIdx PLUS 1, accVert PLUS grid[rIdx][colIdx])
+                        ELSE
+                            RETURN accumulateColumn(rIdx PLUS 1, accVert)
+                        END IF
+                    END FUNCTION
+
+                    SET vertical_sum TO accumulateColumn(0, 0)
+                    SET current_add TO horizontal_sum TIMES vertical_sum
+                    RETURN processCol(colIdx PLUS 1, accumInner PLUS current_add)
+                ELSE
+                    RETURN processCol(colIdx PLUS 1, accumInner)
+                END IF
+            END FUNCTION
+
+            SET newAccum TO processCol(0, accum)
+            RETURN processRow(rowIdx PLUS 1, newAccum)
+        END FUNCTION
+
+        RETURN processRow(0, total_triangles)
+    END FUNCTION
+END CLASS

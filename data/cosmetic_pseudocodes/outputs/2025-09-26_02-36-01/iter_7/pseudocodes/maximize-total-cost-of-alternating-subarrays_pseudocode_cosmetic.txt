@@ -1,0 +1,45 @@
+CLASS Solution
+    FUNCTION maximumTotalCost(nums)
+        LET lengthVar := LENGTH OF nums
+        IF lengthVar == (0 + 1) THEN
+            RETURN nums[1]
+        ELSE
+            LET dpArray BE AN ARRAY OF ZEROS WITH SIZE lengthVar
+            
+            dpArray[lengthVar - 1] := nums[lengthVar - 1]
+            
+            LET outerIdx := lengthVar - 2
+            WHILE outerIdx >= 0 DO
+                LET sumTracker := nums[outerIdx]
+                
+                IF sumTracker > dpArray[outerIdx + 1] THEN
+                    dpArray[outerIdx] := sumTracker
+                ELSE
+                    dpArray[outerIdx] := dpArray[outerIdx + 1] + sumTracker
+                END IF
+                
+                LET innerCounter := outerIdx + (1 * 1)
+                REPEAT
+                    LET signFactor := (-1) ^ (innerCounter - outerIdx)
+                    sumTracker := sumTracker + (nums[innerCounter] * signFactor)
+                    
+                    IF (innerCounter + 1) < lengthVar THEN
+                        IF dpArray[outerIdx] < (sumTracker + dpArray[innerCounter + 1]) THEN
+                            dpArray[outerIdx] := sumTracker + dpArray[innerCounter + 1]
+                        END IF
+                    ELSE
+                        IF dpArray[outerIdx] < sumTracker THEN
+                            dpArray[outerIdx] := sumTracker
+                        END IF
+                    END IF
+                    
+                    innerCounter := innerCounter + 1
+                UNTIL innerCounter > lengthVar - 1
+                
+                outerIdx := outerIdx - 1
+            END WHILE
+            
+            RETURN dpArray[0]
+        END IF
+    END FUNCTION
+END CLASS

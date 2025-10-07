@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        FUNCTION countOccurrences(words)
+            SET frequencyMap TO new dictionary with default zero
+            FUNCTION loopAllWords(idx)
+                IF idx EQUALS length(words) THEN
+                    RETURN
+                END IF
+                SET currentStr TO words[idx]
+                SET lenStr TO length(currentStr)
+                FUNCTION loopStartPos(posStart)
+                    IF posStart EQUALS lenStr THEN
+                        RETURN
+                    END IF
+                    FUNCTION loopEndPos(posEnd)
+                        IF posEnd GREATER THAN lenStr THEN
+                            RETURN
+                        END IF
+                        SET segment TO substring(currentStr, posStart, posEnd - 1)
+                        SET frequencyMap[segment] TO frequencyMap[segment] + 1
+                        CALL loopEndPos(posEnd + 1)
+                    END FUNCTION
+                    CALL loopEndPos(posStart + 1)
+                    CALL loopStartPos(posStart + 1)
+                END FUNCTION
+                CALL loopStartPos(0)
+                CALL loopAllWords(idx + 1)
+            END FUNCTION
+            CALL loopAllWords(0)
+            RETURN frequencyMap
+        END FUNCTION
+
+        SET counts TO countOccurrences(arr)
+        SET results TO empty list
+
+        FUNCTION processString(idx)
+            IF idx EQUALS length(arr) THEN
+                RETURN
+            END IF
+            SET stringToCheck TO arr[idx]
+            SET strLen TO length(stringToCheck)
+
+            FUNCTION findShortest(startPos, best)
+                IF startPos EQUALS strLen THEN
+                    RETURN best
+                END IF
+                FUNCTION checkEnd(endPos, candidate)
+                    IF endPos GREATER THAN strLen THEN
+                        RETURN candidate
+                    END IF
+                    SET part TO substring(stringToCheck, startPos, endPos - 1)
+                    IF counts[part] EQUALS 1 THEN
+                        IF length(candidate) EQUALS 0 OR length(part) LESS THAN length(candidate) OR (length(part) EQUALS length(candidate) AND part LESS THAN candidate) THEN
+                            SET candidate TO part
+                        END IF
+                    END IF
+                    RETURN checkEnd(endPos + 1, candidate)
+                END FUNCTION
+
+                SET newBest TO checkEnd(startPos + 1, best)
+                RETURN findShortest(startPos + 1, newBest)
+            END FUNCTION
+
+            SET shortestCandidate TO findShortest(0, "")
+            APPEND shortestCandidate TO results
+            CALL processString(idx + 1)
+        END FUNCTION
+
+        CALL processString(0)
+        RETURN results
+    END FUNCTION
+END CLASS

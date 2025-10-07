@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION findPattern(board, pattern)
+      SET total_rows TO 0
+      SET total_cols TO 0
+      SET pat_rows TO 0
+      SET pat_cols TO 0
+      SET idx1 TO 0
+      SET idx2 TO 0
+      SET res_r TO -1
+      SET res_c TO -1
+      SET found_match TO False
+
+      ASSIGN the LENGTH of board TO total_rows
+      ASSIGN the LENGTH of element at position zero of board TO total_cols
+      ASSIGN the LENGTH of pattern TO pat_rows
+      ASSIGN the LENGTH of element at position zero of pattern TO pat_cols
+
+      FUNCTION matches(row_start, col_start)
+          DEFINE map_char_to_digit AS empty dictionary
+          DEFINE map_digit_to_char AS empty dictionary
+          SET iii TO 0
+
+          REPEAT
+              IF iii GREATER OR EQUAL pat_rows THEN BREAK
+              SET jjj TO 0
+              REPEAT
+                  IF jjj GREATER OR EQUAL pat_cols THEN BREAK
+                  SET p_ch TO element at position iii of pattern THEN element at position jjj
+                  SET b_dig TO element at position row_start PLUS iii of board THEN element at position col_start PLUS jjj
+
+                  IF (p_ch >= '0') AND (p_ch <= '9') THEN
+                      IF (INTEGER VALUE of p_ch) NOT EQUAL b_dig THEN
+                          RETURN False
+                      END IF
+                  ELSE
+                      IF p_ch IN map_char_to_digit THEN
+                          IF map_char_to_digit at p_ch NOT EQUAL b_dig THEN
+                              RETURN False
+                          END IF
+                      ELSE
+                          IF b_dig IN map_digit_to_char THEN
+                              RETURN False
+                          END IF
+                          SET map_char_to_digit[p_ch] TO b_dig
+                          SET map_digit_to_char[b_dig] TO p_ch
+                      END IF
+                  END IF
+                  SET jjj TO jjj PLUS 1
+              UNTIL False
+              SET iii TO iii PLUS 1
+          UNTIL False
+
+          RETURN True
+      END FUNCTION
+
+      SET row_idx TO 0
+      WHILE row_idx <= total_rows MINUS pat_rows
+          SET col_idx TO 0
+          WHILE col_idx <= total_cols MINUS pat_cols
+              IF matches(row_idx, col_idx) THEN
+                  SET res_r TO row_idx
+                  SET res_c TO col_idx
+                  SET found_match TO True
+                  BREAK
+              END IF
+              SET col_idx TO col_idx PLUS 1
+          END WHILE
+          IF found_match THEN
+              BREAK
+          END IF
+          SET row_idx TO row_idx PLUS 1
+      END WHILE
+
+      RETURN list containing res_r and res_c
+    END FUNCTION
+END CLASS

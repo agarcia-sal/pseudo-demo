@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+        SET totalLen TO LENGTH OF fruits
+
+        SET movesA TO [(1, 1), (1, 0)]
+        SET movesB TO [(1, -1), (1, 0), (1, 1)]
+        SET movesC TO [(-1, 1), (0, 1), (1, 1)]
+
+        SET cache TO EMPTY DICTIONARY
+
+        FUNCTION dp(aX, aY, bX, bY, cX, cY)
+            IF aX < 0 OR aX >= totalLen THEN RETURN -∞ END IF
+            IF aY < 0 OR aY >= totalLen THEN RETURN -∞ END IF
+            IF bX < 0 OR bX >= totalLen THEN RETURN -∞ END IF
+            IF bY < 0 OR bY >= totalLen THEN RETURN -∞ END IF
+            IF cX < 0 OR cX >= totalLen THEN RETURN -∞ END IF
+            IF cY < 0 OR cY >= totalLen THEN RETURN -∞ END IF
+
+            SET finalPos TO totalLen - 1
+            IF aX = aY AND aY = bX AND bX = bY AND bY = cX AND cX = cY AND cY = finalPos THEN
+                RETURN fruits[finalPos][finalPos]
+            END IF
+
+            SET keyTuple TO (aX, aY, bX, bY, cX, cY)
+            IF keyTuple IN cache THEN RETURN cache[keyTuple] END IF
+
+            SET fruitSum TO fruits[aX][aY]
+
+            IF (aX = bX AND aY = bY) OR (aX = cX AND aY = cY) THEN
+                SET fruitSum TO 0
+            END IF
+
+            IF bX = cX AND bY = cY THEN
+                SET fruitSum TO fruitSum + fruits[bX][bY]
+            ELSE
+                SET fruitSum TO fruitSum + fruits[bX][bY] + fruits[cX][cY]
+            END IF
+
+            FUNCTION recurseIter(d1, i1)
+                IF i1 >= LENGTH OF d1 THEN RETURN -∞ END IF
+                SET (dx1, dy1) TO d1[i1]
+                FUNCTION recurseJ(d2, i2)
+                    IF i2 >= LENGTH OF d2 THEN RETURN -∞ END IF
+                    SET (dx2, dy2) TO d2[i2]
+                    FUNCTION recurseK(d3, i3, bestSoFar)
+                        IF i3 >= LENGTH OF d3 THEN RETURN bestSoFar END IF
+                        SET (dx3, dy3) TO d3[i3]
+                        SET cand TO dp(aX + dx1, aY + dy1, bX + dx2, bY + dy2, cX + dx3, cY + dy3)
+                        IF cand > bestSoFar THEN
+                            SET bestSoFar TO cand
+                        END IF
+                        RETURN recurseK(d3, i3 + 1, bestSoFar)
+                    END FUNCTION
+                    RETURN recurseK(d3, 0, -∞)
+                END FUNCTION
+                SET innerBest TO recurseJ(d2, 0)
+                SET restBest TO recurseIter(d1, i1 + 1)
+                IF innerBest > restBest THEN RETURN innerBest ELSE RETURN restBest END IF
+            END FUNCTION
+
+            SET maxVal TO recurseIter(movesA, 0)
+
+            SET resultVal TO fruitSum + maxVal
+            cache[keyTuple] = resultVal
+            RETURN resultVal
+        END FUNCTION
+
+        RETURN dp(0, 0, 0, totalLen - 1, totalLen - 1, 0)
+    END FUNCTION
+END CLASS

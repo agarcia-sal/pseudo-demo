@@ -1,0 +1,63 @@
+FUNCTION get_row(grid_matrix, search_key)
+   LET found_positions BE AN EMPTY LIST
+   LET outer_index = 0
+
+   WHILE outer_index <= LENGTH(grid_matrix) - 1
+      LET inner_index = 0
+
+      WHILE inner_index <= LENGTH(grid_matrix.at(outer_index)) - 1
+         LET current_element = grid_matrix.at(outer_index).at(inner_index)
+         IF NOT current_element != search_key THEN
+            LET position_pair = (outer_index, inner_index)
+            found_positions.APPEND(position_pair)
+         END IF
+         inner_index = inner_index + 1
+      END WHILE
+
+      outer_index = outer_index + 1
+   END WHILE
+
+   LET temp_sort1 = found_positions
+   LET temp_sort2 = EMPTY LIST
+
+   FOR entry IN temp_sort1
+      LET i = 0
+      WHILE i < LENGTH(temp_sort2) AND temp_sort2.at(i).SECOND > entry.SECOND
+         i = i + 1
+      END WHILE
+      temp_sort2.INSERT(i, entry)
+   END FOR
+
+   LET sorted_coordinates = EMPTY LIST
+   LET i = 0
+
+   WHILE i < LENGTH(temp_sort2)
+      LET j = i + 1
+      LET current_group = [temp_sort2.at(i)]
+
+      WHILE j < LENGTH(temp_sort2) AND temp_sort2.at(j).FIRST == temp_sort2.at(i).FIRST
+         current_group.APPEND(temp_sort2.at(j))
+         j = j + 1
+      END WHILE
+
+      LET sorted_group = EMPTY LIST
+
+      FOR element IN current_group
+         LET k = 0
+
+         WHILE k < LENGTH(sorted_group) AND sorted_group.at(k).SECOND > element.SECOND
+            k = k + 1
+         END WHILE
+
+         sorted_group.INSERT(k, element)
+      END FOR
+
+      FOR elem IN sorted_group
+         sorted_coordinates.APPEND(elem)
+      END FOR
+
+      i = j
+   END WHILE
+
+   RETURN sorted_coordinates
+END FUNCTION

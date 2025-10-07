@@ -1,0 +1,61 @@
+class Solution
+{
+  FUNCTION maxUpgrades(count LIST OF INTEGER, upgrade LIST OF INTEGER, sell LIST OF INTEGER, money LIST OF INTEGER) RETURNS LIST OF INTEGER
+  {
+    FUNCTION calcFloorDiv(a INTEGER, b INTEGER) RETURNS INTEGER
+    {
+      RETURN (a - (a MOD b)) / b
+    }
+    FUNCTION maxValue(x INTEGER, y INTEGER) RETURNS INTEGER
+    {
+      IF (x - y) >= 0 THEN
+        RETURN x
+      ELSE
+        RETURN y
+      END IF
+    }
+    FUNCTION minValue(x INTEGER, y INTEGER) RETURNS INTEGER
+    {
+      IF (x - y) <= 0 THEN
+        RETURN x
+      ELSE
+        RETURN y
+      END IF
+    }
+
+    SET resultList TO EMPTY LIST
+    SET outerCounter TO 0
+    WHILE outerCounter < LENGTH(count)
+    {
+      SET currentCount TO count[outerCounter]
+      SET upgradeCostLocal TO upgrade[outerCounter]
+      SET sellValueLocal TO sell[outerCounter]
+      SET budgetInitial TO money[outerCounter]
+
+      SET optimumUpgrade TO 0
+
+      FUNCTION innerLoop(counter INTEGER, best INTEGER) RETURNS INTEGER
+      {
+        IF counter > currentCount THEN
+          RETURN best
+        END IF
+
+        SET remainingUnits TO currentCount - counter
+        SET moneyFromSales TO counter * sellValueLocal
+        SET accumulatedMoney TO budgetInitial + moneyFromSales
+        SET possibleUpgradeCandidate TO calcFloorDiv(accumulatedMoney, upgradeCostLocal)
+        SET cappedUpgrade TO minValue(possibleUpgradeCandidate, remainingUnits)
+        SET newBest TO maxValue(best, cappedUpgrade)
+
+        RETURN innerLoop(counter + 1, newBest)
+      }
+
+      SET optimumUpgrade TO innerLoop(0, 0)
+      resultList APPEND optimumUpgrade
+
+      SET outerCounter TO outerCounter + 1
+    }
+
+    RETURN resultList
+  }
+}

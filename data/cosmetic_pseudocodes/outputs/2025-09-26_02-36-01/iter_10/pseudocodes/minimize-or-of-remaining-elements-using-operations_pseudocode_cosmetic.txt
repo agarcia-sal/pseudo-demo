@@ -1,0 +1,96 @@
+CLASS Solution
+	FUNCTION minOrAfterOperations(nums k)
+		FUNCTION canAchieve(target_or k)
+			PROCEDURE decrementCounter IFGT(x y out)
+				out := FALSE
+				IF x > y THEN
+					out := TRUE
+					x := x - 1
+				END IF
+			END PROCEDURE
+
+			PROCEDURE bitwiseAnd(a b out)
+				out := a AND b
+			END PROCEDURE
+
+			VARIABLE tempAnd <- -1
+			VARIABLE opsCount <- 0
+
+			PROCEDURE processNum(val)
+				IF tempAnd = -1 THEN
+					tempAnd := val
+				ELSE
+					bitwiseAnd(tempAnd val tempAnd)
+				END IF
+			END PROCEDURE
+	
+			PROCEDURE checkAndReset()
+				VARIABLE checkVal <- tempAnd AND target_or
+				IF checkVal = 0 THEN
+					tempAnd := -1
+					RETURN
+				END IF
+				opsCount := opsCount + 1
+				IF opsCount > k THEN
+					RETURN FALSE
+				END IF
+			END PROCEDURE
+
+			VARIABLE idx <- 0
+
+			WHILE TRUE
+				IF idx >= LENGTH(nums) THEN BREAK END IF
+				processNum(nums[idx])
+				VARIABLE cont <- checkAndReset()
+				IF cont = FALSE THEN RETURN FALSE END IF
+				idx := idx + 1
+			END WHILE
+
+			RETURN TRUE
+		END FUNCTION
+
+		PROCEDURE power(base exp out)
+			out := 1
+			VARIABLE i <- 0
+			WHILE i < exp
+				out := out * base
+				i := i + 1
+			END WHILE
+		END PROCEDURE
+
+		VARIABLE mxVal <- 0
+		power(2 30 mxVal)
+		mxVal := mxVal - 1
+
+		VARIABLE rsl <- mxVal
+
+		PROCEDURE inversion(x out)
+			out := NOT x
+		END PROCEDURE
+
+		PROCEDURE xorOp(a b out)
+			out := a XOR b
+		END PROCEDURE
+
+		VARIABLE pos <- 0
+		WHILE pos < 30
+			VARIABLE bMask <- 0
+			power(2 pos bMask)
+			IF (rsl AND bMask) = 0 THEN
+				pos := pos + 1
+				CONTINUE
+			END IF
+
+			VARIABLE invRsl <- 0
+			inversion(rsl invRsl)
+			VARIABLE xorVal <- 0
+			xorOp(invRsl bMask xorVal)
+			IF canAchieve(xorVal k) THEN
+				rsl := rsl AND (NOT bMask)
+			END IF
+			pos := pos + 1
+		END WHILE
+
+		RETURN rsl
+	END FUNCTION
+END CLASS

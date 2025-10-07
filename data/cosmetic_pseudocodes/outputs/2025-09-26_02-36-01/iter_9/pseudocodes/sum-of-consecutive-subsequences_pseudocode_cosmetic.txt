@@ -1,0 +1,63 @@
+CLASS Solution
+	Function getSum(arr)
+		Function auxiliary(seq)
+			CONST lengthVar ← LENGTH(seq)
+			VAR arrayOne ← ARRAY OF ZEROS WITH SIZE lengthVar
+			VAR arrayTwo ← ARRAY OF ZEROS WITH SIZE lengthVar
+			VAR dictionaryA ← NEW COUNTER()
+			
+			VAR index1 ← 1
+			While index1 < lengthVar
+				VAR key1 ← seq[index1 - 1]
+				VAR previousCount1 ← dictionaryA[key1] IF key1 IN dictionaryA ELSE 0
+				dictionaryA[key1] ← previousCount1 + 1
+				arrayOne[index1] ← dictionaryA[key1]
+				index1 ← index1 + 1
+			EndWhile
+
+			dictionaryA ← NEW COUNTER()
+			VAR index2 ← lengthVar - 2
+			REPEAT
+				VAR key2 ← seq[index2 + 1]
+				VAR previousCount2 ← dictionaryA[key2] IF key2 IN dictionaryA ELSE 0
+				dictionaryA[key2] ← previousCount2 + 1
+				arrayTwo[index2] ← dictionaryA[key2]
+				index2 ← index2 - 1
+			UNTIL index2 < 0
+
+			VAR accSum ← 0
+			VAR pos ← 0
+			WHILE pos < lengthVar
+				VAR val ← seq[pos]
+				VAR leftCount ← arrayOne[pos]
+				VAR rightCount ← arrayTwo[pos]
+				accSum ← accSum + ((leftCount + rightCount + leftCount * rightCount) * val)
+				pos ← pos + 1
+			ENDWHILE
+
+			RETURN accSum MODULO MODCONST
+		END Function
+
+		CONST MODCONST ← 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 + 7
+		VAR res1 ← auxiliary(arr)
+		VAR leftIndex ← 0
+		VAR rightIndex ← LENGTH(arr) - 1
+		WHILE leftIndex < rightIndex
+			VAR tempVal ← arr[leftIndex]
+			arr[leftIndex] ← arr[rightIndex]
+			arr[rightIndex] ← tempVal
+			leftIndex ← leftIndex + 1
+			rightIndex ← rightIndex - 1
+		ENDWHILE
+		VAR res2 ← auxiliary(arr)
+
+		VAR idxSum ← 0
+		VAR i ← 0
+		WHILE i < LENGTH(arr)
+			idxSum ← idxSum + arr[i]
+			i ← i + 1
+		ENDWHILE
+
+		RETURN (res1 + res2 + idxSum) MODULO MODCONST
+	END Function
+END CLASS

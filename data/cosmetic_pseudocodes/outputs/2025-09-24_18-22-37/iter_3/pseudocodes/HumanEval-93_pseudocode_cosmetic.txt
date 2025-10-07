@@ -1,0 +1,33 @@
+```
+FUNCTION encode(inputMessage)
+    DEFINE vowelSet AS "aeiouAEIOU"
+    DEFINE translationMap AS EMPTY MAP
+    FOR EACH ch IN vowelSet DO
+        SET translationMap[ch] = CHAR_CODE(ch) + 2 CONVERTED TO CHARACTER
+    END FOR
+
+    FUNCTION toggleCase(str)
+        IF str IS EMPTY THEN RETURN ""
+        LET firstChar = str[0]
+        LET restStr = str[1 TO END]
+        IF firstChar IS UPPERCASE THEN
+            RETURN TO_LOWER(firstChar) + toggleCase(restStr)
+        ELSE IF firstChar IS LOWERCASE THEN
+            RETURN TO_UPPER(firstChar) + toggleCase(restStr)
+        ELSE
+            RETURN firstChar + toggleCase(restStr)
+        END IF
+    END FUNCTION
+
+    SET swappedMessage = toggleCase(inputMessage)
+
+    FUNCTION translateCharacters(index, originalStr, map)
+        IF index >= LENGTH(originalStr) THEN RETURN ""
+        LET currentCharacter = originalStr[index]
+        LET replacementCharacter = IF currentCharacter IN map THEN map[currentCharacter] ELSE currentCharacter
+        RETURN replacementCharacter + translateCharacters(index + 1, originalStr, map)
+    END FUNCTION
+
+    RETURN translateCharacters(0, swappedMessage, translationMap)
+END FUNCTION
+```

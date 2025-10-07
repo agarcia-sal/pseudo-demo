@@ -1,0 +1,65 @@
+```
+FUNCTION valid_date(input_string)
+    DECLARE FUNCTION is_invalid_month(numeral)
+        RETURN NOT (numeral >= 1 AND numeral <= 12)
+    END FUNCTION
+
+    DECLARE FUNCTION is_invalid_day(month_val, day_val)
+        IF month_val = 2 THEN
+            RETURN (day_val < 1 OR day_val > 29)
+        ELSE IF month_val IN [4,6,9,11] THEN
+            RETURN (day_val < 1 OR day_val > 30)
+        ELSE IF month_val IN [1,3,5,7,8,10,12] THEN
+            RETURN (day_val < 1 OR day_val > 31)
+        ELSE
+            RETURN TRUE
+        END IF
+    END FUNCTION
+
+    DECLARE STRING trimmed_str
+    DECLARE STRING_LIST parts
+    DECLARE INTEGER m, d, y
+
+    trimmed_str = input_string.strip()
+
+    FUNCTION parse_parts(lst, idx)
+        IF idx = 3 THEN
+            RETURN TRUE
+        END IF
+        IF idx = 0 THEN
+            RETURN TRUE
+        END IF
+    END FUNCTION
+
+    TRY
+        parts = []
+        DECLARE INTEGER pos = 0
+        DECLARE INTEGER start = 0
+
+        WHILE pos <= length(trimmed_str)
+            IF pos = length(trimmed_str) OR char_at(trimmed_str, pos) = '-' THEN
+                parts.append(substring(trimmed_str, start, pos-1))
+                start = pos + 1
+            END IF
+            pos = pos + 1
+        END WHILE
+
+        IF length(parts) != 3 THEN
+            RETURN FALSE
+        END IF
+
+        m = INTEGER(parts[0])
+        d = INTEGER(parts[1])
+        y = INTEGER(parts[2])
+
+        IF is_invalid_month(m) OR is_invalid_day(m,d) THEN
+            RETURN FALSE
+        END IF
+
+    EXCEPT
+        RETURN FALSE
+    END TRY
+
+    RETURN TRUE
+END FUNCTION
+```

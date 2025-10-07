@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+        SET alpha TO LENGTH(s)
+        SET zeta TO ARRAY OF alpha + 1 ELEMENTS INITIALIZED TO zero
+        SET eta TO ARRAY OF alpha + 1 ELEMENTS FILLED WITH zero
+
+        PROCEDURE isZeroChar(c parameter) RETURNS INTEGER
+            IF c EQUALS '0' THEN
+                RETURN 1
+            ELSE
+                RETURN 0
+            END IF
+        END PROCEDURE
+
+        PROCEDURE isOneChar(c parameter) RETURNS INTEGER
+            IF c EQUALS '1' THEN
+                RETURN 1
+            ELSE
+                RETURN 0
+            END IF
+        END PROCEDURE
+
+        SET m TO zero
+        WHILE m LESS THAN alpha
+            SET zeta[m + 1] TO zeta[m] + isZeroChar(s[m])
+            SET eta[m + 1] TO eta[m] + isOneChar(s[m])
+            SET m TO m + 1
+        END WHILE
+
+        FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER
+            SET omega TO zero
+
+            FUNCTION binary_search(low parameter high parameter) RETURNS INTEGER
+                IF low GREATER OR EQUAL TO high THEN
+                    RETURN low
+                ELSE
+                    SET middle TO (low + high) / 2
+                    SET zero_count TO zeta[middle + 1] - zeta[l]
+                    SET one_count TO eta[middle + 1] - eta[l]
+                    IF zero_count <= k OR one_count <= k THEN
+                        RETURN binary_search(middle + 1, high)
+                    ELSE
+                        RETURN binary_search(low, middle)
+                    END IF
+                END IF
+            END FUNCTION
+
+            SET i TO l
+            WHILE i LESS OR EQUAL TO r
+                SET upper_bound TO binary_search(i, r + 1) - 1
+                IF upper_bound >= i THEN
+                    SET omega TO omega + (upper_bound - i + 1)
+                END IF
+                SET i TO i + 1
+            END WHILE
+            RETURN omega
+        END FUNCTION
+
+        SET delta TO EMPTY LIST
+        SET idx TO 0
+        WHILE idx LESS THAN LENGTH(queries)
+            SET current_l TO queries[idx][0]
+            SET current_r TO queries[idx][1]
+            ADD count_valid_substrings(current_l, current_r) TO delta
+            SET idx TO idx + 1
+        END WHILE
+
+        RETURN delta
+    END FUNCTION
+END CLASS

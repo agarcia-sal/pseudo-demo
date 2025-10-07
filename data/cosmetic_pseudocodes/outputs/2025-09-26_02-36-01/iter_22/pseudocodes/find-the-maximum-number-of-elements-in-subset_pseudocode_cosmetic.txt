@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION maximumLength(nums)
+        SET frequencyMap TO empty map
+        FOR each element IN nums DO
+            IF element EXISTS IN frequencyMap THEN
+                SET currentCount TO frequencyMap[element]
+                SET frequencyMap[element] TO currentCount PLUS 1
+            ELSE
+                SET frequencyMap[element] TO 1
+            END IF
+        END FOR
+
+        SET cacheMap TO empty map
+
+        FUNCTION helper(value)
+            SET isInFreq TO (value IN frequencyMap)
+            SET countValue TO 0
+            IF isInFreq THEN
+                SET countValue TO frequencyMap[value]
+            END IF
+
+            IF NOT isInFreq OR countValue LESS THAN 2 THEN
+                IF isInFreq AND countValue GREATER THAN OR EQUAL TO 1 THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            IF value IN cacheMap THEN
+                RETURN cacheMap[value]
+            END IF
+
+            SET nextValue TO value TIMES value
+            SET recursiveResult TO helper(nextValue)
+            SET cacheMap[value] TO recursiveResult PLUS 2
+            RETURN cacheMap[value]
+        END FUNCTION
+
+        SET maxLen TO 1
+
+        SET frequencyKeys TO list of keys in frequencyMap
+        SET idx TO 0
+        WHILE idx LESS THAN length of frequencyKeys DO
+            SET currentNum TO frequencyKeys[idx]
+            SET currentCount TO frequencyMap[currentNum]
+
+            IF currentNum EQUALS 1 THEN
+                SET adjustedCount TO currentCount MINUS 1 MINUS ((currentCount MOD 2) TIMES 2 DIV 2) TIMES 2
+                SET maxLen TO (maxLen GREATER THAN adjustedCount) ? maxLen : adjustedCount
+            ELSE
+                SET helperResult TO helper(currentNum)
+                SET maxLen TO (maxLen GREATER THAN helperResult) ? maxLen : helperResult
+            END IF
+
+            SET idx TO idx PLUS 1
+        END WHILE
+
+        RETURN maxLen
+    END FUNCTION
+END CLASS

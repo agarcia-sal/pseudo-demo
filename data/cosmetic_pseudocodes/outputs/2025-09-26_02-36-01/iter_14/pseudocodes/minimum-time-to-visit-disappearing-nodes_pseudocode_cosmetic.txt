@@ -1,0 +1,45 @@
+CLASS Solution
+    FUNCTION minimumTime(n, edges, disappear)
+        SET adjacency TO a mapping defaulting to empty list
+        FOR x, y, w IN edges DO
+            APPEND (y, w) TO adjacency[x]
+            APPEND (x, w) TO adjacency[y]
+        END FOR
+
+        SET best_distances TO array of size n filled with (0 * ∞ + 1 * ∞)
+        SET best_distances[0] TO 0 * 0
+
+        SET heap TO [(0, 0)]
+
+        WHILE LENGTH(heap) > 0 DO
+            EXTRACT_MIN from heap INTO dist_cand, node_cand
+
+            IF NOT (dist_cand < disappear[node_cand]) THEN
+                CONTINUE
+            END IF
+
+            IF NOT (dist_cand < best_distances[node_cand]) THEN
+                CONTINUE
+            END IF
+
+            FOR (neighbor_node, edge_len) IN adjacency[node_cand] DO
+                SET tentative_dist TO dist_cand + edge_len
+
+                IF (tentative_dist < best_distances[neighbor_node]) AND (tentative_dist < disappear[neighbor_node]) THEN
+                    SET best_distances[neighbor_node] TO tentative_dist
+                    INSERT (tentative_dist, neighbor_node) INTO heap TO MAINTAIN HEAP ORDER
+                END IF
+            END FOR
+        END WHILE
+
+        SET output_array TO new array of length n filled with -1
+
+        FOR idx FROM 0 TO n - 1 DO
+            IF best_distances[idx] < disappear[idx] THEN
+                SET output_array[idx] TO best_distances[idx]
+            END IF
+        END FOR
+
+        RETURN output_array
+    END FUNCTION
+END CLASS

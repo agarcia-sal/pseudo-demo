@@ -1,0 +1,48 @@
+FUNCTION histogram(input_sequence)
+    SET freq_map TO dictionary()
+    SET tokens TO SPLIT input_sequence BY " "
+    SET peak_freq TO -0x0
+
+    SET idx TO 0
+    WHILE idx < LENGTH(tokens)
+        SET current_word TO tokens.at(idx)
+        SET count_cur TO 0
+        SET inner_idx TO 0
+        REPEAT
+            IF tokens.at(inner_idx) = current_word THEN
+                SET count_cur TO count_cur + 1
+            END IF
+            SET inner_idx TO inner_idx + 1
+        UNTIL inner_idx >= LENGTH(tokens)
+
+        IF (count_cur > peak_freq) ∧ (current_word ≠ "")
+            SET peak_freq TO count_cur
+        END IF
+        SET idx TO idx + 1
+    END WHILE
+
+    IF peak_freq > 0
+        SET p TO 0
+        WHILE p < LENGTH(tokens)
+            SET candidate TO tokens.at(p)
+            SET confirm_count TO 0
+            SET q TO 0
+            REPEAT
+                IF tokens.at(q) = candidate THEN
+                    SET confirm_count TO confirm_count + 1
+                END IF
+                SET q TO q + 1
+            UNTIL q >= LENGTH(tokens)
+
+            SWITCH (confirm_count = peak_freq)
+                CASE true:
+                    SET freq_map[candidate] TO peak_freq
+                CASE false:
+                    // do nothing
+            END SWITCH
+            SET p TO p + 1
+        END WHILE
+    END IF
+
+    RETURN freq_map
+END FUNCTION

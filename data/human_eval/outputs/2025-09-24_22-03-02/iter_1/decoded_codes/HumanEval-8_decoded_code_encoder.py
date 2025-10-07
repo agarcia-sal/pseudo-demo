@@ -1,0 +1,7 @@
+def sum_product(numbers):
+    sum_val = 0
+    prod_val = 1
+    for n in numbers:
+        sum_val += n
+        prod_val *= n
+    return (sum_val, prod_val)

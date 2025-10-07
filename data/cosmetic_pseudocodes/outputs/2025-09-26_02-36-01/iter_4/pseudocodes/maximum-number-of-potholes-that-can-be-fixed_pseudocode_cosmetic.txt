@@ -1,0 +1,69 @@
+CLASS Solution  
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER  
+        DECLARE partitions AS LIST OF STRING  
+        ASSIGN partitions TO EMPTY LIST  
+        DECLARE tempString AS STRING  
+        ASSIGN tempString TO EMPTY STRING  
+        DECLARE idx AS INTEGER  
+        ASSIGN idx TO 1  
+        WHILE idx LESS THAN OR EQUAL TO LENGTH OF road DO  
+            IF road AT idx EQUALS '.' THEN  
+                APPEND tempString TO partitions  
+                ASSIGN tempString TO EMPTY STRING  
+            ELSE  
+                CONCATENATE road AT idx TO tempString  
+            END IF  
+            INCREMENT idx BY one  
+        END WHILE  
+        APPEND tempString TO partitions  
+        
+        DECLARE orderedSegments AS LIST OF STRING  
+        ASSIGN orderedSegments TO partitions  
+        FOR i FROM 1 TO LENGTH OF orderedSegments - 1 DO  
+            FOR j FROM i + 1 TO LENGTH OF orderedSegments DO  
+                IF LENGTH OF orderedSegments AT i GREATER THAN LENGTH OF orderedSegments AT j THEN  
+                    DECLARE swapTmp AS STRING  
+                    ASSIGN swapTmp TO orderedSegments AT i  
+                    ASSIGN orderedSegments AT i TO orderedSegments AT j  
+                    ASSIGN orderedSegments AT j TO swapTmp  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        DECLARE totalFixed AS INTEGER  
+        ASSIGN totalFixed TO 0  
+        DECLARE currentIndex AS INTEGER  
+        ASSIGN currentIndex TO 1  
+        WHILE currentIndex LESS THAN OR EQUAL TO LENGTH OF orderedSegments DO  
+            DECLARE segmentLength AS INTEGER  
+            ASSIGN segmentLength TO LENGTH OF orderedSegments AT currentIndex  
+            
+            IF NOT segmentLength EQUALS 0 THEN  
+                DECLARE requiredCost AS INTEGER  
+                ASSIGN requiredCost TO segmentLength - (-1)  
+                
+                IF requiredCost LESS THAN OR EQUAL TO budget THEN  
+                    totalFixed ASSIGN totalFixed + segmentLength  
+                    budget ASSIGN budget - requiredCost  
+                ELSE  
+                    DECLARE tempLength AS INTEGER  
+                    ASSIGN tempLength TO segmentLength  
+                    WHILE tempLength GREATER THAN 0 AND budget GREATER THAN 0 DO  
+                        DECLARE tempCost AS INTEGER  
+                        ASSIGN tempCost TO tempLength - (-1)  
+                        
+                        IF budget GREATER THAN OR EQUAL TO tempCost THEN  
+                            totalFixed ASSIGN totalFixed + tempLength  
+                            budget ASSIGN budget - tempCost  
+                            EXIT WHILE  
+                        END IF  
+                        tempLength ASSIGN tempLength - 1  
+                    END WHILE  
+                END IF  
+            END IF  
+            currentIndex ASSIGN currentIndex + 1  
+        END WHILE  
+        
+        RETURN totalFixed  
+    END FUNCTION  
+END CLASS

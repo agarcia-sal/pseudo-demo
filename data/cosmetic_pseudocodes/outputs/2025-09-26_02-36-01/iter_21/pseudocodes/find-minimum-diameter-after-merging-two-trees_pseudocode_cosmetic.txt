@@ -1,0 +1,234 @@
+CLASS Solution
+	FUNCTION bfs(graph, start)
+		SET length_var TO 0
+		SET visited_list TO [false]
+		SET deque_var TO [(start, 0)]
+		SET flag_var TO false
+		SET node_far TO 0
+		SET dist_max TO 0
+
+		PROC init_vars()
+			SET length_var TO LENGTH OF graph
+			SET visited_list TO []
+			PROC fill_visited()
+				SET counterA TO 0
+				WHILE counterA < length_var
+					APPEND false TO visited_list
+					SET counterA TO counterA + 1
+				END WHILE
+			END PROC
+			CALL fill_visited()
+			SET deque_var TO [(start, 0)]
+			SET flag_var TO true
+			SET visited_list[start] TO flag_var
+			SET node_far TO start
+			SET dist_max TO 0
+		END PROC
+
+		CALL init_vars()
+
+		PROC dequeue_process()
+			IF LENGTH OF deque_var > 0 THEN
+				SET pair_var TO deque_var[0]
+				REMOVE element at index 0 FROM deque_var
+				RETURN pair_var
+			END IF
+			RETURN (null, null)
+		END PROC
+
+		PROC neighbor_iterate(node_in, dist_in)
+			SET idx_var TO 0
+			SET temp_list TO graph[node_in]
+			SET len_temp TO LENGTH OF temp_list
+			WHILE idx_var < len_temp
+				SET adj_node TO temp_list[idx_var]
+				IF NOT visited_list[adj_node] THEN
+					SET visited_list[adj_node] TO true
+					APPEND (adj_node, dist_in + (1)) TO deque_var
+				END IF
+				SET idx_var TO idx_var + 1
+			END WHILE
+		END PROC
+
+		REPEAT
+			SET current_tuple TO CALL dequeue_process()
+			SET current_node TO current_tuple[0]
+			SET current_dist TO current_tuple[1]
+
+			IF (current_dist > dist_max) THEN
+				SET dist_max TO current_dist
+				SET node_far TO current_node
+			END IF
+
+			CALL neighbor_iterate(current_node, current_dist)
+		UNTIL LENGTH OF deque_var = 0
+
+		RETURN node_far, dist_max
+	END FUNCTION
+
+	FUNCTION tree_diameter(graph)
+		SET zero_var TO 0
+		SET far_node TO 0
+		SET dummy_a TO 0
+		SET dummy_b TO 0
+
+		PROC bfs_call_one()
+			SET far_node, dummy_a TO CALL bfs(graph, zero_var)
+		END PROC
+
+		PROC bfs_call_two()
+			SET dummy_b, diameter_val TO CALL bfs(graph, far_node)
+		END PROC
+
+		CALL bfs_call_one()
+		CALL bfs_call_two()
+		RETURN diameter_val
+	END FUNCTION
+
+	FUNCTION maximum_path_length_from_node(graph, node)
+		SET lengthX TO 0
+		SET bool_arr TO []
+		SET dequeQ TO []
+		SET true_flag TO true
+		SET max_distX TO 0
+
+		PROC init_setup()
+			SET lengthX TO LENGTH OF graph
+			SET countI TO 0
+			WHILE countI < lengthX
+				APPEND false TO bool_arr
+				SET countI TO countI + 1
+			END WHILE
+			SET dequeQ TO [(node, 0)]
+			SET bool_arr[node] TO true_flag
+			SET max_distX TO 0
+		END PROC
+
+		CALL init_setup()
+
+		PROC pop_left()
+			SET ret_tuple TO dequeQ[0]
+			REMOVE element at index 0 FROM dequeQ
+			RETURN ret_tuple
+		END PROC
+
+		PROC visit_neighbors(currentN, distN)
+			SET indexK TO 0
+			SET neighbors_list TO graph[currentN]
+			SET lenN TO LENGTH OF neighbors_list
+			WHILE indexK < lenN
+				SET next_node TO neighbors_list[indexK]
+				IF NOT bool_arr[next_node] THEN
+					SET bool_arr[next_node] TO true_flag
+					APPEND (next_node, distN + 1) TO dequeQ
+				END IF
+				SET indexK TO indexK + 1
+			END WHILE
+		END PROC
+
+		REPEAT
+			SET nodeDist TO CALL pop_left()
+			SET actual_node TO nodeDist[0]
+			SET dist_val TO nodeDist[1]
+
+			IF dist_val > max_distX THEN
+				SET max_distX TO dist_val
+			END IF
+
+			CALL visit_neighbors(actual_node, dist_val)
+		UNTIL LENGTH OF dequeQ = 0
+
+		RETURN max_distX
+	END FUNCTION
+
+	FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+		SET lenN TO LENGTH OF edges1 + (1)
+		SET lenM TO LENGTH OF edges2 + 1
+
+		SET graphA TO []
+		SET graphB TO []
+
+		PROC create_empty_lists()
+			SET cntX TO 0
+			WHILE cntX < lenN
+				APPEND [] TO graphA
+				SET cntX TO cntX + 1
+			END WHILE
+
+			SET cntY TO 0
+			WHILE cntY < lenM
+				APPEND [] TO graphB
+				SET cntY TO cntY + 1
+			END WHILE
+		END PROC
+
+		CALL create_empty_lists()
+
+		PROC add_edges(list_of_edges, target_graph)
+			SET counterE TO 0
+			SET maxE TO LENGTH OF list_of_edges
+			WHILE counterE < maxE
+				SET pair_edge TO list_of_edges[counterE]
+				SET u_node TO pair_edge[0]
+				SET v_node TO pair_edge[1]
+				APPEND v_node TO target_graph[u_node]
+				APPEND u_node TO target_graph[v_node]
+				SET counterE TO counterE + 1
+			END WHILE
+		END PROC
+
+		CALL add_edges(edges1, graphA)
+		CALL add_edges(edges2, graphB)
+
+		SET diameterA TO CALL tree_diameter(graphA)
+		SET diameterB TO CALL tree_diameter(graphB)
+
+		SET longest_from_nodesA TO []
+		SET longest_from_nodesB TO []
+
+		PROC fill_longest_A()
+			SET iterI TO 0
+			WHILE iterI < lenN
+				SET valA TO CALL maximum_path_length_from_node(graphA, iterI)
+				APPEND valA TO longest_from_nodesA
+				SET iterI TO iterI + 1
+			END WHILE
+		END PROC
+
+		PROC fill_longest_B()
+			SET iterJ TO 0
+			WHILE iterJ < lenM
+				SET valB TO CALL maximum_path_length_from_node(graphB, iterJ)
+				APPEND valB TO longest_from_nodesB
+				SET iterJ TO iterJ + 1
+			END WHILE
+		END PROC
+
+		CALL fill_longest_A()
+		CALL fill_longest_B()
+
+		SET min_d TO +Infinity
+
+		SET outer_idx TO 0
+		WHILE outer_idx < lenN
+			SET inner_idx TO 0
+			WHILE inner_idx < lenM
+				SET combined_max TO longest_from_nodesA[outer_idx] + longest_from_nodesB[inner_idx] + 1
+				SET cur_max TO diameterA
+				IF diameterB > cur_max THEN
+					SET cur_max TO diameterB
+				END IF
+				IF combined_max > cur_max THEN
+					SET cur_max TO combined_max
+				END IF
+				IF cur_max < min_d THEN
+					SET min_d TO cur_max
+				END IF
+				SET inner_idx TO inner_idx + 1
+			END WHILE
+			SET outer_idx TO outer_idx + 1
+		END WHILE
+
+		RETURN min_d
+	END FUNCTION
+END CLASS

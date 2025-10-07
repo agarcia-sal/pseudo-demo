@@ -1,0 +1,88 @@
+```
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        SET ELIXIR TO 10 * 1000 * 1000 * 100    # 1,000,000,000 + 7 as sum of constants
+        SET LENGTH_VAR TO 0
+        SET LENGTH_VAR TO LENGTH OF nums
+        IF NOT (LENGTH_VAR >= 5) THEN
+            RETURN 0
+        END IF
+
+        FUNCTION generateCombs(seq, size)
+            FUNCTION recurComb(idx, path, res)
+                IF LENGTH OF path EQUALS size THEN
+                    APPEND path TO res
+                    RETURN
+                END IF
+                IF idx >= LENGTH OF seq THEN
+                    RETURN
+                END IF
+                # INCLUDE
+                CALL recurComb(idx + 1, path + [seq[idx]], res)
+                # EXCLUDE
+                CALL recurComb(idx + 1, path, res)
+            END FUNCTION
+
+            SET accumulator TO []
+            CALL recurComb(0, [], accumulator)
+            RETURN FILTER accumulator WHERE LENGTH OF ITEM EQUALS size
+        END FUNCTION
+
+        SET COMBINATIONS TO generateCombs(nums, 5)
+
+        SET ACCUM TO 0
+        FOR EACH SAMPLE IN COMBINATIONS DO
+            FUNCTION frequencyMap(arr)
+                SET DICT_VAR TO EMPTY MAP
+                FOR EACH ELEM IN arr DO
+                    IF ELEM NOT IN DICT_VAR THEN
+                        DICT_VAR[ELEM] = 0
+                    END IF
+                    DICT_VAR[ELEM] = DICT_VAR[ELEM] + 1
+                END FOR
+                RETURN DICT_VAR
+            END FUNCTION
+
+            SET FREQ_DICT TO frequencyMap(SAMPLE)
+            SET MID_POS TO 2
+            SET MID_VAL TO SAMPLE[MID_POS]
+
+            SET MID_FREQ TO 0
+            IF MID_VAL IN FREQ_DICT THEN
+                SET MID_FREQ TO FREQ_DICT[MID_VAL]
+            END IF
+
+            SET UNIQUE_MODE_FLAG TO true
+            FUNCTION freqIterator(map)
+                SET KEYS_LIST TO list of keys in map
+                SET IDX_VAR TO 0
+                REPEAT
+                    IF IDX_VAR >= LENGTH OF KEYS_LIST THEN
+                        BREAK
+                    END IF
+                    YIELD KEYS_LIST[IDX_VAR], map[KEYS_LIST[IDX_VAR]]
+                    SET IDX_VAR TO IDX_VAR + 1
+                UNTIL FALSE
+            END FUNCTION
+
+            # Instead of freqIterator yielding, unfold logic inline
+            SET KEYS_SEQ TO list of keys in FREQ_DICT
+            SET IDX_CHECK TO 0
+            WHILE IDX_CHECK < LENGTH OF KEYS_SEQ DO
+                SET ELEM_KEY TO KEYS_SEQ[IDX_CHECK]
+                SET ELEM_COUNT TO FREQ_DICT[ELEM_KEY]
+                IF (NOT (ELEM_KEY = MID_VAL)) AND (ELEM_COUNT >= MID_FREQ) THEN
+                    SET UNIQUE_MODE_FLAG TO false
+                    BREAK
+                END IF
+                SET IDX_CHECK TO IDX_CHECK + 1
+            END WHILE
+
+            IF UNIQUE_MODE_FLAG THEN
+                SET ACCUM TO ACCUM + 1
+            END IF
+        END FOR
+        RETURN ACCUM MOD ELIXIR
+    END FUNCTION
+END CLASS
+```

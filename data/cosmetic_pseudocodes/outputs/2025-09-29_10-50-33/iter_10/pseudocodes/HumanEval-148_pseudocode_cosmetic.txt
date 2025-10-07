@@ -1,0 +1,38 @@
+FUNCTION bf(planet1, planet2) {
+    planet_catalog := ("Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune")
+    
+    EXECUTE {
+        IS_INVALID := (NOT (planet_catalog CONTAINS planet1)) OR (NOT (planet_catalog CONTAINS planet2))
+        OR (planet1 = planet2)
+    } UNTIL IS_INVALID = FALSE
+    IF IS_INVALID THEN 
+        INVOKE RETURN ()
+    ENDIF
+
+    planet1_pos := 0
+    planet2_pos := 0
+    indexer := 0
+    WHILE indexer < LENGTH(planet_catalog) DO
+        IF planet_catalog[indexer] = planet1 THEN planet1_pos := indexer ENDIF
+        IF planet_catalog[indexer] = planet2 THEN planet2_pos := indexer ENDIF
+        indexer := indexer + 1
+    ENDWHILE
+
+    IF planet1_pos < planet2_pos THEN
+        result_slice := ()
+        iterator := planet1_pos + 1
+        REPEAT UNTIL iterator = planet2_pos {
+            result_slice := result_slice + (planet_catalog[iterator])
+            iterator := iterator + 1
+        }
+        RETURN result_slice
+    ELSE
+        return_collection := ()
+        cursor := planet2_pos + 1
+        INVOKE WHILE cursor ≠ planet1_pos DO {
+            return_collection := return_collection + (planet_catalog[cursor])
+            cursor := cursor + 1
+        } ENDWHILE
+        RETURN return_collection
+    ENDIF
+}

@@ -1,0 +1,123 @@
+CLASS Solution
+   FUNCTION maxPathLength(coordinates, k)
+      SET pivotX TO coordinates[k][0]
+      SET pivotY TO coordinates[k][1]
+      
+      DEFINE helper_filterLeft(coords)
+         SET filtered TO empty list
+         SET idx TO 0
+         WHILE idx < LENGTH(coords)
+            SET currX TO coords[idx][0]
+            SET currY TO coords[idx][1]
+            IF (currX < pivotX)
+               AND NOT (currY >= pivotY)
+                  APPEND (currX, currY) TO filtered
+            END IF
+            SET idx TO idx + 1
+         END WHILE
+         RETURN filtered
+      END
+      
+      DEFINE helper_filterRight(coords)
+         SET acc TO empty list
+         SET i TO 0
+         REPEAT
+            IF i >= LENGTH(coords)
+               BREAK
+            END IF
+            SET valX TO coords[i][0]
+            SET valY TO coords[i][1]
+            IF valX > pivotX AND valY > pivotY
+               APPEND (valX, valY) TO acc
+            END IF
+            SET i TO i + 1
+         UNTIL FALSE
+         RETURN acc
+      END
+
+      SET leftSubset TO helper_filterLeft(coordinates)
+      SET rightSubset TO helper_filterRight(coordinates)
+
+      RETURN 1 + self._lengthOfLIS(leftSubset) + self._lengthOfLIS(rightSubset)
+   END FUNCTION
+
+
+   FUNCTION _lengthOfLIS(coordinates)
+      DEFINE cmpFunc(a, b)
+         IF a[0] = b[0]
+            RETURN b[1] - a[1]
+         ELSE
+            RETURN a[0] - b[0]
+         END IF
+      END
+
+      PROCEDURE _customSort(arr)
+         CALL _quickSort(arr, 0, LENGTH(arr) - 1)
+      END
+
+      FUNCTION _quickSort(arr, low, high)
+         IF low < high
+            SET p TO _partition(arr, low, high)
+            CALL _quickSort(arr, low, p - 1)
+            CALL _quickSort(arr, p + 1, high)
+         END IF
+      END
+
+      FUNCTION _partition(arr, low, high)
+         SET pivot TO arr[high]
+         SET i TO low - 1
+         SET j TO low
+         WHILE j < high
+            IF cmpFunc(arr[j], pivot) < 0
+               SET i TO i + 1
+               CALL _swap(arr, i, j)
+            END IF
+            SET j TO j + 1
+         END WHILE
+         CALL _swap(arr, i + 1, high)
+         RETURN i + 1
+      END
+      
+      PROCEDURE _swap(arr, a, b)
+         SET temp TO arr[a]
+         SET arr[a] TO arr[b]
+         SET arr[b] TO temp
+      END
+      
+      CALL _customSort(coordinates)
+
+      DEFINE helper_bisectLeft(arr, target)
+         SET left TO 0
+         SET right TO LENGTH(arr)
+         WHILE left < right
+            SET mid TO (left + right) // 2
+            IF arr[mid] < target
+               SET left TO mid + 1
+            ELSE
+               SET right TO mid
+            END IF
+         END WHILE
+         RETURN left
+      END
+
+      SET tailList TO empty list
+      DEFINE idx0 TO 0
+      WHILE idx0 < LENGTH(coordinates)
+         SET _unusedX TO coordinates[idx0][0]
+         SET currY TO coordinates[idx0][1]
+         IF tailList IS empty
+            APPEND currY TO tailList
+         ELSE
+            IF NOT (currY <= tailList[-1])
+               APPEND currY TO tailList
+            ELSE
+               SET replacerIdx TO helper_bisectLeft(tailList, currY)
+               SET tailList[replacerIdx] TO currY
+            END IF
+         END IF
+         SET idx0 TO idx0 + 1
+      END WHILE
+
+      RETURN LENGTH(tailList)
+   END FUNCTION
+END CLASS

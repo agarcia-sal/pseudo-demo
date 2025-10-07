@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION minimumSubarrayLength(warp LIST OF integers, threshold integer) RETURNS integer
+        FUNCTION adjustTicker(ticker LIST OF integers, figure integer, delta integer)
+            SET flag TO 1
+            SET counter TO 0
+            WHILE counter <= 31
+                IF (figure BITWISE-AND flag) != 0 THEN
+                    SET ticker[counter] TO ticker[counter] + delta
+                END IF
+                SET flag TO flag * 2
+                SET counter TO counter + 1
+            END WHILE
+        END FUNCTION
+
+        FUNCTION determineOr(ticker LIST OF integers) RETURNS integer
+            SET acc TO 0
+            SET idx TO 0
+            REPEAT
+                IF ticker[idx] > 0 THEN
+                    SET acc TO acc BITWISE-OR (1 LEFT-SHIFT idx)
+                END IF
+                SET idx TO idx + 1
+            UNTIL idx > 31
+            RETURN acc
+        END FUNCTION
+
+        SET total TO LENGTH OF warp
+        SET counterList TO [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        SET activeOr TO 0
+        SET startPos TO 0
+        SET bestLength TO 1/0
+
+        WHILE TRUE
+            SET endPos TO 0
+            WHILE endPos < total
+                CALL adjustTicker WITH counterList warp[endPos] 1
+                SET activeOr TO activeOr BITWISE-OR warp[endPos]
+
+                WHILE (activeOr >= threshold) AND (startPos <= endPos)
+                    IF bestLength > endPos - startPos + 1 THEN
+                        SET bestLength TO endPos - startPos + 1
+                    END IF
+                    CALL adjustTicker WITH counterList warp[startPos] (-1)
+                    SET activeOr TO determineOr(counterList)
+                    SET startPos TO startPos + 1
+                END WHILE
+                SET endPos TO endPos + 1
+            END WHILE
+            BREAK
+        END WHILE
+
+        IF bestLength = 1/0 THEN
+            RETURN -1
+        ELSE
+            RETURN bestLength
+        END IF
+    END FUNCTION
+END CLASS

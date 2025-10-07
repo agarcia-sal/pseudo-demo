@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION sumOfGoodSubsequences(nums)
+        DECLARE modulus AS 1000000007
+        DECLARE f_map AS map WITH default VALUE 0
+        DECLARE g_map AS map WITH default VALUE 0
+
+        DECLARE idx AS 0
+        WHILE idx < LENGTH(nums)
+            LET current_element BE nums[idx]
+
+            SET g_map[current_element] TO g_map[current_element] + 1
+            SET f_map[current_element] TO f_map[current_element] + current_element
+
+            LET prev_key1 BE current_element - 1
+            LET temp1 BE f_map[prev_key1]
+            LET temp2 BE g_map[prev_key1] * current_element
+            LET sum1 BE temp1 + temp2
+            SET f_map[current_element] TO f_map[current_element] + sum1
+            SET f_map[current_element] TO f_map[current_element] MODULUS modulus
+
+            SET g_map[current_element] TO g_map[current_element] + g_map[prev_key1]
+            SET g_map[current_element] TO g_map[current_element] MODULUS modulus
+
+            LET next_key1 BE current_element + 1
+            LET temp3 BE f_map[next_key1]
+            LET temp4 BE g_map[next_key1] * current_element
+            LET sum2 BE temp3 + temp4
+            SET f_map[current_element] TO f_map[current_element] + sum2
+            SET f_map[current_element] TO f_map[current_element] MODULUS modulus
+
+            SET g_map[current_element] TO g_map[current_element] + g_map[next_key1]
+            SET g_map[current_element] TO g_map[current_element] MODULUS modulus
+
+            INCREMENT idx BY 1
+        END WHILE
+
+        DECLARE accumulator AS 0
+        DECLARE values_iterator AS iterator OVER f_map VALUES
+        WHILE values_iterator HAS_NEXT()
+            LET val_being_processed = values_iterator NEXT()
+            SET accumulator TO accumulator + val_being_processed
+        END WHILE
+
+        LET final_answer BE accumulator MODULUS modulus
+        RETURN final_answer
+    END FUNCTION
+END CLASS

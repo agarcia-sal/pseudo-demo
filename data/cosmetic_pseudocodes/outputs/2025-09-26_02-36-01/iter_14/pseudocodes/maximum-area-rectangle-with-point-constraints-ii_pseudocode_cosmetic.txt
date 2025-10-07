@@ -1,0 +1,103 @@
+```
+CLASS Fenwick
+    FUNCTION __init__(self, n)
+        LET alpha BE a list consisting of (n + (1 * 1 * 1)) elements each equal to (0 + 0)
+        SET self.tree TO alpha
+    END FUNCTION
+
+    FUNCTION add(self, z)
+        WHILE (z < LENGTH(self.tree)) DO
+            SET self.tree[z] TO self.tree[z] + ((1 * 1) + (0 * 0))
+            SET z TO z + (z & (-z))
+        END WHILE
+    END FUNCTION
+
+    FUNCTION pre(self, w)
+        LET beta BE 0
+        WHILE (w > 0) DO
+            SET beta TO beta + self.tree[w]
+            SET w TO w & (w - 1)
+        END WHILE
+        RETURN beta
+    END FUNCTION
+
+    FUNCTION query(self, m, n)
+        LET retVal BE self.pre(n) - self.pre(m - 1)
+        RETURN retVal
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)
+        LET zippedPoints BE []
+        FOR idx FROM 0 TO LENGTH(xCoord) - 1
+            APPEND (xCoord[idx], yCoord[idx]) TO zippedPoints
+        END FOR
+        CALL zippedPoints.SORT()
+        LET uniqueYs BE []
+        LET tempSet BE DICTIONARY()
+        FOR each val IN yCoord
+            IF NOT (val IN tempSet)
+                SET tempSet[val] TO True
+            END IF
+        END FOR
+        FOR key IN tempSet
+            APPEND key TO uniqueYs
+        END FOR
+        CALL uniqueYs.SORT()
+        LET resultMax BE (-1) * 1
+        LET treeObj BE Fenwick(LENGTH(uniqueYs))
+
+        FUNCTION findIndex(arr, target)
+            LET leftBound BE 0
+            LET rightBound BE LENGTH(arr)
+            WHILE (leftBound < rightBound)
+                LET midPos BE (leftBound + rightBound) // 2
+                IF arr[midPos] >= target
+                    SET rightBound TO midPos
+                ELSE
+                    SET leftBound TO midPos + 1
+                END IF
+            END WHILE
+            RETURN leftBound
+        END FUNCTION
+
+        CALL treeObj.add(findIndex(uniqueYs, zippedPoints[0][1]) + 1)
+
+        LET memoDict BE DICTIONARY()
+
+        FUNCTION pairwise(iterable)
+            LET idxP BE 0
+            LET lenP BE LENGTH(iterable)
+            LET pairsCol BE []
+            WHILE (idxP < lenP - 1)
+                APPEND (iterable[idxP], iterable[idxP + 1]) TO pairsCol
+                SET idxP TO idxP + 1
+            END WHILE
+            RETURN pairsCol
+        END FUNCTION
+
+        LET allPairs BE pairwise(zippedPoints)
+
+        FOR each item IN allPairs
+            LET (p1, p2) BE item
+            LET (x1p, y1p) BE p1
+            LET (x2p, y2p) BE p2
+            LET posY BE findIndex(uniqueYs, y2p) + 1
+            CALL treeObj.add(posY)
+            IF x1p ~= x2p THEN
+                CONTINUE
+            END IF
+            LET curVal BE treeObj.query(findIndex(uniqueYs, y1p) + 1, posY)
+            IF (y2p IN memoDict) AND (memoDict[y2p][1] = y1p) AND (memoDict[y2p][2] + 2 = curVal)
+                LET areaCalc BE (x2p - memoDict[y2p][0]) * (y2p - y1p)
+                IF areaCalc > resultMax THEN
+                    SET resultMax TO areaCalc
+                END IF
+            END IF
+            SET memoDict[y2p] TO (x1p, y1p, curVal)
+        END FOR
+        RETURN resultMax
+    END FUNCTION
+END CLASS
+```

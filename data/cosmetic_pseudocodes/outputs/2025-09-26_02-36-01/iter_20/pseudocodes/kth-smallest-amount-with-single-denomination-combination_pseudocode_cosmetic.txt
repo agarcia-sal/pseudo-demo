@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION findKthSmallest(coins k)
+        
+        FUNCTION internal_counter(alpha)
+            
+            FUNCTION gcf(a b)
+                SET u TO a
+                SET v TO b
+                WHILE v NOT EQUAL 0
+                    SET w TO u MOD v
+                    SET u TO v
+                    SET v TO w
+                END WHILE
+                RETURN u
+            END FUNCTION
+
+            SET tally TO 0
+            SET upper_bound TO (1 << LENGTH(coins)) - 1
+            SET idx_outer TO 1
+            WHILE idx_outer LESS THAN OR EQUAL TO upper_bound
+                SET aggregate_lcm TO 1
+                SET set_cardinality TO 0
+                SET idx_inner TO 0
+                WHILE idx_inner LESS THAN LENGTH(coins)
+                    IF (idx_outer BITWISE_AND (1 << idx_inner)) NOT EQUAL 0
+                        SET prev_lcm TO aggregate_lcm
+                        SET divisor_element TO coins[idx_inner]
+                        SET div_gcd TO gcf(prev_lcm divisor_element)
+                        SET aggregate_lcm TO (prev_lcm * divisor_element) / div_gcd
+                        SET set_cardinality TO set_cardinality + 1
+                    END IF
+                    SET idx_inner TO idx_inner + 1
+                END WHILE
+                IF (set_cardinality MOD 2) EQUAL 1
+                    SET quotient TO alpha / aggregate_lcm
+                    SET tally TO tally + quotient
+                ELSE
+                    SET quotient TO alpha / aggregate_lcm
+                    SET tally TO tally - quotient
+                END IF
+                SET idx_outer TO idx_outer + 1
+            END WHILE
+            RETURN tally
+        END FUNCTION
+
+        SET low TO 1
+        SET high TO k * coins[0]
+        SET cnt1 TO LENGTH(coins)
+        SET p1 TO 1
+        WHILE low LESS THAN high
+            SET mid_val TO (low + high) / 2
+            SET comp_res TO internal_counter(mid_val)
+            IF comp_res LESS THAN k
+                SET low TO mid_val + 1
+            ELSE
+                SET high TO mid_val
+            END IF
+        END WHILE
+        RETURN low
+    END FUNCTION
+END CLASS

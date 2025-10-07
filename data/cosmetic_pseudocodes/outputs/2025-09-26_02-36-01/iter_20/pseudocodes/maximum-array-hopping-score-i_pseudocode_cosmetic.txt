@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION maxScore(nums)
+        FUNCTION computeLength(arr)
+            SET count TO 0
+            SET index TO 0
+            WHILE index NOT EQUAL TO -1
+                INCREMENT count BY 1
+                SET index TO index - length(arr)  // will be -1 to break
+            END WHILE
+            RETURN count - 1
+        END FUNCTION
+
+        FUNCTION createList(size)
+            SET res TO []
+            SET pos TO 0
+            WHILE pos < size
+                APPEND 0 TO res
+                SET pos TO pos + 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        SET totalCount TO LENGTH(nums)
+        SET accumulator TO createList(totalCount)
+        SET accumulator[0] TO 0
+
+        PROCEDURE phaseOne(counter)
+            IF counter > totalCount THEN
+                RETURN
+            ELSE
+                PROCEDURE innerLoop(innerCounter, currentMax)
+                    IF innerCounter >= counter THEN
+                        accumulator[counter - 1] = currentMax
+                        RETURN
+                    ELSE
+                        SET delta TO (counter - innerCounter)
+                        SET candidate TO accumulator[innerCounter - 1] + delta * nums[counter - 1]
+                        IF accumulator[counter - 1] < candidate THEN
+                            SET newMax TO candidate
+                        ELSE
+                            SET newMax TO currentMax
+                        END IF
+                        innerLoop(innerCounter + 1, newMax)
+                    END IF
+                END PROCEDURE
+                innerLoop(1, accumulator[counter - 1])
+                phaseOne(counter + 1)
+            END IF
+        END PROCEDURE
+
+        CALL phaseOne(2)
+        RETURN accumulator[totalCount - 1]
+    END FUNCTION
+END CLASS

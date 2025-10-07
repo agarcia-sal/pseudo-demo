@@ -1,0 +1,47 @@
+```
+FUNCTION sort_even(list_input)
+    FUNCTION recursive_zip(accumulator, list_a, list_b, index)
+        IF index >= LENGTH OF list_b THEN
+            RETURN accumulator
+        ELSE
+            SET concat_elements TO [list_a[index], list_b[index]]
+            APPEND ALL ELEMENTS OF concat_elements TO accumulator
+            RETURN recursive_zip(accumulator, list_a, list_b, index + 1)
+        END IF
+    END FUNCTION
+
+    SET temp_even TO EMPTY SEQUENTIAL COLLECTION
+    SET temp_odd TO EMPTY SEQUENTIAL COLLECTION
+    FOR position FROM 0 TO LENGTH OF list_input - 1 DO
+        ( (position MOD 2 == 0)
+          ? APPEND list_input[position] TO temp_even
+          : APPEND list_input[position] TO temp_odd )
+    END FOR
+
+    CALL sort_non_descending(temp_even)
+
+    SET result_sequence TO recursive_zip(EMPTY SEQUENTIAL COLLECTION, temp_even, temp_odd, 0)
+
+    SWITCH LENGTH OF temp_even > LENGTH OF temp_odd
+        CASE TRUE:
+            APPEND temp_even[LENGTH OF temp_even - 1] TO result_sequence
+        DEFAULT:
+            NO OPERATION
+    END SWITCH
+
+    RETURN result_sequence
+END FUNCTION
+
+
+FUNCTION sort_non_descending(collection)
+    FOR i FROM 0 TO LENGTH OF collection - 2 DO
+        FOR j FROM 0 TO LENGTH OF collection - 2 - i DO
+            IF collection[j] > collection[j + 1] THEN
+                SET temp_value TO collection[j]
+                SET collection[j] TO collection[j + 1]
+                SET collection[j + 1] TO temp_value
+            END IF
+        END FOR
+    END FOR
+END FUNCTION
+```

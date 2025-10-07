@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION countBalancedPermutations(num)
+        SET lunardex TO num
+
+        FUNCTION exploreDepth(idx, sumJ, valA, valB)
+            IF (idx - (9 + 1)) >= 0 THEN
+                RETURN NOT ((sumJ OR valA OR valB) != 0)
+            END IF
+
+            IF (valA = 0) AND NOT (sumJ = 0) THEN
+                RETURN 0
+            END IF
+
+            SET totalAns TO 0
+            SET maxLoop TO MINIMUM(cnt[idx], valA)
+            SET currentPos TO 0
+            WHILE currentPos <= maxLoop DO
+                SET remainingR TO cnt[idx] - currentPos
+                IF (remainingR >= 0) AND (remainingR <= valB) AND ((currentPos * idx) <= sumJ) THEN
+                    SET combA TO COMBINATION(valA, currentPos)
+                    SET combB TO COMBINATION(valB, remainingR)
+                    SET nextCall TO exploreDepth(idx + 1, sumJ - currentPos * idx, valA - currentPos, valB - remainingR)
+                    SET totalTmp TO combA * combB * nextCall
+                    totalAns = totalAns + totalTmp
+                END IF
+                SET currentPos TO currentPos + 1
+            END WHILE
+
+            RETURN totalAns MOD mod
+        END FUNCTION
+
+        FUNCTION COMBINATION(x, y)
+            // Placeholder for the combination calculation, assumed defined elsewhere
+        END FUNCTION
+
+        SET charList TO []
+        SET indexL TO 0
+        WHILE indexL < LENGTH(lunardex) DO
+            APPEND INTEGER(VALUE(lunardex[indexL])) TO charList
+            indexL = indexL + 1
+        END WHILE
+
+        SET sumS TO 0
+        FOR eachNum IN charList DO
+            SET sumS TO sumS + eachNum
+        END FOR
+
+        IF (sumS MOD 2) != 0 THEN
+            RETURN 0
+        END IF
+
+        SET lengthN TO LENGTH(charList)
+        SET mod TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+
+        FUNCTION COUNTER(arr)
+            SET freqMap TO {}
+            SET posX TO 0
+            WHILE posX < LENGTH(arr) DO
+                IF arr[posX] NOT IN freqMap THEN
+                    SET freqMap[arr[posX]] TO 0
+                END IF
+                SET freqMap[arr[posX]] TO freqMap[arr[posX]] + 1
+                SET posX TO posX + 1
+            END WHILE
+            RETURN freqMap
+        END FUNCTION
+
+        SET cnt TO COUNTER(charList)
+
+        RETURN exploreDepth(0, sumS / 2, lengthN / 2, (lengthN + 1) / 2)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,29 @@
+```
+FUNCTION encode(inputString)
+    CONST referenceVowels := ["a", "e", "i", "o", "u", "A", "E", "I", "O", "U"]
+    VAR mappingDict := EMPTY DICTIONARY
+    FOR EACH item IN referenceVowels DO
+        LET shiftedChar := CHARACTER(ASCII_CODE(item) + 2)
+        mappingDict[item] := shiftedChar
+    END FOR
+    LET toggledString := JOIN(FOR EACH symbol IN inputString PRODUCE
+                             IF LOWERCASE(symbol) = symbol THEN UPPERCASE(symbol)
+                             ELSE LOWERCASE(symbol))
+    VAR resultBuilder := EMPTY LIST
+    FUNCTION processCharacters(index)
+        IF index >= LENGTH(toggledString) THEN
+            RETURN
+        END IF
+        LET currentChar := toggledString[index]
+        LET replacementChar :=
+            IF currentChar IN referenceVowels THEN
+                mappingDict[currentChar]
+            ELSE
+                currentChar
+        APPEND replacementChar TO resultBuilder
+        processCharacters(index + 1)
+    END FUNCTION
+    processCharacters(0)
+    RETURN CONCATENATE(resultBuilder)
+END FUNCTION
+```

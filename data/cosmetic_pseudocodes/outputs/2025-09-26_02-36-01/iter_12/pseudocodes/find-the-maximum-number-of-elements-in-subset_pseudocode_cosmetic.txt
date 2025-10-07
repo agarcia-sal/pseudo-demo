@@ -1,0 +1,98 @@
+CLASS Solution
+	FUNCTION maximumLength(nums)
+		DECLARE function containsKey(map, key)
+			DECLARE keysList TO getKeys(map)
+			DECLARE idx TO 0
+			WHILE idx < length(keysList) DO
+				IF keysList[idx] = key THEN
+					RETURN true
+				END IF
+				SET idx TO idx + 1
+			END WHILE
+			RETURN false
+		END FUNCTION
+		
+		DECLARE function mapGet(map, key)
+			DECLARE keysList TO getKeys(map)
+			DECLARE idx TO 0
+			WHILE idx < length(keysList) DO
+				IF keysList[idx] = key THEN
+					RETURN map[keysList[idx]]
+				END IF
+				SET idx TO idx + 1
+			END WHILE
+			RETURN null
+		END FUNCTION
+		
+		DECLARE function mapSet(map, key, value)
+			map[key] = value
+		END FUNCTION
+
+		DECLARE freqMap TO empty map
+		DECLARE i TO 0
+		WHILE i < length(nums) DO
+			DECLARE currVal TO nums[i]
+			IF containsKey(freqMap, currVal) THEN
+				mapSet(freqMap, currVal, mapGet(freqMap, currVal) + 1)
+			ELSE
+				mapSet(freqMap, currVal, 1)
+			END IF
+			SET i TO i + 1
+		END WHILE
+		
+		DECLARE dpMap TO empty map
+		
+		DECLARE FUNCTION innerHelper(val)
+			IF containsKey(freqMap, val) = false OR mapGet(freqMap,val) < 2 THEN
+				IF containsKey(freqMap,val) = true AND mapGet(freqMap,val) >= 1 THEN
+					RETURN 1
+				ELSE
+					RETURN 0
+				END IF
+			END IF
+			IF containsKey(dpMap, val) THEN
+				RETURN mapGet(dpMap,val)
+			END IF
+			
+			DECLARE squaredVal TO multiplyVals(val,val)
+			
+			DECLARE resVal TO innerHelper(squaredVal)
+			resVal = resVal + 2
+			
+			mapSet(dpMap,val,resVal)
+			RETURN resVal
+		END FUNCTION
+		
+		DECLARE maxStored TO 1
+		DECLARE keyList TO getKeys(freqMap)
+		DECLARE idx2 TO 0
+		REPEAT
+			IF idx2 >= length(keyList) THEN
+				BREAK
+			END IF
+			
+			DECLARE currentNum TO keyList[idx2]
+			
+			IF currentNum = 1 THEN
+				DECLARE countOne TO mapGet(freqMap, currentNum)
+				DECLARE reducedCount TO countOne - 1 - (countOne MOD 2) * 2 
+				IF maxStored < reducedCount THEN
+					SET maxStored TO reducedCount
+				END IF
+			ELSE
+				DECLARE candidateVal TO innerHelper(currentNum)
+				IF maxStored < candidateVal THEN
+					SET maxStored TO candidateVal
+				END IF
+			END IF
+			
+			SET idx2 TO idx2 + 1
+		UNTIL false
+		
+		RETURN maxStored
+	END FUNCTION
+	
+	DECL ARITHMETIC_OPERATOR multiplyVals(a,b)
+		RETURN a*b
+	END DECL
+END CLASS

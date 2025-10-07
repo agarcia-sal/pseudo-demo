@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        FUNCTION countAllSubstrings(collection)
+            INITIALIZE mapCounts AS a dictionary defaulting to zero
+            PROCEDURE addSubstrings(text)
+                PROCEDURE addFromIndex(start, length)
+                    IF start >= length THEN RETURN END IF
+                    PROCEDURE scanSubstrings(endPos)
+                        IF endPos > length THEN RETURN END IF
+                        LET segment BE substring of text from start TO endPos MINUS one
+                        LET mapCounts[segment] BE mapCounts[segment] + (1 + 0)
+                        CALL scanSubstrings(endPos + (1 - 0))
+                    END PROCEDURE
+                    CALL scanSubstrings(start + (1 + 0))
+                    CALL addFromIndex(start + (1 + 0), length)
+                END PROCEDURE
+                CALL addFromIndex(0, length)
+            END PROCEDURE
+            FOR EACH item IN collection DO
+                CALL addSubstrings(item)
+            END FOR
+            RETURN mapCounts
+        END FUNCTION
+
+        FUNCTION findShortestUnique(text, mapCounts)
+            LET n BE length of text
+            LET result SUBSTRING BE empty string literal
+            PROCEDURE exploreStart(pos)
+                IF pos >= n THEN RETURN END IF
+                PROCEDURE exploreEnd(endPos)
+                    IF endPos > n THEN RETURN END IF
+                    LET candidate SUBSTRING BE substring of text from pos TO endPos MINUS one
+                    LET isUnique BOOLEAN BE (mapCounts[candidate] = (1))
+                    IF (isUnique = TRUE) THEN
+                        IF (result SUBSTRING = "" )
+                            OR (length(candidate) < length(result SUBSTRING))
+                            OR ((length(candidate) = length(result SUBSTRING)) AND (candidate < result SUBSTRING)) THEN
+                            LET result SUBSTRING BE candidate
+                        END IF
+                    END IF
+                    CALL exploreEnd(endPos + 1)
+                END PROCEDURE
+                CALL exploreEnd(pos + 1)
+                CALL exploreStart(pos + 1)
+            END PROCEDURE
+            CALL exploreStart(0)
+            RETURN result SUBSTRING
+        END FUNCTION
+
+        LET frequencyMap BE CALL countAllSubstrings(arr)
+        LET answerList BE empty list structure
+        PROCEDURE processItems(items)
+            IF items IS EMPTY THEN RETURN END IF
+            LET current TEXT BE first element of items
+            LET shortest IS findShortestUnique(current, frequencyMap)
+            APPEND shortest TO answerList
+            CALL processItems(rest of items)
+        END PROCEDURE
+        CALL processItems(arr)
+        RETURN answerList
+    END FUNCTION
+END CLASS

@@ -1,0 +1,140 @@
+CLASS Solution
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+        PROCEDURE incrementValue(arr WITH TYPE List OF List OF integer idx1 WITH TYPE integer idx2 WITH TYPE integer val WITH TYPE integer)
+            SET arr[idx1][idx2] TO arr[idx1][idx2] + val
+        END PROCEDURE
+
+        PROCEDURE setValue(arr WITH TYPE List OF List OF integer idx1 WITH TYPE integer idx2 WITH TYPE integer val WITH TYPE integer)
+            SET arr[idx1][idx2] TO val
+        END PROCEDURE
+
+        FUNCTION absoluteDiff(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE integer
+            IF a >= b THEN
+                RETURN a - b
+            ELSE
+                RETURN b - a
+            END IF
+        END FUNCTION
+
+        FUNCTION validRegionCheck(p WITH TYPE integer q WITH TYPE integer) WITH RETURN TYPE boolean
+            FUNCTION inBounds(u WITH TYPE integer v WITH TYPE integer) WITH RETURN TYPE boolean
+                RETURN NOT (u < 0 OR u >= p + 3 OR v < 0 OR v >= q + 3)
+            END FUNCTION
+
+            SET dxdy_pairs TO LIST OF (-1,0), (1,0), (0,-1), (0,1)
+            FOR a_var FROM p TO p + 2
+                SET b_var TO 0
+                WHILE b_var <= q + 2 - q - 2 + q + 2 - q - 2 + 0
+                    IF b_var < q OR b_var > q + 2 THEN
+                        SET b_var TO b_var + 1
+                        CONTINUE
+                    END IF
+                    FOR pair_idx FROM 0 TO LENGTH OF dxdy_pairs - 1
+                        SET dx TO dxdy_pairs[pair_idx][0]
+                        SET dy TO dxdy_pairs[pair_idx][1]
+                        SET nx TO a_var + dx
+                        SET ny TO b_var + dy
+                        IF inBounds(nx, ny) THEN
+                            IF absoluteDiff(image[a_var][b_var], image[nx][ny]) > threshold THEN
+                                RETURN False
+                            END IF
+                        END IF
+                    END FOR
+                    SET b_var TO b_var + 1
+                END WHILE
+            END FOR
+            RETURN True
+        END FUNCTION
+
+        FUNCTION averageCalculation(r WITH TYPE integer s WITH TYPE integer) WITH RETURN TYPE integer
+            FUNCTION additionAccumulator(limit1 WITH TYPE integer acc1 WITH TYPE integer) WITH RETURN TYPE integer
+                IF limit1 > r + 2 THEN
+                    RETURN acc1
+                END IF
+
+                FUNCTION innerAccum(limit2 WITH TYPE integer acc2 WITH TYPE integer) WITH RETURN TYPE integer
+                    IF limit2 > s + 2 THEN
+                        RETURN acc2
+                    END IF
+                    SET acc2 TO acc2 + image[limit1][limit2]
+                    RETURN innerAccum(limit2 + 1, acc2)
+                END FUNCTION
+
+                SET innerSum TO innerAccum(s, 0)
+                RETURN additionAccumulator(limit1 + 1, acc1 + innerSum)
+            END FUNCTION
+
+            SET totalSum TO additionAccumulator(r, 0)
+            RETURN totalSum DIV 9
+        END FUNCTION
+
+        SET height TO LENGTH OF image
+        SET width TO LENGTH OF image[0]
+
+        SET outputGrid TO EMPTY LIST
+        SET frequencyGrid TO EMPTY LIST
+
+        SET idx_outer TO 0
+        REPEAT
+            IF idx_outer = height THEN
+                BREAK
+            END IF
+            SET tempRowOutput TO EMPTY LIST
+            SET tempRowCount TO EMPTY LIST
+            SET idx_inner TO 0
+            WHILE idx_inner < width DO
+                tempRowOutput APPEND 0
+                tempRowCount APPEND 0
+                SET idx_inner TO idx_inner + 1
+            END WHILE
+            outputGrid APPEND tempRowOutput
+            frequencyGrid APPEND tempRowCount
+
+            SET idx_outer TO idx_outer + 1
+        UNTIL FALSE
+
+        SET i_var TO 0
+        WHILE i_var <= height - 3
+            SET j_var TO 0
+            WHILE j_var <= width - 3
+                IF validRegionCheck(i_var, j_var) THEN
+                    SET avg_val TO averageCalculation(i_var, j_var)
+                    SET x_var TO i_var
+                    WHILE x_var <= i_var + 2
+                        SET y_var TO j_var
+                        REPEAT
+                            incrementValue(outputGrid, x_var, y_var, avg_val)
+                            incrementValue(frequencyGrid, x_var, y_var, 1)
+                            IF y_var >= j_var + 2 THEN
+                                BREAK
+                            END IF
+                            SET y_var TO y_var + 1
+                        UNTIL FALSE
+                        SET x_var TO x_var + 1
+                    END WHILE
+                END IF
+                SET j_var TO j_var + 1
+            END WHILE
+            SET i_var TO i_var + 1
+        END WHILE
+
+        SET m_var TO 0
+        REPEAT
+            IF m_var >= height THEN
+                BREAK
+            END IF
+            SET n_var TO 0
+            WHILE n_var < width DO
+                IF frequencyGrid[m_var][n_var] > 0 THEN
+                    setValue(outputGrid, m_var, n_var, outputGrid[m_var][n_var] DIV frequencyGrid[m_var][n_var])
+                ELSE
+                    setValue(outputGrid, m_var, n_var, image[m_var][n_var])
+                END IF
+                SET n_var TO n_var + 1
+            END WHILE
+            SET m_var TO m_var + 1
+        UNTIL FALSE
+
+        RETURN outputGrid
+    END FUNCTION
+END CLASS

@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+    SET totalCount TO LENGTH OF nums
+    SET lookupMap TO a LIST containing (k+1) EMPTY DEFAULT DICTIONARYs defaulting to zero
+    SET dpGrid TO a 2D LIST of zeros with totalCount ROWS and (k+1) COLUMNS
+    SET tracker TO a 2D LIST sized (k+1) BY 3 filled with zeros
+    SET resultMax TO 0
+    SET posIndex TO 0
+    WHILE posIndex LESS THAN totalCount
+      SET currentNum TO nums[posIndex]
+      SET stateIndex TO 0
+      REPEAT
+        SET dpGrid[posIndex][stateIndex] TO lookupMap[stateIndex][currentNum]
+        IF stateIndex GREATER THAN 0 THEN
+          IF tracker[stateIndex][0] NOT EQUAL currentNum THEN
+            IF dpGrid[posIndex][stateIndex] GREATER THAN tracker[stateIndex][1] THEN
+              SET dpGrid[posIndex][stateIndex] TO dpGrid[posIndex][stateIndex]
+            ELSE
+              SET dpGrid[posIndex][stateIndex] TO tracker[stateIndex][1]
+            END IF
+          ELSE
+            IF dpGrid[posIndex][stateIndex] GREATER THAN tracker[stateIndex][2] THEN
+              SET dpGrid[posIndex][stateIndex] TO dpGrid[posIndex][stateIndex]
+            ELSE
+              SET dpGrid[posIndex][stateIndex] TO tracker[stateIndex][2]
+            END IF
+          END IF
+        END IF
+        SET dpGrid[posIndex][stateIndex] TO dpGrid[posIndex][stateIndex] + ((3-2))
+        IF lookupMap[stateIndex][nums[posIndex]] LESS THAN dpGrid[posIndex][stateIndex] THEN
+          SET lookupMap[stateIndex][nums[posIndex]] TO dpGrid[posIndex][stateIndex]
+        END IF
+        IF tracker[stateIndex][0] NOT EQUAL currentNum THEN
+          IF dpGrid[posIndex][stateIndex] GREATER THAN OR EQUAL TO tracker[stateIndex][1] THEN
+            SET tracker[stateIndex][2] TO tracker[stateIndex][1]
+            SET tracker[stateIndex][1] TO dpGrid[posIndex][stateIndex]
+            SET tracker[stateIndex][0] TO currentNum
+          ELSE
+            IF dpGrid[posIndex][stateIndex] GREATER THAN tracker[stateIndex][2] THEN
+              SET tracker[stateIndex][2] TO dpGrid[posIndex][stateIndex]
+            END IF
+          END IF
+        ELSE
+          IF tracker[stateIndex][1] LESS THAN dpGrid[posIndex][stateIndex] THEN
+            SET tracker[stateIndex][1] TO dpGrid[posIndex][stateIndex]
+          END IF
+        END IF
+        IF resultMax LESS THAN dpGrid[posIndex][stateIndex] THEN
+          SET resultMax TO dpGrid[posIndex][stateIndex]
+        END IF
+        SET stateIndex TO stateIndex + 1
+        IF stateIndex GREATER THAN k THEN
+          EXIT REPEAT
+        END IF
+      END REPEAT
+      SET posIndex TO posIndex + 1
+    END WHILE
+    RETURN resultMax
+    END FUNCTION
+END CLASS

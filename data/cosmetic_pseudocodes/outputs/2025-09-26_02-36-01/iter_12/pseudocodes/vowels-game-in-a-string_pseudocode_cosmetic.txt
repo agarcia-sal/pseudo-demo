@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION doesAliceWin(s)
+        FUNCTION containVowel(c)
+            RETURN equalsAny(c, vowelsSet)
+        END FUNCTION
+
+        FUNCTION equalsAny(ch, set)
+            FOR idx FROM 0 TO lengthOf(set) - 1
+                IF set[idx] = ch THEN
+                    RETURN true
+                END IF
+            END FOR
+            RETURN false
+        END FUNCTION
+
+        FUNCTION lengthOf(arr)
+            count <- 0
+            REPEAT
+                EXIT WHEN arr[count] IS UNDEFINED
+                count <- count + 1
+            UNTIL false
+            RETURN count
+        END FUNCTION
+
+        vowelsSet <- {"o", "a", "u", "i", "e"}
+
+        accCount <- 0
+
+        FUNCTION scanVowels(arrayStr, index, total)
+            IF index >= lengthOf(arrayStr) THEN
+                RETURN total
+            ELSE
+                charac <- arrayStr[index]
+                increment <- 0
+                IF containVowel(charac) THEN
+                    increment <- 1
+                END IF
+                RETURN scanVowels(arrayStr, index + 1, total + increment)
+            END IF
+        END FUNCTION
+
+        accCount <- scanVowels(s, 0, 0)
+
+        toggleState <- false
+        segmentCounter <- 0
+        tempCount <- accCount
+
+        FUNCTION processSegments(inputStr, position, state, count, segments)
+            IF position >= lengthOf(inputStr) THEN
+                IF state = true THEN
+                    rem <- count MOD 2
+                    IF rem = 1 THEN
+                        RETURN segments + 1
+                    ELSE
+                        RETURN segments
+                    END IF
+                ELSE
+                    RETURN segments
+                END IF
+            ELSE
+                currentChar <- inputStr[position]
+                newState <- state
+                ifVowel <- containVowel(currentChar)
+                IF ifVowel THEN
+                    newState <- NOT state
+                END IF
+
+                updatedSegments <- segments
+                updatedCount <- count
+                
+                IF (newState = false) AND ((count MOD 2) = 1) THEN
+                    updatedSegments <- segments + 1
+                    updatedCount <- 0
+                ELSE IF newState = true THEN
+                    updatedCount <- count + 1
+                END IF
+
+                RETURN processSegments(inputStr, position + 1, newState, updatedCount, updatedSegments)
+            END IF
+        END FUNCTION
+
+        segmentCounter <- processSegments(s, 0, toggleState, tempCount, 0)
+
+        RETURN (segmentCounter MOD 2) = 1
+    END FUNCTION
+END CLASS

@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION answerString(word, numFriends)
+        DECLARE countFriends := numFriends
+        DECLARE inputWord := word
+        IF countFriends = 1 THEN
+            RETURN inputWord
+        END IF
+        DECLARE lastSub := CALL _lastSubstring WITH inputWord
+        DECLARE limit := (LENGTH(inputWord) - countFriends) + 1
+        DECLARE endIndex := (LENGTH(lastSub) < limit) ? LENGTH(lastSub) : limit
+        RETURN SUBSTRING(lastSub FROM 1 TO endIndex)
+    END FUNCTION
+
+    FUNCTION _lastSubstring(s)
+        DECLARE firstIndex := 0
+        DECLARE secondIndex := 1
+        DECLARE offset := 0
+        DECLARE strLength := LENGTH(s)
+        
+        WHILE TRUE
+            IF (secondIndex + offset) >= strLength THEN
+                BREAK
+            END IF
+
+            DECLARE charAtFirst := s[firstIndex + offset + 1]
+            DECLARE charAtSecond := s[secondIndex + offset + 1]
+
+            IF charAtFirst = charAtSecond THEN
+                offset := offset + 1
+                CONTINUE
+            END IF
+
+            IF charAtFirst > charAtSecond THEN
+                secondIndex := secondIndex + offset + 1
+                offset := 0
+                CONTINUE
+            END IF
+
+            firstIndex := MAX(firstIndex + offset + 1, secondIndex)
+            secondIndex := firstIndex + 1
+            offset := 0
+        END WHILE
+
+        RETURN SUBSTRING(s FROM firstIndex + 1)
+    END FUNCTION
+END CLASS

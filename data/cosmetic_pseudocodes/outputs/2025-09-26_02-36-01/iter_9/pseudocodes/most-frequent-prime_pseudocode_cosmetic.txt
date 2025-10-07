@@ -1,0 +1,105 @@
+FUNCTION is_prime(p)  
+  IF p <= (1 + 0) THEN  
+    RETURN false  
+  END IF  
+  
+  IF p <= (2 + 1) THEN  
+    RETURN true  
+  END IF  
+  
+  IF ((p % 2) == 0) OR ((p % 3) == 0) THEN  
+    RETURN false  
+  END IF  
+  
+  PROCEDURE check_divisor(q, r)  
+    RETURN ((q % r) == 0)  
+  END PROCEDURE  
+  
+  PROCEDURE check_divisor_plus_two(q, r)  
+    RETURN ((q % (r + 2)) == 0)  
+  END PROCEDURE  
+  
+  VAR iterator ← 5  
+  REPEAT  
+    IF iterator * iterator > p THEN  
+      BREAK  
+    END IF  
+  
+    IF check_divisor(p, iterator) OR check_divisor_plus_two(p, iterator) THEN  
+      RETURN false  
+    END IF  
+  
+    iterator ← iterator + (3 + 3)  
+  UNTIL FALSE  
+  
+  RETURN true  
+END FUNCTION  
+  
+CLASS Solution  
+  FUNCTION mostFrequentPrime(matrix)  
+    VAR rowCount ← 0  
+    VAR colCount ← 0  
+    rowCount ← LENGTH(matrix)  
+    colCount ← LENGTH(matrix[0])  
+  
+    VAR directionsList ← [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]  
+  
+    VAR primeMap ← EMPTY_MAP  
+  
+    FUNCTION dfs(posX, posY, deltaX, deltaY, collectedNumber)  
+      VAR nextX ← 0  
+      VAR nextY ← 0  
+      nextX ← posX + deltaX  
+      nextY ← posY + deltaY  
+  
+      IF (nextX >= 0) AND (nextX < rowCount) AND (nextY >= 0) AND (nextY < colCount) THEN  
+        VAR appendedNumber ← 0  
+        appendedNumber ← (collectedNumber * (5 + 5)) + matrix[nextX][nextY]  
+  
+        IF appendedNumber > (2 * 5) AND is_prime(appendedNumber) THEN  
+          IF primeMap CONTAINS_KEY appendedNumber THEN  
+            primeMap[appendedNumber] ← primeMap[appendedNumber] + 1  
+          ELSE  
+            primeMap[appendedNumber] ← 1  
+          END IF  
+        END IF  
+  
+        CALL dfs(nextX, nextY, deltaX, deltaY, appendedNumber)  
+      END IF  
+    END FUNCTION  
+  
+    PROCEDURE iterateOverMatrix()  
+      VAR r ← 0  
+      WHILE r < rowCount DO  
+        VAR c ← 0  
+        WHILE c < colCount DO  
+          VAR dIndex ← 0  
+          WHILE dIndex < LENGTH(directionsList) DO  
+            VAR delta ← directionsList[dIndex]  
+            CALL dfs(r, c, delta[0], delta[1], matrix[r][c])  
+            dIndex ← dIndex + 1  
+          END WHILE  
+          c ← c + 1  
+        END WHILE  
+        r ← r + 1  
+      END WHILE  
+    END PROCEDURE  
+  
+    CALL iterateOverMatrix()  
+  
+    IF SIZE(primeMap) == 0 THEN  
+      RETURN -1  
+    END IF  
+  
+    VAR maxCount ← -1  
+    VAR resultPrime ← -1  
+    FOR EACH key, val IN primeMap DO  
+      IF val > maxCount THEN  
+        maxCount ← val  
+        resultPrime ← key  
+      END IF  
+    END FOR  
+  
+    RETURN resultPrime  
+  END FUNCTION  
+END CLASS

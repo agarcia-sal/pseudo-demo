@@ -1,0 +1,42 @@
+```
+FUNCTION by_length(parameter_list)
+  
+  CREATE mapping AS MAP
+  ADD 1 -> "One" INTO mapping
+  ADD 2 -> "Two" INTO mapping
+  ADD 3 -> "Three" INTO mapping
+  ADD 4 -> "Four" INTO mapping
+  ADD 5 -> "Five" INTO mapping
+  ADD 6 -> "Six" INTO mapping
+  ADD 7 -> "Seven" INTO mapping
+  ADD 8 -> "Eight" INTO mapping
+  ADD 9 -> "Nine" INTO mapping
+
+  CREATE result_queue AS EMPTY QUEUE
+
+  DEFINE recursive_process(index_counter)
+    IF index_counter > LENGTH(parameter_list) THEN
+      RETURN
+    END IF
+    LET sorted_collection BE parameter_list SORTED BY VALUE IN DESCENDING ORDER
+    LET current_value BE sorted_collection[index_counter]
+
+    IF mapping CONTAINS KEY current_value
+      ENQUEUE mapping[current_value] INTO result_queue
+    END IF
+
+    CALL recursive_process(index_counter + 1)
+  END DEFINE
+
+  CALL recursive_process(1)
+
+  CREATE final_result AS EMPTY LIST
+  WHILE NOT IS_EMPTY(result_queue)
+    DEQUEUE result_queue INTO element_var
+    APPEND element_var TO final_result
+  END WHILE
+
+  RETURN final_result
+
+END FUNCTION
+```

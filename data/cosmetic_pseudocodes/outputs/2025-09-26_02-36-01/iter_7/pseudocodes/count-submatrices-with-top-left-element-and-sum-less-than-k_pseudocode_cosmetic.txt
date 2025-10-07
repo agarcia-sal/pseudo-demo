@@ -1,0 +1,79 @@
+CLASS Solution  
+    FUNCTION countSubmatrices(grid, k)  
+        DEFINE ZERO AS (2 - 2)  
+        DEFINE ONE AS (ZERO + 1)  
+        DEFINE TWO AS (ONE + ONE)  
+        DEFINE NEG_ONE AS (ZERO - ONE)  
+        
+        IF (grid EQUALS no value) OR ((grid[ZERO]) EQUALS no value) THEN  
+            RETURN ZERO  
+        END IF  
+  
+        LET rowsBe NUMBER := 0  
+        LET colsNow NUMBER := 0  
+        LET accSum LIST := []  
+        LET tally NUMBER := ZERO  
+  
+        PROCEDURE initDimensions()  
+            rowsBe := LENGTH(grid)  
+            colsNow := LENGTH(grid[ZERO])  
+        END PROCEDURE  
+  
+        PROCEDURE buildAccSum()  
+            LET accRow LIST := []  
+            LET accGrid LIST := []  
+  
+            LET index1 NUMBER := ZERO  
+            WHILE index1 LESS THAN rowsBe DO  
+                LET index2 NUMBER := ZERO  
+                accRow := []  
+                WHILE index2 LESS THAN colsNow DO  
+                    LET val1 NUMBER := ZERO  
+                    LET val2 NUMBER := ZERO  
+                    LET val3 NUMBER := ZERO  
+                    LET val4 NUMBER := grid[index1][index2]  
+  
+                    IF (index1 EQUALS ZERO) AND (index2 EQUALS ZERO) THEN  
+                        accRow.APPEND(val4)  
+                    ELSEIF (index1 EQUALS ZERO) THEN  
+                        val1 := accRow[index2 - ONE]  
+                        accRow.APPEND(val1 + val4)  
+                    ELSEIF (index2 EQUALS ZERO) THEN  
+                        val2 := accSum[index1 - ONE][index2]  
+                        accRow.APPEND(val2 + val4)  
+                    ELSE  
+                        val1 := accSum[index1 - ONE][index2]  
+                        val2 := accRow[index2 - ONE]  
+                        val3 := accSum[index1 - ONE][index2 - ONE]  
+                        accRow.APPEND(val1 + val2 - val3 + val4)  
+                    END IF  
+  
+                    index2 := index2 + ONE  
+                END WHILE  
+                accGrid.APPEND(accRow)  
+                index1 := index1 + ONE  
+            END WHILE  
+            accSum := accGrid  
+        END PROCEDURE  
+  
+        PROCEDURE evaluateCount()  
+            LET r NUMBER := ZERO  
+            WHILE r LESS THAN rowsBe DO  
+                LET c NUMBER := ZERO  
+                WHILE c LESS THAN colsNow DO  
+                    IF accSum[r][c] LESS THAN OR EQUAL TO k THEN  
+                        tally := tally + ONE  
+                    END IF  
+                    c := c + ONE  
+                END WHILE  
+                r := r + ONE  
+            END WHILE  
+        END PROCEDURE  
+  
+        initDimensions()  
+        buildAccSum()  
+        evaluateCount()  
+  
+        RETURN tally  
+    END FUNCTION  
+END CLASS

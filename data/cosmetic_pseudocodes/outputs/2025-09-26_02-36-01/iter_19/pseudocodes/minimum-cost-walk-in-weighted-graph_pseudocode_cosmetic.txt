@@ -1,0 +1,87 @@
+CLASS UnionFind
+    FUNCTION __init__(self, n)
+   SET self.parent TO empty list
+   SET indexTracker TO 0
+   WHILE indexTracker LESS THAN n DO
+       APPEND indexTracker TO self.parent
+       SET indexTracker TO indexTracker PLUS 1
+   END WHILE
+   SET self.rank TO empty list
+   SET countRepeat TO 0
+   WHILE countRepeat LESS THAN n DO
+        APPEND 1 TO self.rank
+        SET countRepeat TO countRepeat PLUS 1
+   END WHILE
+    END FUNCTION
+
+    FUNCTION find(self, x)
+   SET holder TO self.parent[x]
+   IF holder NOT EQUAL x THEN
+       SET holder TO self.find(holder)
+       SET self.parent[x] TO holder
+   END IF
+   RETURN holder
+    END FUNCTION
+
+    FUNCTION union(self, a, b)
+   SET rootA TO self.find(a)
+   SET rootB TO self.find(b)
+   IF rootA EQUALS rootB THEN
+       RETURN
+   END IF
+   SET rankA TO self.rank[rootA]
+   SET rankB TO self.rank[rootB]
+   IF rankA GREATER THAN rankB THEN
+       SET self.parent[rootB] TO rootA
+   ELSE
+       IF rankB GREATER THAN rankA THEN
+           SET self.parent[rootA] TO rootB
+       ELSE
+           SET self.parent[rootB] TO rootA
+           SET self.rank[rootA] TO rankA PLUS 1
+       END IF
+   END IF
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION minimumCost(self, n, edges, query)
+   SET uf TO UnionFind(n)
+
+   SET MAX_MASK TO ((1 LEFT SHIFT 32) MINUS 1)
+   SET bitwiseFilters TO new list of length n where each element IS MAX_MASK
+
+   FOR EACH triple u, v, w IN edges DO
+       CALL uf.union(u, v)
+       SET compRoot TO uf.find(u)
+       SET bitwiseFilters[compRoot] TO bitwiseFilters[compRoot] BITWISE AND w
+   END FOR
+
+   SET recordedCosts TO empty dictionary
+   SET iteratorIndex TO 0
+   WHILE iteratorIndex LESS THAN n DO
+       SET rootVal TO uf.find(iteratorIndex)
+       IF recordedCosts DOES NOT CONTAIN rootVal THEN
+           SET recordedCosts[rootVal] TO bitwiseFilters[rootVal]
+       END IF
+       SET iteratorIndex TO iteratorIndex PLUS 1
+   END WHILE
+
+   SET finalResults TO empty list
+   FOR EACH pair s, t IN query DO
+       IF s EQUALS t THEN
+           APPEND 0 TO finalResults
+       ELSE
+           SET rootS TO uf.find(s)
+           SET rootT TO uf.find(t)
+           IF rootS EQUALS rootT THEN
+               APPEND recordedCosts[rootS] TO finalResults
+           ELSE
+               APPEND -1 TO finalResults
+           END IF
+       END IF
+   END FOR
+
+   RETURN finalResults
+    END FUNCTION
+END CLASS

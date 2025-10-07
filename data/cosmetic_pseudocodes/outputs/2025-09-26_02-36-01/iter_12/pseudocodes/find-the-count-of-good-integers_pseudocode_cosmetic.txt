@@ -1,0 +1,167 @@
+CLASS Solution  
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer  
+        PROCEDURE replicateFactorials(limit integer, accum list)  
+            IF limit < 0 THEN  
+                RETURN  
+            END IF  
+            CALL replicateFactorials(limit - 1, accum)  
+            SET calc TO 1  
+            SET idx TO 1  
+            WHILE idx <= limit  
+                SET calc TO calc * idx  
+                SET idx TO idx + 1  
+            END WHILE  
+            APPEND calc TO accum  
+        END PROCEDURE
+
+        SET factorials TO empty list  
+        CALL replicateFactorials(n, factorials)  
+
+        SET totalCount TO 0  
+        SET observedPatterns TO empty set  
+
+        FUNCTION powerOfTen(exp integer) RETURNS integer  
+            SET result TO 1  
+            SET counter TO 0  
+            WHILE counter < exp  
+                SET result TO result * 10  
+                SET counter TO counter + 1  
+            END WHILE  
+            RETURN result  
+        END FUNCTION
+
+        SET halfIndex TO (n - 1) DIV 2  
+        SET startNumber TO powerOfTen(halfIndex)  
+
+        SET upperBound TO startNumber * 10 - 1  
+
+        SET currentNum TO startNumber  
+
+        WHILE currentNum <= upperBound  
+            SET originalStr TO ""  
+            SET tempNum TO currentNum  
+            WHILE tempNum > 0  
+                SET digitChar TO CHAR((tempNum MOD 10) + ASC('0'))  
+                SET originalStr TO digitChar + originalStr  
+                SET tempNum TO tempNum DIV 10  
+            END WHILE  
+            IF originalStr = "" THEN  
+                SET originalStr TO "0"  
+            END IF  
+
+            FUNCTION reverseString(s string) RETURNS string  
+                SET reversed TO ""  
+                SET pos TO LENGTH(s) - 1  
+                WHILE pos >= 0  
+                    SET reversed TO reversed + s[pos]  
+                    SET pos TO pos - 1  
+                END WHILE  
+                RETURN reversed  
+            END FUNCTION
+
+            SET revStr TO reverseString(originalStr)  
+            SET suffixStart TO n MOD 2  
+
+            SET suffixStr TO ""  
+            SET idxSuf TO suffixStart  
+            WHILE idxSuf < LENGTH(revStr)  
+                SET suffixStr TO suffixStr + revStr[idxSuf]  
+                SET idxSuf TO idxSuf + 1  
+            END WHILE
+
+            SET fullStr TO originalStr + suffixStr  
+
+            FUNCTION stringToInteger(st string) RETURNS integer  
+                SET resNum TO 0  
+                SET idxConv TO 0  
+                WHILE idxConv < LENGTH(st)  
+                    SET resNum TO resNum * 10 + (ASC(st[idxConv]) - ASC('0'))  
+                    SET idxConv TO idxConv + 1  
+                END WHILE  
+                RETURN resNum  
+            END FUNCTION
+
+            IF stringToInteger(fullStr) MOD k <> 0 THEN  
+                SET currentNum TO currentNum + 1  
+                CONTINUE WHILE  
+            END IF  
+
+            FUNCTION sortStringCharacters(input string) RETURNS string  
+                SET arrChars TO []  
+                SET posStr TO 0  
+                WHILE posStr < LENGTH(input)  
+                    APPEND input[posStr] TO arrChars  
+                    SET posStr TO posStr + 1  
+                END WHILE  
+                SET changed TO TRUE  
+                WHILE changed  
+                    SET changed TO FALSE  
+                    SET posSort TO 0  
+                    WHILE posSort < LENGTH(arrChars) - 1  
+                        IF arrChars[posSort] > arrChars[posSort + 1] THEN  
+                            SET tempChar TO arrChars[posSort]  
+                            SET arrChars[posSort] TO arrChars[posSort + 1]  
+                            SET arrChars[posSort + 1] TO tempChar  
+                            SET changed TO TRUE  
+                        END IF  
+                        SET posSort TO posSort + 1  
+                    END WHILE  
+                END WHILE  
+                SET resultStr TO ""  
+                SET recIdx TO 0  
+                WHILE recIdx < LENGTH(arrChars)  
+                    SET resultStr TO resultStr + arrChars[recIdx]  
+                    SET recIdx TO recIdx + 1  
+                END WHILE  
+                RETURN resultStr  
+            END FUNCTION
+
+            SET sortedStr TO sortStringCharacters(fullStr)  
+
+            IF observedPatterns CONTAINS sortedStr THEN  
+                SET currentNum TO currentNum + 1  
+                CONTINUE WHILE  
+            END IF  
+
+            ADD sortedStr TO observedPatterns  
+
+            FUNCTION countCharacters(s string) RETURNS map of char to integer  
+                SET countMap TO empty map  
+                SET posMap TO 0  
+                WHILE posMap < LENGTH(s)  
+                    SET ch TO s[posMap]  
+                    IF countMap HAS ch THEN  
+                        SET countMap[ch] TO countMap[ch] + 1  
+                    ELSE  
+                        SET countMap[ch] TO 1  
+                    END IF  
+                    SET posMap TO posMap + 1  
+                END WHILE  
+                RETURN countMap  
+            END FUNCTION
+
+            SET charCounts TO countCharacters(sortedStr)  
+
+            SET lengthN TO n  
+            SET zeroChar TO '0'  
+            SET factorialValue TO 0  
+
+            IF charCounts HAS zeroChar AND charCounts[zeroChar] > 0 THEN  
+                SET partResult TO lengthN - charCounts[zeroChar]  
+                SET factorialValue TO partResult * factorials[lengthN - 1]  
+            ELSE  
+                SET factorialValue TO factorials[lengthN]  
+            END IF  
+
+            FOR EACH key IN charCounts KEYS DO  
+                SET factorialValue TO factorialValue DIV factorials[charCounts[key]]  
+            END FOR  
+
+            SET totalCount TO totalCount + factorialValue  
+
+            SET currentNum TO currentNum + 1  
+        END WHILE  
+
+        RETURN totalCount  
+    END FUNCTION  
+END CLASS

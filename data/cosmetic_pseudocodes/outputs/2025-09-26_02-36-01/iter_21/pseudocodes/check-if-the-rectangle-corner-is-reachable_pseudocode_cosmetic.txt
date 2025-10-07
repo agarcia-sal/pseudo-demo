@@ -1,0 +1,118 @@
+CLASS Solution
+	Function canReachCorner(xCorner yCorner circles)
+		
+		Function circle_contains_point(a b c d e)
+			# Check if point (a,b) is inside circle centered at (c,d) with radius e
+			set temp1 TO a - c
+			set temp2 TO temp1 * temp1
+			set temp3 TO b - d
+			set temp4 TO temp3 * temp3
+			set lhs TO temp2 + temp4
+			set rhs TO e * e
+			return lhs <= rhs
+		End Function
+		
+		Function check_left_top_wall(c d e)
+			set cond1_part1 TO (abs(c) <= e)
+			set cond1_part2 TO (0 <= d)
+			set cond1_part3 TO (d <= yCorner)
+			set cond1 TO cond1_part1 and cond1_part2 and cond1_part3
+			
+			set cond2_part1 TO (abs(d - yCorner) <= e)
+			set cond2_part2 TO (0 <= c)
+			set cond2_part3 TO (c <= xCorner)
+			set cond2 TO cond2_part1 and cond2_part2 and cond2_part3
+			return cond1 or cond2
+		End Function
+		
+		Function check_right_bottom_wall(c d e)
+			set cond1_part1 TO (abs(c - xCorner) <= e)
+			set cond1_part2 TO (0 <= d)
+			set cond1_part3 TO (d <= yCorner)
+			set cond1 TO cond1_part1 and cond1_part2 and cond1_part3
+			
+			set cond2_part1 TO (abs(d) <= e)
+			set cond2_part2 TO (0 <= c)
+			set cond2_part3 TO (c <= xCorner)
+			set cond2 TO cond2_part1 and cond2_part2 and cond2_part3
+			return cond1 or cond2
+		End Function
+		
+		Function explore(index)
+			set x_val TO circles[index][0]
+			set y_val TO circles[index][1]
+			set radius_val TO circles[index][2]
+			
+			if check_right_bottom_wall(x_val y_val radius_val)
+				return True
+			endif
+			
+			set vis[index] TO True
+			
+			set k TO 0
+			repeat_until k >= length_of(circles)
+				set x2_val TO circles[k][0]
+				set y2_val TO circles[k][1]
+				set radius2_val TO circles[k][2]
+				
+				if vis[k] = True
+					set skip_flag TO True
+				else
+					set dx TO x_val - x2_val
+					set dy TO y_val - y2_val
+					set dist_sq TO dx*dx + dy*dy
+					set rad_sum TO radius_val + radius2_val
+					set rad_sum_sq TO rad_sum * rad_sum
+					if dist_sq > rad_sum_sq
+						set skip_flag TO True
+					else
+						set skip_flag TO False
+					endif
+				endif
+				
+				if skip_flag
+					set k TO k + 1
+					continue
+				endif
+				
+				set cond_x TO ( x_val * radius2_val + x2_val * radius_val ) < ( rad_sum * xCorner )
+				set cond_y TO ( y_val * radius2_val + y2_val * radius_val ) < ( rad_sum * yCorner )
+				if cond_x and cond_y and explore(k)
+					return True
+				endif
+				set k TO k + 1
+			end_repeat_until
+			
+			return False
+		End Function
+		
+		set vis TO []
+		set counter TO 0
+		repeat_until counter >= length_of(circles)
+			append vis with False
+			set counter TO counter + 1
+		end_repeat_until
+		
+		set idx TO 0
+		repeat_until idx >= length_of(circles)
+			set cx TO circles[idx][0]
+			set cy TO circles[idx][1]
+			set cr TO circles[idx][2]
+			
+			if circle_contains_point(0 0 cx cy cr) or circle_contains_point(xCorner yCorner cx cy cr)
+				return False
+			endif
+			
+			if vis[idx] = False
+				if check_left_top_wall(cx cy cr)
+					if explore(idx)
+						return False
+					endif
+				endif
+			endif
+			set idx TO idx + 1
+		end_repeat_until
+		
+		return True
+	End Function
+END CLASS

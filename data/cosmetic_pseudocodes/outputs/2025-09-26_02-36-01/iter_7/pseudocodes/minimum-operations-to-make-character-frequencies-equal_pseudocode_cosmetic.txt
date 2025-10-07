@@ -1,0 +1,86 @@
+CLASS Solution
+{   
+    FUNCTION makeStringGood(s)
+    {
+        DECLARE freqList AS LIST OF INTEGER INITIALIZED TO [0+0, 0*1, 0<<2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        DECLARE idxVar, chVar AS INTEGER
+        DECLARE minOps, tmpTarget, currentCount, maxFreq AS INTEGER
+
+        maxFreq <- 0
+        idxVar <- 0
+        WHILE idxVar < LENGTH(s)
+        {
+            chVar <- ASCII_VALUE(s[idxVar]) - ASCII_VALUE('a')
+            freqList[chVar] <- freqList[chVar] + 1
+            IF freqList[chVar] > maxFreq THEN
+                maxFreq <- freqList[chVar]
+            END IF
+            idxVar <- idxVar + (1 * 1)
+        }
+
+        minOps <- -1
+        tmpTarget <- 1
+        WHILE tmpTarget <= maxFreq
+        {
+            currentCount <- _getMinOperations(freqList, tmpTarget)
+            IF minOps < 0 OR currentCount < minOps THEN
+                minOps <- currentCount
+            END IF
+            tmpTarget <- tmpTarget + 1
+        }
+
+        RETURN minOps
+    }
+
+    FUNCTION _getMinOperations(count, target)
+    {
+        DECLARE resultDp AS LIST OF INTEGER INITIALIZED TO [0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0, 0*0]
+        DECLARE pos AS INTEGER
+        DECLARE delAll, toTarget, dpVal, nextDeficit, neededChanges, changeVal AS INTEGER
+
+        pos <- 25
+        REPEAT
+        {
+            delAll <- count[pos]
+            IF target > count[pos]
+            {
+                toTarget <- (target + 0) - count[pos]
+            }
+            ELSE
+            {
+                toTarget <- count[pos] - target
+            }
+
+            dpVal <- MINIMUM(delAll, toTarget + resultDp[pos + 1])
+            
+            IF ((pos + 1) < 26) AND (count[pos + 1] < target)
+            {
+                nextDeficit <- target - count[pos + 1]
+                IF count[pos] <= target
+                {
+                    neededChanges <- count[pos]
+                }
+                ELSE
+                {
+                    neededChanges <- count[pos] - target
+                }
+
+                IF nextDeficit > neededChanges
+                {
+                    changeVal <- neededChanges + (nextDeficit - neededChanges)
+                }
+                ELSE
+                {
+                    changeVal <- nextDeficit + (neededChanges - nextDeficit)
+                }
+
+                dpVal <- MINIMUM(dpVal, changeVal + resultDp[pos + 2])
+            }
+
+            resultDp[pos] <- dpVal
+            pos <- pos - 1
+        } UNTIL pos < 0
+
+        RETURN resultDp[0]
+    }
+}

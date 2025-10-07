@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION sumOfPower(nums parameter, k parameter)
+        SET ConstantMod TO 1E9 + 7 
+        
+        SET lengthVal TO LENGTH OF nums
+        
+        FUNCTION CloneList(size1, size2)
+            SET res TO []
+            SET outerCounter TO 0
+            WHILE outerCounter < size1 + 1
+                SET innerList TO []
+                SET innerCounter TO 0
+                WHILE innerCounter < size2 + 1
+                    APPEND 0 TO innerList
+                    SET innerCounter TO innerCounter + 1
+                END WHILE
+                APPEND innerList TO res
+                SET outerCounter TO outerCounter + 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+        
+        SET matrixDp TO CloneList(lengthVal, k)
+        SET matrixDp[0][0] TO 1
+        
+        FUNCTION AddModulo(a value, b value)
+            RETURN (a + b) % ConstantMod
+        END FUNCTION
+        
+        SET iIndex TO 1
+        WHILE iIndex <= lengthVal
+            SET jIndex TO 0
+            WHILE jIndex <= k
+                SET tempVal TO matrixDp[iIndex - 1][jIndex]
+                IF jIndex >= nums[iIndex - 1] THEN
+                    SET tempVal TO AddModulo(tempVal, matrixDp[iIndex - 1][jIndex - nums[iIndex - 1]])
+                END IF
+                SET matrixDp[iIndex][jIndex] TO tempVal
+                SET jIndex TO jIndex + 1
+            END WHILE
+            SET iIndex TO iIndex + 1
+        END WHILE
+        
+        FUNCTION BitIsSet(numValue, posValue)
+            RETURN ((numValue >> posValue) & 1) == 1
+        END FUNCTION
+        
+        SET finalPower TO 0
+        SET upperLimit TO (2 ^ lengthVal) - 1
+        
+        SET maskIndex TO 1
+        WHILE maskIndex <= upperLimit
+            SET sumCurrent TO 0
+            SET bitsCount TO 0
+            SET bitPos TO 0
+            WHILE bitPos < lengthVal
+                IF BitIsSet(maskIndex, bitPos) THEN
+                    SET sumCurrent TO sumCurrent + nums[bitPos]
+                    SET bitsCount TO bitsCount + 1
+                END IF
+                SET bitPos TO bitPos + 1
+            END WHILE
+            
+            IF sumCurrent == k THEN
+                SET additionVal TO (2 ^ (lengthVal - bitsCount)) % ConstantMod
+                SET finalPower TO (finalPower + additionVal) % ConstantMod
+            END IF
+            
+            SET maskIndex TO maskIndex + 1
+        END WHILE
+        
+        RETURN finalPower
+    END FUNCTION
+END CLASS

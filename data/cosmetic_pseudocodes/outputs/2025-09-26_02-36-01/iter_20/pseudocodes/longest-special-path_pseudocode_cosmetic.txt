@@ -1,0 +1,97 @@
+CLASS Solution  
+    FUNCTION longestSpecialPath(edges, nums)  
+        DECLARE graph AS list OF lists INITIALIZED TO EMPTY  
+        DECLARE idxX AS INTEGER  
+        DECLARE idxY AS INTEGER  
+        DECLARE valZ AS INTEGER  
+        DECLARE tempA AS INTEGER  
+        DECLARE tempB AS INTEGER  
+        DECLARE tailR AS INTEGER  
+        DECLARE limL AS INTEGER  
+        DECLARE currLen AS INTEGER  
+        DECLARE currNodes AS INTEGER  
+        DECLARE vtxR AS INTEGER  
+        DECLARE wgtS AS INTEGER  
+        DECLARE tempStack AS list OF INTEGER  
+        
+        PROCEDURE buildGraphHelper(a, b, c)  
+            APPEND [b, c] TO graph[a]  
+            APPEND [a, c] TO graph[b]  
+        END PROCEDURE  
+        
+        tempA = 0  
+        WHILE tempA < LENGTH(nums)  
+            APPEND EMPTY list TO graph  
+            tempA = tempA + 1  
+        END WHILE  
+        
+        FOR idxX = 0 TO LENGTH(edges) - 1  
+            idxY = edges[idxX][0]  
+            valZ = edges[idxX][1]  
+            tempB = edges[idxX][2]  
+            buildGraphHelper(idxY, valZ, tempB)  
+        END FOR  
+        
+        DECLARE maxLength AS INTEGER  
+        DECLARE minNodes AS INTEGER  
+        DECLARE prefix AS list OF INTEGER  
+        DECLARE lastSeenDepth AS DICTIONARY  
+        
+        maxLength = 0  
+        minNodes = 1  
+        prefix = [0]  
+        lastSeenDepth = {}  
+        
+        PROCEDURE dfs(node, previous, limit, depth)  
+            DECLARE priorDepth AS INTEGER  
+            DECLARE neighbor AS INTEGER  
+            DECLARE weightEdge AS INTEGER  
+            DECLARE tempVar1 AS INTEGER  
+            DECLARE tempVar2 AS INTEGER  
+            
+            IF node IN lastSeenDepth THEN  
+                priorDepth = lastSeenDepth[node]  
+            ELSE  
+                priorDepth = 0  
+            END IF  
+            
+            lastSeenDepth[node] = depth  
+            
+            IF limit < priorDepth THEN  
+                limit = priorDepth  
+            END IF  
+            
+            tempVar1 = prefix[LENGTH(prefix) - 1]  
+            tempVar2 = prefix[limit]  
+            currLen = tempVar1 - tempVar2  
+            currNodes = depth - limit  
+            
+            IF (currLen > maxLength) OR ((currLen = maxLength) AND (currNodes < minNodes)) THEN  
+                maxLength = currLen  
+                minNodes = currNodes  
+            END IF  
+            
+            DECLARE i AS INTEGER  
+            i = 0  
+            WHILE i < LENGTH(graph[node])  
+                neighbor = graph[node][i][0]  
+                weightEdge = graph[node][i][1]  
+                IF neighbor = previous THEN  
+                    i = i + 1  
+                    CONTINUE  
+                ELSE  
+                    APPEND prefix[LENGTH(prefix) - 1] + weightEdge TO prefix  
+                    CALL dfs(neighbor, node, limit, depth + 1)  
+                    REMOVE prefix[LENGTH(prefix) - 1]  
+                    i = i + 1  
+                END IF  
+            END WHILE  
+            
+            lastSeenDepth[node] = priorDepth  
+        END PROCEDURE  
+        
+        CALL dfs(0, -1, 0, 1)  
+        
+        RETURN [maxLength, minNodes]  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,104 @@
+```pseudocode
+CLASS Solution
+	FUNCTION countOfPairs(dataList)
+		DEFINE CONSTANT BASE_MOD = 1_000_000_000 + 7
+		DEFINE totalCount = LENGTH OF dataList
+		DEFINE highestValue = MAXIMUM value IN dataList
+		
+		DEFINE table AS ARRAY OF LENGTH totalCount
+		FOR idx FROM 0 TO totalCount - 1
+			table[idx] = ARRAY OF LENGTH (highestValue + 1)
+			FOR x FROM 0 TO highestValue
+				table[idx][x] = ARRAY OF LENGTH (highestValue + 1) FILLED WITH 0
+			END FOR
+		END FOR
+		
+		DEFINE procedure InitializeRow(index)
+			DEFINE helperLoop(value)
+				IF value > dataList[0] THEN
+					RETURN
+				END IF
+				DEFINE complement = dataList[0] - value
+				table[index][value][complement] = 1
+				helperLoop(value + 1)
+			END
+			helperLoop(0)
+		END PROCEDURE
+		
+		InitializeRow(0)
+		
+		DEFINE FUNCTION processIndex(current)
+			IF current >= totalCount THEN
+				RETURN
+			END IF
+			DEFINE val = dataList[current]
+			
+			DEFINE procedure outerLoop(jVal)
+				IF jVal > val THEN
+					RETURN
+				END IF
+				DEFINE kVal = val - jVal
+				
+				DEFINE procedure middleLoop(jPrev)
+					IF jPrev > jVal THEN
+						RETURN
+					END IF
+					
+					DEFINE procedure innerLoop(kPrev)
+						IF kPrev > highestValue THEN
+							RETURN
+						END IF
+						
+						table[current][jVal][kVal] = table[current][jVal][kVal] + table[current - 1][jPrev][kPrev]
+						IF table[current][jVal][kVal] >= BASE_MOD THEN
+							table[current][jVal][kVal] = table[current][jVal][kVal] - BASE_MOD
+						END IF
+						
+						innerLoop(kPrev + 1)
+					END
+					innerLoop(kVal)
+					
+					middleLoop(jPrev + 1)
+				END
+				middleLoop(0)
+				
+				outerLoop(jVal + 1)
+			END
+			outerLoop(0)
+			
+			processIndex(current + 1)
+		END FUNCTION
+		
+		processIndex(1)
+		
+		DEFINE accumulator = 0
+		
+		DEFINE procedure sumJudgments(xPos)
+			IF xPos > highestValue THEN
+				RETURN
+			END IF
+			
+			DEFINE procedure sumK(kPos)
+				IF kPos > highestValue THEN
+					RETURN
+				END IF
+				
+				IF (xPos + kPos) = dataList[totalCount - 1] THEN
+					accumulator = accumulator + table[totalCount - 1][xPos][kPos]
+					IF accumulator >= BASE_MOD THEN
+						accumulator = accumulator - BASE_MOD
+					END IF
+				END IF
+				
+				sumK(kPos + 1)
+			END
+			sumK(0)
+			
+			sumJudgments(xPos + 1)
+		END
+		sumJudgments(0)
+		
+		RETURN accumulator
+	END FUNCTION
+END CLASS
+```

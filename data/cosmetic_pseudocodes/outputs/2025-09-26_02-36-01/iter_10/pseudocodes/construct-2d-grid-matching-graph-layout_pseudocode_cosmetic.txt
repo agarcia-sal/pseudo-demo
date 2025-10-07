@@ -1,0 +1,108 @@
+CLASS Solution
+	FUNCTION constructGridLayout(n, edges)
+		DEFINE FUNCTION make_adj(m, links)
+			LET container BE list()
+			FOR i FROM 0 TO m - 1 DO
+				APPEND container WITH list()
+			END FOR
+			DEFINE PROCEDURE add_edge(p, q)
+				APPEND container[p] WITH q
+				APPEND container[q] WITH p
+			END PROCEDURE
+			FOR EACH pair a, b IN links DO
+				add_edge(a, b)
+			END FOR
+			RETURN container
+		END
+
+		LET alpha_list EQUAL make_adj(n, edges)
+
+		LET beta_list BE list()
+		FOR i FROM 1 TO 5 DO
+			APPEND beta_list WITH -1
+		END FOR
+
+		FOR idx, val IN enumerate(alpha_list) DO
+			beta_list[length(val)] = idx
+		END FOR
+
+		DEFINE FUNCTION build_initial_row()
+			IF beta_list[1] ≠ -1 THEN
+				RETURN list(beta_list[1])
+			ELSE IF beta_list[4] = -1 THEN
+				LET root_node BE beta_list[2]
+				FOR neighbor IN alpha_list[root_node] DO
+					IF length(alpha_list[neighbor]) = 2 THEN
+						RETURN list(root_node, neighbor)
+					END IF
+				END FOR
+			ELSE
+				LET start_node BE beta_list[2]
+				LET result_row BE list(start_node)
+				LET previous_node BE start_node
+				LET active_node BE alpha_list[start_node][0]
+
+				DEFINE FUNCTION next_in_path(current, prev)
+					FOR elem IN alpha_list[current] DO
+						IF elem ≠ prev AND length(alpha_list[elem]) < 4 THEN
+							RETURN elem
+						END IF
+					END FOR
+					RETURN -1
+				END
+
+				WHILE length(alpha_list[active_node]) > 2 DO
+					APPEND result_row WITH active_node
+					LET temp_node BE next_in_path(active_node, previous_node)
+					previous_node = active_node
+					active_node = temp_node
+				END WHILE
+				APPEND result_row WITH active_node
+				RETURN result_row
+			END IF
+		END
+
+		LET initial_line BE build_initial_row()
+
+		LET final_answer BE list(initial_line)
+		LET visited_nodes BE list()
+		FOR i FROM 0 TO n - 1 DO
+			APPEND visited_nodes WITH false
+		END FOR
+
+		DEFINE FUNCTION mark_visited(container)
+			FOR element IN container DO
+				visited_nodes[element] = true
+			END FOR
+		END
+
+		LET block_size BE length(initial_line)
+		LET loops_count BE (n / block_size) - 1
+
+		DEFINE FUNCTION find_next_row(current_row)
+			mark_visited(current_row)
+			LET upcoming_row BE list()
+			FOR item IN current_row DO
+				FOR nbr IN alpha_list[item] DO
+					IF visited_nodes[nbr] = false THEN
+						APPEND upcoming_row WITH nbr
+						BREAK
+					END IF
+				END FOR
+			END FOR
+			RETURN upcoming_row
+		END
+
+		LET iterator BE 0
+		WHILE iterator < loops_count DO
+			LET current_row BE initial_line
+			mark_visited(current_row)
+			LET next_row BE find_next_row(current_row)
+			APPEND final_answer WITH next_row
+			initial_line = next_row
+			iterator = iterator + 1
+		END WHILE
+
+		RETURN final_answer
+	END FUNCTION
+END CLASS

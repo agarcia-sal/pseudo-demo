@@ -1,0 +1,27 @@
+```
+FUNCTION rescale_to_unit(sequence_of_elements)
+    FUNCTION compute_range(sequence_of_elements, index, current_min, current_max)
+        IF index EQUALS LENGTH OF sequence_of_elements THEN
+            RETURN (current_min, current_max)
+        ELSE
+            LET updated_min BE IF sequence_of_elements[index] LESS THAN current_min THEN sequence_of_elements[index] ELSE current_min
+            LET updated_max BE IF sequence_of_elements[index] GREATER THAN current_max THEN sequence_of_elements[index] ELSE current_max
+            RETURN compute_range(sequence_of_elements, index + 1, updated_min, updated_max)
+        END IF
+    END FUNCTION
+
+    LET (lowest_value, highest_value) BE compute_range(sequence_of_elements, 0, sequence_of_elements[0], sequence_of_elements[0])
+    LET range_span BE highest_value MINUS lowest_value
+
+    FUNCTION map_element(position)
+        IF position EQUALS LENGTH OF sequence_of_elements THEN
+            RETURN EMPTY LIST
+        ELSE
+            LET normalized_value BE (sequence_of_elements[position] MINUS lowest_value) DIVIDED BY range_span
+            RETURN [normalized_value] CONCATENATED WITH map_element(position + 1)
+        END IF
+    END FUNCTION
+
+    RETURN map_element(0)
+END FUNCTION
+```

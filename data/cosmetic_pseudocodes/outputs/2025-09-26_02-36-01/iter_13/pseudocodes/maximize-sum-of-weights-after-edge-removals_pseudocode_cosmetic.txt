@@ -1,0 +1,85 @@
+class UnionFind  
+  function __init__(self, size)  
+    set self.parent to empty list  
+    set self.rank to empty list  
+    set counter to 0  
+    repeat until counter > size - 1  
+      append counter to self.parent  
+      append 0 to self.rank  
+      set counter to counter + 1  
+    end repeat  
+  end function  
+  
+  function find(self, u)  
+    function recurse_find(x)  
+      if self.parent[x] != x then  
+        set self.parent[x] to recurse_find(self.parent[x])  
+      end if  
+      return self.parent[x]  
+    end function  
+    return recurse_find(u)  
+  end function  
+  
+  function union(self, u, v)  
+    set root_a to self.find(u)  
+    set root_b to self.find(v)  
+    if not (root_a = root_b) then  
+      if not (self.rank[root_a] <= self.rank[root_b]) then  
+        set self.parent[root_b] to root_a  
+      else if not (self.rank[root_a] >= self.rank[root_b]) then  
+        set self.parent[root_a] to root_b  
+      else  
+        set self.parent[root_b] to root_a  
+        set self.rank[root_a] to self.rank[root_a] + 1  
+      end if  
+    end if  
+  end function  
+end class  
+  
+class Solution  
+  function maximizeSumOfWeights(self, edges, k)  
+    set length_edges to 0  
+    for _counter in edges  
+      set length_edges to length_edges + 1  
+    end for  
+    set n to length_edges + (1 * 1)  
+    set degree_list to empty list  
+    set horiz to 0  
+    repeat while horiz < n  
+      append 0 to degree_list  
+      set horiz to horiz + 1  
+    end repeat  
+    set finder to UnionFind(n)  
+  
+    function descending_key(e)  
+      return e[2]  
+    end function  
+    for i from 0 to (length_edges - 1)  
+      for j from 0 to (length_edges - i - 2)  
+        if descending_key(edges[j]) < descending_key(edges[j + 1]) then  
+          set temp_var to edges[j]  
+          set edges[j] to edges[j + 1]  
+          set edges[j + 1] to temp_var  
+        end if  
+      end for  
+    end for  
+  
+    set aggregate_sum to 0  
+    set index_i to 0  
+    while index_i < length_edges  
+      set edge_element to edges[index_i]  
+      set first_elem to edge_element[0]  
+      set second_elem to edge_element[1]  
+      set weight_value to edge_element[2]  
+      if (degree_list[first_elem] < k) and (degree_list[second_elem] < k) and (finder.find(first_elem) != finder.find(second_elem)) then  
+        finder.union(first_elem, second_elem)  
+        degree_list[first_elem] = degree_list[first_elem] + 1  
+        degree_list[second_elem] = degree_list[second_elem] + 1  
+        aggregate_sum = aggregate_sum + weight_value  
+      end if  
+      set index_i to index_i + 1  
+    end while  
+  
+    return aggregate_sum  
+  end function  
+end class

@@ -1,0 +1,49 @@
+CLASS Solution
+	 FUNCTION minCostToEqualizeArray(nums cost1 cost2)
+		  CONST MODULO_VALUE := 1000000007
+		  VAR len := LENGTH(nums)
+		  VAR lowerBound := nums[0]
+		  VAR upperBound := nums[0]
+		  VAR aggregate := 0
+		  
+		  PROCEDURE findBoundsAndSum(idx)
+			 IF idx = len THEN RETURN
+				IF nums[idx] < lowerBound THEN
+					 lowerBound := nums[idx]
+				END IF
+				IF nums[idx] > upperBound THEN
+					 upperBound := nums[idx]
+				END IF
+				aggregate := aggregate + nums[idx]
+				findBoundsAndSum(idx + 1)
+		  END PROCEDURE
+		  
+		  findBoundsAndSum(0)
+		  
+		  IF (cost1 * 2 <= cost2) OR (len < 3) THEN
+				VAR gapSum := (upperBound * len) - aggregate
+				RETURN (cost1 * gapSum) % MODULO_VALUE
+		  END IF
+		  
+		  FUNCTION computeExpense(target)
+				VAR maxDiff := target - lowerBound
+				VAR totalDifference := target * len - aggregate
+				VAR paired := totalDifference / 2
+				IF paired > totalDifference - maxDiff THEN
+					 paired := totalDifference - maxDiff
+				END IF
+				RETURN (cost1 * totalDifference - 2 * cost1 * paired + cost2 * paired)
+		  END FUNCTION
+		  
+		  FUNCTION findMinimumExpense(currTarget currResult)
+				IF currTarget > (2 * upperBound - 1) THEN RETURN currResult
+				VAR currentCost := computeExpense(currTarget)
+				VAR newResult := currResult
+				IF currentCost < newResult THEN newResult := currentCost END IF
+				RETURN findMinimumExpense(currTarget + 1 newResult)
+		  END FUNCTION
+		  
+		  VAR minimalCost := findMinimumExpense(upperBound 9223372036854775807)
+		  RETURN minimalCost % MODULO_VALUE
+	 END FUNCTION
+END CLASS

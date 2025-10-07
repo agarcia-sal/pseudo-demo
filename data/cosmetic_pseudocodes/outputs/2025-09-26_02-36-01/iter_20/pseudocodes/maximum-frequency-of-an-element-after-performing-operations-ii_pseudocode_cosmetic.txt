@@ -1,0 +1,52 @@
+CLASS Solution  
+    FUNCTION maxFrequency(nums, k, numOperations)  
+        DEFINE FUNCTION helperIncrementMap(m, key, delta)  
+            IF key NOT IN m THEN  
+                SET m[key] = 0  
+            END IF  
+            SET m[key] = m[key] + delta  
+        END FUNCTION  
+  
+        ASSIGN REFERENCE mapA TO new dictionary defaulting to 0  
+        ASSIGN REFERENCE mapB TO new dictionary defaulting to 0  
+  
+        SET idxAlpha TO 0  
+        WHILE idxAlpha < LENGTH(nums)  
+            SET valX TO nums[idxAlpha]  
+            CALL helperIncrementMap(mapA, valX, 1)  
+            CALL helperIncrementMap(mapB, valX, 0)  
+            CALL helperIncrementMap(mapB, valX - k, 1)  
+            CALL helperIncrementMap(mapB, valX + k + 1, -1)  
+            SET idxAlpha = idxAlpha + 1  
+        END WHILE  
+  
+        SET resultMax TO 0  
+        SET accumulatorSum TO 0  
+  
+        DEFINE FUNCTION sortedEntries(dictMap)  
+            SET keysList TO LIST(dictMap KEYS)  
+            CALL keysList SORT ASCENDING  
+            RETURN keysList  
+        END FUNCTION  
+  
+        SET traverser TO 0  
+        SET keysOrdered TO CALL sortedEntries(mapB)  
+  
+        REPEAT  
+            IF traverser >= LENGTH(keysOrdered) THEN BREAK END IF  
+            SET currentKey TO keysOrdered[traverser]  
+            SET deltaT TO mapB[currentKey]  
+            SET accumulatorSum = accumulatorSum + deltaT  
+            SET candidateValue TO accumulatorSum  
+            SET limitValue TO mapA[currentKey] + numOperations  
+            IF candidateValue > resultMax AND candidateValue <= limitValue THEN  
+                SET resultMax = candidateValue  
+            ELSE IF limitValue > resultMax AND limitValue < candidateValue THEN  
+                SET resultMax = limitValue  
+            END IF  
+            SET traverser = traverser + 1  
+        UNTIL FALSE  
+  
+        RETURN resultMax  
+    END FUNCTION  
+END CLASS

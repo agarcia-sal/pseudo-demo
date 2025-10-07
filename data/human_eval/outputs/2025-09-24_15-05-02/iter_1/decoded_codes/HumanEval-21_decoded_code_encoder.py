@@ -1,0 +1,4 @@
+def rescale_to_unit(nums):
+    minV = min(nums)
+    maxV = max(nums)
+    return [(x - minV) / (maxV - minV) for x in nums]

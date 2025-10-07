@@ -1,0 +1,67 @@
+FUNCTION check_dict_case(dict_param)
+  
+    DECLARE flag_state = "start"
+    DECLARE key_iter
+    DECLARE key_type_check
+    DECLARE all_upper_check
+    DECLARE all_lower_check
+    DECLARE key_counter = 0
+    DECLARE keys_list = dict_param KEYS
+    DECLARE key_collection_length = LENGTH OF keys_list
+
+    IF key_collection_length <= 0 THEN
+        RETURN False
+    END IF
+
+    DECLARE index_cursor = 0
+    WHILE index_cursor < key_collection_length DO
+        
+        SET key_iter = keys_list.at(index_cursor)
+        SET key_type_check = (TYPE OF key_iter) IS STRING
+        
+        IF NOT key_type_check THEN
+            SET flag_state = "mixed"
+            EXIT WHILE
+        END IF
+
+        IF flag_state EQUALS "start" THEN
+
+            SET all_upper_check = (key_iter TO UPPERCASE) EQUALS key_iter
+            SET all_lower_check = (key_iter TO LOWERCASE) EQUALS key_iter
+
+            IF all_upper_check THEN
+                SET flag_state = "upper"
+            ELSE 
+                IF all_lower_check THEN
+                    SET flag_state = "lower"
+                ELSE
+                    EXIT WHILE
+                END IF
+            END IF
+
+        ELSE
+
+            DECLARE is_state_upper = (flag_state EQUALS "upper")
+            DECLARE is_state_lower = (flag_state EQUALS "lower")
+            DECLARE cond_upper_mismatch = is_state_upper AND ((key_iter TO UPPERCASE) NOT EQUALS key_iter)
+            DECLARE cond_lower_mismatch = is_state_lower AND ((key_iter TO LOWERCASE) NOT EQUALS key_iter)
+
+            IF cond_upper_mismatch OR cond_lower_mismatch THEN
+                SET flag_state = "mixed"
+                EXIT WHILE
+            ELSE
+                EXIT WHILE
+            END IF
+
+        END IF
+
+        SET index_cursor = index_cursor + 1
+    END WHILE
+
+    IF (flag_state EQUALS "upper") OR (flag_state EQUALS "lower") THEN
+        RETURN True
+    ELSE
+        RETURN False
+    END IF
+
+END FUNCTION

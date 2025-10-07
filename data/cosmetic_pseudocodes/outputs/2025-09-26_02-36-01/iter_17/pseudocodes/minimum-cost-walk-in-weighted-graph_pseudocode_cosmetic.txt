@@ -1,0 +1,133 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, n)  
+        BEGIN  
+            DECLARE aTempList AS LIST  
+            DECLARE aValList AS LIST  
+            SET aTempList TO EMPTY LIST  
+            DECLARE idx AS INTEGER  
+            SET idx TO 0  
+            WHILE idx < n DO  
+                aTempList APPEND idx  
+                SET idx TO idx + 1  
+            END WHILE  
+            SET self.parent TO aTempList  
+            SET aValList TO EMPTY LIST  
+            SET idx TO 0  
+            WHILE idx < n DO  
+                aValList APPEND 1  
+                SET idx TO idx + 1  
+            END WHILE  
+            SET self.rank TO aValList  
+        END  
+    END FUNCTION  
+  
+    FUNCTION find(self, u)  
+        BEGIN  
+            IF NOT (self.parent[u] == u) THEN  
+                SET self.parent[u] TO self.find(self.parent[u])  
+            END IF  
+            RETURN self.parent[u]  
+        END  
+    END FUNCTION  
+  
+    FUNCTION union(self, u, v)  
+        BEGIN  
+            DECLARE aRootU AS INTEGER  
+            DECLARE aRootV AS INTEGER  
+            SET aRootU TO self.find(u)  
+            SET aRootV TO self.find(v)  
+            IF aRootU != aRootV THEN  
+                IF self.rank[aRootU] > self.rank[aRootV] THEN  
+                    SET self.parent[aRootV] TO aRootU  
+                ELSE  
+                    IF NOT (self.rank[aRootU] > self.rank[aRootV]) AND (self.rank[aRootU] < self.rank[aRootV]) THEN  
+                        SET self.parent[aRootU] TO aRootV  
+                    ELSE  
+                        SET self.parent[aRootV] TO aRootU  
+                        SET self.rank[aRootU] TO self.rank[aRootU] + 1  
+                    END IF  
+                END IF  
+            END IF  
+        END  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION minimumCost(self, n, edges, query)  
+        BEGIN  
+            DECLARE uf AS UnionFind  
+            SET uf TO UNIONFIND(n)  
+            
+            DECLARE maskValue AS INTEGER  
+            SET maskValue TO (1 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2) - 1  
+            DECLARE accList AS LIST  
+            SET accList TO EMPTY LIST  
+            DECLARE lIdx AS INTEGER  
+            SET lIdx TO 0  
+            WHILE lIdx < n DO  
+                accList APPEND maskValue  
+                SET lIdx TO lIdx + 1  
+            END WHILE  
+            
+            DECLARE edgeIter AS INTEGER  
+            SET edgeIter TO 0  
+            WHILE edgeIter < LENGTH(edges) DO  
+                DECLARE edgeTuple AS LIST  
+                SET edgeTuple TO edges[edgeIter]  
+                DECLARE aU AS INTEGER  
+                DECLARE aV AS INTEGER  
+                DECLARE aW AS INTEGER  
+                SET aU TO edgeTuple[0]  
+                SET aV TO edgeTuple[1]  
+                SET aW TO edgeTuple[2]  
+                CALL uf.union(aU, aV)  
+                DECLARE compIdx AS INTEGER  
+                SET compIdx TO uf.find(aU)  
+                SET accList[compIdx] TO accList[compIdx] BITWISE_AND aW  
+                SET edgeIter TO edgeIter + 1  
+            END WHILE  
+            
+            DECLARE compCost AS DICTIONARY  
+            SET compCost TO EMPTY DICTIONARY  
+            DECLARE iIdx AS INTEGER  
+            SET iIdx TO 0  
+            WHILE iIdx < n DO  
+                DECLARE rootVal AS INTEGER  
+                SET rootVal TO uf.find(iIdx)  
+                IF NOT compCost HAS_KEY rootVal THEN  
+                    SET compCost[rootVal] TO accList[rootVal]  
+                END IF  
+                SET iIdx TO iIdx + 1  
+            END WHILE  
+            
+            DECLARE resList AS LIST  
+            SET resList TO EMPTY LIST  
+            DECLARE qIdx AS INTEGER  
+            SET qIdx TO 0  
+            WHILE qIdx < LENGTH(query) DO  
+                DECLARE pairEntry AS LIST  
+                SET pairEntry TO query[qIdx]  
+                DECLARE qS AS INTEGER  
+                DECLARE qT AS INTEGER  
+                SET qS TO pairEntry[0]  
+                SET qT TO pairEntry[1]  
+                IF qS == qT THEN  
+                    resList APPEND 0  
+                ELSE  
+                    DECLARE rootS AS INTEGER  
+                    DECLARE rootT AS INTEGER  
+                    SET rootS TO uf.find(qS)  
+                    SET rootT TO uf.find(qT)  
+                    IF rootS == rootT THEN  
+                        resList APPEND compCost[rootS]  
+                    ELSE  
+                        resList APPEND -1  
+                    END IF  
+                END IF  
+                SET qIdx TO qIdx + 1  
+            END WHILE  
+            
+            RETURN resList  
+        END  
+    END FUNCTION  
+END CLASS

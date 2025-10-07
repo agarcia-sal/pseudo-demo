@@ -1,0 +1,97 @@
+CLASS Solution
+    FUNCTION canReachCorner(xCorner yCorner circles)
+        FUNCTION in_circle(x y cx cy r)
+            SET dx TO x - cx
+            SET dy TO y - cy
+            SET distSq TO (dx * dx) + (dy * dy)
+            SET radiusSq TO r * r
+            RETURN distSq <= radiusSq
+        END FUNCTION
+
+        FUNCTION cross_left_top(cx cy r)
+            SET cond1 TO (ABS(cx) <= r) AND (0 <= cy) AND (cy <= yCorner)
+            SET cond2 TO (ABS(cy - yCorner) <= r) AND (0 <= cx) AND (cx <= xCorner)
+            RETURN cond1 OR cond2
+        END FUNCTION
+
+        FUNCTION cross_right_bottom(cx cy r)
+            SET condA TO (ABS(cx - xCorner) <= r) AND (0 <= cy) AND (cy <= yCorner)
+            SET condB TO (ABS(cy) <= r) AND (0 <= cx) AND (cx <= xCorner)
+            RETURN condA OR condB
+        END FUNCTION
+
+        FUNCTION dfs(i)
+            SET cx1 TO circles[i][0]
+            SET cy1 TO circles[i][1]
+            SET rr1 TO circles[i][2]
+
+            IF cross_right_bottom(cx1 cy1 rr1)
+                RETURN True
+            END IF
+
+            SET vis[i] = True
+
+            SET idx TO 0
+            WHILE idx < LENGTH(circles)
+                IF vis[idx] = True
+                    SET idx = idx + 1
+                    CONTINUE
+                END IF
+                SET cx2 TO circles[idx][0]
+                SET cy2 TO circles[idx][1]
+                SET rr2 TO circles[idx][2]
+
+                SET distX TO cx1 - cx2
+                SET distY TO cy1 - cy2
+                SET sumRadii TO rr1 + rr2
+                SET distSquares TO (distX * distX) + (distY * distY)
+                SET radiusSumSq TO sumRadii * sumRadii
+
+                IF distSquares > radiusSumSq
+                    SET idx = idx + 1
+                    CONTINUE
+                END IF
+
+                SET leftBoundX TO (cx1 * rr2) + (cx2 * rr1)
+                SET rightBoundX TO sumRadii * xCorner
+                SET leftBoundY TO (cy1 * rr2) + (cy2 * rr1)
+                SET rightBoundY TO sumRadii * yCorner
+
+                IF (leftBoundX < rightBoundX) AND (leftBoundY < rightBoundY)
+                    IF dfs(idx) = True
+                        RETURN True
+                    END IF
+                END IF
+
+                SET idx = idx + 1
+            END WHILE
+            RETURN False
+        END FUNCTION
+
+        SET vis TO EMPTY_LIST
+        SET counter TO 0
+        WHILE counter < LENGTH(circles)
+            CALL vis.APPEND(False)
+            SET counter = counter + 1
+        END WHILE
+
+        SET pointer TO 0
+        WHILE pointer < LENGTH(circles)
+            SET cx TO circles[pointer][0]
+            SET cy TO circles[pointer][1]
+            SET rr TO circles[pointer][2]
+
+            IF in_circle(0 0 cx cy rr) OR in_circle(xCorner yCorner cx cy rr)
+                RETURN False
+            END IF
+
+            IF (vis[pointer] = False) AND cross_left_top(cx cy rr) AND dfs(pointer)
+                RETURN False
+            END IF
+
+            SET pointer = pointer + 1
+        END WHILE
+
+        RETURN True
+    END FUNCTION
+END CLASS

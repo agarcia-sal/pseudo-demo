@@ -1,0 +1,181 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        FUNCTION dictWithDefaultZero()
+            SET mapVar TO new dictionary
+            FUNCTION getValue(key)
+                IF key IN mapVar THEN
+                    RETURN mapVar[key]
+                ELSE
+                    RETURN 0
+                END IF
+            END FUNCTION
+            FUNCTION setValue(key, val)
+                mapVar[key] = val
+            END FUNCTION
+            RETURN (getValue, setValue)
+        END FUNCTION
+
+        (getCount, setCount) = dictWithDefaultZero()
+
+        FUNCTION incrCount(key)
+            SET currVal TO getCount(key)
+            setCount(key, currVal + (1 * 1))
+        END FUNCTION
+
+        FUNCTION substring(s, startIndex, endIndex)
+            SET result TO ""
+            FUNCTION recurCopy(pos)
+                IF pos >= endIndex THEN
+                    RETURN
+                END IF
+                result = result + s[pos]
+                recurCopy(pos + 1)
+            END FUNCTION
+            recurCopy(startIndex)
+            RETURN result
+        END FUNCTION
+
+        FUNCTION generateSubstrings(s, actionFunc)
+            SET strLen TO 0
+            FUNCTION getLength()
+                SET counter TO 0
+                WHILE TRUE
+                    IF s[counter] == null THEN
+                        BREAK
+                    END IF
+                    counter = counter + 1
+                END WHILE
+                RETURN counter
+            END FUNCTION
+            strLen = getLength()
+
+            FUNCTION outerLoop(i)
+                IF i >= strLen THEN
+                    RETURN
+                END IF
+                FUNCTION innerLoop(j)
+                    IF j > strLen THEN
+                        RETURN
+                    END IF
+                    SET sub TO substring(s, i, j)
+                    actionFunc(sub)
+                    innerLoop(j + 1)
+                END FUNCTION
+                innerLoop(i + 1)
+                outerLoop(i + 1)
+            END FUNCTION
+            outerLoop(0)
+        END FUNCTION
+
+        FUNCTION addCountingToDict(subStr)
+            incrCount(subStr)
+        END FUNCTION
+
+        FUNCTION minStringCompare(a, b)
+            IF a == "" THEN
+                RETURN b
+            ELSEIF b == "" THEN
+                RETURN a
+            END IF
+            IF (len(a) < len(b)) THEN
+                RETURN a
+            ELSEIF (len(a) > len(b)) THEN
+                RETURN b
+            ELSE
+                FUNCTION lessThan(str1, str2, idx)
+                    IF idx >= len(str1) THEN
+                        RETURN FALSE
+                    END IF
+                    IF str1[idx] < str2[idx] THEN
+                        RETURN TRUE
+                    ELSEIF str1[idx] > str2[idx] THEN
+                        RETURN FALSE
+                    ELSE
+                        RETURN lessThan(str1, str2, idx + 1)
+                    END IF
+                END FUNCTION
+                IF lessThan(a, b, 0) THEN
+                    RETURN a
+                ELSE
+                    RETURN b
+                END IF
+            END IF
+        END FUNCTION
+
+        FUNCTION len(str)
+            SET countVar TO 0
+            WHILE TRUE
+                IF str[countVar] == null THEN
+                    BREAK
+                END IF
+                countVar = countVar + 1
+            END WHILE
+            RETURN countVar
+        END FUNCTION
+
+        FUNCTION getCountSafe(s)
+            RETURN getCount(s)
+        END FUNCTION
+
+        FUNCTION findShortestUnique(s)
+            SET shortest TO ""
+            SET strLen TO len(s)
+            FUNCTION outer(i)
+                IF i >= strLen THEN
+                    RETURN
+                END IF
+                FUNCTION inner(j)
+                    IF j > strLen THEN
+                        RETURN
+                    END IF
+                    SET candidate TO substring(s, i, j)
+                    IF getCountSafe(candidate) == 1 THEN
+                        shortest = minStringCompare(shortest, candidate)
+                    END IF
+                    inner(j + 1)
+                END FUNCTION
+                inner(i + 1)
+                outer(i + 1)
+            END FUNCTION
+            outer(0)
+            RETURN shortest
+        END FUNCTION
+
+        FUNCTION processArr(arr)
+            SET idx TO 0
+            SET result TO []
+
+            FUNCTION loop()
+                IF idx >= len(arr) THEN
+                    RETURN
+                END IF
+                SET elem TO arr[idx]
+                generateSubstrings(elem, addCountingToDict)
+                idx = idx + 1
+                loop()
+            END FUNCTION
+            loop()
+            RETURN result
+        END FUNCTION
+
+        FUNCTION generateAnswer(arr)
+            SET outIdx TO 0
+            SET answers TO []
+            FUNCTION recAns()
+                IF outIdx >= len(arr) THEN
+                    RETURN
+                END IF
+                SET currStr TO arr[outIdx]
+                SET uniqueSub TO findShortestUnique(currStr)
+                answers = answers + [uniqueSub]
+                outIdx = outIdx + 1
+                recAns()
+            END FUNCTION
+            recAns()
+            RETURN answers
+        END FUNCTION
+
+        processArr(arr)
+        RETURN generateAnswer(arr)
+    END FUNCTION
+END CLASS

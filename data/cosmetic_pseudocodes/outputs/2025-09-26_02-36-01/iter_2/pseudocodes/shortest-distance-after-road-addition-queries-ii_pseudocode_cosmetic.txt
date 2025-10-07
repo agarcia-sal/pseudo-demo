@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION shortestDistanceAfterQueries(total_nodes, query_list)
+        INITIALIZE adjacency_map AS a mapping FROM integers 0 THROUGH (total_nodes - 1) TO EMPTY arrays
+        SET index_counter TO 0
+        WHILE index_counter < (total_nodes - 1)
+            LET successor_node BE index_counter + 1
+            LET edge_weight BE 1
+            PUSH [successor_node, edge_weight] INTO adjacency_map[index_counter]
+            INCREMENT index_counter BY 1
+        END WHILE
+
+        FUNCTION dijkstra()
+            CREATE distances_array WITH LENGTH total_nodes FILLED WITH POSITIVE_INFINITY
+            ASSIGN distances_array[0] TO 0
+            DECLARE priority_queue AS [[0, 0]]  // elements as [distance, node]
+
+            WHILE priority_queue IS NOT EMPTY
+                EXTRACT [lowest_distance, current_vertex] FROM priority_queue via minimal distance removal
+
+                IF lowest_distance > distances_array[current_vertex] THEN
+                    // skip outdated entry
+                    NEXT ITERATION
+                END IF
+
+                SET neighbor_index TO 0
+                WHILE neighbor_index < LENGTH(adjacency_map[current_vertex])
+                    LET edge_info BE adjacency_map[current_vertex][neighbor_index]
+                    ASSIGN neighbor_node TO edge_info[0]
+                    ASSIGN weight_value TO edge_info[1]
+
+                    LET accum_distance BE lowest_distance PLUS weight_value
+                    IF accum_distance < distances_array[neighbor_node] THEN
+                        SET distances_array[neighbor_node] TO accum_distance
+                        INSERT [accum_distance, neighbor_node] INTO priority_queue maintaining heap order
+                    END IF
+                    INCREMENT neighbor_index
+                END WHILE
+            END WHILE
+
+            RETURN distances_array[total_nodes - 1]
+        END FUNCTION
+
+        INITIALIZE answers AS EMPTY list
+        SET query_iterator TO 0
+        WHILE query_iterator < LENGTH(query_list)
+            LET current_query BE query_list[query_iterator]
+            LET origin_node TO current_query[0]
+            LET destination_node TO current_query[1]
+
+            APPEND [destination_node, 1] TO adjacency_map[origin_node]
+            answers PUSH dijkstra()
+            INCREMENT query_iterator BY 1
+        END WHILE
+
+        RETURN answers
+    END FUNCTION
+END CLASS

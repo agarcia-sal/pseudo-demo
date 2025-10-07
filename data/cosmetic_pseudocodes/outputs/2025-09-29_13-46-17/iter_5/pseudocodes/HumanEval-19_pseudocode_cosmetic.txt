@@ -1,0 +1,76 @@
+```
+FUNCTION sort_numbers(string_of_number_words)
+    INITIAL_value_map := MAP()
+    INITIAL_value_map['seven'] = 7
+    INITIAL_value_map['four'] = 4
+    INITIAL_value_map['nine'] = 9
+    INITIAL_value_map['six'] = 6
+    INITIAL_value_map['eight'] = 8
+    INITIAL_value_map['one'] = 1
+    INITIAL_value_map['three'] = 3
+    INITIAL_value_map['two'] = 2
+    INITIAL_value_map['five'] = 5
+    INITIAL_value_map['zero'] = 0
+
+    FUNCTION filter_nonempty_words(wordsList, index, accList)
+        IF index == LENGTH(wordsList) THEN
+            RETURN accList
+        ELSE 
+            IF wordsList[index] != '' THEN
+                RETURN filter_nonempty_words(wordsList, index + 1, accList + [wordsList[index]])
+            ELSE
+                RETURN filter_nonempty_words(wordsList, index + 1, accList)
+            END IF
+        END IF
+    END FUNCTION
+
+    temp_words := SPLIT(string_of_number_words, ' ')
+    filtered_words := filter_nonempty_words(temp_words, 0, [])
+
+    FUNCTION comparator(wordA, wordB)
+        valA := INITIAL_value_map[wordA]
+        valB := INITIAL_value_map[wordB]
+        IF valA > valB THEN RETURN 1
+        ELSE IF valA < valB THEN RETURN -1
+        ELSE RETURN 0
+        END IF
+    END FUNCTION
+
+    FUNCTION sort_list(lst)
+        IF LENGTH(lst) <= 1 THEN
+            RETURN lst
+        END IF
+        pivot := lst[0]
+        FUNCTION less_than_pivot(acc, elem)
+            IF INITIAL_value_map[elem] < INITIAL_value_map[pivot] THEN
+                RETURN acc + [elem]
+            ELSE
+                RETURN acc
+            END IF
+        END FUNCTION
+        less_than := FOLD(less_than_pivot, [], lst[1:])
+        FUNCTION greater_equal_pivot(acc, elem)
+            IF INITIAL_value_map[elem] >= INITIAL_value_map[pivot] THEN
+                RETURN acc + [elem]
+            ELSE
+                RETURN acc
+            END IF
+        END FUNCTION
+        greater_equal := FOLD(greater_equal_pivot, [], lst[1:])
+        RETURN sort_list(less_than) + [pivot] + sort_list(greater_equal)
+    END FUNCTION
+
+    sorted_list := sort_list(filtered_words)
+
+    answer := ''
+    FOR idx FROM 0 TO LENGTH(sorted_list) - 1 DO
+        IF idx == 0 THEN
+            answer := sorted_list[idx]
+        ELSE
+            answer := answer + ' ' + sorted_list[idx]
+        END IF
+    END FOR
+
+    RETURN answer
+END FUNCTION
+```

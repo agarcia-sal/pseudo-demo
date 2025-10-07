@@ -1,0 +1,129 @@
+CLASS Solution
+	 FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+		  FUNCTION is_peak(j INTEGER) RETURNS BOOLEAN
+				RETURN (nums[j] > nums[j+1]) AND (nums[j] > nums[j-1])
+		  END FUNCTION
+
+		  SET peakIndices TO []
+		  SET x TO 1
+		  WHILE x <= (LENGTH(nums) - 2)
+				IF is_peak(x) THEN
+					 APPEND x TO peakIndices
+				END IF
+				ADD 1 TO x
+		  END WHILE
+
+		  SET output TO []
+		  FOR EACH q IN queries
+				IF q[0] = (1 * 1) THEN
+					 SET lowerBound TO q[1]
+					 SET upperBound TO q[2]
+
+					 FUNCTION lowerBoundPosition(val INTEGER, arr LIST OF INTEGER) RETURNS INTEGER
+						  SET leftPos TO 0
+						  SET rightPos TO LENGTH(arr)
+						  WHILE leftPos < rightPos
+								SET midPos TO (leftPos + rightPos) // (1 + 1)
+								IF arr[midPos] < val THEN
+									 SET leftPos TO midPos + 1
+								ELSE
+									 SET rightPos TO midPos
+								END IF
+						  END WHILE
+						  RETURN leftPos
+					 END FUNCTION
+
+					 FUNCTION upperBoundPosition(val INTEGER, arr LIST OF INTEGER) RETURNS INTEGER
+						  SET lft TO 0
+						  SET rgt TO LENGTH(arr)
+						  WHILE lft < rgt
+								SET md TO ((lft + rgt) // (1 + 1))
+								IF val < arr[md] THEN
+									 SET rgt TO md
+								ELSE
+									 SET lft TO md + 1
+								END IF
+						  END WHILE
+						  RETURN lft
+					 END FUNCTION
+
+					 SET startIdx TO lowerBoundPosition((lowerBound + 1), peakIndices)
+					 SET endIdx TO upperBoundPosition(upperBound, peakIndices) - 1
+					 APPEND (endIdx - startIdx) TO output
+
+				ELSE
+
+					 SET idxToUpdate TO q[1]
+					 SET newValue TO q[2]
+
+					 IF nums[idxToUpdate] = newValue THEN
+						  CONTINUE
+					 END IF
+
+					 SET nums[idxToUpdate] TO newValue
+
+					 FUNCTION maxValue(a INTEGER, b INTEGER) RETURNS INTEGER
+						  IF a > b THEN RETURN a ELSE RETURN b END IF
+					 END FUNCTION
+
+					 FUNCTION minValue(a INTEGER, b INTEGER) RETURNS INTEGER
+						  IF a < b THEN RETURN a ELSE RETURN b END IF
+					 END FUNCTION
+
+
+					 SET loopStart TO maxValue(1, idxToUpdate - 1)
+					 SET loopEnd TO minValue(LENGTH(nums) - 2, idxToUpdate + 1)
+
+					 FUNCTION findIndex(arr LIST OF INTEGER, val INTEGER) RETURNS INTEGER
+						  SET iVar TO 0
+						  WHILE iVar < LENGTH(arr)
+								IF arr[iVar] = val THEN
+									 RETURN iVar
+								END IF
+								ADD 1 TO iVar
+						  END WHILE
+						  RETURN -1
+					 END FUNCTION
+
+					 FOR kVar FROM loopStart TO loopEnd
+						  IF is_peak(kVar) THEN
+								IF findIndex(peakIndices, kVar) < 0 THEN
+									 /* Insert kVar in sorted order */
+									 FUNCTION insertSorted(arr LIST OF INTEGER, v INTEGER)
+										  SET posIns TO 0
+										  WHILE (posIns < LENGTH(arr)) AND (arr[posIns] < v)
+												SET posIns TO posIns + 1
+										  END WHILE
+										  /* Shift elements to right */
+										  SET arrLength TO LENGTH(arr)
+										  SET idxShift TO arrLength
+										  WHILE idxShift > posIns
+												IF idxShift = arrLength THEN
+													 APPEND 0 TO arr
+												END IF
+												SET arr[idxShift] TO arr[idxShift - 1]
+												SUBTRACT 1 FROM idxShift
+										  END WHILE
+										  SET arr[posIns] TO v
+									 END FUNCTION
+
+									 CALL insertSorted(peakIndices, kVar)
+								END IF
+						  ELSE
+								SET posFound TO findIndex(peakIndices, kVar)
+								IF posFound >= 0 THEN
+									 /* Remove element at posFound */
+									 FOR mVar FROM posFound TO (LENGTH(peakIndices) - 2)
+										  SET peakIndices[mVar] TO peakIndices[mVar + 1]
+									 END FOR
+									 /* Remove last duplicate */
+									 SET peakIndices TO peakIndices[0 : LENGTH(peakIndices) - 1]
+								END IF
+						  END IF
+					 END FOR
+				END IF
+		  END FOR
+
+		  RETURN output
+	 END FUNCTION
+END CLASS

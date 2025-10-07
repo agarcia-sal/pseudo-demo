@@ -1,0 +1,69 @@
+```
+FUNCTION split_words(str)
+    FUNCTION helper_replace_commas(s, i, acc)
+        IF i >= LENGTH(s)
+            RETURN acc
+        ELSE
+            SWITCH s[i]
+                CASE ','
+                    RETURN helper_replace_commas(s, i + 1, acc + ' ')
+                DEFAULT
+                    RETURN helper_replace_commas(s, i + 1, acc + s[i])
+            END SWITCH
+        END IF
+    END FUNCTION
+
+    FUNCTION helper_split_whitespace(s, i, current, acc)
+        IF i > LENGTH(s)
+            IF current = ''
+                RETURN acc
+            ELSE
+                RETURN acc + [current]
+            END IF
+        ELSE
+            IF i = LENGTH(s) OR s[i] = ' '
+                IF current = ''
+                    RETURN helper_split_whitespace(s, i + 1, '', acc)
+                ELSE
+                    RETURN helper_split_whitespace(s, i + 1, '', acc + [current])
+                END IF
+            ELSE
+                RETURN helper_split_whitespace(s, i + 1, current + s[i], acc)
+            END IF
+        END IF
+    END FUNCTION
+
+    FUNCTION helper_count_chars(s, i, c)
+        IF i >= LENGTH(s)
+            RETURN c
+        ELSE
+            IF ((s[i] >= 'a' AND s[i] <= 'z') AND ((TO_ASCII(s[i]) % 2) = 0)) = TRUE
+                RETURN helper_count_chars(s, i + 1, c + 1)
+            ELSE
+                RETURN helper_count_chars(s, i + 1, c)
+            END IF
+        END IF
+    END FUNCTION
+
+    FUNCTION contains_char(s, ch, idx)
+        IF idx >= LENGTH(s)
+            RETURN FALSE
+        ELSE
+            IF s[idx] = ch
+                RETURN TRUE
+            ELSE
+                RETURN contains_char(s, ch, idx + 1)
+            END IF
+        END IF
+    END FUNCTION
+
+    IF NOT (NOT contains_char(str, ' ', 0))
+        RETURN helper_split_whitespace(str, 0, '', [])
+    ELSE IF contains_char(str, ',', 0) = TRUE
+        LET temp_str = helper_replace_commas(str, 0, '')
+        RETURN helper_split_whitespace(temp_str, 0, '', [])
+    ELSE
+        RETURN helper_count_chars(str, 0, 0)
+    END IF
+END FUNCTION
+```

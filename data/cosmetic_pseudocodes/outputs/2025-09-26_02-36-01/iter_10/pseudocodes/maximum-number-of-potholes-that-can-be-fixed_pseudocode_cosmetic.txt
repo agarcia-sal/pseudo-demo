@@ -1,0 +1,118 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+    BEGIN
+        VAR segments ARRAY OF STRING := splitByDelimiter(road, '.')
+        CALL sortSegmentsAscendingLength(segments)
+        VAR repairedCount INTEGER := 0
+
+        VAR index INTEGER := 0
+        WHILE index < length(segments) DO
+            VAR currentSegment STRING := segments[index]
+            VAR lengthSegment INTEGER := strLen(currentSegment)
+
+            IF lengthSegment = 0 THEN
+                index := index + 1
+                CONTINUE
+            END IF
+
+            VAR neededBudget INTEGER := lengthSegment + 1
+
+            IF neededBudget <= budget THEN
+                repairedCount := repairedCount + lengthSegment
+                budget := budget - neededBudget
+            ELSE
+                SET_REPAIRS(lengthSegment, budget, repairedCount)
+            END IF
+
+            index := index + 1
+        END WHILE
+
+        RETURN repairedCount
+
+        PROCEDURE SET_REPAIRS(VAR n INTEGER, VAR b INTEGER, VAR count INTEGER)
+        BEGIN
+            IF n <= 0 OR b <= 0 THEN
+                RETURN
+            END IF
+
+            VAR required INTEGER := n + 1
+            IF b >= required THEN
+                count := count + n
+                b := b - required
+                RETURN
+            ELSE
+                n := n - 1
+                CALL SET_REPAIRS(n, b, count)
+            END IF
+        END PROCEDURE
+
+        PROCEDURE sortSegmentsAscendingLength(VAR arr ARRAY OF STRING)
+        BEGIN
+            DECLARE i INTEGER := 1
+            DECLARE len INTEGER := length(arr)
+            WHILE i < len DO
+                DECLARE j INTEGER := i + 1
+                WHILE j <= len DO
+                    IF strLen(arr[i]) > strLen(arr[j]) THEN
+                        CALL swap(arr, i, j)
+                    END IF
+                    j := j + 1
+                END WHILE
+                i := i + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE swap(VAR a ARRAY OF STRING, INTEGER idx1, INTEGER idx2)
+        BEGIN
+            VAR tmp STRING := a[idx1]
+            a[idx1] := a[idx2]
+            a[idx2] := tmp
+        END PROCEDURE
+
+        FUNCTION splitByDelimiter(STRING text, CHAR delim) RETURNS ARRAY OF STRING
+        BEGIN
+            VAR result ARRAY OF STRING := []
+            VAR startPos INTEGER := 1
+            VAR pos INTEGER := findChar(text, delim, startPos)
+            WHILE pos > 0 DO
+                APPEND(result, substring(text, startPos, pos - 1))
+                startPos := pos + 1
+                pos := findChar(text, delim, startPos)
+            END WHILE
+            APPEND(result, substring(text, startPos, strLen(text)))
+            RETURN result
+        END FUNCTION
+
+        FUNCTION findChar(STRING input, CHAR c, INTEGER fromPos) RETURNS INTEGER
+        BEGIN
+            VAR idx INTEGER := fromPos
+            WHILE idx <= strLen(input) DO
+                IF input[idx] = c THEN
+                    RETURN idx
+                END IF
+                idx := idx + 1
+            END WHILE
+            RETURN 0
+        END FUNCTION
+
+        FUNCTION substring(STRING s, INTEGER fromIdx, INTEGER toIdx) RETURNS STRING
+        BEGIN
+            VAR res STRING := ""
+            VAR pos INTEGER := fromIdx
+            WHILE pos <= toIdx DO
+                res := res + s[pos]
+                pos := pos + 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        FUNCTION strLen(STRING s) RETURNS INTEGER
+        BEGIN
+            VAR lengthVal INTEGER := 0
+            FOR EACH ch IN s DO
+                lengthVal := lengthVal + 1
+            END FOR
+            RETURN lengthVal
+        END FUNCTION
+    END
+END CLASS

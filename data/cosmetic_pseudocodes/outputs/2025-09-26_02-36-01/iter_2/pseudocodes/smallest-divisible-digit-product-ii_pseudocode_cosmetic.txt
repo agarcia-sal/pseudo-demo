@@ -1,0 +1,100 @@
+CLASS Solution  
+    FUNCTION smallestNumber(num, t)  
+        DECLARE primeFactors, divisibleFlag AS self._getPrimeCount(t)  
+        IF divisibleFlag IS FALSE THEN  
+            RETURN "-1"  
+        END IF  
+
+        DECLARE factorFreqs AS self._getFactorCount(primeFactors)  
+        IF SUM OF VALUES IN factorFreqs > LENGTH OF num THEN  
+            DECLARE resultStr AS ""  
+            FOR EACH digit, freq IN factorFreqs DO  
+                APPEND digit REPEATED freq TIMES TO resultStr  
+            END FOR  
+            RETURN resultStr  
+        END IF  
+
+        DECLARE prefixPrimeSum AS 0  
+        FOR EACH ch IN num DO  
+            prefixPrimeSum += SUM OF FACTOR_COUNTS OF INTEGER VALUE OF ch  
+        END FOR  
+
+        DECLARE zeroIdx AS LENGTH OF num  
+        DECLARE position AS 0  
+        WHILE position < LENGTH OF num AND num[position] != "0" DO  
+            position += 1  
+        END WHILE  
+        IF position < LENGTH OF num THEN  
+            zeroIdx = position  
+        END IF  
+
+        IF zeroIdx == LENGTH OF num AND primeFactors <= prefixPrimeSum THEN  
+            RETURN num  
+        END IF  
+
+        DECLARE prefixSum AS prefixPrimeSum  
+        FOR pos FROM LENGTH OF num - 1 DOWNTO 0 DO  
+            DECLARE currentDigit AS INT(num[pos])  
+            prefixSum -= SUM OF FACTOR_COUNTS OF currentDigit  
+            DECLARE availableSpace AS LENGTH OF num - 1 - pos  
+            IF pos <= zeroIdx THEN  
+                DECLARE candidateDigit AS currentDigit + 1  
+                WHILE candidateDigit <= 9 DO  
+                    DECLARE changeFactors AS self._getFactorCount(primeFactors - prefixSum - FACTOR_COUNTS OF candidateDigit)  
+                    IF SUM OF VALUES IN changeFactors <= availableSpace THEN  
+                        DECLARE onesCount AS availableSpace - SUM OF VALUES IN changeFactors  
+                        RETURN SUBSTRING OF num FROM 0 TO pos + CONVERT candidateDigit TO STRING + REPEAT "1" onesCount TIMES +  
+                            CONCATENATION OF EACH digit REPEATED freq TIMES IN changeFactors  
+                    END IF  
+                    candidateDigit += 1  
+                END WHILE  
+            END IF  
+        END FOR  
+
+        factorFreqs = self._getFactorCount(primeFactors)  
+        DECLARE onesLen AS LENGTH OF num + 1 - SUM OF VALUES IN factorFreqs  
+        RETURN REPEAT "1" onesLen TIMES + CONCATENATION OF EACH digit REPEATED freq TIMES IN factorFreqs  
+    END FUNCTION  
+
+    FUNCTION _getPrimeCount(t)  
+        DECLARE counts AS EMPTY Counter  
+        FOR EACH p IN [2, 3, 5, 7] DO  
+            WHILE t MOD p == 0 DO  
+                counts[p] += 1  
+                t = t DIV p  
+            END WHILE  
+        END FOR  
+        RETURN counts, (t == 1)  
+    END FUNCTION  
+
+    FUNCTION _getFactorCount(count)  
+        DECLARE eights, remTwos AS DIVMOD(count[2], 3)  
+        DECLARE nines, threes AS DIVMOD(count[3], 2)  
+        DECLARE fours, twos AS DIVMOD(remTwos, 2)  
+
+        DECLARE sixes AS 0  
+        IF twos == 1 AND threes == 1 THEN  
+            twos = 0  
+            threes = 0  
+            sixes = 1  
+        END IF  
+
+        IF threes == 1 AND fours == 1 THEN  
+            twos = 1  
+            sixes = 1  
+            threes = 0  
+            fours = 0  
+        END IF  
+
+        RETURN Counter{  
+            '2': twos,  
+            '3': threes,  
+            '4': fours,  
+            '5': count[5],  
+            '6': sixes,  
+            '7': count[7],  
+            '8': eights,  
+            '9': nines  
+        }  
+    END FUNCTION  
+END CLASS

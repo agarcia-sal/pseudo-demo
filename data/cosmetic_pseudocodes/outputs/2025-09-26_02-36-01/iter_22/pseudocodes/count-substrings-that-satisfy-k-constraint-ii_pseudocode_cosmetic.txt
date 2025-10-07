@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+        SET length TO LENGTH OF s
+        SET zerosPrefix TO LIST OF 0 REPEATED length PLUS 1 TIMES
+        SET onesPrefix TO LIST OF 0 REPEATED length PLUS 1 TIMES
+
+        SET idx TO 0
+        WHILE idx LESS THAN length
+            SET zerosPrefix AT idx PLUS 1 TO zerosPrefix AT idx PLUS (IF s AT idx EQUALS '0' THEN 1 ELSE 0)
+            SET onesPrefix AT idx PLUS 1 TO onesPrefix AT idx PLUS (IF s AT idx EQUALS '1' THEN 1 ELSE 0)
+            INCREMENT idx BY 1
+        END WHILE
+
+        FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER
+            SET totalCount TO 0
+            SET currentStart TO l
+            REPEAT WHILE currentStart LESS THAN OR EQUAL TO r
+                SET lowBound TO currentStart
+                SET highBound TO r PLUS 1
+                WHILE lowBound NOT EQUAL highBound
+                    SET midPos TO (lowBound PLUS highBound) DIVIDED BY 2
+                    SET zeroSegmentCount TO zerosPrefix AT midPos PLUS 1 MINUS zerosPrefix AT currentStart
+                    SET oneSegmentCount TO onesPrefix AT midPos PLUS 1 MINUS onesPrefix AT currentStart
+                    IF zeroSegmentCount LESS THAN OR EQUAL k OR oneSegmentCount LESS THAN OR EQUAL k
+                        SET lowBound TO midPos PLUS 1
+                    ELSE
+                        SET highBound TO midPos
+                    END IF
+                END WHILE
+                SET lastValid TO lowBound MINUS 1
+                IF lastValid GREATER THAN OR EQUAL currentStart
+                    SET totalCount TO totalCount PLUS (lastValid MINUS currentStart PLUS 1)
+                END IF
+                INCREMENT currentStart BY 1
+            END REPEAT
+            RETURN totalCount
+        END FUNCTION
+
+        SET outputList TO EMPTY LIST
+        FOR EACH pair l COMMA r IN queries
+            APPEND count_valid_substrings WITH PARAMS l r TO outputList
+        END FOR
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

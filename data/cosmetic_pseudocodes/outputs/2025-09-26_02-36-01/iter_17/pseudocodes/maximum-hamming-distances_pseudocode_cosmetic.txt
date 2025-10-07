@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER m INTEGER) RETURNS LIST OF INTEGER
+        SET transformed_numbers TO []
+        SET temp_idx TO 0
+        WHILE temp_idx < LENGTH(nums)
+            SET current_num TO nums[temp_idx]
+            SET bin_form TO ""
+            SET bin_length TO 0
+            SET remainder_list TO []
+            WHILE current_num > 0
+                SET remainder_list TO [current_num % 2] + remainder_list
+                SET current_num TO current_num / 2
+            END WHILE
+            WHILE LENGTH(remainder_list) < m
+                SET remainder_list TO [0] + remainder_list
+            END WHILE
+            FOR bit_element IN remainder_list
+                SET bin_form TO bin_form + STRING(bit_element)
+            END FOR
+            SET transformed_numbers TO transformed_numbers + [bin_form]
+            SET temp_idx TO temp_idx + 1
+        END WHILE
+
+        SET result_collection TO []
+
+        FUNCTION hamming_distance(bin1 STRING bin2 STRING) RETURNS INTEGER
+            SET count_diff TO 0
+            SET pos_counter TO 0
+            REPEAT
+                IF NOT (bin1[pos_counter] = bin2[pos_counter])
+                    SET count_diff TO count_diff + 1
+                END IF
+                SET pos_counter TO pos_counter + 1
+            UNTIL pos_counter = LENGTH(bin1)
+            RETURN count_diff
+        END FUNCTION
+
+        SET outer_idx TO 0
+        REPEAT
+            SET max_found TO 0
+            SET inner_idx TO 0
+            REPEAT
+                IF NOT (outer_idx = inner_idx)
+                    SET current_distance TO hamming_distance(transformed_numbers[outer_idx], transformed_numbers[inner_idx])
+                    IF max_found < current_distance
+                        SET max_found TO current_distance
+                    END IF
+                END IF
+                SET inner_idx TO inner_idx + 1
+            UNTIL inner_idx = LENGTH(nums)
+            SET result_collection TO result_collection + [max_found]
+            SET outer_idx TO outer_idx + 1
+        UNTIL outer_idx = LENGTH(nums)
+
+        RETURN result_collection
+    END FUNCTION
+END CLASS

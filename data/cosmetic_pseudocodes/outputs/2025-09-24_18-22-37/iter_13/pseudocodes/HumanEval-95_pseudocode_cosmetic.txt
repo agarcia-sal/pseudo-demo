@@ -1,0 +1,50 @@
+FUNCTION check_dict_case(container)
+        IF container.keys().length <> 0 THEN
+            state_marker = "start"
+            iterator_index = 0
+            max_index = container.keys().size()
+            WHILE iterator_index < max_index
+                current_key = container.keys().at(iterator_index)
+                IF NOT (current_key INSTANCEOF STRING) THEN
+                    state_marker = "mixed"
+                    EXIT WHILE
+                END IF
+                SWITCH state_marker
+                    CASE "start":
+                        temp_is_upper = current_key IS ALL UPPERCASE
+                        temp_is_lower = current_key IS ALL LOWERCASE
+                        IF temp_is_upper THEN
+                            state_marker = "upper"
+                        ELSE
+                            IF temp_is_lower THEN
+                                state_marker = "lower"
+                            ELSE
+                                EXIT WHILE
+                            END IF
+                        END IF
+                    CASE "upper":
+                        IF NOT (current_key IS ALL UPPERCASE) THEN
+                            state_marker = "mixed"
+                            EXIT WHILE
+                        ELSE
+                            EXIT WHILE
+                        END IF
+                    CASE "lower":
+                        IF NOT (current_key IS ALL LOWERCASE) THEN
+                            state_marker = "mixed"
+                            EXIT WHILE
+                        ELSE
+                            EXIT WHILE
+                        END IF
+                    DEFAULT:
+                        EXIT WHILE
+                END SWITCH
+                iterator_index = iterator_index + 1
+            END WHILE
+            temp_result_upper = (state_marker = "upper")
+            temp_result_lower = (state_marker = "lower")
+            RETURN (temp_result_upper OR temp_result_lower)
+        ELSE
+            RETURN False
+        END IF
+END FUNCTION

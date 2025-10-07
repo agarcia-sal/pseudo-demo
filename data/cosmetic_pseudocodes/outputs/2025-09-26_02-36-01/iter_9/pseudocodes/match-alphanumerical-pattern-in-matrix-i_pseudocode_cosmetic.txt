@@ -1,0 +1,59 @@
+CLASS Solution
+	FUNCTION findPattern(board, pattern)
+		DEFINE FUNCTION isEquivalent(xPos, yPos)
+			INITIALIZE mapCharToNum TO empty dictionary
+			INITIALIZE mapNumToChar TO empty dictionary
+			DEFINE FUNCTION isDigitChar(ch)
+				RETURN (ch >= '0') AND (ch <= '9')
+			END FUNCTION
+
+			INITIALIZE idxRow TO 0
+			WHILE idxRow < LENGTH(pattern)
+				INITIALIZE idxCol TO 0
+				WHILE idxCol < LENGTH(pattern[0])
+					INITIALIZE patChar TO pattern[idxRow][idxCol]
+					INITIALIZE brdNum TO board[xPos + idxRow][yPos + idxCol]
+
+					IF isDigitChar(patChar) THEN
+						INITIALIZE digVal TO CAST patChar TO integer
+						IF digVal != brdNum THEN
+							RETURN False
+						END IF
+					ELSE
+						IF patChar IN mapCharToNum THEN
+							IF mapCharToNum[patChar] != brdNum THEN
+								RETURN False
+							END IF
+						ELSE
+							IF brdNum IN mapNumToChar THEN
+								RETURN False
+							END IF
+							mapCharToNum[patChar] = brdNum
+							mapNumToChar[brdNum] = patChar
+						END IF
+					END IF
+
+					idxCol += 1
+				END WHILE
+				idxRow += 1
+			END WHILE
+			RETURN True
+		END FUNCTION
+
+		INITIALIZE maxRowIter TO LENGTH(board) - LENGTH(pattern)
+		INITIALIZE maxColIter TO LENGTH(board[0]) - LENGTH(pattern[0])
+		INITIALIZE outerIter TO 0
+		REPEAT 
+			INITIALIZE innerIter TO 0
+			REPEAT
+				IF isEquivalent(outerIter, innerIter) THEN
+					RETURN [outerIter, innerIter]
+				END IF
+				innerIter += 1
+			UNTIL innerIter > maxColIter
+			outerIter += 1
+		UNTIL outerIter > maxRowIter
+
+		RETURN [-1, -1]
+	END FUNCTION
+END CLASS

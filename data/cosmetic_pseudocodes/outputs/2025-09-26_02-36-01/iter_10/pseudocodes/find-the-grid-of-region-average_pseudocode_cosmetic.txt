@@ -1,0 +1,95 @@
+CLASS Solution
+	FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+		SET p TO LENGTH OF image
+		SET q TO LENGTH OF element at position zero of image
+		SET buffer TO a LIST containing p ELEMENTS EACH of a LIST containing q ELEMENTS EACH set TO 0
+		SET tracker TO a LIST containing p ELEMENTS EACH of a LIST containing q ELEMENTS EACH set TO 0
+
+		FUNCTION check_region(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE boolean
+			DEFINE neighbors AS the COLLECTION consisting of the PAIRS -1 AND 0, 1 AND 0, 0 AND -1, 0 AND 1
+
+			SET u TO a
+			WHILE u < a + 3
+				SET v TO b
+				WHILE v < b + 3
+					SET idx1 TO 0
+					DEFINE inner_check
+						IF idx1 >= LENGTH OF neighbors THEN RETURN True END IF
+						SET dx TO element at position idx1 of neighbors at position zero
+						SET dy TO element at position idx1 of neighbors at position one
+						SET nx TO u + dx
+						SET ny TO v + dy
+						IF nx >= 0 AND nx < a + 3 AND ny >= 0 AND ny < b + 3 THEN
+							SET diff_val TO ABSOLUTE VALUE OF element at position u of image at position v MINUS element at position nx of image at position ny
+							IF diff_val > threshold THEN RETURN False END IF
+						END IF
+						SET idx1 TO idx1 + 1
+						RETURN inner_check()
+					END DEFINE
+					IF inner_check() = False THEN RETURN False END IF
+					SET v TO v + 1
+				END WHILE
+				SET u TO u + 1
+			END WHILE
+			RETURN True
+		END FUNCTION
+
+		FUNCTION average_region(c WITH TYPE integer d WITH TYPE integer) WITH RETURN TYPE integer
+			SET sum_acc TO 0
+			SET r TO c
+			REPEAT
+				SET s TO d
+				REPEAT
+					SET val TO element at position r of image at position s
+					SET sum_acc TO sum_acc + val
+					SET s TO s + 1
+				UNTIL s >= d + 3
+				SET r TO r + 1
+			UNTIL r >= c + 3
+			SET avg_res TO sum_acc DIVIDED BY (3 * 3)
+			RETURN avg_res
+		END FUNCTION
+
+		DEFINE process_rows(idx_outer WITH TYPE integer)
+			IF idx_outer >= p - 2 THEN RETURN END IF
+			DEFINE process_cols(idx_inner WITH TYPE integer)
+				IF idx_inner >= q - 2 THEN RETURN END IF
+				IF check_region(idx_outer idx_inner) = True THEN
+					SET local_avg TO average_region(idx_outer idx_inner)
+					SET oi TO idx_outer
+					WHILE oi < idx_outer + 3
+						SET oj TO idx_inner
+						WHILE oj < idx_inner + 3
+							SET element at position oi of buffer at position oj TO element at position oi of buffer at position oj + local_avg
+							SET element at position oi of tracker at position oj TO element at position oi of tracker at position oj + 1
+							SET oj TO oj + 1
+						END WHILE
+						SET oi TO oi + 1
+					END WHILE
+				END IF
+				process_cols(idx_inner + 1)
+			END DEFINE
+			process_cols(0)
+			process_rows(idx_outer + 1)
+		END DEFINE
+		process_rows(0)
+
+		DEFINE finalize_rows(x_with TYPE integer)
+			IF x_with >= p THEN RETURN END IF
+			DEFINE finalize_cols(y_with TYPE integer)
+				IF y_with >= q THEN RETURN END IF
+				IF element at position x_with of tracker at position y_with > 0 THEN
+					SET element at position x_with of buffer at position y_with TO element at position x_with of buffer at position y_with DIVIDED BY element at position x_with of tracker at position y_with
+				ELSE
+					SET element at position x_with of buffer at position y_with TO element at position x_with of image at position y_with
+				END IF
+				finalize_cols(y_with + 1)
+			END DEFINE
+			finalize_cols(0)
+			finalize_rows(x_with + 1)
+		END DEFINE
+		finalize_rows(0)
+
+		RETURN buffer
+	END FUNCTION
+END CLASS

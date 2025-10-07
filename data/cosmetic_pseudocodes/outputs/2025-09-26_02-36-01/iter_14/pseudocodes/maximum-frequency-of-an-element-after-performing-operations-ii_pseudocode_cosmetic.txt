@@ -1,0 +1,38 @@
+CLASS Solution
+    FUNCTION maxFrequency(nums, k, numOperations)
+        ASSIGN reference omega TO a new default dictionary with integer default
+        ASSIGN reference sigma TO a new default dictionary with integer default
+
+        FOR index FROM 1 TO LENGTH(nums) DO
+            LET psi BE nums[index]
+            SET omega[psi] TO omega[psi] + 1
+            SET sigma[psi] TO sigma[psi] + 0
+            SET sigma[(psi - k)] TO sigma[(psi - k)] + 1
+            SET sigma[(psi + k + 1)] TO sigma[(psi + k + 1)] - 1
+        END FOR
+
+        ASSIGN theta TO 0
+        ASSIGN phi TO 0
+
+        DEFINE FUNCTION loopOverD(keysList, pos, accSum, maxVal)
+            IF pos > LENGTH(keysList) THEN
+                RETURN maxVal
+            ELSE
+                LET currentKey BE keysList[pos]
+                LET accNew BE accSum + sigma[currentKey]
+                LET candidateVal BE MIN(accNew, omega[currentKey] + numOperations)
+                LET maxNew BE candidateVal
+                IF maxVal > maxNew THEN
+                    SET maxNew TO maxVal
+                END IF
+                RETURN loopOverD(keysList, pos + 1, accNew, maxNew)
+            END IF
+        END FUNCTION
+
+        LET sortedKeys BE a sorted list of keys from sigma
+
+        SET theta TO loopOverD(sortedKeys, 1, 0, 0)
+
+        RETURN theta
+    END FUNCTION
+END CLASS

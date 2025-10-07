@@ -1,0 +1,117 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+      SET len_graph TO LENGTH graph
+      SET flags TO ARRAY OF BOOLEAN false REPEATED len_graph TIMES
+      SET q TO NEW deque WITH (start, 0)
+      SET flags[start] TO true
+      SET far_node TO start
+      SET max_dist TO 0
+      WHILE NOT (LENGTH q = 0) DO
+        POP_LEFT q INTO curr_node, curr_dist
+        IF NOT (curr_dist <= max_dist) THEN
+          SET max_dist TO curr_dist
+          SET far_node TO curr_node
+        END IF
+        FOR EACH adj IN graph[curr_node] DO
+          IF NOT flags[adj] THEN
+            SET flags[adj] TO true
+            ENQUEUE q WITH (adj, curr_dist + (1 * 1))
+          END IF
+        END FOR
+      END WHILE
+      RETURN far_node, max_dist
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+      SET base_node TO 0
+      SET extremity, _ TO bfs(graph, base_node)
+      _, diam_len TO bfs(graph, extremity)
+      RETURN diam_len
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+      SET size_g TO LENGTH graph
+      SET visit_flags TO ARRAY OF BOOLEAN false REPEATED size_g TIMES
+      SET q_nodes TO NEW deque WITH (node, 0)
+      SET visit_flags[node] TO true
+      SET max_dist TO (0 + (0 * 0))
+      WHILE (NOT LENGTH q_nodes = 0) DO
+        POP_LEFT q_nodes INTO cur_n, cur_d
+        IF NOT (cur_d <= max_dist) THEN
+          SET max_dist TO cur_d
+        END IF
+        FOR EACH nxt IN graph[cur_n] DO
+          IF NOT visit_flags[nxt] THEN
+            SET visit_flags[nxt] TO true
+            ENQUEUE q_nodes WITH (nxt, (cur_d + (1 - 0)))
+          END IF
+        END FOR
+      END WHILE
+      RETURN max_dist
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+      SET size1 TO (LENGTH edges1 + 1)
+      SET size2 TO (LENGTH edges2 + 1)
+      SET g1 TO ARRAY OF EMPTY LISTS REPEATED size1 TIMES
+      SET g2 TO ARRAY OF EMPTY LISTS REPEATED size2 TIMES
+      FOR EACH pair_u, pair_v IN edges1 DO
+        APPEND pair_v TO g1[pair_u]
+        APPEND pair_u TO g1[pair_v]
+      END FOR
+      FOR EACH pair_u, pair_v IN edges2 DO
+        APPEND pair_v TO g2[pair_u]
+        APPEND pair_u TO g2[pair_v]
+      END FOR
+      SET diam1 TO tree_diameter(g1)
+      SET diam2 TO tree_diameter(g2)
+      SET longest1 TO EMPTY LIST
+      SET idx1 TO 0
+      LOOP_WHILE idx1 <= (size1 - 1)
+        APPEND maximum_path_length_from_node(g1, idx1) TO longest1
+        SET idx1 TO idx1 + 1
+      END LOOP
+      SET longest2 TO []
+      SET idx2 TO 0
+      WHILE NOT (idx2 > (size2 - 1)) DO
+        APPEND maximum_path_length_from_node(g2, idx2) TO longest2
+        SET idx2 TO idx2 + 1
+      END WHILE
+      SET minimum_possible_diameter TO +∞
+      FOR u_idx FROM 0 TO (size1 - 1) DO
+        FOR v_idx FROM 0 TO (size2 - 1) DO
+          SET candidate TO longest1[u_idx] + longest2[v_idx] + 1
+          IF candidate < minimum_possible_diameter AND candidate < diam1 AND candidate < diam2 THEN
+            SET minimum_possible_diameter TO candidate
+          ELSE
+            IF diam1 > diam2 THEN
+              IF diam1 < minimum_possible_diameter THEN
+                SET minimum_possible_diameter TO diam1
+              END IF
+            ELSE
+              IF diam2 < minimum_possible_diameter THEN
+                SET minimum_possible_diameter TO diam2
+              END IF
+            END IF
+          END IF
+          IF diam1 > candidate AND diam1 > diam2 THEN
+            IF diam1 < minimum_possible_diameter THEN
+              SET minimum_possible_diameter TO diam1
+            END IF
+          END IF
+          IF diam2 > candidate AND diam2 > diam1 THEN
+            IF diam2 < minimum_possible_diameter THEN
+              SET minimum_possible_diameter TO diam2
+            END IF
+          END IF
+          IF candidate >= minimum_possible_diameter THEN
+            CONTINUE
+          END IF
+          IF candidate < minimum_possible_diameter THEN
+            SET minimum_possible_diameter TO candidate
+          END IF
+        END FOR
+      END FOR
+      RETURN minimum_possible_diameter
+    END FUNCTION
+END CLASS

@@ -1,0 +1,97 @@
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        PROCEDURE ExtractMin(H LIST) RETURNS tuple
+            SET idx_inner TO 0
+            SET val_inner TO 0
+            SET size_inner TO LENGTH(H)
+            SET parent_idx TO 0
+            WHILE parent_idx * 2 + 1 < size_inner
+                SET child_idx TO parent_idx * 2 + 1
+                IF child_idx + 1 < size_inner AND H[child_idx + 1][0] < H[child_idx][0]
+                    SET child_idx TO child_idx + 1
+                END IF
+                IF H[parent_idx][0] <= H[child_idx][0]
+                    BREAK
+                END IF
+                SET temp_node TO H[parent_idx]
+                SET H[parent_idx] TO H[child_idx]
+                SET H[child_idx] TO temp_node
+                SET parent_idx TO child_idx
+            END WHILE
+            SET idx_inner TO H[0][1]
+            SET val_inner TO H[0][0]
+            SET H[0] TO H[size_inner - 1]
+            REMOVE LAST ELEMENT FROM H
+            CALL ExtractMin(H)
+            RETURN val_inner, idx_inner
+        END PROCEDURE
+
+        PROCEDURE BuildHeap(H LIST)
+            SET length_heap TO LENGTH(H)
+            SET i_heap TO (length_heap DIV 2) - 1
+            WHILE i_heap >= 0
+                SET parent_pos TO i_heap
+                WHILE parent_pos * 2 + 1 < length_heap
+                    SET child_pos TO parent_pos * 2 + 1
+                    IF child_pos + 1 < length_heap AND H[child_pos + 1][0] < H[child_pos][0]
+                        SET child_pos TO child_pos + 1
+                    END IF
+                    IF H[parent_pos][0] <= H[child_pos][0]
+                        BREAK
+                    END IF
+                    SET temp_entry TO H[parent_pos]
+                    SET H[parent_pos] TO H[child_pos]
+                    SET H[child_pos] TO temp_entry
+                    SET parent_pos TO child_pos
+                END WHILE
+                SET i_heap TO i_heap - 1
+            END WHILE
+        END PROCEDURE
+
+        SET heap_container TO []
+        SET ic_counter TO 0
+        WHILE ic_counter < LENGTH(nums)
+            SET node_val TO nums[ic_counter]
+            SET node_idx TO ic_counter
+            APPEND [node_val, node_idx] TO heap_container
+            SET ic_counter TO ic_counter + 1
+        END WHILE
+
+        CALL BuildHeap(heap_container)
+
+        SET seen_marks TO {}
+        SET total_aggregate TO 0
+        SET pos_agg TO 0
+        WHILE pos_agg < LENGTH(nums)
+            SET total_aggregate TO total_aggregate + nums[pos_agg]
+            SET pos_agg TO pos_agg + 1
+        END WHILE
+
+        SET final_answer TO []
+        SET q_pos TO 0
+        REPEAT
+            IF q_pos >= LENGTH(queries) THEN EXIT
+            SET q_idx TO queries[q_pos][0]
+            SET q_k TO queries[q_pos][1]
+            IF NOT (q_idx IN seen_marks)
+                SET seen_marks[q_idx] TO TRUE
+                SET total_aggregate TO total_aggregate + (-1)*nums[q_idx]
+            END IF
+
+            SET counter_loc TO 0
+            WHILE counter_loc < q_k AND LENGTH(heap_container) > 0
+                SET pop_val, pop_idx TO ExtractMin(heap_container)
+                IF NOT (pop_idx IN seen_marks)
+                    SET seen_marks[pop_idx] TO TRUE
+                    SET total_aggregate TO total_aggregate - pop_val
+                    SET counter_loc TO counter_loc + 1
+                END IF
+            END WHILE
+
+            APPEND total_aggregate TO final_answer
+            SET q_pos TO q_pos + 1
+        END REPEAT
+
+        RETURN final_answer
+    END FUNCTION
+END CLASS

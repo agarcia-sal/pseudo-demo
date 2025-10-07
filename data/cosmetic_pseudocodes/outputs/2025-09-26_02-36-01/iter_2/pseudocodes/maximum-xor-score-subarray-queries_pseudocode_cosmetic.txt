@@ -1,0 +1,37 @@
+CLASS Solution  
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)  
+        DEFINE lengthVal ASSIGN LENGTH(nums)  
+        CREATE fMatrix AS LIST OF LISTS WITH lengthVal ROWS AND lengthVal COLUMNS, FILLED WITH 0  
+        CREATE gMatrix AS LIST OF LISTS WITH lengthVal ROWS AND lengthVal COLUMNS, FILLED WITH 0  
+        SET idx TO lengthVal - 1  
+        WHILE idx >= 0  
+            fMatrix[idx][idx] = nums[idx]  
+            gMatrix[idx][idx] = nums[idx]  
+            nextIdx = idx + 1  
+            WHILE nextIdx < lengthVal  
+                fMatrix[idx][nextIdx] = (fMatrix[idx][nextIdx - 1]) XOR (fMatrix[idx + 1][nextIdx])  
+                temp1 = gMatrix[idx][nextIdx - 1]  
+                temp2 = gMatrix[idx + 1][nextIdx]  
+                temp3 = fMatrix[idx][nextIdx]  
+                gMatrix[idx][nextIdx] = temp3  
+                IF temp1 > gMatrix[idx][nextIdx] THEN  
+                    gMatrix[idx][nextIdx] = temp1  
+                END IF  
+                IF temp2 > gMatrix[idx][nextIdx] THEN  
+                    gMatrix[idx][nextIdx] = temp2  
+                END IF  
+                nextIdx = nextIdx + 1  
+            END WHILE  
+            idx = idx - 1  
+        END WHILE  
+        INITIALIZE resultList AS EMPTY LIST  
+        SET queryIdx TO 0  
+        WHILE queryIdx < LENGTH(queries)  
+            DEFINE leftPos = queries[queryIdx][0]  
+            DEFINE rightPos = queries[queryIdx][1]  
+            APPEND gMatrix[leftPos][rightPos] TO resultList  
+            queryIdx = queryIdx + 1  
+        END WHILE  
+        RETURN resultList  
+    END FUNCTION  
+END CLASS

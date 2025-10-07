@@ -1,0 +1,43 @@
+CLASS Solution
+    FUNCTION findMaximumNumber(k, x)
+        FUNCTION count_set_bits(n, pos)
+            SET accumulator TO 0
+            SET segment_size TO 2 ^ pos
+            SET complete_segments TO FLOOR(n / segment_size)
+            SET accumulator TO accumulator + (complete_segments \ 2) * segment_size
+            IF (complete_segments MOD 2) = 1 THEN
+                SET accumulator TO accumulator + ((n MOD segment_size) + 1)
+            END IF
+            RETURN accumulator
+        END FUNCTION
+
+        FUNCTION accumulated_price(n)
+            SET total TO 0
+            SET index TO 1
+            REPEAT
+                SET power_val TO (index * x) - 1
+                SET cond TO (2 ^ power_val) <= n
+                IF NOT cond THEN
+                    EXIT REPEAT
+                END IF
+                SET total TO total + count_set_bits(n, power_val)
+                SET index TO index + 1
+            UNTIL false
+            RETURN total
+        END FUNCTION
+
+        SET start TO 1
+        SET end_val TO 2 ^ 60
+        SET result TO 0
+        WHILE start <= end_val
+            SET midpoint TO FLOOR((start + end_val) / 2)
+            IF accumulated_price(midpoint) <= k THEN
+                SET start TO midpoint + 1
+                SET result TO midpoint
+            ELSE
+                SET end_val TO midpoint - 1
+            END IF
+        END WHILE
+        RETURN result
+    END FUNCTION
+END CLASS

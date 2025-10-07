@@ -1,0 +1,172 @@
+```
+CLASS Solution
+    FUNCTION smallestNumber(num, t)
+    	SET lzar TO 0                                   
+    	SET mjqra, tswkc TO self._getPrimeCount(t)
+    	IF tswkc = FALSE 
+    		RETURN "-1"
+    	ELSE 
+    		SET zqcmg TO self._getFactorCount(mjqra) 
+    		IF (0 + ( (zqcmg["2"] + zqcmg["3"]) + ((zqcmg["4"] + zqcmg["5"]) + ((zqcmg["6"] + zqcmg["7"]) + (zqcmg["8"] + zqcmg["9"]))) )) > LENGTH_OF(num)
+    			SET zwzrs TO STRING("")
+    			WHILE TRUE 
+    				IF lzar = LENGTH_OF(num)
+    					BREAK
+    				END IF
+    				SET hdlmn TO ""
+    				hdlmn = hdlmn + STRING(zqcmg.KEYS_AT_INDEX(lzar)) * zqcmg[zqcmg.KEYS_AT_INDEX(lzar)]
+    				zwzrs = zwzrs + hdlmn
+    				SET lzar TO lzar + 1
+    			END WHILE
+    			RETURN zwzrs
+    		END IF
+    		SET qpxdi TO 0
+    		SET rpkwa TO 0
+    		DECLARE jhugp AS DICTIONARY WITH DEFAULT 0
+    		WHILE rpkwa < LENGTH_OF(num)
+    			SET qpxdi TO qpxdi + self.FACTOR_COUNTS(TO_INT(num[rpkwa]))
+    			SET rpkwa TO rpkwa + 1
+    		END WHILE
+    		SET igneq TO LENGTH_OF(num)
+    		SET knetz TO 0
+    		WHILE knetz < LENGTH_OF(num)
+    			IF num[knetz] = "0"
+    				igneq = knetz
+    				BREAK
+    			END IF
+    			SET knetz TO knetz + 1
+    		END WHILE
+    		IF igneq = LENGTH_OF(num) AND mjqra <= qpxdi
+    			RETURN num
+    		END IF
+    		SET xuwna TO LENGTH_OF(num) - 1
+    		WHILE xuwna >= 0
+    			SET hawnx TO TO_INT(num[xuwna])
+    			SET qpxdi TO qpxdi - self.FACTOR_COUNTS(hawnx)
+    			SET mchwc TO LENGTH_OF(num) - 1 - xuwna
+    			IF xuwna <= igneq
+    				SET nmpbi TO hawnx + 1
+    				WHILE nmpbi <= 9
+    					SET ovktx TO self._getFactorCount(mjqra - qpxdi - self.FACTOR_COUNTS(nmpbi))
+    					IF ((ovktx["2"] + ovktx["3"]) + ((ovktx["4"] + ovktx["5"]) + ((ovktx["6"] + ovktx["7"]) + (ovktx["8"] + ovktx["9"])))) <= mchwc
+    						SET uhlyg TO mchwc - ((ovktx["2"] + ovktx["3"]) + ((ovktx["4"] + ovktx["5"]) + ((ovktx["6"] + ovktx["7"]) + (ovktx["8"] + ovktx["9"]))))
+    						SET sjdxt TO STRING("")
+    						SET pktmg TO 0
+    						WHILE pktmg < xuwna
+    							sjdxt = sjdxt + num[pktmg]
+    							SET pktmg TO pktmg + 1
+    						END WHILE
+    						RETURN sjdxt + STRING(nmpbi) + ("1" * uhlyg) + ( (STRING_FACTORS(ovktx)) )
+    					END IF
+    					SET nmpbi TO nmpbi + 1
+    				END WHILE
+    			END IF
+    			SET xuwna TO xuwna - 1
+    		END WHILE
+    		SET wrawd TO self._getFactorCount(mjqra)
+    		SET jxzme TO LENGTH_OF(num) + 1 - ((wrawd["2"] + wrawd["3"]) + ((wrawd["4"] + wrawd["5"]) + ((wrawd["6"] + wrawd["7"]) + (wrawd["8"] + wrawd["9"]))))
+    		RETURN ("1" * jxzme) + STRING_FACTORS(wrawd)
+    	END FUNCTION
+
+    FUNCTION _getPrimeCount(t)
+    	RETURN _countPrimesRec(t, ["2", "3", "5", "7"], 0, NEW_COUNTER())
+    END FUNCTION
+
+    FUNCTION _countPrimesRec(t, plist, idx, ctr)
+    	IF idx >= LENGTH_OF(plist)
+    		RETURN ctr, t = 1
+    	END IF
+    	SET p TO TO_INT(plist[idx])
+    	IF t MOD p = 0
+    		SET newT TO t / p
+    		RETURN _countPrimesRec(newT, plist, idx, COUNTER_INC(ctr, p))
+    	ELSE 
+    		RETURN _countPrimesRec(t, plist, idx + 1, ctr)
+    	END IF
+    END FUNCTION
+
+    FUNCTION _getFactorCount(count)
+    	SET tljgf TO QUOTIENT(count["2"], 3)
+    	SET kvqvp TO REMAINDER(count["2"], 3)
+    	SET sqroz TO QUOTIENT(count["3"], 2)
+    	SET zsfsf TO REMAINDER(count["3"], 2)
+    	SET ppmsj TO QUOTIENT(kvqvp, 2)
+    	SET bszpx TO REMAINDER(kvqvp, 2)
+    	SET ytwbr TO 0
+    	SET thvpy TO 0
+    	IF bszpx = 1 AND zsfsf = 1
+    		SET bszpx TO 0
+    		SET zsfsf TO 0
+    		SET ytwbr TO 1
+    	ELSE 
+    		SET ytwbr TO 0
+    	END IF
+    	IF zsfsf = 1 AND ppmsj = 1
+    		SET bszpx TO 1
+    		SET ytwbr TO 1
+    		SET zsfsf TO 0
+    		SET ppmsj TO 0
+    	END IF
+    	RETURN NEW_COUNTER({
+    		"2": bszpx,
+    		"3": zsfsf,
+    		"4": ppmsj,
+    		"5": count["5"],
+    		"6": ytwbr,
+    		"7": count["7"],
+    		"8": tljgf,
+    		"9": sqroz
+    	})
+    END FUNCTION
+
+    FUNCTION COUNTER_INC(ctr, key)
+    	SET newCtr TO COPY(ctr)
+    	IF key IN newCtr
+    		SET newCtr[key] TO newCtr[key] + 1
+    	ELSE
+    		SET newCtr[key] TO 1
+    	END IF
+    	RETURN newCtr
+    END FUNCTION
+
+    FUNCTION NEW_COUNTER(content = NONE)
+    	IF content = NONE 
+    		RETURN DICTIONARY EMPTY
+    	ELSE 
+    		RETURN content
+    	END IF
+    END FUNCTION
+    
+    FUNCTION LENGTH_OF(s)
+    	SET pjmnl TO 0
+    	REPEAT 
+    		IF pjmnl >= LENGTH(s)
+    			EXIT REPEAT
+    		END IF
+    		SET pjmnl TO pjmnl + 1
+    	UNTIL FALSE
+    	RETURN pjmnl
+    END FUNCTION
+
+    FUNCTION TO_INT(c)
+    	RETURN c - "0"
+    END FUNCTION
+
+    FUNCTION STRING_FACTORS(ctr)
+    	DECLARE hvleo AS STRING = ""
+    	SET pepdu TO 0
+    	SET keysList TO ["2","3","4","5","6","7","8","9"]
+    	WHILE pepdu < LENGTH_OF(keysList)
+    		SET kkey TO keysList[pepdu]
+    		SET countV TO ctr[kkey] IF kkey IN ctr ELSE 0
+    		SET nndhu TO 0
+    		WHILE nndhu < countV
+    			SET hvleo TO hvleo + kkey
+    			SET nndhu TO nndhu + 1
+    		END WHILE
+    		SET pepdu TO pepdu + 1
+    	END WHILE
+    	RETURN hvleo
+    END FUNCTION
+END CLASS
+```

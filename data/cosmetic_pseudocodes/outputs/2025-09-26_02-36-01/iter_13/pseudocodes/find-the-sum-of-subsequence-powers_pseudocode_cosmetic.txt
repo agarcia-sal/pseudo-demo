@@ -1,0 +1,85 @@
+CLASS Solution
+	FUNCTION sumOfPowers(nums LIST OF INTEGERS, k INTEGER) RETURNS INTEGER
+		CONST BASE ← 10
+		CONST EXPONENT ← 9
+		CONST ADDEND ← 7
+		SET MOD ← (BASE ^ EXPONENT) + ADDEND
+
+		FUNCTION absoluteValue(x INTEGER) RETURNS INTEGER
+			IF x < 0 THEN RETURN -x ELSE RETURN x END IF
+		END FUNCTION
+
+		FUNCTION getCombinations(arr LIST OF INTEGERS, r INTEGER) RETURNS LIST OF LIST OF INTEGERS
+			FUNCTION combineRecursive(start INTEGER, comb LIST OF INTEGERS, results LIST OF LIST OF INTEGERS)
+				IF LENGTH(comb) = r THEN
+					CALL addToList(results, copyList(comb))
+					RETURN
+				END IF
+				IF start >= LENGTH(arr) THEN RETURN END IF
+				SET newComb ← comb
+				CALL appendToList(newComb, arr[start])
+				CALL combineRecursive(start + 1, newComb, results)
+				CALL combineRecursive(start + 1, comb, results)
+			END FUNCTION
+			SET collectedComb ← emptyList()
+			CALL combineRecursive(0, emptyList(), collectedComb)
+			RETURN collectedComb
+		END FUNCTION
+
+		FUNCTION copyList(lst LIST OF INTEGERS) RETURNS LIST OF INTEGERS
+			SET newList ← emptyList()
+			SET idx ← 0
+			WHILE idx < LENGTH(lst)
+				CALL appendToList(newList, lst[idx])
+				SET idx ← idx + 1
+			END WHILE
+			RETURN newList
+		END FUNCTION
+
+		FUNCTION appendToList(lst LIST OF INTEGERS, val INTEGER)
+			SET length ← LENGTH(lst)
+			SET lst[length] ← val
+		END FUNCTION
+
+		FUNCTION addToList(lst LIST OF LIST OF INTEGERS, val LIST OF INTEGERS)
+			SET ln ← LENGTH(lst)
+			SET lst[ln] ← val
+		END FUNCTION
+
+		FUNCTION minOfTwo(a INTEGER, b INTEGER) RETURNS INTEGER
+			IF a < b THEN RETURN a ELSE RETURN b END IF
+		END FUNCTION
+
+		SET accResult ← 0
+		SET combos ← getCombinations(nums, k)
+
+		FUNCTION processIndices(i INTEGER, j INTEGER, currentMin INTEGER, combo LIST OF INTEGERS)
+			WHILE j < k
+				SET diff ← absoluteValue(combo[i] - combo[j])
+				SET currentMin ← minOfTwo(currentMin, diff)
+				SET j ← j + 1
+			END WHILE
+			RETURN currentMin
+		END FUNCTION
+
+		FUNCTION innerLoop(i INTEGER, currentMin INTEGER, combo LIST OF INTEGERS) RETURNS INTEGER
+			RETURN processIndices(i, i + 1, currentMin, combo)
+		END FUNCTION
+
+		SET comboIndex ← 0
+		WHILE comboIndex < LENGTH(combos)
+			SET currentCombo ← combos[comboIndex]
+			SET minDiff ← 1000000000
+			SET idxI ← 0
+			WHILE idxI < k
+				SET minDiff ← innerLoop(idxI, minDiff, currentCombo)
+				SET idxI ← idxI + 1
+			END WHILE
+			SET accResult ← accResult + minDiff
+			SET accResult ← accResult % MOD
+			SET comboIndex ← comboIndex + 1
+		END WHILE
+
+		RETURN accResult
+	END FUNCTION
+END CLASS

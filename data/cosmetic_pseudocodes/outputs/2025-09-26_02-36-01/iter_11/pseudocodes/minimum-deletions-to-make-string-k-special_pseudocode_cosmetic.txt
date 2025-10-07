@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION minimumDeletions(word, k)
+        PROCEDURE computeFreqMap(text, resultMap)
+            SET idx TO 0
+            WHILE idx < LENGTH(text)
+                SET ch TO text[idx]
+                IF ch IN resultMap THEN
+                    SET resultMap[ch] TO resultMap[ch] + 1
+                ELSE
+                    SET resultMap[ch] TO 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+        END PROCEDURE
+
+        SET mapAux TO EMPTY MAP
+        CALL computeFreqMap(word, mapAux)
+
+        PROCEDURE extractSortedValues(mapIn, outList)
+            SET tempArr TO EMPTY LIST
+            FOR key IN KEYS(mapIn)
+                APPEND mapIn[key] TO tempArr
+            END FOR
+            SET tempArr TO SORT(tempArr, ascending = TRUE)
+            SET idx2 TO 0
+            WHILE idx2 < LENGTH(tempArr)
+                APPEND tempArr[idx2] TO outList
+                SET idx2 TO idx2 + 1
+            END WHILE
+        END PROCEDURE
+
+        SET arrFreq TO EMPTY LIST
+        CALL extractSortedValues(mapAux, arrFreq)
+
+        SET infPos TO 1 / 0
+        SET minDel TO infPos
+
+        FUNCTION sumRange(startX, endX, listX)
+            SET resultSum TO 0
+            IF startX <= endX THEN
+                SET iVal TO startX
+                WHILE iVal <= endX
+                    SET resultSum TO resultSum + listX[iVal]
+                    SET iVal TO iVal + 1
+                END WHILE
+            END IF
+            RETURN resultSum
+        END FUNCTION
+
+        FUNCTION sumExcess(startX, endX, listX, limit)
+            SET accum TO 0
+            SET iVal TO endX
+            REPEAT
+                IF listX[iVal] > limit THEN
+                    SET diff TO (listX[iVal] - limit)
+                    SET accum TO accum + diff
+                END IF
+                SET iVal TO iVal - 1
+            UNTIL NOT (iVal >= startX)
+            RETURN accum
+        END FUNCTION
+
+        FUNCTION minimumRec(currIdx, freqArr, kVal, currMin)
+            IF currIdx > LENGTH(freqArr) - 1 THEN
+                RETURN currMin
+            ELSE
+                SET bound TO freqArr[currIdx] + kVal
+
+                SET deletionsLocal TO 0
+                SET deletionsLocal TO deletionsLocal + sumExcess(currIdx + 1, LENGTH(freqArr) - 1, freqArr, bound)
+                SET deletionsLocal TO deletionsLocal + sumRange(0, currIdx - 1, freqArr)
+
+                SET newMin TO currMin
+                IF deletionsLocal < currMin THEN
+                    SET newMin TO deletionsLocal
+                END IF
+
+                RETURN minimumRec(currIdx + 1, freqArr, kVal, newMin)
+            END IF
+        END FUNCTION
+
+        SET resultFinal TO minimumRec(0, arrFreq, k, minDel)
+
+        RETURN resultFinal
+    END FUNCTION
+END CLASS

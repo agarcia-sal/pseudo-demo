@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+    	CONST KNIGHT_DIRECTIONS = [(1,2), (2,1), (-1,2), (-2,1), (1,-2), (2,-1), (-1,-2), (-2,-1)]
+    	VAR pawn_set <- empty set
+    	FOR pos_element IN positions DO
+    		pawn_set <- pawn_set UNION { (pos_element[0], pos_element[1]) }
+    	END FOR
+    	VAR total_pawns <- LENGTH(pawn_set)
+
+    	FUNCTION dp(cx, cy, bitmask, alice_turn)
+    		IF bitmask = 0 THEN
+    			RETURN 0
+    		END IF
+
+    		VAR result_value
+    		IF alice_turn THEN
+    			result_value <- 0
+    		ELSE
+    			result_value <- +∞
+    		END IF
+
+    		FOR iter_index FROM 0 TO total_pawns - 1 DO
+    			VAR bit_check <- 2 ^ iter_index
+    			IF (bitmask & bit_check) ≠ 0 THEN
+    				VAR target_x <- positions[iter_index][0]
+    				VAR target_y <- positions[iter_index][1]
+
+    				VAR visit_queue <- [(cx, cy, 0)]
+    				VAR visited_coords <- {(cx, cy)}
+    				VAR path_found <- false
+
+    				WHILE LENGTH(visit_queue) > 0 DO
+    					VAR current_x, current_y, step_count <- visit_queue[0]
+    					visit_queue <- visit_queue[1..]
+    					IF current_x = target_x AND current_y = target_y THEN
+    						path_found <- true
+    						BREAK
+    					END IF
+
+    					FOR move_dx, move_dy IN KNIGHT_DIRECTIONS DO
+    						VAR next_x <- current_x + move_dx
+    						VAR next_y <- current_y + move_dy
+    						IF next_x >= 0 AND next_x < 50 AND next_y >= 0 AND next_y < 50 THEN
+    							IF NOT ((next_x, next_y) IN visited_coords) THEN
+    								visited_coords <- visited_coords UNION {(next_x, next_y)}
+    								visit_queue <- visit_queue + [(next_x, next_y, step_count + 1)]
+    							END IF
+    						END IF
+    					END FOR
+    				END WHILE
+                
+    				IF path_found THEN
+    					VAR updated_mask <- bitmask ^ bit_check
+    					VAR recursive_eval <- step_count + dp(target_x, target_y, updated_mask, NOT alice_turn)
+    					IF alice_turn THEN
+    						IF result_value < recursive_eval THEN
+    							result_value <- recursive_eval
+    						END IF
+    					ELSE
+    						IF result_value > recursive_eval THEN
+    							result_value <- recursive_eval
+    						END IF
+    					END IF
+    				END IF
+    			END IF
+    		END FOR
+
+    		RETURN result_value
+    	END FUNCTION
+
+    	VAR full_mask <- (2 ^ total_pawns) - 1
+    	RETURN dp(kx, ky, full_mask, TRUE)
+    END FUNCTION
+END CLASS

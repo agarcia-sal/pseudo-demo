@@ -1,0 +1,45 @@
+```
+FUNCTION valid_date(parameter_date)
+    DECLARE trimmed_input, part1, part2, part3
+    DECLARE val_month, val_day, val_year
+    DECLARE error_flag
+
+    SET error_flag = False
+
+    TRY
+        SET trimmed_input = parameter_date.TRIM()
+        SET part1, part2, part3 = SPLIT(trimmed_input, '-')
+        SET val_month = TO_INTEGER(part1)
+        SET val_day = TO_INTEGER(part2)
+        SET val_year = TO_INTEGER(part3)
+        
+        IF (val_month < 0x1) OR (val_month > 0xC) THEN
+            SET error_flag = True
+        ELSE
+            SELECT CASE TRUE
+                CASE (val_month = 0x1) OR (val_month = 0x3) OR (val_month = 0x5) OR (val_month = 0x7) OR (val_month = 0x8) OR (val_month = 0xA) OR (val_month = 0xC):
+                    IF (val_day < 0x1) OR (val_day > 0x1F) THEN
+                        SET error_flag = True
+                    END IF
+                CASE (val_month = 0x4) OR (val_month = 0x6) OR (val_month = 0x9) OR (val_month = 0xB):
+                    IF NOT ((val_day >= 0x1) AND (val_day <= 30)) THEN
+                        SET error_flag = True
+                    END IF
+                CASE (val_month = 0x2):
+                    IF (val_day < 0x1) OR (val_day > 0x1D) THEN
+                        SET error_flag = True
+                    END IF
+            END SELECT
+        END IF
+
+    CATCH ALL
+        SET error_flag = True
+    END TRY
+
+    IF error_flag = True THEN
+        RETURN False
+    ELSE
+        RETURN True
+    END IF
+END FUNCTION
+```

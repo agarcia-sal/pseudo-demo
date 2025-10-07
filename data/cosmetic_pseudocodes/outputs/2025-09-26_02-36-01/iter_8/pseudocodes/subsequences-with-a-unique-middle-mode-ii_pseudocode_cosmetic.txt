@@ -1,0 +1,97 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+      SET ONE TO 3 MINUS 2
+      SET TWO TO ONE PLUS ONE
+      SET FOUR TO TWO PLUS TWO
+      SET MOD TO 10 POWER FOUR PLUS FOUR MULTIPLIED BY 10 POWER THREE PLUS 7
+      SET ARGUMENTS TO nums
+      SET resultAccumulator TO 0
+      SET prefixMap TO empty counter
+      SET suffixMap TO empty counter
+      FOR index FROM 0 TO LENGTH(nums) MINUS 1
+        SET currentValue TO nums AT index
+        INCREMENT suffixMap[currentValue] BY 1
+      END FOR
+
+      FUNCTION nC2(value)
+        SET squareMinusOne TO (value MINUS ONE)
+        RETURN (value MULTIPLIED BY squareMinusOne) DIVIDED BY TWO
+      END FUNCTION
+
+      SET localPss TO 0
+      SET localSpp TO 0
+      SET localPp TO 0
+      SET sumSquaresS TO 0
+      FOR EACH elementKey IN suffixMap KEYS
+        SET frequency TO suffixMap[elementKey]
+        SET squareFreq TO frequency MULTIPLIED BY frequency
+        SET sumSquaresS TO sumSquaresS PLUS squareFreq
+      END FOR
+      SET localSs TO sumSquaresS
+      SET localPs TO 0
+
+      FOR loopVar FROM 0 TO LENGTH(nums) MINUS 1
+        SET elementAtPos TO nums[loopVar]
+        
+        SET interim1 TO localPss PLUS prefixMap[elementAtPos] MULTIPLIED BY (NEGATIVE OF suffixMap[elementAtPos] SQUARED PLUS (suffixMap[elementAtPos] MINUS ONE) SQUARED)
+        SET localPss TO interim1
+
+        SET interim2 TO localSpp PLUS NEGATIVE OF prefixMap[elementAtPos] SQUARED
+        SET localSpp TO interim2
+
+        SET interim3 TO localSs PLUS NEGATIVE OF suffixMap[elementAtPos] SQUARED PLUS (suffixMap[elementAtPos] MINUS ONE) SQUARED
+        SET localSs TO interim3
+
+        SET interim4 TO localPs PLUS NEGATIVE OF prefixMap[elementAtPos]
+        SET localPs TO interim4
+
+        DECREMENT suffixMap[elementAtPos] BY ONE
+
+        SET leftCount TO loopVar
+        SET rightCount TO (LENGTH(nums) MINUS loopVar MINUS 1)
+
+        SET firstTerm TO nC2(leftCount) MULTIPLIED BY nC2(rightCount)
+        SET secondTermLeft TO nC2(leftCount MINUS prefixMap[elementAtPos])
+        SET secondTermRight TO nC2(rightCount MINUS suffixMap[elementAtPos])
+        SET secondTerm TO secondTermLeft MULTIPLIED BY secondTermRight
+        SET resultAccumulator TO resultAccumulator PLUS firstTerm MINUS secondTerm
+
+        SET pssTemp TO localPss MINUS prefixMap[elementAtPos] MULTIPLIED BY suffixMap[elementAtPos] SQUARED
+        SET sppTemp TO localSpp MINUS suffixMap[elementAtPos] MULTIPLIED BY prefixMap[elementAtPos] SQUARED
+        SET ppTemp TO localPp MINUS prefixMap[elementAtPos] SQUARED
+        SET ssTemp TO localSs MINUS suffixMap[elementAtPos] SQUARED
+        SET psTemp TO localPs MINUS prefixMap[elementAtPos] MULTIPLIED BY suffixMap[elementAtPos]
+        SET pTemp TO leftCount MINUS prefixMap[elementAtPos]
+        SET sTemp TO rightCount MINUS suffixMap[elementAtPos]
+
+        SET deltaFirst TO psTemp MULTIPLIED BY prefixMap[elementAtPos] MULTIPLIED BY (rightCount MINUS suffixMap[elementAtPos])
+        SET partFirst TO pssTemp MULTIPLIED BY (NEGATIVE OF prefixMap[elementAtPos])
+        SET termFirst TO deltaFirst PLUS partFirst
+
+        SET deltaSecond TO psTemp MULTIPLIED BY suffixMap[elementAtPos] MULTIPLIED BY (leftCount MINUS prefixMap[elementAtPos])
+        SET partSecond TO sppTemp MULTIPLIED BY (NEGATIVE OF suffixMap[elementAtPos])
+        SET termSecond TO deltaSecond PLUS partSecond
+
+        SET termThirdLeftDiff TO ppTemp MINUS pTemp
+        SET termThirdRightDiff TO sTemp MULTIPLIED BY (rightCount MINUS suffixMap[elementAtPos]) DIVIDED BY TWO
+        SET termThird TO termThirdLeftDiff MULTIPLIED BY suffixMap[elementAtPos] MULTIPLIED BY termThirdRightDiff
+
+        SET termFourthLeftDiff TO ssTemp MINUS sTemp
+        SET termFourthRightDiff TO leftCount MINUS prefixMap[elementAtPos] DIVIDED BY TWO
+        SET termFourth TO termFourthLeftDiff MULTIPLIED BY prefixMap[elementAtPos] MULTIPLIED BY termFourthRightDiff
+
+        SET resultAccumulator TO resultAccumulator MINUS termFirst MINUS termSecond MINUS termThird MINUS termFourth
+
+        SET resultAccumulator TO (resultAccumulator MOD MOD PLUS MOD) MOD MOD
+
+        SET localPss TO localPss PLUS suffixMap[elementAtPos] SQUARED
+        SET localSpp TO localSpp PLUS suffixMap[elementAtPos] MULTIPLIED BY (NEGATIVE OF prefixMap[elementAtPos] SQUARED PLUS (prefixMap[elementAtPos] PLUS ONE) SQUARED)
+        SET localPp TO localPp PLUS NEGATIVE OF prefixMap[elementAtPos] SQUARED PLUS (prefixMap[elementAtPos] PLUS ONE) SQUARED
+        SET localPs TO localPs PLUS suffixMap[elementAtPos]
+
+        INCREMENT prefixMap[elementAtPos] BY ONE
+      END FOR
+
+      RETURN resultAccumulator
+    END FUNCTION
+END CLASS

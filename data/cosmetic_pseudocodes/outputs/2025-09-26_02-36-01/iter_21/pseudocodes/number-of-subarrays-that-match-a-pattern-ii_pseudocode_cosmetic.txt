@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION countMatchingSubarrays(nums, pattern)
+        FUNCTION get_relationship(a, b)
+            IF NOT(a GREATER THAN OR EQUAL TO b) THEN
+                RETURN 1
+            ELSE
+                IF NOT(a NOT EQUAL TO b) THEN
+                    RETURN 0
+                ELSE
+                    RETURN -1
+                END IF
+            END IF
+        END FUNCTION
+
+        SET x TO LENGTH OF nums
+        SET y TO LENGTH OF pattern
+        SET z TO 0
+
+        FUNCTION helper_relations(lst, acc, idx)
+            IF idx GREATER THAN OR EQUAL TO (x - 1) THEN
+                RETURN acc
+            ELSE
+                SET v TO get_relationship(lst[idx], lst[idx + 1])
+                SET new_acc TO acc CONCATENATED WITH v
+                RETURN helper_relations(lst, new_acc, idx + 1)
+            END IF
+        END FUNCTION
+
+        SET temp_rel TO helper_relations(nums, EMPTY LIST, 0)
+
+        FUNCTION check_eq(sub, pat, i)
+            IF i GREATER THAN OR EQUAL TO LENGTH OF pat THEN
+                RETURN TRUE
+            ELSE
+                IF sub[i] NOT EQUAL pat[i] THEN
+                    RETURN FALSE
+                ELSE
+                    RETURN check_eq(sub, pat, i + 1)
+                END IF
+            END IF
+        END FUNCTION
+
+        FUNCTION slice_eq(lst, start, length, pat)
+            IF length LESS THAN OR EQUAL TO 0 THEN
+                RETURN TRUE
+            ELSE
+                IF lst[start] EQUALS pat[0] THEN
+                    RETURN check_eq(lst[start : start + length], pat, 0)
+                ELSE
+                    RETURN FALSE
+                END IF
+            END IF
+        END FUNCTION
+
+        FUNCTION count_occurrences(rel, pat)
+            FUNCTION recur_count(idx, acc)
+                IF idx GREATER THAN OR EQUAL TO (x - y) THEN
+                    RETURN acc
+                ELSE
+                    IF slice_eq(rel, idx, y, pat) THEN
+                        RETURN recur_count(idx + 1, acc + 1)
+                    ELSE
+                        RETURN recur_count(idx + 1, acc)
+                    END IF
+                END IF
+            END FUNCTION
+            RETURN recur_count(0, 0)
+        END FUNCTION
+
+        RETURN count_occurrences(temp_rel, pattern)
+    END FUNCTION
+END CLASS

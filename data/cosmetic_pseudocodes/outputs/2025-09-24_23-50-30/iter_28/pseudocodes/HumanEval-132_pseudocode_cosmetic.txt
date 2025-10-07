@@ -1,0 +1,33 @@
+```
+FUNCTION is_nested(string)
+    FUNCTION gather_indices(pos, opens, closes)
+        IF pos EQUALS LENGTH(string)
+            RETURN [opens, closes]
+        ELSE
+            SET char TO string[pos]
+            SET [o, c] TO gather_indices(pos + 1, opens, closes)
+            SWITCH char
+                CASE '[':
+                    RETURN [[o + [pos]], c]
+                DEFAULT:
+                    RETURN [o, c + [pos]]
+    SET [open_positions, close_positions] TO gather_indices(0, [], [])
+    PROCEDURE reverse_in_place(lst, left, right)
+        IF left < right THEN
+            SET tmp TO lst[left]
+            SET lst[left] TO lst[right]
+            SET lst[right] TO tmp
+            CALL reverse_in_place(lst, left + 1, right - 1)
+    CALL reverse_in_place(close_positions, 0, LENGTH(close_positions) - 1)
+    SET i TO 0
+    SET matched TO 0
+    SET max_close TO LENGTH(close_positions)
+    WHILE i < LENGTH(open_positions)
+        IF matched < max_close AND open_positions[i] < close_positions[matched]
+            SET matched TO matched + 1
+            SET i TO i + 1
+        ELSE
+            SET i TO i + 1
+    RETURN matched >= 2
+END FUNCTION
+```

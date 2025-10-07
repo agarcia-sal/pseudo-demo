@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION minimumOperations(grid)
+        FUNCTION replicateValue(source, target, index)
+            REPEAT WHILE index < LENGTH(source) - 1
+                IF source[index][target] != source[index + 1][target]
+                    source[index + 1][target] = source[index][target]
+                    RETURN 1
+                END IF
+                index = index + 1
+            END REPEAT
+            RETURN 0
+        END FUNCTION
+
+        FUNCTION substituteDifferentValue(grid, row, col, maxVal)
+            IF col < maxVal - 1 AND grid[row][col] == grid[row][col + 1]
+                DECLARE replacementFound = false
+                FOR candidate FROM 0 TO 9
+                    IF candidate != grid[row][col]
+                        grid[row][col + 1] = candidate
+                        replacementFound = true
+                        EXIT FOR
+                    END IF
+                END FOR
+                RETURN CASE replacementFound WHEN true THEN 1 ELSE 0 END
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        DECLARE rows = LENGTH(grid)
+        DECLARE cols = LENGTH(grid[0])
+        DECLARE countOperations = 0
+        DECLARE columnIndex = 0
+        
+        WHILE columnIndex < cols
+            DECLARE rowIndex = 0
+            WHILE rowIndex < rows - 1
+                countOperations = countOperations + replicateValue(grid, columnIndex, rowIndex)
+                rowIndex = rowIndex + 1
+            END WHILE
+
+            DECLARE rowCheck = 0
+            WHILE rowCheck < rows
+                countOperations = countOperations + substituteDifferentValue(grid, rowCheck, columnIndex, cols)
+                rowCheck = rowCheck + 1
+            END WHILE
+
+            columnIndex = columnIndex + 1
+        END WHILE
+        
+        RETURN countOperations
+    END FUNCTION
+END CLASS

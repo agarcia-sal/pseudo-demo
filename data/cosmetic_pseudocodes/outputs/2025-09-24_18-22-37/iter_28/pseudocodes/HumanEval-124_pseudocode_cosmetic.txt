@@ -1,0 +1,31 @@
+FUNCTION valid_date(xray_string)
+    DECLARE mount_index, yvar, dust_var, zodiac_factor, div_temp
+    DECLARE validation_ok AS BOOLEAN
+    validation_ok ← True
+    BEGIN TRY
+        dust_var ← TRIM_WHITESPACE(xray_string)
+        DECLARE sections AS LIST OF STRING
+        sections ← SPLIT_BY_CHAR(dust_var, '-')
+        mount_index ← TO_INT(sections.at(0))
+        yvar ← TO_INT(sections.at(1))
+        zodiac_factor ← TO_INT(sections.at(2))
+        SWITCH TRUE DO
+            CASE (mount_index < 1) ∨ (mount_index > 0xC): 
+                RETURN False
+            CASE (mount_index = 1) ∨ (mount_index = 3) ∨ (mount_index = 5) ∨ (mount_index = 7) ∨ (mount_index = 8) ∨ (mount_index = 0xA) ∨ (mount_index = 0xC):
+                IF NOT ((yvar >= 1) ∧ (yvar ≤ 0x1F)) THEN RETURN False END IF
+            CASE (mount_index = 4) ∨ (mount_index = 6) ∨ (mount_index = 9) ∨ (mount_index = 0xB):
+                IF (yvar < 0x1) ∨ (yvar > 30) THEN
+                    RETURN False
+                END IF
+            CASE (mount_index = 2):
+                div_temp ← yvar ≥ 1
+                IF (div_temp = False) ∨ (yvar > 29) THEN RETURN False END IF
+            DEFAULT:
+                ; ; ;; -- No operation
+        END SWITCH
+    ON ERROR
+        validation_ok ← False
+    END TRY
+    RETURN validation_ok
+END FUNCTION

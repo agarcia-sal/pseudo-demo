@@ -1,0 +1,24 @@
+```
+FUNCTION rescale_to_unit(array_of_values)
+  SET idx_a TO 0
+  SET temp_min TO array_of_values[0]
+  SET temp_max TO array_of_values[0]
+  WHILE idx_a < LENGTH(array_of_values)
+    SET temp_min TO ( temp_min * (temp_min <= array_of_values[idx_a]) ) + ( array_of_values[idx_a] * (array_of_values[idx_a] < temp_min) )
+    SET temp_max TO ( temp_max * (temp_max >= array_of_values[idx_a]) ) + ( array_of_values[idx_a] * (array_of_values[idx_a] > temp_max) )
+    SET idx_a TO idx_a + 1
+  END WHILE
+
+  FUNCTION aux_collect(idx_b, acc_list)
+    IF idx_b < LENGTH(array_of_values) THEN
+      SET diff_value TO (array_of_values[idx_b] - temp_min)
+      SET denom_value TO (temp_max - temp_min)
+      RETURN aux_collect(idx_b + 1, acc_list + [diff_value / denom_value])
+    ELSE
+      RETURN acc_list
+    END IF
+  END FUNCTION
+
+  RETURN aux_collect(0, [])
+END FUNCTION
+```

@@ -1,0 +1,85 @@
+CLASS Solution  
+    FUNCTION maximumScore(grid)  
+        SET m TO LENGTH OF grid  
+        SET cumulative TO 2D array of size m BY (m PLUS 1) FILLED WITH zero  
+        SET earlierSelected TO array of size (m PLUS 1) FILLED WITH zero  
+        SET earlierSkipped TO array of size (m PLUS 1) FILLED WITH zero  
+
+        SET rowIndex TO 0  
+        WHILE rowIndex LESS THAN m  
+            SET colIndex TO 0  
+            WHILE colIndex LESS THAN m  
+                SET cumulative[rowIndex][colIndex PLUS 1] TO cumulative[rowIndex][colIndex] PLUS grid[rowIndex][colIndex]  
+                INCREMENT colIndex BY 1  
+            END WHILE  
+            INCREMENT rowIndex BY 1  
+        END WHILE  
+
+        SET lineNumber TO 1  
+        REPEAT UNTIL lineNumber GREATER THAN m MINUS 1  
+            SET currentSelected TO array of size (m PLUS 1) FILLED WITH zero  
+            SET currentSkipped TO array of size (m PLUS 1) FILLED WITH zero  
+
+            SET currentPos TO 0  
+            WHILE currentPos LESS THAN OR EQUAL TO m  
+                SET previousPos TO 0  
+                WHILE previousPos LESS THAN OR EQUAL TO m  
+                    IF currentPos GREATER THAN previousPos THEN  
+                        SET segmentScore TO cumulative[lineNumber][currentPos MINUS 1] MINUS cumulative[lineNumber][previousPos]  
+                        SET candidateSelected TO currentSelected[currentPos]  
+                        SET candidateSkipped TO currentSkipped[currentPos]  
+                        SET newSelected TO earlierSkipped[previousPos] PLUS segmentScore  
+                        SET newSkipped TO earlierSkipped[previousPos] PLUS segmentScore  
+
+                        IF newSelected GREATER THAN candidateSelected THEN  
+                            SET currentSelected[currentPos] TO newSelected  
+                        ELSE  
+                            SET currentSelected[currentPos] TO candidateSelected  
+                        END IF  
+
+                        IF newSkipped GREATER THAN candidateSkipped THEN  
+                            SET currentSkipped[currentPos] TO newSkipped  
+                        ELSE  
+                            SET currentSkipped[currentPos] TO candidateSkipped  
+                        END IF  
+                    ELSE  
+                        SET segmentScore TO cumulative[lineNumber][previousPos] MINUS cumulative[lineNumber][currentPos]  
+                        SET candidateSelected TO currentSelected[currentPos]  
+                        SET candidateSkipped TO currentSkipped[currentPos]  
+                        SET newSelected TO earlierSelected[previousPos] PLUS segmentScore  
+                        SET newSkippedOpt TO earlierSelected[previousPos]  
+
+                        IF newSelected GREATER THAN candidateSelected THEN  
+                            SET currentSelected[currentPos] TO newSelected  
+                        ELSE  
+                            SET currentSelected[currentPos] TO candidateSelected  
+                        END IF  
+
+                        IF newSkippedOpt GREATER THAN candidateSkipped THEN  
+                            SET currentSkipped[currentPos] TO newSkippedOpt  
+                        ELSE  
+                            SET currentSkipped[currentPos] TO candidateSkipped  
+                        END IF  
+                    END IF  
+                    INCREMENT previousPos BY 1  
+                END WHILE  
+                INCREMENT currentPos BY 1  
+            END WHILE  
+
+            SET earlierSelected TO currentSelected  
+            SET earlierSkipped TO currentSkipped  
+            INCREMENT lineNumber BY 1  
+        END REPEAT  
+
+        SET answer TO earlierSelected[0]  
+        SET idx TO 1  
+        WHILE idx LESS THAN LENGTH OF earlierSelected  
+            IF earlierSelected[idx] GREATER THAN answer THEN  
+                SET answer TO earlierSelected[idx]  
+            END IF  
+            INCREMENT idx BY 1  
+        END WHILE  
+
+        RETURN answer  
+    END FUNCTION  
+END CLASS

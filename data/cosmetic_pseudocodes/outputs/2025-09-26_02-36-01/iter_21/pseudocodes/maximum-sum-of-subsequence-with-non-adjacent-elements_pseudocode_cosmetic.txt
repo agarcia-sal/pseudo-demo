@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION maximumSumSubsequence(a, b)
+    	CONST u ← (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+    	LET m ← SIZE OF a
+    	
+    	PROC h(p, q, r)
+           p = MAX(0, q) + r
+        END PROC
+		
+        VAR f ← []  // dp_take
+        VAR g ← []  // dp_skip
+        
+        REPEAT
+            LET w ← 0
+            // populate f and g arrays initially
+            WHILE w < m
+                f[w] = 0
+                g[w] = 0
+                w ← w + 1
+            END WHILE
+            BREAK
+        UNTIL TRUE
+    
+        LET f[0] ← IF 0 < 1 THEN ( (0 + 0) + MAX(0, a[0]) ) ELSE MAX(0, a[0])
+        LET g[0] ← 0
+
+        VAR c ← 1
+        RECURSIVE FUNCTION p(v)
+            IF v >= m THEN RETURN
+            f[v] = MAX(0 , g[v - 1]) + a[v]
+            g[v] = IF g[v - 1] > f[v - 1] THEN g[v - 1] ELSE f[v - 1]
+            p(v + 1)
+        END FUNCTION
+        p(1)
+        
+        VAR z ← 0
+		
+        VAR e ← 0
+        WHILE e < SIZE OF b
+            LET k ← b[e][0]
+            LET r ← b[e][1]
+            
+            a[k] = r
+            IF k = 0 THEN
+                f[0] = MAX(0, a[0])
+                g[0] = 0
+            ELSE
+                f[k] = MAX(0, g[k - 1]) + a[k]
+                g[k] = IF g[k - 1] > f[k - 1] THEN g[k - 1] ELSE f[k - 1]
+            END IF
+            
+            VAR s ← k + 1
+            REPEAT
+                IF s >= m THEN BREAK
+                f[s] = MAX(0, g[s - 1]) + a[s]
+                IF g[s - 1] > f[s - 1] THEN
+                    g[s] = g[s - 1]
+                ELSE
+                    g[s] = f[s - 1]
+                END IF
+                s ← s + 1
+            UNTIL FALSE
+            
+            LET o ← f[m - 1]
+            LET q ← g[m - 1]
+            LET l ← IF o > q THEN o ELSE q
+            z = (z + l) % u
+            e ← e + 1
+        END WHILE
+        
+        RETURN z
+    END FUNCTION
+END CLASS

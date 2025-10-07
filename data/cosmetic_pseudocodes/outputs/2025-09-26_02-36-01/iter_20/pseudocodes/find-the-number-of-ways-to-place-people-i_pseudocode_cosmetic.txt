@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION numberOfPairs(points)
+        FUNCTION getX(idx)
+            RETURN points[idx][0]
+        END FUNCTION
+
+        FUNCTION getY(idx)
+            RETURN points[idx][1]
+        END FUNCTION
+
+        FUNCTION checkInsideBounds(aX, bX, cX, aY, bY, cY)
+            RETURN (aX <= bX) AND (bX <= cX) AND (aY >= bY) AND (bY >= cY)
+        END FUNCTION
+
+        VARIABLE alpha := 0
+        VARIABLE beta := LENGTH(points)
+        
+        PROCEDURE outerLoop(m)
+            IF m >= beta THEN
+                RETURN
+            END IF
+
+            PROCEDURE innerLoop(n)
+                IF n >= beta THEN
+                    RETURN
+                END IF
+
+                IF m != n THEN
+                    VARIABLE sX := getX(m)
+                    VARIABLE sY := getY(m)
+                    VARIABLE tX := getX(n)
+                    VARIABLE tY := getY(n)
+
+                    IF (sX <= tX) AND (sY >= tY) THEN
+                        VARIABLE omega := TRUE
+
+                        FUNCTION middleCheck(p)
+                            IF p >= beta THEN
+                                RETURN
+                            END IF
+
+                            IF (p != m) AND (p != n) THEN
+                                VARIABLE uX := getX(p)
+                                VARIABLE uY := getY(p)
+
+                                IF checkInsideBounds(sX, uX, tX, sY, uY, tY) THEN
+                                    omega := FALSE
+                                    RETURN
+                                END IF
+                            END IF
+
+                            middleCheck(p + 1)
+                        END FUNCTION
+
+                        middleCheck(0)
+
+                        IF omega THEN
+                            alpha := alpha + 1
+                        END IF
+                    END IF
+                END IF
+
+                innerLoop(n + 1)
+            END PROCEDURE
+
+            innerLoop(0)
+            outerLoop(m + 1)
+        END PROCEDURE
+
+        outerLoop(0)
+
+        RETURN alpha
+    END FUNCTION
+END CLASS

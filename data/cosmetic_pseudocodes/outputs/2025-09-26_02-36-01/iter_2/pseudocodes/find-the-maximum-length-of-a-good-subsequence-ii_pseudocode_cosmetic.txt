@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+        LET lengthNums BE LENGTH(nums)
+        LET dp BE a list where each element is a dictionary defaulting to zero, repeated (k + 1) times, each containing a zero-initialized list of size lengthNums
+        LET tracker BE a list containing (k + 1) elements, each is a list of three zeros
+        LET maxResult BE 0
+
+        SET index TO 0
+        WHILE index < lengthNums
+            LET currentVal BE nums[index]
+            LET count TO 0
+            WHILE count <= k
+                LET currentDPval BE dp[count].get(currentVal, 0)
+                IF count > 0 THEN
+                    IF tracker[count][0] <> nums[index - 1] WHEN index > 0 ELSE TRUE THEN
+                        currentDPval = MAX(currentDPval, tracker[count - 1][1])
+                    ELSE
+                        currentDPval = MAX(currentDPval, tracker[count - 1][2])
+                    END IF
+                END IF
+                LET currentDPvalUpdated BE currentDPval + 1
+                dp[count][currentVal] = MAX(dp[count].get(currentVal, 0), currentDPvalUpdated)
+
+                IF tracker[count][0] <> currentVal THEN
+                    IF currentDPvalUpdated >= tracker[count][1] THEN
+                        tracker[count][2] = tracker[count][1]
+                        tracker[count][1] = currentDPvalUpdated
+                        tracker[count][0] = currentVal
+                    ELSE
+                        tracker[count][2] = MAX(tracker[count][2], currentDPvalUpdated)
+                    END IF
+                ELSE
+                    tracker[count][1] = MAX(tracker[count][1], currentDPvalUpdated)
+                END IF
+
+                maxResult = MAX(maxResult, currentDPvalUpdated)
+                count = count + 1
+            END WHILE
+            index = index + 1
+        END WHILE
+
+        RETURN maxResult
+    END FUNCTION
+END CLASS

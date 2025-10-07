@@ -1,0 +1,65 @@
+CLASS Solution
+  FUNCTION numberOfPermutations(n, requirements)
+    SET M TO 0
+    SET X TO 0
+    REPEAT
+      SET X TO X + 1
+      SET M TO M + 10
+    UNTIL X > 8
+    SET M TO M + 7
+
+    SET R TO {}
+    SET IDX TO 0
+    WHILE IDX < LENGTH(requirements)
+      SET P TO requirements[IDX]
+      SET R[P[0]] TO P[1]
+      SET IDX TO IDX + 1
+    END WHILE
+
+    FUNCTION helper(l, inv, mask)
+      IF l = n THEN
+        IF (R[l - 1] IS NOT DEFINED AND inv = 0) OR (R[l - 1] IS DEFINED AND inv = R[l - 1]) THEN
+          RETURN 1
+        ELSE
+          RETURN 0
+        END IF
+      END IF
+
+      IF l > 0 THEN
+        IF (R[l - 1] IS NOT DEFINED AND inv <> inv) OR (R[l - 1] IS DEFINED AND inv <> R[l - 1]) THEN
+          RETURN 0
+        END IF
+      END IF
+
+      SET TOTAL TO 0
+
+      FUNCTION innerLoop(k, count)
+        IF k >= n THEN
+          RETURN count
+        END IF
+        IF ((mask BITAND (1 << k)) <> 0) THEN
+          RETURN innerLoop(k + 1, count + 1)
+        ELSE
+          RETURN innerLoop(k + 1, count)
+        END IF
+      END FUNCTION
+
+      FUNCTION iterateNum(x, val)
+        IF x >= n THEN
+          RETURN val
+        END IF
+        IF ((mask BITAND (1 << x)) = 0) THEN
+          SET INVS TO inv + innerLoop(x + 1, 0)
+          SET NEWMASK TO mask BITOR (1 << x)
+          SET val TO (val + helper(l + 1, INVS, NEWMASK)) MOD M
+        END IF
+        RETURN iterateNum(x + 1, val)
+      END FUNCTION
+
+      SET TOTAL TO iterateNum(0, 0)
+      RETURN TOTAL
+    END FUNCTION
+
+    RETURN helper(0, 0, 0)
+  END FUNCTION
+END CLASS

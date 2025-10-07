@@ -1,0 +1,128 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+        SET self.mod TO mod  
+        SET self.h TO array WITH SIZE (LENGTH OF s PLUS 1) FILLED WITH 0  
+        SET self.p TO array WITH SIZE (LENGTH OF s PLUS 1) FILLED WITH 1  
+
+        FUNCTION multiplyModulo(a, b)  
+            RETURN (a * b) MOD self.mod  
+        END FUNCTION  
+
+        FUNCTION addModulo(a, b)  
+            RETURN (a + b) MOD self.mod  
+        END FUNCTION  
+
+        PROCEDURE buildHash(index)  
+            IF index GREATER THAN LENGTH OF s THEN  
+                RETURN  
+            END IF  
+
+            CALL buildHash(index PLUS 1)  
+            SET tempA TO self.h[index - 1]  
+            SET tempB TO multiplyModulo(tempA, base)  
+            SET tempC TO UNICODE CODE POINT OF s[index - 1]  
+            SET self.h[index] TO addModulo(tempB, tempC)  
+
+            SET tempD TO self.p[index -1]  
+            SET self.p[index] TO multiplyModulo(tempD, base)  
+        END PROCEDURE  
+
+        PROCEDURE loopBuilder(current)  
+            IF current GREATER THAN LENGTH OF s THEN  
+                RETURN  
+            END IF  
+            SET tempE TO self.h[current - 1]  
+            SET tempF TO multiplyModulo(tempE, base)  
+            SET tempG TO UNICODE CODE POINT OF s[current - 1]  
+            SET self.h[current] TO addModulo(tempF, tempG)  
+            SET tempH TO self.p[current - 1]  
+            SET self.p[current] TO multiplyModulo(tempH, base)  
+            CALL loopBuilder(current PLUS 1)  
+        END PROCEDURE  
+
+        CALL loopBuilder(1)  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        FUNCTION modSubtraction(x, y)  
+            SET diff TO x - y  
+            IF diff LESS THAN 0 THEN  
+                SET diff TO diff PLUS self.mod  
+            END IF  
+            RETURN diff  
+        END FUNCTION  
+
+        FUNCTION modMultiplication(x, y)  
+            RETURN (x * y) MOD self.mod  
+        END FUNCTION  
+
+        SET diffVal TO modSubtraction(self.h[r], self.h[l - 1])  
+        SET powerVal TO self.p[r - l + 1]  
+        SET productVal TO modMultiplication(diffVal, powerVal)  
+        RETURN productVal MOD self.mod  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+        SET n TO LENGTH OF s  
+        SET g TO ARRAY OF EMPTY ARRAYS WITH LENGTH n  
+        PROCEDURE buildGraph(current)  
+            IF current GREATER THAN OR EQUAL TO n THEN RETURN END IF  
+            IF current GREATER THAN 0 THEN  
+                APPEND current TO g[parent[current]]  
+            END IF  
+            CALL buildGraph(current PLUS 1)  
+        END PROCEDURE  
+        CALL buildGraph(1)  
+
+        SET dfsStr TO EMPTY ARRAY  
+        SET pos TO EMPTY MAP  
+
+        FUNCTION dfs(i)  
+            SET beginIdx TO LENGTH OF dfsStr PLUS 1  
+            PROCEDURE iterateChildren(jList, idx)  
+                IF idx GREATER THAN LENGTH OF jList THEN RETURN END IF  
+                CALL dfs(jList[idx])  
+                CALL iterateChildren(jList, idx PLUS 1)  
+            END PROCEDURE  
+            CALL iterateChildren(g[i], 1)  
+            APPEND s[i] TO dfsStr  
+            SET endIdx TO LENGTH OF dfsStr  
+            SET pos[i] TO PAIR OF (beginIdx, endIdx)  
+        END FUNCTION  
+
+        CALL dfs(0)  
+
+        SET base TO 33331  
+        SET mod TO 998244353  
+        SET h1 TO NEW Hashing(dfsStr, base, mod)  
+        SET h2 TO NEW Hashing(REVERSE(dfsStr), base, mod)  
+
+        SET ans TO EMPTY ARRAY  
+
+        PROCEDURE processIndex(x)  
+            IF x GREATER THAN n - 1 THEN RETURN END IF  
+            SET l TO pos[x].first  
+            SET r TO pos[x].second  
+            SET length TO r - l + 1  
+
+            FUNCTION halfLength()  
+                RETURN length DIV 2  
+            END FUNCTION  
+
+            IF (length MOD 2) EQUALS 0 THEN  
+                SET v1 TO h1.query(l, l + halfLength() - 1)  
+                SET v2 TO h2.query(n - r + 1, n - r + 1 + halfLength() - 1)  
+            ELSE  
+                SET v1 TO h1.query(l, l + halfLength() - 1)  
+                SET v2 TO h2.query(n - r + 1, n - r + 1 + halfLength() - 1)  
+            END IF  
+            APPEND (v1 EQUALS v2) TO ans  
+            CALL processIndex(x + 1)  
+        END PROCEDURE  
+
+        CALL processIndex(0)  
+        RETURN ans  
+    END FUNCTION  
+END CLASS

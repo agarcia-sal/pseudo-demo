@@ -1,0 +1,147 @@
+CLASS Solution
+	funcTion canReachCorner(xCorner yCorner circles)
+		funcTion in_circle(x y cx cy r)
+			SET deltaX TO x MINUS cx
+			SET deltaY TO y MINUS cy
+			SET lhs TO (deltaX MULTIPLIED BY deltaX) PLUS (deltaY MULTIPLIED BY deltaY)
+			SET rhs TO r MULTIPLIED BY r
+			RETURN lhs LESS THAN OR EQUAL TO rhs
+		end FuncTION
+
+		FUNCtion cross_left_top(cx cy r)
+			SET absCx TO cx
+			IF absCx LESS THAN (0 MINUS absCx)
+				SET absCx TO (0 MINUS absCx)
+			END IF
+			SET condA TO absCx LESS THAN OR EQUAL TO r AND 0 LESS THAN OR EQUAL TO cy AND cy LESS THAN OR EQUAL TO yCorner
+
+			SET deltaCy TO cy MINUS yCorner
+			SET absDeltaCy TO deltaCy
+			IF absDeltaCy LESS THAN (0 MINUS absDeltaCy)
+				SET absDeltaCy TO (0 MINUS absDeltaCy)
+			END IF
+			SET condB TO absDeltaCy LESS THAN OR EQUAL TO r AND 0 LESS THAN OR EQUAL TO cx AND cx LESS THAN OR EQUAL TO xCorner
+
+			IF condA
+				RETURN True
+			ELSE IF condB
+				RETURN True
+			ELSE
+				RETURN False
+			END IF
+		END FUNCTION
+
+		FUNCtion cross_right_bottom(cx cy r)
+			SET diffCx TO cx MINUS xCorner
+			SET absDiffCx TO diffCx
+			IF absDiffCx LESS THAN (0 MINUS absDiffCx)
+				SET absDiffCx TO (0 MINUS absDiffCx)
+			END IF
+			SET condA TO absDiffCx LESS THAN OR EQUAL TO r AND 0 LESS THAN OR EQUAL TO cy AND cy LESS THAN OR EQUAL TO yCorner
+
+			SET absCy TO cy
+			IF absCy LESS THAN (0 MINUS absCy)
+				SET absCy TO (0 MINUS absCy)
+			END IF
+			SET condB TO absCy LESS THAN OR EQUAL TO r AND 0 LESS THAN OR EQUAL TO cx AND cx LESS THAN OR EQUAL TO xCorner
+
+			IF condA
+				RETURN True
+			ELSE IF condB
+				RETURN True
+			ELSE
+				RETURN False
+			END IF
+		END FUNCTION
+
+		FUNCtion dfs(i)
+			SET circleI TO circles at position i
+			SET posX TO circleI at position 0
+			SET posY TO circleI at position 1
+			SET radiusI TO circleI at position 2
+
+			IF cross_right_bottom(posX posY radiusI)
+				RETURN True
+			END IF
+
+			SET vis at position i TO True
+
+			SET idx TO 0
+			WHILE idx LESS THAN LENGTH OF circles
+				SET circleJ TO circles at position idx
+				SET posXJ TO circleJ at position 0
+				SET posYJ TO circleJ at position 1
+				SET radiusJ TO circleJ at position 2
+
+				IF vis at position idx EQUALS True
+					SET idx TO idx PLUS (1 - 0)
+					CONTINUE
+				END IF
+
+				SET deltaX TO posX MINUS posXJ
+				SET deltaY TO posY MINUS posYJ
+
+				SET lhsVal TO (deltaX MULTIPLIED BY deltaX) PLUS (deltaY MULTIPLIED BY deltaY)
+				SET sumRadius TO radiusI PLUS radiusJ
+				SET rhsVal TO sumRadius MULTIPLIED BY sumRadius
+
+				IF lhsVal GREATER THAN rhsVal
+					SET idx TO idx PLUS (3 - 2)
+					CONTINUE
+				END IF
+
+				SET prod1 TO posX MULTIPLIED BY radiusJ
+				SET prod2 TO posXJ MULTIPLIED BY radiusI
+				SET sumRadiiXCorner TO (radiusI PLUS radiusJ) MULTIPLIED BY xCorner
+				SET prod3 TO posY MULTIPLIED BY radiusJ
+				SET prod4 TO posYJ MULTIPLIED BY radiusI
+				SET sumRadiiYCorner TO (radiusI PLUS radiusJ) MULTIPLIED BY yCorner
+
+				IF (prod1 PLUS prod2) LESS THAN sumRadiiXCorner AND (prod3 PLUS prod4) LESS THAN sumRadiiYCorner
+					IF dfs(idx)
+						RETURN True
+					END IF
+				END IF
+
+				SET idx TO idx PLUS (2 MINUS 1)
+			END WHILE
+
+			RETURN False
+		END FUNCTION
+
+		SET visited TO empty list
+		SET counter TO 0
+		REPEAT
+			APPEND False TO visited
+			SET counter TO counter PLUS (1 MINUS 0)
+		UNTIL counter GREATER THAN OR EQUAL TO LENGTH OF circles
+
+		SET indexI TO 0
+		REPEAT UNTIL indexI GREATER THAN OR EQUAL TO LENGTH OF circles
+			SET currentCircle TO circles at position indexI
+			SET cx TO currentCircle at position 0
+			SET cy TO currentCircle at position 1
+			SET r TO currentCircle at position 2
+
+			IF in_circle(0 0 cx cy r)
+				RETURN False
+			END IF
+
+			IF in_circle(xCorner yCorner cx cy r)
+				RETURN False
+			END IF
+
+			IF visited at position indexI EQUALS False
+				IF cross_left_top(cx cy r)
+					IF dfs(indexI)
+						RETURN False
+					END IF
+				END IF
+			END IF
+
+			SET indexI TO indexI PLUS (4 MINUS 3)
+		END REPEAT
+
+		RETURN True
+	END FUNCTION
+END CLASS

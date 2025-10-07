@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION findPattern(board, pattern)
+        SET total_rows ← LENGTH(board)
+        SET total_columns ← LENGTH(board[0])
+        SET pattern_rows ← LENGTH(pattern)
+        SET pattern_columns ← LENGTH(pattern[0])
+
+        FUNCTION matches(row_idx, col_idx)
+            SET mapA ← EMPTY MAPPING
+            SET mapB ← EMPTY MAPPING
+
+            FUNCTION is_digit_char(ch)
+                RETURN (ch ≥ "0") AND (ch ≤ "9")
+            END FUNCTION
+
+            FUNCTION to_integer(ch)
+                RETURN ORD(ch) - ORD("0")
+            END FUNCTION
+
+            FUNCTION get_pattern_char(x, y)
+                RETURN pattern[x][y]
+            END FUNCTION
+
+            FUNCTION get_board_digit(x, y)
+                RETURN board[x][y]
+            END FUNCTION
+
+            FUNCTION check_cells(x, y)
+                SET a_char ← get_pattern_char(x, y)
+                SET b_val ← get_board_digit(row_idx + x, col_idx + y)
+
+                IF is_digit_char(a_char) THEN
+                    IF to_integer(a_char) ≠ b_val THEN
+                        RETURN False
+                    END IF
+                ELSE
+                    IF a_char IN mapA THEN
+                        IF mapA[a_char] ≠ b_val THEN
+                            RETURN False
+                        END IF
+                    ELSE
+                        IF b_val IN mapB THEN
+                            RETURN False
+                        ELSE
+                            mapA[a_char] ← b_val
+                            mapB[b_val] ← a_char
+                        END IF
+                    END IF
+                END IF
+                RETURN True
+            END FUNCTION
+
+            FUNCTION loop_j(row_i, col_j)
+                IF col_j = pattern_columns THEN
+                    RETURN True
+                ELSIF check_cells(row_i, col_j) THEN
+                    RETURN loop_j(row_i, col_j + 1)
+                ELSE
+                    RETURN False
+                END IF
+            END FUNCTION
+
+            FUNCTION loop_i(row_i)
+                IF row_i = pattern_rows THEN
+                    RETURN True
+                ELSIF loop_j(row_i, 0) THEN
+                    RETURN loop_i(row_i + 1)
+                ELSE
+                    RETURN False
+                END IF
+            END FUNCTION
+
+            RETURN loop_i(0)
+        END FUNCTION
+
+        FUNCTION loop_c(row_r, col_c)
+            IF col_c > total_columns - pattern_columns THEN
+                RETURN False
+            ELSIF matches(row_r, col_c) THEN
+                RETURN [row_r, col_c]
+            ELSE
+                RETURN loop_c(row_r, col_c + 1)
+            END IF
+        END FUNCTION
+
+        FUNCTION loop_r(row_r)
+            IF row_r > total_rows - pattern_rows THEN
+                RETURN [-1, -1]
+            ELSE
+                SET res ← loop_c(row_r, 0)
+                IF res = False THEN
+                    RETURN loop_r(row_r + 1)
+                ELSE
+                    RETURN res
+                END IF
+            END IF
+        END FUNCTION
+
+        RETURN loop_r(0)
+    END FUNCTION
+END CLASS

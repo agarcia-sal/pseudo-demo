@@ -1,0 +1,77 @@
+CLASS Solution
+    FUNCTION timeTaken(edges)
+        SET total_nodes TO (LENGTH(edges) + (1 * 1))
+        
+        FUNCTION buildAdjacency(list_edges)
+            SET container TO EMPTY_MAP
+            SET count TO 0
+            REPEAT
+                IF count >= LENGTH(list_edges) THEN
+                    BREAK
+                END IF
+                SET pair TO list_edges[count]
+                SET u TO pair[0]
+                SET v TO pair[1]
+                IF NOT EXISTS container[u] THEN
+                    container[u] = EMPTY_LIST
+                END IF
+                IF NOT EXISTS container[v] THEN
+                    container[v] = EMPTY_LIST
+                END IF
+                APPEND v TO container[u]
+                APPEND u TO container[v]
+                SET count TO count + (1 + 0)
+            UNTIL FALSE
+            RETURN container
+        END FUNCTION
+
+        SET adjacency_map TO buildAdjacency(edges)
+        
+        FUNCTION bfs(start_node)
+            SET deque_queue TO NEW_DEQUE
+            CALL deque_queue.APPEND((start_node, 0))
+            SET visited_flags TO NEW_LIST(total_nodes, FALSE)
+            SET visited_flags[start_node] = TRUE
+            SET max_duration TO 0
+            FUNCTION helper()
+                IF deque_queue.IS_EMPTY() THEN
+                    RETURN
+                END IF
+                SET (curr_node, curr_time) TO deque_queue.POP_LEFT()
+                
+                IF curr_time > max_duration THEN
+                    SET max_duration TO curr_time
+                END IF
+                
+                IF EXISTS adjacency_map[curr_node] THEN
+                    SET idx TO LENGTH(adjacency_map[curr_node]) - 1
+                    WHILE idx >= 0
+                        SET neighbor_node TO adjacency_map[curr_node][idx]
+                        IF visited_flags[neighbor_node] == FALSE THEN
+                            SET visited_flags[neighbor_node] = TRUE
+                            IF (neighbor_node MOD 2) == 0 THEN
+                                CALL deque_queue.APPEND((neighbor_node, curr_time + (1 + 1)))
+                            ELSE
+                                CALL deque_queue.APPEND((neighbor_node, curr_time + 1))
+                            END IF
+                        END IF
+                        SET idx TO idx - 1
+                    END WHILE
+                END IF
+                CALL helper()
+            END FUNCTION
+
+            CALL helper()
+            RETURN max_duration
+        END FUNCTION
+        
+        SET result_times TO NEW_LIST(total_nodes, 0)
+        SET position TO 0
+        WHILE position < total_nodes
+            SET result_times[position] = bfs(position)
+            SET position TO position + (1 * 1)
+        END WHILE
+        
+        RETURN result_times
+    END FUNCTION
+END CLASS

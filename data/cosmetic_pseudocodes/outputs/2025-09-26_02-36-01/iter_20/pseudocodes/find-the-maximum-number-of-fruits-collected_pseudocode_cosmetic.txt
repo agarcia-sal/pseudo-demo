@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+    VAR alpha := LENGTH(fruits)
+    VAR beta := LIST OF PAIRS [(1,1),(1,0),(0,1)]
+    VAR gamma := LIST OF PAIRS [(1,0),(1,-1),(1,1)]
+    VAR delta := LIST OF PAIRS [(-1,1),(0,1),(1,1)]
+    DICT omega := EMPTY DICTIONARY
+
+    FUNCTION dp(a1,b1,a2,b2,a3,b3)
+    FUNCTION safe_lookup(p,q)
+        IF p < 0 OR p >= alpha OR q < 0 OR q >= alpha THEN
+            RETURN -∞
+        END IF
+        RETURN fruits[q][p]
+    END FUNCTION
+
+    IF (a1 < 0 OR a1 >= alpha) THEN RETURN -∞ END IF
+    IF (b1 < 0 OR b1 >= alpha) THEN RETURN -∞ END IF
+    IF (a2 < 0 OR a2 >= alpha) THEN RETURN -∞ END IF
+    IF (b2 < 0 OR b2 >= alpha) THEN RETURN -∞ END IF
+    IF (a3 < 0 OR a3 >= alpha) THEN RETURN -∞ END IF
+    IF (b3 < 0 OR b3 >= alpha) THEN RETURN -∞ END IF
+
+    IF (a1 = b1 AND b1 = a2 AND a2 = b2 AND b2 = a3 AND a3 = b3 AND b3 = alpha - 1) THEN
+        RETURN fruits[alpha - 1][alpha - 1]
+    END IF
+
+    TUPLE key := (a1,b1,a2,b2,a3,b3)
+    IF key EXISTS IN omega THEN RETURN omega[key] END IF
+
+    VAR x := fruits[b1][a1]
+    IF ((a1 = a2 AND b1 = b2) OR (a1 = a3 AND b1 = b3)) THEN
+        x := 0
+    END IF
+
+    IF (a2 = a3 AND b2 = b3) THEN
+        x := x + fruits[b2][a2]
+    ELSE
+        x := x + fruits[b2][a2] + fruits[b3][a3]
+    END IF
+
+    VAR max_val := -∞
+
+    FUNCTION iterate_dir1(idx)
+        IF idx >= LENGTH(beta) THEN RETURN max_val END IF
+        VAR dx1,vx := beta[idx]
+
+        FUNCTION iterate_dir2(jdx)
+            IF jdx >= LENGTH(gamma) THEN RETURN END IF
+            VAR dx2,vy := gamma[jdx]
+
+            FUNCTION iterate_dir3(kdx)
+                IF kdx >= LENGTH(delta) THEN RETURN END IF
+                VAR dx3,vz := delta[kdx]
+
+                VAR res := dp(a1+dx1,b1+vx,a2+dx2,b2+vy,a3+dx3,b3+vz)
+                IF res > max_val THEN max_val := res END IF
+
+                iterate_dir3(kdx+1)
+            END FUNCTION
+            iterate_dir3(0)
+            iterate_dir2(jdx+1)
+        END FUNCTION
+        iterate_dir2(0)
+        iterate_dir1(idx+1)
+    END FUNCTION
+
+    iterate_dir1(0)
+
+    omega[key] := x + max_val
+    RETURN x + max_val
+    END FUNCTION
+
+    RETURN dp(0,0,0,alpha-1,alpha-1,0)
+    END FUNCTION
+END CLASS

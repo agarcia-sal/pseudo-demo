@@ -1,0 +1,41 @@
+CLASS Solution
+    FUNCTION numberOfWays(n integer parameter, x integer parameter, y integer parameter) RETURNS integer
+        SET MOD_VALUE TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7  
+        SET DP_MATRIX TO a zero-filled matrix of size (n + 1) by (x + 1)
+        SET DP_MATRIX[0][0] TO 1
+
+        SET outerIndex TO 1
+        WHILE outerIndex <= n DO
+            BEGIN
+            SET innerIndex TO 1
+            WHILE innerIndex <= x DO
+                BEGIN
+                SET prev_i_j TO DP_MATRIX[outerIndex - 1][innerIndex]
+                SET prev_i_j_minus_1 TO 0
+                IF innerIndex - 1 >= 0 THEN
+                    SET prev_i_j_minus_1 TO DP_MATRIX[outerIndex - 1][innerIndex - 1]
+                END IF
+
+                SET termA TO (prev_i_j * innerIndex) MOD MOD_VALUE
+                SET termB TO (prev_i_j_minus_1 * (x - innerIndex - 1)) MOD MOD_VALUE
+
+                SET DP_MATRIX[outerIndex][innerIndex] TO (termA + termB) MOD MOD_VALUE
+                SET innerIndex TO innerIndex + 1
+                END
+            SET outerIndex TO outerIndex + 1
+            END
+
+        SET result TO 0
+        SET power_accumulator TO 1
+        SET counter TO 1
+        WHILE counter <= x DO
+            BEGIN
+            SET power_accumulator TO (power_accumulator * y) MOD MOD_VALUE
+            SET addend TO (DP_MATRIX[n][counter] * power_accumulator) MOD MOD_VALUE
+            SET result TO (result + addend) MOD MOD_VALUE
+            SET counter TO counter + 1
+            END
+
+        RETURN result
+    END FUNCTION
+END CLASS

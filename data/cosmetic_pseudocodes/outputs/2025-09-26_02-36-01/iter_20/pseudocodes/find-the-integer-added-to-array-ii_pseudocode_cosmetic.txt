@@ -1,0 +1,80 @@
+CLASS Solution
+    FUNCTION minimumAddedInteger(nums1 RETURNS List OF integer, nums2 RETURNS List OF integer) RETURNS integer
+        PROCEDURE customSort(arr RETURNS List OF integer)
+            DEFINE limit AS LENGTH OF arr
+            DEFINE m AS 0
+            WHILE m < limit - 1 DO
+                DEFINE changed AS FALSE
+                DEFINE n AS 0
+                WHILE n < limit - m - 1 DO
+                    IF arr[n] > arr[n + 1] THEN
+                        DEFINE tmp AS arr[n]
+                        SET arr[n] = arr[n + 1]
+                        SET arr[n + 1] = tmp
+                        SET changed = TRUE
+                    END IF
+                    SET n = n + 1
+                END WHILE
+                IF NOT changed THEN
+                    BREAK
+                END IF
+                SET m = m + 1
+            END WHILE
+        END PROCEDURE
+        
+        CALL customSort(nums1)
+        CALL customSort(nums2)
+        
+        DEFINE p AS 0
+        WHILE p < (LENGTH OF nums1) - 1 DO
+            DEFINE q AS p + 1
+            repeat_loop:
+            REPEAT
+                IF q >= (LENGTH OF nums1) THEN
+                    BREAK repeat_loop
+                END IF
+                
+                DEFINE tempList AS EMPTY LIST
+                DEFINE r AS 0
+                WHILE r < p DO
+                    APPEND nums1[r] TO tempList
+                    SET r = r + 1
+                END WHILE
+
+                DEFINE s AS p + 1
+                WHILE s < q DO
+                    APPEND nums1[s] TO tempList
+                    SET s = s + 1
+                END WHILE
+
+                DEFINE t AS q + 1
+                WHILE t < (LENGTH OF nums1) DO
+                    APPEND nums1[t] TO tempList
+                    SET t = t + 1
+                END WHILE
+                
+                DEFINE diff AS (nums2[0] + 0) - (tempList[0] + 0)
+                
+                DEFINE flagValid AS 1
+                DEFINE u AS 0
+                loop_check:
+                WHILE u < LENGTH OF nums2 DO
+                    IF (tempList[u] + diff) != nums2[u] THEN
+                        SET flagValid = 0
+                        EXIT loop_check
+                    END IF
+                    SET u = u + 1
+                END WHILE
+                
+                IF flagValid == 1 THEN
+                    RETURN diff
+                END IF
+                
+                SET q = q + 1
+            UNTIL FALSE
+            SET p = p + 1
+        END WHILE
+        
+        RETURN None
+    END FUNCTION
+END CLASS

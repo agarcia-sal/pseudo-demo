@@ -1,0 +1,107 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+        SET length_var TO 0
+        SET size_var TO 0
+        WHILE size_var IS LESS THAN THE LENGTH OF nums DO
+            INCREMENT size_var BY 1
+        END WHILE
+
+        SET dim_one TO size_var
+        SET dim_two TO 0
+        SET limit_var TO k + (1 + 0)
+        SET matrix_f TO []
+        
+        SET index_row TO 0
+        WHILE index_row < dim_one
+            SET row_temp TO []
+            SET index_col TO 0
+            WHILE index_col < limit_var
+                APPEND 0 TO row_temp
+                SET index_col TO index_col + (1 + 0)
+            END WHILE
+            APPEND row_temp TO matrix_f
+            SET index_row TO index_row + (1 + 0)
+        END WHILE
+
+        SET mp_list TO []
+        SET idx_mp TO 0
+        WHILE idx_mp < limit_var
+            SET temp_dict TO DICTIONARY()
+            SET mp_list[idx_mp] TO temp_dict
+            APPEND temp_dict TO mp_list
+            SET idx_mp TO idx_mp + (1 + 0)
+        END WHILE
+
+        SET matrix_g TO []
+        SET idx_g_outer TO 0
+        WHILE idx_g_outer < limit_var
+            SET inner_list TO [0,0,0]
+            APPEND inner_list TO matrix_g
+            SET idx_g_outer TO idx_g_outer + (1 + 0)
+        END WHILE
+
+        SET max_answer TO (0 + 0)
+        SET pos_num TO 0
+        REPEAT 
+            IF pos_num >= length_var THEN
+                EXIT REPEAT
+            END IF
+
+            SET val_x TO nums[pos_num]
+            SET idx_h TO 0
+            REPEAT
+                IF idx_h >= limit_var THEN
+                    EXIT REPEAT
+                END IF
+
+                SET val_f_prev TO mp_list[idx_h].GET(val_x, 0)
+                SET matrix_f[pos_num][idx_h] TO val_f_prev
+
+                IF (idx_h > 0) THEN
+                    IF matrix_g[idx_h][0] != nums[pos_num] THEN
+                        SET val_f_alt TO matrix_g[idx_h][1]
+                        IF val_f_alt > matrix_f[pos_num][idx_h] THEN
+                            SET matrix_f[pos_num][idx_h] TO val_f_alt
+                        END IF
+                    ELSE
+                        SET val_f_alt_2 TO matrix_g[idx_h][2]
+                        IF val_f_alt_2 > matrix_f[pos_num][idx_h] THEN
+                            SET matrix_f[pos_num][idx_h] TO val_f_alt_2
+                        END IF
+                    END IF
+                END IF
+
+                SET matrix_f[pos_num][idx_h] TO matrix_f[pos_num][idx_h] + 1
+
+                mp_list[idx_h][nums[pos_num]] = MAX(mp_list[idx_h].GET(nums[pos_num], 0), matrix_f[pos_num][idx_h])
+
+                IF matrix_g[idx_h][0] != val_x THEN
+                    IF matrix_f[pos_num][idx_h] >= matrix_g[idx_h][1] THEN
+                        SET matrix_g[idx_h][2] TO matrix_g[idx_h][1]
+                        SET matrix_g[idx_h][1] TO matrix_f[pos_num][idx_h]
+                        SET matrix_g[idx_h][0] TO val_x
+                    ELSE
+                        IF matrix_g[idx_h][2] < matrix_f[pos_num][idx_h] THEN
+                            SET matrix_g[idx_h][2] TO matrix_f[pos_num][idx_h]
+                        END IF
+                    END IF
+                ELSE
+                    IF matrix_g[idx_h][1] < matrix_f[pos_num][idx_h] THEN
+                        SET matrix_g[idx_h][1] TO matrix_f[pos_num][idx_h]
+                    END IF
+                END IF
+
+                IF max_answer < matrix_f[pos_num][idx_h] THEN
+                    SET max_answer TO matrix_f[pos_num][idx_h]
+                END IF
+
+
+                SET idx_h TO idx_h + 1
+            END REPEAT
+
+            SET pos_num TO pos_num + 1
+        END REPEAT
+
+        RETURN max_answer
+    END FUNCTION
+END CLASS

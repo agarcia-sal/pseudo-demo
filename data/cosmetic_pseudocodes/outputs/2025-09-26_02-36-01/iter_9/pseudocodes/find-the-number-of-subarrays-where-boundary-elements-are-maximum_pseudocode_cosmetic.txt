@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION numberOfSubarrays(tuples)
+        FUNCTION custom_max(sequence)
+            ASSIGN current_max TO sequence[0]
+            ASSIGN iterator TO 1
+            WHILE iterator < LENGTH(sequence) DO
+                IF sequence[iterator] > current_max THEN
+                    ASSIGN current_max TO sequence[iterator]
+                END IF
+                ASSIGN iterator TO iterator + 1
+            END WHILE
+            RETURN current_max
+        END FUNCTION
+
+        ASSIGN mapping_dictionary TO dictionary_with_default_list()
+        ASSIGN enumerator_index TO 0
+        LOOP
+            IF enumerator_index >= LENGTH(tuples) THEN EXIT LOOP
+            ASSIGN element_value TO tuples[enumerator_index]
+            APPEND enumerator_index TO mapping_dictionary[element_value]
+            ASSIGN enumerator_index TO enumerator_index + 1
+        END LOOP
+
+        ASSIGN total_count TO 0
+        ASSIGN value_lists TO list_of_values(mapping_dictionary)
+        ASSIGN outer_counter TO 0
+        WHILE outer_counter < LENGTH(value_lists) DO
+            ASSIGN current_indices TO value_lists[outer_counter]
+            ASSIGN len_indices TO LENGTH(current_indices)
+            ASSIGN inner_i TO 0
+            WHILE inner_i < len_indices DO
+                ASSIGN inner_j TO inner_i
+                WHILE inner_j < len_indices DO
+                    ASSIGN start_pos TO current_indices[inner_i]
+                    ASSIGN end_pos TO current_indices[inner_j]
+                    ASSIGN temp_subarray TO subarray_extractor(tuples, start_pos, end_pos)
+                    ASSIGN max_in_subarray TO custom_max(temp_subarray)
+                    IF (max_in_subarray = tuples[start_pos]) THEN
+                        ASSIGN total_count TO total_count + 1
+                    END IF
+                    ASSIGN inner_j TO inner_j + 1
+                END WHILE
+                ASSIGN inner_i TO inner_i + 1
+            END WHILE
+            ASSIGN outer_counter TO outer_counter + 1
+        END WHILE
+
+        RETURN total_count
+    END FUNCTION
+
+    FUNCTION dictionary_with_default_list()
+        ASSIGN dict_obj TO empty_dictionary()
+        FUNCTION get_or_create(key)
+            IF NOT dict_obj.contains_key(key) THEN
+                ASSIGN dict_obj[key] TO new_empty_list()
+            END IF
+            RETURN dict_obj[key]
+        END FUNCTION
+        RETURN object_with_method_get_or_create(get_or_create)
+    END FUNCTION
+
+    FUNCTION list_of_values(dict_obj)
+        ASSIGN temp_list TO empty_list()
+        FOR EACH k,v IN dict_obj DO
+            APPEND v TO temp_list
+        END FOR
+        RETURN temp_list
+    END FUNCTION
+
+    FUNCTION subarray_extractor(arr, start_index, final_index)
+        ASSIGN result_list TO empty_list()
+        ASSIGN pos_var TO start_index
+        REPEAT
+            APPEND arr[pos_var] TO result_list
+            ASSIGN pos_var TO pos_var + 1
+        UNTIL pos_var > final_index
+        RETURN result_list
+    END FUNCTION
+END CLASS

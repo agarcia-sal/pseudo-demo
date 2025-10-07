@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER
+        FUNCTION computeCost(a INTEGER b INTEGER) RETURNS INTEGER
+            SET center TO (a + b) / 2
+            SET pivot TO onePos[center]
+            SET acc TO 0
+            FUNCTION loopLeft(x INTEGER) RETURNS INTEGER
+                IF x >= center THEN
+                    RETURN 0
+                ELSE
+                    RETURN (pivot - onePos[x] - center + x) + loopLeft(x + 1)
+                END IF
+            END FUNCTION
+            FUNCTION loopRight(y INTEGER) RETURNS INTEGER
+                IF y <= center THEN
+                    RETURN 0
+                ELSE
+                    RETURN (onePos[y] - pivot - y + center) + loopRight(y - 1)
+                END IF
+            END FUNCTION
+            SET acc TO loopLeft(a) + loopRight(b)
+            RETURN acc
+        END FUNCTION
+
+        FUNCTION equal(a INTEGER b INTEGER) RETURNS BOOLEAN
+            RETURN a = b
+        END FUNCTION
+
+        SET onePos TO []
+        SET idx TO 0
+        WHILE idx < LENGTH(nums)
+            IF nums[idx] = 1 THEN
+                onePos :+= [idx]
+            END IF
+            idx := idx + 1
+        END WHILE
+
+        IF LENGTH(onePos) = 0 THEN
+            RETURN k * 2
+        END IF
+        
+        SET total ONES TO LENGTH(onePos)
+        SET prefixSum TO [0] * (total ONES + 1)
+        
+        REPEAT_WITH_COUNTER i FROM 0 TO total ONES - 1
+            prefixSum[i + 1] := prefixSum[i] + onePos[i]
+        END REPEAT_WITH_COUNTER
+
+        SET minimumMovesFound TO 1 / 0
+
+        FUNCTION absVal(x INTEGER) RETURNS INTEGER
+            IF x < 0 THEN
+                RETURN -x
+            ELSE
+                RETURN x
+            END IF
+        END FUNCTION
+
+        REPEAT_WITH_COUNTER start FROM 0 TO total ONES - k
+            SET end TO start + k - 1
+            SET totalCost TO computeCost(start, end)
+
+            IF (k % 2) != 0 THEN
+                SET midIndex TO (start + end) / 2
+                SET midVal TO onePos[midIndex]
+                SET changesRequired TO end - midIndex - (midVal - onePos[midIndex] - 1)
+            ELSE
+                SET leftMid TO (start + end) / 2
+                SET rightMid TO leftMid + 1
+                SET leftMedian TO onePos[leftMid]
+                SET rightMedian TO onePos[rightMid]
+                SET changesRequired TO rightMid - leftMid - 1 - (rightMedian - leftMedian - 1)
+            END IF
+
+            IF changesRequired > maxChanges THEN
+                totalCost := totalCost + (changesRequired - maxChanges)
+            END IF
+
+            IF totalCost < minimumMovesFound THEN
+                minimumMovesFound := totalCost
+            END IF
+        END REPEAT_WITH_COUNTER
+
+        RETURN minimumMovesFound
+    END FUNCTION
+END CLASS

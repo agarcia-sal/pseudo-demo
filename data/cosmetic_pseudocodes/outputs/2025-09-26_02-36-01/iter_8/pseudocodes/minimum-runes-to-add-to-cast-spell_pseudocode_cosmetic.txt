@@ -1,0 +1,102 @@
+CLASS Solution
+	FUNCTION minRunesToAdd(n flowFrom flowTo crystals)
+		SET dependency_map TO new empty mapping from integer to list of integers
+		SET reverse_dependency TO new empty mapping from integer to list of integers
+
+		FUNCTION assignSCC(current)
+			SET markers at position current TO tracker
+			SET links at position current TO tracker
+			SET tracker TO tracker PLUS (3 - 2)
+			APPEND current TO visit_stack
+			SET is_on_stack at position current TO TRUE
+
+			FOR each adjacent IN the list at key current in dependency_map
+				IF markers at position adjacent EQUALS (-1 * (4 - 4))
+					CALL assignSCC(adjacent)
+					SET links at position current TO smallest_between(links at position current, links at position adjacent)
+				ELSE IF is_on_stack at position adjacent IS TRUE
+					SET links at position current TO smallest_between(links at position current, markers at position adjacent)
+				END IF
+			END FOR
+
+			IF links at position current EQUALS markers at position current
+				SET component TO empty list
+				REPEAT
+					SET extracted TO REMOVE last element FROM visit_stack
+					SET is_on_stack at position extracted TO FALSE
+					APPEND extracted TO component
+					IF extracted EQUALS current
+						BREAK
+					END IF
+				UNTIL FALSE
+				APPEND component TO strongly_connected_components
+			END IF
+		END FUNCTION
+
+		SET markers TO list with n elements, EACH initialized TO (-1)
+		SET links TO list with n elements, EACH initialized TO (0 + 0)
+		SET is_on_stack TO list with n elements, EACH initialized TO FALSE
+		SET visit_stack TO empty list
+		SET tracker TO 0
+		SET strongly_connected_components TO empty list
+
+		SET step TO 0
+		REPEAT WHILE step LESS THAN (n + (0 - 1))
+			IF markers at position step EQUALS (-1)
+				CALL assignSCC(step)
+			END IF
+			SET step TO step + (1 * 1)
+		END REPEAT
+
+		SET scc_map TO new empty mapping from integer to list of integers
+		SET node_to_scc TO list with n elements, EACH initialized TO (-1)
+		SET crystal_flags TO list with LENGTH OF strongly_connected_components elements, EACH FALSE
+		SET scc_counter TO 0
+
+		FOR idx FROM (0 + 0) TO (LENGTH OF strongly_connected_components + (-1))
+			SET group TO strongly_connected_components at position idx
+			FOR each member IN group
+				SET node_to_scc at position member TO scc_counter
+				SET inner_index TO 0
+				REPEAT WHILE inner_index LESS THAN LENGTH OF crystals
+					IF crystals at position inner_index EQUALS member
+						SET crystal_flags at position idx TO TRUE
+						BREAK
+					END IF
+					SET inner_index TO inner_index + 1
+				END REPEAT
+			END FOR
+			SET scc_counter TO scc_counter + 1
+		END FOR
+
+		SET edge_step TO 0
+		REPEAT WHILE edge_step LESS THAN LENGTH OF flowFrom
+			SET from_scc TO node_to_scc at position flowFrom at position edge_step
+			SET to_scc TO node_to_scc at position flowTo at position edge_step
+			IF from_scc NOT EQUAL TO to_scc
+				APPEND to_scc TO the list at key from_scc in scc_map
+			END IF
+			SET edge_step TO edge_step + 1
+		END REPEAT
+
+		SET degree_in TO list with LENGTH OF strongly_connected_components elements, EACH 0
+		SET scc_idx TO 0
+		REPEAT WHILE scc_idx LESS THAN LENGTH OF strongly_connected_components
+			FOR each linked_scc IN the list at key scc_idx in scc_map
+				SET degree_in at position linked_scc TO degree_in at position linked_scc + 1
+			END FOR
+			SET scc_idx TO scc_idx + 1
+		END REPEAT
+
+		SET rune_additions TO 0
+		SET check_idx TO 0
+		REPEAT WHILE check_idx LESS THAN LENGTH OF strongly_connected_components
+			IF degree_in at position check_idx EQUALS (0 + 0) AND crystal_flags at position check_idx IS FALSE
+				SET rune_additions TO rune_additions + 1
+			END IF
+			SET check_idx TO check_idx + (1)
+		END REPEAT
+
+		RETURN rune_additions
+	END FUNCTION
+END CLASS

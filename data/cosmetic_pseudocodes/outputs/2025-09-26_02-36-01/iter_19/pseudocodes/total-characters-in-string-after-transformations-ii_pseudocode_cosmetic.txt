@@ -1,0 +1,98 @@
+CLASS Solution
+	FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+		CONST limit_value IS (5 + 5) * (10 ^ 8) * 2 + 1
+
+		SET matrix_container TO list of lists where each inner list is twenty six zeros, repeated twenty six times
+		DEFINE outer_idx AS 0
+		WHILE outer_idx <= 25
+			DEFINE inner_idx AS 0
+			REPEAT
+				IF inner_idx >= nums element at outer_idx THEN
+					BREAK
+				END IF
+				SET target_col TO ((outer_idx + inner_idx + 1) MOD 26)
+				matrix_container element at outer_idx element at target_col TO matrix_container element at outer_idx element at target_col + 1
+				INCREMENT inner_idx BY 1
+			UNTIL FALSE
+			INCREMENT outer_idx BY 1
+		END WHILE
+
+		FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+			SET res_matrix TO a list of twenty six lists, each of size twenty six zeros
+			SET row_counter TO 0
+			LOOP_WHILE row_counter <= 25
+				SET col_counter TO 0
+				REPEAT
+					IF col_counter > 25 THEN EXIT
+					DEFINE accum_value AS res_matrix element at row_counter element at col_counter
+					SET k_index TO 0
+					WHILE k_index <= 25
+						accum_value = (accum_value + (A element at row_counter element at k_index) * (B element at k_index element at col_counter)) MOD limit_value
+						INCREMENT k_index BY 1
+					END WHILE
+					res_matrix element at row_counter element at col_counter = accum_value
+					INCREMENT col_counter BY 1
+				UNTIL FALSE
+				INCREMENT row_counter BY 1
+			END LOOP_WHILE
+			RETURN res_matrix
+		END FUNCTION
+
+		FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+			SET identity_mat TO list of lists twenty six by twenty six zeros
+			SET pos_x TO 0
+			REPEAT
+				IF pos_x > 25 THEN EXIT
+				SET pos_y TO 0
+				WHILE pos_y <= 25
+					identity_mat element at pos_x element at pos_y = IF pos_x == pos_y THEN 1 ELSE 0
+					INCREMENT pos_y BY 1
+				END WHILE
+				INCREMENT pos_x BY 1
+			UNTIL FALSE
+
+			SET base_matrix TO matrix
+			SET exponent_counter TO power
+			WHILE exponent_counter > 0
+				IF (exponent_counter MOD 2) == 1 THEN
+					identity_mat = matrix_multiply(identity_mat, base_matrix)
+				END IF
+				base_matrix = matrix_multiply(base_matrix, base_matrix)
+				exponent_counter = exponent_counter DIV 2
+			END WHILE
+
+			RETURN identity_mat
+		END FUNCTION
+
+		SET resulting_matrix TO matrix_power(matrix_container, t)
+
+		SET frequency_accumulator TO list of twenty six zeros
+		SET position_index TO 0
+		REPEAT
+			IF position_index >= LENGTH of s THEN BREAK
+			SET letter_value TO ASCII_CODE at s element at position_index - ASCII_CODE of 'a'
+			frequency_accumulator element at letter_value = frequency_accumulator element at letter_value + 1
+			INCREMENT position_index BY 1
+		UNTIL FALSE
+
+		SET aggregated_counts TO list of twenty six zeros
+		SET iter_i TO 0
+		WHILE iter_i <= 25
+			SET iter_j TO 0
+			REPEAT
+				IF iter_j > 25 THEN EXIT
+				SET product_term TO frequency_accumulator element at iter_i * resulting_matrix element at iter_i element at iter_j
+				aggregated_counts element at iter_j = (aggregated_counts element at iter_j + product_term) MOD limit_value
+				INCREMENT iter_j BY 1
+			UNTIL FALSE
+			INCREMENT iter_i BY 1
+		END WHILE
+
+		DEFINE sum_total AS 0
+		FOR idx FROM 0 TO 25
+			sum_total = (sum_total + aggregated_counts element at idx) MOD limit_value
+		END FOR
+
+		RETURN sum_total
+	END FUNCTION
+END CLASS

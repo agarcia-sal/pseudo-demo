@@ -1,0 +1,73 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+        INITIALIZE self.mod WITH mod  
+        CREATE self.h AS array filled with zeros, SIZE LENGTH OF s PLUS 1  
+        CREATE self.p AS array filled with ones, SIZE LENGTH OF s PLUS 1  
+        SET index TO 1  
+        WHILE index <= LENGTH OF s  
+            COMPUTE val AS (self.h[index - 1] * base + UNICODE CHARACTER CODE OF s[index - 1]) MOD mod  
+            ASSIGN val TO self.h[index]  
+            COMPUTE power AS (self.p[index - 1] * base) MOD mod  
+            ASSIGN power TO self.p[index]  
+            INCREMENT index BY 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        CALCULATE diff AS (self.h[r] - self.h[l - 1] * self.p[r - l + 1]) MOD self.mod  
+        IF diff < 0 THEN  
+            ADD self.mod TO diff  
+        END IF  
+        RETURN diff  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+        INITIALIZE n AS LENGTH OF s  
+        CREATE adjacency_list AS array OF n empty arrays  
+        FOR idx FROM 1 TO n - 1  
+            APPEND idx TO adjacency_list[parent[idx]]  
+        END FOR  
+
+        INITIALIZE dfsStr AS empty list  
+        DECLARE pos AS empty map  
+
+        FUNCTION dfs(node)  
+            RECORD start_pos AS LENGTH OF dfsStr + 1  
+            FOR each child IN adjacency_list[node]  
+                CALL dfs(child)  
+            END FOR  
+            APPEND s[node] TO dfsStr  
+            RECORD end_pos AS LENGTH OF dfsStr  
+            MAP node TO PAIR (start_pos, end_pos) IN pos  
+        END FUNCTION  
+
+        CALL dfs(0)  
+
+        SET base_val TO 33331  
+        SET mod_val TO 998244353  
+
+        INITIALIZE h1 AS NEW Hashing(dfsStr, base_val, mod_val)  
+        INITIALIZE reversed_dfsStr AS REVERSED COPY OF dfsStr  
+        INITIALIZE h2 AS NEW Hashing(reversed_dfsStr, base_val, mod_val)  
+
+        INITIALIZE result AS empty list  
+
+        FOR i FROM 0 TO n - 1  
+            EXTRACT left, right FROM pos[i]  
+            COMPUTE length AS right - left + 1  
+            IF length MOD 2 == 0 THEN  
+                SET half_len TO length DIVIDED BY 2  
+                SET val1 TO h1.query(left, left + half_len - 1)  
+                SET val2 TO h2.query(n - right + 1, n - right + half_len)  
+            ELSE  
+                SET half_len TO (length + 1) DIVIDED BY 2  
+                SET val1 TO h1.query(left, left + half_len - 1)  
+                SET val2 TO h2.query(n - right + 1, n - right + half_len)  
+            END IF  
+            APPEND (val1 == val2) TO result  
+        END FOR  
+        RETURN result  
+    END FUNCTION  
+END CLASS

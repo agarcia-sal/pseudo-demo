@@ -1,0 +1,84 @@
+CLASS Solution
+	FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+		SET alpha TO LENGTH OF image
+		SET beta TO LENGTH OF element AT position zero OF image
+		SET delta TO a LIST OF alpha ELEMENTS EACH containing a LIST OF beta ELEMENTS EACH initialized TO 0
+		SET omega TO a LIST OF alpha ELEMENTS EACH containing a LIST OF beta ELEMENTS EACH initialized TO 0
+
+		FUNCTION is_valid_region(u WITH TYPE integer v WITH TYPE integer) WITH RETURN TYPE boolean
+			DEFINE offsets AS the COLLECTION of PAIRS: (-1,0), (1,0), (0,-1), (0,1)
+			SET flag TO True
+			SET p TO u
+			WHILE p < u + 3
+				SET q TO v
+				REPEAT
+					FOR EACH (dx, dy) IN offsets
+						SET r TO p + dx
+						SET s TO q + dy
+						IF r >= 0 AND r < u + 3 AND s >= 0 AND s < v + 3 THEN
+							IF ABSOLUTE_VALUE(image[p][q] - image[r][s]) > threshold THEN
+								SET flag TO False
+								SET p TO u + 3
+								SET q TO v + 3
+								BREAK
+							END IF
+						END IF
+					END FOR
+					IF flag == False THEN BREAK END IF
+					SET q TO q + 1
+				UNTIL q >= v + 3
+				IF flag == False THEN BREAK END IF
+				SET p TO p + 1
+			END WHILE
+			RETURN flag
+		END FUNCTION
+
+		FUNCTION calculate_average(g WITH TYPE integer h WITH TYPE integer) WITH RETURN TYPE integer
+			SET sum_value TO 0
+			FOR m_idx IN g TO g + 2
+				FOR n_idx IN h TO h + 2
+					SET sum_value TO sum_value + image[m_idx][n_idx]
+				END FOR
+			END FOR
+			RETURN sum_value / 9
+		END FUNCTION
+
+		SET outer_index TO 0
+		WHILE outer_index < alpha - 2
+			SET inner_index TO 0
+			WHILE inner_index < beta - 2
+				IF is_valid_region(outer_index, inner_index) THEN
+					SET computed_avg TO calculate_average(outer_index, inner_index)
+					SET x_idx TO outer_index
+					REPEAT
+						SET y_idx TO inner_index
+						WHILE y_idx < inner_index + 3
+							SET delta[x_idx][y_idx] TO delta[x_idx][y_idx] + computed_avg
+							SET omega[x_idx][y_idx] TO omega[x_idx][y_idx] + 1
+							SET y_idx TO y_idx + 1
+						END WHILE
+						SET x_idx TO x_idx + 1
+					UNTIL x_idx >= outer_index + 3
+				END IF
+				SET inner_index TO inner_index + 1
+			END WHILE
+			SET outer_index TO outer_index + 1
+		END WHILE
+
+		SET a TO 0
+		WHILE a < alpha
+			SET b TO 0
+			WHILE b < beta
+				IF omega[a][b] > 0 THEN
+					SET delta[a][b] TO delta[a][b] / omega[a][b]
+				ELSE
+					SET delta[a][b] TO image[a][b]
+				END IF
+				SET b TO b + 1
+			END WHILE
+			SET a TO a + 1
+		END WHILE
+
+		RETURN delta
+	END FUNCTION
+END CLASS

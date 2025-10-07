@@ -1,0 +1,79 @@
+CLASS Solution  
+    FUNCTION maxSelectedElements(nums)  
+        SET result TO 0  
+        SET memo TO new empty dictionary  
+        SET sortedNums TO empty list  
+        CALL sortAscending(nums, sortedNums)  
+        SET index TO 0  
+        WHILE index < length of sortedNums DO  
+            SET currNum TO element at index of sortedNums  
+            SET valPlusOne TO getValueOrZero(memo, currNum + 1) + 1  
+            SET memo[currNum + 1] TO valPlusOne  
+            SET valMinusOne TO getValueOrZero(memo, currNum - 1) + 1  
+            SET memo[currNum] TO valMinusOne  
+            SET maxVal TO maximumOfThree(result, valMinusOne, valPlusOne)  
+            SET result TO maxVal  
+            SET index TO index + 1  
+        END WHILE  
+        RETURN result  
+    END FUNCTION  
+  
+    FUNCTION sortAscending(inputList, outputList)  
+        IF length of inputList = 0 THEN  
+            RETURN  
+        END IF  
+        CALL quickSortAsc(inputList, 0, length of inputList - 1)  
+        FOR i FROM 0 TO length of inputList - 1 DO  
+            APPEND element at i of inputList TO outputList  
+        END FOR  
+    END FUNCTION  
+  
+    FUNCTION quickSortAsc(array, low, high)  
+        IF low >= high THEN  
+            RETURN  
+        END IF  
+        SET p TO partition(array, low, high)  
+        CALL quickSortAsc(array, low, p - 1)  
+        CALL quickSortAsc(array, p + 1, high)  
+    END FUNCTION  
+  
+    FUNCTION partition(arr, start, end)  
+        SET pivot TO element at end of arr  
+        SET i TO start - 1  
+        SET j TO start  
+        WHILE j < end DO  
+            IF element at j of arr <= pivot THEN  
+                SET i TO i + 1  
+                CALL swap(arr, i, j)  
+            END IF  
+            SET j TO j + 1  
+        END WHILE  
+        CALL swap(arr, i + 1, end)  
+        RETURN i + 1  
+    END FUNCTION  
+  
+    FUNCTION swap(lst, idx1, idx2)  
+        SET temp TO element at idx1 of lst  
+        SET element at idx1 of lst TO element at idx2 of lst  
+        SET element at idx2 of lst TO temp  
+    END FUNCTION  
+  
+    FUNCTION getValueOrZero(dictionary, key)  
+        IF key exists in dictionary THEN  
+            RETURN dictionary[key]  
+        ELSE  
+            RETURN 0  
+        END IF  
+    END FUNCTION  
+  
+    FUNCTION maximumOfThree(a, b, c)  
+        SET maxVal TO a  
+        IF b > maxVal THEN  
+            SET maxVal TO b  
+        END IF  
+        IF c > maxVal THEN  
+            SET maxVal TO c  
+        END IF  
+        RETURN maxVal  
+    END FUNCTION  
+END CLASS

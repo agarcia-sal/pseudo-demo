@@ -1,0 +1,39 @@
+```
+FUNCTION minPath(grid, k)
+    LET size = LENGTH(grid)
+    LET highest = size * size + 1
+    LET result_val = highest
+    LET coords = RANGE(0, size)
+    
+    FUNCTION neighbors(x, y)
+        RETURN FILTER(
+            [(x-1,y),(x,y-1),(x+1,y),(x,y+1)],
+            LAMBDA (a,b): 0 <= a < size AND 0 <= b < size
+        )
+    END FUNCTION
+    
+    LET pairs = [(x,y) FOR x IN coords FOR y IN coords IF grid[x][y] == 1]
+    
+    FUNCTION find_min(vals, current_min)
+        IF vals IS EMPTY
+            RETURN current_min
+        LET head = HEAD(vals)
+        LET tail = TAIL(vals)
+        RETURN find_min(tail, MIN(current_min, head))
+    END FUNCTION
+    
+    FOR EACH pos IN pairs
+        LET adj_vals = [grid[a][b] FOR (a,b) IN neighbors(pos[0], pos[1])]
+        result_val = find_min(adj_vals, result_val)
+    END FOR
+    
+    FUNCTION build_answer(index, limit, acc)
+        IF index == limit
+            RETURN acc
+        LET next_val = 1 IF index MOD 2 == 0 ELSE result_val
+        RETURN build_answer(index + 1, limit, acc + [next_val])
+    END FUNCTION
+    
+    RETURN build_answer(0, k, [])
+END FUNCTION
+```

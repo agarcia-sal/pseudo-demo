@@ -1,0 +1,78 @@
+CLASS Solution
+	FUNCTION numberOfSubarrays(nums)
+		DEFINE FUNCTION max_value(arr, start_idx, end_idx)
+			ASSIGN acc TO arr[start_idx]
+			ASSIGN k TO start_idx + 1
+			WHILE k <= end_idx
+				IF arr[k] > acc THEN
+					ASSIGN acc TO arr[k]
+				END IF
+				ASSIGN k TO k + 1
+			END WHILE
+			RETURN acc
+		END FUNCTION
+
+		DEFINE FUNCTION map_get_or_create(map_ref, key)
+			IF NOT key IN map_ref THEN
+				map_ref[key] = []
+			END IF
+			RETURN map_ref[key]
+		END FUNCTION
+
+		ASSIGN dict_indexMap TO {}
+
+		ASSIGN outer_counter TO 0
+		REPEAT
+			IF outer_counter >= LENGTH(nums) THEN
+				BREAK
+			END IF
+			ASSIGN element TO nums[outer_counter]
+			ASSIGN list_ref TO map_get_or_create(dict_indexMap, element)
+			CALL list_ref.APPEND(outer_counter)
+			ASSIGN outer_counter TO outer_counter + 1
+		UNTIL FALSE
+
+		ASSIGN result_count TO 0
+		ASSIGN all_indices_lists TO []
+		FOR key IN dict_indexMap
+			all_indices_lists.APPEND(dict_indexMap[key])
+		END FOR
+
+		ASSIGN outerListPointer TO 0
+		WHILE outerListPointer < LENGTH(all_indices_lists)
+			ASSIGN currentList TO all_indices_lists[outerListPointer]
+			ASSIGN lenList TO 0
+			REPEAT
+				IF lenList >= LENGTH(currentList) THEN
+					BREAK
+				END IF
+				ASSIGN inner0 TO lenList
+
+				ASSIGN inner1 TO inner0
+				WHILE inner1 < LENGTH(currentList)
+					ASSIGN startPos TO currentList[inner0]
+					ASSIGN endPos TO currentList[inner1]
+
+					ASSIGN subArr TO []
+					ASSIGN idxCopy TO startPos
+					WHILE idxCopy <= endPos
+						subArr.APPEND(nums[idxCopy])
+						ASSIGN idxCopy TO idxCopy + 1
+					END WHILE
+
+					ASSIGN maxVal TO max_value(subArr, 0, LENGTH(subArr) - 1)
+					IF NOT (maxVal != nums[startPos]) THEN
+						ASSIGN result_count TO result_count + 1
+					END IF
+					ASSIGN inner1 TO inner1 + 1
+				END WHILE
+
+				ASSIGN lenList TO lenList + 1
+			UNTIL FALSE
+
+			ASSIGN outerListPointer TO outerListPointer + 1
+		END WHILE
+
+		RETURN result_count
+	END FUNCTION
+END CLASS

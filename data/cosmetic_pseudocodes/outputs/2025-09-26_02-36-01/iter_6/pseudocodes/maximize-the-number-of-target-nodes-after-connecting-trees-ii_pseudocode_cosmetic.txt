@@ -1,0 +1,154 @@
+CLASS Solution
+    FUNCTION maxTargetNodes(edges1, edges2)
+        SET mapAlpha TO new default dictionary with list as default value
+        SET mapBeta TO new default dictionary with list as default value
+
+        FUNCTION fillAdjacency(inputEdges, adjacencyMap)
+            SET indexA TO 0
+            SET limitA TO LENGTH of inputEdges
+            REPEAT
+                IF indexA GREATER THAN OR EQUAL TO limitA THEN
+                    BREAK
+                END IF
+
+                SET elementX TO inputEdges[indexA][0]
+                SET elementY TO inputEdges[indexA][1]
+
+                IF NOT elementX IN adjacencyMap THEN
+                    SET adjacencyMap[elementX] TO empty list
+                END IF
+                IF NOT elementY IN adjacencyMap THEN
+                    SET adjacencyMap[elementY] TO empty list
+                END IF
+
+                SET tempList1 TO adjacencyMap[elementX]
+                SET tempList2 TO adjacencyMap[elementY]
+
+                SET len1 TO LENGTH of tempList1
+                tempList1[len1 TO len1 + 0] = [elementY]
+
+                SET len2 TO LENGTH of tempList2
+                tempList2[len2 TO len2 + 0] = [elementX]
+
+                SET indexA TO indexA + 1
+            UNTIL FALSE
+        END FUNCTION
+
+        CALL fillAdjacency(edges1, mapAlpha)
+        CALL fillAdjacency(edges2, mapBeta)
+
+        SET sizeAlpha TO 0
+        FOR each key IN mapAlpha
+            SET sizeAlpha TO sizeAlpha + 1
+        END FOR
+
+        SET sizeBeta TO 0
+        FOR each key IN mapBeta
+            SET sizeBeta TO sizeBeta + 1
+        END FOR
+
+        FUNCTION traverse(treeStructure, rootNode)
+            SET countEven TO 0
+            SET countOdd TO 0
+            SET dequeStorage TO new list containing tuple (rootNode, 0)
+            SET discovered TO set initialized with rootNode
+
+            FUNCTION processQueue(queueList, discoveredSet, evenCnt, oddCnt)
+                IF LENGTH(queueList) = 0 THEN
+                    RETURN evenCnt, oddCnt
+                END IF
+
+                SET currentPair TO queueList[0]
+                REMOVE first element from queueList resulting in newQueue
+
+                SET currentNode TO currentPair[0]
+                SET currentDistance TO currentPair[1]
+
+                IF (currentDistance MOD 2) = 0 THEN
+                    SET updatedEven TO evenCnt + 1
+                    SET updatedOdd TO oddCnt
+                ELSE
+                    SET updatedEven TO evenCnt
+                    SET updatedOdd TO oddCnt + 1
+                END IF
+
+                SET neighborsList TO treeStructure[currentNode]
+                SET indexNeighbor TO LENGTH(neighborsList) - 1
+
+                REPEAT
+                    IF indexNeighbor < 0 THEN
+                        BREAK
+                    END IF
+                    SET neighborElem TO neighborsList[indexNeighbor]
+
+                    IF NOT neighborElem IN discoveredSet THEN
+                        SET discoveredSet TO discoveredSet UNION {neighborElem}
+                        SET newPair TO (neighborElem, currentDistance + 1)
+                        SET newQueue TO newQueue + [newPair]
+                    END IF
+                    SET indexNeighbor TO indexNeighbor - 1
+                UNTIL FALSE
+
+                RETURN processQueue(newQueue, discoveredSet, updatedEven, updatedOdd)
+            END FUNCTION
+
+            RETURN processQueue(dequeStorage, discovered, countEven, countOdd)
+        END FUNCTION
+
+        SET listCountsAlpha TO empty list
+        SET idxAlpha TO 0
+        REPEAT
+            IF idxAlpha >= sizeAlpha THEN
+                BREAK
+            END IF
+            SET pairCountsAlpha TO traverse(mapAlpha, idxAlpha)
+            SET listCountsAlpha TO listCountsAlpha + [pairCountsAlpha]
+            SET idxAlpha TO idxAlpha + 1
+        UNTIL FALSE
+
+        SET listCountsBeta TO empty list
+        SET idxBeta TO 0
+        WHILE TRUE
+            IF idxBeta >= sizeBeta THEN
+                BREAK
+            END IF
+            SET pairCountsBeta TO traverse(mapBeta, idxBeta)
+            SET listCountsBeta := listCountsBeta + [pairCountsBeta]
+            SET idxBeta := idxBeta + 1
+        END WHILE
+
+        SET finalResults TO empty list
+        SET posAlpha TO 0
+        WHILE posAlpha < sizeAlpha
+            SET currentEvenOddAlpha TO listCountsAlpha[posAlpha]
+            SET valEvenAlpha TO currentEvenOddAlpha[0]
+            SET valOddAlpha TO currentEvenOddAlpha[1]
+            SET maximumTarget TO 0
+
+            SET posBeta TO 0
+            WHILE posBeta < sizeBeta
+                SET currentEvenOddBeta TO listCountsBeta[posBeta]
+                SET valEvenBeta TO currentEvenOddBeta[0]
+                SET valOddBeta TO currentEvenOddBeta[1]
+
+                IF (posAlpha = posBeta) OR ((posAlpha MOD 2) = (posBeta MOD 2)) THEN
+                    SET candidateCount TO valEvenBeta
+                ELSE
+                    SET candidateCount TO valOddBeta
+                END IF
+
+                IF candidateCount > maximumTarget THEN
+                    SET maximumTarget TO candidateCount
+                END IF
+
+                SET posBeta TO posBeta + 1
+            END WHILE
+
+            SET sumResult TO valEvenAlpha + maximumTarget
+            SET finalResults TO finalResults + [sumResult]
+            SET posAlpha TO posAlpha + 1
+        END WHILE
+
+        RETURN finalResults
+    END FUNCTION
+END CLASS

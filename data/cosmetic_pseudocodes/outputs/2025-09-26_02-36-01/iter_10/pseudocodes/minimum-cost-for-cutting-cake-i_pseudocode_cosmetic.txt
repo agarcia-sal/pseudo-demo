@@ -1,0 +1,42 @@
+CLASS Solution
+    FUNCTION minimumCost(m n horizontalCut verticalCut)
+      FUNCTION descSort(arr)
+        FOR idx FROM 1 TO LENGTH(arr) - 1 DO
+          SET tempPos TO idx
+          WHILE tempPos > 0 AND arr[tempPos] > arr[tempPos - 1] DO
+            SWAP arr[tempPos] WITH arr[tempPos - 1]
+            SET tempPos TO tempPos - 1
+          END WHILE
+        END FOR
+      END FUNCTION
+
+      CALL descSort(horizontalCut)
+      CALL descSort(verticalCut)
+
+      SET totalCost TO 0
+      SET horizIdx TO 0
+      SET vertIdx TO 0
+      SET horizSeg TO 1
+      SET vertSeg TO 1
+
+      FUNCTION recursiveProcess(a b x y)
+        IF NOT (a < m - 1 OR b < n - 1) THEN
+          RETURN
+        ELSE
+          IF b = n - 1 OR (a < m - 1 AND horizontalCut[a] > verticalCut[b]) THEN
+            SET totalCost TO totalCost + horizontalCut[a] * vertSeg
+            SET horizSeg TO horizSeg + 1
+            CALL recursiveProcess(a + 1 b x y)
+          ELSE
+            SET totalCost TO totalCost + verticalCut[b] * horizSeg
+            SET vertSeg TO vertSeg + 1
+            CALL recursiveProcess(a b + 1 x y)
+          END IF
+        END IF
+      END FUNCTION
+
+      CALL recursiveProcess(horizIdx vertIdx horizSeg vertSeg)
+
+      RETURN totalCost
+    END FUNCTION
+END CLASS

@@ -1,0 +1,48 @@
+```
+FUNCTION valid_date(date_string)
+\tLET A1x = date_string
+\tLABEL retry_parse:
+\tLET _tmp = TRUE
+\tTRY
+\t\tLET pQ = TRIM(A1x)
+\t\tLET [mStr, dStr, yStr] = SPLIT(pQ, '-')
+\t\tLET MX = TO_INTEGER(mStr)
+\t\tLET d_0 = TO_INTEGER(dStr)
+\t\tLET Y_Z = TO_INTEGER(yStr)
+\t\tGOTO validation_checks
+\tCATCH
+\t\tLET _tmp = FALSE
+\t\tGOTO finish_up
+\tENDTRY
+
+validation_checks:
+\tIF NOT ((1 <= MX) AND (MX <= 12)) THEN
+\t\tLET _tmp = FALSE
+\t\tGOTO finish_up
+\tEND IF
+
+\tLET firstGroup = [1,3,5,7,8,10,12]
+\tLET secondGroup = [4,6,9,11]
+\t
+\tMATCH true WITH
+\t\tCASE MX IN firstGroup:
+\t\t\tIF NOT ((1 <= d_0) AND (d_0 <= 31)) THEN
+\t\t\t\tLET _tmp = FALSE
+\t\t\t\tGOTO finish_up
+\t\t\tEND IF
+\t\tCASE MX IN secondGroup:
+\t\t\tIF NOT ((1 <= d_0) AND (d_0 <= 30)) THEN
+\t\t\t\tLET _tmp = FALSE
+\t\t\t\tGOTO finish_up
+\t\t\tEND IF
+\t\tCASE MX == 2:
+\t\t\tIF NOT ((1 <= d_0) AND (d_0 <= 29)) THEN
+\t\t\t\tLET _tmp = FALSE
+\t\t\t\tGOTO finish_up
+\t\t\tEND IF
+\tEND MATCH
+
+finish_up:
+\tRETURN _tmp
+END FUNCTION
+```

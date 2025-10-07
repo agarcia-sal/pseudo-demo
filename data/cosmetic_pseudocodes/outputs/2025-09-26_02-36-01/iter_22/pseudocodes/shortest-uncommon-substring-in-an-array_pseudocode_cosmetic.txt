@@ -1,0 +1,78 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+      DEFINE FUNCTION lengthOfString(str)
+        SET counter TO 0
+        WHILE str[counter] IS DEFINED
+          SET counter TO counter PLUS 1
+        END WHILE
+        RETURN counter
+      END FUNCTION
+
+      DEFINE FUNCTION substringFromTo(s, startPos, endPos)
+        SET result TO EMPTY STRING
+        SET pos TO startPos
+        WHILE pos LESS THAN endPos
+          SET result TO result CONCAT s[pos]
+          SET pos TO pos PLUS 1
+        END WHILE
+        RETURN result
+      END FUNCTION
+
+      SET freqMap TO EMPTY DICTIONARY WITH DEFAULT 0
+
+      SET idx1 TO 0
+      WHILE idx1 LESS THAN lengthOfString(arr)
+        SET currentStr TO arr[idx1]
+        SET lenCur TO lengthOfString(currentStr)
+        SET outerIdx TO 0
+        WHILE outerIdx LESS THAN lenCur
+          SET innerIdx TO outerIdx PLUS 1
+          WHILE innerIdx LESS THAN OR EQUAL TO lenCur
+            SET subStrVal TO substringFromTo(currentStr, outerIdx, innerIdx)
+            SET freqMap[subStrVal] TO freqMap[subStrVal] PLUS 1
+            SET innerIdx TO innerIdx PLUS 1
+          END WHILE
+          SET outerIdx TO outerIdx PLUS 1
+        END WHILE
+        SET idx1 TO idx1 PLUS 1
+      END WHILE
+
+      SET resultList TO EMPTY LIST
+      SET z TO 0
+      WHILE z LESS THAN lengthOfString(arr)
+        SET candidateStr TO arr[z]
+        SET lenCandidate TO lengthOfString(candidateStr)
+        SET currentShortest TO EMPTY STRING
+        SET startPos TO 0
+        REPEAT
+          IF startPos GREATER THAN OR EQUAL TO lenCandidate THEN
+            EXIT LOOP
+          END IF
+          SET endPos TO startPos PLUS 1
+          WHILE endPos LESS THAN OR EQUAL TO lenCandidate
+            SET currentSub TO substringFromTo(candidateStr, startPos, endPos)
+            SET isUnique TO (freqMap[currentSub] EQUALS 1)
+            IF isUnique THEN
+              IF currentShortest EQUALS EMPTY STRING THEN
+                SET currentShortest TO currentSub
+              ELSE
+                SET lenCurSub TO lengthOfString(currentSub)
+                SET lenShortest TO lengthOfString(currentShortest)
+                IF (lenCurSub LESS THAN lenShortest) OR
+                   ((lenCurSub EQUALS lenShortest) AND (currentSub LESS THAN currentShortest)) THEN
+                  SET currentShortest TO currentSub
+                END IF
+              END IF
+            END IF
+            SET endPos TO endPos PLUS 1
+          END WHILE
+          SET startPos TO startPos PLUS 1
+        UNTIL FALSE
+
+        APPEND currentShortest TO resultList
+        SET z TO z PLUS 1
+      END WHILE
+
+      RETURN resultList
+    END FUNCTION
+END CLASS

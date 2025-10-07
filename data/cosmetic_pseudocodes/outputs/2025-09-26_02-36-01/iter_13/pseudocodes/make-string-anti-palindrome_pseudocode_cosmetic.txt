@@ -1,0 +1,145 @@
+CLASS Solution
+    FUNCTION makeAntiPalindrome(s)
+        FUNCTION sortCharsAsc(lst)
+            RETURN toSortedList(lst, lessThan)
+        END FUNCTION
+
+        FUNCTION toSortedList(arr, comp)
+            SET result TO arr converted to list
+            CALL quickSortHelper(result, 0, length(result) - 1, comp)
+            RETURN result
+        END FUNCTION
+
+        FUNCTION quickSortHelper(arr, low, high, comp)
+            IF low < high THEN
+                SET pivotIdx TO partition(arr, low, high, comp)
+                CALL quickSortHelper(arr, low, pivotIdx - 1, comp)
+                CALL quickSortHelper(arr, pivotIdx + 1, high, comp)
+            END IF
+        END FUNCTION
+
+        FUNCTION partition(arr, low, high, comp)
+            SET pivotVal TO arr[high]
+            SET pIndex TO low - 1
+            SET m TO low
+            WHILE m <= high - 1
+                IF comp(arr[m], pivotVal) THEN
+                    SET pIndex TO pIndex + 1
+                    CALL swap(arr, pIndex, m)
+                END IF
+                SET m TO m + 1
+            END WHILE
+            CALL swap(arr, pIndex + 1, high)
+            RETURN pIndex + 1
+        END FUNCTION
+
+        FUNCTION lessThan(a, b)
+            RETURN (a < b)
+        END FUNCTION
+
+        FUNCTION swap(lst, x, y)
+            SET temp TO lst[x]
+            SET lst[x] TO lst[y]
+            SET lst[y] TO temp
+        END FUNCTION
+
+        FUNCTION length(lst)
+            SET count TO 0
+            SET idx TO 0
+            REPEAT
+                IF idx >= lengthOfList(lst) THEN BREAK END IF
+                SET count TO count + 1
+                SET idx TO idx + 1
+            UNTIL false
+            RETURN count
+        END FUNCTION
+
+        FUNCTION lengthOfList(lst)
+            # Assume underlying implementation provides length in O(1)
+            RETURN nativeLength(lst)
+        END FUNCTION
+
+        FUNCTION nativeLength(lst)
+            # Placeholder for direct length retrieval of data structure
+        END FUNCTION
+
+        FUNCTION joinChars(lst)
+            SET acc TO empty string
+            SET pos TO 0
+            WHILE pos < length(lst)
+                SET acc TO acc + lst[pos]
+                SET pos TO pos + 1
+            END WHILE
+            RETURN acc
+        END FUNCTION
+
+        SET charList TO sortCharsAsc(convertToList(s))
+        SET total TO length(charList)
+        SET half TO total div 2
+
+        FUNCTION convertToList(strVal)
+            SET res TO empty list
+            SET idx TO 0
+            REPEAT
+                IF idx >= nativeLength(strVal) THEN BREAK END IF
+                APPEND strVal[idx] TO res
+                SET idx TO idx + 1
+            UNTIL false
+            RETURN res
+        END FUNCTION
+
+        FUNCTION areEqual(a, b)
+            RETURN not(a != b)
+        END FUNCTION
+
+        IF areEqual(charList[half], charList[half - 1]) THEN
+            SET p TO half
+            REPEAT
+                IF p >= total THEN BREAK END IF
+                IF not areEqual(charList[p], charList[p - 1]) THEN BREAK END IF
+                SET p TO p + 1
+            UNTIL false
+
+            SET q TO half
+            REPEAT
+                IF q >= total THEN BREAK END IF
+                IF not areEqual(charList[q], charList[total - q - 1]) THEN BREAK END IF
+                IF p >= total THEN
+                    RETURN "-1"
+                END IF
+                CALL swap(charList, p, q)
+                SET p TO p + 1
+                SET q TO q + 1
+            UNTIL false
+        END IF
+
+        FUNCTION innerLoop(iVal)
+            SET swappedFlag TO false
+            SET kIdx TO half
+            REPEAT
+                IF kIdx >= total THEN BREAK END IF
+                IF (charList[kIdx] != charList[iVal]) and (charList[kIdx] != charList[total - iVal - 1]) THEN
+                    CALL swap(charList, kIdx, iVal)
+                    SET swappedFlag TO true
+                    BREAK
+                END IF
+                SET kIdx TO kIdx + 1
+            UNTIL false
+            RETURN swappedFlag
+        END FUNCTION
+
+        SET idxMain TO 0
+        REPEAT
+            IF idxMain >= half THEN BREAK END IF
+            IF areEqual(charList[idxMain], charList[total - idxMain - 1]) THEN
+                SET resultFlag TO innerLoop(idxMain)
+                IF not resultFlag THEN
+                    RETURN "-1"
+                END IF
+            END IF
+            SET idxMain TO idxMain + 1
+        UNTIL false
+
+        RETURN joinChars(charList)
+    END FUNCTION
+END CLASS

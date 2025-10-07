@@ -1,0 +1,66 @@
+``` 
+CLASS Solution
+    FUNCTION findPermutation(nums)
+        FUNCTION dfs(bitmask, previous)
+            FUNCTION isCompleted(state)
+                RETURN state = (1 << LENGTH(nums)) - 1
+            END FUNCTION
+
+            IF isCompleted(bitmask) THEN
+                RETURN ABS(previous - nums[0])
+            END IF
+
+            SET minimalDifference TO +∞
+            SET indexCounter TO 0
+            WHILE indexCounter < LENGTH(nums) DO
+                SET bitIsClear TO ((bitmask >> indexCounter) & 1) = 0
+                IF bitIsClear THEN
+                    SET nextBitmask TO bitmask | (1 << indexCounter)
+                    SET difference TO ABS(previous - nums[indexCounter]) + dfs(nextBitmask, indexCounter)
+                    IF difference < minimalDifference THEN
+                        SET minimalDifference TO difference
+                    END IF
+                END IF
+                ADD 1 TO indexCounter
+            END WHILE
+            RETURN minimalDifference
+        END FUNCTION
+
+        FUNCTION g(currentMask, lastIndex)
+            ans.APPEND(lastIndex)
+            IF currentMask = (1 << LENGTH(nums)) - 1 THEN
+                RETURN
+            END IF
+
+            SET optimal TO dfs(currentMask, lastIndex)
+            SET position TO 0
+            REPEAT
+                EXIT_LOOP = FALSE
+                IF position >= LENGTH(nums) THEN
+                    EXIT_LOOP = TRUE
+                ELSE
+                    SET isUnused TO (((currentMask >> position) & 1) = 0)
+                    IF isUnused THEN
+                        SET newMask TO currentMask | (1 << position)
+                        SET candidate TO ABS(lastIndex - nums[position]) + dfs(newMask, position)
+                        IF candidate = optimal THEN
+                            CALL g(newMask, position)
+                            EXIT_LOOP = TRUE
+                        END IF
+                    END IF
+                END IF
+                IF EXIT_LOOP THEN
+                    BREAK
+                ELSE
+                    ADD 1 TO position
+                END IF
+            UNTIL FALSE
+        END FUNCTION
+
+        SET lengthNums TO LENGTH(nums)
+        SET ans TO []
+        CALL g(1, 0)
+        RETURN ans
+    END FUNCTION
+END CLASS
+```

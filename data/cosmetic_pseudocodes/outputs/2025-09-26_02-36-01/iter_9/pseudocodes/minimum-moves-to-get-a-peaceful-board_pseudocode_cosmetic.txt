@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION minMoves(quaxo)
+        FUNCTION absVal(x)
+            IF x < 0 THEN
+                RETURN 0 - x
+            ELSE
+                RETURN x
+            END IF
+        END FUNCTION
+
+        FUNCTION lenSeq(sq)
+            SET cnt TO 0
+            SET ptr TO 0
+            WHILE ptr < sq LENGTH DO
+                SET cnt TO cnt + 1
+                SET ptr TO ptr + 1
+            END WHILE
+            RETURN cnt
+        END FUNCTION
+
+        FUNCTION sortByFirst(elmList)
+            IF lenSeq(elmList) < 2 THEN
+                RETURN elmList
+            END IF
+            SET pivot TO elmList[0]
+            SET lessPart TO EMPTY LIST
+            SET greaterPart TO EMPTY LIST
+            SET i TO 1
+            WHILE i < lenSeq(elmList) DO
+                IF elmList[i][0] <= pivot[0] THEN
+                    APPEND elmList[i] TO lessPart
+                ELSE
+                    APPEND elmList[i] TO greaterPart
+                END IF
+                SET i TO i + 1
+            END WHILE
+            RETURN (sortByFirst(lessPart) CONCAT [pivot] CONCAT sortByFirst(greaterPart))
+        END FUNCTION
+
+        FUNCTION sortBySecond(elmList)
+            IF lenSeq(elmList) < 2 THEN
+                RETURN elmList
+            END IF
+            SET pivot TO elmList[0]
+            SET lessPart TO EMPTY LIST
+            SET greaterPart TO EMPTY LIST
+            SET i TO 1
+            WHILE i < lenSeq(elmList) DO
+                IF elmList[i][1] <= pivot[1] THEN
+                    APPEND elmList[i] TO lessPart
+                ELSE
+                    APPEND elmList[i] TO greaterPart
+                END IF
+                SET i TO i + 1
+            END WHILE
+            RETURN (sortBySecond(lessPart) CONCAT [pivot] CONCAT sortBySecond(greaterPart))
+        END FUNCTION
+
+        FUNCTION calcAbsDiffSum(sortedList, posIdx, whichCoord)
+            FUNCTION loopSum(counter, acc)
+                IF counter >= lenSeq(sortedList) THEN
+                    RETURN acc
+                ELSE
+                    SET coordVal TO sortedList[counter][whichCoord]
+                    SET diffVal TO coordVal - counter
+                    IF diffVal < 0 THEN
+                        SET diffVal TO 0 - diffVal
+                    END IF
+                    RETURN loopSum(counter + 1, acc + diffVal)
+                END IF
+            END FUNCTION
+            RETURN loopSum(0, 0)
+        END FUNCTION
+
+        SET sizeN TO lenSeq(quaxo)
+        SET rowSorted TO sortByFirst(quaxo)
+        SET colSorted TO sortBySecond(quaxo)
+        SET sumRow TO calcAbsDiffSum(rowSorted, 0, 0)
+        SET sumCol TO calcAbsDiffSum(colSorted, 0, 1)
+
+        RETURN sumRow + sumCol
+    END FUNCTION
+END CLASS

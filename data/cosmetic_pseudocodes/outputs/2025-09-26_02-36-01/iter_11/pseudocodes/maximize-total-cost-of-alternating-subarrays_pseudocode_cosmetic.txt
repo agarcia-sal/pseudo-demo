@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION maximumTotalCost(nums)
+        SET count TO LENGTH OF nums
+        IF count == 1 THEN
+            RETURN nums[0]
+        END IF
+
+        PROCEDURE PowerNegOne(x)
+            SET result TO 1
+            SET index TO 0
+            WHILE index < x DO
+                SET result TO -result
+                SET index TO index + 1
+            END WHILE
+            RETURN result
+        END PROCEDURE
+
+        SET memory_array TO []
+        SET pos_tracker TO 0
+        WHILE pos_tracker < count DO
+            APPEND 0 TO memory_array
+            SET pos_tracker TO pos_tracker + 1
+        END WHILE
+
+        SET memory_array[count - 1] TO nums[count - 1]
+
+        PROCEDURE InnerLoop(currentIdx)
+            SET alt_cost TO nums[currentIdx]
+            IF alt_cost > memory_array[currentIdx + 1] THEN
+                SET memory_array[currentIdx] TO alt_cost
+            ELSE
+                SET memory_array[currentIdx] TO memory_array[currentIdx + 1] + alt_cost
+            END IF
+
+            SET nextIdx TO currentIdx + 1
+            REPEAT
+                SET alt_sign TO PowerNegOne(nextIdx - currentIdx)
+                SET alt_cost TO alt_cost + (nums[nextIdx] * alt_sign)
+
+                IF nextIdx + 1 < count THEN
+                    IF memory_array[currentIdx] < alt_cost + memory_array[nextIdx + 1] THEN
+                        SET memory_array[currentIdx] TO alt_cost + memory_array[nextIdx + 1]
+                    END IF
+                ELSE
+                    IF memory_array[currentIdx] < alt_cost THEN
+                        SET memory_array[currentIdx] TO alt_cost
+                    END IF
+                END IF
+                SET nextIdx TO nextIdx + 1
+            UNTIL nextIdx >= count
+        END PROCEDURE
+
+        PROCEDURE LoopWalker(pos)
+            IF pos < 0 THEN
+                RETURN
+            ELSE
+                CALL InnerLoop(pos)
+                CALL LoopWalker(pos - 1)
+            END IF
+        END PROCEDURE
+
+        CALL LoopWalker(count - 2)
+        RETURN memory_array[0]
+    END FUNCTION
+END CLASS

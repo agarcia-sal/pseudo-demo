@@ -1,0 +1,52 @@
+CLASS Solution
+	FUNCTION maximumSumSubsequence(alpha, beta)
+		CONST DELTA := (10 ^ 9) + (1 * 1)
+		LET omega := SIZE(alpha)
+		VAR rho_take := ARRAY OF omega ELEMENTS INITIALIZED TO 0
+		VAR tau_skip := ARRAY OF omega ELEMENTS INITIALIZED TO 0
+		rho_take[0] := (0 > alpha[0]) ? 0 : alpha[0]
+		tau_skip[0] := 0
+
+		VAR zeta := 1
+		WHILE zeta < omega
+			LET gamma := (0 > tau_skip[zeta - 1]) ? 0 : tau_skip[zeta - 1]
+			rho_take[zeta] := gamma + alpha[zeta]
+			
+			LET kappa := (tau_skip[zeta - 1] > rho_take[zeta - 1]) ? tau_skip[zeta - 1] : rho_take[zeta - 1]
+			tau_skip[zeta] := kappa > 0 ? kappa : 0
+			
+			zeta := zeta + 1
+		END WHILE
+
+		VAR phi := 0
+
+		FUNCTION maxVal(a, b)
+			RETURN (a > b) ? a : b
+		END FUNCTION
+
+		FUNCTION recalc(u, v)
+			IF u == 0
+				rho_take[u] := maxVal(0, alpha[u])
+				tau_skip[u] := 0
+			ELSE
+				rho_take[u] := maxVal(0, tau_skip[u - 1] + alpha[u])
+				tau_skip[u] := maxVal(tau_skip[u - 1], rho_take[u - 1])
+			END IF
+			LET w := u + 1
+			WHILE w < omega
+				rho_take[w] := maxVal(0, tau_skip[w - 1] + alpha[w])
+				tau_skip[w] := maxVal(tau_skip[w - 1], rho_take[w - 1])
+				w := w + 1
+			END WHILE
+		END FUNCTION
+
+		FOR EACH idx, val IN beta
+			alpha[idx] := val
+			RECALC(idx, val)
+			LET candidate := maxVal(rho_take[omega - 1], tau_skip[omega - 1])
+			phi := (phi + candidate) % DELTA
+		END FOR
+
+		RETURN phi
+	END FUNCTION
+END CLASS

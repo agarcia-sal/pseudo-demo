@@ -1,0 +1,98 @@
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+      DEFINE FUNCTION incrementMapValue(map, key, delta)
+          IF NOT map CONTAINS key
+              SET map[key] = 0
+          END IF
+          SET map[key] = map[key] + delta
+      END FUNCTION
+
+      SET u1 = "" 
+      SET u2 = 0
+      SET m1 = DICTIONARY
+      SET i1 = 0
+
+      WHILE i1 < LENGTH(compressed)
+            SET c1 = SUBSTRING(compressed, i1, i1 + 1)
+            IF ( (c1 >= "a" AND c1 <= "z") OR (c1 >= "A" AND c1 <= "Z") )
+                IF NOT (u1 == "")
+                    CALL incrementMapValue(m1, u1, u2)
+                END IF
+                SET u1 = c1
+                SET u2 = 0
+            ELSE 
+                SET u2 = (u2 * (5 + 5)) + (c1 - "0")
+            END IF
+            SET i1 = i1 + 1
+      END WHILE
+
+      IF NOT (u1 == "")
+          CALL incrementMapValue(m1, u1, u2)
+      END IF
+
+      SET l2 = []
+      DEFINE FUNCTION sortKeys(d)
+          SET keysList = []
+          FOR EACH k IN d
+              APPEND k TO keysList
+          END FOR
+
+          DEFINE FUNCTION quickSort(arr)
+              IF LENGTH(arr) <= 1
+                  RETURN arr
+              END IF
+              SET pivot = arr[0]
+              SET less = []
+              SET more = []
+              FOR i FROM 1 TO LENGTH(arr) - 1
+                  IF arr[i] < pivot
+                      APPEND arr[i] TO less
+                  ELSE
+                      APPEND arr[i] TO more
+                  END IF
+              END FOR
+              RETURN quickSort(less) + [pivot] + quickSort(more)
+          END FUNCTION
+
+          RETURN quickSort(keysList)
+      END FUNCTION
+
+      SET sKeys = sortKeys(m1)
+
+      DEFINE FUNCTION toString(num)
+          IF num == 0
+              RETURN "0"
+          END IF
+          SET r = ""
+          SET n = num
+          DEFINE FUNCTION digitChar(d)
+              SET zeroAscii = 48
+              SET code = zeroAscii + d
+              RETURN CHAR(code)
+          END FUNCTION
+          WHILE n > 0
+              SET d = n - ( (n / 10) * 10 )
+              SET r = digitChar(d) + r
+              SET n = (n / 10) - ( (n / 10) % 1 )
+          END WHILE
+          RETURN r
+      END FUNCTION
+
+      FOR EACH ch IN sKeys
+          SET part = ch + toString(m1[ch])
+          APPEND part TO l2
+      END FOR
+
+      SET r2 = ""
+      SET j = 0
+      REPEAT
+          IF j >= LENGTH(l2) THEN
+              BREAK
+          END IF
+          SET r2 = r2 + l2[j]
+          SET j = j + 1
+      UNTIL FALSE
+
+      RETURN r2
+    END FUNCTION
+END CLASS

@@ -1,0 +1,92 @@
+CLASS Solution  
+    FUNCTION constructGridLayout(n, edges)  
+        SET adjacency TO empty list  
+        FOR indexCounter FROM 0 TO n - 1  
+            APPEND empty list TO adjacency  
+        END FOR  
+
+        SET edgePointer TO 0  
+        WHILE edgePointer < LENGTH(edges)  
+            SET nodeA TO edges[edgePointer][0]  
+            SET nodeB TO edges[edgePointer][1]  
+            APPEND nodeB TO adjacency[nodeA]  
+            APPEND nodeA TO adjacency[nodeB]  
+            SET edgePointer TO edgePointer + 1  
+        END WHILE  
+
+        SET degreePositions TO list with 5 elements all initialized to -1  
+        SET posIndex TO 0  
+        WHILE posIndex < LENGTH(adjacency)  
+            SET neighbors TO adjacency[posIndex]  
+            SET degreePositions[LENGTH(neighbors)] TO posIndex  
+            SET posIndex TO posIndex + 1  
+        END WHILE  
+
+        IF degreePositions[1] != -1 THEN  
+            SET currentRow TO list containing degreePositions[1]  
+        ELSE IF degreePositions[4] = -1 THEN  
+            SET centralNode TO degreePositions[2]  
+            SET candidateFound TO false  
+            FOR EACH neighborNode IN adjacency[centralNode]  
+                IF LENGTH(adjacency[neighborNode]) = 2 THEN  
+                    SET currentRow TO list containing centralNode, neighborNode  
+                    SET candidateFound TO true  
+                    BREAK  
+                END IF  
+            END FOR  
+            IF candidateFound = false THEN  
+                SET currentRow TO empty list  
+            END IF  
+        ELSE  
+            SET centralNode TO degreePositions[2]  
+            SET currentRow TO list containing centralNode  
+            SET previousNode TO centralNode  
+            SET adjacentNodeCandidates TO adjacency[centralNode]  
+            SET nextNode TO adjacentNodeCandidates[0]  
+
+            WHILE LENGTH(adjacency[nextNode]) > 2  
+                APPEND nextNode TO currentRow  
+                SET foundNext TO false  
+                FOR EACH neighborCandidate IN adjacency[nextNode]  
+                    IF neighborCandidate != previousNode AND LENGTH(adjacency[neighborCandidate]) < 4 THEN  
+                        SET previousNode TO nextNode  
+                        SET nextNode TO neighborCandidate  
+                        SET foundNext TO true  
+                        BREAK  
+                    END IF  
+                END FOR  
+                IF NOT foundNext THEN  
+                    BREAK  
+                END IF  
+            END WHILE  
+
+            APPEND nextNode TO currentRow  
+        END IF  
+
+        SET layoutRows TO list containing currentRow  
+        SET visitedNodes TO list of n elements all set to false  
+        SET iterations TO (n / LENGTH(currentRow)) - 1  
+        SET iterationCounter TO 0  
+        WHILE iterationCounter < iterations  
+            FOR EACH node IN currentRow  
+                SET visitedNodes[node] TO true  
+            END FOR  
+
+            SET nextRow TO empty list  
+            FOR EACH node IN currentRow  
+                FOR EACH adjacentNode IN adjacency[node]  
+                    IF visitedNodes[adjacentNode] = false THEN  
+                        APPEND adjacentNode TO nextRow  
+                        BREAK  
+                    END IF  
+                END FOR  
+            END FOR  
+
+            APPEND nextRow TO layoutRows  
+            SET currentRow TO nextRow  
+            SET iterationCounter TO iterationCounter + 1  
+        END WHILE  
+
+        RETURN layoutRows  
+    END FUNCTION  
+END CLASS

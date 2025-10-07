@@ -1,0 +1,93 @@
+```pseudocode
+CLASS Solution
+    FUNCTION shortestDistanceAfterQueries(n, queries)
+        SET adjacency TO associate EACH integer x FROM 0 TO (n - 1) WITH an empty list
+        SET idx TO 0
+        WHILE idx <= (n - 2)
+            ADD the pair (idx + 1, 1) TO adjacency[idx]
+            SET idx TO idx + 1
+        END WHILE
+
+        FUNCTION dijkstra()
+            SET distances TO a list of size n filled with (1 / 0)  // positive infinity
+            SET distances[0] TO 0
+            SET heap TO [(0, 0)]
+
+            FUNCTION siftDown(heapList)
+                SET root TO 0
+                SET endIndex TO LENGTH(heapList) - 1
+                WHILE TRUE
+                    SET child TO 2 * root + 1
+                    IF child > endIndex THEN BREAK
+                    SET swap TO root
+                    IF heapList[swap][0] > heapList[child][0]
+                        SET swap TO child
+                    END IF
+                    IF child + 1 <= endIndex AND heapList[swap][0] > heapList[child + 1][0]
+                        SET swap TO child + 1
+                    END IF
+                    IF swap = root THEN BREAK
+                    SWAP heapList[root] WITH heapList[swap]
+                    SET root TO swap
+                END WHILE
+            END FUNCTION
+
+            FUNCTION siftUp(heapList)
+                SET idx TO LENGTH(heapList) - 1
+                WHILE idx > 0
+                    SET parent TO (idx - 1) DIV 2
+                    IF heapList[parent][0] <= heapList[idx][0] THEN BREAK
+                    SWAP heapList[idx] WITH heapList[parent]
+                    SET idx TO parent
+                END WHILE
+            END FUNCTION
+
+            FUNCTION heappush(heapList, element)
+                APPEND element TO heapList
+                CALL siftUp(heapList)
+            END FUNCTION
+
+            FUNCTION heappop(heapList)
+                SET lastElement TO REMOVE last item FROM heapList
+                IF LENGTH(heapList) = 0 THEN
+                    RETURN lastElement
+                END IF
+                SET minItem TO heapList[0]
+                SET heapList[0] TO lastElement
+                CALL siftDown(heapList)
+                RETURN minItem
+            END FUNCTION
+
+            FUNCTION isEmpty(collection)
+                RETURN LENGTH(collection) = 0
+            END FUNCTION
+
+            WHILE NOT isEmpty(heap)
+                SET (currDistance, currVertex) TO heappop(heap)
+                IF currDistance > distances[currVertex]
+                    CONTINUE
+                END IF
+
+                FOR EACH edge IN adjacency[currVertex]
+                    SET (dest, w) TO edge
+                    SET tentativeDist TO currDistance + w
+                    IF tentativeDist < distances[dest]
+                        SET distances[dest] TO tentativeDist
+                        heappush(heap, (tentativeDist, dest))
+                    END IF
+                END FOR
+            END WHILE
+            RETURN distances[n - 1]
+        END FUNCTION
+
+        SET outputList TO []
+        FOR EACH pairElem IN queries
+            SET (firstNode, secondNode) TO pairElem
+            ADD (secondNode, 1) TO adjacency[firstNode]
+            APPEND dijkstra() TO outputList
+        END FOR
+
+        RETURN outputList
+    END FUNCTION
+END CLASS
+```

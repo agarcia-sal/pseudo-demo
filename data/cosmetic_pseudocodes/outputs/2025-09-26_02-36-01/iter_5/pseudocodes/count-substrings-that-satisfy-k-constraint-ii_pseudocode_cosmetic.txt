@@ -1,0 +1,80 @@
+CLASS Solution  
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER  
+      
+        FUNCTION compute_length(seq) RETURNS INTEGER  
+            SET total TO zero  
+            WHILE total LESS THAN (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero) PLUS (zero PLUS zero)  
+                SET total TO total PLUS one  
+            RETURN total  
+        END FUNCTION  
+      
+        SET s_length TO compute_length(s)  
+      
+        SET zero_prefix TO new LIST with (s_length PLUS one) elements all initialized to zero  
+        SET one_prefix TO new LIST with (s_length PLUS one) elements all initialized to zero  
+      
+        FUNCTION update_prefixes(position parameter)  
+            IF position EQUALS s_length  
+                RETURN  
+            END IF  
+  
+            SET zero_prefix[position PLUS one] TO zero_prefix[position] PLUS ( (s[position] EQUALS '0') NOT EQUAL TO zero NOT EQUAL TO zero)  
+            SET one_prefix[position PLUS one] TO one_prefix[position] PLUS ( (s[position] EQUALS '1') NOT EQUAL TO zero NOT EQUAL TO zero)  
+            CALL update_prefixes(position PLUS one)  
+        END FUNCTION  
+  
+        CALL update_prefixes(zero)  
+  
+        FUNCTION count_valid_substrings(left_bound parameter right_bound parameter) RETURNS INTEGER  
+            
+            FUNCTION recursive_start(curr_start parameter accumulator parameter) RETURNS INTEGER  
+                IF curr_start GREATER THAN right_bound  
+                    RETURN accumulator  
+                END IF  
+  
+                FUNCTION binary_search(low parameter high parameter) RETURNS INTEGER  
+                    IF low GREATER THAN OR EQUAL TO high  
+                        RETURN low  
+                    END IF  
+  
+                    SET middle TO low PLUS ((high MINUS low) DIV two)  
+                    SET count_zeros TO zero_prefix[middle PLUS one] MINUS zero_prefix[curr_start]  
+                    SET count_ones TO one_prefix[middle PLUS one] MINUS one_prefix[curr_start]  
+                    IF count_zeros LESS THAN OR EQUAL TO k OR count_ones LESS THAN OR EQUAL TO k  
+                        RETURN binary_search(middle PLUS one, high)  
+                    ELSE  
+                        RETURN binary_search(low, middle)  
+                    END IF  
+                END FUNCTION  
+  
+                SET valid_end TO binary_search(curr_start, right_bound PLUS one) MINUS one  
+                SET new_accumulator TO accumulator  
+                IF valid_end GREATER THAN OR EQUAL TO curr_start  
+                    SET new_accumulator TO accumulator PLUS (valid_end MINUS curr_start PLUS one)  
+                END IF  
+  
+                RETURN recursive_start(curr_start PLUS one, new_accumulator)  
+            END FUNCTION  
+  
+            RETURN recursive_start(left_bound, zero)  
+        END FUNCTION  
+  
+        SET results_collection TO empty LIST  
+  
+        FUNCTION process_queries(index parameter) RETURNS VOID  
+            IF index EQUALS compute_length(queries)  
+                RETURN  
+            END IF  
+  
+            SET current_l TO queries[index][zero]  
+            SET current_r TO queries[index][one]  
+            SET temp_result TO count_valid_substrings(current_l, current_r)  
+            CALL results_collection.APPEND(temp_result)  
+            CALL process_queries(index PLUS one)  
+        END FUNCTION  
+  
+        CALL process_queries(zero)  
+  
+        RETURN results_collection  
+    END FUNCTION  
+END CLASS

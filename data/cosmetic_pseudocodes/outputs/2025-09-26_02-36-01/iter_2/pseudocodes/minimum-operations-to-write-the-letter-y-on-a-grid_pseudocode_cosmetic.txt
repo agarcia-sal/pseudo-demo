@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        LET length_be ASSIGN LENGTH OF grid
+        LET midpoint ASSIGN length_be DIVIDED_BY 2  // integer division
+        LET positions AS EMPTY SET
+
+        LET idx ASSIGN 0
+        WHILE idx <= midpoint
+            positions ADD (idx, idx)
+            idx = idx + 1
+        END WHILE
+
+        idx ASSIGN 0
+        WHILE idx <= midpoint
+            positions ADD (idx, (length_be - 1) - idx)
+            idx = idx + 1
+        END WHILE
+
+        LET row_counter ASSIGN midpoint
+        WHILE row_counter <= (length_be - 1)
+            positions ADD (row_counter, midpoint)
+            row_counter = row_counter + 1
+        END WHILE
+
+        LET y_group_counts ASSIGN EMPTY DICTIONARY WITH DEFAULT 0
+        LET not_y_group_counts ASSIGN EMPTY DICTIONARY WITH DEFAULT 0
+
+        LET r ASSIGN 0
+        WHILE r < length_be
+            LET c ASSIGN 0
+            WHILE c < length_be
+                IF (r, c) IN positions THEN
+                    LET current_val ASSIGN grid[r][c]
+                    IF current_val NOT IN y_group_counts THEN y_group_counts[current_val] = 0
+                    y_group_counts[current_val] = y_group_counts[current_val] + 1
+                ELSE
+                    LET val_alt ASSIGN grid[r][c]
+                    IF val_alt NOT IN not_y_group_counts THEN not_y_group_counts[val_alt] = 0
+                    not_y_group_counts[val_alt] = not_y_group_counts[val_alt] + 1
+                END IF
+                c = c + 1
+            END WHILE
+            r = r + 1
+        END WHILE
+
+        LET minimum_ops ASSIGN +∞
+
+        LET y_val_counter ASSIGN 0
+        WHILE y_val_counter <= 2
+            LET non_y_val_counter ASSIGN 0
+            WHILE non_y_val_counter <= 2
+                IF NOT (y_val_counter == non_y_val_counter)
+                    LET total_y LET sum(Y_VAL for Y_VAL in y_group_counts.values())
+                    LET y_val_count LET y_group_counts.get(y_val_counter, 0)
+                    LET total_not_y LET sum(NONY_VAL for NONY_VAL in not_y_group_counts.values())
+                    LET not_y_val_count LET not_y_group_counts.get(non_y_val_counter, 0)
+                    LET ops_needed LET (total_y - y_val_count) + (total_not_y - not_y_val_count)
+
+                    IF ops_needed < minimum_ops THEN
+                        minimum_ops = ops_needed
+                    END IF
+                END IF
+                non_y_val_counter = non_y_val_counter + 1
+            END WHILE
+            y_val_counter = y_val_counter + 1
+        END WHILE
+
+        RETURN minimum_ops
+    END FUNCTION
+END CLASS

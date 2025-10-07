@@ -1,0 +1,51 @@
+FUNCTION median(sequence_of_values)
+  
+  DECLARE ordered_sequence
+  DECLARE total_items
+  DECLARE half_point
+  DECLARE first_mid_element
+  DECLARE second_mid_element
+  DECLARE computed_median
+  
+  SET ordered_sequence TO EMPTY LIST
+  
+  FOR position FROM 0 TO (LENGTH OF sequence_of_values) - 1
+      INSERT sequence_of_values[position] INTO ordered_sequence AT POSITION position
+  END FOR
+  
+  -- Simple insertion sort to produce the sorted copy (avoiding direct sort shortcut)
+  DECLARE sorting_index
+  DECLARE current_value
+  DECLARE scan_index
+  
+  SET sorting_index TO 1
+  WHILE sorting_index < LENGTH OF ordered_sequence
+      SET current_value TO ordered_sequence[sorting_index]
+      SET scan_index TO sorting_index - 1
+      
+      WHILE scan_index >= 0 AND ordered_sequence[scan_index] > current_value
+          SET ordered_sequence[scan_index + 1] TO ordered_sequence[scan_index]
+          SET scan_index TO scan_index - 1
+      END WHILE
+      
+      SET ordered_sequence[scan_index + 1] TO current_value
+      SET sorting_index TO sorting_index + 1
+  END WHILE
+  
+  SET total_items TO LENGTH OF ordered_sequence
+  
+  IF (total_items MODULO 2) NOT EQUAL TO 0 THEN
+      SET half_point TO (total_items - 1) DIVIDED BY 2
+      RETURN ordered_sequence[half_point]
+  END IF
+  
+  SET half_point TO total_items DIVIDED BY 2
+  
+  SET first_mid_element TO ordered_sequence[half_point - 1]
+  SET second_mid_element TO ordered_sequence[half_point]
+  
+  SET computed_median TO (first_mid_element + second_mid_element) * (1.0 / 2.0)
+  
+  RETURN computed_median
+
+END FUNCTION

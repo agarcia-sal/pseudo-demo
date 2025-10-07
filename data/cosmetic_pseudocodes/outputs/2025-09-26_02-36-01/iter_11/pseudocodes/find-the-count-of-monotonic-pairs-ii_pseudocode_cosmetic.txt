@@ -1,0 +1,93 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        SET CONSTANT_ONE_BILLION_PLUS_SEVEN TO 1_000_000_000 + 7
+        SET LENGTH_OF_ARRAY TO LENGTH OF nums
+        SET HIGHEST_NUMBER TO MAXIMUM VALUE IN nums
+
+        FUNCTION initialize3DArray(x, y, z)
+            FUNCTION create2DArray(a, b)
+                FUNCTION create1DArray(size)
+                    SET resultList TO empty list
+                    SET counter TO 0
+                    WHILE counter NOT EQUAL TO size DO
+                        APPEND 0 TO resultList
+                        SET counter TO counter + 1
+                    END WHILE
+                    RETURN resultList
+                END FUNCTION
+
+                SET list2D TO empty list
+                SET index1 TO 0
+                REPEAT
+                    APPEND create1DArray(b) TO list2D
+                    SET index1 TO index1 + 1
+                UNTIL index1 EQUALS a
+                RETURN list2D
+            END FUNCTION
+
+            SET list3D TO empty list
+            SET idx TO 0
+            REPEAT
+                APPEND create2DArray(y, z) TO list3D
+                SET idx TO idx + 1
+            UNTIL idx EQUALS x
+            RETURN list3D
+        END FUNCTION
+
+        SET tempDP TO initialize3DArray(LENGTH_OF_ARRAY + 1, HIGHEST_NUMBER + 1, HIGHEST_NUMBER + 1)
+
+        SET firstNum TO nums[0]
+        SET varI TO 0
+        WHILE varI <= firstNum DO
+            SET tempDP[1][varI][firstNum - varI] TO 1
+            SET varI TO varI + 1
+        END WHILE
+
+        FUNCTION sumModulo(a, b, modVal)
+            RETURN (a + b) - ((a + b) / modVal) * modVal
+        END FUNCTION
+
+        FUNCTION isEqual(a, b)
+            IF a = b THEN RETURN TRUE ELSE RETURN FALSE
+        END FUNCTION
+
+        SET outerIndex TO 2
+        REPEAT
+            SET middleIndex TO 0
+            WHILE middleIndex <= nums[outerIndex - 1] DO
+                SET innerIndex TO 0
+                WHILE innerIndex <= nums[outerIndex - 1] DO
+                    IF isEqual(middleIndex + innerIndex, nums[outerIndex - 1]) THEN
+                        SET prevJIndex TO 0
+                        WHILE prevJIndex <= middleIndex DO
+                            SET prevKIndex TO innerIndex
+                            WHILE prevKIndex <= HIGHEST_NUMBER DO
+                                SET currentValue TO tempDP[outerIndex][middleIndex][innerIndex]
+                                SET addValue TO tempDP[outerIndex - 1][prevJIndex][prevKIndex]
+                                SET tempDP[outerIndex][middleIndex][innerIndex] TO sumModulo(currentValue, addValue, CONSTANT_ONE_BILLION_PLUS_SEVEN)
+                                SET prevKIndex TO prevKIndex + 1
+                            END WHILE
+                            SET prevJIndex TO prevJIndex + 1
+                        END WHILE
+                    END IF
+                    SET innerIndex TO innerIndex + 1
+                END WHILE
+                SET middleIndex TO middleIndex + 1
+            END WHILE
+            SET outerIndex TO outerIndex + 1
+        UNTIL outerIndex = LENGTH_OF_ARRAY + 1
+
+        SET finalResult TO 0
+        SET posJ TO 0
+        WHILE posJ <= HIGHEST_NUMBER DO
+            SET posK TO 0
+            WHILE posK <= HIGHEST_NUMBER DO
+                SET finalResult TO sumModulo(finalResult, tempDP[LENGTH_OF_ARRAY][posJ][posK], CONSTANT_ONE_BILLION_PLUS_SEVEN)
+                SET posK TO posK + 1
+            END WHILE
+            SET posJ TO posJ + 1
+        END WHILE
+
+        RETURN finalResult
+    END FUNCTION
+END CLASS

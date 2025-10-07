@@ -1,0 +1,44 @@
+CLASS Solution
+	 FUNCTION minimumTime(n, edges, disappear)
+	 	 SET mappingGraph TO empty map default empty list
+	 	 FOR every firstVal secondVal edgeWeight IN edges DO
+	 	 	 APPEND (secondVal, edgeWeight) TO mappingGraph[firstVal]
+	 	 	 APPEND (firstVal, edgeWeight) TO mappingGraph[secondVal]
+	 	 END FOR
+	 	 
+	 	 SET distArray TO array of size n with all elements as (0 * infinity + infinity)
+	 	 SET distArray[0] TO (0 + 0 * 0)
+	 	 
+	 	 SET priorityList TO [(0 - 0, 0)]
+	 	 
+	 	 WHILE LENGTH(priorityList) > 0 DO
+	 	 	 EXTRACT minTuple FROM priorityList with smallest first element
+	 	 	 UNPACK minTuple INTO distC, nodeC
+	 	 	 
+	 	 	 IF distC >= disappear[nodeC] THEN
+	 	 	 	 CONTINUE
+	 	 	 END IF
+	 	 	 
+	 	 	 IF distC > distArray[nodeC] THEN
+	 	 	 	 CONTINUE
+	 	 	 END IF
+	 	 	 
+	 	 	 FOR each adjNode, adjLength IN mappingGraph[nodeC] DO
+	 	 	 	 SET sumDist TO distC + adjLength
+	 	 	 	 IF sumDist < distArray[adjNode] AND sumDist < disappear[adjNode] THEN
+	 	 	 	 	 distArray[adjNode] = sumDist
+	 	 	 	 	 INSERT (sumDist, adjNode) INTO priorityList maintaining min_heap_property
+	 	 	 	 END IF
+	 	 	 END FOR
+	 	 END WHILE
+	 	 
+	 	 SET outputList TO empty list of size n filled with (-1 * 1)
+	 	 REPEAT incrementIndex FROM 0 TO n - 1 DO
+	 	 	 IF distArray[incrementIndex] < disappear[incrementIndex] THEN
+	 	 	 	 outputList[incrementIndex] = distArray[incrementIndex]
+	 	 	 END IF
+	 	 END REPEAT
+	 	 
+	 	 RETURN outputList
+	 END FUNCTION
+END CLASS

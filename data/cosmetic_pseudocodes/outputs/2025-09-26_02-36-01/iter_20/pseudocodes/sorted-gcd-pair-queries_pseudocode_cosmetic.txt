@@ -1,0 +1,81 @@
+CLASS Solution  
+    FUNCTION gcdValues(nums, queries)  
+        FUNCTION binsearch(arr, target)  
+            SET left_bound TO 0  
+            SET right_bound TO LENGTH(arr)  
+            WHILE left_bound < right_bound  
+                SET mid_point TO (left_bound + right_bound) / 2  
+                IF arr[mid_point] <= target THEN  
+                    SET left_bound TO mid_point + 1  
+                ELSE  
+                    SET right_bound TO mid_point  
+                END IF  
+            END WHILE  
+            RETURN left_bound  
+        END FUNCTION  
+
+        SET alpha TO 0  
+        FOR each zeta IN nums  
+            IF zeta > alpha THEN  
+                SET alpha TO zeta  
+            END IF  
+        END FOR  
+
+        FUNCTION count_elements(collection)  
+            SET map_structure TO EMPTY_MAP  
+            PROCEDURE add_element(key)  
+                IF key IN map_structure THEN  
+                    SET map_structure[key] TO map_structure[key] + 1  
+                ELSE  
+                    SET map_structure[key] TO 1  
+                END IF  
+            END PROCEDURE  
+            FOR each element IN collection  
+                CALL add_element(element)  
+            END FOR  
+            RETURN map_structure  
+        END FUNCTION  
+
+        SET omega TO count_elements(nums)  
+        SET gamma TO ARRAY_FILLED_WITH(0, alpha + 1)  
+
+        PROCEDURE proc_i(i)  
+            SET nu TO 0  
+            PROCEDURE proc_j(j)  
+                INCREMENT nu BY (IF j IN omega THEN omega[j] ELSE 0)  
+                SET gamma[i] TO gamma[i] - (IF j < LENGTH(gamma) THEN gamma[j] ELSE 0)  
+            END PROCEDURE  
+            SET index_j TO i  
+            WHILE index_j <= alpha  
+                CALL proc_j(index_j)  
+                SET index_j TO index_j + i  
+            END WHILE  
+            SET gamma[i] TO gamma[i] + nu * (nu - 1) / 2  
+        END PROCEDURE  
+
+        SET index_i TO alpha  
+        WHILE index_i >= 1  
+            CALL proc_i(index_i)  
+            SET index_i TO index_i - 1  
+        END WHILE  
+
+        SET accumulator TO ARRAY_FILLED_WITH(0, LENGTH(gamma))  
+        SET acc_sum TO 0  
+        FOR idx FROM 0 TO LENGTH(gamma) - 1  
+            SET acc_sum TO acc_sum + gamma[idx]  
+            SET accumulator[idx] TO acc_sum  
+        END FOR  
+
+        SET output_list TO EMPTY_LIST  
+        PROCEDURE process_query(q_val)  
+            SET pos TO binsearch(accumulator, q_val)  
+            APPEND pos TO output_list  
+        END PROCEDURE  
+
+        FOR each query_value IN queries  
+            CALL process_query(query_value)  
+        END FOR  
+
+        RETURN output_list  
+    END FUNCTION  
+END CLASS

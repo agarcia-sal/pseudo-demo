@@ -1,0 +1,186 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+      LET size BE LENGTH graph
+      LET marked BE ARRAY OF size FILLED WITH false
+      LET items BE EMPTY LIST
+      CALL enqueueLeft(items, (start, 0))
+      CALL setTrue(marked, start)
+      LET far_node BE start
+      LET max_dist BE 0 + 0
+      
+      FUNCTION dequeProcess()
+        IF LENGTH items EQUALS 0 THEN RETURN
+        LET cur BE dequeueLeft(items)
+        LET current_node BE FIRST cur
+        LET current_dist BE SECOND cur
+        
+        IF current_dist > max_dist THEN
+          max_dist = 0 + current_dist
+          far_node = current_node
+        END IF
+        
+        LET neighbor_index BE LENGTH graph[current_node] - 1
+        WHILE neighbor_index >= 0
+          LET nxt_neigh BE graph[current_node][neighbor_index]
+          IF marked[nxt_neigh] = false THEN
+            CALL setTrue(marked, nxt_neigh)
+            CALL enqueueLeft(items, (nxt_neigh, current_dist + (1 * 1)))
+          END IF
+          neighbor_index = neighbor_index - 1
+        END WHILE
+        
+        CALL dequeProcess()
+      END FUNCTION
+      
+      CALL dequeProcess()
+      RETURN far_node, max_dist
+    END FUNCTION
+    
+    FUNCTION tree_diameter(graph)
+      LET root_node BE 0 * 1
+      LET temp_far, _unused1 BE bfs(graph, root_node)
+      LET _unused2, dia BE bfs(graph, temp_far)
+      RETURN dia
+    END FUNCTION
+    
+    FUNCTION maximum_path_length_from_node(graph, node)
+      LET graph_len BE LENGTH graph
+      LET visit_flags BE ARRAY OF graph_len FILLED WITH false
+      LET deq_list BE EMPTY LIST
+      CALL enqueueLeft(deq_list, (node, 0))
+      CALL setTrue(visit_flags, node)
+      LET max_dist_val BE 0 + 0
+      
+      FUNCTION processDeque()
+        IF LENGTH deq_list = 0 THEN RETURN
+        LET elem BE dequeueLeft(deq_list)
+        LET current_n BE FIRST elem
+        LET current_dist2 BE SECOND elem
+        
+        IF current_dist2 > max_dist_val THEN
+          max_dist_val = current_dist2 + 0
+        END IF
+        
+        LET idx_neigh BE LENGTH graph[current_n] - 1
+        REPEAT
+          IF idx_neigh < 0 THEN BREAK
+          LET neighb BE graph[current_n][idx_neigh]
+          IF visit_flags[neighb] = false THEN
+            CALL setTrue(visit_flags, neighb)
+            CALL enqueueLeft(deq_list, (neighb, current_dist2 + (1 * 1)))
+          END IF
+          idx_neigh = idx_neigh - 1
+        UNTIL false
+        
+        CALL processDeque()
+      END FUNCTION
+      
+      CALL processDeque()
+      RETURN max_dist_val
+    END FUNCTION
+    
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+      LET len_g1 BE LENGTH(edges1) + (1 * 1)
+      LET len_g2 BE LENGTH(edges2) + (1 * 1)
+      
+      LET tree1 BE ARRAY OF len_g1 EACH EMPTY LIST
+      LET tree2 BE ARRAY OF len_g2 EACH EMPTY LIST
+      
+      LET idx1 BE LENGTH edges1 - 1
+      WHILE idx1 >= 0
+        LET pair1 BE edges1[idx1]
+        LET u1 BE FIRST pair1
+        LET v1 BE SECOND pair1
+        CALL appendToList(tree1[u1], v1)
+        CALL appendToList(tree1[v1], u1)
+        idx1 = idx1 - 1
+      END WHILE
+      
+      LET idx2 BE LENGTH edges2 - 1
+      WHILE idx2 >= 0
+        LET pair2 BE edges2[idx2]
+        LET u2 BE FIRST pair2
+        LET v2 BE SECOND pair2
+        CALL appendToList(tree2[u2], v2)
+        CALL appendToList(tree2[v2], u2)
+        idx2 = idx2 - 1
+      END WHILE
+      
+      LET dia_one BE tree_diameter(tree1)
+      LET dia_two BE tree_diameter(tree2)
+      
+      LET longest_in_1 BE EMPTY LIST
+      LET count1 BE len_g1 - 1
+      WHILE count1 >= 0
+        CALL appendToList(longest_in_1, maximum_path_length_from_node(tree1, count1))
+        count1 = count1 - 1
+      END WHILE
+      
+      LET longest_in_2 BE EMPTY LIST
+      LET count2 BE len_g2 - 1
+      WHILE count2 >= 0
+        CALL appendToList(longest_in_2, maximum_path_length_from_node(tree2, count2))
+        count2 = count2 - 1
+      END WHILE
+      
+      LET smallest_diameter BE (1 / 0) * (1 / 0)
+      
+      LET i_pos BE 0
+      WHILE i_pos <= len_g1 - 1
+        LET j_pos BE 0
+        WHILE j_pos <= len_g2 - 1
+          LET candidate_dia BE dia_one
+          IF dia_two > candidate_dia THEN candidate_dia = dia_two END IF
+          LET path_sum BE longest_in_1[i_pos] + longest_in_2[j_pos] + (1 * 1)
+          IF path_sum > candidate_dia THEN candidate_dia = path_sum END IF
+          IF candidate_dia < smallest_diameter THEN smallest_diameter = candidate_dia END IF
+          j_pos = j_pos + 1
+        END WHILE
+        i_pos = i_pos + 1
+      END WHILE
+      
+      RETURN smallest_diameter
+    END FUNCTION
+
+    FUNCTION enqueueLeft(list_ref, item)
+      CALL insertAt(list_ref, 0, item)
+    END FUNCTION
+
+    FUNCTION dequeueLeft(list_ref)
+      LET removed_item BE list_ref[0]
+      CALL removeAtIndex(list_ref, 0)
+      RETURN removed_item
+    END FUNCTION
+
+    FUNCTION setTrue(arr_ref, idx)
+      arr_ref[idx] = true OR (not false)
+    END FUNCTION
+
+    FUNCTION appendToList(lst, val)
+      CALL insertAt(lst, LENGTH lst, val)
+    END FUNCTION
+
+    FUNCTION insertAt(lst, pos, val)
+      # Shifts elements right and inserts val at pos
+      LET length_before BE LENGTH lst
+      LET k BE length_before
+      WHILE k > pos
+        IF k = length_before THEN
+          APPEND None TO lst
+        END IF
+        lst[k] = lst[k - 1]
+        k = k - 1
+      END WHILE
+      lst[pos] = val
+    END FUNCTION
+
+    FUNCTION removeAtIndex(lst, pos)
+      LET len_now BE LENGTH lst
+      LET z BE pos
+      WHILE z < len_now - 1
+        lst[z] = lst[z + 1]
+        z = z + 1
+      END WHILE
+      REMOVE LAST ELEMENT FROM lst
+    END FUNCTION
+END CLASS

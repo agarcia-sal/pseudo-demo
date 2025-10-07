@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION maximumLength(nums)
+        SET frequencyMap TO empty mapping from numbers to integers
+        FOR element IN nums REVERSE
+            IF element IN frequencyMap THEN
+                SET frequencyMap[element] TO frequencyMap[element] + 1
+            ELSE
+                SET frequencyMap[element] TO 1
+            END IF
+        END FOR
+
+        SET lengthCache TO empty mapping from numbers to integers
+
+        FUNCTION helper(value)
+            DECLARE result RETURN_VAR
+            IF NOT (value IN frequencyMap) OR frequencyMap[value] < 2 THEN
+                IF (value IN frequencyMap) AND frequencyMap[value] >= 1 THEN
+                    SET result TO 1
+                ELSE
+                    SET result TO 0
+                END IF
+            ELSE
+                IF value IN lengthCache THEN
+                    SET result TO lengthCache[value]
+                ELSE
+                    SET squaredValue TO value * value
+                    CALL auxiliary := helper(squaredValue)
+                    SET lengthCache[value] TO auxiliary + 2
+                    SET result TO lengthCache[value]
+                END IF
+            END IF
+            RETURN result
+        END FUNCTION
+
+        SET maxLength TO 1
+        SET iteratorList TO list of keys of frequencyMap
+        FOR index FROM 0 TO LENGTH(iteratorList) - 1
+            SET currentKey TO iteratorList[index]
+            IF currentKey == 1 THEN
+                DECLARE countValue TO frequencyMap[currentKey]
+                DECLARE evenAdjustment TO (countValue DIV 2) * 2
+                DECLARE candidate TO countValue - 1 - evenAdjustment
+                IF candidate > maxLength THEN
+                    SET maxLength TO candidate
+                END IF
+            ELSE
+                DECLARE candidate TO helper(currentKey)
+                IF candidate > maxLength THEN
+                    SET maxLength TO candidate
+                END IF
+            END IF
+        END FOR
+
+        RETURN maxLength
+    END FUNCTION
+END CLASS

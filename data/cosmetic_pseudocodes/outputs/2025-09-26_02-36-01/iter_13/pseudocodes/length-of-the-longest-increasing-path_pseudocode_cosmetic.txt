@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION maxPathLength(coordinates, k)
+        SET p1 TO coordinates[k][0]
+        SET p2 TO coordinates[k][1]
+        SET A TO empty list
+        FUNCTION gatherLeft(idx, arr)
+            IF idx EQUALS LENGTH(arr)
+                RETURN
+            END IF
+            SET vx TO arr[idx][0]
+            SET vy TO arr[idx][1]
+            IF vx LESS THAN p1 AND vy LESS THAN p2
+                APPEND (vx, vy) TO A
+            END IF
+            CALL gatherLeft(idx + 1, arr)
+        END FUNCTION
+        CALL gatherLeft(0, coordinates)
+        SET B TO empty list
+        SET i TO 0
+        WHILE i NOT EQUAL TO LENGTH(coordinates)
+            SET cx TO coordinates[i][0]
+            SET cy TO coordinates[i][1]
+            IF (NOT(cx LESS THAN OR EQUAL TO p1)) AND (NOT(cy LESS THAN OR EQUAL TO p2))
+                APPEND (cx, cy) TO B
+            END IF
+            SET i TO i + 1
+        END WHILE
+        SET resA TO self._lengthOfLIS(A)
+        SET resB TO self._lengthOfLIS(B)
+        RETURN 1 + resA + resB
+    END FUNCTION
+
+    FUNCTION _lengthOfLIS(coordinates)
+        FUNCTION customSort(arr)
+            SET n TO LENGTH(arr)
+            SET j TO 0
+            REPEAT
+                SET swapped TO false
+                SET j TO 0
+                WHILE j LESS THAN n - 1
+                    SET first_less_or_equal TO (arr[j][0] GREATER THAN arr[j+1][0]) OR (arr[j][0] EQUALS arr[j+1][0] AND arr[j][1] LESS THAN OR EQUAL TO arr[j+1][1])
+                    IF first_less_or_equal
+                        SWAP arr[j], arr[j+1]
+                        SET swapped TO true
+                    END IF
+                    SET j TO j + 1
+                END WHILE
+                SET n TO n - 1
+            UNTIL NOT swapped
+        END FUNCTION
+
+        CALL customSort(coordinates)
+
+        FUNCTION bisectLeft(lst, val)
+            SET lo TO 0
+            SET hi TO LENGTH(lst)
+            WHILE lo LESS THAN hi
+                SET mid TO (lo + hi) / 2
+                IF lst[mid] LESS THAN val
+                    SET lo TO mid + 1
+                ELSE
+                    SET hi TO mid
+                END IF
+            END WHILE
+            RETURN lo
+        END FUNCTION
+
+        SET tailList TO empty list
+        SET idx TO 0
+        REPEAT
+            IF idx EQUALS LENGTH(coordinates)
+                BREAK
+            END IF
+            SET currentY TO coordinates[idx][1]
+            IF LENGTH(tailList) EQUALS 0 OR tailList[-1] LESS THAN currentY
+                APPEND currentY TO tailList
+            ELSE
+                SET pos TO bisectLeft(tailList, currentY)
+                SET tailList[pos] TO currentY
+            END IF
+            SET idx TO idx + 1
+        UNTIL false
+
+        RETURN LENGTH(tailList)
+    END FUNCTION
+END CLASS

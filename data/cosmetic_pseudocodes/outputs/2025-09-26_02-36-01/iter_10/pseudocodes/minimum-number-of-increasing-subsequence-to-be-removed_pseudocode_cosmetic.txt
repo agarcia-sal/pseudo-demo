@@ -1,0 +1,44 @@
+CLASS Solution
+	FUNCTION minOperations(nums)
+		DEF getMax(arr)
+			SET res TO arr[0]
+			SET idx TO 1
+			WHILE idx < LENGTH(arr)
+				IF arr[idx] > res THEN
+					SET res TO arr[idx]
+				END IF
+				SET idx TO idx + 1
+			END WHILE
+			RETURN res
+		END DEF
+
+		SET totalElements TO LENGTH(nums)
+		IF totalElements = 0 THEN RETURN 0 END IF
+
+		DEF buildDp(lst, size)
+			DEF recurse(pos, dpList)
+				IF pos >= size THEN
+					RETURN dpList
+				END IF
+				SET currentDp TO dpList
+				DEF innerLoop(innerPos, updatedDp)
+					IF innerPos < 0 THEN
+						RETURN updatedDp
+					END IF
+					IF lst[pos] <= lst[innerPos] THEN
+						IF updatedDp[pos] < updatedDp[innerPos] + 1 THEN
+							SET updatedDp[pos] TO updatedDp[innerPos] + 1
+						END IF
+					END IF
+					RETURN innerLoop(innerPos - 1, updatedDp)
+				END DEF
+				SET currentDp TO innerLoop(pos - 1, currentDp)
+				RETURN recurse(pos + 1, currentDp)
+			END DEF
+			RETURN recurse(1, [1 FOR _ FROM 1 TO size])
+		END DEF
+
+		SET dpValues TO buildDp(nums, totalElements)
+		RETURN getMax(dpValues)
+	END FUNCTION
+END CLASS

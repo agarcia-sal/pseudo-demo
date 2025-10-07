@@ -1,0 +1,77 @@
+class Solution
+    function maxPalindromesAfterOperations(words)
+        function localCounter(sequence)
+            local map = {}
+            function incrementKey(key)
+                if map[key] == nil then
+                    map[key] = 1
+                else
+                    map[key] = map[key] + 1
+                end
+            end
+            local index = 0
+            repeat
+                if index >= #sequence then
+                    break
+                end
+                incrementKey(sequence[index + 1])
+                index = index + 1
+            until false
+            return map
+        end
+
+        local totalPairs = 0
+        local totalSingles = 0
+        local counts = localCounter(table.concat(words, ""))
+
+        local function intDiv(x, y)
+            return math.floor(x / y)
+        end
+
+        local values = {}
+        for _, val in pairs(counts) do
+            table.insert(values, val)
+        end
+
+        local iteratorIndex = 1
+        while iteratorIndex <= #values do
+            local currentValue = values[iteratorIndex]
+            local twos = intDiv(currentValue, 2)
+            local ones = currentValue - twos * 2
+            totalPairs = totalPairs + twos
+            totalSingles = totalSingles + ones
+            iteratorIndex = iteratorIndex + 1
+        end
+
+        local function sortByLengthAsc(arr)
+            local n = #arr
+            for i = 1, n - 1 do
+                for j = i + 1, n do
+                    if #arr[i] > #arr[j] then
+                        arr[i], arr[j] = arr[j], arr[i]
+                    end
+                end
+            end
+            return arr
+        end
+
+        local sortedWords = sortByLengthAsc(words)
+        local palindromeCount = 0
+
+        local function processWord(index)
+            if index > #sortedWords then
+                return
+            end
+            local currWord = sortedWords[index]
+            local halfLen = intDiv(#currWord, 2)
+            if totalPairs >= halfLen then
+                totalPairs = totalPairs - halfLen
+                palindromeCount = palindromeCount + 1
+            end
+            processWord(index + 1)
+        end
+
+        processWord(1)
+        return palindromeCount
+    end
+end

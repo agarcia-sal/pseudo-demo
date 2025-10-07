@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION minimumSubstringsInPartition(s)
+        FUNCTION dfs(k)
+            FUNCTION mapGetOrZero(m, x)
+                IF x IN m THEN RETURN m[x] ELSE RETURN 0 END IF
+            END FUNCTION
+
+            IF k >= LENGTH(s) THEN RETURN 0 END IF
+
+            DECLARE alphaCount AS new MAP default 0
+            DECLARE freqCount AS new MAP default 0
+            DECLARE result AS LENGTH(s) - k
+
+            FUNCTION incrMap(m, key)
+                m[key] = mapGetOrZero(m, key) + 1
+            END FUNCTION
+
+            FUNCTION decrMap(m, key)
+                LET currVal = mapGetOrZero(m, key)
+                IF currVal > 0 THEN
+                    m[key] = currVal - 1
+                    IF m[key] = 0 THEN REMOVE key FROM m END IF
+                END IF
+            END FUNCTION
+
+            DECLARE curIndex = k
+            WHILE curIndex < LENGTH(s)
+                LET ch = s[curIndex]
+
+                IF ch IN alphaCount AND alphaCount[ch] > 0 THEN
+                    LET oldFreqVal = alphaCount[ch]
+                    decrMap(freqCount, oldFreqVal)
+                END IF
+
+                incrMap(alphaCount, ch)
+                LET newFreqVal = alphaCount[ch]
+                incrMap(freqCount, newFreqVal)
+
+                IF LENGTH(freqCount) = 1 THEN
+                    LET candidate = 1 + dfs(curIndex + 1)
+                    IF candidate < result THEN result = candidate END IF
+                END IF
+
+                curIndex = curIndex + 1
+            END WHILE
+
+            RETURN result
+        END FUNCTION
+
+        RETURN dfs(0)
+    END FUNCTION
+END CLASS

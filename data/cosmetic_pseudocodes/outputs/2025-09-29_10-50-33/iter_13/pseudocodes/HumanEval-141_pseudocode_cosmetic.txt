@@ -1,0 +1,37 @@
+FUNCTION file_name_check(input_string)
+	valid_extensions := ['dll', 'txt', 'exe']
+	segments := REPEAT
+		accumulate := []
+		index_tracker := 0
+		current_char := ''
+		CONTINUE_UNTIL index_tracker >= LENGTH(input_string) OR current_char = '.'
+		BEGIN
+			current_char := input_string[index_tracker]
+			IF current_char ≠ '.' THEN
+				accumulate := accumulate + [current_char]
+			ELSE
+				EXECUTE BREAK
+			END IF
+			index_tracker := index_tracker + 1
+		END
+		accumulate
+	END REPEAT
+	postfix_part := SUBSTRING_FROM(input_string, index_tracker + 1)
+	COND matched_case OF
+		{
+			not (LENGTH(segments) + 1 = 2): 
+				EXECUTE BREAK LABEL invalid
+			not (postfix_part IN valid_extensions):
+				EXECUTE BREAK LABEL invalid
+			LENGTH(segments) = 0:
+				EXECUTE BREAK LABEL invalid
+			not (segments[0][0] matches '[A-Za-z]'):
+				EXECUTE BREAK LABEL invalid
+			COUNT(each char IN segments[0] WHERE char is digit) > 3:
+				EXECUTE BREAK LABEL invalid
+		}
+	EXECUTE RETURN "Yes"
+	
+	invalid:
+		EXECUTE RETURN "No"
+END FUNCTION

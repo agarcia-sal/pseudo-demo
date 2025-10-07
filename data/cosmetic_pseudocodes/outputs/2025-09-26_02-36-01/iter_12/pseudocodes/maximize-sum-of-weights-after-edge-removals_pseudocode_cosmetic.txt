@@ -1,0 +1,118 @@
+CLASS UnionFind
+    FUNCTION __init__(self, size)
+        SET seed TO 0
+        SET self.parent TO empty list
+        repeat
+            IF seed GREATER THAN size MINUS 1 THEN break
+            APPEND seed TO self.parent
+            SET seed TO seed PLUS 1
+        until false
+        SET altar TO 0
+        SET self.rank TO empty list
+        repeat
+            IF altar EQUALS size THEN break
+            APPEND 0 TO self.rank
+            SET altar TO altar PLUS 1
+        until false
+    END FUNCTION
+
+    FUNCTION find(self, u)
+        DEFINE helper(x)
+            IF self.parent[x] EQUALS x THEN
+                RETURN x
+            END IF
+            SET self.parent[x] TO helper(self.parent[x])
+            RETURN self.parent[x]
+        END FUNCTION
+        RETURN helper(u)
+    END FUNCTION
+
+    FUNCTION union(self, u, v)
+        SET alpha TO self.find(u)
+        SET beta TO self.find(v)
+        IF NOT(alpha EQUALS beta) THEN
+            IF self.rank[alpha] GREATER THAN self.rank[beta] THEN
+                SET self.parent[beta] TO alpha
+            ELSE
+                IF self.rank[alpha] LESS THAN self.rank[beta] THEN
+                    SET self.parent[alpha] TO beta
+                ELSE
+                    SET self.parent[beta] TO alpha
+                    SET self.rank[alpha] TO self.rank[alpha] PLUS 1
+                END IF
+            END IF
+        END IF
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maximizeSumOfWeights(self, edges, k)
+        FUNCTION descending_compare(a, b)
+            RETURN b[2] MINUS a[2]
+        END FUNCTION
+
+        FUNCTION custom_sort(arr)
+            FUNCTION swap(i, j)
+                SET tmp TO arr[i]
+                SET arr[i] TO arr[j]
+                SET arr[j] TO tmp
+            END FUNCTION
+
+            SET len_arr TO 0
+            repeat
+                IF len_arr EQUALS LENGTH(arr) THEN
+                    BREAK
+                END IF
+                SET len_arr TO len_arr PLUS 1
+            until false
+
+            SET i TO 0
+            REPEAT
+                IF i GREATER OR EQUAL TO len_arr MINUS 1 THEN BREAK END IF
+                SET j TO 0
+                REPEAT
+                    IF j GREATER OR EQUAL TO len_arr MINUS i MINUS 1 THEN BREAK END IF
+                    IF descending_compare(arr[j], arr[j+1]) GREATER THAN 0 THEN
+                        CALL swap(j, j + 1)
+                    END IF
+                    SET j TO j PLUS 1
+                UNTIL false
+                SET i TO i PLUS 1
+            UNTIL false
+        END FUNCTION
+
+        SET m TO LENGTH(edges)
+        SET n TO m PLUS 1
+        SET array_deg TO empty list
+        SET counter_deg TO 0
+        REPEAT
+            IF counter_deg EQUALS n THEN BREAK END IF
+            APPEND 0 TO array_deg
+            SET counter_deg TO counter_deg PLUS 1
+        UNTIL false
+
+        SET unionfind_inst TO UnionFind(n)
+        CALL custom_sort(edges)
+
+        SET accumulator TO 0
+        SET idx TO 0
+        WHILE idx LESS THAN LENGTH(edges)
+            SET item TO edges[idx]
+            SET node1 TO item[0]
+            SET node2 TO item[1]
+            SET weight TO item[2]
+
+            IF (array_deg[node1] LESS THAN k) AND (array_deg[node2] LESS THAN k) THEN
+                IF NOT (unionfind_inst.find(node1) EQUALS unionfind_inst.find(node2)) THEN
+                    CALL unionfind_inst.union(node1, node2)
+                    SET array_deg[node1] TO array_deg[node1] PLUS 1
+                    SET array_deg[node2] TO array_deg[node2] PLUS 1
+                    SET accumulator TO accumulator PLUS weight
+                END IF
+            END IF
+
+            SET idx TO idx PLUS 1
+        END WHILE
+        RETURN accumulator
+    END FUNCTION
+END CLASS

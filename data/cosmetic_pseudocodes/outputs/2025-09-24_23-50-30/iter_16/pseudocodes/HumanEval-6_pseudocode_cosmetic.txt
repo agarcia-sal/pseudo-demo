@@ -1,0 +1,36 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+	DEFINE parse_paren_group AS FUNCTION(group_string)
+		SET nesting_level TO 0
+		SET peak_level TO 0
+		DEFINE iterate AS FUNCTION(idx)
+			IF idx >= LENGTH(group_string)
+				RETURN peak_level
+			END IF
+			SET symbol TO group_string[idx]
+			IF symbol = '('
+				SET nesting_level TO nesting_level + 1
+				IF peak_level < nesting_level
+					SET peak_level TO nesting_level
+				END IF
+			ELSE
+				SET nesting_level TO nesting_level - 1
+			END IF
+			RETURN iterate(idx + 1)
+		END DEFINE
+		RETURN iterate(0)
+	END DEFINE
+
+	SET tokens TO FILTER(SPLIT(parentheses_string, ' '), FUNCTION(x) RETURN x != '' END FUNCTION)
+	DEFINE result_list AS EMPTY LIST
+	DEFINE process_group AS FUNCTION(i)
+		IF i >= LENGTH(tokens)
+			RETURN result_list
+		END IF
+		APPEND parse_paren_group(tokens[i]) TO result_list
+		RETURN process_group(i + 1)
+	END FUNCTION
+
+	RETURN process_group(0)
+END FUNCTION
+```

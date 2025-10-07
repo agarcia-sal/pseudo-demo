@@ -1,0 +1,70 @@
+```  
+CLASS Solution
+    FUNCTION maximumLength(nums)
+        SET frequencyMap TO empty mapping from elements to integers
+        FOR indexVar FROM 0 TO LENGTH(nums) MINUS 1 STEP 1
+            SET elementVar TO nums[indexVar]
+            IF elementVar IS IN frequencyMap
+                SET frequencyMap[elementVar] TO frequencyMap[elementVar] PLUS 1
+            ELSE
+                SET frequencyMap[elementVar] TO 1
+            END IF
+        END FOR
+
+        SET memoMap TO empty mapping from elements to integers
+
+        FUNCTION recursiveHelper(valueParam)
+            IF NOT (valueParam IN frequencyMap) OR frequencyMap[valueParam] LESS THAN 2 THEN
+                IF valueParam IN frequencyMap AND frequencyMap[valueParam] GREATER THAN OR EQUAL TO 1 THEN
+                    RETURN 1
+                END IF
+                RETURN 0
+            END IF
+
+            IF valueParam IN memoMap THEN
+                RETURN memoMap[valueParam]
+            END IF
+
+            SET nextValue TO valueParam MULTIPLIED BY valueParam
+            SET recursiveResult TO recursiveHelper(nextValue)
+            SET memoMap[valueParam] TO recursiveResult PLUS 2
+            RETURN memoMap[valueParam]
+        END FUNCTION
+
+        SET maximumLen TO 1
+
+        SET keysList TO empty list
+        FOR keyVar IN frequencyMap
+            APPEND keyVar TO keysList
+        END FOR
+
+        FUNCTION processIndex(iCount)
+            IF iCount GREATER THAN OR EQUAL TO LENGTH(keysList) THEN
+                RETURN
+            END IF
+
+            SET currentKey TO keysList[iCount]
+            IF currentKey EQUALS 1 THEN
+                SET countVal TO frequencyMap[currentKey]
+                SET evenCount TO countVal MINUS (countVal MOD 2)
+                SET candidateMax TO evenCount MINUS 1
+                IF maximumLen LESS THAN candidateMax THEN
+                    SET maximumLen TO candidateMax
+                END IF
+            ELSE
+                SET candidateMax TO recursiveHelper(currentKey)
+                IF maximumLen LESS THAN candidateMax THEN
+                    SET maximumLen TO candidateMax
+                END IF
+            END IF
+
+            SET iCount TO iCount PLUS 1
+            CALL processIndex(iCount)
+        END FUNCTION
+
+        CALL processIndex(0)
+
+        RETURN maximumLen
+    END FUNCTION
+END CLASS
+```

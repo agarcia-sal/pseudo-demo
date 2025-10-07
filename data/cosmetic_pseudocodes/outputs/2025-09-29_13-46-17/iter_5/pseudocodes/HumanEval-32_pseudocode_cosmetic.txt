@@ -1,0 +1,36 @@
+```
+FUNCTION poly(list_of_coefficients, point)
+    DEFINE inner_eval(idx, coeff) = coeff * (point ^ idx)
+    DEFINE helper(l, acc, i) = 
+        IF i = LENGTH(l) THEN RETURN acc
+        ELSE RETURN helper(l, acc + inner_eval(i, l[i]), i + 1)
+    END
+    RETURN helper(list_of_coefficients, 0, 0)
+END FUNCTION
+
+FUNCTION find_zero(list_of_coefficients)
+    SET left_boundary = -1.0
+    SET right_boundary = 1.0
+
+    WHILE TRUE
+        LET val_left = poly(list_of_coefficients, left_boundary)
+        LET val_right = poly(list_of_coefficients, right_boundary)
+        IF val_left * val_right <= 0 THEN BREAK
+        LEFT_SHIFT:
+        left_boundary = left_boundary * 2.0
+        right_boundary = right_boundary * 2.0
+    END WHILE
+
+    FUNCTION bisect(l, r)
+        IF (r - l) <= 10^-10 THEN RETURN l
+        LET mid = (l + r) / 2.0
+        IF poly(list_of_coefficients, mid) * poly(list_of_coefficients, l) > 0 THEN
+            RETURN bisect(mid, r)
+        ELSE
+            RETURN bisect(l, mid)
+        END IF
+    END FUNCTION
+
+    RETURN bisect(left_boundary, right_boundary)
+END FUNCTION
+```

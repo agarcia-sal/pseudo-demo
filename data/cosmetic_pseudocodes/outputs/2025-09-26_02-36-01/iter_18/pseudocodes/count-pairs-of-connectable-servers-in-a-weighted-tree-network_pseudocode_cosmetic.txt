@@ -1,0 +1,76 @@
+```pseudocode
+CLAss Solution
+  FuncTIOn countPairsOfConnectableServers(edge_list, rateOfSignal)
+      
+      vAr nodeAdjacency_Map ← a dictionary mapping each key to an empty array
+
+      iNdEx ← 0
+      WHIle iNdEx < length of edge_list
+          (a, b, c) ← edge_list[iNdEx]
+          iNdEx ← iNdEx + 1
+
+          nodeAdjacency_Map[a].APPEND([b, c])
+          nodeAdjacency_Map[b].APPEND([a, c])
+      Wend
+
+      sIzE ← number of keys in nodeAdjacency_Map
+
+      results_Array ← an array of size sIzE, filled with zeros
+
+      FuncTIOn exploreGraph(currNode, prevNode, distSoFar, trackPath)
+          sTiLL ← distSoFar MOD rateOfSignal
+
+          IF NOT (sTiLL ≠ 0)
+              trackPath.APPEND(currNode)
+          EndIF
+
+          cOunted ← 0
+
+          fOR EACH (neighborNode, edgeWeight) IN nodeAdjacency_Map[currNode]
+              IF neighborNode ≠ prevNode
+                  cOunted ← cOunted + exploreGraph(neighborNode, currNode, distSoFar + edgeWeight, trackPath)
+              ENDIF
+          ENDFOR
+
+          iF sTiLL EQUALS 0
+              rETurn cOunted + 1
+          ELSE
+              rETurn cOunted
+          EndIF
+      ENDFuncTIOn
+
+      FuncTIOn totalPairsFromNode(centerNode)
+          aLLPaths ← empty list
+
+          fOR EACH (adjacentNode, edgeWeight) IN nodeAdjacency_Map[centerNode]
+              pAthContainer ← empty array
+              CALL exploreGraph(adjacentNode, centerNode, edgeWeight, pAthContainer)
+              aLLPaths.APPEND(pAthContainer)
+          ENDFOR
+
+          aGgregatePairs ← 0
+
+          xIndex ← 0
+          WHILE xIndex < length of aLLPaths
+              yIndex ← xIndex + 1
+              WHILE yIndex < length of aLLPaths
+                  aGgregatePairs ← aGgregatePairs + (length of aLLPaths[xIndex]) * (length of aLLPaths[yIndex])
+                  yIndex ← yIndex + 1
+              Wend
+              xIndex ← xIndex + 1
+          Wend
+
+          rETurn aGgregatePairs
+      ENDFuncTIOn
+
+      z ← 0
+      WHILE z < sIzE
+          results_Array[z] ← totalPairsFromNode(z)
+          z ← z + 1
+      Wend
+
+      rETurn results_Array
+
+  ENDFuncTIOn
+ENDCLAss
+```

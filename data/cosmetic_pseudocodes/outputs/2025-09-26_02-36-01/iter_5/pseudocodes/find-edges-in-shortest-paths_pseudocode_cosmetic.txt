@@ -1,0 +1,147 @@
+CLASS Solution  
+    FUNCTION findAnswer(n, edges)  
+        FUNCTION extractMin(pqList)  
+            SET minIndex TO 0  
+            SET idx TO 1  
+            WHILE idx LESS THAN LENGTH(pqList)  
+                IF pqList[idx][0] LESS THAN pqList[minIndex][0]  
+                    SET minIndex TO idx  
+                END IF  
+                INCREMENT idx BY 1  
+            END WHILE  
+            SET minElement TO pqList[minIndex]  
+            REPLACE pqList[minIndex] WITH pqList[LENGTH(pqList) MINUS 1]  
+            REMOVE last element from pqList  
+            RETURN minElement  
+        END FUNCTION  
+
+        FUNCTION addHeapElement(pqList, element)  
+            APPEND element TO pqList  
+            SET i TO LENGTH(pqList) MINUS 1  
+            WHILE i GREATER THAN 0  
+                SET parentIdx TO (i MINUS 1) DIV 2  
+                IF pqList[parentIdx][0] GREATER THAN pqList[i][0]  
+                    SET temp TO pqList[parentIdx]  
+                    SET pqList[parentIdx] TO pqList[i]  
+                    SET pqList[i] TO temp  
+                    SET i TO parentIdx  
+                ELSE  
+                    BREAK  
+                END IF  
+            END WHILE  
+        END FUNCTION  
+
+        SET adjacencyMap TO an empty mapping with default empty lists  
+
+        FOR EACH edgeElement IN edges  
+            SET firstNode TO edgeElement[0]  
+            SET secondNode TO edgeElement[1]  
+            SET edgeWeight TO edgeElement[2]  
+            APPEND (secondNode, edgeWeight) TO adjacencyMap[firstNode]  
+            APPEND (firstNode, edgeWeight) TO adjacencyMap[secondNode]  
+        END FOR  
+
+        SET maxDistance TO (999999999 PLUS 1) MULTIPLIED BY 10   # a large number instead of infinity  
+        SET minimumDistances TO LIST of size n FILLED with maxDistance  
+        SET minimumDistances[0] TO 0  
+
+        SET priorityQueue TO EMPTY list  
+        CALL addHeapElement(priorityQueue, (0, 0))  
+
+        FUNCTION processPriorityQueue(pq)  
+            IF LENGTH(pq) EQUALS 0  
+                RETURN  
+            END IF  
+            SET currentPair TO extractMin(pq)  
+            SET currentDistance TO currentPair[0]  
+            SET currentNode TO currentPair[1]  
+
+            IF currentDistance GREATER THAN minimumDistances[currentNode]  
+                CALL processPriorityQueue(pq)  
+                RETURN  
+            END IF  
+
+            SET neighborIndex TO 0  
+            WHILE neighborIndex LESS THAN LENGTH(adjacencyMap[currentNode])  
+                SET neighborPair TO adjacencyMap[currentNode][neighborIndex]  
+                SET nextNode TO neighborPair[0]  
+                SET travelCost TO neighborPair[1]  
+                SET newDistance TO currentDistance PLUS travelCost  
+                IF newDistance LESS THAN minimumDistances[nextNode]  
+                    SET minimumDistances[nextNode] TO newDistance  
+                    CALL addHeapElement(pq, (newDistance, nextNode))  
+                END IF  
+                INCREMENT neighborIndex BY 1  
+            END WHILE  
+            CALL processPriorityQueue(pq)  
+        END FUNCTION  
+
+        CALL processPriorityQueue(priorityQueue)  
+
+        SET importantEdges TO EMPTY set  
+        SET dfsStack TO [(n MINUS 1, minimumDistances[n MINUS 1])]  
+        SET discovered TO LIST of n elements FILLED with 0  
+
+        FUNCTION dfsVisit(stack)  
+            IF LENGTH(stack) EQUALS 0  
+                RETURN  
+            END IF  
+            SET topElement TO stack[LENGTH(stack) MINUS 1]  
+            REMOVE the element at position LENGTH(stack) MINUS 1 FROM stack  
+            SET nodeId TO topElement[0]  
+            SET distAtNode TO topElement[1]  
+
+            IF discovered[nodeId] EQUALS 1  
+                CALL dfsVisit(stack)  
+                RETURN  
+            END IF  
+
+            SET discovered[nodeId] TO 1  
+
+            SET idx TO 0  
+            WHILE idx LESS THAN LENGTH(adjacencyMap[nodeId])  
+                SET adjPair TO adjacencyMap[nodeId][idx]  
+                SET neighbor TO adjPair[0]  
+                SET weightVal TO adjPair[1]  
+
+                IF distAtNode EQUALS minimumDistances[neighbor] PLUS weightVal  
+                    IF nodeId LESS THAN neighbor  
+                        SET edgePair TO (nodeId, neighbor)  
+                    ELSE  
+                        SET edgePair TO (neighbor, nodeId)  
+                    END IF  
+                    ADD edgePair TO importantEdges  
+                    APPEND (neighbor, minimumDistances[neighbor]) TO stack  
+                END IF  
+                INCREMENT idx BY 1  
+            END WHILE  
+            CALL dfsVisit(stack)  
+        END FUNCTION  
+
+        CALL dfsVisit(dfsStack)  
+
+        SET resultList TO EMPTY list  
+        SET idxLoop TO 0  
+        WHILE idxLoop LESS THAN LENGTH(edges)  
+            SET currEdge TO edges[idxLoop]  
+            SET startNode TO currEdge[0]  
+            SET endNode TO currEdge[1]  
+
+            IF startNode LESS THAN endNode  
+                SET orderedEdge TO (startNode, endNode)  
+            ELSE  
+                SET orderedEdge TO (endNode, startNode)  
+            END IF  
+
+            IF orderedEdge IN importantEdges  
+                APPEND TRUE TO resultList  
+            ELSE  
+                APPEND FALSE TO resultList  
+            END IF  
+            INCREMENT idxLoop BY 1  
+        END WHILE  
+
+        SET finalAnswer TO resultList  
+        RETURN finalAnswer  
+    END FUNCTION  
+END CLASS

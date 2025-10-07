@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION maximumSubarraySum(nums k)
+    
+        PROCEDURE contains_key(dict key, target) RETURNS BOOL
+            SET keys_list TO list of all keys in dict
+            FOR each element IN keys_list
+                IF element EQUALS key
+                    RETURN TRUE
+                END IF
+            END FOR
+            RETURN FALSE
+        END PROCEDURE
+
+        PROCEDURE max_value(a b) RETURNS INT
+            IF a GREATER THAN b
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END PROCEDURE
+
+        PROCEDURE min_value(a b) RETURNS INT
+            IF a LESS THAN b
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END PROCEDURE
+
+        SET alpha TO 0
+        SET beta TO (-1 * 1) * 10 ^ 9 ^ 9
+        SET gamma TO dictionary with no entries
+
+        PROCEDURE traverse_array_rec(index accumulatedSum currentMax)
+            IF index EQUALS length of nums
+                RETURN currentMax
+            END IF
+
+            SET val TO element at index of nums
+            SET lookup1 TO val - k
+            SET lookup2 TO val + k
+
+            IF contains_key(gamma lookup1)
+                SET option1 TO max_value(
+                    currentMax,
+                    (accumulatedSum - (gamma lookup1)) + val
+                )
+            ELSE
+                SET option1 TO currentMax
+            END IF
+
+            IF contains_key(gamma lookup2)
+                SET option2 TO max_value(
+                    option1,
+                    (accumulatedSum - (gamma lookup2)) + val
+                )
+            ELSE
+                SET option2 TO option1
+            END IF
+
+            IF contains_key(gamma val)
+                SET gamma[val] TO min_value(
+                    gamma[val],
+                    accumulatedSum
+                )
+            ELSE
+                SET gamma[val] TO accumulatedSum
+            END IF
+
+            SET newSum TO accumulatedSum + val
+
+            RETURN traverse_array_rec(index + 1 newSum option2)
+        END PROCEDURE
+
+        SET delta TO traverse_array_rec(0 alpha beta)
+        IF delta EQUALS beta
+            RETURN 0
+        ELSE
+            RETURN delta
+        END IF
+
+    END FUNCTION
+END CLASS

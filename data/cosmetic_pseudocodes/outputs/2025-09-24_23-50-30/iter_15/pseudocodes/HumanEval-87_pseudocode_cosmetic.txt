@@ -1,0 +1,65 @@
+```
+FUNCTION get_row(matrix, key)
+  DEFINE accumulator AS EMPTY QUEUE
+  SET outerCounter TO 0
+  WHILE outerCounter <= LENGTH OF matrix - 1 DO
+    SET innerIndex TO 0
+    WHILE innerIndex <= LENGTH OF matrix AT outerCounter - 1 DO
+      IF NOT (matrix AT outerCounter AT innerIndex IS NOT key) THEN
+        ENQUEUE (outerCounter, innerIndex) INTO accumulator
+      END IF
+      SET innerIndex TO innerIndex + 1
+    END WHILE
+    SET outerCounter TO outerCounter + 1
+  END WHILE
+
+  DEFINE sortByFirst AS FUNCTION(list)
+    DEFINE result AS EMPTY LIST
+    WHILE NOT IS EMPTY(list) DO
+      DEFINE minItem AS DEQUEUE(list)
+      DEFINE tempQueue AS EMPTY QUEUE
+      WHILE NOT IS EMPTY(list) DO
+        DEFINE current AS DEQUEUE(list)
+        IF current FIRST ELEMENT < minItem FIRST ELEMENT THEN
+          ENQUEUE minItem INTO tempQueue
+          SET minItem TO current
+        ELSE
+          ENQUEUE current INTO tempQueue
+        END IF
+      END WHILE
+      SET list TO tempQueue
+      APPEND minItem TO result
+    END WHILE
+    RETURN result
+  END FUNCTION
+
+  DEFINE sortBySecondDesc AS FUNCTION(list)
+    DEFINE result AS EMPTY LIST
+    WHILE NOT IS EMPTY(list) DO
+      DEFINE maxItem AS DEQUEUE(list)
+      DEFINE tempQueue AS EMPTY QUEUE
+      WHILE NOT IS EMPTY(list) DO
+        DEFINE current AS DEQUEUE(list)
+        IF current SECOND ELEMENT > maxItem SECOND ELEMENT THEN
+          ENQUEUE maxItem INTO tempQueue
+          SET maxItem TO current
+        ELSE
+          ENQUEUE current INTO tempQueue
+        END IF
+      END WHILE
+      SET list TO tempQueue
+      APPEND maxItem TO result
+    END WHILE
+    RETURN result
+  END FUNCTION
+
+  SET asList TO EMPTY LIST
+  WHILE NOT IS EMPTY(accumulator) DO
+    APPEND DEQUEUE(accumulator) TO asList
+  END WHILE
+
+  SET sortedBySecondDesc TO sortBySecondDesc(asList)
+  SET sortedByFirstAsc TO sortByFirst(sortedBySecondDesc)
+  RETURN sortedByFirstAsc
+END FUNCTION
+```

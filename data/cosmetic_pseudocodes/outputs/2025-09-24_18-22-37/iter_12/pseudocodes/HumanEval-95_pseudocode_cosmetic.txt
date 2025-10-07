@@ -1,0 +1,43 @@
+FUNCTION check_dict_case(dictParameter)
+	stateFlag = "start"
+	keysList = dictParameter.keys()
+	keyCount = LENGTH OF keysList
+	if keyCount EQUALS 0 then
+		RETURN False
+	else
+		indexVar = 0
+		WHILE indexVar < keyCount do
+			currentKey = keysList.at(indexVar)
+			if NOT (currentKey INSTANCEOF STRING) then
+				stateFlag = "mixed"
+				FORCE EXIT
+			else
+				if stateFlag EQUALS "start" then
+					upperCheck = currentKey IS ALL UPPERCASE
+					lowerCheck = currentKey IS ALL LOWERCASE
+					if upperCheck then
+						stateFlag = "upper"
+					else
+						if lowerCheck then
+							stateFlag = "lower"
+						else
+							FORCE EXIT
+						end if
+					end if
+				else
+					upperCondition = (stateFlag EQUALS "upper") AND NOT (currentKey IS ALL UPPERCASE)
+					lowerCondition = (stateFlag EQUALS "lower") AND NOT (currentKey IS ALL LOWERCASE)
+					if upperCondition OR lowerCondition then
+						stateFlag = "mixed"
+						FORCE EXIT
+					else
+						FORCE EXIT
+					end if
+				end if
+			end if
+			indexVar = indexVar + 1
+		end while
+		resultFlag = (stateFlag EQUALS "upper") OR (stateFlag EQUALS "lower")
+		RETURN resultFlag
+	end if
+END FUNCTION

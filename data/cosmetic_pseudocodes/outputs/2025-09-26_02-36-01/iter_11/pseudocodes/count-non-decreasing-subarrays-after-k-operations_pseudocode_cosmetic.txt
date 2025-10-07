@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION countNonDecreasingSubarrays(nums k)
+        SET length_nums TO LENGTH OF nums
+
+        FUNCTION canMakeNonDecreasing(start_idx len_sub)
+            SET adjustment_cost TO 0
+            SET max_value TO nums AT start_idx
+            SET position TO 1
+            REPEAT
+                IF position >= len_sub THEN
+                    BREAK
+                END IF
+                SET current_val TO nums AT start_idx PLUS position
+                IF current_val < max_value THEN
+                    SET adjustment_cost TO adjustment_cost PLUS (max_value MINUS current_val)
+                END IF
+                SET max_value TO MAX OF max_value AND current_val
+                IF adjustment_cost > k THEN
+                    RETURN False
+                END IF
+                SET position TO position PLUS 1
+            UNTIL false
+            RETURN True
+        END FUNCTION
+
+        SET total_candidates TO (length_nums TIMES (length_nums PLUS 1)) DIV 2
+        SET count_invalid TO 0
+
+        SET idx_start TO 0
+        WHILE idx_start <= length_nums MINUS 1
+            SET low_bound TO 1
+            SET high_bound TO length_nums MINUS idx_start
+            WHILE low_bound <= high_bound
+                SET mean_val TO (low_bound PLUS high_bound) DIV 2
+                IF canMakeNonDecreasing(idx_start mean_val) THEN
+                    SET low_bound TO mean_val PLUS 1
+                ELSE
+                    SET high_bound TO mean_val MINUS 1
+                END IF
+            END WHILE
+            SET count_invalid TO count_invalid PLUS (length_nums MINUS idx_start MINUS high_bound)
+            SET idx_start TO idx_start PLUS 1
+        END WHILE
+
+        RETURN total_candidates MINUS count_invalid
+    END FUNCTION
+END CLASS

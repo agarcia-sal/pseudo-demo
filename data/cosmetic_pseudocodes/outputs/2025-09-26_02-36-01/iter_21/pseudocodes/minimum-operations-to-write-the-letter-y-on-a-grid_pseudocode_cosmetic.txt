@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+t0 := LENGTH OF grid
+t1 := t0 / 2 // integer division truncated
+t2 := EMPTY SET
+
+PROCEDURE add_diag_indices(p1)
+    IF p1 > t1 THEN RETURN ENDIF
+    t2 := t2 UNION {(p1, p1)}
+    add_diag_indices(p1 + 1)
+END PROCEDURE
+
+add_diag_indices(0)
+
+PROCEDURE add_anti_diag_indices(p3)
+    IF p3 > t1 THEN RETURN ENDIF
+    t2 := t2 UNION {(p3, (t0 - p3 - 1))}
+    add_anti_diag_indices(p3 + 1)
+END PROCEDURE
+
+add_anti_diag_indices(0)
+
+p4 := t0
+WHILE TRUE
+    IF p4 < t1 THEN BREAK ENDIF
+    t2 := t2 UNION {(p4, t1)}
+    p4 := p4 - 1
+ENDWHILE
+
+PROCEDURE count_cells(target_set)
+    count_map := DICTIONARY mapping integers 0..2 TO 0
+    PROCEDURE traverse_row(r)
+        IF r >= t0 THEN RETURN ENDIF
+        PROCEDURE traverse_col(c)
+            IF c >= t0 THEN RETURN ENDIF
+            IF (r, c) IN target_set THEN
+                v := grid[r][c]
+                count_map[v] := count_map[v] + 1
+            ENDIF
+            traverse_col(c + 1)
+        END PROCEDURE
+        traverse_col(0)
+        traverse_row(r + 1)
+    END PROCEDURE
+    traverse_row(0)
+    RETURN count_map
+END PROCEDURE
+
+t5 := count_cells(t2)
+full_set := EMPTY SET
+r1 := 0
+WHILE r1 < t0 DO
+    c1 := 0
+    WHILE c1 < t0 DO
+        full_set := full_set UNION {(r1, c1)}
+        c1 := c1 + 1
+    ENDWHILE
+    r1 := r1 + 1
+ENDWHILE
+t6 := full_set - t2
+t7 := count_cells(t6)
+
+t8 := +∞
+
+FOR r IN 0 TO 2 DO
+    s := 0
+    WHILE s <= 2 DO
+        IF NOT (r == s) THEN
+            sum_y := 0
+            ITER := [0,1,2]
+            t_sum := 0
+            PROCEDURE sum_yc(i)
+                IF i >= 3 THEN RETURN ENDIF
+                t_sum := t_sum + t5[ITER[i]]
+                sum_yc(i+1)
+            END PROCEDURE
+            sum_yc(0)
+            sum_y := t_sum - t5[r]
+
+            sum_n := 0
+            t_sum := 0
+            PROCEDURE sum_nc(i)
+                IF i >= 3 THEN RETURN ENDIF
+                t_sum := t_sum + t7[ITER[i]]
+                sum_nc(i+1)
+            END PROCEDURE
+            sum_n := t_sum - t7[s]
+
+            op := sum_y + sum_n
+            IF op < t8 THEN
+                t8 := op
+            ENDIF
+        ENDIF
+        s := s + 1
+    ENDWHILE
+END FOR
+
+RETURN t8
+    END FUNCTION
+END CLASS

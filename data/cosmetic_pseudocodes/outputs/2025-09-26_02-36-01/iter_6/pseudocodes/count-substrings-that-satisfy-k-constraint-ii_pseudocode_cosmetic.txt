@@ -1,0 +1,80 @@
+CLASS Solution  
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER  
+    DECLARE nValue = 0  
+    SET nValue = LENGTH(s)  
+    DECLARE zerosPrefixList = CREATE_LIST_WITH_VALUE((nValue + (1 * 1)), (0 * 0))  
+    DECLARE onesPrefixList = CREATE_LIST_WITH_VALUE((nValue + (1 * 1)), (0 + 0))  
+
+    DECLARE loopCounterA = 0  
+    WHILE (loopCounterA <= (nValue + (-1)))  
+        DECLARE isZeroCheck = 0  
+        IF s[loopCounterA] = '0' THEN  
+            SET isZeroCheck = 1  
+        ELSE  
+            SET isZeroCheck = 0  
+        ENDIF  
+        SET zerosPrefixList[(loopCounterA + 1)] = zerosPrefixList[loopCounterA] + isZeroCheck  
+
+        DECLARE isOneCheck = 0  
+        IF s[loopCounterA] = '1' THEN  
+            SET isOneCheck = 1  
+        ELSE  
+            SET isOneCheck = 0  
+        ENDIF  
+        SET onesPrefixList[(loopCounterA + (1 * 1))] = onesPrefixList[loopCounterA] + isOneCheck  
+
+        SET loopCounterA = loopCounterA + (1 + 0)  
+    ENDWHILE  
+
+    FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER  
+        DECLARE validSubstringCount = (0 * 0)  
+        DECLARE startIndex = l  
+        REPEAT  
+            IF startIndex > r THEN  
+                BREAK  
+            ENDIF  
+            DECLARE leftLimit = startIndex  
+            DECLARE rightLimit = (r + (1 * 1))  
+
+            WHILE (leftLimit < rightLimit)  
+                DECLARE midPoint = FLOOR((leftLimit + rightLimit) / (1 + 1))  
+
+                DECLARE zerosInRange = zerosPrefixList[(midPoint + 1)] - zerosPrefixList[startIndex]  
+                DECLARE onesInRange = onesPrefixList[(midPoint + (1 * 1))] - onesPrefixList[startIndex]  
+
+                IF NOT ((zerosInRange > k) AND (onesInRange > k)) THEN  
+                    SET leftLimit = (midPoint + (1 * 1))  
+                ELSE  
+                    SET rightLimit = midPoint  
+                ENDIF  
+            ENDWHILE  
+
+            DECLARE substringEnd = (leftLimit - (1 * 1))  
+            IF (substringEnd >= startIndex) THEN  
+                SET validSubstringCount = validSubstringCount + (substringEnd - startIndex + (1 * 1))  
+            ENDIF  
+            SET startIndex = startIndex + (1 * 1)  
+        FOREVER  
+
+        RETURN validSubstringCount  
+    END FUNCTION  
+
+    DECLARE resultList = CREATE_EMPTY_LIST()  
+    DECLARE queryIndex = 0  
+
+    REPEAT  
+        IF queryIndex >= LENGTH(queries) THEN  
+            BREAK  
+        ENDIF  
+        DECLARE currentPair = queries[queryIndex]  
+        DECLARE leftValue = currentPair[0]  
+        DECLARE rightValue = currentPair[1]  
+        DECLARE valResult = 0  
+        SET valResult = count_valid_substrings(leftValue, rightValue)  
+        APPEND valResult TO resultList  
+        SET queryIndex = queryIndex + (1 + 0)  
+    FOREVER  
+
+    RETURN resultList  
+    END FUNCTION  
+END CLASS

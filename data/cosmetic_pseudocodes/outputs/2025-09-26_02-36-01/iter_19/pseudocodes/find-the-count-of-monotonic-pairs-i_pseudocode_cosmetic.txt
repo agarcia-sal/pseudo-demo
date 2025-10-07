@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        CONST THRESHOLD = 1000000000 + 7
+        LET lengthVal BE LENGTH OF nums
+        LET upperBound BE MAXIMUM ELEMENT IN nums
+
+        PROCEDURE moduloAdd(x, y, modVal)
+            LET addition BE (x MOD modVal) + (y MOD modVal)
+            RETURN addition MOD modVal
+        END PROCEDURE
+
+        LET matrix BE EMPTY LIST
+        FOR indexB FROM 0 TO lengthVal - 1
+            LET innerList1 BE EMPTY LIST
+            FOR indexC FROM 0 TO upperBound
+                LET innerList2 BE EMPTY LIST
+                FOR indexD FROM 0 TO upperBound
+                    APPEND 0 TO innerList2
+                END FOR
+                APPEND innerList2 TO innerList1
+            END FOR
+            APPEND innerList1 TO matrix
+        END FOR
+
+        LET firstNum BE nums[0]
+        LET yVar BE 0
+        WHILE yVar <= firstNum
+            LET zVar BE firstNum - yVar
+            matrix[0][yVar][zVar] = 1
+            yVar = yVar + 1
+        END WHILE
+
+        PROCEDURE updateDP(iVal)
+            LET currentNum BE nums[iVal]
+            FOR idxJ FROM 0 TO currentNum
+                LET remK BE currentNum - idxJ
+                LET prevJ BE 0
+                WHILE prevJ <= idxJ
+                    LET prevK BE remK
+                    WHILE prevK <= upperBound
+                        matrix[iVal][idxJ][remK] = moduloAdd(matrix[iVal][idxJ][remK], matrix[iVal - 1][prevJ][prevK], THRESHOLD)
+                        prevK = prevK + 1
+                    END WHILE
+                    prevJ = prevJ + 1
+                END WHILE
+            END FOR
+        END PROCEDURE
+
+        LET counter IS 1
+        WHILE counter < lengthVal
+            updateDP(counter)
+            counter = counter + 1
+        END WHILE
+
+        LET accumulator BE 0
+        FOR valJ FROM 0 TO upperBound
+            FOR valK FROM 0 TO upperBound
+                IF (valJ + valK) = nums[lengthVal - 1] THEN
+                    accumulator = (accumulator + matrix[lengthVal - 1][valJ][valK]) MOD THRESHOLD
+                END IF
+            END FOR
+        END FOR
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

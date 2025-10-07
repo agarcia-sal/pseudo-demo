@@ -1,0 +1,96 @@
+CLASS Solution
+	FUNCTION maxSubarraySum(nums)
+		FUNCTION kadane(arr)
+			DEFINE FUNCTION maxOfTwo(a, b)
+				IF a GREATER THAN OR EQUAL TO b THEN RETURN a ELSE RETURN b END IF
+			END FUNCTION
+
+			DEFINE FUNCTION maxOfThree(a, b, c)
+				IF a GREATER THAN OR EQUAL TO b THEN
+					IF a GREATER THAN OR EQUAL TO c THEN
+						RETURN a
+					ELSE
+						RETURN c
+					END IF
+				ELSE
+					IF b GREATER THAN OR EQUAL TO c THEN
+						RETURN b
+					ELSE
+						RETURN c
+					END IF
+				END IF
+			END FUNCTION
+
+			SET idx TO 2
+			SET arrSize TO LENGTH OF arr
+
+			SET tempMax TO arr[1]
+			SET globalMax TO arr[1]
+
+			WHILE idx LESS THAN OR EQUAL TO arrSize
+				IF tempMax PLUS arr[idx] GREATER THAN arr[idx] THEN
+					SET tempMax TO tempMax PLUS arr[idx]
+				ELSE
+					SET tempMax TO arr[idx]
+				END IF
+
+				IF globalMax LESS THAN tempMax THEN
+					SET globalMax TO tempMax
+				END IF
+
+				SET idx TO idx PLUS 1
+			END WHILE
+
+			RETURN globalMax
+		END FUNCTION
+
+		SET initialMaxSum TO kadane(nums)
+
+		DEFINE FUNCTION uniqueSet(collection)
+			SET outputSet TO empty dictionary
+			SET resultList TO empty list
+			SET pointer TO 1
+			WHILE pointer LESS THAN OR EQUAL TO LENGTH OF collection
+				IF outputSet DOES NOT HAVE KEY collection[pointer] THEN
+					SET outputSet[collection[pointer]] TO true
+					APPEND collection[pointer] TO resultList
+				END IF
+				SET pointer TO pointer PLUS 1
+			END WHILE
+			RETURN resultList
+		END FUNCTION
+
+		SET distinctValues TO uniqueSet(nums)
+
+		SET maxOverall TO initialMaxSum
+
+		DEFINE FUNCTION filterElements(fullList, exclusion)
+			SET filtered TO empty list
+			SET p TO 1
+			WHILE p LESS THAN OR EQUAL TO LENGTH OF fullList
+				IF fullList[p] NOT EQUALS exclusion THEN
+					APPEND fullList[p] TO filtered
+				END IF
+				SET p TO p PLUS 1
+			END WHILE
+			RETURN filtered
+		END FUNCTION
+
+		SET uIdx TO 1
+		WHILE uIdx LESS THAN OR EQUAL TO LENGTH OF distinctValues
+			SET excludedElem TO distinctValues[uIdx]
+			SET tempCollection TO filterElements(nums, excludedElem)
+
+			IF LENGTH OF tempCollection GREATER THAN 0 THEN
+				SET candidateMax TO kadane(tempCollection)
+				IF maxOverall LESS THAN candidateMax THEN
+					SET maxOverall TO candidateMax
+				END IF
+			END IF
+
+			SET uIdx TO uIdx PLUS 1
+		END WHILE
+
+		RETURN maxOverall
+	END FUNCTION
+END CLASS

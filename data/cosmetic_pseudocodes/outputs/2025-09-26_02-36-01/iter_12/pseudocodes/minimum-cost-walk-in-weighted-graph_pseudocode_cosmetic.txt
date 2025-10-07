@@ -1,0 +1,102 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, n)  
+        SET tempList TO empty list  
+        SET indexVal TO 0  
+        WHILE indexVal LESS THAN n DO  
+            APPEND indexVal TO tempList  
+            SET indexVal TO indexVal PLUS 1  
+        END WHILE  
+        SET self.parent TO tempList  
+
+        SET rankList TO empty list  
+        SET counterVal TO 0  
+        WHILE counterVal LESS THAN n DO  
+            APPEND (1 TIMES 1) TO rankList  
+            SET counterVal TO counterVal PLUS 1  
+        END WHILE  
+        SET self.rank TO rankList  
+    END FUNCTION  
+
+    FUNCTION find(self, u)  
+        DEFINE FUNCTION recurse(x)  
+            IF NOT (self.parent[x] EQUALS x) THEN  
+                SET self.parent[x] TO recurse(self.parent[x])  
+            END IF  
+            RETURN self.parent[x]  
+        END FUNCTION  
+
+        RETURN recurse(u)  
+    END FUNCTION  
+
+    FUNCTION union(self, u, v)  
+        DECLARE rootX, rootY  
+        SET rootX TO self.find(u)  
+        SET rootY TO self.find(v)  
+
+        IF (rootX NOT EQUAL rootY) THEN  
+            IF ((self.rank[rootX] - self.rank[rootY]) GREATER THAN (0)) THEN  
+                SET self.parent[rootY] TO rootX  
+            ELSE  
+                IF ((self.rank[rootX] LESS THAN self.rank[rootY])) THEN  
+                    SET self.parent[rootX] TO rootY  
+                ELSE  
+                    SET self.parent[rootY] TO rootX  
+                    SET self.rank[rootX] TO self.rank[rootX] + 1  
+                END IF  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION minimumCost(self, n, edges, query)  
+        SET uf TO UnionFind(n)  
+        DECLARE maskVal  
+        SET maskVal TO ((2 RAISED_TO_POWER 32) - 1)  
+
+        SET compAnd TO empty list  
+        FOR i FROM 0 TO n - 1 DO  
+            APPEND maskVal TO compAnd  
+        END FOR  
+
+        FOR each triple WITH elements u, v, w IN edges DO  
+            CALL uf.union(u, v)  
+            SET compIndex TO uf.find(u)  
+            SET compAnd[compIndex] TO compAnd[compIndex] BITWISE_AND w  
+        END FOR  
+
+        SET compCost TO empty dictionary  
+        SET iterIndex TO 0  
+        WHILE iterIndex LESS THAN n DO  
+            SET rootVal TO uf.find(iterIndex)  
+            IF NOT (rootVal IN compCost) THEN  
+                SET compCost[rootVal] TO compAnd[rootVal]  
+            END IF  
+            SET iterIndex TO iterIndex + 1  
+        END WHILE  
+
+        SET resultList TO empty list  
+        DEFINE FUNCTION processPair(pair)  
+            SET sVal TO pair[0]  
+            SET tVal TO pair[1]  
+            IF (sVal EQUALS tVal) THEN  
+                RETURN 0  
+            ELSE  
+                SET rootS TO uf.find(sVal)  
+                SET rootT TO uf.find(tVal)  
+                IF (rootS EQUALS rootT) THEN  
+                    RETURN compCost[rootS]  
+                ELSE  
+                    RETURN -1  
+                END IF  
+            END IF  
+        END FUNCTION  
+
+        FOR each pairVal IN query DO  
+            SET appendVal TO processPair(pairVal)  
+            APPEND appendVal TO resultList  
+        END FOR  
+
+        RETURN resultList  
+    END FUNCTION  
+END CLASS

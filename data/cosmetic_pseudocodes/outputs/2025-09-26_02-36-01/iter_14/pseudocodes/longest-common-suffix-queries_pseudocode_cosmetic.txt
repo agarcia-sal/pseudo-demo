@@ -1,0 +1,83 @@
+```pseudocode
+CLASS Solution
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+        SET mapSuffixes TO empty dictionary mapping STRING to INTEGER
+
+        FUNCTION assign_suffixes(posIdx posIdx TO INTEGER, currentWord currentWord TO STRING, originIdx originIdx TO INTEGER)
+            IF posIdx GREATER THAN LENGTH OF currentWord MINUS one THEN
+                RETURN
+            END IF
+
+            SET subStr TO substring from posIdx TO end of currentWord
+
+            IF subStr NOT IN mapSuffixes THEN
+                SET mapSuffixes element at key subStr TO originIdx
+            ELSE
+                SET recordedIdx TO mapSuffixes element at key subStr
+                SET wordAtRecorded TO wordsContainer element at recordedIdx
+                IF (LENGTH OF currentWord LESS THAN LENGTH OF wordAtRecorded) OR
+                   ((LENGTH OF currentWord EQUALS LENGTH OF wordAtRecorded) AND originIdx LESS THAN recordedIdx) THEN
+                    SET mapSuffixes element at key subStr TO originIdx
+                END IF
+            END IF
+
+            CALL assign_suffixes(posIdx + 1, currentWord, originIdx)
+        END FUNCTION
+
+        FUNCTION process_word(idxOuter idxOuter TO INTEGER)
+            IF idxOuter GREATER THAN OR EQUAL TO LENGTH OF wordsContainer THEN
+                RETURN
+            END IF
+
+            CALL assign_suffixes(0, wordsContainer element at idxOuter, idxOuter)
+
+            CALL process_word(idxOuter + 1)
+        END FUNCTION
+
+        CALL process_word(0)
+
+        FUNCTION minimal_index() RETURNS INTEGER
+            SET minIdx TO 0
+            SET minLength TO LENGTH OF wordsContainer element at 0
+            SET currIdx TO 1
+
+            WHILE currIdx LESS THAN LENGTH OF wordsContainer DO
+                SET currWordLength TO LENGTH OF wordsContainer element at currIdx
+                IF (currWordLength LESS THAN minLength) OR
+                   ((currWordLength EQUALS minLength) AND currIdx LESS THAN minIdx) THEN
+                    SET minIdx TO currIdx
+                    SET minLength TO currWordLength
+                END IF
+                SET currIdx TO currIdx + 1
+            END WHILE
+
+            RETURN minIdx
+        END FUNCTION
+
+        FUNCTION get_best_match(queryStr queryStr TO STRING) RETURNS INTEGER
+            SET pos TO 0
+
+            WHILE pos LESS THAN LENGTH OF queryStr DO
+                SET subSuf TO substring from pos TO end of queryStr
+                IF subSuf IN mapSuffixes THEN
+                    RETURN mapSuffixes element at key subSuf
+                END IF
+                SET pos TO pos + 1
+            END WHILE
+
+            RETURN minimal_index()
+        END FUNCTION
+
+        SET answer TO empty list of integer
+
+        SET idxQ TO 0
+        WHILE idxQ LESS THAN LENGTH OF wordsQuery DO
+            SET currentQuery TO wordsQuery element at idxQ
+            APPEND get_best_match(currentQuery) TO answer
+            SET idxQ TO idxQ + 1
+        END WHILE
+
+        RETURN answer
+    END FUNCTION
+END CLASS
+```

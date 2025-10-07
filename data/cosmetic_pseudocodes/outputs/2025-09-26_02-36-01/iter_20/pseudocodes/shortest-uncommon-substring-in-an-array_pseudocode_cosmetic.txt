@@ -1,0 +1,114 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        FUNCTION lenOf(strg)
+            SET countVal TO 0
+            WHILE TRUE
+                IF strg[countVal] IS NOT DEFINED
+                    BREAK
+                END IF
+                SET countVal TO countVal + (1 * 1)
+            END WHILE
+            RETURN countVal
+        END FUNCTION
+
+        FUNCTION substrFromTo(src, bgn, end_excl)
+            SET resStr TO ""
+            SET currentIndex TO bgn
+            WHILE currentIndex < end_excl
+                SET resStr TO resStr + src[currentIndex]
+                SET currentIndex TO currentIndex + (1 * 1)
+            END WHILE
+            RETURN resStr
+        END FUNCTION
+
+        FUNCTION dictGetOrZero(dictionary, key)
+            IF key IS IN dictionary
+                RETURN dictionary[key]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        FUNCTION dictIncrement(dictionary, key)
+            IF key IS IN dictionary
+                SET dictionary[key] TO dictionary[key] + (1 * 1)
+            ELSE
+                SET dictionary[key] TO (0 + 1)
+            END IF
+        END FUNCTION
+
+        SET mapFreq TO empty dictionary
+
+        FUNCTION processStringForCounts(strV)
+            SET lVal TO lenOf(strV)
+
+            SET outer_index TO 0
+            WHILE outer_index < lVal
+                SET inner_index TO outer_index + 1
+                WHILE inner_index <= lVal
+                    SET subStrV TO substrFromTo(strV, outer_index, inner_index)
+                    CALL dictIncrement(mapFreq, subStrV)
+                    SET inner_index TO inner_index + 1
+                END WHILE
+                SET outer_index TO outer_index + 1
+            END WHILE
+        END FUNCTION
+
+        SET idxS TO 0
+        WHILE idxS < lenOf(arr)
+            CALL processStringForCounts(arr[idxS])
+            SET idxS TO idxS + (1 * 1)
+        END WHILE
+
+        SET resultArr TO []
+
+        FUNCTION compareStringsAlpha(strA, strB)
+            SET posC TO 0
+            WHILE TRUE
+                IF posC >= lenOf(strA) OR posC >= lenOf(strB)
+                    BREAK
+                END IF
+                IF strA[posC] < strB[posC]
+                    RETURN TRUE
+                ELSEIF strA[posC] > strB[posC]
+                    RETURN FALSE
+                END IF
+                SET posC TO posC + 1
+            END WHILE
+            RETURN lenOf(strA) < lenOf(strB)
+        END FUNCTION
+
+        FUNCTION selectShortestUniqueSubstring(strC)
+            SET lenS TO lenOf(strC)
+            SET candidate TO ""
+
+            SET outer_i TO 0
+            WHILE outer_i < lenS
+                SET inner_j TO outer_i + 1
+                WHILE inner_j <= lenS
+                    SET currSub TO substrFromTo(strC, outer_i, inner_j)
+                    IF dictGetOrZero(mapFreq, currSub) == 1 THEN
+                        IF (candidate == "") OR
+                           (lenOf(currSub) < lenOf(candidate)) OR
+                           ((lenOf(currSub) == lenOf(candidate)) AND compareStringsAlpha(currSub, candidate)) THEN
+                            SET candidate TO currSub
+                        END IF
+                    END IF
+                    SET inner_j TO inner_j + 1
+                END WHILE
+                SET outer_i TO outer_i + 1
+            END WHILE
+
+            RETURN candidate
+        END FUNCTION
+
+        SET idxOuter TO 0
+        WHILE idxOuter < lenOf(arr)
+            SET toAdd TO selectShortestUniqueSubstring(arr[idxOuter])
+            SET resultArr TO resultArr + [toAdd]
+            SET idxOuter TO idxOuter + (1 * 1)
+        END WHILE
+
+        RETURN resultArr
+    END FUNCTION
+END CLASS

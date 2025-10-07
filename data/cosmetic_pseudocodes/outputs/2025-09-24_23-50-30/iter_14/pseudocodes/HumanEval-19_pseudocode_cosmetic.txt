@@ -1,0 +1,43 @@
+```
+FUNCTION sort_numbers(input_string)
+  DEFINE lookup AS MAP
+    'zero' -> 0
+    'one' -> 1
+    'two' -> 2
+    'three' -> 3
+    'four' -> 4
+    'five' -> 5
+    'six' -> 6
+    'seven' -> 7
+    'eight' -> 8
+    'nine' -> 9
+
+  FUNCTION extract_nonempty(tokens, acc)
+    IF tokens IS EMPTY THEN
+      RETURN acc
+    LET current_token = tokens[0]
+    IF current_token = "" THEN
+      RETURN extract_nonempty(tokens[1:], acc)
+    RETURN extract_nonempty(tokens[1:], acc + [current_token])
+  END FUNCTION
+
+  LET tokens = extract_nonempty(split input_string BY " ", [])
+
+  FUNCTION insert_sorted(sorted, element)
+    FOR i FROM 0 TO LENGTH(sorted) - 1
+      IF lookup[element] < lookup[sorted[i]] THEN
+        RETURN sorted[0:i] + [element] + sorted[i:]
+    RETURN sorted + [element]
+  END FUNCTION
+
+  FUNCTION insertion_sort(array, index, result)
+    IF index >= LENGTH(array) THEN
+      RETURN result
+    RETURN insertion_sort(array, index + 1, insert_sorted(result, array[index]))
+  END FUNCTION
+
+  LET sorted_tokens = insertion_sort(tokens, 0, [])
+
+  RETURN join(sorted_tokens, " ")
+END FUNCTION
+```

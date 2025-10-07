@@ -1,0 +1,96 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+        
+        FUNCTION computeLength(source PARAMETER)
+            SET count TO 0
+            WHILE TRUE DO
+                IF source[count] EXISTS THEN
+                    SET count TO count + 1
+                ELSE
+                    BREAK
+                END IF
+            END WHILE
+            RETURN count
+        END FUNCTION
+
+        PROCEDURE initializeMatrix(rows PARAMETER, cols PARAMETER, matrix PARAMETER)
+            SET rowIndex TO 0
+            CALL fillRow(rowIndex, cols, matrix)
+        END PROCEDURE
+        
+        PROCEDURE fillRow(r PARAMETER, c PARAMETER, mat PARAMETER)
+            IF r >= c THEN RETURN END IF
+            SET mat[r] TO []
+            SET colIndex TO 0
+            CALL fillColumn(r, colIndex, c, mat)
+            CALL fillRow(r + 1, c, mat)
+        END PROCEDURE
+        
+        PROCEDURE fillColumn(r PARAMETER, c PARAMETER, maxCols PARAMETER, mat PARAMETER)
+            IF c >= maxCols THEN RETURN END IF
+            SET mat[r][c] TO 0
+            CALL fillColumn(r, c + 1, maxCols, mat)
+        END PROCEDURE
+
+        SET countNums TO computeLength(nums)
+        SET dimension TO countNums
+
+        SET gridF TO []
+        SET gridG TO []
+        CALL initializeMatrix(dimension, dimension, gridF)
+        CALL initializeMatrix(dimension, dimension, gridG)
+
+        FUNCTION xorValue(a PARAMETER, b PARAMETER)
+            RETURN (a AND (NOT b)) OR ((NOT a) AND b)
+        END FUNCTION
+
+        FUNCTION maximum3(a PARAMETER, b PARAMETER, c PARAMETER)
+            IF a >= b THEN 
+                IF a >= c THEN RETURN a ELSE RETURN c END IF
+            ELSE
+                IF b >= c THEN RETURN b ELSE RETURN c END IF
+            END IF
+        END FUNCTION
+
+        PROCEDURE populateMatrices(idx PARAMETER)
+            IF idx < 0 THEN RETURN END IF
+
+            SET gridF[idx][idx] TO nums[idx]
+            SET gridG[idx][idx] TO nums[idx]
+
+            CALL fillRowUpper(idx + 1, dimension - 1, idx)
+
+            CALL populateMatrices(idx - 1)
+        END PROCEDURE
+
+        PROCEDURE fillRowUpper(start PARAMETER, endParam PARAMETER, current PARAMETER)
+            IF start > endParam THEN RETURN END IF
+            
+            SET leftXor TO gridF[current][start - 1]
+            SET rightXor TO gridF[current + 1][start]
+
+            SET valF TO leftXor XOR rightXor
+            SET gridF[current][start] TO valF
+
+            SET valG TO maximum3(valF, gridG[current][start - 1], gridG[current + 1][start])
+            SET gridG[current][start] TO valG
+
+            CALL fillRowUpper(start + 1, endParam, current)
+        END PROCEDURE
+
+        CALL populateMatrices(dimension - 1)
+
+        PROCEDURE assembleAnswers(pairs PARAMETER, accumulator PARAMETER, index PARAMETER, result PARAMETER)
+            IF index = computeLength(pairs) THEN RETURN result END IF
+
+            SET l PARAMETER TO pairs[index][0]
+            SET r PARAMETER TO pairs[index][1]
+
+            APPEND gridG[l][r] TO result
+
+            RETURN assembleAnswers(pairs, accumulator, index + 1, result)
+        END PROCEDURE
+
+        RETURN assembleAnswers(queries, [], 0, [])
+    END FUNCTION
+END CLASS

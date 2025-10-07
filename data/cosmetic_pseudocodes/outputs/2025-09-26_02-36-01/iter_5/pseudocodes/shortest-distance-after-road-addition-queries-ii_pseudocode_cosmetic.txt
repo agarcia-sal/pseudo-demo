@@ -1,0 +1,87 @@
+CLASS Solution  
+    FUNCTION shortestDistanceAfterQueries(length, requestList)  
+        SET adjacencyMap TO a dictionary mapping each integer key x WHERE x FROM 0 TO (length - 1) WITH an empty array  
+        
+        FUNCTION buildEdges(index)  
+            IF index >= (length - 1) THEN  
+                RETURN  
+            END IF  
+            SET nextNode TO index + 1  
+            LET edgeTuple BE (nextNode, 1)  
+            APPEND edgeTuple TO adjacencyMap[index]  
+            CALL buildEdges(index + 1)  
+        END FUNCTION  
+        
+        CALL buildEdges(0)  
+        
+        FUNCTION dijkstra()  
+            SET distances TO an array of size length FILLED WITH (1 / 0)  // positive infinity representation  
+            ASSIGN zero TO distances[0]  
+            SET priorityQueue TO [(0, 0)]  
+            
+            FUNCTION heapPopLowest(pq)  
+                IF LENGTH OF pq == 0 THEN RETURN null END IF  
+                SET minIndex TO 0  
+                FOR idx FROM 1 TO LENGTH OF pq - 1  
+                    IF pq[idx][0] < pq[minIndex][0] THEN  
+                        SET minIndex TO idx  
+                    END IF  
+                END FOR  
+                LET poppedElement BE pq[minIndex]  
+                REMOVE pq[minIndex]  
+                RETURN poppedElement  
+            END FUNCTION  
+            
+            FUNCTION heapPushMaintainHeap(pq, entry)  
+                APPEND entry TO pq  
+            END FUNCTION  
+            
+            FUNCTION processQueue()  
+                LET extraction BE heapPopLowest(priorityQueue)  
+                IF extraction == null THEN RETURN END IF  
+                LET (currentDistance, currentVertex) BE extraction  
+                
+                IF currentDistance > distances[currentVertex] THEN  
+                    CALL processQueue()  
+                    RETURN  
+                END IF  
+                
+                FUNCTION iterateNeighbors(index)  
+                    IF index == LENGTH OF adjacencyMap[currentVertex] THEN  
+                        CALL processQueue()  
+                        RETURN  
+                    END IF  
+                    LET neighborPair BE adjacencyMap[currentVertex][index]  
+                    LET (adjacentNode, edgeWeight) BE neighborPair  
+                    LET newDistance TO currentDistance + edgeWeight  
+                    IF newDistance < distances[adjacentNode] THEN  
+                        ASSIGN newDistance TO distances[adjacentNode]  
+                        CALL heapPushMaintainHeap(priorityQueue, (newDistance, adjacentNode))  
+                    END IF  
+                    CALL iterateNeighbors(index + 1)  
+                END FUNCTION  
+                
+                CALL iterateNeighbors(0)  
+            END FUNCTION  
+            
+            CALL processQueue()  
+            RETURN distances[length - 1]  
+        END FUNCTION  
+        
+        SET outputResults TO empty array  
+        
+        FUNCTION processQueries(qIndex)  
+            IF qIndex == LENGTH OF requestList THEN  
+                RETURN  
+            END IF  
+            LET (startNode, edgeVal) BE requestList[qIndex]  
+            APPEND (edgeVal, 1) TO adjacencyMap[startNode]  
+            LET dijkstraResult TO dijkstra()  
+            APPEND dijkstraResult TO outputResults  
+            CALL processQueries(qIndex + 1)  
+        END FUNCTION  
+        
+        CALL processQueries(0)  
+        RETURN outputResults  
+    END FUNCTION  
+END CLASS

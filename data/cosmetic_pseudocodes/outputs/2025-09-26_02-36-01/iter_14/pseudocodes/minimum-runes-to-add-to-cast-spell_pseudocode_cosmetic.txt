@@ -1,0 +1,126 @@
+CLASS Solution  
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)  
+        SET mappingA TO an empty dictionary from int to list of int  
+        SET mappingB TO another empty dictionary from int to list of int  
+
+        SET idx_counter TO 0  
+        SET indices_array TO a list with n elements all set to -1  
+        SET lows_array TO a list with n elements all set to 0  
+        SET stack_flags TO a list with n elements all set to False  
+        SET node_stack TO an empty list  
+        SET components_list TO an empty list  
+
+        PROCEDURE explore(node)  
+            SET indices_array[node] TO idx_counter  
+            SET lows_array[node] TO idx_counter  
+            SET idx_counter TO idx_counter + 1  
+            PUSH node INTO node_stack  
+            SET stack_flags[node] TO True  
+
+            SET neighbors_iter TO mappingA[node] OR empty list  
+            SET pos TO 0  
+            WHILE pos LESS THAN LENGTH OF neighbors_iter  
+                SET current_neighbor TO neighbors_iter[pos]  
+                IF indices_array[current_neighbor] EQUALS -1  
+                    CALL explore(current_neighbor)  
+                    SET lows_array[node] TO (lows_array[node] IF lows_array[node] < lows_array[current_neighbor] ELSE lows_array[current_neighbor])  
+                ELSE IF stack_flags[current_neighbor] IS True  
+                    SET lows_array[node] TO (lows_array[node] IF lows_array[node] < indices_array[current_neighbor] ELSE indices_array[current_neighbor])  
+                END IF  
+                SET pos TO pos + 1  
+            END WHILE  
+
+            IF lows_array[node] EQUALS indices_array[node]  
+                SET component_nodes TO empty list  
+                LOOP FOREVER  
+                    SET popped_node TO POP LAST element FROM node_stack  
+                    SET stack_flags[popped_node] TO False  
+                    APPEND popped_node TO component_nodes  
+                    IF popped_node EQUALS node  
+                        EXIT LOOP  
+                    END IF  
+                END LOOP  
+                APPEND component_nodes TO components_list  
+            END IF  
+        END PROCEDURE  
+
+        SET pos_flowFrom TO 0  
+        WHILE pos_flowFrom LESS THAN LENGTH OF flowFrom  
+            SET elem_u TO flowFrom[pos_flowFrom]  
+            SET elem_v TO flowTo[pos_flowFrom]  
+            IF NOT EXISTS mappingA[elem_u]  
+                SET mappingA[elem_u] TO empty list  
+            END IF  
+            APPEND elem_v TO mappingA[elem_u]  
+            IF NOT EXISTS mappingB[elem_v]  
+                SET mappingB[elem_v] TO empty list  
+            END IF  
+            APPEND elem_u TO mappingB[elem_v]  
+            SET pos_flowFrom TO pos_flowFrom + 1  
+        END WHILE  
+
+        SET idx TO 0  
+        WHILE idx LESS THAN n  
+            IF indices_array[idx] EQUALS -1  
+                CALL explore(idx)  
+            END IF  
+            SET idx TO idx + 1  
+        END WHILE  
+
+        SET scc_mappings TO empty dictionary from int to list of int  
+        SET node_to_scc TO a list with n elements set to -1  
+        SET scc_presence_flags TO a list with LENGTH OF components_list elements set to False  
+        SET count_scc TO 0  
+
+        FOR idx_component FROM 0 TO LENGTH OF components_list - 1  
+            SET current_scc TO components_list[idx_component]  
+            FOR idx_node FROM 0 TO LENGTH OF current_scc - 1  
+                SET node_item TO current_scc[idx_node]  
+                SET node_to_scc[node_item] TO count_scc  
+                IF node_item IS IN crystals  
+                    SET scc_presence_flags[idx_component] TO True  
+                END IF  
+            END FOR  
+            SET count_scc TO count_scc + 1  
+        END FOR  
+
+        SET pos_edge TO 0  
+        WHILE pos_edge LESS THAN LENGTH OF flowFrom  
+            SET start_node TO flowFrom[pos_edge]  
+            SET end_node TO flowTo[pos_edge]  
+            SET start_scc TO node_to_scc[start_node]  
+            SET end_scc TO node_to_scc[end_node]  
+            IF start_scc IS NOT EQUAL TO end_scc  
+                IF NOT EXISTS scc_mappings[start_scc]  
+                    SET scc_mappings[start_scc] TO empty list  
+                END IF  
+                APPEND end_scc TO scc_mappings[start_scc]  
+            END IF  
+            SET pos_edge TO pos_edge + 1  
+        END WHILE  
+
+        SET in_degrees TO a list with LENGTH OF components_list elements all zero  
+        SET scc_index_iter TO 0  
+        WHILE scc_index_iter LESS THAN LENGTH OF components_list  
+            SET neighbors_list TO scc_mappings[scc_index_iter] OR empty list  
+            SET neighbor_ptr TO 0  
+            WHILE neighbor_ptr LESS THAN LENGTH OF neighbors_list  
+                SET neighbor_node TO neighbors_list[neighbor_ptr]  
+                SET in_degrees[neighbor_node] TO in_degrees[neighbor_node] + 1  
+                SET neighbor_ptr TO neighbor_ptr + 1  
+            END WHILE  
+            SET scc_index_iter TO scc_index_iter + 1  
+        END WHILE  
+
+        SET needed_runes TO 0  
+        SET scc_check TO 0  
+        WHILE scc_check LESS THAN LENGTH OF components_list  
+            IF in_degrees[scc_check] EQUALS 0 AND scc_presence_flags[scc_check] IS False  
+                SET needed_runes TO needed_runes + 1  
+            END IF  
+            SET scc_check TO scc_check + 1  
+        END WHILE  
+
+        RETURN needed_runes  
+    END FUNCTION  
+END CLASS

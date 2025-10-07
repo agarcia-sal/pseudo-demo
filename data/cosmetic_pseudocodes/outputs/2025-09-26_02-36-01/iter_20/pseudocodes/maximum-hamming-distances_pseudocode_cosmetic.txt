@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER m INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION computeHamming(binA STRING binB STRING) RETURNS INTEGER
+            SET cnt TO 0
+            SET idx TO 0
+            WHILE idx < LENGTH(binA)
+                IF ((binA[idx] = binB[idx]) = FALSE)
+                    SET cnt TO cnt + 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN cnt
+        END FUNCTION
+
+        FUNCTION toBinaryString(x INTEGER length INTEGER) RETURNS STRING
+            FUNCTION recConvert(val INTEGER acc STRING) RETURNS STRING
+                IF val = 0
+                    RETURN acc
+                ELSE
+                    SET bit_char TO '1' IF (val % 2) = 1 ELSE '0'
+                    RETURN recConvert(val // 2, bit_char + acc)
+                END IF
+            END FUNCTION
+
+            SET binStr TO recConvert(x, "")
+            SET pad_len TO length - LENGTH(binStr)
+            SET padStr TO ""
+            SET ctr TO 0
+            REPEAT
+                IF ctr >= pad_len THEN BREAK
+                SET padStr TO padStr + "0"
+                SET ctr TO ctr + 1
+            UNTIL FALSE
+            RETURN padStr + binStr
+        END FUNCTION
+
+        SET transformedNums TO []
+        SET u TO 0
+        REPEAT
+            IF u >= LENGTH(nums) THEN BREAK
+            SET binForm TO toBinaryString(nums[u], m)
+            transformedNums.APPEND(binForm)
+            SET u TO u + 1
+        UNTIL FALSE
+
+        SET resultList TO []
+        SET a1 TO 0
+        REPEAT
+            IF a1 >= LENGTH(nums) THEN BREAK
+
+            SET currMax TO 0
+            SET a2 TO 0
+            LOOP
+                IF a2 >= LENGTH(nums) THEN EXIT LOOP
+                IF a1 != a2 THEN
+                    SET hd_val TO computeHamming(transformedNums[a1], transformedNums[a2])
+                    IF hd_val > currMax THEN
+                        SET currMax TO hd_val
+                    END IF
+                END IF
+                SET a2 TO a2 + 1
+            END LOOP
+
+            resultList.APPEND(currMax)
+            SET a1 TO a1 + 1
+        UNTIL FALSE
+
+        RETURN resultList
+    END FUNCTION
+END CLASS

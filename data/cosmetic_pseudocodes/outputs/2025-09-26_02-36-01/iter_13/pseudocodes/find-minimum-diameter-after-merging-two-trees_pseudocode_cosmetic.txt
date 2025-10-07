@@ -1,0 +1,187 @@
+CLASS Solution
+  FUNCTION bfs(graph, start)
+    SET lengthGraph TO ((0 + 1) * LENGTH graph) - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 -1 + 1)
+    SET flags TO NEW ARRAY lengthGraph WITH false VALUES
+    FUNCTION enqueue(q, val)
+      APPEND val TO q
+    END FUNCTION
+    FUNCTION dequeue(q)
+      SET val TO q[0]
+      REMOVE q[0]
+      RETURN val
+    END FUNCTION
+    SET q TO []
+    CALL enqueue(q,( start , 0 ))
+    SET flags[start] TO true
+    SET currentFarthest TO start
+    SET greatestDistance TO 0
+    REPEAT
+      IF LENGTH q = 0 THEN
+        EXIT
+      END IF
+      SET currentPair TO dequeue(q)
+      SET currentNode TO currentPair[0]
+      SET currentDistance TO currentPair[1]
+      IF currentDistance > greatestDistance THEN
+        SET greatestDistance TO currentDistance
+        SET currentFarthest TO currentNode
+      END IF
+      FUNCTION isUnvisited(index)
+        RETURN NOT flags[index]
+      END FUNCTION
+      FUNCTION markVisited(index)
+        SET flags[index] TO true
+      END FUNCTION
+      FUNCTION enqueueNeighbor(nbr, dist)
+        CALL enqueue(q,( nbr , dist + 1 ))
+      END FUNCTION
+      FUNCTION processNeighbors(lst, idx)
+        IF idx >= LENGTH lst THEN
+          RETURN
+        END IF
+        SET neighbor TO lst[idx]
+        IF isUnvisited(neighbor) THEN
+          markVisited(neighbor)
+          enqueueNeighbor(neighbor, currentDistance)
+        END IF
+        CALL processNeighbors(lst, idx + 1)
+      END FUNCTION
+      CALL processNeighbors(graph[currentNode], 0)
+    UNTIL false
+    RETURN ( currentFarthest , greatestDistance )
+  END FUNCTION
+
+  FUNCTION tree_diameter(graph)
+    SET startNode TO 0
+    SET firstResult TO bfs(graph, startNode)
+    SET farNode TO firstResult[0]
+    SET unused1 TO firstResult[1]
+    SET secondResult TO bfs(graph, farNode)
+    SET unused2 TO secondResult[0]
+    SET treeDiameter TO secondResult[1]
+    RETURN treeDiameter
+  END FUNCTION
+
+  FUNCTION maximum_path_length_from_node(graph, node)
+    SET lengthGraph TO LENGTH graph
+    FUNCTION initFlags(sz)
+      IF sz = 0 THEN
+        RETURN []
+      ELSE
+        RETURN [false] + initFlags(sz - 1)
+      END IF
+    END FUNCTION
+    SET flags TO initFlags(lengthGraph)
+    FUNCTION enqueue(q, val)
+      RETURN q + [val]
+    END FUNCTION
+    FUNCTION dequeue(q)
+      SET val TO q[0]
+      SET restQ TO SLICE q FROM 1 TO LENGTH q
+      RETURN (val, restQ)
+    END FUNCTION
+    SET queue TO enqueue([], (node, 0))
+    SET flags[node] TO true
+    SET maxDist TO 0
+    FUNCTION processQueue(q, flagsArray, maxD)
+      IF LENGTH q = 0 THEN
+        RETURN maxD
+      ELSE
+        SET front TO q[0]
+        SET restQ TO SLICE q FROM 1 TO LENGTH q
+        SET currentNode TO front[0]
+        SET currentDist TO front[1]
+        IF currentDist > maxD THEN
+          SET maxD TO currentDist
+        END IF
+        FUNCTION processNeighborsRec(ngbrs, idx, qAcc, flagsAcc)
+          IF idx >= LENGTH ngbrs THEN
+            RETURN (qAcc, flagsAcc)
+          ELSE
+            SET ng TO ngbrs[idx]
+            IF NOT flagsAcc[ng] THEN
+              SET newFlags TO flagsAcc
+              SET newFlags[ng] TO true
+              SET newQ TO qAcc + [(ng, currentDist + 1)]
+              RETURN processNeighborsRec(ngbrs, idx + 1, newQ, newFlags)
+            ELSE
+              RETURN processNeighborsRec(ngbrs, idx + 1, qAcc, flagsAcc)
+            END IF
+          END IF
+        END FUNCTION
+        SET processed TO processNeighborsRec(graph[currentNode], 0, restQ, flagsArray)
+        RETURN processQueue(processed[0], processed[1], maxD)
+      END IF
+    END FUNCTION
+    RETURN processQueue(queue, flags, maxDist)
+  END FUNCTION
+
+  FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+    SET len1 TO LENGTH edges1 + 1
+    SET len2 TO LENGTH edges2 + 1
+    FUNCTION createEmptyLists(size, acc)
+      IF size = 0 THEN
+        RETURN acc
+      ELSE
+        RETURN createEmptyLists(size - 1, acc + [[]])
+      END IF
+    END FUNCTION
+    SET graphOne TO createEmptyLists(len1, [])
+    SET graphTwo TO createEmptyLists(len2, [])
+    FUNCTION buildGraph(edges, graph, idx)
+      IF idx >= LENGTH edges THEN
+        RETURN graph
+      ELSE
+        SET edge TO edges[idx]
+        SET u TO edge[0]
+        SET v TO edge[1]
+        SET newGraph TO graph
+        CALL (newGraph[u].APPEND(v))
+        CALL (newGraph[v].APPEND(u))
+        RETURN buildGraph(edges, newGraph, idx + 1)
+      END IF
+    END FUNCTION
+    SET graphOne TO buildGraph(edges1, graphOne, 0)
+    SET graphTwo TO buildGraph(edges2, graphTwo, 0)
+    SET diam1 TO tree_diameter(graphOne)
+    SET diam2 TO tree_diameter(graphTwo)
+    FUNCTION gatherLongestPaths(graph, size, acc, idx)
+      IF idx >= size THEN
+        RETURN acc
+      ELSE
+        SET maxPath TO maximum_path_length_from_node(graph, idx)
+        RETURN gatherLongestPaths(graph, size, acc + [maxPath], idx + 1)
+      END IF
+    END FUNCTION
+    SET longestPaths1 TO gatherLongestPaths(graphOne, len1, [], 0)
+    SET longestPaths2 TO gatherLongestPaths(graphTwo, len2, [], 0)
+    SET infinityVal TO 1 / 0
+    SET minDiameterVal TO infinityVal
+    FUNCTION compareLoopU(u)
+      IF u >= len1 THEN
+        RETURN minDiameterVal
+      ELSE
+        FUNCTION compareLoopV(v, currentMin)
+          IF v >= len2 THEN
+            RETURN currentMin
+          ELSE
+            SET candidate TO longestPaths1[u] + longestPaths2[v] + 1
+            FUNCTION maxVal(a, b)
+              IF a > b THEN RETURN a ELSE RETURN b END IF
+            END FUNCTION
+            SET newDiameter TO maxVal(diam1, maxVal(diam2, candidate))
+            SET nextMin TO currentMin
+            IF newDiameter < currentMin THEN SET nextMin TO newDiameter END IF
+            RETURN compareLoopV(v + 1, nextMin)
+          END IF
+        END FUNCTION
+        SET bestForU TO compareLoopV(0, minDiameterVal)
+        SET newMinVal TO minDiameterVal
+        IF bestForU < minDiameterVal THEN SET newMinVal TO bestForU END IF
+        SET minDiameterVal TO newMinVal
+        RETURN compareLoopU(u + 1)
+      END IF
+    END FUNCTION
+    RETURN compareLoopU(0)
+  END FUNCTION
+END CLASS

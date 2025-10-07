@@ -1,0 +1,129 @@
+```pseudocode
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION is_peak(x INTEGER) RETURNS BOOLEAN
+            IF NOT (nums[x - 1] >= nums[x]) AND NOT (nums[x + 1] >= nums[x]) THEN
+                RETURN true
+            ELSE
+                RETURN false
+            END IF
+        END FUNCTION
+
+        SET hams TO []
+        SET k TO 1
+        WHILE k <= LENGTH(nums) - 2
+            IF is_peak(k) THEN
+                APPEND k TO hams
+            END IF
+            SET k TO k + 1
+        END WHILE
+
+        SET out TO []
+        FOR each y IN queries
+            IF (y[0] = 1) THEN
+                SET a TO y[1]
+                SET b TO y[2]
+
+                FUNCTION bisect_left(arr LIST OF INTEGER, val INTEGER) RETURNS INTEGER
+                    SET low TO 0
+                    SET high TO LENGTH(arr)
+                    WHILE low < high
+                        SET mid TO (low + high) / 2
+                        IF arr[mid] < val THEN
+                            SET low TO mid + 1
+                        ELSE
+                            SET high TO mid
+                        END IF
+                    END WHILE
+                    RETURN low
+                END FUNCTION
+
+                FUNCTION bisect_right(arr LIST OF INTEGER, val INTEGER) RETURNS INTEGER
+                    SET low TO 0
+                    SET high TO LENGTH(arr)
+                    WHILE low < high
+                        SET mid TO (low + high) / 2
+                        IF arr[mid] <= val THEN
+                            SET low TO mid + 1
+                        ELSE
+                            SET high TO mid
+                        END IF
+                    END WHILE
+                    RETURN low
+                END FUNCTION
+
+                SET pleft TO bisect_left(hams, a + 1)
+                SET pright TO bisect_right(hams, b) - 1
+                IF (pleft <= pright) THEN
+                    APPEND pright - pleft TO out
+                ELSE
+                    APPEND 0 TO out
+                END IF
+            ELSE
+                SET idx TO y[1]
+                SET valn TO y[2]
+                IF nums[idx] = valn THEN
+                    CONTINUE
+                END IF
+                SET nums[idx] TO valn
+
+                FUNCTION sorted_insert(arr LIST OF INTEGER, v INTEGER)
+                    SET lo TO 0
+                    SET hi TO LENGTH(arr)
+                    WHILE lo < hi
+                        SET md TO (lo + hi) / 2
+                        IF arr[md] < v THEN
+                            SET lo TO md + 1
+                        ELSE
+                            SET hi TO md
+                        END IF
+                    END WHILE
+                    INSERT v INTO arr AT POSITION lo
+                END FUNCTION
+
+                SET starti TO idx - 1
+                IF starti < 1 THEN
+                    SET starti TO 1
+                END IF
+                SET endi TO idx + 1
+                IF endi > LENGTH(nums) - 2 THEN
+                    SET endi TO LENGTH(nums) - 2
+                END IF
+
+                SET r TO starti
+                WHILE r <= endi
+                    SET peak_flag TO is_peak(r)
+                    SET found TO false
+                    SET left_bound TO 0
+                    SET right_bound TO LENGTH(hams) - 1
+                    WHILE left_bound <= right_bound
+                        SET mid_val TO (left_bound + right_bound) / 2
+                        IF hams[mid_val] = r THEN
+                            SET found TO true
+                            BREAK
+                        ELSEIF hams[mid_val] < r THEN
+                            SET left_bound TO mid_val + 1
+                        ELSE
+                            SET right_bound TO mid_val - 1
+                        END IF
+                    END WHILE
+
+                    IF peak_flag THEN
+                        IF NOT found THEN
+                            sorted_insert(hams, r)
+                        END IF
+                    ELSE
+                        IF found THEN
+                            REMOVE hams[left_bound] FROM hams
+                        END IF
+                    END IF
+                    SET r TO r + 1
+                END WHILE
+
+            END IF
+        END FOR
+
+        RETURN out
+    END FUNCTION
+END CLASS
+```

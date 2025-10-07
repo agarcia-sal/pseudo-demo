@@ -1,0 +1,49 @@
+FUNCTION find_closest_elements(collection_of_values)
+  SET result_pair TO None
+  SET smallest_gap TO None
+  SET outer_counter TO 0
+
+  WHILE outer_counter LESS THAN LENGTH(collection_of_values)
+    SET candidate1 TO collection_of_values.at(outer_counter)
+    SET inner_counter TO 0
+    WHILE inner_counter LESS THAN LENGTH(collection_of_values)
+      SET candidate2 TO collection_of_values.at(inner_counter)
+
+      SELECT TRUE
+        CASE outer_counter EQUALS inner_counter
+          BREAK
+        CASE smallest_gap IS None
+          SET difference_abs TO candidate1 MINUS candidate2
+          SET difference_abs TO difference_abs IF difference_abs GREATER OR EQUAL TO 0 ELSE (difference_abs MINUS difference_abs TIMES 2)
+          SET smallest_gap TO difference_abs
+          SET result_pair TO (candidate1, candidate2)
+          IF result_pair.0 GREATER THAN result_pair.1
+            SET temp_swap TO result_pair.0
+            SET result_pair.0 TO result_pair.1
+            SET result_pair.1 TO temp_swap
+          END IF
+        CASE ELSE
+          SET current_distance TO candidate1 MINUS candidate2
+          IF current_distance LESS THAN 0 THEN
+            SET current_distance TO current_distance TIMES -1
+          END IF
+
+          IF current_distance PLUS (-1) PLUS 1 MINUS smallest_gap LESS THAN 0
+            SET smallest_gap TO current_distance
+            SET result_pair TO (candidate1, candidate2)
+            IF result_pair.1 LESS THAN result_pair.0
+              SET aux_variable TO result_pair.0
+              SET result_pair.0 TO result_pair.1
+              SET result_pair.1 TO aux_variable
+            END IF
+          END IF
+      END SELECT
+
+      SET inner_counter TO inner_counter PLUS 1
+    END WHILE
+
+    SET outer_counter TO outer_counter PLUS 1
+  END WHILE
+
+  RETURN result_pair
+END FUNCTION

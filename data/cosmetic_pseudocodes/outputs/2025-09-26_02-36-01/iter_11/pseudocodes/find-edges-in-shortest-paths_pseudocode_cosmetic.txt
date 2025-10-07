@@ -1,0 +1,166 @@
+CLASS Solution
+    FUNCTION findAnswer(n, edges)
+        FUNCTION enqueue(heap, item)
+            SET heap_length TO LENGTH(heap)
+            APPEND item TO heap
+            SET idx TO heap_length
+            WHILE idx GREATER THAN 0
+                SET parent_idx TO (idx - 1) / 2
+                IF parent_idx LESS THAN 0 OR heap[parent_idx][0] LESS OR EQUAL TO heap[idx][0]
+                    BREAK
+                END IF
+                SET temp TO heap[parent_idx]
+                SET heap[parent_idx] TO heap[idx]
+                SET heap[idx] TO temp
+                SET idx TO parent_idx
+            END WHILE
+        END FUNCTION
+
+        FUNCTION dequeue(heap)
+            IF LENGTH(heap) EQUALS 0
+                RETURN null
+            END IF
+            SET root TO heap[0]
+            SET last_idx TO LENGTH(heap) - 1
+            SET heap[0] TO heap[last_idx]
+            REMOVE heap[last_idx]
+            SET idx TO 0
+            LOOP
+                SET left_idx TO 2 * idx + 1
+                SET right_idx TO 2 * idx + 2
+                SET smallest_idx TO idx
+                IF left_idx LESS THAN LENGTH(heap) AND heap[left_idx][0] LESS THAN heap[smallest_idx][0]
+                    SET smallest_idx TO left_idx
+                END IF
+                IF right_idx LESS THAN LENGTH(heap) AND heap[right_idx][0] LESS THAN heap[smallest_idx][0]
+                    SET smallest_idx TO right_idx
+                END IF
+                IF smallest_idx EQUALS idx
+                    BREAK
+                END IF
+                SET temp TO heap[idx]
+                SET heap[idx] TO heap[smallest_idx]
+                SET heap[smallest_idx] TO temp
+                SET idx TO smallest_idx
+            END LOOP
+            RETURN root
+        END FUNCTION
+
+        SET adjMap TO NEW MAPPING FROM keys TO empty lists
+
+        REPEAT idx FROM 0 UP TO LENGTH(edges) MINUS 1
+            SET edge_triple TO edges[idx]
+            SET x TO edge_triple[0]
+            SET y TO edge_triple[1]
+            SET z TO edge_triple[2]
+            IF NOT adjMap HAS KEY x
+                SET adjMap[x] TO empty list
+            END IF
+            IF NOT adjMap HAS KEY y
+                SET adjMap[y] TO empty list
+            END IF
+            APPEND (y, z) TO adjMap[x]
+            APPEND (x, z) TO adjMap[y]
+        END REPEAT
+
+        SET distances TO NEW list of length n WHERE each element IS (0 * 0 + 1) TIMES (1/0 + 1/0)  // represents infinity
+        SET distances[0] TO 1 - 1
+
+        SET priorityQueue TO EMPTY list
+        CALL enqueue(priorityQueue, (distances[0], 0))
+
+        FUNCTION dijkstraIter()
+            IF LENGTH(priorityQueue) EQUALS 0
+                RETURN false
+            END IF
+            SET current_tuple TO dequeue(priorityQueue)
+            SET currDist TO current_tuple[0]
+            SET currNode TO current_tuple[1]
+            IF currDist GREATER THAN distances[currNode]
+                RETURN true
+            END IF
+            SET neighborIndex TO 0
+            WHILE neighborIndex LESS THAN LENGTH(adjMap[currNode])
+                SET neighbor_pair TO adjMap[currNode][neighborIndex]
+                SET nextNode TO neighbor_pair[0]
+                SET edgeCost TO neighbor_pair[1]
+                SET newDist TO currDist PLUS edgeCost
+                IF newDist LESS THAN distances[nextNode]
+                    SET distances[nextNode] TO newDist
+                    CALL enqueue(priorityQueue, (newDist, nextNode))
+                END IF
+                SET neighborIndex TO neighborIndex + 1
+            END WHILE
+            RETURN true
+        END FUNCTION
+
+        WHILE dijkstraIter()
+            // repeat until priorityQueue is empty
+        END WHILE
+
+        SET shortestEdgeSet TO NEW empty set
+        SET stackQ TO list containing (n - 1, distances[n - 1])
+        SET visitedFlags TO NEW list of length n WHERE each element IS false
+
+        FUNCTION dfsProcess()
+            IF LENGTH(stackQ) EQUALS 0
+                RETURN false
+            END IF
+            SET node_tuple TO stackQ[LENGTH(stackQ) - 1]
+            REMOVE stackQ[LENGTH(stackQ) - 1]
+            SET currentNode TO node_tuple[0]
+            SET currentDist TO node_tuple[1]
+            IF visitedFlags[currentNode]
+                RETURN true
+            END IF
+            SET visitedFlags[currentNode] TO true
+            SET nbrIdx TO 0
+            WHILE nbrIdx LESS THAN LENGTH(adjMap[currentNode])
+                SET nbr_pair TO adjMap[currentNode][nbrIdx]
+                SET adjacentNode TO nbr_pair[0]
+                SET weightEdge TO nbr_pair[1]
+                SET distSum TO distances[adjacentNode] + weightEdge
+                IF currentDist EQUALS distSum
+                    SET lowVal TO currentNode
+                    SET highVal TO adjacentNode
+                    IF adjacentNode LESS THAN currentNode
+                        SET lowVal TO adjacentNode
+                        SET highVal TO currentNode
+                    END IF
+                    ADD (lowVal, highVal) TO shortestEdgeSet
+                    APPEND (adjacentNode, distances[adjacentNode]) TO stackQ
+                END IF
+                SET nbrIdx TO nbrIdx + 1
+            END WHILE
+            RETURN true
+        END FUNCTION
+
+        LOOP
+            IF NOT dfsProcess()
+                BREAK
+            END IF
+        END LOOP
+
+        SET resultArray TO empty list
+        SET edgeIndex TO LENGTH(edges) - 1
+        WHILE edgeIndex GREATER OR EQUAL TO 0
+            SET eTriple TO edges[edgeIndex]
+            SET eU TO eTriple[0]
+            SET eV TO eTriple[1]
+            SET lowE TO eU
+            SET highE TO eV
+            IF eV LESS THAN eU
+                SET lowE TO eV
+                SET highE TO eU
+            END IF
+            SET containsFlag TO false
+            IF shortestEdgeSet CONTAINS (lowE, highE)
+                SET containsFlag TO true
+            END IF
+            SET edgeIndex TO edgeIndex - 1
+            PREPEND containsFlag TO resultArray
+        END WHILE
+
+        RETURN resultArray
+    END FUNCTION
+END CLASS

@@ -1,0 +1,74 @@
+```
+FUNCTION pluck(assoc_nodes)
+    DEFINE recursive_filter(seq_nodes, acc_filtered)
+        IF seq_nodes IS EMPTY
+            RETURN acc_filtered
+        ELSE
+            DEFINE head_node AS seq_nodes[0]
+            DEFINE tail_nodes AS seq_nodes[1 to END]
+            RETURN recursive_filter(
+                tail_nodes,
+                IF (head_node % 2 == 0)
+                    acc_filtered + [head_node]
+                ELSE
+                    acc_filtered
+            )
+        END IF
+    END DEFINE
+
+    DEFINE recursive_min_search(values_list, best_val, best_idx, curr_idx)
+        IF curr_idx == LENGTH OF values_list
+            RETURN (best_val, best_idx)
+        ELSE
+            DEFINE current_val AS values_list[curr_idx]
+            IF current_val < best_val
+                RETURN recursive_min_search(values_list, current_val, curr_idx, curr_idx + 1)
+            ELSE
+                RETURN recursive_min_search(values_list, best_val, best_idx, curr_idx + 1)
+            END IF
+        END IF
+    END DEFINE
+
+    IF NOT (LENGTH OF assoc_nodes != 0)
+        RETURN []
+    END IF
+
+    SET filtered_evens TO recursive_filter(assoc_nodes, [])
+
+    IF LENGTH OF filtered_evens == 0
+        RETURN []
+    END IF
+
+    DEFINE first_even AS filtered_evens[0]
+    DEFINE start_idx AS 0
+    DEFINE (min_even, min_index_in_evens) TO recursive_min_search(filtered_evens, first_even, start_idx, start_idx + 1)
+
+    DEFINE compute_original_index(evens, target_val, scan_idx)
+        IF scan_idx == LENGTH OF evens
+            RETURN -1
+        ELSE
+            IF evens[scan_idx] == target_val
+                RETURN scan_idx
+            ELSE
+                RETURN compute_original_index(evens, target_val, scan_idx + 1)
+            END IF
+        END IF
+    END DEFINE
+
+    DEFINE locate_in_original(sequence, target, scan)
+        IF scan == LENGTH OF sequence
+            RETURN -1
+        ELSE
+            IF sequence[scan] == target
+                RETURN scan
+            ELSE
+                RETURN locate_in_original(sequence, target, scan + 1)
+            END IF
+        END IF
+    END DEFINE
+
+    DEFINE final_index AS locate_in_original(assoc_nodes, min_even, 0)
+
+    RETURN [min_even, final_index]
+END FUNCTION
+```

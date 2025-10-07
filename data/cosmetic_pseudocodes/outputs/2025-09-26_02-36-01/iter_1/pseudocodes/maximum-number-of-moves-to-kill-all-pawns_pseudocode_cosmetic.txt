@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+        DEFINE knight_jumps AS [(2,1),(1,2),(-1,2),(-2,1),(-2,-1),(-1,-2),(1,-2),(2,-1)]
+        
+        DECLARE pawns_set AS empty set
+        FOR pos IN positions DO
+            ADD (pos[0], pos[1]) TO pawns_set
+        END FOR
+        
+        SET total_pawns TO SIZE of pawns_set
+        
+        FUNCTION dp(x, y, bits_mask, alice_turn)
+            IF bits_mask == 0 THEN
+                RETURN 0
+            END IF
+            
+            IF alice_turn THEN
+                SET best_score TO 0
+            ELSE
+                SET best_score TO +∞
+            END IF
+            
+            FOR i FROM 0 TO total_pawns - 1 DO
+                IF bits_mask BITWISE-AND (1 << i) != 0 THEN
+                    SET target_x TO positions[i][0]
+                    SET target_y TO positions[i][1]
+                    
+                    INITIALIZE bfs_queue WITH [(x, y, 0)]
+                    INITIALIZE seen_positions AS empty set
+                    ADD (x, y) TO seen_positions
+                    SET reached TO False
+                    
+                    WHILE LENGTH OF bfs_queue > 0 DO
+                        POP front element INTO (curr_x, curr_y, dist)
+                        IF curr_x == target_x AND curr_y == target_y THEN
+                            SET reached TO True
+                            BREAK
+                        END IF
+                        
+                        FOR (dx, dy) IN knight_jumps DO
+                            SET next_x TO curr_x + dx
+                            SET next_y TO curr_y + dy
+                            
+                            IF next_x >= 0 AND next_x < 50 AND next_y >= 0 AND next_y < 50 AND (next_x, next_y) NOT IN seen_positions THEN
+                                ADD (next_x, next_y) TO seen_positions
+                                APPEND (next_x, next_y, dist + 1) TO bfs_queue
+                            END IF
+                        END FOR
+                    END WHILE
+                    
+                    IF reached THEN
+                        SET new_mask TO bits_mask XOR (1 << i)
+                        SET candidate TO dist + dp(target_x, target_y, new_mask, NOT alice_turn)
+                        
+                        IF alice_turn AND candidate > best_score THEN
+                            best_score = candidate
+                        ELSE IF NOT alice_turn AND candidate < best_score THEN
+                            best_score = candidate
+                        END IF
+                    END IF
+                END IF
+            END FOR
+            
+            RETURN best_score
+        END FUNCTION
+        
+        SET initial_mask TO (1 << total_pawns) - 1
+        RETURN dp(kx, ky, initial_mask, TRUE)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,295 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+        FUNCTION pop_left_custom(dqueue)
+            SET idx_internal TO 0
+            SET element_internal TO dqueue[idx_internal]
+            REMOVE element at idx_internal FROM dqueue
+            RETURN element_internal
+        END FUNCTION
+
+        SET length_graph TO 0
+        SET idx_counter TO 0
+        WHILE TRUE
+            IF graph[idx_counter] IS NOT DEFINED
+                BREAK
+            END IF
+            SET length_graph TO length_graph + 1
+            SET idx_counter TO idx_counter + 1
+        END WHILE
+
+        SET visited_flag_list TO []
+        SET count_padding TO 0
+        REPEAT
+            IF count_padding >= length_graph
+                BREAK
+            END IF
+            APPEND false TO visited_flag_list
+            SET count_padding TO count_padding + 1
+        UNTIL FALSE
+
+        SET data_queue TO []
+        APPEND (start, 0) TO data_queue
+        SET ptr_visited TO start
+        SET visited_flag_list[ptr_visited] TO true
+
+        SET farthest_marker TO start
+        SET max_dist_val TO 0
+
+        WHILE TRUE
+            SET len_queue_val TO 0
+            SET idx_j TO 0
+            WHILE TRUE
+                IF data_queue[idx_j] IS NOT DEFINED
+                    BREAK
+                END IF
+                SET len_queue_val TO len_queue_val + 1
+                SET idx_j TO idx_j + 1
+            END WHILE
+            IF len_queue_val <= 0
+                BREAK
+            END IF
+
+            SET pair_val TO pop_left_custom(data_queue)
+            SET cur_node TO pair_val[0]
+            SET cur_dist TO pair_val[1]
+
+            IF NOT (cur_dist <= max_dist_val)
+                SET max_dist_val TO cur_dist
+                SET farthest_marker TO cur_node
+            END IF
+
+            SET idx_k TO 0
+            WHILE TRUE
+                IF graph[cur_node][idx_k] IS NOT DEFINED
+                    BREAK
+                END IF
+                SET adj_node TO graph[cur_node][idx_k]
+                IF NOT visited_flag_list[adj_node]
+                    SET visited_flag_list[adj_node] TO true
+                    SET new_dist TO cur_dist + 1
+                    APPEND (adj_node, new_dist) TO data_queue
+                END IF
+                SET idx_k TO idx_k + 1
+            END WHILE
+        END WHILE
+
+        RETURN (farthest_marker, max_dist_val)
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        SET starting_index TO 0
+        SET res_farthest, _temp_unused1 TO bfs(graph, starting_index)
+        SET _temp_unused2, res_diameter TO bfs(graph, res_farthest)
+        RETURN res_diameter
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+        FUNCTION pop_left_custom(dqueue)
+            SET internal_index TO 0
+            SET temp_element TO dqueue[internal_index]
+            REMOVE element at internal_index FROM dqueue
+            RETURN temp_element
+        END FUNCTION
+
+        SET graph_length_val TO 0
+        SET idx_p TO 0
+        WHILE TRUE
+            IF graph[idx_p] IS NOT DEFINED
+                BREAK
+            END IF
+            SET graph_length_val TO graph_length_val + 1
+            SET idx_p TO idx_p + 1
+        END WHILE
+
+        SET visit_list TO []
+        SET c_iter TO 0
+        REPEAT
+            IF c_iter >= graph_length_val
+                BREAK
+            END IF
+            APPEND false TO visit_list
+            SET c_iter TO c_iter + 1
+        UNTIL FALSE
+
+        SET deque_holder TO []
+        APPEND (node, 0) TO deque_holder
+        SET visit_list[node] TO true
+
+        SET max_dist FROM NODE TO 0
+
+        WHILE TRUE
+            SET q_len TO 0
+            SET idx_r TO 0
+            WHILE TRUE
+                IF deque_holder[idx_r] IS NOT DEFINED
+                    BREAK
+                END IF
+                SET q_len TO q_len + 1
+                SET idx_r TO idx_r + 1
+            END WHILE
+            IF q_len <= 0
+                BREAK
+            END IF
+
+            SET pair_now TO pop_left_custom(deque_holder)
+            SET cur_node_x TO pair_now[0]
+            SET dist_now TO pair_now[1]
+
+            IF NOT (dist_now <= max_dist FROM NODE)
+                SET max_dist FROM NODE TO dist_now
+            END IF
+
+            SET idx_s TO 0
+            WHILE TRUE
+                IF graph[cur_node_x][idx_s] IS NOT DEFINED
+                    BREAK
+                END IF
+                SET neighbor_val TO graph[cur_node_x][idx_s]
+                IF NOT visit_list[neighbor_val]
+                    SET visit_list[neighbor_val] TO true
+                    SET next_dist TO dist_now + 1
+                    APPEND (neighbor_val, next_dist) TO deque_holder
+                END IF
+                SET idx_s TO idx_s + 1
+            END WHILE
+        END WHILE
+
+        RETURN max_dist FROM NODE
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        SET len_edges1 TO 0
+        SET ind1 TO 0
+        WHILE TRUE
+            IF edges1[ind1] IS NOT DEFINED
+                BREAK
+            END IF
+            SET len_edges1 TO len_edges1 + 1
+            SET ind1 TO ind1 + 1
+        END WHILE
+
+        SET len_edges2 TO 0
+        SET ind2 TO 0
+        WHILE TRUE
+            IF edges2[ind2] IS NOT DEFINED
+                BREAK
+            END IF
+            SET len_edges2 TO len_edges2 + 1
+            SET ind2 TO ind2 + 1
+        END WHILE
+
+        SET size_n TO len_edges1 + 1
+        SET size_m TO len_edges2 + 1
+
+        SET graph_one TO []
+        SET count_one TO 0
+        REPEAT
+            IF count_one >= size_n
+                BREAK
+            END IF
+            APPEND [] TO graph_one
+            SET count_one TO count_one + 1
+        UNTIL FALSE
+
+        SET graph_two TO []
+        SET count_two TO 0
+        REPEAT
+            IF count_two >= size_m
+                BREAK
+            END IF
+            APPEND [] TO graph_two
+            SET count_two TO count_two + 1
+        UNTIL FALSE
+
+        SET idx_e1 TO 0
+        WHILE TRUE
+            IF edges1[idx_e1] IS NOT DEFINED
+                BREAK
+            END IF
+
+            SET u1 TO edges1[idx_e1][0]
+            SET v1 TO edges1[idx_e1][1]
+
+            APPEND v1 TO graph_one[u1]
+            APPEND u1 TO graph_one[v1]
+
+            SET idx_e1 TO idx_e1 + 1
+        END WHILE
+
+        SET idx_e2 TO 0
+        WHILE TRUE
+            IF edges2[idx_e2] IS NOT DEFINED
+                BREAK
+            END IF
+
+            SET u2 TO edges2[idx_e2][0]
+            SET v2 TO edges2[idx_e2][1]
+
+            APPEND v2 TO graph_two[u2]
+            APPEND u2 TO graph_two[v2]
+
+            SET idx_e2 TO idx_e2 + 1
+        END WHILE
+
+        SET diam_1 TO tree_diameter(graph_one)
+        SET diam_2 TO tree_diameter(graph_two)
+
+        SET longest_paths_1 TO []
+        SET idx_i TO 0
+        WHILE TRUE
+            IF idx_i >= size_n
+                BREAK
+            END IF
+            SET val_max TO maximum_path_length_from_node(graph_one, idx_i)
+            APPEND val_max TO longest_paths_1
+            SET idx_i TO idx_i + 1
+        END WHILE
+
+        SET longest_paths_2 TO []
+        SET i_j TO 0
+        WHILE TRUE
+            IF i_j >= size_m
+                BREAK
+            END IF
+            SET val_max_2 TO maximum_path_length_from_node(graph_two, i_j)
+            APPEND val_max_2 TO longest_paths_2
+            SET i_j TO i_j + 1
+        END WHILE
+
+        SET result_min TO 1 / 0.0  // Positive infinity representation
+
+        SET idx_u TO 0
+        WHILE TRUE
+            IF idx_u >= size_n
+                BREAK
+            END IF
+
+            SET idx_v TO 0
+            WHILE TRUE
+                IF idx_v >= size_m
+                    BREAK
+                END IF
+
+                SET curr_new_diam TO diam_1
+                IF diam_2 > curr_new_diam
+                    SET curr_new_diam TO diam_2
+                END IF
+
+                SET sum_paths TO longest_paths_1[idx_u] + longest_paths_2[idx_v] + 1
+                IF sum_paths > curr_new_diam
+                    SET curr_new_diam TO sum_paths
+                END IF
+
+                IF curr_new_diam < result_min
+                    SET result_min TO curr_new_diam
+                END IF
+
+                SET idx_v TO idx_v + 1
+            END WHILE
+
+            SET idx_u TO idx_u + 1
+        END WHILE
+
+        RETURN result_min
+    END FUNCTION
+END CLASS

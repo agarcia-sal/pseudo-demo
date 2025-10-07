@@ -1,0 +1,78 @@
+CLASS Solution
+	Function minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer
+		Function nxt(x x AS integer y y AS integer) RETURNS integer
+			declare temp_res AS integer
+			declare one_val AS integer
+			set one_val TO (1)
+			set temp_res TO (x BITWISE_AND (one_val XOR y))
+			if temp_res EQUALS one_val then
+				return (x PLUS one_val)
+			else
+				return (x PLUS (one_val PLUS one_val))
+			end if
+		End Function
+
+		declare len1 AS integer
+		declare len2 AS integer
+		declare matrix AS list OF list OF integers
+		declare outer_i AS integer
+		declare outer_j AS integer
+		declare val_x AS integer
+		declare val_y AS integer
+
+		set len1 TO LENGTH(nums1)
+		set len2 TO LENGTH(nums2)
+		set matrix TO NEW list OF list OF integers
+		declare row_counter AS integer
+		declare col_counter AS integer
+		set row_counter TO 0
+		while row_counter LESS_THAN_OR_EQUAL len1
+			set col_counter TO 0
+			declare new_row AS list OF integers
+			while col_counter LESS_THAN_OR_EQUAL len2
+				PUSH(new_row, 0)
+				set col_counter TO col_counter PLUS 1
+			end while
+			PUSH(matrix, new_row)
+			set row_counter TO row_counter PLUS 1
+		end while
+
+		set outer_i TO 1
+		while outer_i LESS_THAN_OR_EQUAL len1
+			set val_x TO nums1[outer_i]
+			set matrix[outer_i][0] TO nxt(matrix[outer_i MINUS 1][0], val_x)
+			set outer_i TO outer_i PLUS 1
+		end while
+
+		set outer_j TO 1
+		while outer_j LESS_THAN_OR_EQUAL len2
+			set val_y TO nums2[outer_j]
+			set matrix[0][outer_j] TO nxt(matrix[0][outer_j MINUS 1], val_y)
+			set outer_j TO outer_j PLUS 1
+		end while
+
+		outer_i = 1
+		while outer_i LESS_THAN_OR_EQUAL len1
+			set val_x TO nums1[outer_i]
+			outer_j = 1
+			while outer_j LESS_THAN_OR_EQUAL len2
+				set val_y TO nums2[outer_j]
+				declare candidateOne AS integer
+				declare candidateTwo AS integer
+				set candidateOne TO nxt(matrix[outer_i MINUS 1][outer_j], val_x)
+				set candidateTwo TO nxt(matrix[outer_i][outer_j MINUS 1], val_y)
+				if candidateOne LESS_THAN candidateTwo then
+					set matrix[outer_i][outer_j] TO candidateOne
+				else
+					set matrix[outer_i][outer_j] TO candidateTwo
+				end if
+				set outer_j TO outer_j PLUS 1
+			end while
+			set outer_i TO outer_i PLUS 1
+		end while
+
+		declare result_val AS integer
+		set result_val TO matrix[len1][len2]
+		return result_val
+	End Function
+END CLASS

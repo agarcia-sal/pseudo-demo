@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION maximumLength(nums k)
+        SET lengthNums TO 0
+        PROCEDURE computeLength()
+            SET indexCounter TO 0
+            WHILE indexCounter LESS THAN LENGTH OF nums
+                INCREMENT indexCounter BY 1
+            END WHILE
+            SET lengthNums TO indexCounter
+        END PROCEDURE
+
+        CALL computeLength()
+
+        PROCEDURE createMatrix(rows cols)
+            SET resultMatrix TO empty list
+            SET rowIndex TO 0
+            WHILE rowIndex LESS THAN rows
+                SET colIndex TO 0
+                SET newRow TO empty list
+                WHILE colIndex LESS THAN cols
+                    ADD 1 TO newRow
+                    INCREMENT colIndex BY 1
+                END WHILE
+                ADD newRow TO resultMatrix
+                INCREMENT rowIndex BY 1
+            END WHILE
+            RETURN resultMatrix
+        END PROCEDURE
+
+        SET matrixF TO createMatrix(lengthNums (k + 1))
+        SET maxAnswer TO 0
+
+        PROCEDURE innerLoop(xVal hVal iVal)
+            SET jVar TO 0
+            WHILE jVar LESS THAN iVal
+                SET yVal TO nums[jVar]
+                SET currentVal TO matrixF[iVal][hVal]
+                IF xVal EQUALS yVal THEN
+                    SET candidateVal TO matrixF[jVar][hVal] + 1
+                    IF candidateVal GREATER THAN currentVal THEN
+                        SET matrixF[iVal][hVal] TO candidateVal
+                    END IF
+                ELSE IF hVal GREATER THAN 0 THEN
+                    SET candidateVal TO matrixF[jVar][hVal - 1] + 1
+                    IF candidateVal GREATER THAN currentVal THEN
+                        SET matrixF[iVal][hVal] TO candidateVal
+                    END IF
+                END IF
+                INCREMENT jVar BY 1
+            END WHILE
+        END PROCEDURE
+
+        SET iTemp TO 0
+        WHILE iTemp LESS THAN lengthNums
+            SET elemX TO nums[iTemp]
+            SET hTemp TO 0
+
+            PROCEDURE hLoop()
+                IF hTemp LESS THAN (k + 1) THEN
+                    innerLoop(elemX hTemp iTemp)
+                    SET hTemp TO hTemp + 1
+                    CALL hLoop()
+                END IF
+            END PROCEDURE
+
+            CALL hLoop()
+
+            IF matrixF[iTemp][k] GREATER THAN maxAnswer THEN
+                SET maxAnswer TO matrixF[iTemp][k]
+            END IF
+            SET iTemp TO iTemp + 1
+        END WHILE
+
+        RETURN maxAnswer
+    END FUNCTION
+END CLASS

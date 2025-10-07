@@ -1,0 +1,37 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+        SET retVal TO 0
+        SET blank TO 0
+        IF (NOT (grid IS NOT NULL AND grid[0] IS NOT NULL))
+            RETURN blank
+        END IF
+        SET rowsCount TO LENGTH(grid)
+        SET colsCount TO LENGTH(grid[0])
+        SET sums TO A LIST OF SIZE rowsCount WHERE EACH ELEMENT IS A LIST OF SIZE colsCount FILLED WITH 0
+        SET outerIndex TO 0
+        WHILE outerIndex < rowsCount
+            SET innerIndex TO 0
+            WHILE innerIndex < colsCount
+                IF outerIndex == 0 THEN
+                    IF innerIndex == 0 THEN
+                        sums[outerIndex][innerIndex] = grid[outerIndex][innerIndex]
+                    ELSE
+                        sums[outerIndex][innerIndex] = sums[outerIndex][innerIndex - 1] + grid[outerIndex][innerIndex]
+                    END IF
+                ELSE
+                    IF innerIndex == 0 THEN
+                        sums[outerIndex][innerIndex] = sums[outerIndex - 1][innerIndex] + grid[outerIndex][innerIndex]
+                    ELSE
+                        sums[outerIndex][innerIndex] = sums[outerIndex][innerIndex - 1] + sums[outerIndex - 1][innerIndex] - sums[outerIndex - 1][innerIndex - 1] + grid[outerIndex][innerIndex]
+                    END IF
+                END IF
+                IF sums[outerIndex][innerIndex] <= k THEN
+                    retVal = retVal + 1
+                END IF
+                innerIndex = innerIndex + 1
+            END WHILE
+            outerIndex = outerIndex + 1
+        END WHILE
+        RETURN retVal
+    END FUNCTION
+END CLASS

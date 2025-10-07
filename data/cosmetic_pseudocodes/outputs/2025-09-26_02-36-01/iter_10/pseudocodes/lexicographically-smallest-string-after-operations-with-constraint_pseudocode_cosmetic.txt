@@ -1,0 +1,45 @@
+CLASS Solution  
+	FUNCTION getSmallestString(s STRING, k INTEGER) RETURNS STRING  
+		FUNCTION cyclic_distance(c1 CHARACTER, c2 CHARACTER) RETURNS INTEGER  
+			VAR x INTEGER = ABS(CHAR_CODE(c1) - CHAR_CODE(c2))  
+			RETURN MIN(x, 26 - x)  
+		END FUNCTION  
+
+		VAR arr LIST OF CHARACTER = []  
+		FOR index FROM 0 TO LENGTH(s) - 1  
+			APPEND s[index] TO arr  
+		END FOR  
+
+		VAR pos INTEGER = 0  
+		VAR len INTEGER = LENGTH(s)  
+
+		WHILE TRUE  
+			IF NOT (k > 0 AND pos < len) THEN BREAK END IF  
+
+			IF arr[pos] = 'a' THEN  
+				pos = pos + 1  
+				CONTINUE  
+			END IF  
+
+			VAR dist INTEGER = cyclic_distance(arr[pos], 'a')  
+
+			IF dist <= k THEN  
+				arr[pos] = 'a'  
+				k = k - dist  
+			ELSE  
+				VAR new_char_code INTEGER = CHAR_CODE(arr[pos]) - k  
+				arr[pos] = CHAR_FROM_CODE(new_char_code)  
+				k = 0  
+			END IF  
+
+			pos = pos + 1  
+		END WHILE  
+
+		VAR ret STRING = ""  
+		FOR j FROM 0 TO len - 1  
+			ret = ret + arr[j]  
+		END FOR  
+
+		RETURN ret  
+	END FUNCTION  
+END CLASS

@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+      SET length_val TO LENGTH(s)
+      SET zero_prefix TO ARRAY(length_val + 1, 0)
+      SET one_prefix TO ARRAY(length_val + 1, 0)
+
+      SET idx TO 0
+      WHILE idx < length_val
+        SET zero_prefix[idx + 1] TO zero_prefix[idx] + (IF s[idx] == '0' THEN 1 ELSE 0)
+        SET one_prefix[idx + 1] TO one_prefix[idx] + (IF s[idx] == '1' THEN 1 ELSE 0)
+        SET idx TO idx + 1
+      END WHILE
+
+      FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER
+        SET total TO 0
+        SET pos TO l
+        WHILE pos <= r
+          SET low TO pos
+          SET high TO r + 1
+          WHILE low < high
+            SET middle TO FLOOR((low + high) / 2)
+            SET zero_diff TO zero_prefix[middle + 1] - zero_prefix[pos]
+            SET one_diff TO one_prefix[middle + 1] - one_prefix[pos]
+            IF zero_diff <= k OR one_diff <= k THEN
+              SET low TO middle + 1
+            ELSE
+              SET high TO middle
+            END IF
+          END WHILE
+          SET last_valid TO low - 1
+          IF last_valid >= pos THEN
+            SET total TO total + (last_valid - pos + 1)
+          END IF
+          SET pos TO pos + 1
+        END WHILE
+        RETURN total
+      END FUNCTION
+
+      SET output_list TO EMPTY LIST
+      SET i_query TO 0
+      WHILE i_query < LENGTH(queries)
+        SET query_pair TO queries[i_query]
+        SET left_bound TO query_pair[0]
+        SET right_bound TO query_pair[1]
+        APPEND count_valid_substrings(left_bound, right_bound) TO output_list
+        SET i_query TO i_query + 1
+      END WHILE
+
+      RETURN output_list
+    END FUNCTION
+END CLASS

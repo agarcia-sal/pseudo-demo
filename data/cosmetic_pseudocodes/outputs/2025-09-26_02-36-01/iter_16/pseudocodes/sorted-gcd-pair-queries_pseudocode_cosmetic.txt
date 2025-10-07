@@ -1,0 +1,56 @@
+CLASS Solution
+	func gcdValues(nums, queries)
+		VAR alpha <- 0
+		FOR k FROM 1 TO LENGTH nums DO
+			IF nums[k] > alpha THEN
+				alpha <- nums[k]
+			FI
+		OD
+
+		VAR omega <- new map defaulting to zero
+		FOR idx FROM 1 TO LENGTH nums DO
+			omega[nums[idx]] <- omega[nums[idx]] + 1
+		OD
+
+		VAR sigma <- array_of_zeros(alpha + 1)
+		VAR tau <- array_of_zeros(alpha + 1)
+
+		VAR r1 <- alpha
+		WHILE r1 >= 1 DO
+			VAR c1 <- 0
+			VAR r2 <- r1
+			WHILE r2 <= alpha DO
+				c1 <- c1 + (omega[r2] if r2 in omega else 0)
+				tau[r1] <- tau[r1] - tau[r2]
+				r2 <- r2 + r1
+			OD
+			tau[r1] <- tau[r1] + (c1 * (c1 - 1) / 2)
+			r1 <- r1 - 1
+		OD
+
+		VAR acc <- array_of_zeros(alpha + 1)
+		VAR scnt <- 0
+		FOR i FROM 1 TO alpha DO
+			scnt <- scnt + tau[i]
+			acc[i] <- scnt
+		OD
+		
+		VAR output <- []
+		FOR elem IN queries DO
+			VAR left <- 1
+			VAR right <- alpha
+			VAR pos <- right + 1
+			WHILE left <= right DO
+				VAR mid <- (left + right) / 2
+				IF acc[mid] > elem THEN
+					pos <- mid
+					right <- mid - 1
+				ELSE
+					left <- mid + 1
+				FI
+			OD
+			output.APPEND(pos)
+		OD
+		RETURN output
+	END FUNC
+END CLASS

@@ -1,0 +1,137 @@
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        FUNCTION countElements(seq)
+            FUNCTION helperCount(idx, accum)
+                IF idx >= LENGTH(seq) THEN
+                    RETURN accum
+                ELSE
+                    LET key = seq[idx]
+                    LET updatedCount = 0
+                    IF key IN accum THEN
+                        updatedCount = accum[key] + 1
+                    ELSE
+                        updatedCount = 1
+                    END IF
+                    LET newAccum = accum
+                    SET newAccum[key] = updatedCount
+                    RETURN helperCount(idx + 1, newAccum)
+                END IF
+            END FUNCTION
+            RETURN helperCount(0, {})
+        END FUNCTION
+
+        LET temp_counter = countElements(s)
+        IF "?" IN temp_counter THEN
+            DELETE temp_counter["?"]
+        END IF
+
+        LET question_positions = []
+        LET position_index = 0
+        WHILE position_index < LENGTH(s) DO
+            IF s[position_index] = "?" THEN
+                APPEND question_positions, position_index
+            END IF
+            position_index = position_index + 1
+        END WHILE
+
+        LET chars_for_replacement = []
+
+        FUNCTION alphabetIterator(charCode, limit, acc)
+            IF charCode > limit THEN
+                RETURN acc
+            ELSE
+                RETURN alphabetIterator(charCode + 1, limit, acc + [CHAR(charCode)])
+            END IF
+        END FUNCTION
+        LET alphabet_list = alphabetIterator(97, 122, [])
+
+        FUNCTION processPositions(posList, accCount, accChars, idx)
+            IF idx >= LENGTH(posList) THEN
+                RETURN accChars
+            ELSE
+                LET minValue = 1 / 0
+                LET minChar = ""
+                FUNCTION findMinChar(alphList, currentMinVal, currentMinChar)
+                    IF LENGTH(alphList) = 0 THEN
+                        RETURN [currentMinVal, currentMinChar]
+                    ELSE
+                        LET head = alphList[0]
+                        LET tail = alphList[1:]
+                        LET countVal = 0
+                        IF head IN accCount THEN
+                            countVal = accCount[head]
+                        ELSE
+                            countVal = 0
+                        END IF
+                        IF countVal < currentMinVal THEN
+                            RETURN findMinChar(tail, countVal, head)
+                        ELSE
+                            RETURN findMinChar(tail, currentMinVal, currentMinChar)
+                        END IF
+                    END IF
+                END FUNCTION
+
+                LET minSearchResult = findMinChar(alphabet_list, minValue, minChar)
+                LET minValueAssigned = minSearchResult[0]
+                LET minCharAssigned = minSearchResult[1]
+
+                LET newAccCount = accCount
+                IF minCharAssigned IN newAccCount THEN
+                    newAccCount[minCharAssigned] = newAccCount[minCharAssigned] + 1
+                ELSE
+                    newAccCount[minCharAssigned] = 1
+                END IF
+
+                RETURN processPositions(posList, newAccCount, accChars + [minCharAssigned], idx + 1)
+            END IF
+        END FUNCTION
+
+        LET replacedChars = processPositions(question_positions, temp_counter, [], 0)
+
+        FUNCTION bubbleSort(arr)
+            LET n = LENGTH(arr)
+            FUNCTION innerSort(i, j, array)
+                IF i >= n THEN
+                    RETURN array
+                ELSEIF j < n - i - 1 THEN
+                    IF array[j] > array[j + 1] THEN
+                        LET temp = array[j]
+                        SET array[j] = array[j + 1]
+                        SET array[j + 1] = temp
+                    END IF
+                    RETURN innerSort(i, j + 1, array)
+                ELSE
+                    RETURN innerSort(i + 1, 0, array)
+                END IF
+            END FUNCTION
+            RETURN innerSort(0, 0, arr)
+        END FUNCTION
+
+        LET sortedChars = bubbleSort(replacedChars)
+
+        LET mutable_s_list = []
+        LET buildIndex = 0
+        WHILE buildIndex < LENGTH(s) DO
+            APPEND mutable_s_list, s[buildIndex]
+            buildIndex = buildIndex + 1
+        END WHILE
+
+        LET replaceIndex = 0
+        WHILE replaceIndex < LENGTH(question_positions) DO
+            LET pos = question_positions[replaceIndex]
+            LET charToSet = sortedChars[replaceIndex]
+            SET mutable_s_list[pos] = charToSet
+            replaceIndex = replaceIndex + 1
+        END WHILE
+
+        FUNCTION joinCharacters(charList, idx, accumStr)
+            IF idx >= LENGTH(charList) THEN
+                RETURN accumStr
+            ELSE
+                RETURN joinCharacters(charList, idx + 1, accumStr + charList[idx])
+            END IF
+        END FUNCTION
+
+        RETURN joinCharacters(mutable_s_list, 0, "")
+    END FUNCTION
+END CLASS

@@ -1,0 +1,65 @@
+CLASS Solution
+	Function maximumScore(grid)
+		SET size TO LENGTH(grid)
+		DEFINE prefix AS 2D array WITH (size + 1) rows AND (size + 1) columns FILL WITH 0
+		DEFINE oldChosen AS array WITH (size + 1) elements FILL WITH 0
+		DEFINE oldIgnored AS array WITH (size + 1) elements FILL WITH 0
+
+		LET rowIndex BE 0
+		WHILE rowIndex < size
+			LET colIndex BE 0
+			WHILE colIndex < size
+				prefix[colIndex + 1][rowIndex] = prefix[colIndex][rowIndex] + grid[rowIndex][colIndex]
+				colIndex = colIndex + 1
+			END WHILE
+			rowIndex = rowIndex + 1
+		END WHILE
+
+		LET lineIndex BE 1
+		REPEAT
+			IF NOT (lineIndex < size) THEN BREAK
+
+			DEFINE newChosen AS array WITH (size + 1) elements FILL WITH 0
+			DEFINE newIgnored AS array WITH (size + 1) elements FILL WITH 0
+
+			LET currentPos BE 0
+			REPEAT 
+				IF currentPos > size THEN BREAK
+
+				LET previousPos BE 0
+				REPEAT
+					IF previousPos > size THEN BREAK
+
+					IF currentPos > previousPos THEN
+						LET segmentScore = prefix[currentPos][lineIndex - 1] - prefix[previousPos][lineIndex - 1]
+						newChosen[currentPos] = MAX(newChosen[currentPos], oldIgnored[previousPos] + segmentScore)
+						newIgnored[currentPos] = MAX(newIgnored[currentPos], oldIgnored[previousPos] + segmentScore)
+					ELSE
+						LET segmentScore = prefix[previousPos][lineIndex] - prefix[currentPos][lineIndex]
+						newChosen[currentPos] = MAX(newChosen[currentPos], oldChosen[previousPos] + segmentScore)
+						newIgnored[currentPos] = MAX(newIgnored[currentPos], oldChosen[previousPos])
+					END IF
+
+					previousPos = previousPos + 1
+				END REPEAT
+				currentPos = currentPos + 1
+			END REPEAT
+
+			oldChosen = newChosen
+			oldIgnored = newIgnored
+
+			lineIndex = lineIndex + 1
+		END REPEAT
+
+		LET maximumValue BE - (10 ^ 9) * 10     // sufficiently low initial value
+		LET indexVar BE 0
+		WHILE indexVar <= size
+			IF oldChosen[indexVar] > maximumValue THEN
+				maximumValue = oldChosen[indexVar]
+			END IF
+			indexVar = indexVar + 1
+		END WHILE
+
+		RETURN maximumValue
+	END Function
+END CLASS

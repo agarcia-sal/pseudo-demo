@@ -1,0 +1,96 @@
+CLASS Solution  
+    FUNCTION countPairs(nums)  
+        DEFINE procedure sortInPlace(arr)  
+            DEFINE FUNCTION partition(left, right, pivotIndex)  
+                SET pivotValue TO arr[pivotIndex]  
+                SWAP arr[pivotIndex], arr[right]  
+                SET storeIndex TO left  
+                FOR k FROM left TO right - 1  
+                    IF arr[k] < pivotValue THEN  
+                        SWAP arr[k], arr[storeIndex]  
+                        INCREMENT storeIndex BY 1  
+                    END IF  
+                END FOR  
+                SWAP arr[storeIndex], arr[right]  
+                RETURN storeIndex  
+            END FUNCTION  
+            DEFINE FUNCTION quicksortRecursive(low, high)  
+                IF low < high THEN  
+                    SET pivot TO partition(low, high, low)  
+                    CALL quicksortRecursive(low, pivot - 1)  
+                    CALL quicksortRecursive(pivot + 1, high)  
+                END IF  
+            END FUNCTION  
+            CALL quicksortRecursive(0, LENGTH(arr) - 1)  
+        END PROCEDURE  
+  
+        CALL sortInPlace(nums)  
+  
+        SET totalPairs TO 0  
+        DEFINE cntMap AS a map with default value 0  
+  
+        DEFINE FUNCTION strToIntConcat(chars)  
+            SET acc TO 0  
+            FOR idx FROM 0 TO LENGTH(chars) - 1  
+                SET acc TO acc * 10 + (TO_INTEGER(chars[idx]))  
+            END FOR  
+            RETURN acc  
+        END FUNCTION  
+  
+        DEFINE FUNCTION addSwappedVariations(lst, baseSet)  
+            DEFINE RECURSIVE FUNCTION recurseSwap(start, end)  
+                IF start >= end THEN RETURN END IF  
+  
+                FOR rightIdx FROM end TO start + 1 STEP -1  
+                    FOR leftIdx FROM start TO rightIdx - 1  
+                        SWAP lst[leftIdx], lst[rightIdx]  
+                        SET val TO strToIntConcat(lst)  
+                        baseSet[val] = true  
+                        CALL recurseSwap(leftIdx + 1, rightIdx - 1)  
+                        SWAP lst[leftIdx], lst[rightIdx]  
+                    END FOR  
+                END FOR  
+            END FUNCTION  
+  
+            CALL recurseSwap(0, LENGTH(lst) - 1)  
+        END FUNCTION  
+  
+        FOR each number IN nums  
+            DEFINE visitedSet AS a map from integer to boolean with default false  
+            SET visitedSet[number] = true  
+            SET strList TO LIST(STR(number))  
+            SET nChars TO LENGTH(strList)  
+  
+            FOR j FROM 0 TO nChars - 1  
+                FOR i FROM 0 TO j - 1  
+                    SWAP strList[i], strList[j]  
+                    SET val1 TO strToIntConcat(strList)  
+                    visitedSet[val1] = true  
+  
+                    FOR q FROM i + 1 TO nChars - 1  
+                        FOR p FROM i + 1 TO q - 1  
+                            SWAP strList[p], strList[q]  
+                            SET val2 TO strToIntConcat(strList)  
+                            visitedSet[val2] = true  
+                            SWAP strList[p], strList[q]  
+                        END FOR  
+                    END FOR  
+  
+                    SWAP strList[i], strList[j]  
+                END FOR  
+            END FOR  
+  
+            SET sumVals TO 0  
+            FOR key IN visitedSet KEYS  
+                IF cntMap[key] EXISTS THEN  
+                    SET sumVals TO sumVals + cntMap[key]  
+                END IF  
+            END FOR  
+  
+            SET totalPairs TO totalPairs + sumVals  
+            cntMap[number] = cntMap[number] + 1  
+        END FOR  
+  
+        RETURN totalPairs  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+      LET alpha = LENGTH(grid)
+      LET beta = LENGTH(grid[0])
+      LET omega = 0
+
+      FUNCTION check_all_elements(matrix)  
+          LET p = 0
+          WHILE p < LENGTH(matrix)
+            LET q = 0
+            WHILE q < LENGTH(matrix[p])
+              IF matrix[p][q] > k THEN
+                RETURN False
+              END IF
+              SET q = q + 1
+            END WHILE
+            SET p = p + 1
+          END WHILE
+          RETURN True
+      END FUNCTION
+
+      FUNCTION verify_non_increasing(matrix)
+          LET r = 0
+          REPEAT
+            IF r >= LENGTH(matrix) THEN
+              BREAK
+            END IF
+            LET s = 1
+            WHILE s < LENGTH(matrix[r])
+              IF NOT (matrix[r][s] <= matrix[r][s - 1]) THEN
+                RETURN False
+              END IF
+              SET s = s + 1
+            END WHILE
+            SET r = r + 1
+          UNTIL False
+          RETURN True
+      END FUNCTION
+
+      LET firstRow = 0
+      WHILE firstRow < alpha
+        LET firstCol = 0
+        WHILE firstCol < beta
+          LET lastRow = firstRow
+          WHILE lastRow < alpha
+            LET lastCol = firstCol
+            WHILE lastCol < beta
+              LET temp_matrix = []
+              LET idx_row = firstRow
+              WHILE idx_row <= lastRow
+                LET segment = []
+                LET idx_col = firstCol
+                WHILE idx_col <= lastCol
+                  APPEND grid[idx_row][idx_col] TO segment
+                  SET idx_col = idx_col + 1
+                END WHILE
+                APPEND segment TO temp_matrix
+                SET idx_row = idx_row + 1
+              END WHILE
+              
+              IF check_all_elements(temp_matrix) AND verify_non_increasing(temp_matrix) THEN
+                SET omega = omega + 1
+              END IF
+
+              SET lastCol = lastCol + 1
+            END WHILE
+            SET lastRow = lastRow + 1
+          END WHILE
+          SET firstCol = firstCol + 1
+        END WHILE
+        SET firstRow = firstRow + 1
+      END WHILE
+
+      RETURN omega
+    END FUNCTION
+END CLASS

@@ -1,0 +1,63 @@
+CLASS Solution  
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer, threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer  
+        LET rows BE LENGTH OF image  
+        LET cols BE LENGTH OF image[0]  
+        
+        LET sums BE A 2D LIST OF SIZE rows BY cols INITIALIZED TO 0  
+        LET occurrences BE A 2D LIST OF SIZE rows BY cols INITIALIZED TO 0  
+        
+        FUNCTION is_valid_region(x WITH TYPE integer, y WITH TYPE integer) WITH RETURN TYPE boolean  
+            LET directions BE LIST OF (dx, dy) PAIRS: [(-1,0), (1,0), (0,-1), (0,1)]  
+            FOR row FROM x TO x + 2  
+                FOR col FROM y TO y + 2  
+                    FOR EACH (dx, dy) IN directions  
+                        LET nx BE row + dx  
+                        LET ny BE col + dy  
+                        IF 0 <= nx < x + 3 AND 0 <= ny < y + 3 THEN  
+                            IF ABS(image[row][col] - image[nx][ny]) > threshold THEN  
+                                RETURN False  
+                            END IF  
+                        END IF  
+                    END FOR  
+                END FOR  
+            END FOR  
+            RETURN True  
+        END FUNCTION  
+        
+        FUNCTION calculate_average(x WITH TYPE integer, y WITH TYPE integer) WITH RETURN TYPE integer  
+            LET total_sum BE 0  
+            FOR row FROM x TO x + 2  
+                FOR col FROM y TO y + 2  
+                    total_sum = total_sum + image[row][col]  
+                END FOR  
+            END FOR  
+            RETURN total_sum // 9  
+        END FUNCTION  
+        
+        FOR i FROM 0 TO rows - 3  
+            FOR j FROM 0 TO cols - 3  
+                IF is_valid_region(i, j) THEN  
+                    LET avg_val BE calculate_average(i, j)  
+                    FOR r FROM i TO i + 2  
+                        FOR c FROM j TO j + 2  
+                            sums[r][c] = sums[r][c] + avg_val  
+                            occurrences[r][c] = occurrences[r][c] + 1  
+                        END FOR  
+                    END FOR  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        FOR i FROM 0 TO rows - 1  
+            FOR j FROM 0 TO cols - 1  
+                IF occurrences[i][j] > 0 THEN  
+                    sums[i][j] = sums[i][j] // occurrences[i][j]  
+                ELSE  
+                    sums[i][j] = image[i][j]  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        RETURN sums  
+    END FUNCTION  
+END CLASS

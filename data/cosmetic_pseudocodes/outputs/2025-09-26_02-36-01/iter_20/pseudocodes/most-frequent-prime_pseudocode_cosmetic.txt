@@ -1,0 +1,99 @@
+FUNCTION is_prime(parameter_alpha)  
+  DECLARE boolean_beta  
+  DECLARE integer_gamma, integer_delta, integer_omega  
+  ASSIGN boolean_beta <- false  
+  ASSIGN integer_gamma <- parameter_alpha  
+  ASSIGN integer_delta <- 1  
+  IF NOT (integer_gamma > integer_delta) THEN  
+    SET boolean_beta <- false  
+    RETURN boolean_beta  
+  END IF  
+  ASSIGN integer_delta <- 3  
+  IF (integer_gamma <= integer_delta) THEN  
+    RETURN true  
+  END IF  
+  ASSIGN integer_omega <- 2  
+  FUNCTION divisible(mod_dividend, mod_divisor)  
+    RETURN ((mod_dividend - ( (mod_dividend / mod_divisor) * mod_divisor )) = 0)  
+  END FUNCTION  
+  IF (divisible(integer_gamma, integer_omega) OR divisible(integer_gamma, integer_delta)) THEN  
+    RETURN false  
+  END IF  
+  ASSIGN integer_omega <- 5  
+  FUNCTION RepeatCheck(counter)  
+    IF (counter * counter) > integer_gamma THEN  
+      RETURN true  
+    ELSE   
+      IF divisible(integer_gamma, counter) OR divisible(integer_gamma, (counter + 2)) THEN  
+        RETURN false  
+      ELSE  
+        RETURN RepeatCheck(counter + 6)  
+      END IF  
+    END IF  
+  END FUNCTION  
+  RETURN RepeatCheck(integer_omega)  
+END FUNCTION  
+
+CLASS Solution  
+  FUNCTION mostFrequentPrime(parameter_mat)  
+    DECLARE integer_var_m, integer_var_n, integer_var_p, integer_ux, integer_uy, integer_val, integer_idx, integer_idy  
+    DECLARE map_prime_count  
+    DECLARE LIST_pair_directions  
+    FUNCTION CheckPrimeInDirection(origin_x, origin_y, delta_x, delta_y, num_so_far)  
+      DECLARE integer_next_x, integer_next_y, integer_new_num  
+      SET integer_next_x <- origin_x + delta_x  
+      SET integer_next_y <- origin_y + delta_y  
+      IF (integer_next_x >= 0) THEN  
+        IF (integer_next_x < integer_var_m) THEN  
+          IF (integer_next_y >= 0) THEN  
+            IF (integer_next_y < integer_var_n) THEN  
+              SET integer_new_num <- (num_so_far * 10) + parameter_mat[integer_next_x][integer_next_y]  
+              IF (integer_new_num > 10) THEN  
+                IF (is_prime(integer_new_num) = true) THEN  
+                  IF (integer_new_num IN map_prime_count) THEN  
+                    map_prime_count[integer_new_num] <- map_prime_count[integer_new_num] + 1  
+                  ELSE  
+                    map_prime_count[integer_new_num] <- 1  
+                  END IF  
+                END IF  
+              END IF  
+              CALL CheckPrimeInDirection(integer_next_x, integer_next_y, delta_x, delta_y, integer_new_num)  
+            END IF  
+          END IF  
+        END IF  
+      END IF  
+    END FUNCTION  
+    SET integer_var_m <- 0  
+    WHILE integer_var_m < LENGTH(parameter_mat) DO  
+      integer_var_m <- integer_var_m + 1  
+    END WHILE  
+    integer_var_m <- integer_var_m - 1  
+    SET integer_var_n <- 0  
+    WHILE integer_var_n < LENGTH(parameter_mat[0]) DO  
+      integer_var_n <- integer_var_n + 1  
+    END WHILE  
+    integer_var_n <- integer_var_n - 1  
+    SET LIST_pair_directions <- [( -1 , 0 ), ( -1 , 1 ), ( 0 , 1 ), ( 1 , 1 ), ( 1 , 0 ), ( 1 , -1 ), ( 0 , -1 ), ( -1 , -1 )]  
+    SET map_prime_count <- {}  
+    FOR integer_idx FROM 0 TO integer_var_m DO  
+      FOR integer_idy FROM 0 TO integer_var_n DO  
+        FOR integer_ux, integer_uy IN LIST_pair_directions DO  
+          CALL CheckPrimeInDirection(integer_idx, integer_idy, integer_ux, integer_uy, parameter_mat[integer_idx][integer_idy])  
+        END FOR  
+      END FOR  
+    END FOR  
+    IF (Size(map_prime_count) = 0) THEN  
+      RETURN -1  
+    END IF  
+    DECLARE integer_candidate_freq, integer_candidate_value, integer_result  
+    SET integer_candidate_freq <- -1  
+    SET integer_candidate_value <- -1  
+    FOR integer_val IN KEYS(map_prime_count) DO  
+      IF ((map_prime_count[integer_val] > integer_candidate_freq) OR ((map_prime_count[integer_val] = integer_candidate_freq) AND (integer_val > integer_candidate_value))) THEN  
+        SET integer_candidate_freq <- map_prime_count[integer_val]  
+        SET integer_candidate_value <- integer_val  
+      END IF  
+    END FOR  
+    RETURN integer_candidate_value  
+  END FUNCTION  
+END CLASS

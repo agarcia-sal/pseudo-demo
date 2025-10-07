@@ -1,0 +1,61 @@
+CLASS Solution
+  FUNCTION minimumAddedInteger(nums1 RETURNS List OF integer, nums2 RETURNS List OF integer) RETURNS integer
+        CALL sort ON nums1
+        CALL sort ON nums2
+
+        SET m TO LENGTH OF nums1
+        SET n TO LENGTH OF nums2
+
+        DEFINE FUNCTION check_adjusted(subset: List OF integer, adjustment: integer) RETURNS Boolean
+          SET idx_check TO 0
+          DEFINE FUNCTION loop_check(p: integer) RETURNS Boolean
+            IF p = n THEN
+              RETURN TRUE
+            ELSE IF subset[p] + adjustment ≠ nums2[p] THEN
+              RETURN FALSE
+            ELSE
+              RETURN loop_check(p + 1)
+            END IF
+          END FUNCTION
+          RETURN loop_check(idx_check)
+        END FUNCTION
+
+        DEFINE FUNCTION build_subset(skip_start: integer, skip_end: integer) RETURNS List OF integer
+          SET temp_list TO empty List
+          SET pos TO 0
+          WHILE pos < skip_start DO
+            APPEND nums1[pos] TO temp_list
+            SET pos TO pos + 1
+          END WHILE
+          SET pos TO skip_start + 1
+          WHILE pos < skip_end DO
+            APPEND nums1[pos] TO temp_list
+            SET pos TO pos + 1
+          END WHILE
+          SET pos TO skip_end + 1
+          WHILE pos < m DO
+            APPEND nums1[pos] TO temp_list
+            SET pos TO pos + 1
+          END WHILE
+          RETURN temp_list
+        END FUNCTION
+
+        SET outer_index TO 0
+        WHILE outer_index < m - 1 DO
+          SET inner_index TO outer_index + 1
+          WHILE inner_index < m DO
+            SET candidate_subset TO build_subset(outer_index, inner_index)
+            SET proposed_x TO nums2[0] + (0 - candidate_subset[0])
+
+            IF check_adjusted(candidate_subset, proposed_x) THEN
+              RETURN proposed_x
+            END IF
+
+            SET inner_index TO inner_index + 1
+          END WHILE
+          SET outer_index TO outer_index + 1
+        END WHILE
+
+        RETURN None
+  END FUNCTION
+END CLASS

@@ -1,0 +1,41 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+        LET total TO LENGTH(nums)
+        DECLARE dp AS 2D ARRAY FILLED WITH 0S OF SIZE total BY (k + 1)
+        DECLARE mp AS ARRAY OF DICTIONARIES OF INTS INITIALIZED WITH DEFAULT 0, LENGTH (k + 1)
+        DECLARE topVals AS 2D ARRAY FILLED WITH 0S OF SIZE (k + 1) BY 3
+        LET result TO 0
+        LET pos TO 0
+        WHILE pos < total
+            LET val TO nums[pos]
+            LET level TO 0
+            WHILE level <= k
+                dp[pos][level] = mp[level].get(val, 0)
+                IF level > 0 THEN
+                    IF topVals[level - 1][0] != nums[pos] THEN
+                        dp[pos][level] = MAX(dp[pos][level], topVals[level - 1][1])
+                    ELSE
+                        dp[pos][level] = dp[pos][level] MAX_OPERATOR topVals[level - 1][2]
+                    END IF
+                END IF
+                dp[pos][level] = dp[pos][level] + 1
+                mp[level][nums[pos]] = MAX(mp[level].get(nums[pos], 0), dp[pos][level])
+                IF topVals[level][0] != val THEN
+                    IF dp[pos][level] >= topVals[level][1] THEN
+                        topVals[level][2] = topVals[level][1]
+                        topVals[level][1] = dp[pos][level]
+                        topVals[level][0] = val
+                    ELSE
+                        topVals[level][2] = MAX(topVals[level][2], dp[pos][level])
+                    END IF
+                ELSE
+                    topVals[level][1] = MAX(topVals[level][1], dp[pos][level])
+                END IF
+                result = MAX(result, dp[pos][level])
+                INCREMENT level BY 1
+            END WHILE
+            INCREMENT pos BY 1
+        END WHILE
+        RETURN result
+    END FUNCTION
+END CLASS

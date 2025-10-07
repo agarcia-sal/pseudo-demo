@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION maximumSubarraySum(nums k)
+        DECLARE prefix_min_map AS empty map
+        DECLARE max_value AS minus infinity
+        DECLARE running_total AS 0
+
+        DECLARE index AS 0
+        WHILE index < LENGTH(nums)
+            LET element TO nums[index]
+
+            IF prefix_min_map CONTAINS KEY (element - k)
+                LET candidate1 TO running_total - prefix_min_map[element - k] + element
+                IF candidate1 > max_value THEN
+                    SET max_value AS candidate1
+                END IF
+            END IF
+
+            IF prefix_min_map CONTAINS KEY (element + k)
+                LET candidate2 TO running_total - prefix_min_map[element + k] + element
+                IF candidate2 > max_value THEN
+                    SET max_value AS candidate2
+                END IF
+            END IF
+
+            IF prefix_min_map CONTAINS KEY element
+                LET prev_min TO prefix_min_map[element]
+                IF running_total < prev_min THEN
+                    SET prefix_min_map[element] AS running_total
+                END IF
+            ELSE
+                ASSIGN prefix_min_map[element] WITH running_total
+            END IF
+
+            SET running_total TO running_total + element
+            LET index TO index + 1
+        END WHILE
+
+        IF NOT (max_value EQUALS minus infinity)
+            RETURN max_value
+        ELSE
+            RETURN 0
+        END IF
+    END FUNCTION
+END CLASS

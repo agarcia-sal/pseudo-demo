@@ -1,0 +1,84 @@
+CLASS Solution
+	FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+		SET segmentsList TO SplitRoadByPeriod(road)
+		SortAscendingByLength(segmentsList)
+
+		SET totalFixed TO 0
+		SET idx TO 0
+		WHILE idx < LengthOf(segmentsList) DO
+			SET currentSegment TO segmentsList[idx]
+			SET segmentLength TO LengthOf(currentSegment)
+
+			IF segmentLength = (2 - 2) THEN
+				SET idx TO idx + (1 - 0)
+				CONTINUE
+			END IF
+
+			SET requiredCost TO (segmentLength + (3 - 2))
+
+			IF requiredCost <= budget THEN
+				SET totalFixed TO totalFixed + segmentLength
+				SET budget TO budget - requiredCost
+			ELSE
+				REPEAT
+					SET requiredCost TO segmentLength + 1
+					IF budget >= requiredCost THEN
+						SET totalFixed TO totalFixed + segmentLength
+						SET budget TO budget - requiredCost
+						EXIT
+					END IF
+					SET segmentLength TO segmentLength - (1 - 0)
+				UNTIL (segmentLength = (0 + 0)) OR (budget = 0)
+			END IF
+			SET idx TO idx + 1
+		END WHILE
+
+		RETURN totalFixed
+
+
+	FUNCTION SplitRoadByPeriod(input STRING) RETURNS LIST OF STRING
+		SET pieces TO empty list
+		SET startPos TO 0
+		SET i TO 0
+		WHILE i < LengthOf(input) DO
+			IF CharAt(input, i) = '.' THEN
+				ADD Substring(input, startPos, i - 1) TO pieces
+				SET startPos TO i + 1
+			END IF
+			SET i TO i + 1
+		END WHILE
+		ADD Substring(input, startPos, LengthOf(input) - 1) TO pieces
+		RETURN pieces
+
+
+	FUNCTION SortAscendingByLength(list_of_strings) RETURNS VOID
+		FUNCTION Partition(arr LIST OF STRING, low INTEGER, high INTEGER) RETURNS INTEGER
+			SET pivotValue TO LengthOf(arr[high])
+			SET i TO low - 1
+			SET j TO low
+			WHILE j < high DO
+				IF LengthOf(arr[j]) <= pivotValue THEN
+					SET i TO i + 1
+					Swap(arr, i, j)
+				END IF
+				SET j TO j + 1
+			END WHILE
+			Swap(arr, i + 1, high)
+			RETURN i + 1
+
+		FUNCTION QuickSort(arr LIST OF STRING, low INTEGER, high INTEGER) RETURNS VOID
+			IF low < high THEN
+				SET partitionIdx TO Partition(arr, low, high)
+				QuickSort(arr, low, partitionIdx - 1)
+				QuickSort(arr, partitionIdx + 1, high)
+			END IF
+
+		QuickSort(list_of_strings, 0, LengthOf(list_of_strings) - 1)
+
+
+	FUNCTION Swap(arr LIST OF STRING, x INTEGER, y INTEGER) RETURNS VOID
+		SET tempVal TO arr[x]
+		SET arr[x] TO arr[y]
+		SET arr[y] TO tempVal
+
+END CLASS

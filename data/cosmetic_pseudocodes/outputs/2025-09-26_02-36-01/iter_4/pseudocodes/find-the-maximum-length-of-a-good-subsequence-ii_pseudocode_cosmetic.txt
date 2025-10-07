@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)  
+        LET length_of_nums BE THE COUNT OF nums  
+        LET dp BE A MATRIX FILLED WITH ZEROS HAVING DIMENSIONS length_of_nums BY (k PLUS 1)  
+        LET map_list BE A LIST CONTAINING (k PLUS 1) ELEMENTS EACH AS A DEFAULT DICTIONARY DEFAULTING TO ZERO  
+        LET top_values BE A MATRIX WITH (k PLUS 1) ROWS AND 3 COLUMNS FILLED WITH ZEROS  
+        LET maximum_answer BE ZERO  
+        LET pos_be SET TO ZERO  
+        WHILE pos_be LESS THAN length_of_nums  
+            LET current_num BE THE ELEMENT AT INDEX pos_be IN nums  
+            LET counter BE ZERO  
+            WHILE counter NOT EQUAL TO (k PLUS 1)  
+                LET dp_value BE THE VALUE ASSOCIATED WITH KEY current_num IN map_list[counter]  
+                ASSIGN dp[pos_be][counter] TO dp_value  
+                IF counter GREATER THAN ZERO THEN  
+                    LET prev_index BE counter MINUS 1  
+                    IF top_values[prev_index][0] NOT EQUALS nums[pos_be] THEN  
+                        IF dp[pos_be][counter] LESS THAN top_values[prev_index][1] THEN  
+                            ASSIGN dp[pos_be][counter] TO top_values[prev_index][1]  
+                        END IF  
+                    ELSE  
+                        IF dp[pos_be][counter] LESS THAN top_values[prev_index][2] THEN  
+                            ASSIGN dp[pos_be][counter] TO top_values[prev_index][2]  
+                        END IF  
+                    END IF  
+                END IF  
+                INCREMENT dp[pos_be][counter] BY 1  
+                IF map_list[counter] DOES NOT HAVE KEY nums[pos_be] OR map_list[counter][nums[pos_be]] LESS THAN dp[pos_be][counter] THEN  
+                    SET map_list[counter][nums[pos_be]] TO dp[pos_be][counter]  
+                END IF  
+                IF top_values[counter][0] IS NOT EQUAL TO current_num THEN  
+                    IF dp[pos_be][counter] GREATER THAN OR EQUAL TO top_values[counter][1] THEN  
+                        SET top_values[counter][2] TO top_values[counter][1]  
+                        SET top_values[counter][1] TO dp[pos_be][counter]  
+                        SET top_values[counter][0] TO current_num  
+                    ELSE  
+                        IF top_values[counter][2] LESS THAN dp[pos_be][counter] THEN  
+                            SET top_values[counter][2] TO dp[pos_be][counter]  
+                        END IF  
+                    END IF  
+                ELSE  
+                    IF top_values[counter][1] LESS THAN dp[pos_be][counter] THEN  
+                        SET top_values[counter][1] TO dp[pos_be][counter]  
+                    END IF  
+                END IF  
+                IF maximum_answer LESS THAN dp[pos_be][counter] THEN  
+                    SET maximum_answer TO dp[pos_be][counter]  
+                END IF  
+                INCREMENT counter BY 1  
+            END WHILE  
+            INCREMENT pos_be BY 1  
+        END WHILE  
+        RETURN maximum_answer  
+    END FUNCTION  
+END CLASS

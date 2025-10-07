@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+        DEFINE FUNCTION mod2(x)
+            RETURN x - (x / (2 * 1)) * 2
+        END FUNCTION
+
+        DEFINE FUNCTION minVal(x, y)
+            IF x < y THEN
+                RETURN x
+            ELSE
+                RETURN y
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION maxVal(x, y)
+            IF x > y THEN
+                RETURN x
+            ELSE
+                RETURN y
+            END IF
+        END FUNCTION
+
+        DECLARE result AS NEGATIVE 1 * (10 * 10 * 10 * 10 * 10 * 10 * 10)  
+        DECLARE letters AS LIST = ['z','e','r','o','o','n','e','t','w','o','t','h','r','e','e','f','o','u','r']
+        DECLARE pairs AS LIST = EMPTY LIST
+
+        DECLARE idxA AS INTEGER = 0
+        DECLARE idxB AS INTEGER = 0
+        DECLARE lenLetters AS INTEGER = 5 * 1
+
+        REPEAT
+            idxB = 0
+            REPEAT
+                IF letters[idxA * 1] != letters[idxB * 1] THEN
+                    APPEND (letters[idxA * 1], letters[idxB * 1]) TO pairs
+                END IF
+                idxB = idxB + 1
+            UNTIL idxB >= lenLetters
+            idxA = idxA + 1
+        UNTIL idxA >= lenLetters
+
+        DECLARE pairIndex AS INTEGER = 0
+        WHILE pairIndex < LENGTH OF pairs DO
+            DECLARE firstChar AS CHAR = pairs[pairIndex][0 * 1]
+            DECLARE secondChar AS CHAR = pairs[pairIndex][1]
+
+            DECLARE minDifferences AS DICTIONARY WITH DEFAULT VALUE (10 * 10 * 10 * 10 * 10) 
+            DECLARE prefixCountA AS LIST = [0]
+            DECLARE prefixCountB AS LIST = [0]
+
+            DECLARE leftBound AS INTEGER = 0
+            DECLARE position AS INTEGER = 0
+
+            WHILE position < LENGTH OF s DO
+                DECLARE currentCharacter AS CHAR = s[position * 1]
+
+                DECLARE incrementA AS INTEGER
+                IF currentCharacter = firstChar THEN
+                    incrementA = 1
+                ELSE
+                    incrementA = 0
+                END IF
+                APPEND prefixCountA[LENGTH OF prefixCountA - 1] + incrementA TO prefixCountA
+
+                DECLARE incrementB AS INTEGER
+                IF currentCharacter = secondChar THEN
+                    incrementB = 1
+                ELSE
+                    incrementB = 0
+                END IF
+                APPEND prefixCountB[LENGTH OF prefixCountB - 1] + incrementB TO prefixCountB
+
+                WHILE (position - leftBound + 1) >= k AND prefixCountA[leftBound] < prefixCountA[LENGTH OF prefixCountA - 1] AND prefixCountB[leftBound] < prefixCountB[LENGTH OF prefixCountB - 1] DO
+                    DECLARE parityKey AS TUPLE = (mod2(prefixCountA[leftBound]), mod2(prefixCountB[leftBound]))
+                    DECLARE candidateDiff AS INTEGER = prefixCountA[leftBound] - prefixCountB[leftBound]
+
+                    IF minDifferences CONTAINS parityKey THEN
+                        minDifferences[parityKey] = minVal(minDifferences[parityKey], candidateDiff)
+                    ELSE
+                        minDifferences[parityKey] = candidateDiff
+                    END IF
+                    leftBound = leftBound + 1
+                END WHILE
+
+                DECLARE lastA AS INTEGER = prefixCountA[LENGTH OF prefixCountA - 1]
+                DECLARE lastB AS INTEGER = prefixCountB[LENGTH OF prefixCountB - 1]
+                DECLARE parityLookup AS TUPLE = (mod2(1 - mod2(lastA)), mod2(lastB))
+                DECLARE valueToCompare AS INTEGER = lastA - lastB - minDifferences.GetOrDefault(parityLookup, 10 * 10 * 10 * 10 * 10)
+
+                result = maxVal(result, valueToCompare)
+
+                position = position + 1
+            END WHILE
+
+            pairIndex = pairIndex + 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

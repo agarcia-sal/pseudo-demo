@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+        SET map_suffixes TO empty dictionary mapping STRING to INTEGER
+
+        SET idx_outer TO 0
+        WHILE idx_outer < LENGTH OF wordsContainer
+            SET element_word TO element at position idx_outer of wordsContainer
+            SET pos_inner TO 0
+            WHILE pos_inner < LENGTH OF element_word
+                SET substr_suffix TO substring from position pos_inner TO end of element_word
+
+                IF NOT (substr_suffix IN map_suffixes)
+                    SET map_suffixes at key substr_suffix TO idx_outer
+                ELSE
+                    SET stored_idx TO map_suffixes element at key substr_suffix
+                    SET stored_word TO element at position stored_idx of wordsContainer
+                    IF (LENGTH OF element_word < LENGTH OF stored_word) OR ((LENGTH OF element_word = LENGTH OF stored_word) AND (idx_outer < stored_idx))
+                        SET map_suffixes at key substr_suffix TO idx_outer
+                    END IF
+                END IF
+
+                SET pos_inner TO pos_inner + 1
+            END WHILE
+            SET idx_outer TO idx_outer + 1
+        END WHILE
+
+        FUNCTION get_best_match(query query TO STRING) RETURNS INTEGER
+            SET len_query TO LENGTH OF query
+            SET pos_i TO 0
+            WHILE pos_i < len_query
+                SET suff_substr TO substring from position pos_i TO end of query
+                IF suff_substr IN map_suffixes
+                    RETURN map_suffixes element at key suff_substr
+                END IF
+                SET pos_i TO pos_i + 1
+            END WHILE
+
+            SET min_len TO LENGTH OF element at position zero of wordsContainer
+            SET min_index TO 0
+            SET j TO 1
+            WHILE j < LENGTH OF wordsContainer
+                SET curr_word TO element at position j of wordsContainer
+                IF (LENGTH OF curr_word < min_len) OR ((LENGTH OF curr_word = min_len) AND (j < min_index))
+                    SET min_len TO LENGTH OF curr_word
+                    SET min_index TO j
+                END IF
+                SET j TO j + 1
+            END WHILE
+
+            RETURN min_index
+        END FUNCTION
+
+        SET list_results TO empty list of integer
+        SET k TO 0
+        WHILE k < LENGTH OF wordsQuery
+            SET query_element TO element at position k of wordsQuery
+            APPEND get_best_match(query_element) TO list_results
+            SET k TO k + 1
+        END WHILE
+
+        RETURN list_results
+    END FUNCTION
+END CLASS

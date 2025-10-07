@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION minLength(s parameter representing a string, numOps parameter representing an integer) RETURNS integer
+        FUNCTION check(m parameter representing an integer) RETURNS boolean
+            PROCEDURE process(index parameter representing an integer, groupCount parameter representing an integer, totalOps parameter representing an integer)
+                IF index GREATER OR EQUAL TO LENGTH(s) THEN
+                    RETURN totalOps
+                ELSE
+                    SET nextIndex TO index + 1
+                    SET isEndGroup TO (nextIndex EQUALS LENGTH(s)) OR (s[index] NOT_EQUALS s[nextIndex])
+                    SET newGroupCount TO groupCount + 1
+                    IF isEndGroup THEN
+                        SET opsAdded TO (newGroupCount - 1) / m + 1
+                        SET newTotalOps TO totalOps + opsAdded
+                        IF newTotalOps > numOps THEN
+                            RETURN newTotalOps
+                        ELSE
+                            RETURN process(nextIndex, 0, newTotalOps)
+                        END IF
+                    ELSE
+                        RETURN process(nextIndex, newGroupCount, totalOps)
+                    END IF
+                END IF
+            END PROCEDURE
+
+            SET operationsCount TO process(0, 0, 0)
+            RETURN (operationsCount <= numOps)
+        END FUNCTION
+
+        SET lengthStr TO LENGTH(s)
+        SET low TO 1
+        SET high TO lengthStr
+
+        FUNCTION binarySearch(lowVal parameter representing an integer, highVal parameter representing an integer) RETURNS integer
+            IF lowVal EQUALS highVal THEN
+                RETURN lowVal
+            ELSE
+                SET midpoint TO lowVal + (highVal - lowVal) / 2
+                IF check(midpoint) THEN
+                    RETURN binarySearch(lowVal, midpoint)
+                ELSE
+                    RETURN binarySearch(midpoint + 1, highVal)
+                END IF
+            END IF
+        END FUNCTION
+
+        SET result TO binarySearch(low, high)
+        RETURN result
+    END FUNCTION
+END CLASS

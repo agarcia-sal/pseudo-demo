@@ -1,0 +1,79 @@
+CLASS DSU  
+  FUNCTION __init__(self, count)  
+    DECLARE mappingA AS empty mapping  
+    DECLARE mappingB AS empty mapping  
+    DECLARE index AS 0  
+    WHILE index <= (count - 1) DO  
+      mappingA[index] = index  
+      mappingB[index] = 0  
+      index = index + 1  
+    END WHILE  
+    self.parent = mappingA  
+    self.rank = mappingB  
+  END FUNCTION  
+
+  FUNCTION find(self, element)  
+    FUNCTION helper_find(key)  
+      IF self.parent[key] != key THEN  
+        self.parent[key] = helper_find(self.parent[key])  
+      END IF  
+      RETURN self.parent[key]  
+    END FUNCTION  
+    RETURN helper_find(element)  
+  END FUNCTION  
+
+  FUNCTION union_set(self, first, second)  
+    DECLARE x AS self.find(first)  
+    DECLARE y AS self.find(second)  
+    IF x != y THEN  
+      IF self.rank[x] < self.rank[y] THEN  
+        DECLARE swap_temp AS x  
+        x = y  
+        y = swap_temp  
+      END IF  
+      self.parent[y] = x  
+      IF self.rank[x] == self.rank[y] THEN  
+        self.rank[x] = self.rank[x] + 1  
+      END IF  
+    END IF  
+  END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+  FUNCTION countComponents(self, arr, limit)  
+    DECLARE data_structure AS DSU(limit + 1)  
+
+    DECLARE outer_index AS 0  
+    WHILE outer_index < LENGTH(arr) DO  
+      DECLARE value AS arr[outer_index]  
+      DECLARE inner_value AS value * 2  
+      REPEAT UNTIL inner_value > limit  
+        data_structure.union_set(value, inner_value)  
+        inner_value = inner_value + value  
+      END REPEAT  
+      outer_index = outer_index + 1  
+    END WHILE  
+
+    DECLARE collector_set AS empty set  
+    DECLARE gather_index AS 0  
+    WHILE gather_index < LENGTH(arr) DO  
+      DECLARE curr_val AS arr[gather_index]  
+      IF curr_val <= limit THEN  
+        collector_set = collector_set UNION {data_structure.find(curr_val)}  
+      ELSE  
+        collector_set = collector_set UNION {curr_val}  
+      END IF  
+      gather_index = gather_index + 1  
+    END WHILE  
+
+    FUNCTION set_size(s)  
+      DECLARE count_items AS 0  
+      FOR EACH element IN s DO  
+        count_items = count_items + 1  
+      END FOR  
+      RETURN count_items  
+    END FUNCTION  
+
+    RETURN set_size(collector_set)  
+  END FUNCTION  
+END CLASS

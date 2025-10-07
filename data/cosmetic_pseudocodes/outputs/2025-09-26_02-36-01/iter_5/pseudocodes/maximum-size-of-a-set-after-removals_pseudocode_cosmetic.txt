@@ -1,0 +1,139 @@
+CLASS Solution
+    FUNCTION maximumSetSize(nums1 PARAMETER List OF integers nums2 PARAMETER List OF integers) RETURNS integer
+        FUNCTION lengthOf(collection PARAMETER List OF integers) RETURNS integer
+            SET count TO zero
+            FUNCTION recurse(idx PARAMETER integer) RETURNS integer
+                IF idx EQUALS length(collection)
+                    RETURN count
+                ELSE
+                    SET count TO count PLUS one
+                    RETURN recurse(idx PLUS one)
+                END IF
+            END FUNCTION
+            RETURN recurse(zero)
+        END FUNCTION
+
+        FUNCTION uniqueElements(inputList PARAMETER List OF integers) RETURNS List OF integers
+            SET uniqueList TO an empty List OF integers
+            FUNCTION contains(coll PARAMETER List OF integers, elem PARAMETER integer) RETURNS boolean
+                SET present TO false
+                FUNCTION check(index PARAMETER integer) RETURNS boolean
+                    IF index EQUALS length(coll)
+                        RETURN present
+                    ELSE
+                        SET present TO present OR (coll[ index ] EQUALS elem)
+                        RETURN check(index PLUS one)
+                    END IF
+                END FUNCTION
+                RETURN check(zero)
+            END FUNCTION
+
+            FUNCTION addIfUnique(idx PARAMETER integer)
+                IF idx EQUALS length(inputList)
+                    RETURN
+                ELSE
+                    IF NOT contains(uniqueList, inputList[ idx ])
+                        SET uniqueList TO uniqueList PLUS [inputList[ idx ]]
+                    END IF
+                    CALL addIfUnique(idx PLUS one)
+                END IF
+            END FUNCTION
+
+            CALL addIfUnique(zero)
+            RETURN uniqueList
+        END FUNCTION
+
+        FUNCTION intersection(listA PARAMETER List OF integers, listB PARAMETER List OF integers) RETURNS List OF integers
+            SET interList TO an empty List OF integers
+
+            FUNCTION existsInListB(value PARAMETER integer) RETURNS boolean
+                SET found TO false
+                FUNCTION search(j PARAMETER integer) RETURNS boolean
+                    IF j EQUALS length(listB)
+                        RETURN found
+                    ELSE
+                        SET found TO found OR (listB[ j ] EQUALS value)
+                        RETURN search(j PLUS one)
+                    END IF
+                END FUNCTION
+                RETURN search(zero)
+            END FUNCTION
+
+            FUNCTION buildInter(idx PARAMETER integer)
+                IF idx EQUALS length(listA)
+                    RETURN
+                ELSE
+                    IF existsInListB(listA[ idx ]) AND NOT (listA[ idx ] IN interList)
+                        SET interList TO interList PLUS [listA[ idx ]]
+                    END IF
+                    CALL buildInter(idx PLUS one)
+                END IF
+            END FUNCTION
+
+            CALL buildInter(zero)
+            RETURN interList
+        END FUNCTION
+
+        FUNCTION difference(fromList PARAMETER List OF integers, withoutList PARAMETER List OF integers) RETURNS List OF integers
+            SET diffList TO an empty List OF integers
+
+            FUNCTION isInWithout(val PARAMETER integer) RETURNS boolean
+                SET included TO false
+                FUNCTION checkK(k PARAMETER integer) RETURNS boolean
+                    IF k EQUALS length(withoutList)
+                        RETURN included
+                    ELSE
+                        SET included TO included OR (withoutList[ k ] EQUALS val)
+                        RETURN checkK(k PLUS one)
+                    END IF
+                END FUNCTION
+                RETURN checkK(zero)
+            END FUNCTION
+
+            FUNCTION buildDiff(i PARAMETER integer)
+                IF i EQUALS length(fromList)
+                    RETURN
+                ELSE
+                    IF NOT isInWithout(fromList[ i ])
+                        SET diffList TO diffList PLUS [fromList[ i ]]
+                    END IF
+                    CALL buildDiff(i PLUS one)
+                END IF
+            END FUNCTION
+
+            CALL buildDiff(zero)
+            RETURN diffList
+        END FUNCTION
+
+        FUNCTION minVal(a PARAMETER integer, b PARAMETER integer) RETURNS integer
+            IF a LESS THAN b THEN RETURN a ELSE RETURN b END IF
+        END FUNCTION
+
+        FUNCTION maxVal(a PARAMETER integer, b PARAMETER integer) RETURNS integer
+            IF a GREATER THAN b THEN RETURN a ELSE RETURN b END IF
+        END FUNCTION
+
+
+        SET totalLength TO lengthOf(nums1)
+        SET halfLength TO totalLength DIVIDED BY (one PLUS one)
+
+        SET uniqueNums1 TO uniqueElements(nums1)
+        SET uniqueNums2 TO uniqueElements(nums2)
+
+        SET commonElements TO intersection(uniqueNums1, uniqueNums2)
+        SET uniqueSet1 TO difference(uniqueNums1, commonElements)
+        SET uniqueSet2 TO difference(uniqueNums2, commonElements)
+
+        SET take1 TO minVal(halfLength, lengthOf(uniqueSet1))
+        SET take2 TO minVal(halfLength, lengthOf(uniqueSet2))
+
+        SET remain1 TO maxVal(zero, halfLength MINUS take1)
+        SET remain2 TO maxVal(zero, halfLength MINUS take2)
+        SET takeCommonRaw TO remain1 PLUS remain2
+        SET takeCommon TO minVal(takeCommonRaw, lengthOf(commonElements))
+
+        SET finalAnswer TO take1 PLUS take2 PLUS takeCommon
+
+        RETURN finalAnswer
+    END FUNCTION
+END CLASS

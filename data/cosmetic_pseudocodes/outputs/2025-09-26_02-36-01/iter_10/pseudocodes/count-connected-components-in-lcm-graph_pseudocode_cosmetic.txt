@@ -1,0 +1,77 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+        DECLARE mappingA AS empty mapping  
+        DECLARE mappingB AS empty mapping  
+        DECLARE idx AS integer  
+        idx = 0  
+        WHILE idx < n DO  
+            mappingA[idx] = idx  
+            mappingB[idx] = 0  
+            idx = idx + 1  
+        END WHILE  
+        self.parent = mappingA  
+        self.rank = mappingB  
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+        FUNCTION locate(y)  
+            IF self.parent[y] != y THEN  
+                self.parent[y] = locate(self.parent[y])  
+            END IF  
+            RETURN self.parent[y]  
+        END FUNCTION  
+        RETURN locate(x)  
+    END FUNCTION  
+
+    FUNCTION union_set(self, u, v)  
+        FUNCTION combine(a, b)  
+            DECLARE tempVal  
+            a = self.find(a)  
+            b = self.find(b)  
+            IF a != b THEN  
+                IF self.rank[a] < self.rank[b] THEN  
+                    tempVal = a  
+                    a = b  
+                    b = tempVal  
+                END IF  
+                self.parent[b] = a  
+                IF self.rank[a] == self.rank[b] THEN  
+                    self.rank[a] = self.rank[a] + 1  
+                END IF  
+            END IF  
+        END FUNCTION  
+        combine(u, v)  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+        DECLARE disjointSet AS DSU(threshold + 1)  
+        DECLARE i AS integer  
+        DECLARE k AS integer  
+
+        i = 0  
+        WHILE i < LENGTH(nums) DO  
+            k = nums[i] * 2  
+            WHILE k <= threshold DO  
+                disjointSet.union_set(nums[i], k)  
+                k = k + nums[i]  
+            END WHILE  
+            i = i + 1  
+        END WHILE  
+
+        DECLARE parentsSet AS empty set  
+        DECLARE m AS integer  
+        m = 0  
+        WHILE m < LENGTH(nums) DO  
+            IF nums[m] <= threshold THEN  
+                parentsSet.ADD(disjointSet.find(nums[m]))  
+            ELSE  
+                parentsSet.ADD(nums[m])  
+            END IF  
+            m = m + 1  
+        END WHILE
+
+        RETURN SIZE(parentsSet)  
+    END FUNCTION  
+END CLASS

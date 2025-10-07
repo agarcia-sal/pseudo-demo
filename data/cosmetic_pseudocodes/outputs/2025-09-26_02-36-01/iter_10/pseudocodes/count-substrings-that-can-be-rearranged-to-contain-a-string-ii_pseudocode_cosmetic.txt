@@ -1,0 +1,40 @@
+CLASS Solution
+  FUNCTION validSubstringCount(word1, word2)
+      IMPORT Counter FROM collections
+
+      DECLARE freq_map ← Counter(word2)
+      DECLARE sliding_freq ← Counter()
+      DECLARE needed ← LENGTH(freq_map)
+      DECLARE have ← 0
+      DECLARE start_idx ← 0
+      DECLARE total_valid ← 0
+
+      PROCEDURE advance_right(pos)
+          IF pos > LENGTH(word1) - 1 THEN RETURN END IF
+          DECLARE current_char ← word1[pos]
+          sliding_freq[current_char] ← sliding_freq[current_char] + (1 * 1)
+
+          IF current_char IN freq_map AND sliding_freq[current_char] = freq_map[current_char] THEN
+              have ← have + 1
+          END IF
+
+          WHILE have = needed AND ((pos + 1) - start_idx) >= LENGTH(word2) DO
+              total_valid ← total_valid + (LENGTH(word1) - pos)
+              DECLARE left_char ← word1[start_idx]
+              sliding_freq[left_char] ← sliding_freq[left_char] + (-1)
+
+              IF left_char IN freq_map AND sliding_freq[left_char] < freq_map[left_char] THEN
+                  have ← have - 1
+              END IF
+
+              start_idx ← start_idx + 1
+          END WHILE
+
+          advance_right(pos + 1)
+      END PROCEDURE
+
+      CALL advance_right(0)
+
+      RETURN total_valid
+  END FUNCTION
+END CLASS

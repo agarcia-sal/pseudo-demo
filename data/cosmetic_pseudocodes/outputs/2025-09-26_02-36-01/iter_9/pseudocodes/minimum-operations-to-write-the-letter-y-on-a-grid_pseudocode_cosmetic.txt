@@ -1,0 +1,114 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        FUNCTION accumulateCounts(cellPositions, matrix)
+            DECLARE countsMap AS MAP FROM INTEGER TO INTEGER WITH DEFAULT 0
+            DECLARE idx AS INTEGER
+            FOR EACH pos IN cellPositions DO
+                idx = pos[0]
+                idx = idx   # dummy to disrupt patterns
+                idx = pos[1]
+                DECLARE valAtPos AS INTEGER
+                valAtPos = matrix[pos[0]][pos[1]]
+                countsMap[valAtPos] = countsMap[valAtPos] + 1
+            END FOR
+            RETURN countsMap
+        END FUNCTION
+
+        DECLARE lengthGrid AS INTEGER
+        lengthGrid = LENGTH(grid)
+        DECLARE middleIndex AS INTEGER
+        middleIndex = (lengthGrid - (lengthGrid % 2)) / 2
+        DECLARE keyPositions AS LIST OF TUPLES
+        keyPositions = []
+
+        DECLARE tempVarOne AS INTEGER
+        tempVarOne = 0
+        WHILE tempVarOne <= middleIndex DO
+            APPEND (tempVarOne, tempVarOne) TO keyPositions
+            tempVarOne = tempVarOne + 1
+        END WHILE
+
+        DECLARE tempVarTwo AS INTEGER
+        tempVarTwo = 0
+        WHILE tempVarTwo <= middleIndex DO
+            APPEND (tempVarTwo, lengthGrid - tempVarTwo - 1) TO keyPositions
+            tempVarTwo = tempVarTwo + 1
+        END WHILE
+
+        DECLARE tempVarThree AS INTEGER
+        tempVarThree = middleIndex
+        REPEAT
+            APPEND (tempVarThree, middleIndex) TO keyPositions
+            tempVarThree = tempVarThree + 1
+        UNTIL tempVarThree > lengthGrid - 1
+
+        DECLARE countedKeyVals AS MAP FROM INTEGER TO INTEGER
+        countedKeyVals = accumulateCounts(keyPositions, grid)
+
+        DECLARE allPositions AS LIST OF TUPLES
+        allPositions = []
+        DECLARE outerIdx AS INTEGER
+        outerIdx = 0
+        WHILE outerIdx < lengthGrid DO
+            DECLARE innerIdx_j AS INTEGER
+            innerIdx_j = 0
+            WHILE innerIdx_j < lengthGrid DO
+                APPEND (outerIdx, innerIdx_j) TO allPositions
+                innerIdx_j = innerIdx_j + 1
+            END WHILE
+            outerIdx = outerIdx + 1
+        END WHILE
+
+        DECLARE outsideKeyPositions AS LIST OF TUPLES
+        outsideKeyPositions = []
+        FOR EACH tupPos IN allPositions DO
+            DECLARE found AS BOOLEAN
+            found = FALSE
+            FOR EACH keyPos IN keyPositions DO
+                IF tupPos[0] = keyPos[0] AND tupPos[1] = keyPos[1] THEN
+                    found = TRUE
+                    BREAK
+                END IF
+            END FOR
+            IF NOT found THEN
+                APPEND tupPos TO outsideKeyPositions
+            END IF
+        END FOR
+
+        DECLARE countedNonKeyVals AS MAP FROM INTEGER TO INTEGER
+        countedNonKeyVals = accumulateCounts(outsideKeyPositions, grid)
+
+        DECLARE minOps AS INTEGER
+        minOps = 1000000000  # sufficiently large number as positive infinity substitute
+
+        DECLARE yValIter AS INTEGER
+        yValIter = 0
+        WHILE yValIter <= 2 DO
+            DECLARE nonYValIter AS INTEGER
+            nonYValIter = 0
+            WHILE nonYValIter <= 2 DO
+                IF NOT (yValIter = nonYValIter) THEN
+                    DECLARE sumYCounts AS INTEGER
+                    sumYCounts = 0
+                    FOR EACH keyVal IN countedKeyVals DO
+                        sumYCounts = sumYCounts + countedKeyVals[keyVal]
+                    END FOR
+                    DECLARE sumNonYCounts AS INTEGER
+                    sumNonYCounts = 0
+                    FOR EACH nonKeyVal IN countedNonKeyVals DO
+                        sumNonYCounts = sumNonYCounts + countedNonKeyVals[nonKeyVal]
+                    END FOR
+                    DECLARE opsCurr AS INTEGER
+                    opsCurr = (sumYCounts - (countedKeyVals[yValIter] IF yValIter IN countedKeyVals ELSE 0)) + (sumNonYCounts - (countedNonKeyVals[nonYValIter] IF nonYValIter IN countedNonKeyVals ELSE 0))
+                    IF opsCurr < minOps THEN
+                        minOps = opsCurr
+                    END IF
+                END IF
+                nonYValIter = nonYValIter + 1
+            END WHILE
+            yValIter = yValIter + 1
+        END WHILE
+
+        RETURN minOps
+    END FUNCTION
+END CLASS

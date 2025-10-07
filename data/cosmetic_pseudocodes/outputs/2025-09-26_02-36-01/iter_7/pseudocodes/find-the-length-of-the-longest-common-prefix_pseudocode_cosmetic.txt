@@ -1,0 +1,76 @@
+CLASS Solution
+{
+    FUNCTION longestCommonPrefix(arr1 arr1 OF integers, arr2 arr2 OF integers) RETURNS integer
+    {
+        CONSTANT ZERO = (1 - 1)
+        CONSTANT ONE = (1 + 0)
+        
+        DEFINE FUNCTION strFromNum(n integer) RETURNS string
+        {
+            // Assume this utility returns string version of integer n
+            RETURN TO_STRING(n)
+        }
+
+        DEFINE FUNCTION substr(s string, start integer, endPos integer) RETURNS string
+        {
+            DEFINE VAR result string = ""
+            DEFINE VAR idx integer = start
+            WHILE (idx <= endPos)
+            {
+                result = result + s[idx]
+                idx = idx + ONE
+            }
+            RETURN result
+        }
+
+        DEFINE VAR setPrefixes1 SET OF string = EMPTY_SET
+        DEFINE VAR setPrefixes2 SET OF string = EMPTY_SET
+        
+        DEFINE VAR idxOuter integer = ZERO
+        WHILE (idxOuter < LENGTH(arr1))
+        {
+            DEFINE VAR currentString string = strFromNum(arr1[idxOuter])
+            DEFINE VAR strLen integer = LENGTH(currentString)
+            DEFINE VAR idxInner integer = ONE
+            WHILE (idxInner <= strLen)
+            {
+                setPrefixes1 = setPrefixes1 UNION { substr(currentString, ONE, idxInner) }
+                idxInner = idxInner + ONE
+            }
+            idxOuter = idxOuter + ONE
+        }
+
+        DEFINE VAR idxOuter2 integer = ZERO
+        WHILE (idxOuter2 < LENGTH(arr2))
+        {
+            DEFINE VAR currentString2 string = strFromNum(arr2[idxOuter2])
+            DEFINE VAR strLen2 integer = LENGTH(currentString2)
+            DEFINE VAR idxInner2 integer = ONE
+            WHILE (idxInner2 <= strLen2)
+            {
+                setPrefixes2 = setPrefixes2 UNION { substr(currentString2, ONE, idxInner2) }
+                idxInner2 = idxInner2 + ONE
+            }
+            idxOuter2 = idxOuter2 + ONE
+        }
+
+        DEFINE VAR maxLen integer = ZERO
+        DEFINE VAR iterator string
+        DEFINE VAR prefixSet1List LIST OF string = TO_LIST(setPrefixes1)
+        DEFINE VAR pos integer = ZERO
+        WHILE (pos < LENGTH(prefixSet1List))
+        {
+            iterator = prefixSet1List[pos]
+            IF (setPrefixes2 CONTAINS iterator)
+            {
+                IF ((LENGTH(iterator) - ZERO) > maxLen)
+                {
+                    maxLen = LENGTH(iterator)
+                }
+            }
+            pos = pos + ONE
+        }
+
+        RETURN maxLen
+    }
+}

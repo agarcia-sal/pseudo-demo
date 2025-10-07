@@ -1,0 +1,75 @@
+CLASS Solution  
+    FUNCTION constructGridLayout(n, edges)  
+        LET adjacencyList BE a list of n elements, each an empty list  
+        LET nodeA, nodeB BE variables  
+        FOR each edgePair IN edges  
+            ASSIGN nodeA, nodeB FROM edgePair  
+            APPEND nodeB TO adjacencyList[nodeA]  
+            APPEND nodeA TO adjacencyList[nodeB]  
+        END FOR
+
+        LET degreePositions BE a list of 5 elements initialized with -1  
+        LET idx, neighbors BE variables  
+        SET idx TO 0  
+        WHILE idx < LENGTH OF adjacencyList DO  
+            neighbors = adjacencyList[idx]  
+            degreePositions[LENGTH OF neighbors] = idx  
+            idx = idx + 1  
+        END WHILE
+
+        IF degreePositions[1] != -1 THEN  
+            LET currentRow BE a list containing degreePositions[1]  
+        ELSE IF degreePositions[4] == -1 THEN  
+            LET startingNode BE degreePositions[2]  
+            LET neighborCandidate BE null  
+            FOR each candidate IN adjacencyList[startingNode] DO  
+                IF LENGTH OF adjacencyList[candidate] == 2 THEN  
+                    neighborCandidate = candidate  
+                    BREAK  
+                END IF  
+            END FOR  
+            LET currentRow BE a list with elements startingNode, neighborCandidate  
+        ELSE  
+            LET previousNode BE degreePositions[2]  
+            LET currentRow BE [previousNode]  
+            LET nextNode BE adjacencyList[previousNode][0]  
+            WHILE LENGTH OF adjacencyList[nextNode] > 2 DO  
+                APPEND nextNode TO currentRow  
+                FOR each neighbor IN adjacencyList[nextNode] DO  
+                    IF neighbor != previousNode AND LENGTH OF adjacencyList[neighbor] < 4 THEN  
+                        previousNode = nextNode  
+                        nextNode = neighbor  
+                        BREAK  
+                    END IF  
+                END FOR  
+            END WHILE  
+            APPEND nextNode TO currentRow  
+        END IF
+
+        LET answerGrid BE [currentRow]  
+        LET visitedNodes BE a list of n false values  
+        LET iterations BE (n / LENGTH OF currentRow) - 1  
+        LET i BE 0  
+        WHILE i < iterations DO  
+            FOR each node IN currentRow DO  
+                visitedNodes[node] = true  
+            END FOR
+
+            LET nextRow BE an empty list  
+            FOR each node IN currentRow DO  
+                FOR each neighbor IN adjacencyList[node] DO  
+                    IF visitedNodes[neighbor] == false THEN  
+                        APPEND neighbor TO nextRow  
+                        BREAK  
+                    END IF  
+                END FOR  
+            END FOR
+
+            APPEND nextRow TO answerGrid  
+            currentRow = nextRow  
+            i = i + 1  
+        END WHILE
+
+        RETURN answerGrid  
+    END FUNCTION  
+END CLASS

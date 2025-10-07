@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION countNonDecreasingSubarrays(nums k)
+        DEFINE FUNCTION evaluateFeasibility(origin span)
+            SET expense TO 0
+            SET threshold TO nums[origin]
+            DEFINE FUNCTION maximum(a b)
+                IF a GREATER THAN b THEN
+                    RETURN a
+                ELSE
+                    RETURN b
+                END IF
+            END FUNCTION
+
+            SET index TO 1
+            WHILE index LESS THAN span
+                IF nums[origin + index] LESS THAN threshold THEN
+                    SET expense TO expense + (threshold - nums[origin + index])
+                END IF
+                SET threshold TO maximum(threshold, nums[origin + index])
+                IF expense GREATER THAN k THEN
+                    RETURN False
+                END IF
+                SET index TO index + 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        SET length TO LENGTH(nums)
+        SET all_subs TO length * (length + 1) / 2
+        SET rejected TO 0
+
+        SET base TO 0
+        WHILE base LESS THAN length
+            SET minimal TO 1
+            SET maximal TO length - base
+            WHILE minimal <= maximal
+                SET midpoint TO (minimal + maximal) // 2
+                IF evaluateFeasibility(base midpoint) THEN
+                    SET minimal TO midpoint + 1
+                ELSE
+                    SET maximal TO midpoint - 1
+                END IF
+            END WHILE
+            SET rejected TO rejected + (length - base - maximal)
+            SET base TO base + 1
+        END WHILE
+
+        RETURN all_subs - rejected
+    END FUNCTION
+END CLASS

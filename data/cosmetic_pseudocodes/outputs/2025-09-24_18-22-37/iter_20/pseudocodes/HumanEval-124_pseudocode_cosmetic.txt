@@ -1,0 +1,42 @@
+FUNCTION valid_date(alpha)
+   
+    DECLARE trimmed_input, parts, m_str, d_str, y_str
+    DECLARE m_val, d_val, y_val
+    
+    trimmed_input  ←  REMOVE_WHITESPACE_FROM_BOTH_SIDES(alpha)
+    
+    TRY
+        parts ← SPLIT_STRING(trimmed_input, '-')
+        
+        m_str ← parts.at(0)
+        d_str ← parts.at(1)
+        y_str ← parts.at(2)
+        
+        m_val ← TO_INTEGER(m_str)
+        d_val ← TO_INTEGER(d_str)
+        y_val ← TO_INTEGER(y_str)
+       
+        SWITCH
+            CASE (m_val < 1) ∨ (m_val > 0xC) : 
+                RETURN False
+            CASE m_val IN [0x1, 0x3, 0x5, 0x7, 8, 10, 0xC]:
+                IF (d_val < 1) ∨ (d_val > 31) THEN
+                    RETURN False
+                END IF
+            CASE m_val IN [4, 6, 9, 0xB]:
+                IF (d_val < 1) ∨ (d_val > 0x1E) THEN
+                   RETURN False
+                END IF
+            CASE m_val = 2:
+                IF (d_val < 1) ∨ (d_val > 29) THEN
+                   RETURN False
+                END IF
+        END SWITCH
+        
+    EXCEPT
+        RETURN False
+    END TRY
+
+    RETURN True
+    
+END FUNCTION

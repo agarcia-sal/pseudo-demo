@@ -1,0 +1,46 @@
+FUNCTION check_dict_case(assoc_array)
+  DECLARE mode
+  DECLARE current_key
+  IF LENGTH(assoc_array.keys()) = 0 THEN
+    RETURN False
+  END IF
+
+  SET mode TO "start"
+
+  FOR idx FROM 0 TO LENGTH(assoc_array.keys()) - 1
+    SET current_key TO assoc_array.keys().at(idx)
+
+    IF NOT (current_key INSTANCEOF STRING) THEN
+      SET mode TO "mixed"
+      BREAK
+    END IF
+
+    SWITCH mode
+      CASE "start":
+        IF current_key = current_key.UPPERCASE() THEN
+          SET mode TO "upper"
+        ELSE
+          IF current_key = current_key.LOWERCASE() THEN
+            SET mode TO "lower"
+          ELSE
+            BREAK
+          END IF
+        END CASE
+      CASE "upper":
+        IF current_key != current_key.UPPERCASE() THEN
+          SET mode TO "mixed"
+          BREAK
+        END IF
+      CASE "lower":
+        IF current_key != current_key.LOWERCASE() THEN
+          SET mode TO "mixed"
+          BREAK
+        END IF
+      DEFAULT:
+        BREAK
+    END SWITCH
+
+  END FOR
+
+  RETURN (mode = "upper") OR (mode = "lower")
+END FUNCTION

@@ -1,0 +1,132 @@
+CLASS Solution
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+      SET alpha TO LENGTH OF image
+      SET beta TO LENGTH OF FIRST ELEMENT OF image
+
+      SET output_matrix TO EMPTY LIST
+      SET freq_matrix TO EMPTY LIST
+
+      FUNCTION replicate_row(length_val WITH TYPE integer) WITH RETURN TYPE List OF integer
+        SET row_accumulator TO EMPTY LIST
+        SET idx_counter TO 0
+        WHILE idx_counter LESS THAN length_val DO
+          APPEND 0 TO row_accumulator
+          SET idx_counter TO idx_counter + 1
+        END WHILE
+        RETURN row_accumulator
+      END FUNCTION
+
+      SET row_marker TO 0
+      WHILE row_marker LESS THAN alpha DO
+        APPEND replicate_row(beta) TO output_matrix
+        APPEND replicate_row(beta) TO freq_matrix
+        SET row_marker TO row_marker + 1
+      END WHILE
+
+      FUNCTION is_valid_region(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE boolean
+        FUNCTION neighbor_offsets() WITH RETURN TYPE List OF (integer, integer)
+          RETURN LIST OF (-1,0), (1,0), (0,-1), (0,1)
+        END FUNCTION
+
+        SET pos_i TO x
+        SET limit_i TO x + 3
+        FUNCTION i_loop(index WITH TYPE integer) WITH RETURN TYPE boolean
+          IF index GREATER THAN OR EQUAL TO limit_i THEN
+            RETURN TRUE
+          END IF
+          SET pos_j TO y
+          FUNCTION j_loop(inner_index WITH TYPE integer) WITH RETURN TYPE boolean
+            IF inner_index GREATER THAN OR EQUAL TO y + 3 THEN
+              RETURN TRUE
+            END IF
+            SET diffs TO neighbor_offsets()
+            FUNCTION check_offsets(offset_idx WITH TYPE integer) WITH RETURN TYPE boolean
+              IF offset_idx GREATER THAN OR EQUAL TO LENGTH OF diffs THEN
+                RETURN TRUE
+              END IF
+              SET dx_dy TO diffs[offset_idx]
+              SET nx_val TO index + dx_dy[0]
+              SET ny_val TO inner_index + dx_dy[1]
+              IF NOT (nx_val GREATER THAN OR EQUAL TO 0 AND nx_val LESS THAN x + 3 AND ny_val GREATER THAN OR EQUAL TO 0 AND ny_val LESS THAN y + 3) THEN
+                RETURN check_offsets(offset_idx + 1)
+              END IF
+
+              SET c_left TO ABS(image[index][inner_index] - image[nx_val][ny_val])
+              IF c_left GREATER THAN threshold THEN
+                RETURN FALSE
+              END IF
+              RETURN check_offsets(offset_idx + 1)
+            END FUNCTION
+            IF NOT check_offsets(0) THEN
+              RETURN FALSE
+            ELSE
+              RETURN j_loop(inner_index + 1)
+            END IF
+          END FUNCTION
+          IF NOT j_loop(pos_j) THEN
+            RETURN FALSE
+          ELSE
+            RETURN i_loop(index + 1)
+          END IF
+        END FUNCTION
+        RETURN i_loop(pos_i)
+      END FUNCTION
+
+      FUNCTION calculate_average(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE integer
+        FUNCTION sum_recursive(x_pos WITH TYPE integer i_pos WITH TYPE integer acc WITH TYPE integer) WITH RETURN TYPE integer
+          IF x_pos GREATER THAN OR EQUAL TO x + 3 THEN
+            RETURN acc
+          END IF
+          IF i_pos GREATER THAN OR EQUAL TO y + 3 THEN
+            RETURN sum_recursive(x_pos + 1, y, acc)
+          END IF
+          SET new_acc TO acc + image[x_pos][i_pos]
+          RETURN sum_recursive(x_pos, i_pos + 1, new_acc)
+        END FUNCTION
+
+        SET final_sum TO sum_recursive(x, y, 0)
+        SET nine_val TO 3 * 3
+        RETURN final_sum DIVIDED BY nine_val
+      END FUNCTION
+
+      SET outer_i TO 0
+      WHILE outer_i LESS THAN alpha - 2 DO
+        SET outer_j TO 0
+        WHILE outer_j LESS THAN beta - 2 DO
+          IF TRUE EQUALS is_valid_region(outer_i, outer_j) THEN
+            SET average_val TO calculate_average(outer_i, outer_j)
+            SET fill_x TO outer_i
+            WHILE fill_x LESS THAN outer_i + 3 DO
+              SET fill_y TO outer_j
+              WHILE fill_y LESS THAN outer_j + 3 DO
+                SET out_current TO output_matrix[fill_x][fill_y]
+                SET freq_current TO freq_matrix[fill_x][fill_y]
+                SET output_matrix[fill_x][fill_y] TO out_current + average_val
+                SET freq_matrix[fill_x][fill_y] TO freq_current + (1 * 1)
+                SET fill_y TO fill_y + 1
+              END WHILE
+              SET fill_x TO fill_x + 1
+            END WHILE
+          END IF
+          SET outer_j TO outer_j + 1
+        END WHILE
+        SET outer_i TO outer_i + 1
+      END WHILE
+
+      SET cnt_i TO 0
+      WHILE cnt_i LESS THAN alpha DO
+        SET cnt_j TO 0
+        WHILE cnt_j LESS THAN beta DO
+          IF freq_matrix[cnt_i][cnt_j] GREATER THAN 0 THEN
+            SET output_matrix[cnt_i][cnt_j] TO output_matrix[cnt_i][cnt_j] DIVIDED BY freq_matrix[cnt_i][cnt_j]
+          ELSE
+            SET output_matrix[cnt_i][cnt_j] TO image[cnt_i][cnt_j]
+          END IF
+          SET cnt_j TO cnt_j + 1
+        END WHILE
+        SET cnt_i TO cnt_i + 1
+      END WHILE
+
+      RETURN output_matrix
+    END FUNCTION
+END CLASS

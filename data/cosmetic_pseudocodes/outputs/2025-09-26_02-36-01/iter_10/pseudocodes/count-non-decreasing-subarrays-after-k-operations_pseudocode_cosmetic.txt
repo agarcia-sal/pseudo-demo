@@ -1,0 +1,59 @@
+CLASS Solution
+  FUNCTION countNonDecreasingSubarrays(nums k)
+  
+    SET lengthNums TO LENGTH(nums)
+    
+    FUNCTION isValidWindow(beginIdx winLen)
+      SET penaltyAccumulator TO 0
+      SET maximumSoFar TO nums[beginIdx]
+      
+      PROCEDURE iterate(i currentStep limit)
+        IF currentStep EQUALS limit
+          RETURN
+        END IF
+        
+        IF nums[beginIdx+currentStep] LESS THAN maximumSoFar
+          SET penaltyAccumulator TO penaltyAccumulator + (maximumSoFar - nums[beginIdx+currentStep])
+        END IF
+        
+        SET maximumSoFar TO MAXIMUM(maximumSoFar, nums[beginIdx+currentStep])
+        
+        IF penaltyAccumulator GREATER THAN k
+          RAISE "earlyStop"
+        END IF
+        
+        CALL iterate(i currentStep + 1 limit)
+      END PROCEDURE
+      
+      TRY
+        CALL iterate(0 1 winLen)
+      CATCH "earlyStop"
+        RETURN False
+      END TRY
+      
+      RETURN True
+    END FUNCTION
+    
+    SET totalSubarrays TO lengthNums * (lengthNums + 1) / 2
+    SET countInvalid TO 0
+    
+    FOR startIdx FROM 0 TO lengthNums - 1
+      SET lowBound TO 1
+      SET upBound TO lengthNums - startIdx
+      
+      WHILE (lowBound <= upBound)
+        SET midpoint TO (lowBound + upBound) / 2 // integer division
+        
+        IF isValidWindow(startIdx midpoint) EQUALS True
+          SET lowBound TO midpoint + 1
+        ELSE
+          SET upBound TO midpoint - 1
+        END IF
+      END WHILE
+      
+      SET countInvalid TO countInvalid + (lengthNums - startIdx - upBound)
+    END FOR
+    
+    RETURN totalSubarrays - countInvalid
+  END FUNCTION
+END CLASS

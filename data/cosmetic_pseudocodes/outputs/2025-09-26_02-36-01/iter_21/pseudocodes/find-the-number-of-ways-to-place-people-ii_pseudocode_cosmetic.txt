@@ -1,0 +1,83 @@
+CLASS Solution
+	Function numberOfPairs(points)
+		DEFINE FUNCTION qsort(arr, l, r)
+			IF l GE r THEN RETURN END IF
+			SET pivot_index TO l
+			SET pivot_val_X TO arr[pivot_index].x
+			SET pivot_val_Y TO arr[pivot_index].y
+			SET left_cursor TO l + 1
+			SET right_cursor TO r
+			WHILE left_cursor LE right_cursor
+				WHILE (left_cursor LE r) AND ((arr[left_cursor].x LT pivot_val_X) OR ((arr[left_cursor].x EQ pivot_val_X) AND (arr[left_cursor].y GT pivot_val_Y)))
+					SET left_cursor TO left_cursor + 1
+				END WHILE
+				WHILE (right_cursor GT l) AND ((arr[right_cursor].x GT pivot_val_X) OR ((arr[right_cursor].x EQ pivot_val_X) AND (arr[right_cursor].y LT pivot_val_Y)))
+					SET right_cursor TO right_cursor - 1
+				END WHILE
+				IF left_cursor LT right_cursor
+					SET temp TO arr[left_cursor]
+					SET arr[left_cursor] TO arr[right_cursor]
+					SET arr[right_cursor] TO temp
+					SET left_cursor TO left_cursor + 1
+					SET right_cursor TO right_cursor - 1
+				END IF
+			END WHILE
+			SET temp2 TO arr[pivot_index]
+			SET arr[pivot_index] TO arr[right_cursor]
+			SET arr[right_cursor] TO temp2
+			CALL qsort(arr, l, right_cursor - 1)
+			CALL qsort(arr, right_cursor + 1, r)
+		END FUNCTION
+
+		CALL qsort(points, 0, (LEN(points) - 1))
+		SET I TO LEN(points)
+		SET A TO 0
+
+		DEFINE FUNCTION condition_check(a, b)
+			IF (a.x LE b.x) AND (a.y GE b.y) THEN RETURN TRUE ELSE RETURN FALSE END IF
+		END FUNCTION
+
+		DEFINE FUNCTION range_check(p, a, b)
+			IF (a.x LE p.x) AND (p.x LE b.x) AND (b.y LE p.y) AND (p.y LE a.y) THEN RETURN TRUE ELSE RETURN FALSE END IF
+		END FUNCTION
+
+		SET C TO 0
+		SET D TO 0
+
+		DEFINE FUNCTION inner_loop(M, N, O)
+			IF O LT N THEN
+				LET P = points[O]
+				IF range_check(P, points[M], points[N]) THEN RETURN FALSE END IF
+				RETURN inner_loop(M, N, O + 1)
+			ELSE
+				RETURN TRUE
+			END IF
+		END FUNCTION
+
+		DEFINE FUNCTION outer_loop(X)
+			IF X GE I THEN
+				RETURN D
+			END IF
+			SET Y TO X + 1
+
+			DEFINE FUNCTION second_loop(Y)
+				IF Y GE I THEN RETURN 0 END IF
+				IF condition_check(points[X], points[Y]) THEN
+					IF inner_loop(X, Y, X + 1) THEN
+						RETURN 1 + second_loop(Y + 1)
+					ELSE
+						RETURN second_loop(Y + 1)
+					END IF
+				ELSE
+					RETURN second_loop(Y + 1)
+				END IF
+			END FUNCTION
+
+			SET Z TO second_loop(Y)
+			RETURN Z + outer_loop(X + 1)
+		END FUNCTION
+
+		SET D TO outer_loop(0)
+		RETURN D
+	END Function
+END CLASS

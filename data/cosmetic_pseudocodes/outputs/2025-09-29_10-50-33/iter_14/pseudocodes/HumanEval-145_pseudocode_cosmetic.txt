@@ -1,0 +1,47 @@
+FUNCTION order_by_points(collection_of_values)
+
+  FUNCTION digits_sum(value)
+    sign_flag ← 1
+    IF NOT (value ≥ 0) THEN
+      value ← 0 - value
+      sign_flag ← -1
+    END IF
+
+    components ← [ ]
+    index_counter ← 1
+    WHILE index_counter ≤ LENGTH(STRING(value)) DO
+      current_char ← STRING(value)[index_counter]
+      components ← components + {(INTEGER(current_char))}
+      index_counter ← index_counter + 1
+    END WHILE
+
+    components[1] ← components[1] * sign_flag
+
+    accumulator ← 0
+    pointer ← 1
+    REPEAT
+      accumulator ← accumulator + components[pointer]
+      pointer ← pointer + 1
+    UNTIL pointer > LENGTH(components)
+
+    EXECUTE RETURN accumulator
+  END FUNCTION
+
+  sorted_list ← []
+  unsorted_copy ← collection_of_values
+  WHILE LENGTH(unsorted_copy) > 0 DO
+    minimal_index ← 1
+    iter_index ← 2
+    REPEAT
+      IF digits_sum(unsorted_copy[iter_index]) < digits_sum(unsorted_copy[minimal_index]) THEN
+        minimal_index ← iter_index
+      END IF
+      iter_index ← iter_index + 1
+    UNTIL iter_index > LENGTH(unsorted_copy)
+
+    sorted_list ← sorted_list + {unsorted_copy[minimal_index]}
+    unsorted_copy ← unsorted_copy[1 : minimal_index - 1] + unsorted_copy[minimal_index + 1 : LENGTH(unsorted_copy)]
+  END WHILE
+
+  EXECUTE RETURN sorted_list
+END FUNCTION

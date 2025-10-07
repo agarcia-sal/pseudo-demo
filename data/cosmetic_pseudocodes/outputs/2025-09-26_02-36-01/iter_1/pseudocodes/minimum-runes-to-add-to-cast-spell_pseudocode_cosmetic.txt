@@ -1,0 +1,104 @@
+CLASS Solution  
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)  
+        DECLARE adj AS a mapping from integer to list of integers INITIALIZED empty  
+        DECLARE rev_adj AS a mapping from integer to list of integers INITIALIZED empty  
+
+        FOR index FROM 0 TO LENGTH(flowFrom) - 1  
+            LET start_node = flowFrom[index]  
+            LET end_node = flowTo[index]  
+            IF start_node NOT IN adj  
+                SET adj[start_node] TO empty list  
+            END IF  
+            APPEND end_node TO adj[start_node]  
+
+            IF end_node NOT IN rev_adj  
+                SET rev_adj[end_node] TO empty list  
+            END IF  
+            APPEND start_node TO rev_adj[end_node]  
+        END FOR  
+
+        DECLARE current_index AS 0  
+        DECLARE stack_nodes AS empty list  
+        DECLARE visited_stack AS list of size n FILLED WITH False  
+        DECLARE node_index AS list of size n FILLED WITH -1  
+        DECLARE node_lowlink AS list of size n FILLED WITH 0  
+        DECLARE strongly_connected_components AS empty list  
+
+        DEFINE FUNCTION tarjanDFS(vertex)  
+            SET node_index[vertex] TO current_index  
+            SET node_lowlink[vertex] TO current_index  
+            INCREMENT current_index BY 1  
+            APPEND vertex TO stack_nodes  
+            SET visited_stack[vertex] TO True  
+
+            FOR each neighbor IN adj.get(vertex, empty list)  
+                IF node_index[neighbor] IS -1  
+                    CALL tarjanDFS(neighbor)  
+                    SET node_lowlink[vertex] TO MIN(node_lowlink[vertex], node_lowlink[neighbor])  
+                ELSE IF visited_stack[neighbor] IS True  
+                    SET node_lowlink[vertex] TO MIN(node_lowlink[vertex], node_index[neighbor])  
+                END IF  
+            END FOR  
+
+            IF node_lowlink[vertex] EQUALS node_index[vertex]  
+                DECLARE component AS empty list  
+                WHILE True  
+                    LET w = REMOVE LAST ELEMENT FROM stack_nodes  
+                    SET visited_stack[w] TO False  
+                    APPEND w TO component  
+                    IF w EQUALS vertex  
+                        BREAK  
+                    END IF  
+                END WHILE  
+                APPEND component TO strongly_connected_components  
+            END IF  
+        END FUNCTION  
+
+        FOR node FROM 0 TO n - 1  
+            IF node_index[node] IS -1  
+                CALL tarjanDFS(node)  
+            END IF  
+        END FOR  
+
+        DECLARE scc_map AS list of size n FILLED WITH -1  
+        DECLARE scc_contains_crystal AS list of size LENGTH(strongly_connected_components) FILLED WITH False  
+
+        FOR index_scc FROM 0 TO LENGTH(strongly_connected_components) - 1  
+            FOR each member_node IN strongly_connected_components[index_scc]  
+                SET scc_map[member_node] TO index_scc  
+                IF member_node IN crystals  
+                    SET scc_contains_crystal[index_scc] TO True  
+                END IF  
+            END FOR  
+        END FOR  
+
+        DECLARE condensed_graph AS a mapping from integer to list of integers INITIALIZED empty  
+
+        FOR edge_index FROM 0 TO LENGTH(flowFrom) - 1  
+            LET src_scc = scc_map[flowFrom[edge_index]]  
+            LET dst_scc = scc_map[flowTo[edge_index]]  
+            IF src_scc != dst_scc  
+                IF src_scc NOT IN condensed_graph  
+                    SET condensed_graph[src_scc] TO empty list  
+                END IF  
+                APPEND dst_scc TO condensed_graph[src_scc]  
+            END IF  
+        END FOR  
+
+        DECLARE in_degree_scc AS list of size LENGTH(strongly_connected_components) FILLED WITH 0  
+        FOR scc_node FROM 0 TO LENGTH(strongly_connected_components) - 1  
+            FOR neighbor_scc IN condensed_graph.get(scc_node, empty list)  
+                INCREMENT in_degree_scc[neighbor_scc] BY 1  
+            END FOR  
+        END FOR  
+
+        DECLARE count_new_runes AS 0  
+        FOR scc_node FROM 0 TO LENGTH(strongly_connected_components) - 1  
+            IF in_degree_scc[scc_node] EQUALS 0 AND scc_contains_crystal[scc_node] IS False  
+                INCREMENT count_new_runes BY 1  
+            END IF  
+        END FOR  
+
+        RETURN count_new_runes  
+    END FUNCTION  
+END CLASS

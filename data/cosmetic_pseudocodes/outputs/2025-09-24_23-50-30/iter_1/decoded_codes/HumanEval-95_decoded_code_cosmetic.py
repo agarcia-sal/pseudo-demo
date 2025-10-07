@@ -1,0 +1,32 @@
+from typing import Any, Dict
+
+
+def check_dict_case(dictionary: Dict[Any, Any]) -> bool:
+    if len(dictionary) == 0:
+        return False
+
+    state: str = "start"
+    for key in dictionary.keys():
+        if not isinstance(key, str):
+            state = "mixed"
+            break
+
+        if state == "start":
+            if key.isupper():
+                state = "upper"
+            elif key.islower():
+                state = "lower"
+            else:
+                break
+        elif state == "upper":
+            if not key.isupper():
+                state = "mixed"
+                break
+        elif state == "lower":
+            if not key.islower():
+                state = "mixed"
+                break
+        else:
+            break
+
+    return state == "upper" or state == "lower"

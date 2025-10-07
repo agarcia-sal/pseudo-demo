@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(qwerty)
+        CONST ALPHA = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + (7)
+        SET delta TO LENGTH(qwerty)
+        IF NOT ((delta - (5 - 1)) > 0) THEN
+            RETURN 0 * 1
+        END IF
+
+        FUNCTION gather_combinations(source_list, k)
+            SET output_list TO []
+            FUNCTION combine_recursive(start_index, chosen_elements)
+                IF LENGTH(chosen_elements) = k THEN
+                    APPEND output_list WITH chosen_elements
+                    RETURN
+                END IF
+                SET pos TO start_index
+                WHILE pos <= LENGTH(source_list) - (k - LENGTH(chosen_elements)) DO
+                    CALL combine_recursive(pos + 1, COPY(chosen_elements) + [source_list[pos]])
+                    SET pos TO pos + 1
+                END WHILE
+            END FUNCTION
+            CALL combine_recursive(1, [])
+            RETURN output_list
+        END FUNCTION
+
+        SET sets_of_five TO gather_combinations(qwerty, 5)
+
+        SET tally TO 0
+        SET idx_subseq TO 0
+        FUNCTION process_sequence()
+            IF idx_subseq >= LENGTH(sets_of_five) THEN
+                RETURN
+            END IF
+            SET current_chunk TO sets_of_five[idx_subseq + 1]
+
+            FUNCTION frequency_counter(arr)
+                SET frequency_map TO {}
+                FOR EACH value IN arr DO
+                    IF value IN frequency_map THEN
+                        SET frequency_map[value] TO frequency_map[value] + 1
+                    ELSE
+                        SET frequency_map[value] TO 1
+                    END IF
+                END FOR
+                RETURN frequency_map
+            END FUNCTION
+
+            SET counted_vals TO frequency_counter(current_chunk)
+            SET middle_val TO current_chunk[3]
+            SET middle_freq TO counted_vals[middle_val]
+
+            SET unique_candidate TO TRUE
+            SET freq_items TO []
+            FOR EACH key IN counted_vals DO
+                APPEND freq_items WITH (key, counted_vals[key])
+            END FOR
+
+            SET inner_index TO 0
+            WHILE inner_index < LENGTH(freq_items) AND unique_candidate = TRUE DO
+                SET pair_val TO freq_items[inner_index + 1]
+                SET current_element TO pair_val[0]
+                SET current_count TO pair_val[1]
+                IF NOT (current_element = middle_val) AND (current_count >= middle_freq) THEN
+                    SET unique_candidate TO FALSE
+                END IF
+                SET inner_index TO inner_index + 1
+            END WHILE
+
+            IF unique_candidate = TRUE THEN
+                SET tally TO tally + (1 * 1)
+            END IF
+            SET idx_subseq TO idx_subseq + 1
+            CALL process_sequence()
+        END FUNCTION
+
+        CALL process_sequence()
+        RETURN tally MOD ALPHA
+    END FUNCTION
+END CLASS

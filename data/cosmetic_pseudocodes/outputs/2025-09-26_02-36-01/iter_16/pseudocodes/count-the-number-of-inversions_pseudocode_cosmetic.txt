@@ -1,0 +1,54 @@
+CLASS Solution
+
+    FUNCTION numberOfPermutations(n, requirements)
+  SET CONST_MOD TO (10 ^ 9) + 7
+  SET map_reqs TO { }
+  FOR EACH pair req_entry OF requirements DO
+    SET key_pos TO req_entry[0]
+    SET val_count TO req_entry[1]
+    map_reqs[key_pos] := val_count
+  END FOR
+
+  FUNCTION count_permutations(len_pre, count_inv, bits_used)
+    IF len_pre == n THEN
+      IF count_inv == (IF map_reqs.CONTAINS_KEY(n - 1) THEN map_reqs[n - 1] ELSE 0) THEN
+        RETURN 1
+      ELSE
+        RETURN 0
+      END IF
+    END IF
+
+    IF len_pre > 0 THEN
+      IF count_inv != (IF map_reqs.CONTAINS_KEY(len_pre - 1) THEN map_reqs[len_pre - 1] ELSE count_inv) THEN
+        RETURN 0
+      END IF
+    END IF
+
+    SET total_count TO 0
+    SET index_num TO 0
+    WHILE index_num < n DO
+      IF (bits_used & (1 << index_num)) == 0 THEN
+        SET inv_next TO count_inv
+
+        SET inner_j TO index_num + 1
+        WHILE inner_j < n DO
+          IF (bits_used & (1 << inner_j)) != 0 THEN
+            inv_next := inv_next + 1
+          END IF
+          inner_j := inner_j + 1
+        END WHILE
+
+        SET total_count TO (total_count + count_permutations(len_pre + 1, inv_next, bits_used | (1 << index_num))) % CONST_MOD
+      END IF
+      index_num := index_num + 1
+    END WHILE
+
+    RETURN total_count
+
+  END FUNCTION
+
+  RETURN count_permutations(0, 0, 0)
+
+END FUNCTION
+
+END CLASS

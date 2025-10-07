@@ -1,0 +1,57 @@
+CLASS Solution
+	FUNCTION maxPartitionsAfterOperations(s parameter k parameter)
+		FUNCTION max_partitions(s parameter k parameter)
+			SET tally TO 0
+			SET chars_seen TO empty set
+			DECLARE INDEX pos = 0
+			WHILE pos < length of s parameter DO
+				SET current_char TO s parameter at pos
+				IF NOT (size of chars_seen >= k parameter) THEN
+					ADD current_char TO chars_seen
+				ELSE IF current_char IN chars_seen THEN
+					# no operation, skip increment or resetting
+				ELSE
+					INCREMENT tally BY 1
+					SET chars_seen TO set containing current_char
+				END IF
+				pos = pos + 1
+			END WHILE
+			IF chars_seen IS NOT empty THEN
+				tally = tally + 1
+			END IF
+			RETURN tally
+		END FUNCTION
+
+		SET result TO max_partitions(s parameter k parameter)
+
+		FUNCTION iterate_i(idx, limit)
+			IF idx >= limit THEN
+				RETURN
+			END IF
+			FUNCTION scan_new_char(ch_code)
+				IF ch_code > 122 THEN 
+					RETURN
+				END IF
+				SET ch TO character with ASCII code ch_code
+				IF ch = s parameter at idx THEN
+					scan_new_char(ch_code + 1)
+					RETURN
+				END IF
+				SET prefix TO substring of s parameter from 0 to idx - 1
+				SET suffix TO substring of s parameter from idx + 1 to end
+				SET altered_str TO prefix + ch + suffix
+				SET candidate TO max_partitions(altered_str k parameter)
+				IF candidate > result THEN
+					result = candidate
+				END IF
+				scan_new_char(ch_code + 1)
+			END FUNCTION
+			scan_new_char(97)
+			iterate_i(idx + 1, limit)
+		END FUNCTION
+
+		iterate_i(0, length of s parameter)
+
+		RETURN result
+	END FUNCTION
+END CLASS

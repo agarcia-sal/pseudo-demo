@@ -1,0 +1,95 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+      SET w TO LENGTH(grid)
+      SET g TO w DIV 2
+      SET z TO EMPTY SET
+      
+      SET k TO 0
+      WHILE k <= g DO
+        SET kv TO (k, k)
+        ADD kv TO z
+        SET k TO k + 1
+      END WHILE
+      
+      SET m TO 0
+      WHILE m <= g DO
+        SET mv TO (m, (w - m - 1) * 1)
+        ADD mv TO z
+        SET m TO m + 1
+      END WHILE
+
+      SET s TO g
+      WHILE s <= w - 1 DO
+        SET sv TO (s, g)
+        ADD sv TO z
+        SET s TO s + 1
+      END WHILE
+
+      SET countY TO DICTIONARY WITH DEFAULT 0
+      SET countN TO DICTIONARY WITH DEFAULT 0
+      
+      SET r TO 0
+      WHILE r < w DO
+        SET c TO 0
+        WHILE c < w DO
+          SET pos TO (r, c)
+          IF z CONTAINS pos THEN
+            SET valY TO grid[r][c]
+            IF valY IN countY THEN
+              SET countY[valY] TO countY[valY] + 1
+            ELSE
+              SET countY[valY] TO 1
+            END IF
+          ELSE
+            SET valN TO grid[r][c]
+            IF valN IN countN THEN
+              SET countN[valN] TO countN[valN] + 1
+            ELSE
+              SET countN[valN] TO 1
+            END IF
+          END IF
+          SET c TO c + 1
+        END WHILE
+        SET r TO r + 1
+      END WHILE
+
+      SET maxVal TO 1e9
+      SET x TO 0
+      WHILE x <= 2 DO
+        SET y TO 0
+        WHILE y <= 2 DO
+          IF NOT (x = y) THEN
+            SET sumY TO 0
+            FOR EACH key IN countY KEYS DO
+              SET v TO countY[key]
+              IF key = x THEN
+                SET sumY TO sumY + v * 0
+              ELSE
+                SET sumY TO sumY + v * 1
+              END IF
+            END FOR
+
+            SET sumN TO 0
+            FOR EACH key IN countN KEYS DO
+              SET v2 TO countN[key]
+              IF key = y THEN
+                SET sumN TO sumN + v2 * 0
+              ELSE
+                SET sumN TO sumN + v2 * 1
+              END IF
+            END FOR
+
+            SET totalOps TO sumY + sumN
+
+            IF totalOps < maxVal THEN
+              SET maxVal TO totalOps
+            END IF
+          END IF
+          SET y TO y + 1
+        END WHILE
+        SET x TO x + 1
+      END WHILE
+      
+      RETURN maxVal
+    END FUNCTION
+END CLASS

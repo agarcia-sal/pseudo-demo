@@ -1,0 +1,53 @@
+CLASS Solution  
+    FUNCTION numberOfSubmatrices(grid)  
+        IF NOT (grid ≠ [] AND grid[0] ≠ []) THEN  
+            RETURN 0  
+        END IF  
+        LET numRows BE LENGTH(grid)  
+        LET numCols BE LENGTH(grid[0])  
+        LET prefixSum BE ARRAY OF SIZE (numRows + 1)  
+        FOR idx FROM 0 TO numRows DO  
+            prefixSum[idx] ← ARRAY OF SIZE (numCols + 1)  
+            FOR jdx FROM 0 TO numCols DO  
+                prefixSum[idx][jdx] ← [0, 0]  
+            END FOR  
+        END FOR  
+        LET r BE 1  
+        WHILE r ≤ numRows DO  
+            LET c BE 1  
+            WHILE c ≤ numCols DO  
+                LET val00 BE prefixSum[r - 1][c][0]  
+                LET val01 BE prefixSum[r][c - 1][0]  
+                LET val02 BE prefixSum[r - 1][c - 1][0]  
+                prefixSum[r][c][0] ← val00 + val01 - val02  
+                LET val10 BE prefixSum[r - 1][c][1]  
+                LET val11 BE prefixSum[r][c - 1][1]  
+                LET val12 BE prefixSum[r - 1][c - 1][1]  
+                prefixSum[r][c][1] ← val10 + val11 - val12  
+                LET ch BE grid[r - 1][c - 1]  
+                IF ch = 'X' THEN  
+                    prefixSum[r][c][0] ← prefixSum[r][c][0] + 1  
+                ELSE IF ch = 'Y' THEN  
+                    prefixSum[r][c][1] ← prefixSum[r][c][1] + 1  
+                END IF  
+                c ← c + 1  
+            END WHILE  
+            r ← r + 1  
+        END WHILE  
+        LET total BE 0  
+        LET i BE 1  
+        WHILE i ≤ numRows DO  
+            LET j BE 1  
+            WHILE j ≤ numCols DO  
+                LET countX BE prefixSum[i][j][0]  
+                LET countY BE prefixSum[i][j][1]  
+                IF countX > 0 AND countX = countY THEN  
+                    total ← total + 1  
+                END IF  
+                j ← j + 1  
+            END WHILE  
+            i ← i + 1  
+        END WHILE  
+        RETURN total  
+    END FUNCTION  
+END CLASS

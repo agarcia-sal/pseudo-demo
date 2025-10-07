@@ -1,0 +1,87 @@
+CLASS Solution
+    FUNCTION numberOfSubarrays(nums)
+LET aMap BE default dictionary mapping to list
+PROCEDURE addToMap(k, v)
+    IF k NOT IN aMap THEN
+        aMap[k] ← empty list
+    END IF
+    APPEND v TO aMap[k]
+END PROCEDURE
+
+DEFINE enumerateList(lst, fn)
+    SET n TO LENGTH(lst)
+    SET r TO 0
+    WHILE r < n DO
+        CALL fn(r, lst[r])
+        SET r TO r + 1
+    END WHILE
+END DEFINE
+
+CALL enumerateList(nums, (x, y) => addToMap(y, x))
+
+LET totalCount ← 0
+
+DEFINE iterIndices(l, cb)
+    SET p ← 0
+    WHILE p < LENGTH(l) DO
+        CALL cb(p)
+        SET p ← p + 1
+    END WHILE
+END DEFINE
+
+DEFINE iterRanges(startIdx, endIdx, fn)
+    SET s ← startIdx
+    WHILE s <= endIdx DO
+        CALL fn(s)
+        SET s ← s + 1
+    END WHILE
+END DEFINE
+
+DEFINE computeMaximum(seg)
+    LET mx ← seg[0]
+    LET idx ← 1
+    WHILE idx < LENGTH(seg) DO
+        IF seg[idx] > mx THEN
+            mx ← seg[idx]
+        END IF
+        idx ← idx + 1
+    END WHILE
+    RETURN mx
+END DEFINE
+
+DEFINE processSubarrays(idxs)
+    LET lengthIndices ← LENGTH(idxs)
+    DEFINE processI(i)
+        DEFINE processJ(j)
+            LET sub ← empty list
+            LET startP ← idxs[i]
+            LET endP ← idxs[j]
+            LET k ← startP
+            WHILE k <= endP DO
+                APPEND nums[k] TO sub
+                k ← k + 1
+            END WHILE
+            LET maxSub ← computeMaximum(sub)
+            IF maxSub = nums[startP] THEN
+                totalCount ← totalCount + 1
+            END IF
+        END DEFINE
+        iterRanges(i, lengthIndices - 1, processJ)
+    END DEFINE
+    iterIndices(idxs, processI)
+END DEFINE
+
+DEFINE iterateMapVals(m)
+    LET keys ← list of all keys in m
+    LET u ← 0
+    WHILE u < LENGTH(keys) DO
+        CALL processSubarrays(m[keys[u]])
+        u ← u + 1
+    END WHILE
+END DEFINE
+
+iterateMapVals(aMap)
+
+RETURN totalCount
+    END FUNCTION
+END CLASS

@@ -1,0 +1,43 @@
+CLASS Solution  
+    FUNCTION minimumTime(n, edges, disappear)  
+        SET adjacency TO an empty mapping defaulting to empty list  
+        FOR each x y w IN edges  
+            APPEND (y, w) TO adjacency[x]  
+            APPEND (x, w) TO adjacency[y]  
+        END FOR  
+        
+        SET dist TO a list of n elements each initialized with positive infinity  
+        SET dist[0] TO 0  
+        
+        SET heap TO list containing (0, 0)  
+        
+        WHILE LENGTH(heap) > 0  
+            EXTRACT minElement FROM heap INTO d, node  
+            
+            IF d >= disappear[node] THEN  
+                CONTINUE  
+            END IF  
+            
+            IF d > dist[node] THEN  
+                CONTINUE  
+            END IF  
+            
+            FOR each adjNode, lengthValue IN adjacency[node]  
+                SET newDist TO d + lengthValue  
+                IF newDist < dist[adjNode] AND newDist < disappear[adjNode] THEN  
+                    SET dist[adjNode] TO newDist  
+                    INSERT (newDist, adjNode) INTO heap PRESERVING heap_property  
+                END IF  
+            END FOR  
+        END WHILE  
+        
+        SET output TO a list of length n filled with -1  
+        FOR index FROM 0 TO n-1  
+            IF dist[index] < disappear[index] THEN  
+                SET output[index] TO dist[index]  
+            END IF  
+        END FOR  
+        
+        RETURN output  
+    END FUNCTION  
+END CLASS

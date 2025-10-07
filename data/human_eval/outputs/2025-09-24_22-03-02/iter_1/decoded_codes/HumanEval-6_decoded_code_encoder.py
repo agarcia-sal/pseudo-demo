@@ -1,0 +1,8 @@
+def parse_nested_parens(s):
+    def parse_group(g):
+        d = m = 0
+        for c in g:
+            d += 1 if c == '(' else -1
+            m = max(m, d)
+        return m
+    return [parse_group(g) for g in s.split() if g]

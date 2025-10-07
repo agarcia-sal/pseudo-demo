@@ -1,0 +1,92 @@
+CLASS TreeNode  
+    FUNCTION __init__(self COMMA val EQUALS 0 COMMA left EQUALS None COMMA right EQUALS None)  
+        self.val = val  
+        self.left = left  
+        self.right = right  
+    END FUNCTION  
+END CLASS  
+
+FUNCTION tree_node(values)  
+    IF NOT values THEN  
+        RETURN None  
+    END IF  
+
+    SET idx TO 1  
+    SET root TO TreeNode(val = values[0])  
+    SET q TO deque()  
+    APPEND root TO q  
+
+    WHILE LENGTH(q) > 0  
+        SET current TO POP_LEFT(q)  
+
+        IF idx < LENGTH(values) THEN  
+            IF values[idx] IS NOT None THEN  
+                SET current.left TO TreeNode(val = values[idx])  
+                APPEND current.left TO q  
+            END IF  
+            idx = idx + 1  
+        END IF  
+
+        IF idx < LENGTH(values) THEN  
+            IF values[idx] IS NOT None THEN  
+                SET current.right TO TreeNode(val = values[idx])  
+                APPEND current.right TO q  
+            END IF  
+            idx = idx + 1  
+        END IF  
+    END WHILE  
+
+    RETURN root  
+END FUNCTION  
+
+FUNCTION is_same_tree(p COMMA q)  
+    IF p IS None THEN  
+        IF q IS None THEN  
+            RETURN True  
+        ELSE  
+            RETURN False  
+        END IF  
+    ELSE IF q IS None THEN  
+        RETURN False  
+    ELSE IF p.val != q.val THEN  
+        RETURN False  
+    END IF  
+
+    RETURN is_same_tree(p.left COMMA q.left) AND is_same_tree(p.right COMMA q.right)  
+END FUNCTION  
+
+CLASS Solution  
+    FUNCTION minimumLevel(self COMMA root)  
+        IF root IS None THEN  
+            RETURN 0  
+        END IF  
+
+        SET q TO deque()  
+        APPEND root TO q  
+        SET min_level TO 1  
+        SET min_sum TO +infinity  
+        SET level TO 1  
+
+        WHILE NOT (LENGTH(q) == 0)  
+            SET level_sum TO 0  
+            SET nodes_count TO LENGTH(q)  
+            SET count TO 0  
+            WHILE count < nodes_count  
+                SET current TO POP_LEFT(q)  
+                level_sum = level_sum + current.val  
+                IF current.left IS NOT None THEN APPEND current.left TO q END IF  
+                IF current.right IS NOT None THEN APPEND current.right TO q END IF  
+                count = count + 1  
+            END WHILE  
+
+            IF level_sum < min_sum THEN  
+                min_sum = level_sum  
+                min_level = level  
+            END IF  
+
+            level = level + 1  
+        END WHILE  
+
+        RETURN min_level  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,26 @@
+```
+FUNCTION select_words(string_s, natural_number_n)
+    SET accumulator TO []
+    SET words_list TO SPLIT string_s BY " "
+    
+    FUNCTION check_consonant_count(curr_word, counter, position, limit)
+        IF position > limit THEN RETURN counter END IF
+        SET char_lower TO LOWERCASE OF curr_word[position]
+        SET is_consonant TO NOT (char_lower IN ["a","e","i","o","u"])
+        RETURN check_consonant_count(curr_word,
+                                     counter + (is_consonant ? 1 : 0),
+                                     position + 1,
+                                     limit)
+    END FUNCTION
+    
+    FUNCTION process_words(index, boundary, collected)
+        IF index >= boundary THEN RETURN collected END IF
+        SET word_candidate TO words_list[index]
+        SET consonants_found TO check_consonant_count(word_candidate, 0, 0, LENGTH OF word_candidate - 1)
+        SET filtered_list TO (consonants_found = natural_number_n) ? collected + [word_candidate] : collected
+        RETURN process_words(index + 1, boundary, filtered_list)
+    END FUNCTION
+    
+    RETURN process_words(0, LENGTH OF words_list, accumulator)
+END FUNCTION
+```

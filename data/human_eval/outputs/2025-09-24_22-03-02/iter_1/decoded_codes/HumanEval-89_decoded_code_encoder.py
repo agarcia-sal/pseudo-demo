@@ -1,0 +1,6 @@
+def encrypt(s):
+    d = "abcdefghijklmnopqrstuvwxyz"
+    out = ""
+    for c in s:
+        out += d[(d.index(c) + 4) % 26] if c in d else c
+    return out

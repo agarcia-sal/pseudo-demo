@@ -1,0 +1,109 @@
+```pseudocode
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        PROCEDURE reheapify(list_to_heap)
+            LET length_counter BE LENGTH(list_to_heap)
+            LET parent_idx BE (length_counter DIV 2) - 1
+            WHILE parent_idx GREATER THAN OR EQUAL TO 0
+                LET child_idx BE 2 * parent_idx + 1
+                LET current_idx BE parent_idx
+                WHILE child_idx LESS THAN length_counter
+                    LET right_child_idx BE child_idx + 1
+                    IF right_child_idx LESS THAN length_counter AND list_to_heap[right_child_idx][0] LESS THAN list_to_heap[child_idx][0]
+                        SET child_idx TO right_child_idx
+                    END IF
+                    IF list_to_heap[current_idx][0] GREATER THAN list_to_heap[child_idx][0]
+                        SWAP list_to_heap[current_idx], list_to_heap[child_idx]
+                        SET current_idx TO child_idx
+                        SET child_idx TO 2 * current_idx + 1
+                    ELSE
+                        BREAK
+                    END IF
+                END WHILE
+                DECREMENT parent_idx BY 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE pop_heap(heap_list) RETURNS tuple
+            LET size_val BE LENGTH(heap_list)
+            IF size_val EQUALS 0
+                RETURN NULL
+            END IF
+            LET popped_element BE heap_list[0]
+            SET heap_list[0] TO heap_list[size_val - 1]
+            REMOVE last element FROM heap_list
+            LET idx_pointer BE 0
+            LET length_heap BE LENGTH(heap_list)
+            LOOP
+                LET left_child BE 2 * idx_pointer + 1
+                LET right_child BE 2 * idx_pointer + 2
+                LET smallest_idx BE idx_pointer
+                IF left_child LESS THAN length_heap AND heap_list[left_child][0] LESS THAN heap_list[smallest_idx][0]
+                    SET smallest_idx TO left_child
+                END IF
+                IF right_child LESS THAN length_heap AND heap_list[right_child][0] LESS THAN heap_list[smallest_idx][0]
+                    SET smallest_idx TO right_child
+                END IF
+                IF smallest_idx NOT EQUAL TO idx_pointer
+                    SWAP heap_list[idx_pointer], heap_list[smallest_idx]
+                    SET idx_pointer TO smallest_idx
+                ELSE
+                    EXIT LOOP
+                END IF
+            END LOOP
+            RETURN popped_element
+        END PROCEDURE
+
+        LET heap_storage BE EMPTY ARRAY
+        LET num_size BE LENGTH(nums)
+        LET enum_pointer BE 0
+        WHILE enum_pointer LESS THAN num_size
+            LET element_val BE nums[enum_pointer]
+            APPEND [element_val + 0, enum_pointer] TO heap_storage
+            ADD 1 TO enum_pointer
+        END WHILE
+
+        CALL reheapify(heap_storage)
+
+        LET visited_indices BE EMPTY SET
+        LET sum_total BE 0
+        LET pos_pointer BE 0
+        WHILE pos_pointer LESS THAN num_size
+            SET sum_total TO sum_total + nums[pos_pointer]
+            INCREMENT pos_pointer BY 1
+        END WHILE
+
+        LET output_list BE EMPTY LIST
+
+        LET q_index BE 0
+        LET q_size BE LENGTH(queries)
+        WHILE q_index LESS THAN q_size
+            LET query_pair BE queries[q_index]
+            LET first_idx BE query_pair[0]
+            LET second_val BE query_pair[1]
+
+            IF NOT (first_idx IN visited_indices)
+                ADD first_idx TO visited_indices
+                SET sum_total TO sum_total - nums[first_idx]
+            END IF
+
+            LET counter_internal BE 0
+            WHILE counter_internal LESS THAN second_val AND LENGTH(heap_storage) GREATER THAN 0
+                LET min_pair BE pop_heap(heap_storage)
+                LET val_extracted BE min_pair[0]
+                LET idx_extracted BE min_pair[1]
+                IF NOT (idx_extracted IN visited_indices)
+                    ADD idx_extracted TO visited_indices
+                    SET sum_total TO sum_total - val_extracted
+                    SET counter_internal TO counter_internal + 1
+                END IF
+            END WHILE
+
+            APPEND sum_total TO output_list
+            SET q_index TO q_index + 1
+        END WHILE
+
+        RETURN output_list
+    END FUNCTION
+END CLASS
+```

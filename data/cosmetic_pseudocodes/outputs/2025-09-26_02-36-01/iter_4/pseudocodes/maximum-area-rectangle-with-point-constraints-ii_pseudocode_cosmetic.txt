@@ -1,0 +1,138 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, n)  
+        DECLARE length AS n PLUS 1  
+        INITIALIZE self.tree AS an array filled with zeros of size length  
+    END FUNCTION  
+
+    FUNCTION add(self, index)  
+        DECLARE idx AS index  
+        WHILE idx IS LESS THAN THE SIZE OF self.tree DO  
+            SET self.tree[idx] TO self.tree[idx] PLUS one  
+            SET temp AS bitwise AND of idx and bitwise NEGATION of idx  
+            SET idx TO idx PLUS temp  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION pre(self, index)  
+        DECLARE total AS 0  
+        DECLARE idx AS index  
+        WHILE idx IS GREATER THAN 0 DO  
+            SET total TO total PLUS self.tree[idx]  
+            SET idx TO bitwise AND of idx and (idx MINUS 1)  
+        END WHILE  
+        RETURN total  
+    END FUNCTION  
+
+    FUNCTION query(self, left, right)  
+        DECLARE preRight AS self.pre(right)  
+        DECLARE preLeftMinusOne AS self.pre(left MINUS 1)  
+        RETURN preRight MINUS preLeftMinusOne  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+        DECLARE zippedPoints AS an empty list  
+        DECLARE i AS 0  
+        WHILE i IS LESS THAN LENGTH OF xCoord DO  
+            APPEND a pair (xCoord[i], yCoord[i]) TO zippedPoints  
+            SET i TO i PLUS 1  
+        END WHILE  
+        SORT zippedPoints INTO ascending order by first element, then second element  
+
+        DECLARE uniqueYsSet AS an empty set  
+        DECLARE j AS 0  
+        WHILE j IS LESS THAN LENGTH OF yCoord DO  
+            ADD yCoord[j] TO uniqueYsSet  
+            SET j TO j PLUS 1  
+        END WHILE  
+        CONVERT uniqueYsSet TO A LIST called ys  
+        SORT ys IN ascending order  
+
+        DECLARE answer AS negative 1  
+
+        INITIALIZE tree AS a Fenwick object WITH LENGTH OF ys  
+
+        DECLARE firstYIndex AS 0  
+        DECLARE leftIndex AS 0  
+        DECLARE rightIndex AS LENGTH OF ys MINUS 1  
+        DECLARE mid AS 0  
+        DECLARE target AS zippedPoints[0][1]  
+        WHILE leftIndex LESS THAN OR EQUAL TO rightIndex DO  
+            SET mid TO (leftIndex PLUS rightIndex) DIVIDED BY 2  
+            IF ys[mid] IS GREATER THAN OR EQUAL TO target THEN  
+                SET rightIndex TO mid MINUS 1  
+            ELSE  
+                SET leftIndex TO mid PLUS 1  
+            END IF  
+        END WHILE  
+        SET firstYIndex TO leftIndex PLUS 1  
+        CALL tree.add(firstYIndex)  
+
+        DECLARE pre AS an empty map/dictionary  
+
+        DECLARE k AS 0  
+        WHILE k IS LESS THAN LENGTH OF zippedPoints MINUS 1 DO  
+            DECLARE x1 AS zippedPoints[k][0]  
+            DECLARE y1 AS zippedPoints[k][1]  
+            DECLARE x2 AS zippedPoints[k PLUS 1][0]  
+            DECLARE y2 AS zippedPoints[k PLUS 1][1]  
+
+            DECLARE leftIdx AS 0  
+            DECLARE rightIdx AS LENGTH OF ys MINUS 1  
+            DECLARE midIdx AS 0  
+            DECLARE targetY AS y2  
+            WHILE leftIdx LESS THAN OR EQUAL TO rightIdx DO  
+                SET midIdx TO (leftIdx PLUS rightIdx) DIVIDED BY 2  
+                IF ys[midIdx] IS GREATER THAN OR EQUAL TO targetY THEN  
+                    SET rightIdx TO midIdx MINUS 1  
+                ELSE  
+                    SET leftIdx TO midIdx PLUS 1  
+                END IF  
+            END WHILE  
+            DECLARE yPos AS leftIdx PLUS 1  
+            CALL tree.add(yPos)  
+
+            IF x1 IS NOT EQUAL TO x2 THEN  
+                SET k TO k PLUS 1  
+                CONTINUE TO NEXT ITERATION  
+            END IF  
+
+            DECLARE queryLeft AS 0  
+            leftIdx = 0  
+            rightIdx = LENGTH OF ys MINUS 1  
+            targetY = y1  
+            WHILE leftIdx LESS THAN OR EQUAL TO rightIdx DO  
+                SET midIdx TO (leftIdx PLUS rightIdx) DIVIDED BY 2  
+                IF ys[midIdx] IS GREATER THAN OR EQUAL TO targetY THEN  
+                    SET rightIdx TO midIdx MINUS 1  
+                ELSE  
+                    SET leftIdx TO midIdx PLUS 1  
+                END IF  
+            END WHILE  
+            queryLeft = leftIdx PLUS 1  
+
+            DECLARE curr AS tree.query(queryLeft, yPos)  
+
+            IF y2 IS A KEY IN pre THEN  
+                DECLARE storedTuple AS pre[y2]  
+                DECLARE storedX AS storedTuple[0]  
+                DECLARE storedY1 AS storedTuple[1]  
+                DECLARE storedCur AS storedTuple[2]  
+                IF storedY1 EQUALS y1 AND storedCur PLUS 2 EQUALS curr THEN  
+                    DECLARE areaWidth AS x2 MINUS storedX  
+                    DECLARE areaHeight AS y2 MINUS y1  
+                    DECLARE candidate AS areaWidth TIMES areaHeight  
+                    IF candidate IS GREATER THAN answer THEN  
+                        SET answer TO candidate  
+                    END IF  
+                END IF  
+            END IF  
+            SET pre[y2] TO A TUPLE composed of x1, y1, curr  
+
+            SET k TO k PLUS 1  
+        END WHILE  
+
+        RETURN answer  
+    END FUNCTION  
+END CLASS

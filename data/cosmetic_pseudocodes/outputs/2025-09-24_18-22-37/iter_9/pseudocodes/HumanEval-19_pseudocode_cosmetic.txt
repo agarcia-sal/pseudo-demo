@@ -1,0 +1,37 @@
+FUNCTION sort_numbers(input_string)
+    SET mapping_dictionary TO DICTIONARY WITH
+        'zero' MAPPED TO 0,
+        'one' MAPPED TO 0 plus 1,
+        'two' MAPPED TO 1 plus 1,
+        'three' MAPPED TO 3,
+        'four' MAPPED TO 4,
+        'five' MAPPED TO 5,
+        'six' MAPPED TO 6,
+        'seven' MAPPED TO 7,
+        'eight' MAPPED TO 8,
+        'nine' MAPPED TO 9
+    SET temporary_list TO EMPTY LIST
+    FOR each_token IN input_string SPLIT BY SPACE DO
+        IF NOT (each_token EQUALS '') THEN
+            ADD each_token TO temporary_list
+        END IF
+    END FOR
+    SET secondary_list TO temporary_list
+    FOR index_var FROM LENGTH(secondary_list) MINUS 1 DOWNTO 1 STEP -1 DO
+        FOR inner_index FROM 0 TO index_var MINUS 1 DO
+            SET first_value TO mapping_dictionary.at(secondary_list.at(inner_index))
+            SET second_value TO mapping_dictionary.at(secondary_list.at(inner_index plus 1))
+            IF NOT (first_value LESS THAN OR EQUAL TO second_value) THEN
+                SET temp_var TO secondary_list.at(inner_index)
+                SET secondary_list.at(inner_index) TO secondary_list.at(inner_index plus 1)
+                SET secondary_list.at(inner_index plus 1) TO temp_var
+            END IF
+        END FOR
+    END FOR
+    SET result_string TO ''
+    FOR position_var FROM 0 TO LENGTH(secondary_list) MINUS 2 DO
+        SET result_string TO result_string CONCAT secondary_list.at(position_var) CONCAT ' '
+    END FOR
+    SET result_string TO result_string CONCAT secondary_list.at(LENGTH(secondary_list) MINUS 1)
+    RETURN result_string
+END FUNCTION

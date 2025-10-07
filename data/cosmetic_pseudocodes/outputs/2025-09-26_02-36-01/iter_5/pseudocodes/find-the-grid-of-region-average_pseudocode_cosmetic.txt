@@ -1,0 +1,122 @@
+CLASS Solution  
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer  
+        SET height TO LENGTH OF image  
+        SET width TO LENGTH OF image AT 0  
+        SET accum TO INITIALIZE LIST OF SIZE height EACH containing LIST OF SIZE width EACH WITH zero  
+        SET freq TO INITIALIZE LIST OF SIZE height EACH containing LIST OF SIZE width EACH WITH zero  
+
+        FUNCTION check_region_validity(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE boolean  
+            FUNCTION recur_i(i_current WITH TYPE integer) WITH RETURN TYPE boolean  
+                IF i_current EQUALS a PLUS 3 THEN  
+                    RETURN True  
+                END IF  
+                FUNCTION recur_j(j_current WITH TYPE integer) WITH RETURN TYPE boolean  
+                    IF j_current EQUALS b PLUS 3 THEN  
+                        RETURN recur_i(i_current PLUS 1)  
+                    END IF  
+                    SET neighbor_offsets TO LIST OF PAIRS: (-1,0), (1,0), (0,-1), (0,1)  
+                    FUNCTION check_neighbor(k WITH TYPE integer) WITH RETURN TYPE boolean  
+                        IF k EQUALS LENGTH OF neighbor_offsets THEN  
+                            RETURN recur_j(j_current PLUS 1)  
+                        END IF  
+                        SET dx TO neighbor_offsets AT k AT 0  
+                        SET dy TO neighbor_offsets AT k AT 1  
+                        SET ni TO i_current PLUS dx  
+                        SET nj TO j_current PLUS dy  
+                        IF ni GREATER THAN OR EQUAL TO 0 AND ni LESS THAN a PLUS 3 AND nj GREATER THAN OR EQUAL TO 0 AND nj LESS THAN b PLUS 3 THEN  
+                            SET diff TO image AT i_current AT j_current MINUS image AT ni AT nj  
+                            IF (diff LESS THAN 0 AND -diff GREATER THAN threshold) OR (diff GREATER THAN 0 AND diff GREATER THAN threshold) THEN  
+                                RETURN False  
+                            END IF  
+                        END IF  
+                        RETURN check_neighbor(k PLUS 1)  
+                    END FUNCTION  
+                    RETURN check_neighbor(0)  
+                END FUNCTION  
+                RETURN recur_j(b)  
+            END FUNCTION  
+            RETURN recur_i(a)  
+        END FUNCTION  
+
+        FUNCTION compute_avg(p WITH TYPE integer q WITH TYPE integer) WITH RETURN TYPE integer  
+            FUNCTION sum_i(idx_i WITH TYPE integer total_sum WITH TYPE integer) WITH RETURN TYPE integer  
+                IF idx_i EQUALS p PLUS 3 THEN  
+                    RETURN total_sum  
+                END IF  
+                FUNCTION sum_j(idx_j WITH TYPE integer acc WITH TYPE integer) WITH RETURN TYPE integer  
+                    IF idx_j EQUALS q PLUS 3 THEN  
+                        RETURN sum_i(idx_i PLUS 1, acc)  
+                    END IF  
+                    SET updated_acc TO acc PLUS image AT idx_i AT idx_j  
+                    RETURN sum_j(idx_j PLUS 1, updated_acc)  
+                END FUNCTION  
+                RETURN sum_j(q, total_sum)  
+            END FUNCTION  
+            SET total_sum TO sum_i(p, 0)  
+            SET divisor TO 9  
+            RETURN total_sum DIVIDED BY divisor  
+        END FUNCTION  
+
+        FUNCTION outer_loop_i(ii WITH TYPE integer) WITH RETURN TYPE void  
+            IF ii GREATER THAN height MINUS 3 THEN  
+                RETURN  
+            END IF  
+            FUNCTION outer_loop_j(jj WITH TYPE integer) WITH RETURN TYPE void  
+                IF jj GREATER THAN width MINUS 3 THEN  
+                    RETURN  
+                END IF  
+                SET valid_region_flag TO check_region_validity(ii, jj)  
+                IF valid_region_flag EQUALS True THEN  
+                    SET avg_val TO compute_avg(ii, jj)  
+                    FUNCTION update_region(u WITH TYPE integer) WITH RETURN TYPE void  
+                        IF u EQUALS ii PLUS 3 THEN  
+                            RETURN  
+                        END IF  
+                        FUNCTION update_col(v WITH TYPE integer) WITH RETURN TYPE void  
+                            IF v EQUALS jj PLUS 3 THEN  
+                                RETURN  
+                            END IF  
+                            SET accum_u_v TO accum AT u AT v  
+                            SET freq_u_v TO freq AT u AT v  
+                            SET accum_u_v TO accum_u_v PLUS avg_val  
+                            SET freq_u_v TO freq_u_v PLUS 1  
+                            SET accum AT u AT v TO accum_u_v  
+                            SET freq AT u AT v TO freq_u_v  
+                            update_col(v PLUS 1)  
+                        END FUNCTION  
+                        update_col(jj)  
+                        update_region(u PLUS 1)  
+                    END FUNCTION  
+                    update_region(ii)  
+                END IF  
+                outer_loop_j(jj PLUS 1)  
+            END FUNCTION  
+            outer_loop_j(0)  
+            outer_loop_i(ii PLUS 1)  
+        END FUNCTION  
+        outer_loop_i(0)  
+
+        FUNCTION finalize_rows(r WITH TYPE integer) WITH RETURN TYPE void  
+            IF r EQUALS height THEN  
+                RETURN  
+            END IF  
+            FUNCTION finalize_cols(c WITH TYPE integer) WITH RETURN TYPE void  
+                IF c EQUALS width THEN  
+                    RETURN  
+                END IF  
+                IF freq AT r AT c GREATER THAN 0 THEN  
+                    SET accum AT r AT c TO accum AT r AT c DIVIDED BY freq AT r AT c  
+                ELSE  
+                    SET accum AT r AT c TO image AT r AT c  
+                END IF  
+                finalize_cols(c PLUS 1)  
+            END FUNCTION  
+            finalize_cols(0)  
+            finalize_rows(r PLUS 1)  
+        END FUNCTION  
+        finalize_rows(0)  
+
+        SET output TO accum  
+        RETURN output  
+    END FUNCTION  
+END CLASS

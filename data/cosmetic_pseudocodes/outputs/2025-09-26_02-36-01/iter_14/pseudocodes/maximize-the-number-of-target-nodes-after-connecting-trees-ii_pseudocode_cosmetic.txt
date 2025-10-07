@@ -1,0 +1,104 @@
+```
+CLASS Solution
+    FUNCTION maxTargetNodes(edges1, edges2)
+        SET mapA TO new default dictionary with default value as list
+        SET mapB TO new default dictionary with default value as list
+
+        SET iterator1 TO 0
+        REPEAT LENGTH(edges1) TIMES
+            SET elemX TO edges1[iterator1][0]
+            SET elemY TO edges1[iterator1][1]
+
+            APPEND elemY TO mapA[elemX]
+            APPEND elemX TO mapA[elemY]
+
+            INCREMENT iterator1 BY 1
+        UNTIL iterator1 EQUALS LENGTH(edges1)
+
+        SET iterator2 TO 0
+        REPEAT LENGTH(edges2) TIMES
+            SET nodeP TO edges2[iterator2][0]
+            SET nodeQ TO edges2[iterator2][1]
+
+            APPEND nodeQ TO mapB[nodeP]
+            APPEND nodeP TO mapB[nodeQ]
+
+            INCREMENT iterator2 BY 1
+        UNTIL iterator2 EQUALS LENGTH(edges2)
+
+        SET sizeA TO COUNT_KEYS(mapA)
+        SET sizeB TO COUNT_KEYS(mapB)
+
+        FUNCTION breadthFirstSearch(graph, origin)
+            SET countEven TO 0
+            SET countOdd TO 0
+            SET dequeList TO new deque containing tuple(origin, 0)
+            SET visitedSet TO set containing origin
+
+            FUNCTION dequeueItem()
+                REMOVE first element FROM dequeList AND RETURN AS tuple currentNode, distanceValue
+            END FUNCTION
+
+            WHILE LENGTH(dequeList) GREATER THAN 0
+                SET currentNode, distanceValue TO dequeueItem()
+                IF (distanceValue MOD 2) EQUALS 0 THEN
+                    SET countEven TO countEven PLUS 1
+                ELSE
+                    SET countOdd TO countOdd PLUS 1
+                END IF
+
+                FOR EACH adjNode IN graph[currentNode]
+                    IF adjNode NOT IN visitedSet THEN
+                        ADD adjNode TO visitedSet
+                        APPEND tuple(adjNode, distanceValue PLUS 1) TO dequeList
+                    END IF
+                END FOR
+            END WHILE
+
+            RETURN countEven, countOdd
+        END FUNCTION
+
+        SET resultsListA TO empty list
+        SET indexA TO 0
+        WHILE indexA LESS THAN sizeA
+            APPEND breadthFirstSearch(mapA, indexA) TO resultsListA
+            INCREMENT indexA BY 1
+        END WHILE
+
+        SET resultsListB TO empty list
+        SET indexB TO 0
+        WHILE indexB LESS THAN sizeB
+            APPEND breadthFirstSearch(mapB, indexB) TO resultsListB
+            INCREMENT indexB BY 1
+        END WHILE
+
+        SET finalResults TO empty list
+        SET posA TO 0
+        WHILE posA LESS THAN sizeA
+            SET currEvenA, currOddA TO resultsListA[posA]
+            SET maxVal TO 0
+            SET posB TO 0
+
+            PERFORM
+                SET evenB, oddB TO resultsListB[posB]
+                IF (posA EQUALS posB) OR ((posA MOD 2) EQUALS (posB MOD 2)) THEN
+                    SET candidate TO evenB
+                ELSE
+                    SET candidate TO oddB
+                END IF
+
+                IF candidate GREATER THAN maxVal THEN
+                    SET maxVal TO candidate
+                END IF
+
+                INCREMENT posB BY 1
+            UNTIL posB EQUALS sizeB
+
+            APPEND (currEvenA PLUS maxVal) TO finalResults
+            INCREMENT posA BY 1
+        END WHILE
+
+        RETURN finalResults
+    END FUNCTION
+END CLASS
+```

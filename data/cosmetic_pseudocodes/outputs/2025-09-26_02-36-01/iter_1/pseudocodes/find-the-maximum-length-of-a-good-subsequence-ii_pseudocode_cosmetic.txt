@@ -1,0 +1,49 @@
+CLASS Solution  
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)  
+        LET length BE LENGTH OF nums  
+        LET dp BE A LIST of length ELEMENTS, each IS A LIST of (k+1) ZEROS  
+        LET dicts BE A LIST of (k+1) ELEMENTS, each IS A DICTIONARY WITH DEFAULT VALUE 0  
+        LET top_three BE A LIST of (k+1) ELEMENTS, each IS A LIST WITH [None, 0, 0]  
+        LET result BE 0  
+        
+        FOR idx FROM 0 TO length MINUS 1 DO  
+            LET val BE nums AT idx  
+            FOR count FROM 0 TO k DO  
+                dp[idx][count] = dicts[count].GET(val, 0)  
+                
+                IF count > 0 THEN  
+                    LET prev_val, first_max, second_max = top_three[count - 1]  
+                    IF prev_val IS NOT EQUAL TO val THEN  
+                        dp[idx][count] = MAX(dp[idx][count], first_max)  
+                    ELSE  
+                        dp[idx][count] = MAX(dp[idx][count], second_max)  
+                    END IF  
+                END IF  
+                
+                dp[idx][count] = dp[idx][count] + 1  
+                
+                IF val NOT IN dicts[count] OR dicts[count][val] < dp[idx][count] THEN  
+                    dicts[count][val] = dp[idx][count]  
+                END IF  
+                
+                LET current_first, current_second, current_third = top_three[count]  
+                
+                IF current_first IS NOT val THEN  
+                    IF dp[idx][count] >= current_second THEN  
+                        top_three[count][2] = current_second  
+                        top_three[count][1] = dp[idx][count]  
+                        top_three[count][0] = val  
+                    ELSE  
+                        top_three[count][2] = MAX(current_third, dp[idx][count])  
+                    END IF  
+                ELSE  
+                    top_three[count][1] = MAX(current_second, dp[idx][count])  
+                END IF  
+                
+                result = MAX(result, dp[idx][count])  
+            END FOR  
+        END FOR  
+        
+        RETURN result  
+    END FUNCTION  
+END CLASS

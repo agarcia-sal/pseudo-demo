@@ -1,0 +1,57 @@
+CLASS Solution  
+    FUNCTION findPattern(board, pattern)  
+        SET height TO LENGTH(board)  
+        SET width TO LENGTH(board[0])  
+        SET p_height TO LENGTH(pattern)  
+        SET p_width TO LENGTH(pattern[0])  
+        
+        FUNCTION matches(row, col)  
+            SET mapCharToDigit TO empty dictionary  
+            SET mapDigitToChar TO empty dictionary  
+            
+            SET idxRow TO 0  
+            WHILE idxRow <= p_height - 1  
+                SET idxCol TO 0  
+                WHILE idxCol <= p_width - 1  
+                    SET patChar TO pattern[idxRow][idxCol]  
+                    SET brdVal TO board[row + idxRow][col + idxCol]  
+                    
+                    IF (patChar >= "0") AND (patChar <= "9") THEN  
+                        IF (NUMBER(patChar) != brdVal) THEN  
+                            RETURN False  
+                        END IF  
+                    ELSE  
+                        IF patChar IN mapCharToDigit THEN  
+                            IF mapCharToDigit[patChar] != brdVal THEN  
+                                RETURN False  
+                            END IF  
+                        ELSE  
+                            IF brdVal IN mapDigitToChar THEN  
+                                RETURN False  
+                            END IF  
+                            SET mapCharToDigit[patChar] = brdVal  
+                            SET mapDigitToChar[brdVal] = patChar  
+                        END IF  
+                    END IF  
+                    idxCol = idxCol + 1  
+                END WHILE  
+                idxRow = idxRow + 1  
+            END WHILE  
+            RETURN True  
+        END FUNCTION  
+        
+        SET rIndex TO 0  
+        WHILE rIndex < height - (p_height - 1)  
+            SET cIndex TO 0  
+            WHILE cIndex < width - (p_width - 1)  
+                IF matches(rIndex, cIndex) THEN  
+                    RETURN [rIndex, cIndex]  
+                END IF  
+                cIndex = cIndex + 1  
+            END WHILE  
+            rIndex = rIndex + 1  
+        END WHILE  
+        
+        RETURN [-1, -1]  
+    END FUNCTION  
+END CLASS

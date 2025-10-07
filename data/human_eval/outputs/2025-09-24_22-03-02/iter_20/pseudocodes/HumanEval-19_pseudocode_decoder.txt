@@ -1,0 +1,55 @@
+FUNCTION sort_numbers WITH PARAMETER numbers AS str RETURNS str
+    SET value_map AS DICTIONARY WITH ELEMENTS
+        'zero' EQUALS 0,
+        'one' EQUALS 1,
+        'two' EQUALS 2,
+        'three' EQUALS 3,
+        'four' EQUALS 4,
+        'five' EQUALS 5,
+        'six' EQUALS 6,
+        'seven' EQUALS 7,
+        'eight' EQUALS 8,
+        'nine' EQUALS 9
+    SET split_numbers AS LIST WITH ELEMENTS EMPTY
+    SET temp_string AS EMPTY STRING
+    SET index AS 0
+    WHILE index LESS THAN LENGTH OF numbers
+        IF CHARACTER AT numbers[index] EQUALS SPACE
+            IF temp_string NOT EQUALS EMPTY STRING
+                APPEND temp_string TO split_numbers
+                SET temp_string AS EMPTY STRING
+            END IF
+        ELSE
+            SET temp_string AS CONCATENATE temp_string PLUS CHARACTER AT numbers[index]
+        END IF
+        INCREMENT index BY 1
+    END WHILE
+    IF temp_string NOT EQUALS EMPTY STRING
+        APPEND temp_string TO split_numbers
+    END IF
+    SET filtered_numbers AS LIST WITH ELEMENTS EMPTY
+    SET i AS 0
+    WHILE i LESS THAN LENGTH OF split_numbers
+        IF split_numbers[i] NOT EQUALS EMPTY STRING
+            APPEND split_numbers[i] TO filtered_numbers
+        END IF
+        INCREMENT i BY 1
+    END WHILE
+    SET length_filtered AS LENGTH OF filtered_numbers
+    FOR outer_index FROM 0 TO length_filtered MINUS 2
+        FOR inner_index FROM 0 TO length_filtered MINUS 2 MINUS outer_index
+            IF value_map[filtered_numbers[inner_index]] GREATER THAN value_map[filtered_numbers[inner_index PLUS 1]]
+                SET temp AS filtered_numbers[inner_index]
+                SET filtered_numbers[inner_index] AS filtered_numbers[inner_index PLUS 1]
+                SET filtered_numbers[inner_index PLUS 1] AS temp
+            END IF
+        END FOR
+    END FOR
+    SET result AS EMPTY STRING
+    FOR j FROM 0 TO length_filtered MINUS 1
+        SET result AS CONCATENATE result PLUS filtered_numbers[j]
+        IF j LESS THAN length_filtered MINUS 1
+            SET result AS CONCATENATE result PLUS SPACE
+        END IF
+    END FOR
+    RETURN result

@@ -1,0 +1,101 @@
+CLASS Solution  
+	FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer  
+		SET u TO LENGTH OF image  
+		SET v TO LENGTH OF ELEMENT AT 0 OF image  
+		SET alpha TO A LIST OF u ELEMENTS EACH BEING A LIST OF v ZEROS  
+		SET beta TO A LIST OF u ELEMENTS EACH BEING A LIST OF v ZEROS  
+		
+		FUNCTION checkRegion(p WITH TYPE integer q WITH TYPE integer) WITH RETURN TYPE boolean  
+			DEFINE neighborhood AS LIST OF PAIRS: (−1,0), (1,0), (0,−1), (0,1)  
+			
+			DEFINE recursive_i(r WITH TYPE integer s WITH TYPE integer) WITH RETURN TYPE boolean  
+				IF r EQUALS p + 3 THEN RETURN True END IF  
+				DEFINE recursive_j(t WITH TYPE integer) WITH RETURN TYPE boolean  
+					IF t EQUALS q + 3 THEN RETURN recursive_i(r + 1, s) END IF  
+					SET rr TO r  
+					SET ss TO t  
+					DEFINE recursive_dx_dy(index WITH TYPE integer) WITH RETURN TYPE boolean  
+						IF index EQUALS LENGTH OF neighborhood THEN RETURN recursive_j(t + 1) END IF  
+						SET offX TO ELEMENT AT index OF neighborhood AT 0  
+						SET offY TO ELEMENT AT index OF neighborhood AT 1  
+						SET nx TO rr + offX  
+						SET ny TO ss + offY  
+						IF nx GREATER THAN OR EQUAL TO p AND nx LESS THAN p + 3 AND ny GREATER THAN OR EQUAL TO q AND ny LESS THAN q + 3 THEN  
+							IF ABS(ELEMENT AT rr OF image AT ss MINUS ELEMENT AT nx OF image AT ny) GREATER THAN threshold THEN RETURN False END IF  
+						END IF  
+						RETURN recursive_dx_dy(index + 1)  
+					END FUNCTION  
+					RETURN recursive_dx_dy(0)  
+				END FUNCTION  
+				RETURN recursive_j(s)  
+			END FUNCTION  
+			
+			RETURN recursive_i(p,q)  
+		END FUNCTION  
+		
+		FUNCTION avgValue(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE integer  
+			SET acc TO 0  
+			SET i_inner TO x  
+			WHILE i_inner LESS THAN x + 3 DO  
+				SET j_inner TO y  
+				WHILE j_inner LESS THAN y + 3 DO  
+					SET acc TO acc + ELEMENT AT i_inner OF image AT j_inner  
+					SET j_inner TO j_inner + 1  
+				END WHILE  
+				SET i_inner TO i_inner + 1  
+			END WHILE  
+			RETURN acc DIVIDED BY 9  
+		END FUNCTION  
+		
+		SET outer_i TO 0  
+		REPEAT  
+			IF NOT (outer_i LESS THAN u - 2) THEN EXIT END IF  
+			SET outer_j TO 0  
+			REPEAT  
+				IF NOT (outer_j LESS THAN v - 2) THEN EXIT END IF  
+				IF checkRegion(outer_i, outer_j) THEN  
+					SET avg_r TO avgValue(outer_i, outer_j)  
+					SET xx TO outer_i  
+					REPEAT  
+						IF NOT (xx LESS THAN outer_i + 3) THEN EXIT END IF  
+						SET yy TO outer_j  
+						REPEAT  
+							IF NOT (yy LESS THAN outer_j + 3) THEN EXIT END IF  
+							SET alpha_x_y TO ELEMENT AT xx OF alpha AT yy  
+							SET beta_x_y TO ELEMENT AT xx OF beta AT yy  
+							SET alpha_x_y TO alpha_x_y + avg_r  
+							SET beta_x_y TO beta_x_y + 1  
+							REPLACE ELEMENT AT xx OF alpha AT yy WITH alpha_x_y  
+							REPLACE ELEMENT AT xx OF beta AT yy WITH beta_x_y  
+							SET yy TO yy + 1  
+						END REPEAT  
+						SET xx TO xx + 1  
+					END REPEAT  
+				END IF  
+				SET outer_j TO outer_j + 1  
+			END REPEAT  
+			SET outer_i TO outer_i + 1  
+		END REPEAT  
+		
+		SET final_i TO 0  
+		REPEAT  
+			IF NOT (final_i LESS THAN u) THEN EXIT END IF  
+			SET final_j TO 0  
+			REPEAT  
+				IF NOT (final_j LESS THAN v) THEN EXIT END IF  
+				IF ELEMENT AT final_i OF beta AT final_j GREATER THAN 0 THEN  
+					SET result_val TO ELEMENT AT final_i OF alpha AT final_j  
+					SET count_val TO ELEMENT AT final_i OF beta AT final_j  
+					SET new_val TO result_val DIVIDED BY count_val  
+					REPLACE ELEMENT AT final_i OF alpha AT final_j WITH new_val  
+				ELSE  
+					REPLACE ELEMENT AT final_i OF alpha AT final_j WITH ELEMENT AT final_i OF image AT final_j  
+				END IF  
+				SET final_j TO final_j + 1  
+			END REPEAT  
+			SET final_i TO final_i + 1  
+		END REPEAT  
+		
+		RETURN alpha  
+	END FUNCTION  
+END CLASS

@@ -1,0 +1,51 @@
+CLASS Solution
+	FUNCTION maximumPoints(enemyEnergies currentEnergy)
+		DEFINE FUNCTION partition(arr low high)
+			IF NOT (low < high)
+				RETURN
+			END IF
+			define pivotIndex = low
+			define leftCursor = low + 1
+			define rightCursor = high
+			WHILE leftCursor <= rightCursor
+				IF arr[leftCursor] > arr[pivotIndex]
+					SWAP arr[leftCursor] WITH arr[rightCursor]
+					rightCursor = rightCursor - 1
+				ELSE
+					leftCursor = leftCursor + 1
+				END IF
+			END WHILE
+			SWAP arr[pivotIndex] WITH arr[rightCursor]
+			partition(arr low rightCursor - 1)
+			partition(arr rightCursor + 1 high)
+		END FUNCTION
+
+		partition(enemyEnergies 0 (LENGTH(enemyEnergies) - 1))
+
+		DEFINE FUNCTION localZero()
+			RETURN 0
+		END FUNCTION
+
+		IF currentEnergy < enemyEnergies[0]
+			RETURN localZero()
+		END IF
+
+		define accumulator = 0
+		define cursor = LENGTH(enemyEnergies) - 1
+
+		DEFINE FUNCTION loopRecursive(index acc energy)
+			IF index < 0
+				RETURN acc
+			END IF
+			define divResult = energy / enemyEnergies[0]
+			define modResult = energy % enemyEnergies[0]
+			define newAcc = acc + divResult
+			define newEnergy = modResult + enemyEnergies[index]
+			RETURN loopRecursive(index - 1 newAcc newEnergy)
+		END FUNCTION
+
+		accumulator = loopRecursive(cursor accumulator currentEnergy)
+
+		RETURN accumulator
+	END FUNCTION
+END CLASS

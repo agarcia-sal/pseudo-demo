@@ -1,0 +1,87 @@
+CLASS Solution
+    FUNCTION maximumTotalDamage(power)
+        SET frequency_map TO empty mapping
+        SET idx TO 0
+        WHILE idx < LENGTH(power)
+            SET val TO power[idx]
+            IF val IN frequency_map
+                SET frequency_map[val] TO frequency_map[val] + 1
+            ELSE
+                SET frequency_map[val] TO 1
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+
+        SET sorted_keys TO EMPTY LIST
+        FOR key IN frequency_map
+            APPEND key TO sorted_keys
+        END FOR
+
+        SET n TO LENGTH(sorted_keys)
+
+        SET i TO 0
+        REPEAT
+            SET j TO i + 1
+            WHILE j < n
+                IF sorted_keys[i] > sorted_keys[j]
+                    SET temp TO sorted_keys[i]
+                    SET sorted_keys[i] TO sorted_keys[j]
+                    SET sorted_keys[j] TO temp
+                END IF
+                SET j TO j + 1
+            END WHILE
+            SET i TO i + 1
+        UNTIL i >= n - 1
+
+        SET dp_map TO empty mapping
+
+        SET m TO 0
+        WHILE m < n
+            SET current_key TO sorted_keys[m]
+
+            IF m > 0 THEN
+                IF sorted_keys[m - 1] IN dp_map THEN
+                    SET exclude_val TO dp_map[sorted_keys[m - 1]]
+                ELSE
+                    SET exclude_val TO 0
+                END IF
+            ELSE
+                SET exclude_val TO 0
+            END IF
+
+            SET include_val TO current_key * frequency_map[current_key]
+
+            SET l TO m - 1
+            REPEAT
+                IF l < 0
+                    BREAK
+                END IF
+                IF sorted_keys[l] < current_key - 1
+                    BREAK
+                END IF
+                SET l TO l - 1
+            UNTIL FALSE
+
+            IF l >= 0 AND sorted_keys[l] IN dp_map THEN
+                SET include_val TO include_val + dp_map[sorted_keys[l]]
+            END IF
+
+            IF include_val > exclude_val THEN
+                SET dp_map[current_key] TO include_val
+            ELSE
+                SET dp_map[current_key] TO exclude_val
+            END IF
+
+            SET m TO m + 1
+        END WHILE
+
+        SET max_damage TO 0
+        FOR value IN dp_map
+            IF value > max_damage THEN
+                SET max_damage TO value
+            END IF
+        END FOR
+
+        RETURN max_damage
+    END FUNCTION
+END CLASS

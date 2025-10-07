@@ -1,0 +1,124 @@
+CLASS Solution
+    FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+        FUNCTION incrementBits(bitCount LIST OF integers val integer diff integer)
+            SET bitPosition TO 0
+            FUNCTION mulByTwo(x integer) RETURNS integer
+                RETURN x + x
+            END FUNCTION
+            SET bitFlag TO 1
+            REPEAT
+                IF (val AND bitFlag) NOT EQUAL TO 0 THEN
+                    SET bitCount[bitPosition] TO bitCount[bitPosition] + diff
+                END IF
+                SET bitFlag TO mulByTwo(bitFlag)
+                SET bitPosition TO bitPosition + 1
+            UNTIL bitPosition >= 32
+        END FUNCTION
+
+        FUNCTION gatherOr(bitsCount LIST OF integers) RETURNS integer
+            SET resultToZero TO 0
+            FUNCTION shiftOneLeft(pos integer) RETURNS integer
+                IF pos = 0 THEN
+                    RETURN 1
+                ELSE
+                    RETURN 2 * shiftOneLeft(pos - 1)
+                END IF
+            END FUNCTION
+
+            SET indexTracker TO 0
+            WHILE indexTracker < 32
+                IF bitsCount[indexTracker] > 0 THEN
+                    SET resultToZero TO resultToZero OR shiftOneLeft(indexTracker)
+                END IF
+                SET indexTracker TO indexTracker + 1
+            END WHILE
+            RETURN resultToZero
+        END FUNCTION
+
+        FUNCTION lessThan(a integer b integer) RETURNS boolean
+            RETURN NOT (a >= b)
+        END FUNCTION
+
+        SET sizeOfList TO 0
+        WHILE true
+            IF sizeOfList >= LENGTH(nums) THEN
+                BREAK
+            END IF
+            SET sizeOfList TO sizeOfList + 1
+        END WHILE
+
+        SET bitsCounter TO []
+        FUNCTION fillWithZeroes(count integer)
+            IF count <= 0 THEN RETURN ENDIF
+            SET cIndex TO 0
+            WHILE cIndex < count
+                bitsCounter APPEND 0
+                SET cIndex TO cIndex + 1
+            END WHILE
+        END FUNCTION
+        CALL fillWithZeroes(32)
+
+        SET collectedOr TO 0
+        SET windowStart TO 0
+
+        FUNCTION infiniteVal() RETURNS integer
+            RETURN 1 / 0
+        END FUNCTION
+        SET minimumSubLen TO infiniteVal()
+
+        FUNCTION addOne(x integer) RETURNS integer
+            RETURN x + 1
+        END FUNCTION
+
+        FUNCTION subtractOne(x integer) RETURNS integer
+            RETURN x - 1
+        END FUNCTION
+
+        SET pointerRight TO 0
+
+        LABEL loop_right_start
+        IF NOT lessThan(pointerRight, sizeOfList) THEN
+            GOTO loop_right_end
+        END IF
+
+        CALL incrementBits(bitsCounter, nums[pointerRight], 1)
+
+        FUNCTION bitwiseOr(a integer b integer) RETURNS integer
+            RETURN a OR b
+        END FUNCTION
+        SET collectedOr TO bitwiseOr(collectedOr, nums[pointerRight])
+
+        LABEL inner_while_check
+        FUNCTION conditionMet(a integer b integer) RETURNS boolean
+            RETURN a >= b
+        END FUNCTION
+
+        IF conditionMet(collectedOr, k) AND (windowStart <= pointerRight) THEN
+            IF minimumSubLen > ((pointerRight - windowStart) + 1) THEN
+                SET minimumSubLen TO (pointerRight - windowStart) + 1
+            END IF
+
+            CALL incrementBits(bitsCounter, nums[windowStart], -1)
+
+            SET collectedOr TO gatherOr(bitsCounter)
+
+            SET windowStart TO addOne(windowStart)
+            GOTO inner_while_check
+        END IF
+
+        SET pointerRight TO addOne(pointerRight)
+        GOTO loop_right_start
+
+        LABEL loop_right_end
+
+        FUNCTION isInfinity(x integer) RETURNS boolean
+            RETURN x = infiniteVal()
+        END FUNCTION
+
+        IF isInfinity(minimumSubLen) THEN
+            RETURN -1
+        ELSE
+            RETURN minimumSubLen
+        END IF
+    END FUNCTION
+END CLASS

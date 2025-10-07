@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION tripletCount(a AS List OF integer, b AS List OF integer, c AS List OF integer) RETURNS integer
+
+        FUNCTION count_even_odd_bits(arr AS List OF integer) RETURNS tuple OF integer and integer
+            FUNCTION bits_set_count(n AS integer) RETURNS integer
+                SET acc TO 0
+                WHILE n > 0 DO
+                    SET acc TO acc + (n AND 1)
+                    SET n TO n DIV 2
+                END WHILE
+                RETURN acc
+            END FUNCTION
+
+            SET total_length TO LENGTH(arr)
+            SET acc_even TO 0
+            SET idx_rec TO 0
+
+            FUNCTION loop_rec(i AS integer)
+                IF i = total_length THEN RETURN END IF
+                SET tmp TO bits_set_count(arr[i])
+                IF (tmp MOD 2) = 0 THEN
+                    SET acc_even TO acc_even + 1
+                END IF
+                CALL loop_rec(i + 1)
+            END FUNCTION
+
+            CALL loop_rec(idx_rec)
+            SET acc_odd TO total_length - acc_even
+            RETURN acc_even AND acc_odd
+        END FUNCTION
+
+        SET ea TO 0
+        SET oa TO 0
+        SET eb TO 0
+        SET ob TO 0
+        SET ec TO 0
+        SET oc TO 0
+
+        FUNCTION decompose_counts()
+            SET tempa TO count_even_odd_bits(a)
+            SET ea TO tempa[0]
+            SET oa TO tempa[1]
+
+            SET tempb TO count_even_odd_bits(b)
+            SET eb TO tempb[0]
+            SET ob TO tempb[1]
+
+            SET tempc TO count_even_odd_bits(c)
+            SET ec TO tempc[0]
+            SET oc TO tempc[1]
+        END FUNCTION
+
+        CALL decompose_counts()
+
+        FUNCTION multiply(x AS integer, y AS integer, z AS integer) RETURNS integer
+            RETURN (x * y) * z
+        END FUNCTION
+
+        SET part_one TO multiply(ea, eb, ec)
+        SET part_two TO multiply(ea, ob, oc) + multiply(oa, eb, oc) + multiply(oa, ob, ec)
+
+        SET final_res TO part_one + part_two
+
+        RETURN final_res
+    END FUNCTION
+END CLASS

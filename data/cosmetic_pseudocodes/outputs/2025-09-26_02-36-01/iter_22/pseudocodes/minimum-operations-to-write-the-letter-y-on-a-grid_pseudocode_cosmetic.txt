@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        SET lengthVar TO LENGTH OF grid
+        SET halfIndex TO lengthVar DIVIDED BY 2
+        SET coordSet TO EMPTY SET
+
+        SET indexVar TO 0
+        WHILE indexVar <= halfIndex
+            INSERT (indexVar, indexVar) INTO coordSet
+            INCREMENT indexVar BY 1
+        END WHILE
+
+        SET iteratorVar TO 0
+        WHILE iteratorVar <= halfIndex
+            INSERT (iteratorVar, (lengthVar - iteratorVar) - 1) INTO coordSet
+            SET iteratorVar TO iteratorVar + 1
+        END WHILE
+
+        SET posVar TO halfIndex
+        REPEAT
+            INSERT (posVar, halfIndex) INTO coordSet
+            SET posVar TO posVar + 1
+        UNTIL posVar > (lengthVar - 1)
+
+        FUNCTION countValuesAtPositions(gridInput, positions)
+            SET countMap TO MAP WITH DEFAULT 0
+            FOR EACH rowIter FROM 0 TO LENGTH OF gridInput - 1
+                FOR EACH colIter FROM 0 TO LENGTH OF gridInput[rowIter] - 1
+                    IF (rowIter, colIter) IN positions THEN
+                        LET val TO gridInput[rowIter][colIter]
+                        SET countMap[val] TO countMap[val] + 1
+                    END IF
+                END FOR
+            END FOR
+            RETURN countMap
+        END FUNCTION
+
+        FUNCTION countValuesNotAtPositions(gridInput, positions)
+            SET countStorage TO MAP WITH DEFAULT 0
+            FOR rowIter FROM 0 TO LENGTH OF gridInput - 1
+                FOR colIter FROM 0 TO LENGTH OF gridInput[rowIter] - 1
+                    IF NOT ((rowIter, colIter) IN positions) THEN
+                        LET elementVal TO gridInput[rowIter][colIter]
+                        SET countStorage[elementVal] TO countStorage[elementVal] + 1
+                    END IF
+                END FOR
+            END FOR
+            RETURN countStorage
+        END FUNCTION
+
+        SET yCountMap TO countValuesAtPositions(grid, coordSet)
+        SET nonYCountMap TO countValuesNotAtPositions(grid, coordSet)
+
+        SET minimalOps TO +∞
+        SET outerCounter TO 0
+        WHILE outerCounter <= 2
+            SET innerCounter TO 0
+            REPEAT
+                IF outerCounter ≠ innerCounter THEN
+                    SET ySum TO 0
+                    FOR eachKey IN yCountMap KEYS DO
+                        SET ySum TO ySum + yCountMap[eachKey]
+                    END FOR
+                    SET yRemaining TO ySum - (yCountMap[outerCounter] IF outerCounter EXISTS IN yCountMap ELSE 0)
+
+                    SET nonYSum TO 0
+                    FOR eachKey IN nonYCountMap KEYS DO
+                        SET nonYSum TO nonYSum + nonYCountMap[eachKey]
+                    END FOR
+                    SET nonYRemaining TO nonYSum - (nonYCountMap[innerCounter] IF innerCounter EXISTS IN nonYCountMap ELSE 0)
+
+                    SET combinationOps TO yRemaining + nonYRemaining
+                    IF combinationOps < minimalOps THEN
+                        SET minimalOps TO combinationOps
+                    END IF
+                END IF
+                INCREMENT innerCounter BY 1
+            UNTIL innerCounter > 2
+            SET outerCounter TO outerCounter + 1
+        END WHILE
+
+        RETURN minimalOps
+    END FUNCTION
+END CLASS

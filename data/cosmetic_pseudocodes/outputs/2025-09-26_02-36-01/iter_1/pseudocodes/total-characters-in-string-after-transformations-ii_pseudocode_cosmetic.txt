@@ -1,0 +1,58 @@
+CLASS Solution  
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer  
+        SET MOD TO 10^9 + 1  
+
+        DECLARE transformation_matrix AS 26x26 matrix initialized with zeros  
+        FOR letter_idx FROM 0 TO 25  
+            FOR step FROM 0 TO nums[letter_idx] - 1  
+                DEFINE target_idx AS (letter_idx + step + 1) MOD 26  
+                INCREMENT transformation_matrix[letter_idx][target_idx] BY 1  
+            END FOR  
+        END FOR  
+
+        FUNCTION multiply_matrices(X parameter X IS 26x26 integer matrix, Y parameter Y IS 26x26 integer matrix) RETURNS 26x26 integer matrix  
+            DECLARE product AS 26x26 matrix filled with zeros  
+            FOR row FROM 0 TO 25  
+                FOR col FROM 0 TO 25  
+                    SET cell_sum TO 0  
+                    FOR mid FROM 0 TO 25  
+                        SET cell_sum TO (cell_sum + X[row][mid] * Y[mid][col]) MOD MOD  
+                    END FOR  
+                    SET product[row][col] TO cell_sum  
+                END FOR  
+            END FOR  
+            RETURN product  
+        END FUNCTION  
+
+        FUNCTION power_matrix(mat parameter mat IS 26x26 integer matrix, exp parameter exp IS integer) RETURNS 26x26 integer matrix  
+            DECLARE identity AS 26x26 matrix with 1s on diagonal and 0s elsewhere  
+            DECLARE base_matrix AS mat  
+            DECLARE exponent AS exp  
+            DECLARE result_matrix AS identity  
+            WHILE exponent > 0  
+                IF (exponent MOD 2) = 1 THEN  
+                    SET result_matrix TO multiply_matrices(result_matrix, base_matrix)  
+                END IF  
+                SET base_matrix TO multiply_matrices(base_matrix, base_matrix)  
+                SET exponent TO exponent // 2  
+            END WHILE  
+            RETURN result_matrix  
+        END FUNCTION  
+
+        SET powered_matrix TO power_matrix(transformation_matrix, t)  
+
+        DECLARE frequency_vector AS list of 26 zeros  
+        FOR character IN s  
+            INCREMENT frequency_vector[ASCII(character) - ASCII('a')] BY 1  
+        END FOR  
+
+        DECLARE final_vector AS list of 26 zeros  
+        FOR from_idx FROM 0 TO 25  
+            FOR to_idx FROM 0 TO 25  
+                SET final_vector[to_idx] TO (final_vector[to_idx] + frequency_vector[from_idx] * powered_matrix[from_idx][to_idx]) MOD MOD  
+            END FOR  
+        END FOR  
+
+        RETURN sum(final_vector) MOD MOD  
+    END FUNCTION  
+END CLASS

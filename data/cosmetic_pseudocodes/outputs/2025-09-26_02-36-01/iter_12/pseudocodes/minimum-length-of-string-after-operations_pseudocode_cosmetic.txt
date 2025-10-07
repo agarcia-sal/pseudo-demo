@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION minimumLength(s)
+        FUNCTION modTwo(n)
+            RETURN n - ((n / 2) * 2)
+        END FUNCTION
+
+        FUNCTION incrementByOne(val)
+            RETURN val + 1
+        END FUNCTION
+
+        FUNCTION incrementByTwo(val)
+            RETURN val + 2
+        END FUNCTION
+
+        FUNCTION isZero(n)
+            RETURN (n = 0)
+        END FUNCTION
+
+        FUNCTION notEquals(a, b)
+            RETURN NOT (a = b)
+        END FUNCTION
+
+        FUNCTION getValues(d)
+            FUNCTION collectKeys(keysList, resultList, index)
+                IF index >= LENGTH(keysList)
+                    RETURN resultList
+                ELSE
+                    CALL resultList.ADD(d[keysList[index]])
+                    RETURN collectKeys(keysList, resultList, index + 1)
+                END IF
+            END FUNCTION
+            RETURN collectKeys(ALL_KEYS(d), [], 0)
+        END FUNCTION
+
+        FUNCTION countElements(arr)
+            FUNCTION countHelper(accumMap, idx)
+                IF idx >= LENGTH(arr)
+                    RETURN accumMap
+                ELSE
+                    LET key = arr[idx]
+                    IF NOT key IN accumMap
+                        SET accumMap[key] TO 1
+                    ELSE
+                        SET accumMap[key] TO accumMap[key] + 1
+                    END IF
+                    RETURN countHelper(accumMap, idx + 1)
+                END IF
+            END FUNCTION
+            RETURN countHelper(MAP(), 0)
+        END FUNCTION
+
+        LET frequencyMap TO countElements(s)
+        LET valuesList TO getValues(frequencyMap)
+
+        FUNCTION processCountList(lst)
+            FUNCTION loop(index, oddSum, evenSum)
+                IF index >= LENGTH(lst)
+                    RETURN [oddSum, evenSum]
+                ELSE
+                    LET val = lst[index]
+                    LET rem = modTwo(val)
+                    IF rem = 1
+                        RETURN loop(index + 1, incrementByOne(oddSum), evenSum)
+                    ELSE IF (rem = 0) AND notEquals(val,0)
+                        RETURN loop(index + 1, oddSum, incrementByTwo(evenSum))
+                    ELSE
+                        RETURN loop(index + 1, oddSum, evenSum)
+                    END IF
+                END IF
+            END FUNCTION
+            RETURN loop(0, 0, 0)
+        END FUNCTION
+
+        LET sums TO processCountList(valuesList)
+        LET finalResult TO sums[0] + sums[1]
+
+        RETURN finalResult
+    END FUNCTION
+END CLASS

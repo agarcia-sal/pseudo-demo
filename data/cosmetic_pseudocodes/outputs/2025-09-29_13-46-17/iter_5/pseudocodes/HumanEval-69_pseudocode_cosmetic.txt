@@ -1,0 +1,42 @@
+```
+FUNCTION search(arr)
+  DEFINE accumulate(freq_arr, idx)
+    IF idx > LENGTH(freq_arr) - 1 THEN
+      RETURN -1
+    ELSE
+      LET updated_val = (freq_arr[idx] >= idx) ? idx : -1
+      LET recurse_val = accumulate(freq_arr, idx + 1)
+      IF updated_val > recurse_val THEN
+        RETURN updated_val
+      ELSE
+        RETURN recurse_val
+      ENDIF
+    ENDIF
+  END
+
+  LET maximum = arr[0]
+  FOR i FROM 1 TO LENGTH(arr) - 1 DO
+    LET maximum = (arr[i] > maximum) * arr[i] + (arr[i] <= maximum) * maximum
+  END
+
+  LET frequencies = []
+  LET pos = 0
+  WHILE pos <= maximum DO
+    frequencies = frequencies + [0]
+    pos = pos + 1
+  END
+
+  DEFINE increment_frequencies(data, pointer, freq)
+    IF pointer >= LENGTH(data) THEN
+      RETURN freq
+    ELSE
+      LET idx = data[pointer]
+      LET freq_updated = freq[0:idx] + [freq[idx] + 1] + freq[(idx + 1):]
+      RETURN increment_frequencies(data, pointer + 1, freq_updated)
+    ENDIF
+  END
+
+  LET freq_list = increment_frequencies(arr, 0, frequencies)
+  RETURN accumulate(freq_list, 1)
+END FUNCTION
+```

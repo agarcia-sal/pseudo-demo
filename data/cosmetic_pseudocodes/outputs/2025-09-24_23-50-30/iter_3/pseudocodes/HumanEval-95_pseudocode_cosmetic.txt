@@ -1,0 +1,35 @@
+```
+FUNCTION check_dict_case(dictionary)
+    IF dictionary KEYS LENGTH == 0 THEN
+        RETURN False
+    END IF
+
+    SET current_state TO "start"
+    DECLARE index TO 0
+    DECLARE keys_list TO dictionary KEYS
+    WHILE index < LENGTH OF keys_list
+        SET current_key TO keys_list[index]
+        IF TYPEOF current_key != "string" THEN
+            current_state = "mixed"
+            EXIT WHILE
+        END IF
+
+        IF current_state == "start" THEN
+            MATCH
+                WHEN current_key == TO_UPPER(current_key): current_state = "upper"
+                WHEN current_key == TO_LOWER(current_key): current_state = "lower"
+                ELSE 
+                    EXIT WHILE
+            END MATCH
+        ELSE IF (current_state == "upper" AND current_key != TO_UPPER(current_key)) OR (current_state == "lower" AND current_key != TO_LOWER(current_key)) THEN
+            current_state = "mixed"
+            EXIT WHILE
+        ELSE
+            EXIT WHILE
+        END IF
+        index = index + 1
+    END WHILE
+
+    RETURN (current_state == "upper") OR (current_state == "lower")
+END FUNCTION
+```

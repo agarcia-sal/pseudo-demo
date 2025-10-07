@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION beautifulIndices(s parameter, a parameter, b parameter, k parameter)
+        FUNCTION findAllOccurrences(text parameter, pattern parameter) RETURNS list
+            SET resultIndices TO an empty list
+            SET textLength TO LENGTH of text
+            SET patternLength TO LENGTH of pattern
+            SET pos TO 0
+            REPEAT
+                IF pos GREATER_THAN_OR_EQUAL_TO textLength MINUS patternLength PLUS 1 THEN
+                    BREAK
+                END IF
+                FUNCTION subStrEqual(t parameter, startIdx parameter, p parameter) RETURNS boolean
+                    SET endIdx TO startIdx PLUS LENGTH of p MINUS 1
+                    SET idx1 TO startIdx
+                    SET idx2 TO 0
+                    WHILE idx2 LESS_THAN LENGTH of p
+                        IF t[idx1] NOT_EQUALS p[idx2] THEN
+                            RETURN FALSE
+                        END IF
+                        SET idx1 TO idx1 PLUS 1
+                        SET idx2 TO idx2 PLUS 1
+                    END WHILE
+                    RETURN TRUE
+                END FUNCTION
+                IF subStrEqual(text, pos, pattern) THEN
+                    APPEND pos TO resultIndices
+                END IF
+                SET pos TO pos PLUS 1
+            UNTIL FALSE
+            RETURN resultIndices
+        END FUNCTION
+
+        SET listA TO findAllOccurrences(s, a)
+        SET listB TO findAllOccurrences(s, b)
+
+        FUNCTION absDiff(x parameter, y parameter) RETURNS integer
+            IF x GREATER_THAN_OR_EQUAL_TO y THEN
+                RETURN x MINUS y
+            ELSE
+                RETURN y MINUS x
+            END IF
+        END FUNCTION
+
+        SET resultList TO an empty list
+        FUNCTION checkProximity(list1 parameter, list2 parameter, maxDist parameter) RETURNS list
+            SET res TO an empty list
+            SET iIdx TO 0
+            WHILE iIdx LESS_THAN LENGTH of list1
+                SET jIdx TO 0
+                SET added TO FALSE
+                WHILE jIdx LESS_THAN LENGTH of list2 AND NOT added
+                    IF absDiff(list1[iIdx], list2[jIdx]) LESS_THAN_OR_EQUAL_TO maxDist THEN
+                        APPEND list1[iIdx] TO res
+                        SET added TO TRUE
+                    END IF
+                    SET jIdx TO jIdx PLUS 1
+                END WHILE
+                SET iIdx TO iIdx PLUS 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        RETURN checkProximity(listA, listB, k)
+    END FUNCTION
+END CLASS

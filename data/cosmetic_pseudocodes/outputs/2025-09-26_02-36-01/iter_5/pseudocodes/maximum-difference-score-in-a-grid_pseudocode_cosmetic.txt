@@ -1,0 +1,95 @@
+CLASS Solution
+    FUNCTION maxScore(grid)
+      SET rowsCount TO LENGTH(grid)
+      SET colsCount TO LENGTH(grid[0])
+
+      FUNCTION createInfinityRow(lengthVal)
+          SET recIndex TO zero
+          FUNCTION auxBuild(rowAcc)
+              IF recIndex == lengthVal THEN
+                  RETURN rowAcc
+              ELSE
+                  SET newAcc TO rowAcc + [positive_infinity]
+                  SET recIndex TO recIndex + one
+                  RETURN auxBuild(newAcc)
+              ENDIF
+          ENDFUNCTION
+          RETURN auxBuild([])
+      ENDFUNCTION
+
+      FUNCTION buildDp(rowsLeft, dpAcc)
+          IF rowsLeft == zero THEN
+              RETURN dpAcc
+          ELSE
+              SET newRow TO createInfinityRow(colsCount)
+              RETURN buildDp(rowsLeft - one, dpAcc + [newRow])
+          ENDIF
+      ENDFUNCTION
+
+      SET dpMatrix TO buildDp(rowsCount, [])
+
+      SET dpMatrix[0][0] TO grid[0][0]
+
+      SET indexCol TO one
+      WHILE indexCol < colsCount DO
+          SET leftVal TO dpMatrix[0][indexCol - one]
+          SET currentGridVal TO grid[0][indexCol]
+          IF leftVal < currentGridVal THEN
+              SET dpMatrix[0][indexCol] TO leftVal
+          ELSE
+              SET dpMatrix[0][indexCol] TO currentGridVal
+          ENDIF
+          SET indexCol TO indexCol + one
+      ENDWHILE
+
+      SET indexRow TO one
+      WHILE indexRow < rowsCount DO
+          SET topVal TO dpMatrix[indexRow - one][0]
+          SET currentGridVal TO grid[indexRow][0]
+          IF topVal < currentGridVal THEN
+              SET dpMatrix[indexRow][0] TO topVal
+          ELSE
+              SET dpMatrix[indexRow][0] TO currentGridVal
+          ENDIF
+          SET indexRow TO indexRow + one
+      ENDWHILE
+
+      SET rowCursor TO one
+      FUNCTION processRow(colCursor, rowIdx, currMax)
+          IF colCursor == colsCount THEN
+              RETURN currMax
+          ELSE
+              SET fromTop TO dpMatrix[rowIdx - one][colCursor]
+              SET fromLeft TO dpMatrix[rowIdx][colCursor - one]
+              SET minVal TO fromTop
+              IF fromLeft < fromTop THEN
+                  SET minVal TO fromLeft
+              ENDIF
+              SET dpMatrix[rowIdx][colCursor] TO minVal
+
+              SET currentDiff TO grid[rowIdx][colCursor] - dpMatrix[rowIdx][colCursor]
+
+              IF currentDiff > currMax THEN
+                  SET updatedMax TO currentDiff
+              ELSE
+                  SET updatedMax TO currMax
+              ENDIF
+
+              RETURN processRow(colCursor + one, rowIdx, updatedMax)
+          ENDIF
+      ENDFUNCTION
+
+      FUNCTION processAllRows(rIdx, currentMaxScore)
+          IF rIdx == rowsCount THEN
+              RETURN currentMaxScore
+          ELSE
+              SET maxAfterRow TO processRow(one, rIdx, currentMaxScore)
+              RETURN processAllRows(rIdx + one, maxAfterRow)
+          ENDIF
+      ENDFUNCTION
+
+      SET finalMax TO processAllRows(rowCursor, negative_infinity)
+
+      RETURN finalMax
+    END FUNCTION
+END CLASS

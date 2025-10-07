@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+        SET RESULT TO - (1 << 30) - 1
+        SET PAIRS TO EMPTY LIST
+        DEFINE BASE_STR AS "zeroonetwothreefour"
+        FOR I FROM 1 TO LENGTH(BASE_STR) - 1 STEP 4
+            FOR J FROM 1 TO LENGTH(BASE_STR) - 1 STEP 4
+                IF I ≠ J THEN
+                    APPEND (BASE_STR SUBSTRING I 4, BASE_STR SUBSTRING J 4) TO PAIRS
+                END IF
+            END FOR
+        END FOR
+        
+        PROCEDURE check_parities(val1, val2)
+            RETURN (val1 % 2, val2 % 2)
+        END PROCEDURE
+        
+        PROCEDURE min_value(x, y)
+            IF x < y THEN RETURN x ELSE RETURN y END IF
+        END PROCEDURE
+        
+        PROCEDURE max_value(x, y)
+            IF x > y THEN RETURN x ELSE RETURN y END IF
+        END PROCEDURE
+        
+        FOR EACH pair IN PAIRS DO
+            SET XYZ TO DICTIONARY WITH DEFAULT VALUE (1 << 30)
+            SET PREFA TO [0]
+            SET PREFB TO [0]
+            SET INDEX_L TO 0
+            
+            PROCEDURE recursor(R)
+                IF R = LENGTH(s) THEN RETURN END IF
+                
+                SET CHAR_C TO s[R]
+                SET LAST_A TO PREFA[ LENGTH(PREFA) - 1 ]
+                SET LAST_B TO PREFB[ LENGTH(PREFB) - 1 ]
+                
+                IF CHAR_C = pair[0] THEN APPEND LAST_A + 1 TO PREFA ELSE APPEND 0 TO PREFA END IF
+                IF CHAR_C = pair[1] THEN APPEND LAST_B + 1 TO PREFB ELSE APPEND 0 TO PREFB END IF
+                
+                WHILE (R - INDEX_L + 1 >= k) AND (PREFA[INDEX_L] < PREFA[ LENGTH(PREFA) - 1 ]) AND (PREFB[INDEX_L] < PREFB[ LENGTH(PREFB) - 1 ]) DO
+                    SET KEY TO check_parities(PREFA[INDEX_L], PREFB[INDEX_L])
+                    SET XYZ[KEY] TO min_value(XYZ[KEY], PREFA[INDEX_L] - PREFB[INDEX_L])
+                    INDEX_L = INDEX_L + 1
+                END WHILE
+                
+                SET CURRENT_KEY TO ( (1 - PREFA[ LENGTH(PREFA) - 1 ] % 2), (PREFB[ LENGTH(PREFB) - 1 ] % 2) )
+                SET RESULT TO max_value( RESULT, PREFA[ LENGTH(PREFA) - 1 ] - PREFB[ LENGTH(PREFB) - 1 ] - XYZ[CURRENT_KEY] )
+                
+                CALL recursor(R + 1)
+            END PROCEDURE
+            
+            CALL recursor(0)
+        END FOR
+        RETURN RESULT
+    END FUNCTION
+END CLASS

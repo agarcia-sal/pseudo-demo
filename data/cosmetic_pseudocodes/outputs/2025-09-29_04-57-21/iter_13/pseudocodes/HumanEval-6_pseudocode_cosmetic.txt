@@ -1,0 +1,41 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        DECLARE depth_counter := 0
+        DECLARE depth_peak := 0
+
+        FUNCTION iterate_chars(char_list, index)
+            IF index = LENGTH(char_list) THEN
+                RETURN depth_peak
+            END IF
+
+            IF char_list[index] = '(' THEN
+                depth_counter := depth_counter + 1
+                IF depth_counter > depth_peak THEN
+                    depth_peak := depth_counter
+                END IF
+            ELSE
+                depth_counter := depth_counter - 1
+            END IF
+
+            RETURN iterate_chars(char_list, index + 1)
+        END FUNCTION
+
+        DECLARE characters_list := CONVERT_TO_LIST(group_string)
+        RETURN iterate_chars(characters_list, 0)
+    END FUNCTION
+
+    DECLARE segments := SPLIT parentheses_string ON ' '
+    DECLARE filtered_segments := FILTER segments WHERE segment != ''
+    
+    FUNCTION map_parse(segment_list, idx)
+        IF idx = LENGTH(segment_list) THEN
+            RETURN []
+        END IF
+        
+        RETURN [parse_paren_group(segment_list[idx])] + map_parse(segment_list, idx + 1)
+    END FUNCTION
+
+    RETURN map_parse(filtered_segments, 0)
+END FUNCTION
+```

@@ -1,0 +1,36 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+  FUNCTION parse_paren_group(group_string)
+    DEFINE recursive_depth(index, depth_accum, max_accum)
+      IF index EQUALS LENGTH OF group_string THEN
+        RETURN max_accum
+      ELSE
+        LET char = group_string[index]
+        LET new_depth = IF char EQUALS '(' THEN depth_accum + 1 ELSE depth_accum - 1 ENDIF
+        LET new_max   = IF new_depth > max_accum THEN new_depth ELSE max_accum ENDIF
+        RETURN recursive_depth(index + 1, new_depth, new_max)
+      END IF
+    END FUNCTION
+
+    RETURN recursive_depth(0, 0, 0)
+  END FUNCTION
+
+  LET substrings = []
+  LET start_idx = 0
+  FOR i FROM 0 TO LENGTH OF parentheses_string
+    IF i EQUALS LENGTH OF parentheses_string OR parentheses_string[i] EQUALS ' ' THEN
+      LET piece = SUBSTRING parentheses_string FROM start_idx TO i - 1
+      IF LENGTH OF piece > 0 THEN
+        APPEND piece TO substrings
+      END IF
+      SET start_idx TO i + 1
+    END IF
+  END FOR
+
+  LET results = []
+  FOR each sub IN substrings
+    APPEND parse_paren_group(sub) TO results
+  END FOR
+  RETURN results
+END FUNCTION
+```

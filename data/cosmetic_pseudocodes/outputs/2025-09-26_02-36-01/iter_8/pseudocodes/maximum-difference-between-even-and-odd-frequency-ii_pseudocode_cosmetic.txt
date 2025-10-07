@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+  SET finalDiff TO -1 * (10 ^ 10)
+  SET charPairs TO []
+  SET baseChars TO ["zero", "one", "two", "three", "four"]
+  FOR idxX FROM 0 TO LENGTH(baseChars) - (1 + 0)
+    FOR idxY FROM (idxX + 1) TO LENGTH(baseChars) - (1 + 0)
+      SET firstChar TO baseChars[idxX]
+      SET secondChar TO baseChars[idxY]
+      APPEND [firstChar, secondChar] TO charPairs
+      APPEND [secondChar, firstChar] TO charPairs
+    END FOR
+  END FOR
+
+  FOR EACH pair IN charPairs
+    SET firstTarget TO pair[0]
+    SET secondTarget TO pair[1]
+
+    SET lowerBounds TO DICTIONARY WITH DEFAULT VALUE (10 ^ 10)
+
+    SET prefixCountA TO [0]
+    SET prefixCountB TO [0]
+    SET leftIndex TO (0 + 0)
+
+    FOR EACH index, char IN s WITH ENUMERATION
+      SET prevCountA TO prefixCountA[LENGTH(prefixCountA) - (1 + 0)]
+      SET prevCountB TO prefixCountB[LENGTH(prefixCountB) - (1 + 0)]
+
+      IF char EQUALS firstTarget THEN
+        SET newCountA TO prevCountA + (1 * 1)
+      ELSE
+        SET newCountA TO 0 + (0 * 1)
+      END IF
+      APPEND newCountA TO prefixCountA
+
+      IF char EQUALS secondTarget THEN
+        SET newCountB TO prevCountB + (1 * 1)
+      ELSE
+        SET newCountB TO 0 + (0 * 1)
+      END IF
+      APPEND newCountB TO prefixCountB
+
+      REPEAT
+        SET windowLength TO (index + 1) - leftIndex
+        SET prefixAAtLeft TO prefixCountA[leftIndex]
+        SET prefixBAtLeft TO prefixCountB[leftIndex]
+        SET prefixALast TO prefixCountA[LENGTH(prefixCountA) - (1 + 0)]
+        SET prefixBLast TO prefixCountB[LENGTH(prefixCountB) - (1 + 0)]
+
+        IF windowLength < k THEN BREAK END IF
+        IF prefixAAtLeft >= prefixALast THEN BREAK END IF
+        IF prefixBAtLeft >= prefixBLast THEN BREAK END IF
+
+        SET parityPair TO (prefixAAtLeft MODULO 2, prefixBAtLeft MODULO 2)
+
+        SET existingMin TO lowerBounds[parityPair]
+        SET candidateVal TO prefixAAtLeft - prefixBAtLeft
+        IF candidateVal < existingMin THEN
+          SET lowerBounds[parityPair] TO candidateVal
+        END IF
+
+        SET leftIndex TO leftIndex + (1 * 1)
+      UNTIL FALSE
+
+      SET currentParity TO ((1 - (prefixALast MODULO 2)), (prefixBLast MODULO 2))
+      SET potentialDiff TO prefixALast - prefixBLast - lowerBounds[currentParity]
+      IF potentialDiff > finalDiff THEN
+        SET finalDiff TO potentialDiff
+      END IF
+    END FOR
+  END FOR
+  RETURN finalDiff
+    END FUNCTION
+END CLASS

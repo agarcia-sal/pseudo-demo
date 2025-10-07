@@ -1,0 +1,141 @@
+FUNCTION closest_integer(value)
+    SET dot_count TO 0
+    SET index TO 0
+    SET dot_count TO 0
+    SET LENGTH_value TO LENGTH OF value
+    SET i TO 0
+    WHILE i LESS THAN LENGTH_value
+        IF value AT i EQUALS '.'
+            INCREMENT dot_count BY 1
+        INCREMENT i BY 1
+    END WHILE
+
+    IF dot_count EQUALS 1
+        SET value_length TO LENGTH OF value
+        SET j TO value_length MINUS 1
+        WHILE j GREATER THAN OR EQUAL TO 0
+            IF value AT j EQUALS '0'
+                SET new_value TO EMPTY STRING
+                SET k TO 0
+                WHILE k LESS THAN j
+                    SET new_value TO CONCATENATE new_value AND value AT k
+                    INCREMENT k BY 1
+                END WHILE
+                SET value TO new_value
+                DECREMENT j BY 1
+            ELSE
+                BREAK
+            END IF
+        END WHILE
+    END IF
+
+    FUNCTION TO_FLOAT(v)
+        SET result TO 0.0
+        SET negative TO FALSE
+        SET start_idx TO 0
+        IF v AT 0 EQUALS '-'
+            SET negative TO TRUE
+            SET start_idx TO 1
+        END IF
+        SET integer_part TO 0
+        SET fraction_part TO 0.0
+        SET fraction_divisor TO 1.0
+        SET decimal_found TO FALSE
+        SET idx TO start_idx
+        WHILE idx LESS THAN LENGTH OF v
+            SET c TO v AT idx
+            IF c EQUALS '.'
+                SET decimal_found TO TRUE
+            ELSE
+                SET digit TO ASCII VALUE OF c MINUS ASCII VALUE OF '0'
+                IF decimal_found EQUALS FALSE
+                    SET integer_part TO integer_part MULTIPLY 10 PLUS digit
+                ELSE
+                    SET fraction_divisor TO fraction_divisor MULTIPLY 10
+                    SET fraction_part TO fraction_part PLUS digit DIVIDED BY fraction_divisor
+                END IF
+            END IF
+            INCREMENT idx BY 1
+        END WHILE
+        SET result TO integer_part PLUS fraction_part
+        IF negative EQUALS TRUE
+            SET result TO NEGATIVE result
+        END IF
+        RETURN result
+    END FUNCTION
+
+    SET num TO CALL TO_FLOAT WITH ARGUMENT value
+
+    FUNCTION STRING_ENDS_WITH(string, ending)
+        SET length_string TO LENGTH OF string
+        SET length_ending TO LENGTH OF ending
+        IF length_ending GREATER THAN length_string
+            RETURN FALSE
+        END IF
+        SET start_index TO length_string MINUS length_ending
+        SET i TO 0
+        WHILE i LESS THAN length_ending
+            IF string AT (start_index PLUS i) NOT EQUAL TO ending AT i
+                RETURN FALSE
+            END IF
+            INCREMENT i BY 1
+        END WHILE
+        RETURN TRUE
+    END FUNCTION
+
+    IF CALL STRING_ENDS_WITH WITH ARGUMENTS value AND '.5' EQUALS TRUE
+        FUNCTION CEIL(x)
+            IF x EQUALS CALL FLOOR OF x
+                RETURN x
+            ELSE IF x GREATER THAN 0
+                RETURN CALL FLOOR OF x PLUS 1
+            ELSE
+                RETURN CALL FLOOR OF x
+            END IF
+        END FUNCTION
+
+        FUNCTION FLOOR(x)
+            SET int_part TO 0
+            IF x GREATER THAN OR EQUAL TO 0
+                SET int_part TO CONVERT x TO INTEGER PART (TRUNCATE TOWARD ZERO)
+            ELSE
+                SET int_part TO CONVERT x TO INTEGER PART (TRUNCATE TOWARD ZERO)
+                IF int_part NOT EQUAL TO x
+                    DECREMENT int_part BY 1
+                END IF
+            END IF
+            RETURN int_part
+        END FUNCTION
+
+        IF num GREATER THAN 0
+            SET res TO CALL CEIL WITH ARGUMENT num
+        ELSE
+            SET res TO CALL FLOOR WITH ARGUMENT num
+        END IF
+    ELSE IF LENGTH OF value GREATER THAN 0
+        FUNCTION ROUND_NUMBER(x)
+            IF x GREATER THAN OR EQUAL TO 0
+                SET floor_x TO CALL FLOOR WITH ARGUMENT x
+                SET diff TO x MINUS floor_x
+                IF diff GREATER THAN OR EQUAL TO 0.5
+                    RETURN floor_x PLUS 1
+                ELSE
+                    RETURN floor_x
+                END IF
+            ELSE
+                SET ceil_x TO CALL CEIL WITH ARGUMENT x
+                SET diff TO ceil_x MINUS x
+                IF diff GREATER THAN OR EQUAL TO 0.5
+                    RETURN ceil_x MINUS 1
+                ELSE
+                    RETURN ceil_x
+                END IF
+            END IF
+        END FUNCTION
+        SET res TO CALL ROUND_NUMBER WITH ARGUMENT num
+    ELSE
+        SET res TO 0
+    END IF
+
+    RETURN res
+END FUNCTION

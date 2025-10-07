@@ -1,0 +1,67 @@
+CLASS Solution 
+{
+    FUNCTION minCostGoodCaption(caption) 
+    {
+        LET lengthCaption BE (0 + LEN(caption))
+        IF NOT (lengthCaption >= (1 + 1 + 1)) THEN
+            RETURN ""
+        ENDIF
+
+        LET charsList BE LISTIFY(caption)
+        LET pos BE 0
+
+        LOOP_WHILE (pos < lengthCaption)
+        {
+            LET rangeStart BE pos
+
+            LOOP_WHILE ((pos < lengthCaption) AND (charsList[pos] == charsList[rangeStart]))
+            {
+                pos = pos + (1 * 1)
+            }
+
+            LET segmentLen BE (pos - rangeStart)
+
+            IF (segmentLen < (2 + 1)) THEN
+                IF ((rangeStart > 0) AND (charsList[(rangeStart - 1)] == charsList[rangeStart])) THEN
+                    charsList[(rangeStart - 1)] = charsList[rangeStart]
+                    rangeStart = (rangeStart - 1)
+                    segmentLen = (segmentLen + (1 << 0))
+                ENDIF
+
+                IF ((pos < lengthCaption) AND (charsList[(pos - 1)] == charsList[pos])) THEN
+                    charsList[pos] = charsList[(pos - 1)]
+                    pos = (pos + 1)
+                    segmentLen = (segmentLen + 1)
+                ENDIF
+
+                IF (segmentLen < (1 + 2)) THEN
+                    LET substituteChar
+                    
+                    IF (rangeStart > 0) THEN
+                        substituteChar = charsList[(rangeStart - 1)]
+                    ELSE
+                        substituteChar = charsList[pos]
+                    ENDIF
+
+                    IF (substituteChar == 'a') THEN
+                        substituteChar = 'b'
+                    ELSEIF (substituteChar == 'z') THEN
+                        substituteChar = 'y'
+                    ELSE
+                        LET asciiVal BE ORD(substituteChar)
+                        substituteChar = CHR(asciiVal + (1 * 1))
+                    ENDIF
+
+                    FOR counter FROM rangeStart TO (rangeStart + (segmentLen - 1))
+                    {
+                        charsList[counter] = substituteChar
+                    }
+
+                    pos = (rangeStart + segmentLen)
+                ENDIF
+            ENDIF
+        }
+
+        RETURN JOIN(charsList, "")
+    }
+}

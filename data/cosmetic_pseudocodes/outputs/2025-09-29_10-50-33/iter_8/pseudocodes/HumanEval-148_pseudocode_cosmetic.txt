@@ -1,0 +1,52 @@
+FUNCTION bf(first_planet, second_planet)
+  DECLARE celestial_bodies AS LIST = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
+
+  EXECUTE
+    IF (NOT (first_planet IN celestial_bodies)) OR (NOT (second_planet IN celestial_bodies))
+       OR (first_planet = second_planet)
+    THEN
+      INVOKE BREAK WITH []
+    END IF
+  END EXECUTE
+
+  DECLARE idx_one AS INTEGER = -1
+  DECLARE idx_two AS INTEGER = -1
+
+  DECLARE finder AS FUNCTION(pos = 0)
+    IF pos = LENGTH(celestial_bodies)
+    THEN RETURN
+    ELSE IF celestial_bodies[pos] = first_planet
+      THEN idx_one = pos
+    ELSE IF celestial_bodies[pos] = second_planet
+      THEN idx_two = pos
+    END IF
+    INVOKE finder(pos + 1)
+  END FUNCTION
+
+  INVOKE finder(0)
+
+  IF (idx_one < idx_two)
+  THEN
+    DECLARE result AS LIST = []
+    DECLARE collector AS FUNCTION(index = idx_one + 1)
+      IF index >= idx_two THEN RETURN
+      ELSE
+        result.APPEND(celestial_bodies[index])
+        INVOKE collector(index + 1)
+      END IF
+    END FUNCTION
+    INVOKE collector()
+    INVOKE BREAK WITH TUPLE OF result
+  ELSE
+    DECLARE result AS LIST = []
+    DECLARE collector AS FUNCTION(index = idx_two + 1)
+      IF index >= idx_one THEN RETURN
+      ELSE
+        result.APPEND(celestial_bodies[index])
+        INVOKE collector(index + 1)
+      END IF
+    END FUNCTION
+    INVOKE collector()
+    EXECUTE BREAK WITH TUPLE OF result
+  END IF
+END FUNCTION

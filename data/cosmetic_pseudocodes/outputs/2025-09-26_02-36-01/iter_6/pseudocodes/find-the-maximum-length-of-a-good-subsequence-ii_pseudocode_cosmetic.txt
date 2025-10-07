@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+        SET totalElements TO LENGTH(nums)
+        FUNCTION maxValue(a PARAMETER, b PARAMETER)
+            IF a > b THEN RETURN a
+            ELSE RETURN b
+        END FUNCTION
+        SET table TO EMPTY LIST
+        SET dictList TO EMPTY LIST
+        SET tracker TO EMPTY LIST
+        SET maxAnswer TO 0
+        SET maxKey TO (k + 1)
+        INITIALIZE tIndex TO 0
+        WHILE tIndex < totalElements
+            APPEND an empty list of length maxKey FILLED WITH 0 TO table
+            SET tIndex TO tIndex + 1
+        END WHILE
+        SET dictCounter TO 0
+        WHILE dictCounter < maxKey
+            APPEND a DEFAULT DICTIONARY WITH default 0 TO dictList
+            SET dictCounter TO dictCounter + 1
+        END WHILE
+        SET trackerCounter TO 0
+        WHILE trackerCounter < maxKey
+            APPEND a list of three zeros TO tracker
+            SET trackerCounter TO trackerCounter + 1
+        END WHILE
+        FUNCTION processIndex(idx PARAMETER)
+            IF idx = totalElements THEN RETURN
+            SET currentEntry TO nums[idx]
+            FUNCTION iterateH(hValue PARAMETER)
+                IF hValue = maxKey THEN RETURN
+                SET fromDict TO dictList[hValue][currentEntry]
+                SET table[idx][hValue] TO fromDict
+                IF hValue > 0 THEN
+                    IF tracker[hValue-1][0] != nums[idx] THEN
+                        SET table[idx][hValue] TO maxValue(table[idx][hValue], tracker[hValue-1][1])
+                    ELSE
+                        SET table[idx][hValue] TO maxValue(table[idx][hValue], tracker[hValue-1][2])
+                    END IF
+                END IF
+                SET table[idx][hValue] TO table[idx][hValue] + (1 * 1)
+                SET dictList[hValue][nums[idx]] TO maxValue(dictList[hValue][nums[idx]], table[idx][hValue])
+                IF tracker[hValue][0] != currentEntry THEN
+                    IF table[idx][hValue] >= tracker[hValue][1] THEN
+                        SET tracker[hValue][2] TO tracker[hValue][1]
+                        SET tracker[hValue][1] TO table[idx][hValue]
+                        SET tracker[hValue][0] TO currentEntry
+                    ELSE
+                        SET tracker[hValue][2] TO maxValue(tracker[hValue][2], table[idx][hValue])
+                    END IF
+                ELSE
+                    SET tracker[hValue][1] TO maxValue(tracker[hValue][1], table[idx][hValue])
+                END IF
+                IF maxAnswer < table[idx][hValue] THEN
+                    SET maxAnswer TO table[idx][hValue]
+                END IF
+                CALL iterateH(hValue + 1)
+            END FUNCTION
+            CALL iterateH(0)
+            CALL processIndex(idx + 1)
+        END FUNCTION
+        CALL processIndex(0)
+        RETURN maxAnswer
+    END FUNCTION
+END CLASS

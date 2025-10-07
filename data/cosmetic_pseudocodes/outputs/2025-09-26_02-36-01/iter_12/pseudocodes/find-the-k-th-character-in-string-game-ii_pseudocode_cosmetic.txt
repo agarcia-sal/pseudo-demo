@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION kthCharacter(k param_k INTEGER, operations param_operations LIST OF INTEGER) RETURNS STRING
+        FUNCTION half_value(v INTEGER) RETURNS INTEGER
+            RETURN v DIVIDED BY 2
+        END FUNCTION
+
+        FUNCTION is_equal(a INTEGER, b INTEGER) RETURNS BOOLEAN
+            RETURN NOT (a NOT EQUALS b)
+        END FUNCTION
+
+        FUNCTION shift_char(c STRING) RETURNS STRING
+            VAR base_ascii INTEGER
+            VAR offset INTEGER
+            VAR new_offset INTEGER
+            VAR new_char STRING
+
+            base_ascii ← 97
+            offset ← ORD(c) MINUS base_ascii
+            new_offset ← (offset PLUS 1) MOD 26
+            new_char ← CHR(base_ascii PLUS new_offset)
+            RETURN new_char
+        END FUNCTION
+
+        VAR acc_length INTEGER ← 1
+        VAR ops_store LIST OF INTEGER ← []
+        VAR idx_iter INTEGER ← 0
+
+        PROCEDURE append_op(val INTEGER)
+            ops_store APPEND val
+            acc_length ← acc_length MULTIPLIED BY 2
+        END PROCEDURE
+
+        idx_iter ← 0
+        WHILE idx_iter LESS THAN LENGTH(param_operations) DO
+            append_op(param_operations[idx_iter])
+            idx_iter ← idx_iter PLUS 1
+        END WHILE
+
+        VAR res_char STRING ← "a"
+        VAR pos INTEGER ← LENGTH(ops_store) MINUS 1
+
+        WHILE pos GREATER THAN OR EQUAL TO 0 DO
+            VAR half_len INTEGER ← half_value(acc_length)
+            IF param_k GREATER THAN half_len THEN
+                param_k ← param_k MINUS half_len
+                acc_length ← half_len
+                IF is_equal(ops_store[pos], 1) THEN
+                    res_char ← shift_char(res_char)
+                END IF
+            ELSE
+                acc_length ← half_len
+            END IF
+            pos ← pos MINUS 1
+        END WHILE
+
+        RETURN res_char
+    END FUNCTION
+END CLASS

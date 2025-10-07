@@ -1,0 +1,48 @@
+CLASS Solution
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER
+        PROCEDURE CalculateAbsDifference(x parameter INTEGER, y parameter INTEGER) RETURNS INTEGER
+            IF x GREATER OR EQUAL y THEN
+                RETURN x MINUS y
+            ELSE
+                RETURN y MINUS x
+            END IF
+        END PROCEDURE
+
+        SET modValue TO (10 MULTIPLIED BY 10 MULTIPLIED BY 10 MULTIPLIED BY 10 MULTIPLIED BY 10 MULTIPLIED BY 10 MULTIPLIED BY 10 MULTIPLIED BY 10 MULTIPLIED BY 10) PLUS 7
+        SET accumulator TO 0
+        SET comboList TO all combinations OF nums TAKING k elements
+
+        FUNCTION AccumulateMinDiff(comb parameter LIST OF INTEGERS, posA parameter INTEGER, posB parameter INTEGER, currMin parameter INTEGER) RETURNS INTEGER
+            IF posA GREATER OR EQUAL LENGTH OF comb THEN
+                RETURN currMin
+            ELSE
+                IF posB GREATER OR EQUAL LENGTH OF comb THEN
+                    RETURN AccumulateMinDiff(comb, posA PLUS 1, posA PLUS 2, currMin)
+                ELSE
+                    SET diffValue TO CalculateAbsDifference(comb AT posA, comb AT posB)
+                    SET newMin TO currMin
+                    IF diffValue LESS THAN currMin THEN
+                        SET newMin TO diffValue
+                    END IF
+                    RETURN AccumulateMinDiff(comb, posA, posB PLUS 1, newMin)
+                END IF
+            END IF
+        END FUNCTION
+
+        PROCEDURE ProcessComboList(index parameter INTEGER)
+            IF index GREATER OR EQUAL LENGTH OF comboList THEN
+                RETURN
+            ELSE
+                SET currentCombo TO comboList AT index
+                SET infinityEquivalent TO 999999999999
+                SET minimumDiff TO AccumulateMinDiff(currentCombo, 0, 1, infinityEquivalent)
+                SET accumulator TO accumulator PLUS minimumDiff
+                SET accumulator TO accumulator MOD modValue
+                ProcessComboList(index PLUS 1)
+            END IF
+        END PROCEDURE
+
+        ProcessComboList(0)
+        RETURN accumulator
+    END FUNCTION
+END CLASS

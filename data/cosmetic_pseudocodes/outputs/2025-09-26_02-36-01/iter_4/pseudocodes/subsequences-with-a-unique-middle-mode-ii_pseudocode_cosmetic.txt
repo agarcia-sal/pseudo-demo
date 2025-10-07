@@ -1,0 +1,104 @@
+CLASS Solution  
+    FUNCTION subsequencesWithMiddleMode(nums)  
+        DECLARE modulo AS 1000000007  
+        DECLARE totalCount AS 0  
+        DECLARE prefixCounter AS an empty dictionary with default 0  
+        DECLARE suffixCounter AS an empty dictionary with default 0  
+        FOR each element e IN nums DO  
+            INCREMENT suffixCounter[e] BY 1  
+        END FOR  
+
+        FUNCTION combin2(x)  
+            LET prod BE x TIMES (x MINUS 1)  
+            RETURN prod DIVIDED BY 2  
+        END FUNCTION  
+
+        LET prefixSuffixSum BE 0  
+        LET suffixPrefixProduct BE 0  
+        LET prefixPrefixSum BE 0  
+        LET suffixSquareSum BE 0  
+        LET prefixSuffixCount BE 0  
+
+        FOR each key k IN suffixCounter KEYS DO  
+            DECLARE freq AS suffixCounter[k]  
+            suffixSquareSum LET suffixSquareSum PLUS freq TIMES freq  
+        END FOR  
+
+        LET index BE 0  
+        WHILE index IS LESS THAN LENGTH OF nums DO  
+            LET currentVal BE nums[index]  
+            
+            LET valPrefixFreq BE prefixCounter[currentVal]  
+            LET valSuffixFreq BE suffixCounter[currentVal]  
+            
+            LET deltaPSS1 BE valPrefixFreq TIMES ( (valSuffixFreq MINUS 1) TIMES (valSuffixFreq MINUS 1) MINUS (valSuffixFreq TIMES valSuffixFreq) )  
+            LET deltaPSS2 BE valPrefixFreq  
+            prefixSuffixSum LET prefixSuffixSum PLUS ( deltaPSS1 + deltaPSS2 )  
+            
+            suffixPrefixProduct LET suffixPrefixProduct MINUS ( valPrefixFreq TIMES valPrefixFreq )  
+            
+            LET deltaSS1 BE (valSuffixFreq MINUS 1) TIMES (valSuffixFreq MINUS 1) MINUS (valSuffixFreq TIMES valSuffixFreq)  
+            suffixSquareSum LET suffixSquareSum PLUS deltaSS1  
+            
+            prefixSuffixCount LET prefixSuffixCount MINUS valPrefixFreq
+            
+            suffixCounter[currentVal] LET valSuffixFreq MINUS 1  
+            
+            LET leftCount BE index  
+            LET rightCount BE ( LENGTH OF nums MINUS index MINUS 1 )  
+            
+            LET combLeft BE combin2(leftCount)  
+            LET combRight BE combin2(rightCount)  
+            
+            totalCount LET totalCount PLUS ( combLeft TIMES combRight )  
+            
+            LET modLeft BE leftCount MINUS valPrefixFreq  
+            LET modRight BE rightCount MINUS suffixCounter[currentVal]  
+            
+            totalCount LET totalCount MINUS ( combin2(modLeft) TIMES combin2(modRight) )  
+            
+            LET tempPSS BE prefixSuffixSum MINUS valPrefixFreq TIMES (valSuffixFreq TIMES valSuffixFreq)  
+            LET tempSPP BE suffixPrefixProduct MINUS suffixCounter[currentVal] TIMES (valPrefixFreq TIMES valPrefixFreq)  
+            LET tempPP BE prefixPrefixSum MINUS (valPrefixFreq TIMES valPrefixFreq)  
+            LET tempSS BE suffixSquareSum MINUS (suffixCounter[currentVal] TIMES suffixCounter[currentVal])  
+            LET tempPS BE prefixSuffixCount MINUS valPrefixFreq TIMES suffixCounter[currentVal]  
+            LET modP BE leftCount MINUS valPrefixFreq  
+            LET modS BE rightCount MINUS suffixCounter[currentVal]  
+            
+            LET part1 BE tempPS TIMES valPrefixFreq TIMES ( rightCount MINUS suffixCounter[currentVal] )  
+            LET part2 BE tempPSS TIMES ( - valPrefixFreq )  
+            totalCount LET totalCount MINUS ( part1 + part2 )  
+            
+            LET part3 BE tempPS TIMES suffixCounter[currentVal] TIMES ( leftCount MINUS valPrefixFreq )  
+            LET part4 BE tempSPP TIMES ( - suffixCounter[currentVal] )  
+            totalCount LET totalCount MINUS ( part3 + part4 )  
+            
+            LET part5 BE ( tempPP MINUS modP ) TIMES suffixCounter[currentVal] TIMES ( rightCount MINUS suffixCounter[currentVal] )  
+            LET part5div TWO BE part5 DIVIDED BY 2  
+            totalCount LET totalCount MINUS part5div TWO  
+            
+            LET part6 BE ( tempSS MINUS modS ) TIMES valPrefixFreq TIMES ( leftCount MINUS valPrefixFreq )  
+            LET part6div TWO BE part6 DIVIDED BY 2  
+            totalCount LET totalCount MINUS part6div_TWO  
+            
+            totalCount LET totalCount MODULO modulo  
+            
+            LET squareValSuffix AS valSuffixFreq TIMES valSuffixFreq  
+            prefixSuffixSum LET prefixSuffixSum PLUS squareValSuffix  
+            
+            LET incSPP AS valSuffixFreq TIMES ( - valPrefixFreq TIMES valPrefixFreq )  
+            LET surplus AS (valPrefixFreq PLUS 1) TIMES (valPrefixFreq PLUS 1)  
+            suffixPrefixProduct LET suffixPrefixProduct PLUS ( incSPP + surplus )  
+            
+            prefixPrefixSum LET prefixPrefixSum PLUS ( - valPrefixFreq TIMES valPrefixFreq + (valPrefixFreq PLUS 1) TIMES (valPrefixFreq PLUS 1) )  
+            
+            prefixSuffixCount LET prefixSuffixCount PLUS valSuffixFreq  
+            
+            prefixCounter[currentVal] LET valPrefixFreq PLUS 1  
+            
+            index LET index PLUS 1  
+        END WHILE  
+
+        RETURN totalCount  
+    END FUNCTION  
+END CLASS

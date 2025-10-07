@@ -1,0 +1,109 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+  DECLARE helperGraph AS LIST OF LISTS
+  SET helperGraph TO empty list
+
+  PROCEDURE makeEmptyLists(n)
+    SET resultList TO empty list
+    REPEAT n TIMES
+      APPEND empty list TO resultList
+    END REPEAT
+    RETURN resultList
+  END PROCEDURE
+
+  SET helperGraph TO makeEmptyLists(LENGTH(nums))
+
+  PROCEDURE insertEdges(edgeList, container)
+    PROCEDURE insertEdgePair(pair1, pair2, graphContainer)
+      APPEND pair1 TO graphContainer[pair2[1]]
+      APPEND pair2 TO graphContainer[pair1[1]]
+    END PROCEDURE
+
+    PROCEDURE insertAll(index)
+      IF index EQUALS LENGTH(edgeList) THEN
+        RETURN
+      END IF
+      SET currentEdge TO edgeList[index]
+      CALL insertEdgePair([currentEdge[2], currentEdge[3]], [currentEdge[1], currentEdge[3]], container)
+      CALL insertAll(index + 1)
+    END PROCEDURE
+
+    CALL insertAll(0)
+  END PROCEDURE
+  
+  CALL insertEdges(edges, helperGraph)
+
+  DECLARE lengthMax AS NUMBER
+  DECLARE countMin AS NUMBER
+  DECLARE depthPrefix AS LIST
+  DECLARE depthRecorded AS DICTIONARY
+
+  SET lengthMax TO 0
+  SET countMin TO 1
+  SET depthPrefix TO [0]
+  SET depthRecorded TO EMPTY DICTIONARY
+
+  FUNCTION exploreDepth(currentNode, lastNode, boundaryLimit, depthIndex)
+    DECLARE previousDepth AS NUMBER
+    DECLARE currentMax AS NUMBER
+    DECLARE currentMin AS NUMBER
+    DECLARE segmentLength AS NUMBER
+    DECLARE nodeCount AS NUMBER
+    
+    SET previousDepth TO 0
+    IF depthRecorded CONTAINS KEY nums[currentNode] THEN
+      SET previousDepth TO depthRecorded[nums[currentNode]]
+    END IF
+
+    SET depthRecorded[nums[currentNode]] TO depthIndex
+
+    IF boundaryLimit < previousDepth THEN
+      SET boundaryLimit TO previousDepth
+    END IF
+
+    SET segmentLength TO depthPrefix[LAST_INDEX(depthPrefix)] - depthPrefix[boundaryLimit]
+    SET nodeCount TO depthIndex - boundaryLimit
+
+    SET currentMax TO lengthMax
+    SET currentMin TO countMin
+
+    IF (segmentLength > currentMax) OR ((segmentLength EQUALS currentMax) AND (nodeCount < currentMin)) THEN
+      SET lengthMax TO segmentLength
+      SET countMin TO nodeCount
+    END IF
+
+    PROCEDURE traverseNeighbours(index)
+      IF index EQUALS LENGTH(helperGraph[currentNode]) THEN
+        RETURN
+      END IF
+
+      DECLARE neighbourPair AS LIST
+      SET neighbourPair TO helperGraph[currentNode][index]
+      DECLARE targetNode AS NUMBER
+      DECLARE edgeWeight AS NUMBER
+
+      SET targetNode TO neighbourPair[1]
+      SET edgeWeight TO neighbourPair[2]
+
+      IF targetNode = lastNode THEN
+        CALL traverseNeighbours(index + 1)
+        RETURN
+      END IF
+
+      APPEND (depthPrefix[LAST_INDEX(depthPrefix)] + edgeWeight) TO depthPrefix
+      CALL exploreDepth(targetNode, currentNode, boundaryLimit, depthIndex + 1)
+      REMOVE LAST ELEMENT FROM depthPrefix
+
+      CALL traverseNeighbours(index + 1)
+    END PROCEDURE
+
+    CALL traverseNeighbours(0)
+
+    SET depthRecorded[nums[currentNode]] TO previousDepth
+  END FUNCTION
+
+  CALL exploreDepth(0, -1, 0, 1)
+
+  RETURN [lengthMax, countMin]
+END FUNCTION
+END CLASS

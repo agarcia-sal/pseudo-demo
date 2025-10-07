@@ -1,0 +1,24 @@
+FUNCTION compare(list_of_game_scores, list_of_guess_scores)
+    DEFINE function recursive_collect(pairings, accumulator, position)
+        IF position EQUALS LENGTH(pairings)
+            EXECUTE accumulator
+        ENDIF
+        LET current_pair BE pairings[position]
+        LET first_element BE current_pair[0]
+        LET second_element BE current_pair[1]
+        LET difference BE first_element MINUS second_element
+        LET absolute_difference BE difference
+        IF difference LESS_THAN 0
+            LET absolute_difference BE difference MULTIPLY -1
+        ENDIF
+        RETURN recursive_collect(pairings, accumulator CONCATENATED_WITH [absolute_difference], position PLUS 1)
+    ENDFUNCTION
+
+    LET zipped_scores BE []
+    FOR index FROM 0 TO LENGTH(list_of_game_scores) MINUS 1
+        LET tuple_pair BE (list_of_game_scores[index], list_of_guess_scores[index])
+        SET zipped_scores TO zipped_scores CONCATENATED_WITH [tuple_pair]
+    ENDFOR
+
+    EXECUTE recursive_collect(zipped_scores, [], 0)
+END FUNCTION

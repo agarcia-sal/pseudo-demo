@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION longestCommonPrefix(arr1 arr1 OF integers arr2 arr2 OF integers) RETURNS integer
+    BEGIN
+        DECLARE setA AS SET OF strings
+        DECLARE setB AS SET OF strings
+        SET setA TO {}
+        SET setB TO {}
+
+        PROCEDURE fillSet(collection, outputSet)
+        BEGIN
+            DECLARE index_outer AS integer
+            SET index_outer TO 0
+            WHILE index_outer < LENGTH(collection) DO
+            BEGIN
+                DECLARE val AS string
+                SET val TO TO_STRING(collection[index_outer])
+                DECLARE idx_inner AS integer
+                SET idx_inner TO 1
+                REPEAT
+                BEGIN
+                    DECLARE part AS string
+                    SET part TO SUBSTRING(val, 1, idx_inner)
+                    outputSet.ADD(part)
+                    SET idx_inner TO idx_inner + 1
+                END
+                UNTIL idx_inner > LENGTH(val)
+                SET index_outer TO index_outer + 1
+            END
+        END
+
+        CALL fillSet(arr1, setA)
+        CALL fillSet(arr2, setB)
+
+        DECLARE max_len AS integer
+        SET max_len TO 0
+
+        DECLARE iterator AS iterator of strings
+        FOR EACH iterator IN setA DO
+        BEGIN
+            DECLARE currPrefix AS string
+            SET currPrefix TO iterator
+            DECLARE inB AS boolean
+            SET inB TO FALSE
+            IF setB.CONTAINS(currPrefix) THEN
+                SET inB TO TRUE
+            END IF
+            IF inB AND (LENGTH(currPrefix) > max_len) THEN
+                SET max_len TO LENGTH(currPrefix)
+            END IF
+        END
+
+        RETURN max_len
+    END FUNCTION
+END CLASS

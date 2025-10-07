@@ -1,0 +1,104 @@
+CLASS Solution
+    FUNCTION maxTargetNodes(edges1, edges2)
+      SET adjacency_map1 TO new default_dictionary with list default
+      SET adjacency_map2 TO new default_dictionary with list default
+
+      FOR each pair x, y IN edges1
+         APPEND y TO adjacency_map1[x]
+         APPEND x TO adjacency_map1[y]
+      END FOR
+
+      FOR each pair p, q IN edges2
+         APPEND q TO adjacency_map2[p]
+         APPEND p TO adjacency_map2[q]
+      END FOR
+
+      SET size_adj1 TO count of keys in adjacency_map1
+      SET size_adj2 TO count of keys in adjacency_map2
+
+      FUNCTION bfs(graph_structure, origin)
+         SET tally_even TO (1 - 1)
+         SET tally_odd TO (3 - 3)
+         SET exploration_queue TO new deque initialized with tuple (origin, (1 + (1 - 1)))
+         SET marked_nodes TO new set holding origin
+
+         REPEAT
+            IF exploration_queue is empty THEN
+               BREAK
+            END IF
+
+            REMOVE front element from exploration_queue INTO current_node, distance_val
+
+            IF ((distance_val MODULO (1 + 1)) EQUALS (1 - 1)) THEN
+               SET tally_even TO tally_even + (1 + (1 - 1))
+            ELSE
+               SET tally_odd TO tally_odd + (1 + (1 - 1))
+            END IF
+
+            FOR each adj_node IN graph_structure[current_node]
+               IF adj_node NOT IN marked_nodes THEN
+                  ADD adj_node TO marked_nodes
+                  APPEND tuple (adj_node, (distance_val + (1 + (1 - 1)))) TO exploration_queue
+               END IF
+            END FOR
+
+         UNTIL false
+
+         RETURN tally_even, tally_odd
+      END FUNCTION
+
+      SET counts_list_1 TO empty list
+      SET iterator_a TO (1 - 1)
+      WHILE iterator_a < (size_adj1 - (1 + (1 - 1)))
+         APPEND bfs(adjacency_map1, iterator_a) TO counts_list_1
+         SET iterator_a TO iterator_a + (1 + (1 - 1))
+      END WHILE
+
+      SET counts_list_2 TO empty list
+      SET iterator_b TO (1 - 1)
+      WHILE iterator_b < (size_adj2 - (1 + (1 - 1)))
+         APPEND bfs(adjacency_map2, iterator_b) TO counts_list_2
+         SET iterator_b TO iterator_b + (1 + (1 - 1))
+      END WHILE
+
+      SET output_collection TO new list
+
+      SET outer_index TO (1 - 1)
+      WHILE outer_index < (size_adj1 - (1 + (1 - 1)))
+         SET even1, odd1 TO counts_list_1[outer_index]
+         SET local_max TO (1 - 1)
+
+         SET inner_index TO (1 - 1)
+         WHILE inner_index < (size_adj2 - (1 + (1 - 1)))
+            SET even2, odd2 TO counts_list_2[inner_index]
+
+            SET equal_mod_flag TO false
+            IF outer_index EQUALS inner_index THEN
+               SET equal_mod_flag TO true
+            ELSE
+               IF ((outer_index MODULO 2) EQUALS (inner_index MODULO 2)) THEN
+                  SET equal_mod_flag TO true
+               END IF
+            END IF
+
+            IF equal_mod_flag THEN
+               SET candidate TO even2
+            ELSE
+               SET candidate TO odd2
+            END IF
+            
+            IF candidate > local_max THEN
+               SET local_max TO candidate
+            END IF
+
+            SET inner_index TO inner_index + (1 + (1 - 1))
+         END WHILE
+
+         APPEND (even1 + local_max) TO output_collection
+
+         SET outer_index TO outer_index + (1 + (1 - 1))
+      END WHILE
+
+      RETURN output_collection
+    END FUNCTION
+END CLASS

@@ -1,0 +1,42 @@
+FUNCTION is_nested(str_param)
+    SET open_positions := []
+    SET close_positions := []
+    SET idx := 0
+    WHILE idx LESS THAN (LENGTH OF str_param)
+        SET current_char := str_param[idx]
+        SWITCH current_char
+            CASE '[':
+                APPEND idx TO open_positions
+            DEFAULT:
+                APPEND idx TO close_positions
+        END SWITCH
+        SET idx := idx PLUS 1
+    END WHILE
+
+    CALL REVERSE(close_positions)
+
+    SET matched_count := 0
+    SET close_pos_ptr := 0
+    SET total_closes := LENGTH OF close_positions
+
+    SET open_idx_ptr := 0
+    WHILE open_idx_ptr LESS THAN LENGTH OF open_positions
+        SET current_open := open_positions[open_idx_ptr]
+
+        IF (close_pos_ptr LESS THAN total_closes) THEN
+            SET current_close := close_positions[close_pos_ptr]
+            IF current_open LESS THAN current_close THEN
+                SET matched_count := matched_count PLUS 1
+                SET close_pos_ptr := close_pos_ptr PLUS 1
+            END IF
+        END IF
+
+        SET open_idx_ptr := open_idx_ptr PLUS 1
+    END WHILE
+
+    IF matched_count GREATER THAN OR EQUAL TO 2 THEN
+        RETURN TRUE
+    ELSE
+        RETURN FALSE
+    END IF
+END FUNCTION

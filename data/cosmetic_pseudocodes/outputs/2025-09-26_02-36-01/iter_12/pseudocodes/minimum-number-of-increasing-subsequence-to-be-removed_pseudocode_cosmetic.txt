@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION minOperations(nums)
+      
+        FUNCTION computeLength(arr)
+            SET idx TO 0
+            SET result TO 1
+            IF LENGTH(arr) EQUALS 0
+                RETURN 0
+            END IF
+            SET dp_arr TO ARRAY FILLED WITH 1 OF SIZE LENGTH(arr)
+            
+            FUNCTION innerHelper(k, limit, acc)
+                IF k GREATER THAN limit
+                    RETURN acc
+                ELSE
+                    FUNCTION innerLoop(m, bound, currentMax)
+                        IF m GREATER THAN bound
+                            RETURN currentMax
+                        ELSE
+                            IF (arr[k] <= arr[m])
+                                SET updatedMax TO currentMax
+                                IF dp_arr[k] LESS THAN dp_arr[m] PLUS 1
+                                    SET updatedMax TO dp_arr[m] PLUS 1
+                                END IF
+                                SET dp_arr[k] TO updatedMax
+                                RETURN innerLoop(m + 1, bound, updatedMax)
+                            ELSE
+                                RETURN innerLoop(m + 1, bound, currentMax)
+                            END IF
+                        END IF
+                    END FUNCTION
+                    CALL innerLoop(0, k - 1, 1)
+                    RETURN innerHelper(k + 1, limit, acc)
+                END IF
+            END FUNCTION
+
+            CALL innerHelper(1, LENGTH(arr) - 1, 1)
+            
+            FUNCTION findMaxValue(array, index, limit, currentMax)
+                IF index GREATER THAN limit
+                    RETURN currentMax
+                ELSE
+                    SET candidate TO array[index]
+                    IF candidate GREATER THAN currentMax
+                        SET currentMax TO candidate
+                    END IF
+                    RETURN findMaxValue(array, index + 1, limit, currentMax)
+                END IF
+            END FUNCTION
+            
+            RETURN findMaxValue(dp_arr, 0, LENGTH(dp_arr) - 1, dp_arr[0])
+        END FUNCTION
+        
+        RETURN computeLength(nums)
+    END FUNCTION
+END CLASS

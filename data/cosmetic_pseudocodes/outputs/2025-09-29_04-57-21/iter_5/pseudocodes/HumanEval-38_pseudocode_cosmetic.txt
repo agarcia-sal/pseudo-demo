@@ -1,0 +1,38 @@
+```
+FUNCTION encode_cyclic(input_string)
+    INITIALIZE segment_collection AS empty array
+    SET limit TO ( LENGTH(input_string) + 2 ) DIV 3
+    SET idx TO 0
+    WHILE idx < limit
+        DEFINE start_pos AS idx * 3
+        DEFINE end_pos AS start_pos + 3
+        IF end_pos > LENGTH(input_string) THEN
+            end_pos = LENGTH(input_string)
+        END IF
+        APPEND SUBSTRING(input_string, start_pos, end_pos) TO segment_collection
+        SET idx TO idx + 1
+    END WHILE
+
+    INITIALIZE transformed_segments AS empty array
+    FOR EACH segment IN segment_collection DO
+        IF LENGTH(segment) != 3 THEN
+            APPEND segment TO transformed_segments
+            CONTINUE
+        END IF
+        SET tail_part TO SUBSTRING(segment, 1, 3)
+        SET head_char TO SUBSTRING(segment, 0, 1)
+        APPEND CONCAT(tail_part, head_char) TO transformed_segments
+    END FOR
+
+    INITIALIZE result_string AS EMPTY_STRING
+    FOR EACH part IN transformed_segments DO
+        result_string = CONCAT(result_string, part)
+    END FOR
+
+    RETURN result_string
+END FUNCTION
+
+FUNCTION decode_cyclic(input_string)
+    RETURN encode_cyclic( encode_cyclic(input_string) )
+END FUNCTION
+```

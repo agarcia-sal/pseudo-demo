@@ -1,0 +1,49 @@
+```
+FUNCTION check_dict_case(collection)
+  DO BEGIN
+    IF 0 = SIZE OF KEYS OF collection THEN
+      RETURN False
+    ENDIF
+
+    LET phase := "start"
+    LET iterator := ITERATOR OVER KEYS OF collection
+    LOOP_FOREVER:
+      IF NOT HAS_NEXT(iterator) THEN
+        EXIT LOOP_FOREVER
+      ENDIF
+
+      LET element := NEXT(iterator)
+
+      IF NOT (TYPE OF element EQUALS STRING) THEN
+        phase := "mixed"
+        EXIT LOOP_FOREVER
+      ENDIF
+
+      SELECT phase
+        CASE "start":
+          IF TO_LOWER(element) = element THEN
+            phase := "lower"
+          ELSE IF TO_UPPER(element) = element THEN
+            phase := "upper"
+          ELSE
+            EXIT LOOP_FOREVER
+          ENDIF
+        CASE "upper":
+          IF TO_UPPER(element) <> element THEN
+            phase := "mixed"
+            EXIT LOOP_FOREVER
+          ENDIF
+        CASE "lower":
+          IF TO_LOWER(element) <> element THEN
+            phase := "mixed"
+            EXIT LOOP_FOREVER
+          ENDIF
+        OTHERWISE
+          EXIT LOOP_FOREVER
+      ENDSELECT
+    ENDLOOP
+
+    RETURN (phase = "upper") OR (phase = "lower")
+  END
+END FUNCTION
+```

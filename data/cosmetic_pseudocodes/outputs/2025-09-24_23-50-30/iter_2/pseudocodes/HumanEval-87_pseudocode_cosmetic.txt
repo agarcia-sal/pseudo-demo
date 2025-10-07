@@ -1,0 +1,30 @@
+```
+FUNCTION get_row(two_dimensional_list, target_integer)
+    DEFINE FUNCTION find_positions(r, c, acc)
+        IF r < 0 THEN
+            RETURN acc
+        ELSE IF c < 0 THEN
+            RETURN find_positions(r - 1, LENGTH(two_dimensional_list[r - 1]) - 1, acc)
+        ELSE
+            IF two_dimensional_list[r][c] <> target_integer THEN
+                RETURN find_positions(r, c - 1, acc)
+            ELSE
+                RETURN find_positions(r, c - 1, [(r, c)] + acc)
+    SET total_rows TO LENGTH(two_dimensional_list)
+    SET initial_col TO IF total_rows > 0 THEN LENGTH(two_dimensional_list[total_rows - 1]) - 1 ELSE -1
+    SET found_coords TO find_positions(total_rows - 1, initial_col, [])
+    SET grouped_by_row TO EMPTY MAPPING
+    FOR position IN found_coords
+        SET r, c TO position
+        IF r NOT IN grouped_by_row THEN
+            grouped_by_row[r] = EMPTY LIST
+        grouped_by_row[r] = [c] + grouped_by_row[r]
+    SET sorted_rows TO sorted(KEYS(grouped_by_row))
+    SET final_result TO EMPTY LIST
+    FOR r_key IN sorted_rows
+        SET sorted_cols_desc TO sorted(grouped_by_row[r_key], REVERSE = TRUE)
+        FOR c_val IN sorted_cols_desc
+            final_result = final_result + [(r_key, c_val)]
+    RETURN final_result
+END FUNCTION
+```

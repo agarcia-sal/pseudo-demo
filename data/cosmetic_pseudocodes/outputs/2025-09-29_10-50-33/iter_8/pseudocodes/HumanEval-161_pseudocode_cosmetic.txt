@@ -1,0 +1,41 @@
+FUNCTION solve(sourceText)
+  DEFINE toggleCaseAt(position, textArray)
+    IF (NOT ((textArray[position] >= 'a' AND textArray[position] <= 'z') OR (textArray[position] >= 'A' AND textArray[position] <= 'Z')))
+      EXECUTE
+        RETURN
+      END EXECUTE
+    ELSE
+      textArray[position] <- IF (textArray[position] >= 'a' AND textArray[position] <= 'z') THEN TO_UPPER(textArray[position]) ELSE TO_LOWER(textArray[position])
+    END IF
+  END DEFINE
+
+  FLAG_SWITCH <- FALSE
+  charsList <- SPLIT_TO_ARRAY(sourceText)
+  
+  PROCEDURE processAtPosition(pos)
+    IF pos >= LENGTH(charsList)
+      BREAK
+    END IF
+
+    CONDITIONAL isAlpha <- (('a' <= charsList[pos]) AND (charsList[pos] <= 'z')) OR (('A' <= charsList[pos]) AND (charsList[pos] <= 'Z'))
+    isAlpha AND EXECUTE
+      toggleCaseAt(pos, charsList)
+      FLAG_SWITCH <- TRUE
+    END EXECUTE
+
+    processAtPosition(pos + 1)
+  END PROCEDURE
+
+  EXECUTE processAtPosition(0)
+
+  reconstructedText <- JOIN(charsList, '')
+
+  EVALUATE (NOT FLAG_SWITCH) THEN
+    EXECUTE
+      OUTPUT REVERSE_STRING(reconstructedText)
+      BREAK
+    END EXECUTE
+  ELSE
+    OUTPUT reconstructedText
+  END EVALUATE
+END FUNCTION

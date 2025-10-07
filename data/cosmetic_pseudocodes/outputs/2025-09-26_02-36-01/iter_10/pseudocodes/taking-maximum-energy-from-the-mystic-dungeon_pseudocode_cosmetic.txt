@@ -1,0 +1,89 @@
+CLASS Solution  
+    FUNCTION maximumEnergy(energy, k)  
+        DEFINE FUNCTION gen_empty_list(length)  
+            SET x TO 0  
+            SET acc TO []  
+            WHILE x < length DO  
+                acc APPEND 0  
+                SET x TO x + 1  
+            END WHILE  
+            RETURN acc  
+        END FUNCTION  
+        
+        DEFINE FUNCTION get_length(coll)  
+            SET c TO 0  
+            FOR EACH _ IN coll DO  
+                SET c TO c + 1  
+            END FOR  
+            RETURN c  
+        END FUNCTION  
+        
+        DEFINE FUNCTION front(dq)  
+            RETURN dq[0]  
+        END FUNCTION  
+        
+        DEFINE FUNCTION back(dq)  
+            RETURN dq[LENGTH_OF(dq) - 1]  
+        END FUNCTION  
+        
+        DEFINE FUNCTION is_not_empty(dq)  
+            RETURN LENGTH_OF(dq) != 0  
+        END FUNCTION  
+        
+        DEFINE FUNCTION pop_front(dq)  
+            SET first TO dq[0]  
+            FOR j FROM 0 TO LENGTH_OF(dq) - 2 DO  
+                SET dq[j] TO dq[j + 1]  
+            END FOR  
+            REMOVE last element from dq  
+            RETURN first  
+        END FUNCTION  
+        
+        DEFINE FUNCTION pop_back(dq)  
+            SET last_elem TO dq[LENGTH_OF(dq) - 1]  
+            REMOVE last element from dq  
+            RETURN last_elem  
+        END FUNCTION  
+        
+        DEFINE FUNCTION append_back(dq, val)  
+            SET index TO LENGTH_OF(dq)  
+            SET dq[index] TO val  
+        END FUNCTION  
+        
+        SET len_x TO get_length(energy)  
+        SET dp_list TO gen_empty_list(len_x)  
+        SET dp_list[len_x - 1] TO energy[len_x - 1]  
+        SET max_val TO dp_list[len_x - 1]  
+        SET queue_deque TO [len_x - 1]  
+        
+        FUNCTION process_index(i, dp_ref, enrg_ref, dk, dq)  
+            WHILE is_not_empty(dq) AND (front(dq) - i >= dk) DO  
+                CALL pop_front(dq)  
+            END WHILE  
+            
+            SET dp_ref[i] TO enrg_ref[i] + dp_ref[front(dq)]  
+            
+            IF max_val < dp_ref[i] THEN  
+                SET max_val TO dp_ref[i]  
+            END IF  
+            
+            WHILE is_not_empty(dq) AND dp_ref[i] >= dp_ref[back(dq)] DO  
+                CALL pop_back(dq)  
+            END WHILE  
+            
+            CALL append_back(dq,i)  
+        END FUNCTION  
+        
+        DEFINE FUNCTION loop_descend(start, stop, act, dp_list_ref, energy_ref, k_val, deque_ref)  
+            IF start < stop THEN  
+                RETURN  
+            END IF  
+            CALL act(start, dp_list_ref, energy_ref, k_val, deque_ref)  
+            CALL loop_descend(start - 1, stop, act, dp_list_ref, energy_ref, k_val, deque_ref)  
+        END FUNCTION  
+        
+        CALL loop_descend(len_x - 2, 0, process_index, dp_list, energy, k, queue_deque)  
+        
+        RETURN max_val  
+    END FUNCTION  
+END CLASS

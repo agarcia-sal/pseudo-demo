@@ -1,0 +1,37 @@
+```
+FUNCTION is_nested(input_str)
+    DEFINE FUNCTION collect_brackets(pos, open_list, close_list)
+        IF pos EQUALS LENGTH(input_str) THEN
+            RETURN (open_list, close_list)
+        ENDIF
+        IF input_str[pos] EQUALS '[' THEN
+            RETURN collect_brackets(pos + 1, open_list + [pos], close_list)
+        ELSE
+            RETURN collect_brackets(pos + 1, open_list, close_list + [pos])
+        ENDIF
+    END FUNCTION
+
+    SET (opens, closes) TO collect_brackets(0, [], [])
+    SET reversed_closes TO []
+    FOR i FROM LENGTH(closes) - 1 DOWNTO 0 DO
+        reversed_closes = reversed_closes + [closes[i]]
+    END FOR
+
+    SET hit_count TO 0
+    SET idx_close TO 0
+    SET max_close TO LENGTH(reversed_closes)
+
+    FOR open_pos IN opens DO
+        IF (idx_close < max_close) AND (open_pos < reversed_closes[idx_close]) THEN
+            hit_count = hit_count + 1
+            idx_close = idx_close + 1
+        ENDIF
+    END FOR
+
+    IF hit_count >= 2 THEN
+        RETURN TRUE
+    ELSE
+        RETURN FALSE
+    ENDIF
+END FUNCTION
+```

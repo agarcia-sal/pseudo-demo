@@ -1,0 +1,36 @@
+```
+FUNCTION encode(input_text)
+    SET symbol_set TO "aeiouAEIOU"
+    SET symbol_map TO EMPTY_DICTIONARY
+    FOR EACH element IN symbol_set
+        SET symbol_map[element] TO CHARACTER_FROM_ASCII(ASCII_CODE(element) + 2)
+    END FOR
+
+    FUNCTION toggle_case_recursively(index, accumulated)
+        IF index >= LENGTH(input_text)
+            RETURN accumulated
+        ELSE
+            SET current_char TO input_text[index]
+            SET toggled_char TO IF current_char IS UPPERCASE THEN TO_LOWERCASE(current_char) ELSE TO_UPPERCASE(current_char)
+            RETURN toggle_case_recursively(index + 1, accumulated + toggled_char)
+        END IF
+    END FUNCTION
+
+    SET toggled_text TO toggle_case_recursively(0, "")
+
+    FUNCTION substitute_recursively(position, buffer)
+        IF position == LENGTH(toggled_text)
+            RETURN buffer
+        ELSE
+            SET char_to_process TO toggled_text[position]
+            IF symbol_map CONTAINS char_to_process
+                RETURN substitute_recursively(position + 1, buffer + symbol_map[char_to_process])
+            ELSE
+                RETURN substitute_recursively(position + 1, buffer + char_to_process)
+            END IF
+        END IF
+    END FUNCTION
+
+    RETURN substitute_recursively(0, "")
+END FUNCTION
+```

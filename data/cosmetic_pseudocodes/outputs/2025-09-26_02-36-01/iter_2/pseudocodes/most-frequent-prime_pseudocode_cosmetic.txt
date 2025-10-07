@@ -1,0 +1,80 @@
+FUNCTION is_prime(number)  
+    IF NOT (number > 1) THEN  
+        RETURN false  
+    END IF  
+  
+    IF number <= 3 THEN  
+        RETURN true  
+    END IF  
+  
+    IF (number MOD 2 = 0) OR (number MOD 3 = 0) THEN  
+        RETURN false  
+    END IF  
+  
+    idx <- 5  
+    WHILE idx * idx <= number DO  
+        IF (number MOD idx = 0) OR (number MOD (idx + 2) = 0) THEN  
+            RETURN false  
+        END IF  
+        idx <- idx + 6  
+    END WHILE  
+  
+    RETURN true  
+END FUNCTION  
+  
+CLASS Solution  
+    FUNCTION mostFrequentPrime(matrix)  
+        rows ASSIGN LENGTH(matrix)  
+        cols ASSIGN LENGTH(matrix[0])  
+  
+        directionsList ASSIGN [(-1,0), (-1,1), (0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1)]  
+        countsMap ASSIGN empty map from integer to integer  
+  
+        FUNCTION traverse(posX, posY, stepX, stepY, numSoFar)  
+            nextX = posX + stepX  
+            nextY = posY + stepY  
+  
+            IF (0 <= nextX < rows) AND (0 <= nextY < cols) THEN  
+                updatedNum = (numSoFar * 10) + (matrix[nextX][nextY])  
+  
+                IF (updatedNum > 10) AND is_prime(updatedNum) THEN  
+                    IF updatedNum NOT IN countsMap THEN  
+                        countsMap[updatedNum] = 1  
+                    ELSE  
+                        countsMap[updatedNum] = countsMap[updatedNum] + 1  
+                    END IF  
+                END IF  
+  
+                CALL traverse(nextX, nextY, stepX, stepY, updatedNum)  
+            END IF  
+        END FUNCTION  
+  
+        rowIndex <- 0  
+        WHILE rowIndex < rows DO  
+            colIndex <- 0  
+            WHILE colIndex < cols DO  
+                FOR EACH (dx, dy) IN directionsList DO  
+                    CALL traverse(rowIndex, colIndex, dx, dy, matrix[rowIndex][colIndex])  
+                END FOR  
+                colIndex <- colIndex + 1  
+            END WHILE  
+            rowIndex <- rowIndex + 1  
+        END WHILE  
+  
+        IF LENGTH(countsMap) = 0 THEN  
+            RETURN -1  
+        END IF  
+  
+        maxPrime <- NULL  
+        maxCount <- -1  
+        FOR primeKey IN countsMap KEYS DO  
+            currentCount <- countsMap[primeKey]  
+            IF (currentCount > maxCount) OR ((currentCount = maxCount) AND (primeKey > maxPrime)) THEN  
+                maxCount = currentCount  
+                maxPrime = primeKey  
+            END IF  
+        END FOR  
+  
+        RETURN maxPrime  
+    END FUNCTION  
+END CLASS

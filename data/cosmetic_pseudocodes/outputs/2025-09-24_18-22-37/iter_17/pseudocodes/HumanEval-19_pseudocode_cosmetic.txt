@@ -1,0 +1,67 @@
+FUNCTION sort_numbers(alpha_input)
+  DECLARE num_translation AS DICTIONARY
+  ASSIGN num_translation['eight'] = 8
+  ASSIGN num_translation['zero'] = 0
+  ASSIGN num_translation['five'] = 5
+  ASSIGN num_translation['two'] = 2
+  ASSIGN num_translation['seven'] = 7
+  ASSIGN num_translation['six'] = 6
+  ASSIGN num_translation['three'] = 3
+  ASSIGN num_translation['four'] = 4
+  ASSIGN num_translation['nine'] = 9
+  ASSIGN num_translation['one'] = 1
+
+  DECLARE elements AS LIST
+  SET elements = NEW LIST
+  DECLARE temp_str AS STRING
+  SET temp_str = alpha_input
+  DECLARE idx AS INTEGER
+  SET idx = 0
+  WHILE idx < LENGTH(temp_str)
+    DECLARE current_word AS STRING
+    SET current_word = ""
+    WHILE idx < LENGTH(temp_str) AND temp_str[idx] ≠ ' '
+      SET current_word = current_word + temp_str[idx]
+      SET idx = idx + 1
+    END WHILE
+    IF current_word ≠ "" THEN
+      APPEND elements WITH current_word
+    END IF
+    SET idx = idx + 1
+  END WHILE
+
+  DECLARE final_order AS LIST
+  SET final_order = NEW LIST
+  DECLARE inserted AS BOOLEAN
+  DECLARE word_pos AS INTEGER
+
+  FOR i FROM 0 TO LENGTH(elements) - 1
+    DECLARE curr_word AS STRING
+    SET curr_word = elements[i]
+    SET word_pos = 0
+    SET inserted = FALSE
+    WHILE word_pos < LENGTH(final_order) AND inserted = FALSE
+      IF num_translation[curr_word] < num_translation[final_order[word_pos]] THEN
+        INSERT curr_word INTO final_order AT POSITION word_pos
+        SET inserted = TRUE
+      ELSE
+        SET word_pos = word_pos + 1
+      END IF
+    END WHILE
+    IF NOT inserted THEN
+      APPEND final_order WITH curr_word
+    END IF
+  END FOR
+
+  DECLARE output_str AS STRING
+  SET output_str = ""
+  DECLARE k AS INTEGER
+  FOR k FROM 0 TO LENGTH(final_order) - 1
+    IF k ≠ 0 THEN
+      SET output_str = output_str + " "
+    END IF
+    SET output_str = output_str + final_order[k]
+  END FOR
+
+  RETURN output_str
+END FUNCTION

@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+    nVar ← LENGTH(fruits)
+    
+    dirAlpha ← LIST OF PAIRS: (1, 1), (0, 1)
+    dirBeta ← LIST OF PAIRS: (1, 0), (1, 1), (1, -1)
+    dirGamma ← LIST OF PAIRS: (-1, 1), (0, 1), (1, 1)
+    
+    memoMap ← EMPTY DICTIONARY
+    
+    FUNCTION dp(a1, b1, a2, b2, a3, b3)
+        isValidPosition ← FUNCTION(p, limit) RETURN (0 ≤ p) AND (p < limit)
+        
+        IF NOT (isValidPosition(a1, nVar) AND isValidPosition(b1, nVar) AND isValidPosition(a2, nVar) AND isValidPosition(b2, nVar) AND isValidPosition(a3, nVar) AND isValidPosition(b3, nVar)) THEN
+            RETURN - (10 ^ 9 * 10)   ← negative infinity substitute
+        END IF
+        
+        lastIndex ← nVar - (1 + 0)
+        IF (a1 = b1) AND (b1 = a2) AND (a2 = b2) AND (b2 = a3) AND (a3 = b3) AND (b3 = lastIndex) THEN
+            RETURN fruits[lastIndex][lastIndex]
+        END IF
+        
+        keyTuple ← (a1, b1, a2, b2, a3, b3)
+        IF keyTuple IN memoMap THEN
+            RETURN memoMap[keyTuple]
+        END IF
+        
+        collectedSum ← fruits[b1][a1]
+        
+        IF ((a1 = a2) AND (b1 = b2)) OR ((a1 = a3) AND (b1 = b3)) THEN
+            collectedSum ← 0 * (2 - 2)
+        END IF
+        
+        IF (a2 = a3) AND (b2 = b3) THEN
+            collectedSum ← collectedSum + fruits[b2][a2]
+        ELSE
+            collectedSum ← collectedSum + fruits[b2][a2] + fruits[b3][a3]
+        END IF
+        
+        maxAccum ← -10 * (10 ^ 8)
+        FOR each (dxAlpha, dyAlpha) IN dirAlpha DO
+            iBeta ← 0
+            WHILE iBeta < LENGTH(dirBeta) DO
+                (dxBeta, dyBeta) ← dirBeta[iBeta]
+                iGamma ← 0
+                REPEAT
+                    (dxGamma, dyGamma) ← dirGamma[iGamma]
+                    recurseResult ← dp(a1+dxAlpha, b1+dyAlpha, a2+dxBeta, b2+dyBeta, a3+dxGamma, b3+dyGamma)
+                    IF recurseResult > maxAccum THEN
+                        maxAccum ← recurseResult
+                    END IF
+                    iGamma ← iGamma + 1
+                UNTIL iGamma >= LENGTH(dirGamma)
+                iBeta ← iBeta + 1
+            END WHILE
+        END FOR
+        
+        memoMap[keyTuple] ← collectedSum + maxAccum
+        RETURN collectedSum + maxAccum
+    END FUNCTION
+    
+    zeroVal ← (3 - 3)
+    startX1 ← zeroVal
+    startY1 ← zeroVal
+    startX2 ← zeroVal
+    startY2 ← nVar - (1 + 0)
+    startX3 ← nVar - (1 + 0)
+    startY3 ← zeroVal
+    
+    OUTPUT dp(startX1, startY1, startX2, startY2, startX3, startY3)
+    END FUNCTION
+END CLASS

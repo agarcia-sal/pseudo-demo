@@ -1,0 +1,78 @@
+CLASS Solution
+    FUNCTION numberOfPairs(points)
+        PROCEDURE customSort(arr, low, high)
+            IF low < high THEN
+                SET pivotIndex TO low
+                SET pivot TO arr[pivotIndex]
+                SET left TO low + 1
+                SET right TO high
+                WHILE left <= right DO
+                    WHILE left <= high AND (arr[left].x < pivot.x OR (arr[left].x = pivot.x AND arr[left].y > pivot.y)) DO
+                        SET left TO left + 1
+                    END WHILE
+                    WHILE right > low AND (arr[right].x > pivot.x OR (arr[right].x = pivot.x AND arr[right].y < pivot.y)) DO
+                        SET right TO right - 1
+                    END WHILE
+                    IF left < right THEN
+                        SET tempPoint TO arr[left]
+                        SET arr[left] TO arr[right]
+                        SET arr[right] TO tempPoint
+                        SET left TO left + 1
+                        SET right TO right - 1
+                    END IF
+                END WHILE
+                SET tempPoint TO arr[low]
+                SET arr[low] TO arr[right]
+                SET arr[right] TO tempPoint
+                CALL customSort(arr, low, right - 1)
+                CALL customSort(arr, right + 1, high)
+            END IF
+        END PROCEDURE
+
+        PROCEDURE isValidPair(array, startIdx, endIdx, px, py, qx, qy)
+            IF NOT (px <= qx AND py >= qy) THEN
+                RETURN False
+            END IF
+
+            RECURSIVE FUNCTION checkIntermediate(index)
+                IF index >= endIdx THEN
+                    RETURN True
+                END IF
+                SET cx TO array[index].x
+                SET cy TO array[index].y
+                IF (px <= cx AND cx <= qx) AND (qy <= cy AND cy <= py) THEN
+                    RETURN False
+                END IF
+                RETURN checkIntermediate(index + 1)
+            END FUNCTION
+
+            RETURN checkIntermediate(startIdx + 1)
+        END PROCEDURE
+
+        CALL customSort(points, 0, LENGTH(points) - 1)
+
+        SET totalPoints TO LENGTH(points)
+        SET pairCounter TO 0
+        SET outerIndex TO 0
+
+        WHILE outerIndex <= totalPoints - 2 DO
+            SET innerIndex TO totalPoints - 1
+            WHILE innerIndex > outerIndex DO
+                SET pxVal TO points[outerIndex].x
+                SET pyVal TO points[outerIndex].y
+                SET qxVal TO points[innerIndex].x
+                SET qyVal TO points[innerIndex].y
+
+                IF (pxVal <= qxVal) AND (pyVal >= qyVal) THEN
+                    IF isValidPair(points, outerIndex, innerIndex, pxVal, pyVal, qxVal, qyVal) THEN
+                        SET pairCounter TO pairCounter + (1 * 1)
+                    END IF
+                END IF
+                SET innerIndex TO innerIndex - 1
+            END WHILE
+            SET outerIndex TO outerIndex + 1
+        END WHILE
+
+        RETURN pairCounter
+    END FUNCTION
+END CLASS

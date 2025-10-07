@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION minimumSubstringsInPartition(s)
+        FUNCTION explore(index)
+            IF NOT (index < LENGTH(s)) THEN
+                RETURN 0
+            END IF
+
+            DEFINE charCount AS map with default int 0
+            DEFINE freqCount AS map with default int 0
+            LET bestAnswer BE LENGTH(s) - index
+
+            LET position BE index
+            WHILE position < LENGTH(s) DO
+                LET currChar = s[position]
+                IF charCount.CONTAINS_KEY(currChar) AND charCount[currChar] != 0 THEN
+                    LET currFreq = charCount[currChar]
+                    LET updatedFreqCount = freqCount[currFreq] - 1
+                    freqCount[currFreq] = updatedFreqCount
+                    IF updatedFreqCount == 0 THEN
+                        freqCount.REMOVE(currFreq)
+                    END IF
+                END IF
+
+                LET increasedCharCount = charCount[currChar] + 1
+                charCount[currChar] = increasedCharCount
+
+                LET increasedFreqCount = freqCount[increasedCharCount] + 1
+                freqCount[increasedCharCount] = increasedFreqCount
+
+                IF LENGTH(freqCount.KEYS()) == 1 THEN
+                    LET candidate = 1 + explore(position + 1)
+                    IF candidate < bestAnswer THEN
+                        bestAnswer = candidate
+                    END IF
+                END IF
+
+                position = position + 1
+            END WHILE
+
+            RETURN bestAnswer
+        END FUNCTION
+
+        LET lengthOfString = LENGTH(s)
+        RETURN explore(0)
+    END FUNCTION
+END CLASS

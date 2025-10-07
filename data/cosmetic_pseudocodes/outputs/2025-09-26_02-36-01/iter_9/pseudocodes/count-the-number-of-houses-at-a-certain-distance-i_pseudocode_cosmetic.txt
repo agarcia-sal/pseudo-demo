@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION countOfPairs(n parameter, x parameter, y parameter) RETURNS list of integer
+        SET outputList TO an array containing n zeros indexed from 0 to n - 1
+
+        FUNCTION traverseGraph(origin parameter)
+            PROCEDURE addToQueueIfValid(idx parameter, queueRef, visitedRef, distRef)
+                IF  (idx >= 1) AND (idx <= n) AND (visitedRef[idx] = False)
+                    THEN
+                        visitedRef[idx] ← True
+                        distRef[idx] ← distRef[originPtr] + 1
+                        queueRef.append(idx)
+                END IF
+            END PROCEDURE
+
+            SET visitedNodes TO array of (n + 1) False values
+            SET nodeDistance TO array of (n + 1) zeros
+            SET originPtr TO origin
+            SET frontier TO deque with originPtr element added
+
+            WHILE NOT frontier.isEmpty()
+                SET currentNode TO frontier.popFront()
+                CALL addToQueueIfValid(currentNode - 1, frontier, visitedNodes, nodeDistance)
+                CALL addToQueueIfValid(currentNode + 1, frontier, visitedNodes, nodeDistance)
+
+                IF currentNode = x AND visitedNodes[y] = False
+                    THEN
+                        visitedNodes[y] ← True
+                        nodeDistance[y] ← nodeDistance[currentNode] + 1
+                        frontier.append(y)
+                END IF
+
+                IF currentNode = y AND visitedNodes[x] = False
+                    THEN
+                        visitedNodes[x] ← True
+                        nodeDistance[x] ← nodeDistance[currentNode] + 1
+                        frontier.append(x)
+                END IF
+            END WHILE
+
+            SET idx TO 1
+            REPEAT
+                IF nodeDistance[idx] > 0
+                    THEN 
+                        outputList[nodeDistance[idx] - 1] ← outputList[nodeDistance[idx] - 1] + 1
+                END IF
+                idx ← idx + 1
+            UNTIL idx > n
+        END FUNCTION
+
+        SET counter ← 1
+        WHILE counter <= n
+            CALL traverseGraph(counter)
+            counter ← counter + 1
+        END WHILE
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

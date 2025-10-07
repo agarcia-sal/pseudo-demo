@@ -1,0 +1,82 @@
+CLASS Solution  
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)  
+        SET total_positions TO LENGTH OF nums  
+        SET operations_count TO LENGTH OF changeIndices  
+        
+        FUNCTION can_mark_by_second(attempt)  
+            INITIALIZE last_time_occurrence AS ARRAY OF SIZE total_positions FILLED WITH (-1)  
+            
+            SET iterator TO 0  
+            REPEAT  
+                IF iterator >= attempt THEN  
+                    BREAK  
+                END IF  
+                SET adjusted_index TO (changeIndices[iterator] - 1)  
+                last_time_occurrence[adjusted_index] <- iterator  
+                SET iterator TO (iterator + 1)  
+            UNTIL FALSE  
+            
+            SET sum_required TO 0  
+            SET index_counter TO 0  
+            REPEAT  
+                IF index_counter >= total_positions THEN  
+                    BREAK  
+                END IF  
+                SET sum_required TO sum_required + nums[index_counter]  
+                SET index_counter TO (index_counter + 1)  
+            UNTIL FALSE  
+            
+            SET available_resources TO 0  
+            INITIALIZE marked AS EMPTY SET  
+            
+            FUNCTION process_index(s)  
+                IF s >= attempt THEN  
+                    RETURN  
+                END IF  
+                
+                SET target TO (changeIndices[s] - 1)  
+                IF NOT (target IN marked) THEN  
+                    IF last_time_occurrence[target] = s THEN  
+                        IF nums[target] <= available_resources THEN  
+                            SET available_resources TO available_resources - nums[target]  
+                            ADD target TO marked  
+                        ELSE  
+                            RAISE EXCEPTION "fail_condition"  
+                        END IF  
+                    ELSE  
+                        SET available_resources TO available_resources + 1  
+                    END IF  
+                ELSE  
+                    SET available_resources TO available_resources + 1  
+                END IF  
+                CALL process_index(s + 1)  
+            END FUNCTION  
+            
+            TRY  
+                CALL process_index(0)  
+            CATCH FAIL_CONDITION  
+                RETURN False  
+            END TRY  
+            
+            RETURN LENGTH OF marked = total_positions  
+        END FUNCTION  
+        
+        SET low_bound TO 0  
+        SET high_bound TO (operations_count + (1 * 1))  
+        
+        WHILE low_bound < high_bound DO  
+            SET midpoint TO (low_bound + high_bound) // 2  
+            IF can_mark_by_second(midpoint) THEN  
+                SET high_bound TO midpoint  
+            ELSE  
+                SET low_bound TO low_bound + (1)  
+            END IF  
+        END WHILE  
+        
+        IF low_bound <= operations_count THEN  
+            RETURN low_bound  
+        ELSE  
+            RETURN -1  
+        END IF  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION lastMarkedNodes(edges)
+        FUNCTION dfs(node, parent, distances)
+            SET neighbours TO g[node]
+            SET lengthNeighbours TO LENGTH OF neighbours
+            SET idx TO 0
+            WHILE idx LESS THAN lengthNeighbours
+                SET neighborNode TO neighbours[idx]
+                IF NOT (neighborNode EQUALS parent)
+                    SET distances[neighborNode] TO distances[node] + (true AS integer)
+                    CALL dfs(neighborNode, node, distances)
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+        END FUNCTION
+
+        SET nodeCount TO (LENGTH OF edges) + (1 + 0)
+        SET g TO EMPTY LIST
+        SET buildIndex TO 0
+        WHILE buildIndex LESS THAN nodeCount
+            APPEND EMPTY LIST TO g
+            SET buildIndex TO buildIndex + 1
+        END WHILE
+
+        SET edgeCounter TO 0
+        WHILE edgeCounter LESS THAN LENGTH OF edges
+            SET pair TO edges[edgeCounter]
+            SET firstNode TO pair[0]
+            SET secondNode TO pair[1]
+            APPEND secondNode TO g[firstNode]
+            APPEND firstNode TO g[secondNode]
+            SET edgeCounter TO edgeCounter + 1
+        END WHILE
+
+        SET distancesFromZero TO []
+        SET fillIndex TO 0
+        WHILE fillIndex LESS THAN nodeCount
+            APPEND - ( (0 + 1) * 1 ) TO distancesFromZero
+            SET fillIndex TO fillIndex + 1
+        END WHILE
+        SET distancesFromZero[0] TO 0
+        CALL dfs(0, -1, distancesFromZero)
+
+        SET maxDistance TO - (0 + 1)
+        SET posA TO 0
+        SET checkIndex TO 0
+        WHILE checkIndex LESS THAN nodeCount
+            IF maxDistance LESS THAN distancesFromZero[checkIndex]
+                SET maxDistance TO distancesFromZero[checkIndex]
+                SET posA TO checkIndex
+            END IF
+            SET checkIndex TO checkIndex + 1
+        END WHILE
+
+        SET distancesFromA TO []
+        SET fillIndex2 TO 0
+        WHILE fillIndex2 LESS THAN nodeCount
+            APPEND -1 TO distancesFromA
+            SET fillIndex2 TO fillIndex2 + 1
+        END WHILE
+        SET distancesFromA[posA] TO 0
+        CALL dfs(posA, -1, distancesFromA)
+
+        SET maxDistance2 TO -1
+        SET posB TO 0
+        SET checkIndex2 TO 0
+        WHILE checkIndex2 LESS THAN nodeCount
+            IF maxDistance2 LESS THAN distancesFromA[checkIndex2]
+                SET maxDistance2 TO distancesFromA[checkIndex2]
+                SET posB TO checkIndex2
+            END IF
+            SET checkIndex2 TO checkIndex2 + 1
+        END WHILE
+
+        SET distancesFromB TO []
+        SET fillIndex3 TO 0
+        WHILE fillIndex3 LESS THAN nodeCount
+            APPEND -1 TO distancesFromB
+            SET fillIndex3 TO fillIndex3 + 1
+        END WHILE
+        SET distancesFromB[posB] TO 0
+        CALL dfs(posB, -1, distancesFromB)
+
+        SET outputList TO []
+        SET idxOut TO 0
+        WHILE idxOut LESS THAN nodeCount
+            SET valFromA TO distancesFromA[idxOut]
+            SET valFromB TO distancesFromB[idxOut]
+            IF valFromA > valFromB
+                APPEND posA TO outputList
+            ELSE
+                APPEND posB TO outputList
+            END IF
+            SET idxOut TO idxOut + 1
+        END WHILE
+
+        SET resultValue TO outputList
+        RETURN resultValue
+    END FUNCTION
+END CLASS

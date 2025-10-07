@@ -1,0 +1,72 @@
+CLASS Solution
+	FUNCTION minimumDeletions(word,k)
+		DEFINE alphaFrequencyMap AS EMPTY MAP
+		FOR scanIndex FROM 0 TO LENGTH(word) - 1
+			DEFINE currChar AS word[scanIndex]
+			IF currChar NOT IN alphaFrequencyMap THEN
+				SET alphaFrequencyMap[currChar] TO 0
+			END IF
+			SET alphaFrequencyMap[currChar] TO alphaFrequencyMap[currChar] + 1
+		END FOR
+		
+		DEFINE sortedFreqVals AS EMPTY LIST
+		DEFINE tempList AS EMPTY LIST
+		FOREACH val IN alphaFrequencyMap VALUES
+			CALL tempList.APPEND(val)
+		END FOREACH
+
+		PROCEDURE quickSort(arr,left,right)
+			IF left >= right THEN
+				RETURN
+			END IF
+			DEFINE pivotIdx AS left
+			DEFINE wall AS left
+			FOR iter FROM left + 1 TO right
+				IF arr[iter] < arr[pivotIdx] THEN
+					INCREMENT wall BY 1
+					SWAP arr[wall], arr[iter]
+				END IF
+			END FOR
+			SWAP arr[wall], arr[pivotIdx]
+			quickSort(arr,left,wall - 1)
+			quickSort(arr,wall + 1,right)
+		END PROCEDURE
+
+		CALL quickSort(tempList,0,LENGTH(tempList) - 1)
+		SET sortedFreqVals TO tempList
+
+		DEFINE globalMinDeletions AS a very large value
+		DEFINE outerIndex AS 0
+
+		PROCEDURE processIndex(idx)
+			DEFINE allowedMaxFreq AS sortedFreqVals[idx] + k
+			DEFINE calcDeletions AS 0
+
+			DEFINE forwardIndex AS idx + 1
+			WHILE forwardIndex <= LENGTH(sortedFreqVals) - 1
+				DEFINE currFreq AS sortedFreqVals[forwardIndex]
+				IF NOT(currFreq <= allowedMaxFreq)
+					SET calcDeletions TO calcDeletions + (currFreq - allowedMaxFreq)
+				END IF
+				INCREMENT forwardIndex BY 1
+			END WHILE
+
+			DEFINE backIndex AS 0
+			WHILE backIndex <= idx - 1
+				SET calcDeletions TO calcDeletions + sortedFreqVals[backIndex]
+				INCREMENT backIndex BY 1
+			END WHILE
+
+			IF calcDeletions < globalMinDeletions
+				SET globalMinDeletions TO calcDeletions
+			END IF
+		END PROCEDURE
+
+		WHILE outerIndex <= LENGTH(sortedFreqVals) - 1
+			PROCESS processIndex(outerIndex)
+			INCREMENT outerIndex BY 1
+		END WHILE
+
+		RETURN globalMinDeletions
+	END FUNCTION
+END CLASS

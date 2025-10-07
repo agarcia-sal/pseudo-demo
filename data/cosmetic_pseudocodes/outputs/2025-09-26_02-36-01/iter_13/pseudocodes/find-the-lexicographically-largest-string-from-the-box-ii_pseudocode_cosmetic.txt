@@ -1,0 +1,48 @@
+CLASS Solution
+  FUNCTION answerString(word, numFriends)
+    SET resultVar TO null
+    IF NOT (numFriends NOT EQUAL one)
+      SET resultVar TO word
+    ELSE
+      SET helperVal TO CALL _lastSubstring WITH word
+      SET calcLen TO LENGTH(word) MINUS numFriends PLUS one
+      SET limitIdx TO helperVal.LENGTH
+      IF limitIdx > calcLen THEN
+        SET limitIdx TO calcLen
+      END IF
+      SET resultVar TO SUBSTRING(helperVal, 1, limitIdx)
+    END IF
+    RETURN resultVar
+  END FUNCTION
+
+  FUNCTION _lastSubstring(s)
+    PROCEDURE compareChars(a, b)
+      RETURN a GREATER b
+    END PROCEDURE
+
+    SET idxA TO 0
+    SET idxB TO 1
+    SET offset TO 0
+
+    WHILE TRUE
+      IF (idxB + offset) GREATER= s.LENGTH THEN
+        BREAK
+      END IF
+      IF s.ELEM(idxA + offset) EQUAL s.ELEM(idxB + offset) THEN
+        SET offset TO offset + 1
+      ELSE
+        IF compareChars(s.ELEM(idxA + offset), s.ELEM(idxB + offset)) THEN
+          SET idxB TO idxB + offset + 1
+          SET offset TO 0
+        ELSE
+          SET newI TO MAX(idxA + offset + 1, idxB)
+          SET idxA TO newI
+          SET idxB TO idxA + 1
+          SET offset TO 0
+        END IF
+      END IF
+    END WHILE
+
+    RETURN SUBSTRING(s, idxA + 1, s.LENGTH)
+  END FUNCTION
+END CLASS

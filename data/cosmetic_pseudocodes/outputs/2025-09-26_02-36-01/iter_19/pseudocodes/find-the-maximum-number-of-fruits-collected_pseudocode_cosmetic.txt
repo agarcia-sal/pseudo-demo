@@ -1,0 +1,64 @@
+CLASS Solution
+	FUNCTION maxCollectedFruits(fruits)
+		SET lengthVar TO LENGTH OF fruits
+		
+		SET delta1 TO [(1,1),(1,0),(0,1)]
+		SET delta2 TO [(1,0),(1,-1),(1,1)]
+		SET delta3 TO [(-1,1),(0,1),(1,1)]
+		
+		SET cacheStore TO {}
+		
+		FUNCTION explore(a, b, c, d, e, f)
+			IF a < 0 THEN RETURN -∞ END IF
+			IF a >= lengthVar THEN RETURN -∞ END IF
+			IF b < 0 THEN RETURN -∞ END IF
+			IF b >= lengthVar THEN RETURN -∞ END IF
+			IF c < 0 THEN RETURN -∞ END IF
+			IF c >= lengthVar THEN RETURN -∞ END IF
+			IF d < 0 THEN RETURN -∞ END IF
+			IF d >= lengthVar THEN RETURN -∞ END IF
+			IF e < 0 THEN RETURN -∞ END IF
+			IF e >= lengthVar THEN RETURN -∞ END IF
+			IF f < 0 THEN RETURN -∞ END IF
+			IF f >= lengthVar THEN RETURN -∞ END IF
+			
+			IF a = b AND b = c AND c = d AND d = e AND e = f AND f = lengthVar - 1 THEN
+				RETURN fruits[lengthVar - 1][lengthVar - 1]
+			END IF
+			
+			SET keyTuple TO (a,b,c,d,e,f)
+			IF keyTuple EXISTS IN cacheStore THEN
+				RETURN cacheStore[keyTuple]
+			END IF
+			
+			SET gatherCount TO fruits[a][b]
+			
+			IF (a = c AND b = d) OR (a = e AND b = f) THEN
+				SET gatherCount TO 0
+			END IF
+			
+			IF e = c AND f = d THEN
+				SET gatherCount TO gatherCount + fruits[c][d]
+			ELSE
+				SET gatherCount TO gatherCount + fruits[c][d] + fruits[e][f]
+			END IF
+			
+			SET bestVal TO -∞
+			FOR (dxA, dyA) IN delta1 DO
+				FOR (dxB, dyB) IN delta2 DO
+					FOR (dxC, dyC) IN delta3 DO
+						SET tempVal TO explore(a + dxA, b + dyA, c + dxB, d + dyB, e + dxC, f + dyC)
+						IF tempVal > bestVal THEN
+							SET bestVal TO tempVal
+						END IF
+					END FOR
+				END FOR
+			END FOR
+			
+			SET cacheStore[keyTuple] = gatherCount + bestVal
+			RETURN gatherCount + bestVal
+		END FUNCTION
+		
+		RETURN explore(0, 0, 0, lengthVar - 1, lengthVar - 1, 0)
+	END FUNCTION
+END CLASS

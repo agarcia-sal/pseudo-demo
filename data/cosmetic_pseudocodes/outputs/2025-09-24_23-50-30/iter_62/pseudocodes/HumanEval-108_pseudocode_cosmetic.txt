@@ -1,0 +1,59 @@
+```
+FUNCTION count_nums(array_of_integers)
+    FUNCTION digits_sum(integer_value)
+        FUNCTION to_abs(value, factor)
+            IF value < 0
+                RETURN (value * -1, factor * -1)
+            ELSE
+                RETURN (value, factor)
+            END IF
+        END FUNCTION
+
+        (abs_val, factor) = to_abs(integer_value, 1)
+        SET digit_str TO STRING(abs_val)
+        FUNCTION convert_and_apply(index, seq)
+            IF index = LENGTH(seq)
+                RETURN []
+            ELSE
+                LET head = TO_INTEGER(seq[index])
+                LET adjusted = IF index = 0 THEN head * factor ELSE head
+                RETURN [adjusted] + convert_and_apply(index + 1, seq)
+            END IF
+        END FUNCTION
+        SET digits_list TO convert_and_apply(0, digit_str)
+        FUNCTION sum_list(lst, acc)
+            IF lst = []
+                RETURN acc
+            ELSE
+                RETURN sum_list(tail(lst), acc + head(lst))
+            END IF
+        END FUNCTION
+        RETURN sum_list(digits_list, 0)
+    END FUNCTION
+
+    FUNCTION map_digits_sums(seq, idx, acc)
+        IF idx = LENGTH(seq)
+            RETURN acc
+        ELSE
+            RETURN map_digits_sums(seq, idx + 1, acc + [digits_sum(seq[idx])])
+        END IF
+    END FUNCTION
+
+    SET all_sums TO map_digits_sums(array_of_integers, 0, [])
+    FUNCTION filter_positive(lst, index, collected)
+        IF index = LENGTH(lst)
+            RETURN collected
+        ELSE
+            LET current_val = lst[index]
+            IF NOT (current_val > 0)
+                RETURN filter_positive(lst, index + 1, collected)
+            ELSE
+                RETURN filter_positive(lst, index + 1, collected + [current_val])
+            END IF
+        END IF
+    END FUNCTION
+
+    SET positives TO filter_positive(all_sums, 0, [])
+    RETURN LENGTH(positives)
+END FUNCTION
+```

@@ -1,0 +1,98 @@
+CLASS Solution
+    FUNCTION lastMarkedNodes(edges)
+        FUNCTION explore(nodeIdx, parentIdx, distanceArray)
+            IF nodeIdx < 0 THEN RETURN END IF
+            LET queueList = [nodeIdx]
+            LET pointerIdx = 0
+            WHILE pointerIdx < LENGTH(queueList)
+                LET currentNode = queueList[pointerIdx]
+                LET nextNodes = g[currentNode]
+                LET adjIdx = 0
+                WHILE adjIdx < LENGTH(nextNodes)
+                    LET linkedNode = nextNodes[adjIdx]
+                    IF linkedNode != parentIdx AND distanceArray[linkedNode] < 0 THEN
+                        distanceArray[linkedNode] = distanceArray[currentNode] + 1
+                        APPEND linkedNode TO queueList
+                    END IF
+                    SET adjIdx = adjIdx + 1
+                END WHILE
+                SET pointerIdx = pointerIdx + 1
+            END WHILE
+        END FUNCTION
+
+        LET nodeCount = LENGTH(edges) + 1
+        LET g = []
+        LET idxFill = 0
+        WHILE idxFill < nodeCount
+            APPEND [] TO g
+            SET idxFill = idxFill + 1
+        END WHILE
+
+        LET edgeIndex = 0
+        WHILE edgeIndex < LENGTH(edges)
+            LET u_val = edges[edgeIndex][0]
+            LET v_val = edges[edgeIndex][1]
+            APPEND v_val TO g[u_val]
+            APPEND u_val TO g[v_val]
+            SET edgeIndex = edgeIndex + 1
+        END WHILE
+
+        LET distFromStart = []
+        FOR _ IN RANGE(nodeCount)
+            APPEND (-1) TO distFromStart
+        END FOR
+        distFromStart[0] = 0
+        CALL explore(0, -1, distFromStart)
+        LET maxDistA = distFromStart[0]
+        LET aIndex = 0
+        LET distIter = 1
+        WHILE distIter < nodeCount
+            IF distFromStart[distIter] > maxDistA THEN
+                maxDistA = distFromStart[distIter]
+                aIndex = distIter
+            END IF
+            SET distIter = distIter + 1
+        END WHILE
+
+        LET distFromA = []
+        LET fillCountA = 0
+        WHILE fillCountA < nodeCount
+            APPEND (-1) TO distFromA
+            SET fillCountA = fillCountA + 1
+        END WHILE
+        distFromA[aIndex] = 0
+        CALL explore(aIndex, -1, distFromA)
+        LET maxDistB = distFromA[0]
+        LET bIndex = 0
+        LET distIterB = 1
+        WHILE distIterB < nodeCount
+            IF distFromA[distIterB] > maxDistB THEN
+                maxDistB = distFromA[distIterB]
+                bIndex = distIterB
+            END IF
+            SET distIterB = distIterB + 1
+        END WHILE
+
+        LET distFromB = []
+        LET fillCountB = 0
+        WHILE fillCountB < nodeCount
+            APPEND (-1) TO distFromB
+            SET fillCountB = fillCountB + 1
+        END WHILE
+        distFromB[bIndex] = 0
+        CALL explore(bIndex, -1, distFromB)
+
+        LET answerList = []
+        LET posIter = 0
+        WHILE posIter < nodeCount
+            IF distFromA[posIter] > distFromB[posIter] THEN
+                APPEND aIndex TO answerList
+            ELSE
+                APPEND bIndex TO answerList
+            END IF
+            SET posIter = posIter + 1
+        END WHILE
+
+        RETURN answerList
+    END FUNCTION
+END CLASS

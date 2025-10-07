@@ -1,0 +1,110 @@
+CLASS Solution
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+
+        SET alpha TO LENGTH OF image
+        SET beta TO LENGTH OF element at position zero of image
+        SET omega TO a LIST of length alpha EACH element a LIST of length beta EACH element zero
+        SET psi TO a LIST of length alpha EACH element a LIST of length beta EACH element zero
+
+        FUNCTION check_validity(p WITH TYPE integer q WITH TYPE integer) WITH RETURN TYPE boolean
+            DEFINE neighbors AS LIST OF PAIRS [(−1,0),(1,0),(0,−1),(0,1)]
+            SET u TO p
+            WHILE u LESS THAN p PLUS 3 DO
+                SET v TO q
+                WHILE v LESS THAN q PLUS 3 DO
+                    SET idx TO 0
+                    REPEAT
+                        IF idx EQUALS LENGTH OF neighbors THEN
+                            EXIT REPEAT
+                        END IF
+                        SET dx, dy TO neighbors AT position idx
+                        SET nx TO u PLUS dx
+                        SET ny TO v PLUS dy
+                        IF nx GREATER THAN OR EQUAL TO 0 AND nx LESS THAN p PLUS 3 AND ny GREATER THAN OR EQUAL TO 0 AND ny LESS THAN q PLUS 3 THEN
+                            IF ABSOLUTE VALUE OF (ELEMENT at position u of image at position v) MINUS (ELEMENT at position nx of image at position ny) GREATER THAN threshold THEN
+                                RETURN False
+                            END IF
+                        END IF
+                        INCREMENT idx BY 1
+                    UNTIL False
+                    SET v TO v PLUS 1
+                END WHILE
+                SET u TO u PLUS 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        FUNCTION compute_average(p WITH TYPE integer q WITH TYPE integer) WITH RETURN TYPE integer
+            SET acc TO 0
+            SET a TO p
+            REPEAT
+                IF a EQUALS p PLUS 3 THEN
+                    EXIT REPEAT
+                END IF
+                SET b TO q
+                REPEAT
+                    IF b EQUALS q PLUS 3 THEN
+                        EXIT REPEAT
+                    END IF
+                    SET acc TO acc PLUS ELEMENT at position a of image at position b
+                    SET b TO b PLUS 1
+                UNTIL False
+                SET a TO a PLUS 1
+            UNTIL False
+            SET res_avg TO acc DIVIDED BY (1 PLUS 2 PLUS 3)
+            RETURN res_avg
+        END FUNCTION
+
+        SET r TO 0
+        WHILE r LESS THAN alpha MINUS 2 DO
+            SET s TO 0
+            WHILE s LESS THAN beta MINUS 2 DO
+                IF check_validity(r, s) EQUALS True THEN
+                    SET val TO compute_average(r, s)
+
+                    FUNCTION increment_cells(x WITH TYPE integer y WITH TYPE integer)
+                        SET i_0 TO x
+                        IF i_0 EQUALS x PLUS 3 THEN
+                            RETURN
+                        END IF
+                        SET j_0 TO y
+                        IF j_0 EQUALS y PLUS 3 THEN
+                            SET i_0 TO i_0 PLUS 1
+                            CALL increment_cells(i_0, y)
+                            RETURN
+                        END IF
+                        SET ELEMENT at position i_0 of omega at position j_0 TO ELEMENT at position i_0 of omega at position j_0 PLUS val
+                        SET ELEMENT at position i_0 of psi at position j_0 TO ELEMENT at position i_0 of psi at position j_0 PLUS 1
+                        CALL increment_cells(i_0, j_0 PLUS 1)
+                    END FUNCTION
+
+                    CALL increment_cells(r, s)
+                END IF
+                SET s TO s PLUS 1
+            END WHILE
+            SET r TO r PLUS 1
+        END WHILE
+
+        SET row_idx TO 0
+        REPEAT
+            IF row_idx EQUALS alpha THEN
+                EXIT REPEAT
+            END IF
+            SET col_idx TO 0
+            REPEAT
+                IF col_idx EQUALS beta THEN
+                    EXIT REPEAT
+                END IF
+                IF ELEMENT at position row_idx of psi at position col_idx GREATER THAN 0 THEN
+                    SET ELEMENT at position row_idx of omega at position col_idx TO ELEMENT at position row_idx of omega at position col_idx DIVIDED BY ELEMENT at position row_idx of psi at position col_idx
+                ELSE
+                    SET ELEMENT at position row_idx of omega at position col_idx TO ELEMENT at position row_idx of image at position col_idx
+                END IF
+                SET col_idx TO col_idx PLUS 1
+            UNTIL False
+            SET row_idx TO row_idx PLUS 1
+        UNTIL False
+
+        RETURN omega
+    END FUNCTION
+END CLASS

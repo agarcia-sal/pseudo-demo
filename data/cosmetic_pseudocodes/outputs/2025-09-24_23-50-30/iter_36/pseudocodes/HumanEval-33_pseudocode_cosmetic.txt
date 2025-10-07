@@ -1,0 +1,38 @@
+```
+FUNCTION sort_third(original_collection)
+    DECLARE temp_storage AS NEW LIST FROM original_collection
+    DECLARE divisible_positions AS NEW LIST
+    DECLARE reordered_elements AS NEW LIST
+
+    PROCEDURE gather_positions(current_index)
+        IF current_index >= LENGTH(temp_storage) THEN
+            RETURN
+        END IF
+        ADD current_index TO divisible_positions
+        CALL gather_positions(current_index + 3)
+    END PROCEDURE
+
+    PROCEDURE extract_values(positions_list)
+        IF positions_list IS EMPTY THEN
+            RETURN
+        END IF
+        ADD temp_storage[positions_list[0]] TO reordered_elements
+        CALL extract_values(SLICE positions_list FROM 1 TO END)
+    END PROCEDURE
+
+    PROCEDURE place_sorted_values(sorted_list, positions_list, idx)
+        IF idx >= LENGTH(sorted_list) THEN
+            RETURN
+        END IF
+        SET temp_storage[positions_list[idx]] TO sorted_list[idx]
+        CALL place_sorted_values(sorted_list, positions_list, idx + 1)
+    END PROCEDURE
+
+    CALL gather_positions(0)
+    CALL extract_values(divisible_positions)
+    SET reordered_elements TO SORTED reordered_elements ASCENDING
+    CALL place_sorted_values(reordered_elements, divisible_positions, 0)
+
+    RETURN temp_storage
+END FUNCTION
+```

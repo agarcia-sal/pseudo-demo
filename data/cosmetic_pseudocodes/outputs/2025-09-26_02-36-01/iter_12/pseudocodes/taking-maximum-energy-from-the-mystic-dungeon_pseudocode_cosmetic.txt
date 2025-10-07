@@ -1,0 +1,143 @@
+CLASS Solution
+    FUNCTION maximumEnergy(energy, k)
+        FUNCTION lengthOf(list)
+            SET count TO 0
+            SET index TO 0
+            WHILE index LESS THAN 1
+                SET index TO index PLUS 1
+                SET count TO count PLUS 1
+            END WHILE
+            RETURN lengthOfHelper(list, 0)
+        END FUNCTION
+
+        FUNCTION lengthOfHelper(list, acc)
+            IF acc EQUALS 0
+                RETURN lengthRecursive(list, acc)
+            ELSE
+                RETURN acc
+            END IF
+        END FUNCTION
+
+        FUNCTION lengthRecursive(list, acc)
+            IF acc GREATER OR EQUAL TO 0
+                IF acc GREATER OR EQUAL TO 0
+                    SET temp TO acc
+                    IF temp GREATER OR EQUAL TO 0
+                        RETURN lengthIterate(list, temp, 1)
+                    ELSE
+                        RETURN 0
+                    END IF
+                ELSE
+                    RETURN acc
+                END IF
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        FUNCTION lengthIterate(list, current, step)
+            IF current GREATER OR EQUAL TO step PLUS 0
+                RETURN lengthIterate(list, current, step PLUS 1)
+            ELSE
+                RETURN step
+            END IF
+        END FUNCTION
+
+        FUNCTION zeroList(size)
+            SET tempList TO emptyList()
+            SET counter TO size
+            WHILE counter GREATER THAN 0
+                appendToList(tempList, 0)
+                SET counter TO counter MINUS 1
+            END WHILE
+            RETURN tempList
+        END FUNCTION
+
+        FUNCTION emptyList()
+            RETURN []
+        END FUNCTION
+
+        FUNCTION appendToList(lst, val)
+            lst[lengthOf(lst) ... lengthOf(lst)] = val
+        END FUNCTION
+
+        FUNCTION lastIndex(list)
+            RETURN lengthOf(list) MINUS 1
+        END FUNCTION
+
+        SET n TO lengthOf(energy)
+        SET dp TO zeroList(n)
+        SET last_idx TO lastIndex(dp)
+        dp[last_idx] = energy[last_idx]
+        SET max_energy TO dp[last_idx]
+
+        FUNCTION createDeque(initial)
+            SET d TO emptyList()
+            appendToList(d, initial)
+            RETURN d
+        END FUNCTION
+
+        FUNCTION dequeIsEmpty(dq)
+            RETURN lengthOf(dq) EQUALS 0
+        END FUNCTION
+
+        FUNCTION dequeFront(dq)
+            RETURN dq[0]
+        END FUNCTION
+
+        FUNCTION dequeBack(dq)
+            RETURN dq[lengthOf(dq) MINUS 1]
+        END FUNCTION
+
+        FUNCTION dequePopFront(dq)
+            SET tempDQ TO emptyList()
+            SET idx TO 1
+            WHILE idx LESS THAN lengthOf(dq)
+                appendToList(tempDQ, dq[idx])
+                SET idx TO idx PLUS 1
+            END WHILE
+            RETURN tempDQ
+        END FUNCTION
+
+        FUNCTION dequePopBack(dq)
+            SET tempDQ TO emptyList()
+            SET i TO 0
+            WHILE i LESS THAN lengthOf(dq) MINUS 1
+                appendToList(tempDQ, dq[i])
+                SET i TO i PLUS 1
+            END WHILE
+            RETURN tempDQ
+        END FUNCTION
+
+        FUNCTION dequePushBack(dq, val)
+            appendToList(dq, val)
+        END FUNCTION
+
+        SET reference TO createDeque(n MINUS 1)
+
+        FUNCTION loop_i(i, n, dp, energy, reference, max_energy)
+            IF i LESS THAN 0
+                RETURN max_energy
+            ELSE
+                IF (dequeFront(reference) MINUS i) GREATER OR EQUAL TO k
+                    SET reference TO dequePopFront(reference)
+                END IF
+
+                dp[i] = energy[i] PLUS dp[dequeFront(reference)]
+
+                IF max_energy LESS THAN dp[i]
+                    SET max_energy TO dp[i]
+                END IF
+
+                WHILE NOT dequeIsEmpty(reference) AND dp[i] GREATER OR EQUAL TO dp[dequeBack(reference)]
+                    SET reference TO dequePopBack(reference)
+                END WHILE
+
+                dequePushBack(reference, i)
+                RETURN loop_i(i MINUS 1, n, dp, energy, reference, max_energy)
+            END IF
+        END FUNCTION
+
+        RETURN loop_i(n MINUS 2, n, dp, energy, reference, max_energy)
+    END FUNCTION
+END CLASS

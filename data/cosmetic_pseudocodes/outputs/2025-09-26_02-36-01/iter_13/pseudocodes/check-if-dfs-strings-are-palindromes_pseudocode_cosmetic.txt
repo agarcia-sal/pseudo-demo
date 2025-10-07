@@ -1,0 +1,90 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+        SET self.mod TO mod  
+        SET self.h TO list containing a zero  
+        SET self.p TO list containing a one  
+        FUNCTION compute(i)  
+            IF i GREATER THAN LENGTH OF s THEN RETURN  
+            SET x TO self.h[i - 1] * base  
+            SET y TO UNICODE code point of s[i - 1]  
+            SET z TO (x + y) MOD mod  
+            APPEND z TO self.h  
+            SET w TO (self.p[i - 1] * base) MOD mod  
+            APPEND w TO self.p  
+            CALL compute WITH i + 1  
+        END FUNCTION  
+        CALL compute WITH 1  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        SET left_hash TO self.h[l - 1] * self.p[r - l + 1]  
+        SET diff TO self.h[r] - left_hash  
+        SET result TO ((diff MOD self.mod) + self.mod) MOD self.mod  
+        RETURN result  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+        SET n TO LENGTH OF s  
+        SET g TO list of empty lists of size n  
+        FUNCTION build(i)  
+            IF i EQUALS n THEN RETURN  
+            SET u TO parent[i]  
+            IF u GREATER THAN OR EQUAL TO 0 THEN  
+                APPEND i TO g[u]  
+            END IF  
+            CALL build WITH i + 1  
+        END FUNCTION  
+        CALL build WITH 1  
+
+        SET dfsStr TO empty list  
+        SET pos TO empty dictionary  
+        FUNCTION dfs(i)  
+            SET start_pos TO LENGTH OF dfsStr + 1  
+            SET children TO g[i]  
+            FUNCTION dfs_children(index)  
+                IF index EQUALS LENGTH OF children THEN RETURN  
+                CALL dfs WITH children[index]  
+                CALL dfs_children WITH index + 1  
+            END FUNCTION  
+            CALL dfs_children WITH 0  
+            APPEND s[i] TO dfsStr  
+            SET end_pos TO LENGTH OF dfsStr  
+            SET pos[i] TO (start_pos, end_pos)  
+        END FUNCTION  
+        CALL dfs WITH 0  
+
+        SET BASE_CONST TO 33331  
+        SET MOD_CONST TO 998244353  
+        SET h1 TO new Hashing WITH dfsStr, BASE_CONST, MOD_CONST  
+        SET rev_dfsStr TO empty list  
+        FUNCTION reverse_dfsStr(index)  
+            IF index LESS THAN 0 THEN RETURN  
+            APPEND dfsStr[index] TO rev_dfsStr  
+            CALL reverse_dfsStr WITH index - 1  
+        END FUNCTION  
+        CALL reverse_dfsStr WITH LENGTH OF dfsStr - 1  
+        SET h2 TO new Hashing WITH rev_dfsStr, BASE_CONST, MOD_CONST  
+
+        SET result TO empty list  
+        FUNCTION process(i)  
+            IF i EQUALS n THEN RETURN  
+            SET l, r TO pos[i][0], pos[i][1]  
+            SET length TO r - l + 1  
+            IF (length MOD 2) EQUALS 0 THEN  
+                SET half TO length / 2  
+                SET val1 TO h1.query(l, l + half - 1)  
+                SET val2 TO h2.query(n - r + 1, n - r + half)  
+            ELSE  
+                SET half TO length // 2  
+                SET val1 TO h1.query(l, l + half - 1)  
+                SET val2 TO h2.query(n - r + 1, n - r + half)  
+            END IF  
+            APPEND (val1 EQUALS val2) TO result  
+            CALL process WITH i + 1  
+        END FUNCTION  
+        CALL process WITH 0  
+        RETURN result  
+    END FUNCTION  
+END CLASS

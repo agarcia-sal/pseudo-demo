@@ -1,0 +1,133 @@
+CLASS Solution
+    FUNCTION makeStringGood(inputStr)
+        PROCEDURE countChars(idx, counts)
+            IF idx EQUALS LENGTH(inputStr) THEN
+                RETURN counts
+            END IF
+            LET charVal BE ORD(inputStr[idx]) - ORD('a')
+            LET updatedCount BE counts[charVal] + 1
+            LET newCounts BE counts
+            newCounts[charVal] = updatedCount
+            RETURN countChars(idx + 1, newCounts)
+        END PROCEDURE
+        
+        LET zeroArray BE A LIST OF ZEROES WITH LENGTH 26
+        LET freqArray BE countChars(0, zeroArray)
+        
+        PROCEDURE maxInList(lst, idx, currentMax)
+            IF idx EQUALS LENGTH(lst) THEN
+                RETURN currentMax
+            END IF
+            LET candidate BE lst[idx]
+            LET newMax BE candidate
+            IF currentMax GREATER THAN candidate THEN
+                newMax = currentMax
+            END IF
+            RETURN maxInList(idx + 1, lst, newMax)
+        END PROCEDURE
+        
+        LET maxFreq BE maxInList(freqArray, 0, 0)
+        
+        PROCEDURE generateRange(start, end, acc)
+            IF start GREATER THAN end THEN
+                RETURN acc
+            END IF
+            RETURN generateRange(start + 1, end, acc + [start])
+        END PROCEDURE
+        
+        LET targets BE generateRange(1, maxFreq, [])
+        
+        PROCEDURE mapMinOperations(tgts, accum)
+            IF LENGTH(tgts) EQUALS 0 THEN
+                RETURN accum
+            END IF
+            LET headTarget BE tgts[0]
+            LET tailTargets BE tgts[1:]
+            LET val BE _getMinOperations(freqArray, headTarget)
+            RETURN mapMinOperations(tailTargets, accum + [val])
+        END PROCEDURE
+        
+        LET operationsList BE mapMinOperations(targets, [])
+        
+        PROCEDURE findMin(lst, idx, currentMin)
+            IF idx EQUALS LENGTH(lst) THEN
+                RETURN currentMin
+            END IF
+            LET candidate BE lst[idx]
+            LET newMin BE candidate
+            IF currentMin LESS THAN candidate THEN
+                newMin = currentMin
+            END IF
+            RETURN findMin(lst, idx + 1, newMin)
+        END PROCEDURE
+        
+        LET minimumOperations BE findMin(operationsList, 0, operationsList[0])
+        
+        RETURN minimumOperations
+    END FUNCTION
+
+    FUNCTION _getMinOperations(freqArr, tgt)
+        PROCEDURE helper(pos, dpList)
+            IF pos LESS THAN 0 THEN
+                RETURN dpList
+            END IF
+            
+            LET countAtPos BE freqArr[pos]
+            
+            LET delAllCost BE countAtPos
+            
+            LET delOrInsCost BE 0
+            IF tgt GREATER THAN countAtPos THEN
+                delOrInsCost = tgt - countAtPos
+            ELSE
+                delOrInsCost = countAtPos - tgt
+            END IF
+            
+            LET nextDpVal BE dpList[pos + 1]
+            LET op1 BE delAllCost
+            LET op2 BE delOrInsCost + nextDpVal
+            
+            LET currentDpVal BE op1
+            IF currentDpVal GREATER THAN op2 THEN
+                currentDpVal = op2
+            END IF
+            
+            IF (pos + 1) LESS THAN 26 THEN
+                LET nextCount BE freqArr[pos + 1]
+                IF nextCount LESS THAN tgt THEN
+                    LET diffNext BE tgt - nextCount
+                    
+                    LET needChange BE 0
+                    IF countAtPos LESS THAN OR EQUAL TO tgt THEN
+                        needChange = countAtPos
+                    ELSE
+                        needChange = countAtPos - tgt
+                    END IF
+                    
+                    LET changeCost BE 0
+                    IF diffNext GREATER THAN needChange THEN
+                        changeCost = needChange + (diffNext - needChange)
+                    ELSE
+                        changeCost = diffNext + (needChange - diffNext)
+                    END IF
+                    
+                    LET altCost BE changeCost + dpList[pos + 2]
+                    
+                    IF currentDpVal GREATER THAN altCost THEN
+                        currentDpVal = altCost
+                    END IF
+                END IF
+            END IF
+            
+            LET newDpList BE dpList
+            newDpList[pos] = currentDpVal
+            
+            RETURN helper(pos - 1, newDpList)
+        END PROCEDURE
+        
+        LET initDp BE A LIST OF ZEROES WITH LENGTH 27
+        LET finalDp BE helper(25, initDp)
+        
+        RETURN finalDp[0]
+    END FUNCTION
+END CLASS

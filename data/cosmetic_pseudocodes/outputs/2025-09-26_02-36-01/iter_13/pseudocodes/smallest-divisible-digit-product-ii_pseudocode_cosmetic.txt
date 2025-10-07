@@ -1,0 +1,268 @@
+CLASS Solution
+	Function smallestNumber(num, t)
+		Var alpha, omega, delta := self._getPrimeCount(t)
+		If omega = false Then
+			Return "-" + "1"
+		EndIf
+		
+		Var sigma := self._getFactorCount(alpha)
+		Var tau := 0
+		ForEach k In sigma.Keys()
+			tau := tau + sigma[k]
+		EndFor
+		If tau > Length(num) Then
+			Var beta := ""
+			ForEach x In sigma.Keys()
+				Var reps := sigma[x]
+				Var i := 0
+				While i < reps
+					beta := beta + x
+					i := i + 1
+				EndWhile
+			EndFor
+			Return beta
+		EndIf
+		
+		Var primeCountPrefix := CounterEmpty()
+		Var idx := Length(num) - 1
+		While idx >= 0
+			PrimeCountAdd(primeCountPrefix, FACTOR_COUNTS[ToInteger(num[idx])])
+			idx := idx - 1
+		EndWhile
+		
+		Var zeroPos := Length(num)
+		Var pos := 0
+		RepeatUntil pos = Length(num)
+			If num[pos] = "0" Then
+				zeroPos := pos
+				pos := Length(num)  // break
+			Else
+				pos := pos + 1
+			EndIf
+		EndRepeat
+		
+		If zeroPos = Length(num) And LessEqual(alpha, primeCountPrefix) Then
+			Return num
+		EndIf
+		
+		RecursiveSearch(Length(num) - 1, primeCountPrefix)
+		Return TailReturnValue()
+		
+		Function RecursiveSearch(i, prefix)
+			If i < 0 Then
+				TailReturnValue_Set("")
+				Return
+			EndIf
+			
+			Var d := ToInteger(num[i])
+			PrimeCountSub(prefix, FACTOR_COUNTS[d])
+			Var spaceAfterThisDigit := Length(num) - 1 - i
+			
+			If LessEqual(i, zeroPos) Then
+				Var digitCandidate := d + 1
+				While digitCandidate <= 9
+					Var rem := self._getFactorCount(SubtractCounter(alpha, prefix, FACTOR_COUNTS[digitCandidate]))
+					Var sumRem := 0
+					ForEach key In rem.Keys()
+						sumRem := sumRem + rem[key]
+					EndFor
+					If sumRem <= spaceAfterThisDigit Then
+						Var onesFill := spaceAfterThisDigit - sumRem
+						Var prefixStr := Substring(num, 0, i) + ToString(digitCandidate) + RepeatChar("1", onesFill)
+						Var suffixStr := ""
+						ForEach k In rem.Keys()
+							Var cnt := rem[k]
+							Var iter := 0
+							While iter < cnt
+								suffixStr := suffixStr + k
+								iter := iter + 1
+							EndWhile
+						EndFor
+						TailReturnValue_Set(prefixStr + suffixStr)
+						Return
+					EndIf
+					digitCandidate := digitCandidate + 1
+				EndWhile
+			EndIf
+			
+			RecursiveSearch(i - 1, prefix)
+		EndFunction
+		
+		Function TailReturnValue_Set(val)
+			Var retValLocal := val
+			Var globalResult := retValLocal
+		EndFunction
+		
+		Function TailReturnValue()
+			Return globalResult
+		EndFunction
+		
+		Function ToInteger(c)
+			Return CharCode(c) - CharCode("0")
+		EndFunction
+		
+		Function RepeatChar(ch, n)
+			Var outp := ""
+			Var i := 0
+			While i < n
+				outp := outp + ch
+				i := i + 1
+			EndWhile
+			Return outp
+		EndFunction
+		
+		Function Substring(str, startInd, endInd)
+			Var res := ""
+			Var pos := startInd
+			While pos < endInd
+				res := res + str[pos]
+				pos := pos + 1
+			EndWhile
+			Return res
+		EndFunction
+		
+		Function LessEqual(lhs, rhs)
+			ForEach key In lhs.Keys()
+				Var lhsVal := lhs[key]
+				Var rhsVal := GetFromCounter(rhs, key)
+				If lhsVal > rhsVal Then
+					Return False
+				EndIf
+			EndFor
+			Return True
+		EndFunction
+		
+		Function SubtractCounter(a, b, c)
+			Var result := CounterEmpty()
+			ForEach key In a.Keys()
+				Var aVal := a[key]
+				Var bVal := GetFromCounter(b, key)
+				Var cVal := GetFromCounter(c, key)
+				result[key] := aVal - bVal - cVal
+			EndFor
+			Return result
+		EndFunction
+		
+		Function GetFromCounter(counterVar, key)
+			If key In counterVar.Keys() Then
+				Return counterVar[key]
+			Else
+				Return 0
+			EndIf
+		EndFunction
+		
+		Function CounterEmpty()
+			Var newCounter := MapEmpty()
+			Return newCounter
+		EndFunction
+		
+		Function PrimeCountAdd(counterVar, additionMap)
+			ForEach k In additionMap.Keys()
+				If k In counterVar.Keys() Then
+					counterVar[k] := counterVar[k] + additionMap[k]
+				Else
+					counterVar[k] := additionMap[k]
+				EndIf
+			EndFor
+		EndFunction
+		
+		Function PrimeCountSub(counterVar, subtractionMap)
+			ForEach k In subtractionMap.Keys()
+				If k In counterVar.Keys() Then
+					counterVar[k] := counterVar[k] - subtractionMap[k]
+				Else
+					counterVar[k] := -subtractionMap[k]
+				EndIf
+			EndFor
+		EndFunction
+	EndFunction
+	
+	Function _getPrimeCount(t)
+		Var retCounter := CounterEmpty()
+		Var primeList := [2, 3, 5, 7]
+		
+		Var currentVal := t
+		CallFactor(0, currentVal, retCounter)
+		Return retCounter, (currentVal = 1)
+		
+		Function CallFactor(i, val, ctr)
+			If i = Length(primeList) Then
+				currentVal := val
+				Return
+			EndIf
+			Var p := primeList[i]
+			While val Mod p = 0
+				val := val / p
+				If p In ctr.Keys()
+					ctr[p] := ctr[p] + 1
+				Else
+					ctr[p] := 1
+				EndIf
+			EndWhile
+			CallFactor(i + 1, val, ctr)
+		EndFunction
+	EndFunction
+	
+	Function _getFactorCount(count)
+		Var c2 := GetFromCounter(count, 2)
+		Var c3 := GetFromCounter(count, 3)
+		Var c5 := GetFromCounter(count, 5)
+		Var c7 := GetFromCounter(count, 7)
+		
+		Var count8 := IntDivision(c2, 3)
+		Var rem2 := Modulo(c2, 3)
+		Var count9 := IntDivision(c3, 2)
+		Var rem3 := Modulo(c3, 2)
+		
+		Var count4 := IntDivision(rem2, 2)
+		Var remCount2 := Modulo(rem2, 2)
+		
+		Var count2, count3, count6, count4Final := 0, 0, 0, count4
+		
+		If remCount2 = 1 And rem3 = 1 Then
+			count2 := 0
+			count3 := 0
+			count6 := 1
+		Else
+			count2 := remCount2
+			count3 := rem3
+			count6 := 0
+		EndIf
+		
+		If rem3 = 1 And count4Final = 1 Then
+			count2 := 1
+			count6 := 1
+			count3 := 0
+			count4Final := 0
+		EndIf
+		
+		Var resultCounter := CounterEmpty()
+		resultCounter["2"] := count2
+		resultCounter["3"] := count3
+		resultCounter["4"] := count4Final
+		resultCounter["5"] := c5
+		resultCounter["6"] := count6
+		resultCounter["7"] := c7
+		resultCounter["8"] := count8
+		resultCounter["9"] := count9
+		Return resultCounter
+		
+		Function GetFromCounter(counterVar, k)
+			If k In counterVar.Keys() Then
+				Return counterVar[k]
+			Else
+				Return 0
+			EndIf
+		EndFunction
+		
+		Function IntDivision(a, b)
+			Var res := (a - (a Mod b)) / b
+			Return res
+		EndFunction
+		
+		Function Modulo(a, b)
+			Var res := a - b * ((a - (a Mod b)) / b)
+			Return res
+		EndFunction
+	EndFunction
+ENDCLASS

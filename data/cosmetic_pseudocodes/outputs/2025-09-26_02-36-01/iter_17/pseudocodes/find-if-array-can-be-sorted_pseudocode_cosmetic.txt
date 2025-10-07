@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION canSortArray(nums)
+        FUNCTION count_set_bits(x)
+            SET total_ones TO 0
+            SET mask TO 1
+            REPEAT
+                IF (x AND mask) NOT EQUAL TO 0 THEN
+                    SET total_ones TO total_ones + 1
+                END IF
+                SET mask TO mask << 1
+            UNTIL mask > x
+            RETURN total_ones
+        END FUNCTION
+
+        SET length_nums TO 0
+        WHILE TRUE
+            IF length_nums >= LENGTH OF nums THEN
+                BREAK
+            END IF
+            SET length_nums TO length_nums + 1
+        END WHILE
+
+        SET sorted_copy TO [ ]
+        FOR index_var FROM 0 TO length_nums - 1
+            SET sorted_copy[index_var] TO nums[index_var]
+        END FOR
+        CALL SORT sorted_copy IN ASCENDING ORDER
+
+        SET outer_idx TO 0
+        WHILE outer_idx < length_nums
+            SET inner_idx TO 0
+            WHILE inner_idx < length_nums - 1
+                SET left_bit_count TO count_set_bits(nums[inner_idx])
+                SET right_bit_count TO count_set_bits(nums[inner_idx + 1])
+                IF (left_bit_count = right_bit_count) AND (nums[inner_idx] > nums[inner_idx + 1]) THEN
+                    SET swap_tmp TO nums[inner_idx]
+                    SET nums[inner_idx] TO nums[inner_idx + 1]
+                    SET nums[inner_idx + 1] TO swap_tmp
+                END IF
+                SET inner_idx TO inner_idx + 1
+            END WHILE
+            SET outer_idx TO outer_idx + 1
+        END WHILE
+
+        SET is_equal TO TRUE
+        SET check_pos TO 0
+        WHILE check_pos < length_nums
+            IF nums[check_pos] NOT EQUAL TO sorted_copy[check_pos] THEN
+                SET is_equal TO FALSE
+                BREAK
+            END IF
+            SET check_pos TO check_pos + 1
+        END WHILE
+
+        RETURN is_equal
+    END FUNCTION
+END CLASS

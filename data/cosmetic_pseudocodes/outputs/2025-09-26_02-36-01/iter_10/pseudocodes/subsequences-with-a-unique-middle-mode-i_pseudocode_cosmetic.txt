@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+      CONSTANT P ← (1000000000 + 7)
+      VARIABLE L ← LENGTH(nums)
+      IF (L < (2 + 3)) THEN RETURN 0 ENDIF
+
+      FUNCTION allFiveCombos(collection)
+        VARIABLE results ← []
+        FUNCTION recur(start, combo)
+          IF LENGTH(combo) = 5 THEN
+            APPEND combo TO results
+            RETURN
+          ENDIF
+          IF start = LENGTH(collection) THEN RETURN ENDIF
+          recur(start + 1, combo)
+          VARIABLE extended ← combo + [collection[start]]
+          recur(start + 1, extended)
+        END FUNCTION
+        recur(0, [])
+        RETURN results
+      END FUNCTION
+
+      FUNCTION countFreq(arr)
+        VARIABLE map ← {}
+        FOR i ← 0 TO (LENGTH(arr) - 1)
+          VARIABLE elem ← arr[i]
+          IF elem IN map THEN
+            map[elem] ← map[elem] + 1
+          ELSE
+            map[elem] ← 1
+          ENDIF
+        ENDFOR
+        RETURN map
+      END FUNCTION
+
+      VARIABLE allsubs ← allFiveCombos(nums)
+      VARIABLE accumulator ← 0
+
+      FUNCTION checkMode(candidates)
+        VARIABLE histogram ← countFreq(candidates)
+        VARIABLE midpoint ← candidates[2]
+        VARIABLE modeFreq ← histogram[midpoint]
+        VARIABLE uniqueMode ← TRUE
+
+        FUNCTION scan(freqMap, keyList, idx)
+          IF idx = LENGTH(keyList) THEN RETURN ENDIF
+          VARIABLE curKey ← keyList[idx]
+          IF (curKey != midpoint) AND (freqMap[curKey] >= modeFreq) THEN
+            uniqueMode ← FALSE
+            RETURN
+          ENDIF
+          scan(freqMap, keyList, idx + 1)
+        END FUNCTION
+
+        scan(histogram, KEYS(histogram), 0)
+        RETURN uniqueMode
+      END FUNCTION
+
+      VARIABLE idxSubs ← 0
+      WHILE (idxSubs < LENGTH(allsubs))
+        VARIABLE currCombo ← allsubs[idxSubs]
+        IF checkMode(currCombo) THEN
+          accumulator ← accumulator + 1
+        ENDIF
+        idxSubs ← idxSubs + 1
+      ENDWHILE
+
+      RETURN (accumulator % P)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,42 @@
+FUNCTION sort_array(arr)
+    SET sorted_arr TO CALL sorted WITH ARGUMENTS arr
+    SET length_arr TO LENGTH OF arr
+    SET indexed_list TO LIST WITH ELEMENTS EMPTY
+    FOR i FROM 0 TO length_arr MINUS 1
+        SET x TO CALL sorted_arr AT INDEX i
+        SET binary_string TO CALL BINARY REPRESENTATION OF x
+        SET binary_substring TO SLICE binary_string FROM INDEX 2 TO END
+        SET count_ones TO 0
+        SET length_binary_substring TO LENGTH OF binary_substring
+        FOR j FROM 0 TO length_binary_substring MINUS 1
+            IF CALL binary_substring AT INDEX j EQUALS TO CHARACTER "1"
+                INCREMENT count_ones BY 1
+            END IF
+        END FOR
+        CALL APPEND TO indexed_list THE TUPLE (count_ones, x)
+    END FOR
+    SET length_indexed_list TO LENGTH OF indexed_list
+    FOR i FROM 0 TO length_indexed_list MINUS 2
+        FOR k FROM 0 TO length_indexed_list MINUS 2 MINUS i
+            SET first_item TO CALL indexed_list AT INDEX k
+            SET second_item TO CALL indexed_list AT INDEX k PLUS 1
+            IF CALL first_item AT INDEX 0 GREATER THAN CALL second_item AT INDEX 0
+                SET temp TO CALL indexed_list AT INDEX k
+                SET CALL indexed_list AT INDEX k TO CALL indexed_list AT INDEX k PLUS 1
+                SET CALL indexed_list AT INDEX k PLUS 1 TO temp
+            ELSE IF CALL first_item AT INDEX 0 EQUALS TO CALL second_item AT INDEX 0
+                IF CALL first_item AT INDEX 1 GREATER THAN CALL second_item AT INDEX 1
+                    SET temp TO CALL indexed_list AT INDEX k
+                    SET CALL indexed_list AT INDEX k TO CALL indexed_list AT INDEX k PLUS 1
+                    SET CALL indexed_list AT INDEX k PLUS 1 TO temp
+                END IF
+            END IF
+        END FOR
+    END FOR
+    SET result_list TO LIST WITH ELEMENTS EMPTY
+    FOR i FROM 0 TO length_indexed_list MINUS 1
+        SET current_tuple TO CALL indexed_list AT INDEX i
+        CALL APPEND TO result_list THE CALL current_tuple AT INDEX 1
+    END FOR
+    RETURN result_list
+END FUNCTION

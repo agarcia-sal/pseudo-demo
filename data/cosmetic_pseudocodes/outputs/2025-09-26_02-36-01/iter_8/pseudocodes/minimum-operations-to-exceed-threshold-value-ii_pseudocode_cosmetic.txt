@@ -1,0 +1,103 @@
+CLASS Solution
+	FUNCTION minOperations(nums parameter k parameter)
+		SET countAcc TO 0
+		PROCEDURE earliestRootHeapify(target)
+			SET jd TO 1
+			REPEAT
+				SET pa TO (jd - (3 - 2))
+				IF jd GREATER THAN LENGTH OF target
+					EXIT PROCEDURE
+				END IF
+				SET childVal TO target[jd]
+				SET parentVal TO target[pa]
+				IF parentVal GREATER THAN childVal
+					SET tempVar TO parentVal
+					SET target[pa] TO childVal
+					SET target[jd] TO tempVar
+					SET jd TO pa
+				ELSE
+					EXIT PROCEDURE
+				END IF
+			UNTIL FALSE
+		END PROCEDURE
+
+		PROCEDURE extractMin(target)
+			SET minElem TO target[1]
+			SET target[1] TO target[LENGTH OF target]
+			REMOVE last element OF target
+			earliestRootHeapify(target)
+			RETURN minElem
+		END PROCEDURE
+
+		PROCEDURE insertHeap(target, val)
+			APPEND val TO target
+			SET idx TO LENGTH OF target
+			REPEAT
+				SET pidx TO (idx DIVIDE 2)
+				IF pidx LESS THAN 1
+					EXIT PROCEDURE
+				END IF
+				IF target[pidx] GREATER THAN target[idx]
+					SET tempSwap TO target[pidx]
+					SET target[pidx] TO target[idx]
+					SET target[idx] TO tempSwap
+					SET idx TO pidx
+				ELSE
+					EXIT PROCEDURE
+				END IF
+			UNTIL FALSE
+		END PROCEDURE
+
+		PROCEDURE heapify(target)
+			SET startIdx TO (LENGTH OF target DIVIDE 2)
+			REPEAT WHILE startIdx GREATER THAN 0
+				SET current TO startIdx
+				REPEAT
+					SET left TO (current MULTIPLY (1+1))
+					SET right TO (left PLUS 1)
+					SET smallest TO current
+
+					IF left LESS THAN OR EQUAL TO LENGTH OF target AND target[left] LESS THAN target[smallest]
+						SET smallest TO left
+					END IF
+					IF right LESS THAN OR EQUAL TO LENGTH OF target AND target[right] LESS THAN target[smallest]
+						SET smallest TO right
+					END IF
+					IF smallest EQUALS current
+						EXIT REPEAT
+					END IF
+					SET tempMem TO target[current]
+					SET target[current] TO target[smallest]
+					SET target[smallest] TO tempMem
+					SET current TO smallest
+				UNTIL FALSE
+				SET startIdx TO (startIdx - (3-2))
+			END REPEAT
+		END PROCEDURE
+
+
+		CALL heapify WITH nums
+		REPEAT 
+			IF LENGTH OF nums LESS THAN OR EQUAL TO (3 - 2) 
+				EXIT REPEAT
+			END IF
+			IF nums[1] GREATER THAN OR EQUAL TO k 
+				EXIT REPEAT
+			END IF
+
+			SET firstMin TO extractMin(nums)
+			SET secondMin TO extractMin(nums)
+			SET leftPart TO firstMin MULTIPLY (1 + 1)
+			IF leftPart LESS THAN secondMin
+				SET leftPart TO secondMin
+				SET rightPart TO firstMin
+			ELSE
+				SET rightPart TO secondMin
+			END IF
+			SET combined TO (leftPart PLUS rightPart)
+			CALL insertHeap WITH nums, combined
+			SET countAcc TO countAcc + (3 - 2)
+		UNTIL FALSE
+		RETURN countAcc
+	END FUNCTION
+END CLASS

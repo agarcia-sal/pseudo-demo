@@ -1,0 +1,81 @@
+CLASS Solution
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER
+        DECLARE alpha_list AS LIST OF INTEGER = []
+        DECLARE x_cursor AS INTEGER = 0
+
+        WHILE x_cursor < LENGTH(nums)
+            IF nums[x_cursor] == 1 THEN
+                alpha_list.APPEND(x_cursor)
+            END IF
+            x_cursor = x_cursor + 1
+        END WHILE
+
+        IF LENGTH(alpha_list) == 0 THEN
+            RETURN 2 * k
+        END IF
+
+        DECLARE count_ones AS INTEGER = LENGTH(alpha_list)
+        DECLARE sum_prefix AS LIST OF INTEGER = NEW LIST FILLED WITH ZEROS(count_ones + 1)
+        DECLARE y_counter AS INTEGER = 0
+
+        REPEAT
+            IF y_counter >= count_ones THEN
+                BREAK
+            END IF
+            sum_prefix[y_counter + 1] = sum_prefix[y_counter] + alpha_list[y_counter]
+            y_counter = y_counter + 1
+        UNTIL FALSE
+
+        FUNCTION cost(start INTEGER end INTEGER) RETURNS INTEGER
+            DECLARE middle AS INTEGER = (start + end) DIV 2
+            DECLARE central_value AS INTEGER = alpha_list[middle]
+            DECLARE accumulated_cost AS INTEGER = 0
+            DECLARE i_left AS INTEGER = start
+
+            WHILE i_left < middle
+                accumulated_cost = accumulated_cost + (central_value - alpha_list[i_left]) - (middle - i_left)
+                i_left = i_left + 1
+            END WHILE
+
+            DECLARE i_right AS INTEGER = middle + 1
+            WHILE i_right <= end
+                accumulated_cost = accumulated_cost + (alpha_list[i_right] - central_value) - (i_right - middle)
+                i_right = i_right + 1
+            END WHILE
+
+            RETURN accumulated_cost
+        END FUNCTION
+
+        DECLARE minimum_moves AS INTEGER = POSITIVE_INFINITY
+        DECLARE begin_index AS INTEGER = 0
+
+        WHILE begin_index <= count_ones - k
+            DECLARE finish_index AS INTEGER = begin_index + k - 1
+            DECLARE overall_cost AS INTEGER = cost(begin_index, finish_index)
+
+            IF (k MOD 2) == 1 THEN
+                DECLARE mid_idx AS INTEGER = (begin_index + finish_index) DIV 2
+                DECLARE med_val AS INTEGER = alpha_list[mid_idx]
+                DECLARE changes_calc AS INTEGER = finish_index - mid_idx - (med_val - alpha_list[mid_idx] - 1)
+            ELSE
+                DECLARE mid_left AS INTEGER = (begin_index + finish_index) DIV 2
+                DECLARE mid_right AS INTEGER = mid_left + 1
+                DECLARE med_left AS INTEGER = alpha_list[mid_left]
+                DECLARE med_right AS INTEGER = alpha_list[mid_right]
+                DECLARE changes_calc AS INTEGER = mid_right - mid_left - 1 - (med_right - med_left - 1)
+            END IF
+
+            IF changes_calc > maxChanges THEN
+                overall_cost = overall_cost + (changes_calc - maxChanges)
+            END IF
+
+            IF overall_cost < minimum_moves THEN
+                minimum_moves = overall_cost
+            END IF
+
+            begin_index = begin_index + 1
+        END WHILE
+
+        RETURN minimum_moves
+    END FUNCTION
+END CLASS

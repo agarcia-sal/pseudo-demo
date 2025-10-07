@@ -1,0 +1,134 @@
+CLASS Solution  
+    FUNCTION maxDifference WITH PARAMETERS s k  
+        FUNCTION calc_mod2 WITH PARAMETERS x  
+            RETURN x - 2 * (x DIV 2)  
+        END FUNCTION  
+
+        FUNCTION smaller_of TWO PARAMETERS x y  
+            IF x < y THEN  
+                RETURN x  
+            ELSE  
+                RETURN y  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION larger_of TWO PARAMETERS x y  
+            IF x > y THEN  
+                RETURN x  
+            ELSE  
+                RETURN y  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION get_permutations  
+            SET items TO ["zero", "one", "two", "three", "four"]  
+            SET result TO []  
+            
+            FUNCTION perm_indexer WITH PARAMETERS i j  
+                IF i >= LENGTH(items) THEN  
+                    RETURN  
+                ELSE  
+                    IF j >= LENGTH(items) THEN  
+                        CALL perm_indexer WITH PARAMETERS i + 1, 0  
+                    ELSE  
+                        IF items[i] != items[j] THEN  
+                            APPEND TO result [items[i], items[j]]  
+                        END IF  
+                        CALL perm_indexer WITH PARAMETERS i, j + 1  
+                    END IF  
+                END IF  
+            END FUNCTION  
+            
+            CALL perm_indexer WITH PARAMETERS 0, 0  
+            RETURN result  
+        END FUNCTION  
+
+        SET alpha TO NEGATIVE_INFINITY  
+        SET combos TO CALL get_permutations  
+
+        FUNCTION default_infinity_map  
+            SET store TO EMPTY_MAP  
+            FUNCTION get WITH PARAMETER key  
+                IF key IN store THEN  
+                    RETURN store[key]  
+                ELSE  
+                    RETURN POSITIVE_INFINITY  
+                END IF  
+            END FUNCTION  
+            FUNCTION set WITH PARAMETERS key value  
+                store[key] ← value  
+            END FUNCTION  
+            RETURN OBJECT WITH METHODS get AND set  
+        END FUNCTION  
+
+        FOR EACH pair_1 IN combos  
+            SET first_char TO pair_1[0]  
+            SET second_char TO pair_1[1]  
+
+            SET tracker TO CALL default_infinity_map  
+            SET prefixListOne TO [0]  
+            SET prefixListTwo TO [0]  
+            SET ptr_l TO 0  
+
+            FUNCTION loop_over_indices WITH PARAMETERS idx curr_char  
+                IF idx >= LENGTH(s) THEN  
+                    RETURN  
+                END IF  
+
+                SET lastIndex1 TO prefixListOne[LENGTH(prefixListOne) - 1]  
+                SET lastIndex2 TO prefixListTwo[LENGTH(prefixListTwo) - 1]  
+
+                IF curr_char == first_char THEN  
+                    SET next_val1 TO lastIndex1 + 1  
+                ELSE  
+                    SET next_val1 TO 0  
+                END IF  
+
+                IF curr_char == second_char THEN  
+                    SET next_val2 TO lastIndex2 + 1  
+                ELSE  
+                    SET next_val2 TO 0  
+                END IF  
+
+                APPEND next_val1 TO prefixListOne  
+                APPEND next_val2 TO prefixListTwo  
+
+                WHILE TRUE  
+                    IF (idx + 1 - ptr_l) < k THEN  
+                        BREAK  
+                    END IF  
+
+                    IF prefixListOne[ptr_l] >= prefixListOne[LENGTH(prefixListOne) - 1] THEN  
+                        BREAK  
+                    END IF  
+
+                    IF prefixListTwo[ptr_l] >= prefixListTwo[LENGTH(prefixListTwo) - 1] THEN  
+                        BREAK  
+                    END IF  
+
+                    SET parity_key TO [calc_mod2(prefixListOne[ptr_l]), calc_mod2(prefixListTwo[ptr_l])]  
+
+                    SET cur_diff TO prefixListOne[ptr_l] - prefixListTwo[ptr_l]  
+                    SET stored_diff TO tracker.get(parity_key)  
+                    IF cur_diff < stored_diff THEN  
+                        tracker.set(parity_key, cur_diff)  
+                    END IF  
+
+                    ptr_l ← ptr_l + 1  
+                END WHILE  
+
+                SET final_parity_key TO [calc_mod2(prefixListOne[LENGTH(prefixListOne) - 1] - 1), calc_mod2(prefixListTwo[LENGTH(prefixListTwo) - 1])]  
+                SET candidate TO (prefixListOne[LENGTH(prefixListOne) - 1] - prefixListTwo[LENGTH(prefixListTwo) - 1]) - tracker.get(final_parity_key)  
+                alpha ← larger_of(alpha, candidate)  
+
+                CALL loop_over_indices WITH PARAMETERS idx + 1, s[idx + 1] IF idx + 1 < LENGTH(s) ELSE RETURN  
+            END FUNCTION  
+
+            IF LENGTH(s) > 0 THEN  
+                CALL loop_over_indices WITH PARAMETERS 0, s[0]  
+            END IF  
+        END FOR  
+
+        RETURN alpha  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,48 @@
+```
+FUNCTION poly(list_of_coefficients, point)
+  FUNCTION aux(ζ, ο, λ)
+    IF ο == LENGTH(list_of_coefficients) THEN
+      RETURN ζ
+    ELSE
+      RETURN aux(ζ + list_of_coefficients[ο] * (^point λ ο), ο + 1, λ)
+    END IF
+  END FUNCTION
+
+  FUNCTION ^point(base, exp)
+    IF exp == 0 THEN
+      RETURN 1
+    ELSE
+      RETURN base * ^point(base, exp - 1)
+    END IF
+  END FUNCTION
+
+  RETURN aux(0, 0, 1)
+END FUNCTION
+
+FUNCTION find_zero(list_of_coefficients)
+  FUNCTION recur_bounds(α, β)
+    IF poly(list_of_coefficients, α)*poly(list_of_coefficients, β) <= 0 THEN
+      RETURN (α, β)
+    ELSE
+      RETURN recur_bounds(α*2.0, β*2.0)
+    END IF
+  END FUNCTION
+
+  FUNCTION bin_search(σ, τ)
+    IF ABS(τ - σ) <= 10^-10 THEN
+      RETURN σ
+    ELSE
+      LET υ = (σ + τ) / 2
+      LET cond = poly(list_of_coefficients, υ)*poly(list_of_coefficients, σ)
+      IF cond <= 0 THEN
+        RETURN bin_search(σ, υ)
+      ELSE
+        RETURN bin_search(υ, τ)
+      END IF
+    END IF
+  END FUNCTION
+
+  LET (δ, ε) = recur_bounds(-1.0, 1.0)
+  RETURN bin_search(δ, ε)
+END FUNCTION
+```

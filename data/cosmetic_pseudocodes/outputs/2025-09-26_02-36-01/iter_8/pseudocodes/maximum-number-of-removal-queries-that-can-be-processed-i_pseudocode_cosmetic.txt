@@ -1,0 +1,60 @@
+CLASS Solution  
+    FUNCTION maximumProcessableQueries(nums parameters AS list of integers, queries parameters AS list of integers) RETURNS integer  
+        FUNCTION process_queries(subseq parameters AS list of integers, queries parameters AS list of integers) RETURNS integer  
+            SET positionIndex TO (1 - 1)  
+            REPEAT UNTIL positionIndex EQUALS LENGTH(subseq) OR FOREACH_LOOP_COMPLETED  
+                SET FOREACH_LOOP_COMPLETED TO true  
+                FOR each currentQuery IN queries  
+                    IF positionIndex EQUALS LENGTH(subseq) THEN  
+                        SET FOREACH_LOOP_COMPLETED TO false  
+                        BREAK  
+                    END IF  
+                    SET conditionCheck TO (subseq[positionIndex] >= currentQuery)  
+                    IF conditionCheck THEN  
+                        SET incAmount TO (1)  
+                        SET positionIndex TO positionIndex + incAmount  
+                    END IF  
+                END FOR  
+            END REPEAT  
+            RETURN positionIndex  
+        END FUNCTION  
+
+        SET totalNums TO LENGTH(nums)  
+        SET totalQueries TO LENGTH(queries)  
+        SET maximumAchieved TO (process_queries(nums, queries))  
+        SET iterator TO (0)  
+        WHILE iterator <= (totalNums - (1))  
+            SET headSlice TO SLICE(nums, 0, iterator - (0))  
+            SET tailSliceOriginal TO SLICE(nums, iterator, totalNums)  
+            SET reversedTailSlice TO EMPTY LIST  
+            SET backwardIndex TO LENGTH(tailSliceOriginal) - 1  
+            WHILE backwardIndex >= 0  
+                APPEND tailSliceOriginal[backwardIndex] TO reversedTailSlice  
+                SET backwardIndex TO backwardIndex - (1)  
+            END WHILE  
+            SET combinedSequence TO EMPTY LIST  
+            FOR forwardIndex FROM 0 TO LENGTH(headSlice) - 1  
+                APPEND headSlice[forwardIndex] TO combinedSequence  
+            END FOR  
+            FOR forwardIndex FROM 0 TO LENGTH(reversedTailSlice) - 1  
+                APPEND reversedTailSlice[forwardIndex] TO combinedSequence  
+            END FOR  
+            // Sorting via insertion-like method  
+            FOR outerIdx FROM 1 TO LENGTH(combinedSequence) - 1  
+                SET tempValue TO combinedSequence[outerIdx]  
+                SET innerIdx TO outerIdx - 1  
+                WHILE innerIdx >= 0 AND combinedSequence[innerIdx] > tempValue  
+                    SET combinedSequence[innerIdx + 1] TO combinedSequence[innerIdx]  
+                    SET innerIdx TO innerIdx - 1  
+                END WHILE  
+                SET combinedSequence[innerIdx + 1] TO tempValue  
+            END FOR  
+            SET candidateResult TO process_queries(combinedSequence, queries)  
+            IF candidateResult > maximumAchieved THEN  
+                SET maximumAchieved TO candidateResult  
+            END IF  
+            SET iterator TO iterator + 1  
+        END WHILE  
+        RETURN maximumAchieved  
+    END FUNCTION  
+END CLASS

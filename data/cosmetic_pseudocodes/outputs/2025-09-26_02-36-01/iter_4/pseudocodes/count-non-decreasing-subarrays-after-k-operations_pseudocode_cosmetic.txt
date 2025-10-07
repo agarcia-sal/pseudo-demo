@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION countNonDecreasingSubarrays(nums k)
+        DECLARE lengthNums AS LENGTH OF nums
+
+        FUNCTION canMakeNonDecreasing(startIdx segmentLen)
+            DECLARE adjustmentCost AS 0
+            DECLARE maxAllowed AS nums[startIdx]
+
+            DECLARE index AS 1
+            WHILE index < segmentLen
+                DECLARE currentValue AS nums[startIdx + index]
+                IF currentValue < maxAllowed
+                    DECLARE diff AS maxAllowed - currentValue
+                    SET adjustmentCost TO adjustmentCost + diff
+                END IF
+
+                IF maxAllowed < currentValue
+                    SET maxAllowed TO currentValue
+                END IF
+
+                IF adjustmentCost > k
+                    RETURN False
+                END IF
+
+                INCREMENT index BY 1
+            END WHILE
+
+            RETURN True
+        END FUNCTION
+
+        DECLARE totalSubintervals AS (lengthNums * (lengthNums + 1)) DIVIDED BY 2
+        DECLARE invalidCount AS 0
+
+        DECLARE startIndex AS 0
+        WHILE startIndex < lengthNums
+            DECLARE lowerBound AS 1
+            DECLARE upperBound AS lengthNums - startIndex
+
+            WHILE lowerBound <= upperBound
+                DECLARE midpoint AS (lowerBound + upperBound) DIVIDED BY 2
+                DECLARE feasible AS canMakeNonDecreasing(startIndex midpoint)
+
+                IF feasible == True
+                    SET lowerBound TO midpoint + 1
+                ELSE
+                    SET upperBound TO midpoint - 1
+                END IF
+            END WHILE
+
+            DECLARE invalidIntervals AS (lengthNums - startIndex) - upperBound
+            SET invalidCount TO invalidCount + invalidIntervals
+
+            INCREMENT startIndex BY 1
+        END WHILE
+
+        DECLARE resultCount AS totalSubintervals - invalidCount
+        RETURN resultCount
+    END FUNCTION
+END CLASS

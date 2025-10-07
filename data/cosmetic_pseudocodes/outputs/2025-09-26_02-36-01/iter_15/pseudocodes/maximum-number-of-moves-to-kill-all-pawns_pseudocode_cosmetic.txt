@@ -1,0 +1,91 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+        SET knightOffsets TO [(1,2), (2,1), (2,-1), (1,-2), (-1,-2), (-2,-1), (-2,1), (-1,2)]
+        SET pawnsSet TO empty set
+        INDEX_VAR_1 = 0
+        WHILE INDEX_VAR_1 < LENGTH(positions)
+            SET elem TO positions[INDEX_VAR_1]
+            ADD (elem[0], elem[1]) TO pawnsSet
+            INDEX_VAR_1 = INDEX_VAR_1 + 1
+        END WHILE
+        SET pawnsCount TO SIZE(pawnsSet)
+
+        FUNCTION dp(cx, cy, bitmask, aliceTurn)
+            IF bitmask = 0 THEN
+                RETURN 0
+            END IF
+
+            IF aliceTurn = TRUE THEN
+                SET optScore TO 0
+            ELSE
+                SET optScore TO +∞
+            END IF
+
+            SET idx TO 0
+            WHILE idx < pawnsCount
+                SET bitmaskAnd TO bitmask & (2 ^ idx)
+                IF bitmaskAnd != 0 THEN
+                    SET targetX TO positions[idx][0]
+                    SET targetY TO positions[idx][1]
+
+                    SET q TO [(cx, cy, 0)]
+                    SET visitedCoords TO empty set
+                    ADD (cx, cy) TO visitedCoords
+                    SET foundFlag TO FALSE
+
+                    REPEAT
+                        IF LENGTH(q) = 0 THEN
+                            EXIT REPEAT
+                        END IF
+                        SET curEntry TO REMOVE q[0]
+                        SET curX TO curEntry[0]
+                        SET curY TO curEntry[1]
+                        SET curSteps TO curEntry[2]
+
+                        IF curX = targetX AND curY = targetY THEN
+                            SET foundFlag TO TRUE
+                            EXIT REPEAT
+                        END IF
+
+                        FOR offsetIdx FROM 0 TO LENGTH(knightOffsets)-1
+                            SET offX TO knightOffsets[offsetIdx][0]
+                            SET offY TO knightOffsets[offsetIdx][1]
+                            SET newX TO curX + offX
+                            SET newY TO curY + offY
+                            IF 0 <= newX AND newX < 50 AND 0 <= newY AND newY < 50 THEN
+                                IF NOT ((newX, newY) IN visitedCoords) THEN
+                                    ADD (newX, newY) TO visitedCoords
+                                    APPEND (newX, newY, curSteps + 1) TO q
+                                END IF
+                            END IF
+                        END FOR
+                    UNTIL FALSE
+
+                    IF foundFlag = TRUE THEN
+                        SET nextMask TO bitmask ^ (2 ^ idx)
+                        SET nestedVal TO dp(targetX, targetY, nextMask, NOT aliceTurn)
+                        SET combinedVal TO curSteps + nestedVal
+
+                        IF aliceTurn = TRUE THEN
+                            IF optScore < combinedVal THEN
+                                SET optScore TO combinedVal
+                            END IF
+                        ELSE
+                            IF optScore > combinedVal THEN
+                                SET optScore TO combinedVal
+                            END IF
+                        END IF
+                    END IF
+                END IF
+                idx = idx + 1
+            END WHILE
+
+            RETURN optScore
+        END FUNCTION
+
+        SET fullMask TO (2 ^ pawnsCount) - 1
+        RETURN dp(kx, ky, fullMask, TRUE)
+    END FUNCTION
+END CLASS
+```

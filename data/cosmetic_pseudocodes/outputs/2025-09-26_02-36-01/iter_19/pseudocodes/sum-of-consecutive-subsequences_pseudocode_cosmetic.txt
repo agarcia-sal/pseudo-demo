@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION getSum(nums)
+        FUNCTION calc(array)
+            SET length TO the LENGTH OF array
+            SET countsLeft TO list of zeros WITH length
+            SET countsRight TO list of zeros WITH length
+            SET histogram TO a new counter object
+
+            SET index TO 1
+            WHILE index < length
+                SET keyLeft TO array[index - 1]
+                SET newCountLeft TO 1 + histogram[keyLeft - 1]
+                SET histogram[keyLeft - 1] TO newCountLeft
+                countsLeft[index] = newCountLeft
+                SET index TO index + 1
+            END WHILE
+
+            SET histogram TO a new counter object
+            FOR pointer FROM length - 2 DOWNTO 0 STEP -1
+                SET keyRight TO array[pointer + 1]
+                SET newCountRight TO 1 + histogram[keyRight + 1 + 0]
+                SET histogram[keyRight + 1] TO newCountRight
+                countsRight[pointer] = newCountRight
+            END FOR
+
+            SET accumulator TO 0
+            SET pos TO 0
+            WHILE pos < length
+                SET valL TO countsLeft[pos]
+                SET valR TO countsRight[pos]
+                SET valX TO array[pos]
+                SET partialSum TO (valL + valR + valL * valR) * valX
+                accumulator = accumulator + partialSum
+                pos = pos + 1
+            END WHILE
+
+            RETURN accumulator MODULO ((10 ^ 9) + 7)
+        END FUNCTION
+
+        SET MOD_VALUE TO (10 ^ 9) + 7
+        SET firstCalc TO calc(nums)
+
+        SET left TO 0
+        SET right TO LENGTH OF nums - 1
+        WHILE left < right
+            SET temp TO nums[left]
+            nums[left] = nums[right]
+            nums[right] = temp
+            left = left + 1
+            right = right - 1
+        END WHILE
+
+        SET secondCalc TO calc(nums)
+
+        SET total TO (firstCalc + secondCalc + SUM OF nums) MODULO MOD_VALUE
+        RETURN total
+    END FUNCTION
+END CLASS

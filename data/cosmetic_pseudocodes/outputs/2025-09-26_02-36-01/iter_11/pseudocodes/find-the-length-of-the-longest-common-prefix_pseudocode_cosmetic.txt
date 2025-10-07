@@ -1,0 +1,64 @@
+CLASS Solution  
+    FUNCTION longestCommonPrefix(arr1 arr1 OF integers arr2 arr2 OF integers) RETURNS integer  
+        PROCEDURE stringFromNumber(x INTEGER) RETURNS string  
+            DECLARE result STRING ← ""  
+            DECLARE temp INTEGER ← x  
+            REPEAT  
+                DECLARE digit INTEGER ← temp MOD 10  
+                temp ← (temp - digit) / 10  
+                result ← CHAR(48 + digit) + result  
+            UNTIL temp = 0  
+            RETURN result  
+        END PROCEDURE
+
+        DECLARE setA SET<string> ← {}  
+        DECLARE setB SET<string> ← {}  
+
+        DECLARE idxA INTEGER ← 0  
+        WHILE idxA < LENGTH(arr1) DO  
+            DECLARE conv STRING ← stringFromNumber(arr1[idxA])  
+            DECLARE posA INTEGER ← 1  
+            REPEAT  
+                setA ← setA UNION { SUBSTRING(conv, 1, posA) }  
+                posA ← posA + 1  
+            UNTIL posA > LENGTH(conv)  
+            idxA ← idxA + 1  
+        END WHILE  
+
+        DECLARE idxB INTEGER ← 0  
+        WHILE idxB < LENGTH(arr2) DO  
+            DECLARE convB STRING ← stringFromNumber(arr2[idxB])  
+            DECLARE posB INTEGER ← 1  
+            REPEAT  
+                setB ← setB UNION { SUBSTRING(convB, 1, posB) }  
+                posB ← posB + 1  
+            UNTIL posB > LENGTH(convB)  
+            idxB ← idxB + 1  
+        END WHILE  
+
+        DECLARE maxPrefixLength INTEGER ← 0  
+        DECLARE iterator SET<string> ← setA  
+        PROCEDURE checkPrefix(pfx STRING)  
+            IF (pfx IN setB) THEN  
+                DECLARE lenP INTEGER ← LENGTH(pfx)  
+                IF lenP > maxPrefixLength THEN  
+                    maxPrefixLength ← lenP  
+                END IF  
+            END IF  
+        END PROCEDURE  
+
+        DECLARE arrPrefixes ARRAY OF string ← []  
+        FOR EACH p IN setA DO  
+            arrPrefixes ← arrPrefixes + [p]  
+        END FOR  
+
+        PROCEDURE iteratePrefixes(i INTEGER)  
+            IF i >= LENGTH(arrPrefixes) THEN RETURN END IF  
+            checkPrefix(arrPrefixes[i])  
+            iteratePrefixes(i + 1)  
+        END PROCEDURE  
+        iteratePrefixes(0)  
+
+        RETURN maxPrefixLength  
+    END FUNCTION  
+END CLASS

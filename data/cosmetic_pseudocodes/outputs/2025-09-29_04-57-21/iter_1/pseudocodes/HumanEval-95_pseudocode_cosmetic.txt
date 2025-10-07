@@ -1,0 +1,43 @@
+```
+FUNCTION check_dict_case(dictionary)
+    IF dictionary KEYS COUNT == 0 THEN
+        RETURN False
+    END IF
+
+    DECLARE current_state = "start"
+
+    FOR key IN dictionary KEYS DO
+        IF TYPE_OF(key) != STRING THEN
+            current_state = "mixed"
+            EXIT LOOP
+        END IF
+
+        SELECT current_state
+            CASE "start":
+                IF key == key TO UPPERCASE THEN
+                    current_state = "upper"
+                ELSE IF key == key TO LOWERCASE THEN
+                    current_state = "lower"
+                ELSE
+                    EXIT LOOP
+                END IF
+            CASE "upper":
+                IF key != key TO UPPERCASE THEN
+                    current_state = "mixed"
+                    EXIT LOOP
+                END IF
+            CASE "lower":
+                IF key != key TO LOWERCASE THEN
+                    current_state = "mixed"
+                    EXIT LOOP
+                END IF
+        END SELECT
+
+        IF current_state == "mixed" THEN
+            EXIT LOOP
+        END IF
+    END FOR
+
+    RETURN (current_state == "upper") OR (current_state == "lower")
+END FUNCTION
+```

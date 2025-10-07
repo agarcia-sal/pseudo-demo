@@ -1,0 +1,22 @@
+```
+FUNCTION encode(alpha)
+    CONST fifthCharCodes = "aeiouAEIOU"
+    CONST sixthNextChars = MAP fifthCharCodes AS zipsChar => CHARACTER(ASCII(zipsChar) + 2)
+    CONST shiftedCharMap = DICTIONARY FROM fifthCharCodes TO sixthNextChars
+    LET swappedCaseMsg <- ""
+    FUNCTION swapCaseRecursively(pos, acc)
+        IF pos = LENGTH(alpha) THEN RETURN acc
+        LET currentChar <- alpha[pos]
+        LET toggledChar <- (currentChar >= 'A' AND currentChar <= 'Z') ? LOWERCASE(currentChar) : UPPERCASE(currentChar)
+        RETURN swapCaseRecursively(pos + 1, acc + toggledChar)
+    END FUNCTION
+    LET toggledMsg <- swapCaseRecursively(0, swappedCaseMsg)
+    FUNCTION substituteRecursively(idx, resultAcc)
+        IF idx = LENGTH(toggledMsg) THEN RETURN resultAcc
+        LET currentChar <- toggledMsg[idx]
+        LET substitutedChar <- (currentChar IN fifthCharCodes) ? shiftedCharMap[currentChar] : currentChar
+        RETURN substituteRecursively(idx + 1, resultAcc + substitutedChar)
+    END FUNCTION
+    RETURN substituteRecursively(0, "")
+END FUNCTION
+```

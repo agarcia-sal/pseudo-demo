@@ -1,0 +1,80 @@
+CLASS Solution
+	FUNCTION canReachCorner(xCorner yCorner circles)
+		FUNCTION is_inside(px py cx cy radius)
+			RETURN ((px - cx) * (px - cx) + (py - cy) * (py - cy)) <= radius * radius
+		END FUNCTION
+
+		FUNCTION touches_left_or_top(cx cy radius)
+			SET part1 TO (ABS(cx) <= radius) AND (0 <= cy) AND (cy <= yCorner)
+			SET part2 TO (ABS(cy - yCorner) <= radius) AND (0 <= cx) AND (cx <= xCorner)
+			RETURN part1 OR part2
+		END FUNCTION
+
+		FUNCTION touches_right_or_bottom(cx cy radius)
+			SET expr1 TO (ABS(cx - xCorner) <= radius) AND (0 <= cy) AND (cy <= yCorner)
+			SET expr2 TO (ABS(cy) <= radius) AND (0 <= cx) AND (cx <= xCorner)
+			RETURN expr1 OR expr2
+		END FUNCTION
+
+		FUNCTION dfs(idx)
+			LET a TO circles[idx][0]
+			LET b TO circles[idx][1]
+			LET c TO circles[idx][2]
+
+			IF touches_right_or_bottom(a b c)
+				RETURN True
+			END IF
+
+			SET vis[idx] TO True
+
+			SET itr TO 0
+			WHILE itr < LENGTH(circles)
+				LET d TO circles[itr][0]
+				LET e TO circles[itr][1]
+				LET f TO circles[itr][2]
+
+				IF vis[itr] OR ((a - d) * (a - d) + (b - e) * (b - e)) > (c + f) * (c + f)
+					SET itr TO itr + 1
+					CONTINUE
+				END IF
+
+				IF (a * f + d * c) < (c + f) * xCorner AND (b * f + e * c) < (c + f) * yCorner AND dfs(itr)
+					RETURN True
+				END IF
+
+				SET itr TO itr + 1
+			END WHILE
+
+			RETURN False
+		END FUNCTION
+
+		SET vis TO []
+		SET cnt TO LENGTH(circles)
+		FOR t FROM 1 TO cnt
+			APPEND False TO vis
+		END FOR
+
+		SET i TO 0
+		REPEAT
+			IF i >= LENGTH(circles)
+				EXIT
+			END IF
+
+			LET p TO circles[i][0]
+			LET q TO circles[i][1]
+			LET r TO circles[i][2]
+
+			IF is_inside(0 0 p q r) OR is_inside(xCorner yCorner p q r)
+				RETURN False
+			END IF
+
+			IF (NOT vis[i]) AND touches_left_or_top(p q r) AND dfs(i)
+				RETURN False
+			END IF
+
+			SET i TO i + 1
+		UNTIL False
+
+		RETURN True
+	END FUNCTION
+END CLASS

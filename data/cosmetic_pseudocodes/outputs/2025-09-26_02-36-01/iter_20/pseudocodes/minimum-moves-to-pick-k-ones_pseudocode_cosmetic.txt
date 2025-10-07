@@ -1,0 +1,92 @@
+CLASS Solution
+  FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER
+    PROCEDURE replicateList(size INTEGER, output LIST OF INTEGERS)
+      SET idx TO 0
+      REPEAT
+        EXIT WHEN idx >= size
+        APPEND 0 TO output
+        SET idx TO idx + 1
+      UNTIL FALSE
+    END PROCEDURE
+
+    PROCEDURE appendToList(val INTEGER, lst LIST OF INTEGERS)
+      APPEND val TO lst
+    END PROCEDURE
+
+    SET tmpA TO []
+    SET ctrX TO 0
+    WHILE ctrX < LENGTH(nums)
+      IF nums[ctrX] = 1 THEN
+        CALL appendToList(ctrX, tmpA)
+      END IF
+      SET ctrX TO ctrX + 1
+    END WHILE
+
+    IF LENGTH(tmpA) = 0 THEN
+      RETURN k * 2
+    END IF
+
+    SET lenA TO LENGTH(tmpA)
+    SET prefixArr TO []
+    CALL replicateList(lenA + 1, prefixArr)
+
+    SET indexP TO 0
+    REPEAT
+      EXIT WHEN indexP >= lenA
+      SET prefixArr[indexP + 1] TO prefixArr[indexP] + tmpA[indexP]
+      SET indexP TO indexP + 1
+    UNTIL FALSE
+
+    FUNCTION cost(l INTEGER r INTEGER) RETURNS INTEGER
+      SET halfLen TO (l + r) // 2
+      SET medVal TO tmpA[halfLen]
+      SET acc TO 0
+      SET varP TO l
+      WHILE varP < halfLen
+        SET diffLeft TO medVal - tmpA[varP] - halfLen + varP
+        SET acc TO acc + diffLeft
+        SET varP TO varP + 1
+      END WHILE
+
+      SET varQ TO halfLen + 1
+      WHILE varQ <= r
+        SET diffRight TO tmpA[varQ] - medVal - varQ + halfLen
+        SET acc TO acc + diffRight
+        SET varQ TO varQ + 1
+      END WHILE
+
+      RETURN acc
+    END FUNCTION
+
+    SET minVal TO 1000000000
+    SET startI TO 0
+    WHILE startI <= lenA - k
+      SET endI TO startI + k - 1
+      SET sumCost TO CALL cost(startI, endI)
+
+      IF k % 2 = 1 THEN
+        SET midI TO (startI + endI) // 2
+        SET medX TO tmpA[midI]
+        SET chgNum TO endI - midI - (medX - tmpA[midI] - 1)
+      ELSE
+        SET leftM TO (startI + endI) // 2
+        SET rightM TO leftM + 1
+        SET leftMed TO tmpA[leftM]
+        SET rightMed TO tmpA[rightM]
+        SET chgNum TO rightM - leftM - 1 - (rightMed - leftMed - 1)
+      END IF
+
+      IF chgNum > maxChanges THEN
+        SET sumCost TO sumCost + (chgNum - maxChanges)
+      END IF
+
+      IF sumCost < minVal THEN
+        SET minVal TO sumCost
+      END IF
+
+      SET startI TO startI + 1
+    END WHILE
+
+    RETURN minVal
+  END FUNCTION
+END CLASS

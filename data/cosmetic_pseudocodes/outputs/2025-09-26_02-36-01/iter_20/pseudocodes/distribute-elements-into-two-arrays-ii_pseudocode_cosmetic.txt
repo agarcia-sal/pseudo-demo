@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION resultArray(nums)
+        FUNCTION binaryInsertPosition(seq, target)
+            SET lowIndex TO 0
+            SET highIndex TO LENGTH OF seq
+            FUNCTION recurSearch(l, h)
+                IF l GREATER OR EQUAL TO h
+                    RETURN l
+                ELSE
+                    SET midIndex TO (l + h) / 2
+                    IF target GREATER OR EQUAL TO seq[midIndex]
+                        RETURN recurSearch(midIndex + 1, h)
+                    ELSE
+                        RETURN recurSearch(l, midIndex)
+                    END IF
+                END IF
+            END FUNCTION
+            RETURN recurSearch(lowIndex, highIndex)
+        END FUNCTION
+
+        FUNCTION countGreater(sortedCollection, element)
+            SET insertionPoint TO binaryInsertPosition(sortedCollection, element)
+            RETURN LENGTH OF sortedCollection - insertionPoint
+        END FUNCTION
+
+        SET listA TO [nums[0]]
+        SET listB TO [nums[1]]
+        SET sortedA TO [nums[0]]
+        SET sortedB TO [nums[1]]
+
+        SET indexTracker TO 2
+        WHILE indexTracker LESS THAN LENGTH OF nums
+            SET currentNumber TO nums[indexTracker]
+            SET cntA TO countGreater(sortedA, currentNumber)
+            SET cntB TO countGreater(sortedB, currentNumber)
+
+            IF cntA GREATER THAN cntB
+                CALL insertValue(sortedA, currentNumber)
+                CALL appendValue(listA, currentNumber)
+            ELSE IF cntA LESS THAN cntB
+                CALL appendValue(listB, currentNumber)
+                CALL insertValue(sortedB, currentNumber)
+            ELSE
+                IF LENGTH OF listA LESS OR EQUAL TO LENGTH OF listB
+                    CALL appendValue(listA, currentNumber)
+                    CALL insertValue(sortedA, currentNumber)
+                ELSE
+                    CALL insertValue(sortedB, currentNumber)
+                    CALL appendValue(listB, currentNumber)
+                END IF
+            END IF
+
+            SET indexTracker TO indexTracker + 1
+        END WHILE
+
+        FUNCTION appendValue(collection, val)
+            SET collection[LENGTH OF collection] TO val
+        END FUNCTION
+
+        FUNCTION insertValue(sortedList, val)
+            SET pos TO binaryInsertPosition(sortedList, val)
+            SET k TO LENGTH OF sortedList
+            REPEAT UNTIL k LESS OR EQUAL TO pos
+                SET sortedList[k] TO sortedList[k - 1]
+                SET k TO k - 1
+            END REPEAT
+            SET sortedList[pos] TO val
+        END FUNCTION
+
+        RETURN listA + listB
+    END FUNCTION
+END CLASS

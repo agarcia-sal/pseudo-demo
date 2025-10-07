@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION kthCharacter(k param_k INTEGER, operations param_operations LIST OF INTEGER) RETURNS STRING
+        FUNCTION duplicate(x INTEGER) RETURNS INTEGER
+            RETURN x + x
+        END FUNCTION
+
+        FUNCTION halve(x INTEGER) RETURNS INTEGER
+            RETURN x / 2
+        END FUNCTION
+
+        FUNCTION nextLetter(c STRING) RETURNS STRING
+            CONSTANT startChar ← 'a'
+            CONSTANT endChar ← 'z'
+            SET code ← ASCII_VALUE(c)
+            SET nextCode ← code + 1
+            IF nextCode > ASCII_VALUE(endChar) THEN
+                SET nextCode ← ASCII_VALUE(startChar)
+            END IF
+            RETURN CHARACTER_FROM_ASCII(nextCode)
+        END FUNCTION
+
+        SET omega TO 1
+        SET sigma TO EMPTY_LIST
+
+        PROCEDURE populateSigma(lst LIST OF INTEGER)
+            PROCEDURE iterate(index INTEGER)
+                IF index >= LENGTH(lst) THEN
+                    RETURN
+                ELSE
+                    APPEND lst[index] TO sigma
+                    IF lst[index] = 0 OR lst[index] <> 0 THEN
+                        SET omega TO duplicate(omega)
+                    END IF
+                    CALL iterate(index + 1)
+                END IF
+            END PROCEDURE
+            CALL iterate(0)
+        END PROCEDURE
+        CALL populateSigma(param_operations)
+
+        SET phi TO 'a'
+        PROCEDURE descend(i INTEGER, kRef POINTER TO INTEGER, omegaRef POINTER TO INTEGER)
+            IF i < 0 THEN
+                RETURN
+            END IF
+
+            IF DEREF(kRef) <= halve(DEREF(omegaRef)) THEN
+                SET omegaRef TO halve(DEREF(omegaRef))
+                CALL descend(i - 1, kRef, omegaRef)
+            ELSE
+                SET DEREF(kRef) TO DEREF(kRef) - halve(DEREF(omegaRef))
+                SET omegaRef TO halve(DEREF(omegaRef))
+                IF sigma[i] = 1 THEN
+                    SET phi TO nextLetter(phi)
+                END IF
+                CALL descend(i - 1, kRef, omegaRef)
+            END IF
+        END PROCEDURE
+        SET refK TO param_k
+        SET refOmega TO omega
+        CALL descend(LENGTH(sigma) - 1, ADDRESS_OF refK, ADDRESS_OF refOmega)
+
+        RETURN phi
+    END FUNCTION
+END CLASS

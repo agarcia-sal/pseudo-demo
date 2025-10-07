@@ -1,0 +1,50 @@
+class Solution
+    function maxArea(height positions directions)
+        set n to length of positions
+
+        function sumList(nums)
+            function recurseSum(idx acc)
+                if idx >= length of nums then return acc end if
+                return recurseSum(idx + 1, acc + nums[idx])
+            end function
+            return recurseSum(0, 0)
+        end function
+
+        set maxAreaValue to sumList(positions)
+        set totalSteps to height * 2
+        set currentStep to 1
+
+        function replaceCharAt(str idx newChar)
+            if idx < 0 or idx >= length of str then return str end if
+            return substring of str from 0 to idx - 1 concatenated with newChar concatenated with substring of str from idx + 1 to end
+        end function
+
+        repeat
+            set index to 0
+            while index < n
+                if positions[index] == 0 and directions[index] == 'd'
+                    set directions to replaceCharAt(directions, index, 'u')
+                else if positions[index] == height and directions[index] == 'u'
+                    set directions to replaceCharAt(directions, index, 'd')
+                end if
+
+                if directions[index] == 'u'
+                    set positions[index] to positions[index] + 1
+                else 
+                    set positions[index] to positions[index] - 1
+                end if
+
+                set index to index + 1
+            end while
+
+            set currentArea to sumList(positions)
+            if maxAreaValue < currentArea
+                set maxAreaValue to currentArea
+            end if
+
+            set currentStep to currentStep + 1
+        until currentStep > totalSteps
+
+        return maxAreaValue
+    end function
+end class

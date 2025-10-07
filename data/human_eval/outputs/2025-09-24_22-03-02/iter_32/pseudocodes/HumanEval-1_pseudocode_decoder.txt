@@ -1,0 +1,29 @@
+FUNCTION separate_paren_groups WITH PARAMETER paren_string OF TYPE STRING RETURNS LIST OF STRING
+    SET result TO LIST WITH ELEMENTS EMPTY
+    SET current_string TO LIST WITH ELEMENTS EMPTY
+    SET current_depth TO 0
+
+    FOR index FROM 0 TO LENGTH OF paren_string MINUS 1
+        SET c TO CHARACTER AT POSITION index IN paren_string
+
+        IF c EQUALS '(' THEN
+            SET current_depth TO current_depth PLUS 1
+            CALL APPEND ON current_string WITH ARGUMENT c
+
+        ELSE IF c EQUALS ')' THEN
+            SET current_depth TO current_depth MINUS 1
+            CALL APPEND ON current_string WITH ARGUMENT c
+
+            IF current_depth EQUALS 0 THEN
+                SET concatenated_string TO EMPTY STRING
+                FOR i FROM 0 TO LENGTH OF current_string MINUS 1
+                    SET concatenated_string TO concatenated_string CONCATENATE CHARACTER AT POSITION i IN current_string
+                END FOR
+                CALL APPEND ON result WITH ARGUMENT concatenated_string
+                CALL CLEAR ON current_string
+            END IF
+        END IF
+    END FOR
+
+    RETURN result
+END FUNCTION

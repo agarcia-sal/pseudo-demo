@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION minValidStrings(words, target)
+        FUNCTION custom_substring(s, start_pos, end_pos) 
+            SET result_accumulator TO empty string
+            SET current_index TO start_pos
+            WHILE current_index LESS THAN OR EQUAL TO end_pos
+                SET result_accumulator TO result_accumulator CONCAT s[current_index]
+                INCREMENT current_index BY 1
+            END WHILE
+            RETURN result_accumulator
+        END FUNCTION
+
+        FUNCTION custom_min(a, b)
+            IF a LESS THAN b
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        SET prefix_collection TO empty set
+        SET word_index TO 0
+        REPEAT
+            IF word_index GREATER THAN OR EQUAL TO LENGTH(words)
+                BREAK
+            END IF
+            SET current_word TO words[word_index]
+            SET upper_bound TO LENGTH(current_word)
+            SET pos_iter TO 1
+            REPEAT
+                IF pos_iter GREATER THAN upper_bound
+                    BREAK
+                END IF
+                SET extracted_prefix TO custom_substring(current_word, 1, pos_iter)
+                ADD extracted_prefix TO prefix_collection
+                INCREMENT pos_iter BY 1
+            UNTIL FALSE
+            INCREMENT word_index BY 1
+        UNTIL FALSE
+
+        SET target_length TO LENGTH(target)
+        SET dp_array TO a list containing (target_length + 1) elements each initialized to a value calculated as (1 + 1) raised to the power of 30
+
+        SET counter_index TO 0
+        WHILE counter_index LESS THAN (target_length + 1)
+            SET dp_array[counter_index] TO (POW(2, 30))
+            INCREMENT counter_index BY 1
+        END WHILE
+
+        SET dp_array[0] TO 0
+        SET outer_i TO 1
+        WHILE outer_i LESS THAN OR EQUAL TO target_length
+            SET inner_j TO 1
+            WHILE inner_j LESS THAN OR EQUAL TO outer_i
+                SET segment TO custom_substring(target, inner_j, outer_i)
+                IF segment IN prefix_collection THEN
+                    SET candidate_value TO dp_array[inner_j - 1] + 1
+                    SET dp_array[outer_i] TO custom_min(dp_array[outer_i], candidate_value)
+                END IF
+                INCREMENT inner_j BY 1
+            END WHILE
+            INCREMENT outer_i BY 1
+        END WHILE
+
+        SET final_answer TO dp_array[target_length]
+        IF final_answer NOT EQUAL TO POW(2, 30)
+            RETURN final_answer
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

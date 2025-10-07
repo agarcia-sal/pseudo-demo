@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION minOperations(nums parameter k parameter)
+        DEFINE FUNCTION ExtractMin(collection)
+            IF collection LENGTH EQUALS zero THEN
+                RETURN null
+            END IF
+            SET leastIndex TO zero
+            SET currentIndex TO 1
+            WHILE currentIndex LESS THAN collection LENGTH
+                IF collection[currentIndex] LESS THAN collection[leastIndex] THEN
+                    SET leastIndex TO currentIndex
+                END IF
+                INCREMENT currentIndex BY 1
+            END WHILE
+            SET poppedValue TO collection[leastIndex]
+            SET collection[leastIndex] TO collection[collection LENGTH - 1]
+            REMOVE last element FROM collection
+            CALL RebalanceHeap(collection, leastIndex)
+            RETURN poppedValue
+        END FUNCTION
+
+        DEFINE FUNCTION InsertHeap(collection, value)
+            APPEND value TO collection
+            SET idx TO collection LENGTH MINUS 1
+            WHILE idx GREATER THAN zero
+                SET parentIdx TO (idx - 1) DIVIDED BY 2
+                IF collection[parentIdx] GREATER THAN collection[idx] THEN
+                    SWAP collection[parentIdx] AND collection[idx]
+                    SET idx TO parentIdx
+                ELSE
+                    BREAK
+                END IF
+            END WHILE
+        END FUNCTION
+
+        DEFINE FUNCTION RebalanceHeap(collection, index)
+            SET length TO collection LENGTH
+            SET current TO index
+            LOOP
+                SET leftChild TO current TIMES 2 PLUS 1
+                SET rightChild TO leftChild PLUS 1
+                SET smallest TO current
+                IF leftChild LESS THAN length AND collection[leftChild] LESS THAN collection[smallest] THEN
+                    SET smallest TO leftChild
+                END IF
+                IF rightChild LESS THAN length AND collection[rightChild] LESS THAN collection[smallest] THEN
+                    SET smallest TO rightChild
+                END IF
+                IF smallest EQUALS current THEN
+                    BREAK
+                END IF
+                SWAP collection[current] AND collection[smallest]
+                SET current TO smallest
+            END LOOP
+        END FUNCTION
+
+        DEFINE FUNCTION BuildMinHeap(collection)
+            SET startIdx TO (collection LENGTH DIVIDED BY 2) MINUS 1
+            WHILE startIdx GREATER THAN OR EQUAL TO zero
+                CALL RebalanceHeap(collection, startIdx)
+                DECREMENT startIdx BY 1
+            END WHILE
+        END FUNCTION
+
+        SET tally TO 0
+        CALL BuildMinHeap(nums)
+
+        DEFINE FUNCTION ConditionCheck()
+            RETURN nums[0] LESS THAN k AND nums LENGTH GREATER THAN 1
+        END FUNCTION
+
+        WHILE ConditionCheck()
+            SET firstPop TO ExtractMin(nums)
+            SET secondPop TO ExtractMin(nums)
+            SET computedValue TO (firstPop MIN(secondPop) TIMES 2) PLUS MAX(firstPop, secondPop)
+            CALL InsertHeap(nums, computedValue)
+            SET tally TO tally PLUS 1
+        END WHILE
+
+        RETURN tally
+    END FUNCTION
+END CLASS

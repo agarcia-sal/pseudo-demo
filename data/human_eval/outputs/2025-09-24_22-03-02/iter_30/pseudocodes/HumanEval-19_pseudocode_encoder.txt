@@ -1,0 +1,61 @@
+FUNCTION sort_numbers WITH PARAMETER numbers AS STRING RETURNS STRING
+    SET value_map TO DICTIONARY WITH KEYS AND VALUES:
+        'zero' EQUALS 0,
+        'one' EQUALS 1,
+        'two' EQUALS 2,
+        'three' EQUALS 3,
+        'four' EQUALS 4,
+        'five' EQUALS 5,
+        'six' EQUALS 6,
+        'seven' EQUALS 7,
+        'eight' EQUALS 8,
+        'nine' EQUALS 9
+
+    SET split_list TO CALL method split ON numbers WITH ARGUMENT ' '
+    SET filtered_list TO EMPTY LIST
+
+    FOR index FROM 0 TO LENGTH OF split_list MINUS 1
+        IF split_list AT index NOT EQUAL TO EMPTY STRING
+            CALL APPEND ON filtered_list WITH ARGUMENT split_list AT index
+        END IF
+    END FOR
+
+    SET indexed_list TO EMPTY LIST
+    FOR index FROM 0 TO LENGTH OF filtered_list MINUS 1
+        SET current_element TO filtered_list AT index
+        SET current_value TO value_map AT current_element
+        CALL APPEND ON indexed_list WITH ELEMENT LIST WITH ELEMENTS current_element AND current_value
+    END FOR
+
+    SET sorted_indexed_list TO CALL FUNCTION sort_with_key ON indexed_list WITH KEY INDEX 1
+
+    SET sorted_list TO EMPTY LIST
+    FOR index FROM 0 TO LENGTH OF sorted_indexed_list MINUS 1
+        SET element TO sorted_indexed_list AT index AT INDEX 0
+        CALL APPEND ON sorted_list WITH ELEMENT element
+    END FOR
+
+    SET result_string TO EMPTY STRING
+    FOR index FROM 0 TO LENGTH OF sorted_list MINUS 1
+        IF index GREATER THAN 0
+            SET result_string TO CONCATENATE result_string AND ' '
+        END IF
+        SET result_string TO CONCATENATE result_string AND sorted_list AT index
+    END FOR
+
+    RETURN result_string
+END FUNCTION
+
+FUNCTION sort_with_key WITH PARAMETER list_of_pairs AND PARAMETER key_index RETURNS LIST
+    SET length TO LENGTH OF list_of_pairs
+    FOR i FROM 0 TO length MINUS 2
+        FOR j FROM 0 TO length MINUS 2 MINUS i
+            IF list_of_pairs AT j AT key_index GREATER THAN list_of_pairs AT j PLUS 1 AT key_index
+                SET temp TO list_of_pairs AT j
+                SET list_of_pairs AT j TO list_of_pairs AT j PLUS 1
+                SET list_of_pairs AT j PLUS 1 TO temp
+            END IF
+        END FOR
+    END FOR
+    RETURN list_of_pairs
+END FUNCTION

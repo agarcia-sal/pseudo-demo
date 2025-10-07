@@ -1,0 +1,109 @@
+CLASS Solution  
+    FUNCTION maximumProcessableQueries(nums parameters as list of integers queries parameters as list of integers) RETURNS integer  
+        FUNCTION process_queries(subseq parameters as list of integers queries parameters as list of integers) RETURNS integer  
+            FUNCTION recur_process(index_p integer, queries_p list of integers) RETURNS integer  
+                IF index_p = LENGTH(subseq) THEN  
+                    RETURN index_p  
+                ELSE IF LENGTH(queries_p) = 0 THEN  
+                    RETURN index_p  
+                ELSE  
+                    IF subseq[index_p] >= queries_p[0] THEN  
+                        RETURN recur_process(index_p + 1, queries_p[1..LENGTH(queries_p)-1])  
+                    ELSE  
+                        RETURN recur_process(index_p, queries_p[1..LENGTH(queries_p)-1])  
+                    END IF  
+                END IF  
+            END FUNCTION  
+            RETURN recur_process(0, queries)  
+        END FUNCTION  
+
+        SET total_nums TO LENGTH(nums)  
+        SET total_queries TO LENGTH(queries)  
+        
+        SET result_max TO process_queries(nums, queries)  
+
+        FUNCTION iterate_indices(current_idx integer, acc_max integer) RETURNS integer  
+            IF current_idx = total_nums THEN  
+                RETURN acc_max  
+            ELSE  
+                # prefixes: slice nums as nums[0..current_idx-1]  
+                SET prefix_slice TO EMPTY_LIST  
+                IF current_idx > 0 THEN  
+                    SET prefix_slice TO nums[0..current_idx - 1]  
+                END IF  
+
+                # suffix: nums[current_idx..end]  
+                SET suffix_slice TO nums[current_idx..total_nums - 1]  
+
+                # build reversed suffix  
+                FUNCTION reverse_list(lst list of integers) RETURNS list of integers  
+                    FUNCTION rev_rec(i integer, acc list of integers) RETURNS list of integers  
+                        IF i < 0 THEN  
+                            RETURN acc  
+                        ELSE  
+                            RETURN rev_rec(i - 1, acc + [lst[i]])  
+                        END IF  
+                    END FUNCTION  
+                    RETURN rev_rec(LENGTH(lst) - 1, [])  
+                END FUNCTION  
+                SET reversed_suffix TO reverse_list(suffix_slice)  
+
+                # concatenation  
+                FUNCTION concat_lists(a list of integers, b list of integers) RETURNS list of integers  
+                    FUNCTION concat_rec(i integer, res list of integers) RETURNS list of integers  
+                        IF i = LENGTH(a) THEN  
+                            RETURN res + b  
+                        ELSE  
+                            RETURN concat_rec(i + 1, res + [a[i]])  
+                        END IF  
+                    END FUNCTION  
+                    RETURN concat_rec(0, [])  
+                END FUNCTION  
+                SET combined TO concat_lists(prefix_slice, reversed_suffix)  
+
+                # sorting by selection sort  
+                FUNCTION selection_sort(arr list of integers) RETURNS list of integers  
+                    FUNCTION find_min_index(lst list of integers, start integer) RETURNS integer  
+                        IF start = LENGTH(lst) - 1 THEN  
+                            RETURN start  
+                        ELSE  
+                            SET rest_min_idx TO find_min_index(lst, start + 1)  
+                            IF lst[start] < lst[rest_min_idx] THEN  
+                                RETURN start  
+                            ELSE  
+                                RETURN rest_min_idx  
+                            END IF  
+                        END IF  
+                    END FUNCTION  
+
+                    FUNCTION sort_rec(lst list of integers, idx integer) RETURNS list of integers  
+                        IF idx = LENGTH(lst) THEN  
+                            RETURN lst  
+                        ELSE  
+                            SET min_idx TO find_min_index(lst, idx)  
+                            SET lst2 TO lst  
+                            SET temp_val TO lst2[idx]  
+                            SET lst2[idx] TO lst2[min_idx]  
+                            SET lst2[min_idx] TO temp_val  
+                            RETURN sort_rec(lst2, idx + 1)  
+                        END IF  
+                    END FUNCTION  
+
+                    RETURN sort_rec(arr, 0)  
+                END FUNCTION  
+
+                SET sorted_combined TO selection_sort(combined)  
+
+                SET candidate TO process_queries(sorted_combined, queries)  
+                SET new_max TO acc_max  
+                IF candidate > new_max THEN  
+                    SET new_max TO candidate  
+                END IF  
+                RETURN iterate_indices(current_idx + 1, new_max)  
+            END IF  
+        END FUNCTION  
+
+        SET final_answer TO iterate_indices(0, result_max)  
+        RETURN final_answer  
+    END FUNCTION  
+END CLASS

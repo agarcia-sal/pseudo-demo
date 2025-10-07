@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+        SET rowsCount TO LENGTH OF grid
+        SET colsCount TO LENGTH OF element at position 0 of grid
+        SET totalCounter TO 0
+
+        FUNCTION checkSubmatrixValidity(matrix)
+            FUNCTION checkRowValidity(row, idx)
+                IF idx EQUALS LENGTH OF row THEN
+                    RETURN True
+                END IF
+                IF element at idx of row GREATER THAN k THEN
+                    RETURN False
+                END IF
+                RETURN checkRowValidity(row, idx + 1)
+            END FUNCTION
+
+            FUNCTION validateRows(matrix, idx)
+                IF idx EQUALS LENGTH OF matrix THEN
+                    RETURN True
+                END IF
+                IF NOT checkRowValidity(element at idx of matrix, 0) THEN
+                    RETURN False
+                END IF
+                RETURN validateRows(matrix, idx + 1)
+            END FUNCTION
+
+            RETURN validateRows(matrix, 0)
+        END FUNCTION
+
+        FUNCTION verifySubmatrixSortedOrder(matrix)
+            FUNCTION checkRowOrder(row, position)
+                IF position EQUALS LENGTH OF row THEN
+                    RETURN True
+                END IF
+                IF NOT (element at position of row LESS THAN OR EQUAL TO element at position - 1 of row) THEN
+                    RETURN False
+                END IF
+                RETURN checkRowOrder(row, position + 1)
+            END FUNCTION
+
+            FUNCTION validateAllRows(matrix, index)
+                IF index EQUALS LENGTH OF matrix THEN
+                    RETURN True
+                END IF
+                IF NOT checkRowOrder(element at index of matrix, 1) THEN
+                    RETURN False
+                END IF
+                RETURN validateAllRows(matrix, index + 1)
+            END FUNCTION
+
+            RETURN validateAllRows(matrix, 0)
+        END FUNCTION
+
+        PROCEDURE iterateY2(x1, y1, x2)
+            SET y2Index TO y1
+            WHILE y2Index LESS THAN colsCount DO
+                SET extractedSubmatrix TO EMPTY LIST
+                SET tempRowIndex TO x1
+
+                WHILE tempRowIndex LESS THAN OR EQUAL TO x2 DO
+                    ADD sublist of element at tempRowIndex of grid from y1 TO y2Index inclusive TO extractedSubmatrix
+                    SET tempRowIndex TO tempRowIndex + 1
+                END WHILE
+
+                IF checkSubmatrixValidity(extractedSubmatrix) AND verifySubmatrixSortedOrder(extractedSubmatrix) THEN
+                    SET totalCounter TO totalCounter + 1
+                END IF
+                SET y2Index TO y2Index + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE iterateX2(x1, y1)
+            SET x2Index TO x1
+            WHILE x2Index LESS THAN rowsCount DO
+                CALL iterateY2(x1, y1, x2Index)
+                SET x2Index TO x2Index + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE iterateY1(x1)
+            SET y1Index TO 0
+            WHILE y1Index LESS THAN colsCount DO
+                CALL iterateX2(x1, y1Index)
+                SET y1Index TO y1Index + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE iterateX1()
+            SET x1Index TO 0
+            WHILE x1Index LESS THAN rowsCount DO
+                CALL iterateY1(x1Index)
+                SET x1Index TO x1Index + 1
+            END WHILE
+        END PROCEDURE
+
+        CALL iterateX1()
+
+        RETURN totalCounter
+    END FUNCTION
+END CLASS

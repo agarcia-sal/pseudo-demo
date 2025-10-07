@@ -1,0 +1,34 @@
+CLASS Solution
+    FUNCTION maxUpgrades(count LIST OF INTEGER upgrade LIST OF INTEGER sell LIST OF INTEGER money LIST OF INTEGER) RETURNS LIST OF INTEGER
+        SET result TO EMPTY LIST
+        SET pos TO 0
+        WHILE pos < LENGTH(count) DO
+            SET current_count TO count[pos]
+            SET cost_upgrade TO upgrade[pos]
+            SET price_sell TO sell[pos]
+            SET funds TO money[pos]
+            SET best_upgrade_number TO 0
+
+            FUNCTION scan_sell(sell_iter INTEGER)
+                IF sell_iter > current_count THEN
+                    RETURN
+                END IF
+                SET leftover_servers TO current_count - sell_iter
+                SET cash_after_sale TO funds + (sell_iter * price_sell)
+                SET possible_upgrs TO cash_after_sale DIV cost_upgrade
+                IF possible_upgrs > leftover_servers THEN
+                    SET possible_upgrs TO leftover_servers
+                END IF
+                IF possible_upgrs > best_upgrade_number THEN
+                    SET best_upgrade_number TO possible_upgrs
+                END IF
+                CALL scan_sell(sell_iter + 1)
+            END FUNCTION
+
+            CALL scan_sell(0)
+            APPEND best_upgrade_number TO result
+            SET pos TO pos + 1
+        END WHILE
+        RETURN result
+    END FUNCTION
+END CLASS

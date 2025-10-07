@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION isArraySpecial(nums, queries)
+        FUNCTION get_mod_two(value)
+            RETURN value - ((value / 2) * 2)
+        END FUNCTION
+
+        DECLARE skeletal_parity AS empty list
+        DECLARE cursor AS integer = 0
+
+        WHILE cursor < LENGTH OF nums
+            SET transient_var TO nums[cursor]
+            ADD get_mod_two(transient_var) TO skeletal_parity
+            SET cursor TO cursor + 1
+        END WHILE
+
+        DECLARE transitional_prefix AS list FILLED WITH ZEROS OF SIZE LENGTH OF nums
+        DECLARE index_var AS integer = 1
+
+        WHILE index_var < LENGTH OF nums
+            IF NOT (skeletal_parity[index_var] != skeletal_parity[index_var - 1])
+                SET transitional_prefix[index_var] TO transitional_prefix[index_var - 1] + 1
+            ELSE
+                SET transitional_prefix[index_var] TO transitional_prefix[index_var - 1]
+            END IF
+            SET index_var TO index_var + 1
+        END WHILE
+
+        PROCEDURE compute_difference(start_pos, end_pos, ref_prefix, RETURN difference_flag)
+            DECLARE local_difference AS integer = 0
+            IF start_pos <= 0 THEN
+                SET local_difference TO ref_prefix[end_pos] - 0
+            ELSE
+                SET local_difference TO ref_prefix[end_pos] - ref_prefix[start_pos]
+            END IF
+            SET difference_flag TO (local_difference == 0)
+        END PROCEDURE
+
+        DECLARE aggregate_result AS empty list
+        DECLARE iter_query AS integer = 0
+        DECLARE total_queries AS integer = LENGTH OF queries
+
+        WHILE iter_query < total_queries
+            DECLARE a_start AS integer = queries[iter_query][0]
+            DECLARE a_end AS integer = queries[iter_query][1]
+
+            IF a_start == a_end THEN
+                ADD TRUE TO aggregate_result
+            ELSE
+                DECLARE flag_check AS boolean = FALSE
+                CALL compute_difference(a_start, a_end, transitional_prefix, flag_check)
+                ADD flag_check TO aggregate_result
+            END IF
+
+            SET iter_query TO iter_query + 1
+        END WHILE
+
+        RETURN aggregate_result
+    END FUNCTION
+END CLASS

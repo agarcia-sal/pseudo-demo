@@ -1,0 +1,30 @@
+FUNCTION filter_by_substring WITH PARAMETERS strings OF TYPE LIST OF STRING, substring OF TYPE STRING RETURNS LIST OF STRING
+    SET filtered_list TO EMPTY LIST
+    SET index TO 0
+    WHILE index LESS THAN LENGTH OF strings
+        SET current_string TO ELEMENT OF strings AT index
+        SET substring_found TO FALSE
+        SET position TO 0
+        SET max_position TO LENGTH OF current_string MINUS LENGTH OF substring
+        WHILE position LESS THAN OR EQUAL TO max_position AND substring_found EQUALS FALSE
+            SET match TO TRUE
+            SET substring_index TO 0
+            WHILE substring_index LESS THAN LENGTH OF substring AND match EQUALS TRUE
+                IF ELEMENT OF current_string AT position PLUS substring_index NOT EQUAL TO ELEMENT OF substring AT substring_index THEN
+                    SET match TO FALSE
+                END IF
+                INCREMENT substring_index BY 1
+            END WHILE
+            IF match EQUALS TRUE THEN
+                SET substring_found TO TRUE
+            ELSE
+                INCREMENT position BY 1
+            END IF
+        END WHILE
+        IF substring_found EQUALS TRUE THEN
+            CALL APPEND WITH filtered_list AND current_string
+        END IF
+        INCREMENT index BY 1
+    END WHILE
+    RETURN filtered_list
+END FUNCTION

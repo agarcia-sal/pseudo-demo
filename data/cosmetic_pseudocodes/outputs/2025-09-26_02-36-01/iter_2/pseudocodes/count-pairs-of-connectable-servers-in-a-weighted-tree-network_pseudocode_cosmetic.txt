@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)
+        LET adjacencyMap BE a dictionary with default value as an empty list
+        LET index BE 0
+        WHILE index < LENGTH(edges)
+            LET link SET TO edges[index]
+            LET firstNode BE link[0]
+            LET secondNode BE link[1]
+            LET weightVal BE link[2]
+            LET adjacencyMap[firstNode] = adjacencyMap[firstNode] + [(secondNode, weightVal)]
+            LET adjacencyMap[secondNode] = adjacencyMap[secondNode] + [(firstNode, weightVal)]
+            SET index TO index + 1
+        END WHILE
+        
+        LET totalNodes BE LENGTH(keys of adjacencyMap)
+        LET pairsCountList BE a list containing totalNodes copies of 0
+        
+        FUNCTION dfs(current, ancestor, accumulatedDistance, pathList)
+            LET remainderVal BE accumulatedDistance MODULO signalSpeed
+            IF remainderVal = 0 THEN
+                LET pathList BE pathList + [current]
+            END IF
+            LET subCount BE 0
+            LET neighborsIterator BE 0
+            WHILE neighborsIterator < LENGTH(adjacencyMap[current])
+                LET neighborTuple SET TO adjacencyMap[current][neighborsIterator]
+                LET neighborNode BE neighborTuple[0]
+                LET edgeWeight BE neighborTuple[1]
+                IF neighborNode != ancestor THEN
+                    LET subCount = subCount + dfs(neighborNode, current, accumulatedDistance + edgeWeight, pathList)
+                END IF
+                SET neighborsIterator = neighborsIterator + 1
+            END WHILE
+            IF remainderVal = 0 THEN
+                RETURN subCount + 1
+            ELSE
+                RETURN subCount
+            END IF
+        END FUNCTION
+        
+        FUNCTION count_pairs_through_c(node_c)
+            LET collectionPaths BE []
+            LET neighborIdx BE 0
+            WHILE neighborIdx < LENGTH(adjacencyMap[node_c])
+                LET neighborEntry BE adjacencyMap[node_c][neighborIdx]
+                LET neighborNode BE neighborEntry[0]
+                LET edgeWeight BE neighborEntry[1]
+                LET currentPath BE []
+                CALL dfs(neighborNode, node_c, edgeWeight, currentPath)
+                LET collectionPaths BE collectionPaths + [currentPath]
+                SET neighborIdx TO neighborIdx + 1
+            END WHILE
+            LET aggregatePairs BE 0
+            LET leftIdx BE 0
+            WHILE leftIdx < LENGTH(collectionPaths) - 1
+                LET rightIdx BE leftIdx + 1
+                WHILE rightIdx < LENGTH(collectionPaths)
+                    LET leftLength BE LENGTH(collectionPaths[leftIdx])
+                    LET rightLength BE LENGTH(collectionPaths[rightIdx])
+                    LET aggregatePairs BE aggregatePairs + (leftLength * rightLength)
+                    SET rightIdx TO rightIdx + 1
+                END WHILE
+                SET leftIdx TO leftIdx + 1
+            END WHILE
+            RETURN aggregatePairs
+        END FUNCTION
+        
+        LET counter BE 0
+        WHILE counter < totalNodes
+            LET pairsCountList[counter] = count_pairs_through_c(counter)
+            SET counter TO counter + 1
+        END WHILE
+        
+        RETURN pairsCountList
+    END FUNCTION
+END CLASS

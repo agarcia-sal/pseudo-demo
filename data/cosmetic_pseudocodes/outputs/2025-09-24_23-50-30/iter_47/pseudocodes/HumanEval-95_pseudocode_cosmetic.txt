@@ -1,0 +1,52 @@
+```
+FUNCTION check_dict_case(dict_input)
+    IF NOT (COUNT dict_input KEYS > 0)
+        RETURN False
+    END IF
+
+    SET mode_state TO "start"
+    SET idx_counter TO 0
+    SET key_list TO ARRAY_FROM dict_input KEYS
+
+    WHILE idx_counter < LENGTH OF key_list
+        SET current_key TO key_list[idx_counter]
+        INCREMENT idx_counter BY 1
+
+        IF TYPE_OF current_key IS NOT STRING
+            SET mode_state TO "mixed"
+            BREAK
+        END IF
+
+        SWITCH mode_state
+            CASE "start":
+                IF current_key == TO_UPPERCASE(current_key)
+                    SET mode_state TO "upper"
+                ELSE 
+                    IF current_key == TO_LOWERCASE(current_key)
+                        SET mode_state TO "lower"
+                    ELSE
+                        BREAK
+                    END IF
+                END IF
+
+            CASE "upper":
+                IF current_key != TO_UPPERCASE(current_key)
+                    SET mode_state TO "mixed"
+                    BREAK
+                ELSE
+                    BREAK
+                END IF
+
+            CASE "lower":
+                IF current_key != TO_LOWERCASE(current_key)
+                    SET mode_state TO "mixed"
+                    BREAK
+                ELSE
+                    BREAK
+                END IF
+        END SWITCH
+    END WHILE
+
+    RETURN (mode_state == "upper") OR (mode_state == "lower")
+END FUNCTION
+```

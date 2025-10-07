@@ -1,0 +1,114 @@
+CLASS Solution
+	FUNCTION shortestDistanceAfterQueries(n, queries)
+		SET adjacencyMap TO mapping FROM integers 0 THROUGH n-1 TO empty lists
+		SET indexCounter TO 0
+		REPEAT
+			IF indexCounter GREATER THAN n - 2 THEN
+				BREAK
+			END IF
+			SET link TO (indexCounter + 1, 1)
+			APPEND link TO adjacencyMap[indexCounter]
+			SET indexCounter TO indexCounter + 1
+		UNTIL FALSE
+
+		FUNCTION dijkstra()
+			SET distances TO list OF length n FILLED WITH (1.0 / 0.0)
+			SET distances[0] TO 0
+			SET priorityQueue TO list CONTAINING (0, 0)
+
+			PROCEDURE siftDown(queue)
+				SET start TO 0
+				LOOP
+					SET leftChild TO 2 * start + 1
+					SET rightChild TO 2 * start + 2
+					SET smallest TO start
+					IF leftChild LESS THAN LENGTH OF queue AND queue[leftChild][0] LESS THAN queue[smallest][0] THEN
+						SET smallest TO leftChild
+					END IF
+					IF rightChild LESS THAN LENGTH OF queue AND queue[rightChild][0] LESS THAN queue[smallest][0] THEN
+						SET smallest TO rightChild
+					END IF
+					IF smallest EQUALS start THEN
+						EXIT LOOP
+					END IF
+					SET queue[start] TO queue[smallest]
+					SET queue[smallest] TO queue[start]
+					SET start TO smallest
+				END LOOP
+			END PROCEDURE
+
+			PROCEDURE pushHeap(queue, item)
+				APPEND item TO queue
+				SET idx TO LENGTH OF queue - 1
+				WHILE idx GREATER THAN 0
+					SET parent TO (idx - 1) // 2
+					IF queue[parent][0] LESS THAN OR EQUAL TO queue[idx][0] THEN
+						BREAK
+					END IF
+					SWAP queue[parent], queue[idx]
+					SET idx TO parent
+				END WHILE
+			END PROCEDURE
+
+			PROCEDURE popHeap(queue)
+				SET initial TO queue[0]
+				SET lastItem TO queue[LENGTH OF queue - 1]
+				SET queue[0] TO lastItem
+				REMOVE last element FROM queue
+				SET start TO 0
+				WHILE TRUE
+					SET leftChild TO 2 * start + 1
+					SET rightChild TO 2 * start + 2
+					SET smallest TO start
+					IF leftChild LESS THAN LENGTH OF queue AND queue[leftChild][0] LESS THAN queue[smallest][0] THEN
+						SET smallest TO leftChild
+					END IF
+					IF rightChild LESS THAN LENGTH OF queue AND queue[rightChild][0] LESS THAN queue[smallest][0] THEN
+						SET smallest TO rightChild
+					END IF
+					IF smallest EQUALS start THEN
+						BREAK
+					END IF
+					SWAP queue[start], queue[smallest]
+					SET start TO smallest
+				END WHILE
+				RETURN initial
+			END PROCEDURE
+
+			WHILE LENGTH OF priorityQueue GREATER THAN 0
+				SET currentPair TO popHeap(priorityQueue)
+				SET currentDistance TO currentPair[0]
+				SET currentVertex TO currentPair[1]
+				IF currentDistance GREATER THAN distances[currentVertex] THEN
+					CONTINUE
+				END IF
+				FOR EACH edge IN adjacencyMap[currentVertex]
+					SET neighborVertex TO edge[0]
+					SET edgeWeight TO edge[1]
+					SET newDistance TO currentDistance + edgeWeight
+					IF newDistance LESS THAN distances[neighborVertex] THEN
+						SET distances[neighborVertex] TO newDistance
+						pushHeap(priorityQueue, (newDistance, neighborVertex))
+					END IF
+				END FOR
+			END WHILE
+			RETURN distances[n - 1]
+		END FUNCTION
+
+		SET outputList TO empty list
+		SET queryIndex TO 0
+		REPEAT
+			IF queryIndex GREATER THAN LENGTH OF queries - 1 THEN
+				BREAK
+			END IF
+			SET currentQuery TO queries[queryIndex]
+			SET sourceNode TO currentQuery[0]
+			SET destinationNode TO currentQuery[1]
+			APPEND (destinationNode, 1) TO adjacencyMap[sourceNode]
+			APPEND dijkstra() TO outputList
+			SET queryIndex TO queryIndex + 1
+		UNTIL FALSE
+
+		RETURN outputList
+	END FUNCTION
+END CLASS

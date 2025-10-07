@@ -1,0 +1,40 @@
+CLASS Solution  
+    FUNCTION maximumTotalDamage(power)  
+        CREATE frequency_map AS empty dictionary  
+        FOR each element val IN power DO  
+            IF val NOT IN frequency_map THEN  
+                SET frequency_map[val] TO 1  
+            ELSE  
+                INCREMENT frequency_map[val] BY 1  
+            END IF  
+        END FOR  
+
+        CREATE sorted_powers AS list of keys in frequency_map SORTED in ascending order  
+        CREATE memo AS empty dictionary  
+
+        FOR idx FROM 0 TO LENGTH(sorted_powers) - 1 DO  
+            SET current_power TO sorted_powers[idx]  
+
+            IF idx > 0 THEN  
+                SET opt_exclude TO memo[sorted_powers[idx - 1]] IF sorted_powers[idx - 1] IN memo ELSE 0  
+            ELSE  
+                SET opt_exclude TO 0  
+            END IF  
+
+            SET opt_include TO current_power * frequency_map[current_power]  
+
+            SET scan_idx TO idx - 1  
+            WHILE scan_idx >= 0 AND sorted_powers[scan_idx] >= current_power - 2 DO  
+                DECREMENT scan_idx BY 1  
+            END WHILE  
+
+            IF scan_idx >= 0 THEN  
+                SET opt_include TO opt_include + memo[sorted_powers[scan_idx]]  
+            END IF  
+
+            SET memo[current_power] TO MAXIMUM(opt_include, opt_exclude)  
+        END FOR  
+
+        RETURN MAXIMUM value in memo  
+    END FUNCTION  
+END CLASS

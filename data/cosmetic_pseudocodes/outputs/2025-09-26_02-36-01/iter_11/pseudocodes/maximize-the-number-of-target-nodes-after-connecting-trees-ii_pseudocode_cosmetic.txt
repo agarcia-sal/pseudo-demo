@@ -1,0 +1,129 @@
+CLASS Solution
+    FUNCTION maxTargetNodes(edges1, edges2)
+        SET containerAlpha TO new default dictionary of list
+        SET containerBeta TO new default dictionary of list
+        
+        PROCEDURE insertEdges(edgeList, adjacency)
+            SET idx TO 0
+            WHILE idx < LENGTH(edgeList)
+                SET firstNode TO edgeList[idx][0]
+                SET secondNode TO edgeList[idx][1]
+                CALL addConnection(adjacency, firstNode, secondNode)
+                CALL addConnection(adjacency, secondNode, firstNode)
+                SET idx TO idx + 1
+            END WHILE
+        END PROCEDURE
+        
+        PROCEDURE addConnection(graph, node1, node2)
+            APPEND node2 TO graph[node1]
+        END PROCEDURE
+        
+        CALL insertEdges(edges1, containerAlpha)
+        CALL insertEdges(edges2, containerBeta)
+        
+        SET countAlpha TO LENGTH(containerAlpha)
+        SET countBeta TO LENGTH(containerBeta)
+        
+        FUNCTION exploreLevels(graphStructure, origin)
+            SET countEven TO 0
+            SET countOdd TO 0
+            FUNCTION dequeuePop(dequeStructure)
+                SET element TO dequeStructure[0]
+                REMOVE dequeStructure[0] 
+                RETURN element
+            END FUNCTION
+            
+            SET frontier TO [ (origin, 0) ]
+            SET seenNodes TO { origin }
+            
+            FUNCTION loopFrontier()
+                IF LENGTH(frontier) = 0
+                    RETURN
+                END IF
+                
+                SET currentNode, distanceValue TO dequeuePop(frontier)
+                
+                IF (distanceValue % 2) = 0
+                    SET countEven TO countEven + 1
+                ELSE
+                    SET countOdd TO countOdd + 1
+                END IF
+                
+                FUNCTION examineNeighbors(nodesList)
+                    IF LENGTH(nodesList) = 0
+                        RETURN
+                    END IF
+                    
+                    SET neighbor TO nodesList[0]
+                    REMOVE nodesList[0]
+                    
+                    IF neighbor NOT IN seenNodes
+                        ADD neighbor TO seenNodes
+                        APPEND (neighbor, distanceValue + 1) TO frontier
+                    END IF
+                    CALL examineNeighbors(nodesList)
+                END FUNCTION
+                
+                CALL examineNeighbors(COPY graphStructure[currentNode])
+                CALL loopFrontier()
+            END FUNCTION
+            
+            CALL loopFrontier()
+            
+            RETURN (countEven, countOdd)
+        END FUNCTION
+        
+        SET listCountsA TO EMPTY LIST
+        PROCEDURE generateCountsA(idx, limit)
+            IF idx = limit
+                RETURN
+            END IF
+            APPEND exploreLevels(containerAlpha, idx) TO listCountsA
+            CALL generateCountsA(idx + 1, limit)
+        END PROCEDURE
+        CALL generateCountsA(0, countAlpha)
+        
+        SET listCountsB TO []
+        FOR iterator FROM 0 TO (countBeta - 1) STEP 1
+            SET tempPair TO exploreLevels(containerBeta, iterator)
+            APPEND tempPair TO listCountsB
+        END FOR
+        
+        SET compilation TO EMPTY LIST
+        PROCEDURE combineCounts(x, upperBound)
+            IF x = upperBound
+                RETURN
+            END IF
+            
+            SET evenAlpha, oddAlpha TO listCountsA[x]
+            SET highestTargets TO 0
+            
+            PROCEDURE checkCandidates(y, bound)
+                IF y = bound
+                    RETURN
+                END IF
+                
+                SET evenBeta, oddBeta TO listCountsB[y]
+                IF x = y OR ((x % 2) = (y % 2))
+                    SET localMax TO evenBeta
+                ELSE
+                    SET localMax TO oddBeta
+                END IF
+                
+                IF localMax > highestTargets
+                    SET highestTargets TO localMax
+                END IF
+                
+                CALL checkCandidates(y + 1, bound)
+            END PROCEDURE
+            
+            CALL checkCandidates(0, countBeta)
+            APPEND (evenAlpha + highestTargets) TO compilation
+            CALL combineCounts(x + 1, upperBound)
+        END PROCEDURE
+        
+        CALL combineCounts(0, countAlpha)
+        
+        RETURN compilation
+    END FUNCTION
+END CLASS

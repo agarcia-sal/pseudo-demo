@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION maxSelectedElements(nums)
+        SET result TO 0
+        SET mapCache TO new dictionary
+        DEFINE FUNCTION getValue(key)
+            IF key in mapCache THEN
+                RETURN mapCache[key]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        SET sortedNums TO empty list
+        DEFINE FUNCTION copyAndSort(inputList)
+            FOR IDX FROM 1 TO LENGTH(inputList) DO
+                APPEND inputList[IDX] TO sortedNums
+            END FOR
+            DEFINE PROCEDURE bubbleSort(LST)
+                SET n TO LENGTH(LST)
+                SET swapped TO TRUE
+                WHILE swapped DO
+                    SET swapped TO FALSE
+                    SET i TO 2
+                    WHILE i <= n DO
+                        IF LST[i-1] > LST[i] THEN
+                            SET tempVar TO LST[i-1]
+                            SET LST[i-1] TO LST[i]
+                            SET LST[i] TO tempVar
+                            SET swapped TO TRUE
+                        END IF
+                        SET i TO i + 1
+                    END WHILE
+                END WHILE
+            END PROCEDURE
+            CALL bubbleSort(sortedNums)
+        END FUNCTION
+        CALL copyAndSort(nums)
+
+        SET currentIndex TO 1
+        WHILE currentIndex <= LENGTH(sortedNums) DO
+            SET elementCurrent TO sortedNums[currentIndex]
+            SET valueOneAhead TO getValue(elementCurrent + 1) + 1
+            SET mapCache[elementCurrent + 1] TO valueOneAhead
+            SET valueOneBehind TO getValue(elementCurrent - 1) + 1
+            SET mapCache[elementCurrent] TO valueOneBehind
+            SET tempMaxCandidates TO [result, mapCache[elementCurrent], mapCache[elementCurrent + 1]]
+            SET candidateIndex TO 1
+            SET maxVal TO tempMaxCandidates[1]
+            WHILE candidateIndex <= LENGTH(tempMaxCandidates) DO
+                IF tempMaxCandidates[candidateIndex] > maxVal THEN
+                    SET maxVal TO tempMaxCandidates[candidateIndex]
+                END IF
+                SET candidateIndex TO candidateIndex + 1
+            END WHILE
+            SET result TO maxVal
+            SET currentIndex TO currentIndex + 1
+        END WHILE
+        RETURN result
+    END FUNCTION
+END CLASS

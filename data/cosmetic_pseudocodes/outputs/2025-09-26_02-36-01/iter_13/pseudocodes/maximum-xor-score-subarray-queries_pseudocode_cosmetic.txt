@@ -1,0 +1,147 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+        SET totalCount TO 0
+        DEFINE FUNCTION lengthOfList(L)
+            SET count TO 0
+            REPEAT
+                IF L[count] DOES NOT EXIST
+                    BREAK
+                END IF
+                SET count TO count PLUS 1
+            UNTIL FALSE
+            RETURN count
+        END FUNCTION
+
+        SET totalCount TO lengthOfList(nums)
+        SET matrixA TO EMPTY LIST
+        SET matrixB TO EMPTY LIST
+
+        DEFINE FUNCTION generateZeroMatrix(rows, cols)
+            SET outerIdx TO 0
+            SET resultMatrix TO EMPTY LIST
+            REPEAT
+                IF outerIdx IS EQUAL TO rows
+                    BREAK
+                END IF
+                SET innerIdx TO 0
+                SET innerList TO EMPTY LIST
+                REPEAT
+                    IF innerIdx IS EQUAL TO cols
+                        BREAK
+                    END IF
+                    CALL innerList APPEND 0
+                    SET innerIdx TO innerIdx PLUS 1
+                UNTIL FALSE
+                CALL resultMatrix APPEND innerList
+                SET outerIdx TO outerIdx PLUS 1
+            UNTIL FALSE
+            RETURN resultMatrix
+        END FUNCTION
+
+        SET matrixA TO generateZeroMatrix(totalCount, totalCount)
+        SET matrixB TO generateZeroMatrix(totalCount, totalCount)
+
+        DEFINE FUNCTION maximum(x,y)
+            IF (x GREATER THAN OR EQUAL TO y)
+                RETURN x
+            ELSE
+                RETURN y
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION xorOp(a,b)
+            IF a AND b ARE BOTH 0
+                RETURN 0
+            ELSE IF a IS 0 AND b IS 1
+                RETURN 1
+            ELSE IF a IS 1 AND b IS 0
+                RETURN 1
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION bitwiseXor(num1, num2)
+            SET bitPos TO 0
+            SET resultNum TO 0
+            WHILE (num1 GREATER THAN 0 OR num2 GREATER THAN 0)
+                SET bit1 TO num1 MOD 2
+                SET bit2 TO num2 MOD 2
+                SET bitResult TO xorOp(bit1, bit2)
+                SET resultNum TO resultNum PLUS (bitResult LEFT SHIFTED BY bitPos)
+                SET num1 TO FLOOR DIVISION OF num1 BY 2
+                SET num2 TO FLOOR DIVISION OF num2 BY 2
+                SET bitPos TO bitPos PLUS 1
+            END WHILE
+            RETURN resultNum
+        END FUNCTION
+
+        SET indexI TO totalCount MINUS 1
+
+        WHILE TRUE
+            IF indexI LESS THAN 0
+                BREAK
+            END IF
+            SET matrixA[indexI][indexI] TO nums[indexI]
+            SET matrixB[indexI][indexI] TO nums[indexI]
+
+            SET indexJ TO indexI PLUS 1
+
+            WHILE TRUE
+                IF indexJ EQUAL TO totalCount
+                    BREAK
+                END IF
+
+                SET leftXor TO matrixA[indexI][indexJ MINUS 1]
+                SET rightXor TO matrixA[indexI PLUS 1][indexJ]
+                SET xorValue TO bitwiseXor(leftXor, rightXor)
+                SET matrixA[indexI][indexJ] TO xorValue
+
+                SET firstVal TO matrixA[indexI][indexJ]
+                SET secondVal TO matrixB[indexI][indexJ MINUS 1]
+                SET thirdVal TO matrixB[indexI PLUS 1][indexJ]
+
+                SET maxLeft TO maximum(firstVal, secondVal)
+                SET overallMax TO maximum(maxLeft, thirdVal)
+
+                SET matrixB[indexI][indexJ] TO overallMax
+
+                SET indexJ TO indexJ PLUS 1
+            END WHILE
+
+            SET indexI TO indexI MINUS 1
+        END WHILE
+
+        SET resultList TO EMPTY LIST
+
+        DEFINE FUNCTION getPairCount(pairs)
+            SET iterator TO 0
+            SET countPairs TO 0
+            REPEAT
+                IF pairs[iterator] DOES NOT EXIST
+                    BREAK
+                END IF
+                SET countPairs TO countPairs PLUS 1
+                SET iterator TO iterator PLUS 1
+            UNTIL FALSE
+            RETURN countPairs
+        END FUNCTION
+
+        SET lengthQueries TO getPairCount(queries)
+
+        DEFINE FUNCTION getElement(a,b)
+            RETURN matrixB[a][b]
+        END FUNCTION
+
+        SET currentIdx TO 0
+        WHILE currentIdx LESS THAN lengthQueries
+            SET pairElement TO queries[currentIdx]
+            SET leftVal TO pairElement[0]
+            SET rightVal TO pairElement[1]
+            CALL resultList APPEND getElement(leftVal, rightVal)
+            SET currentIdx TO currentIdx PLUS 1
+        END WHILE
+
+        RETURN resultList
+    END FUNCTION
+END CLASS

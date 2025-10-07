@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION getSum(nums)
+        SET mod TO 1000000007
+
+        FUNCTION calc(arr)
+            LET length BE SIZE OF arr
+            INITIALIZE leftArr AS ARRAY OF length ITEMS FILLED WITH 0
+            INITIALIZE rightArr AS ARRAY OF length ITEMS FILLED WITH 0
+            INITIALIZE countMap AS EMPTY DICTIONARY DEFAULTING TO 0
+
+            FOR index FROM 1 TO length - 1 DO
+                LET prevVal BE arr[index - 1]
+                LET incrementValue BE 1 + (countMap[prevVal - 1] OR 0)
+                countMap[prevVal] = (countMap[prevVal] OR 0) + incrementValue
+                leftArr[index] = countMap[prevVal]
+            END FOR
+
+            RESET countMap TO EMPTY DICTIONARY DEFAULTING TO 0
+
+            FOR index FROM length - 2 DOWNTO 0 DO
+                LET nextVal BE arr[index + 1]
+                LET incrementValue BE 1 + (countMap[nextVal + 1] OR 0)
+                countMap[nextVal] = (countMap[nextVal] OR 0) + incrementValue
+                rightArr[index] = countMap[nextVal]
+            END FOR
+
+            SET result TO 0
+            FOR EACH i FROM 0 TO length - 1 DO
+                LET lVal BE leftArr[i]
+                LET rVal BE rightArr[i]
+                LET elem BE arr[i]
+                result = result + (lVal + rVal + lVal * rVal) * elem
+            END FOR
+
+            RETURN result MOD mod
+        END FUNCTION
+
+        LET originalCalcResult BE calc(nums)
+        REVERSE nums IN PLACE
+        LET reversedCalcResult BE calc(nums)
+
+        RETURN (originalCalcResult + reversedCalcResult + SUM OF ALL ELEMENTS IN nums) MOD mod
+    END FUNCTION
+END CLASS

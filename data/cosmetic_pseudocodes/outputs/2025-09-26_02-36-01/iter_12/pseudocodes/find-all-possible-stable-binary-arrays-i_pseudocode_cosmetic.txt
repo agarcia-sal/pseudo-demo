@@ -1,0 +1,40 @@
+CLASS Solution
+    FUNCTION numberOfStableArrays(zero, one, limit)
+        CONSTANT BASE_MODULUS := (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+
+        FUNCTION recurse(remainingZeros, remainingOnes, prevChar, runLen)
+            FUNCTION moduloSum(a, b)
+                RETURN (a + b) - BASE_MODULUS * FLOOR((a + b) / BASE_MODULUS)
+            END FUNCTION
+
+            IF remainingZeros = 0 AND remainingOnes = 0 THEN
+                RETURN 1
+            END IF
+
+            IF remainingZeros < 0 OR remainingOnes < 0 THEN
+                RETURN 0
+            END IF
+
+            VARIABLE accumulator := 0
+
+            IF NOT (prevChar = 0 AND runLen >= limit) THEN
+                VARIABLE newRunLen := IF prevChar = 0 THEN runLen + 1 ELSE 1
+                VARIABLE partialResult := recurse(remainingZeros - 1, remainingOnes, 0, newRunLen)
+                accumulator := moduloSum(accumulator, partialResult)
+            END IF
+
+            IF NOT (prevChar = 1 AND runLen >= limit) THEN
+                VARIABLE updatedRunLen := IF prevChar = 1 THEN runLen + 1 ELSE 1
+                VARIABLE partialRes2 := recurse(remainingZeros, remainingOnes - 1, 1, updatedRunLen)
+                accumulator := moduloSum(accumulator, partialRes2)
+            END IF
+
+            RETURN accumulator
+        END FUNCTION
+
+        VARIABLE startPrevChar := -1
+        VARIABLE startRunLength := 0
+
+        RETURN recurse(zero, one, startPrevChar, startRunLength)
+    END FUNCTION
+END CLASS

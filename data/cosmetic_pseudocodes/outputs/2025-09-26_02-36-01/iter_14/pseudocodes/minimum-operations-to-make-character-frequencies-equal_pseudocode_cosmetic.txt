@@ -1,0 +1,99 @@
+```  
+CLASS Solution  
+    FUNCTION makeStringGood(s)  
+          SET freqArray TO list filled with 0, length 26  
+          SET idx1 TO 0  
+          WHILE idx1 < LENGTH(s) DO  
+                SET ch TO s[idx1]  
+                SET posIdx TO ORD(ch) - ORD('a')  
+                SET freqArray[posIdx] TO freqArray[posIdx] + (1 * 1)  
+                SET idx1 TO idx1 + 1  
+          END WHILE  
+          SET maxCount TO 0  
+          SET idx2 TO 0  
+          WHILE idx2 < LENGTH(freqArray) DO  
+                IF freqArray[idx2] > maxCount THEN  
+                      SET maxCount TO freqArray[idx2]  
+                END IF  
+                SET idx2 TO idx2 + 1  
+          END WHILE  
+          
+          FUNCTION helper(targetFreq)  
+                SET dpList TO list of zeros with length 27  
+                SET i TO 25  
+                WHILE i >= 0 DO  
+                      SET delAll TO freqArray[i]  
+                      SET diffVal TO 0  
+                      IF targetFreq > freqArray[i] THEN  
+                            SET diffVal TO targetFreq - freqArray[i]  
+                      ELSE  
+                            SET diffVal TO freqArray[i] - targetFreq  
+                      END IF  
+                      SET val1 TO MIN(delAll, diffVal + dpList[i + 1])  
+                      IF (i + 1) < 26 AND freqArray[i + 1] < targetFreq THEN  
+                            SET diffNext TO targetFreq - freqArray[i + 1]  
+                            SET needChange TO 0  
+                            IF freqArray[i] <= targetFreq THEN  
+                                  SET needChange TO freqArray[i]  
+                            ELSE  
+                                  SET needChange TO freqArray[i] - targetFreq  
+                            END IF  
+                            SET changeVal TO 0  
+                            IF diffNext > needChange THEN  
+                                  SET changeVal TO needChange + (diffNext - needChange)  
+                            ELSE  
+                                  SET changeVal TO diffNext + (needChange - diffNext)  
+                            END IF  
+                            SET val1 TO MIN(val1, changeVal + dpList[i + 2])  
+                      END IF  
+                      SET dpList[i] TO val1  
+                      SET i TO i - 1  
+                END WHILE  
+                RETURN dpList[0]  
+          END FUNCTION  
+          
+          SET minOps TO helper(1)  
+          SET targetNum TO 2  
+          WHILE targetNum <= maxCount DO  
+                SET currOps TO helper(targetNum)  
+                IF currOps < minOps THEN  
+                      SET minOps TO currOps  
+                END IF  
+                SET targetNum TO targetNum + 1  
+          END WHILE  
+          RETURN minOps  
+    END FUNCTION  
+    
+    FUNCTION _getMinOperations(count, target)  
+          DEFINE function body inline:  # Replace call to helper inside makeStringGood with direct call to this function  
+          SET dpList TO list of zeros, length 27  
+          SET iterIdx TO 25  
+          REPEAT  
+                SET delFull TO count[iterIdx]  
+                IF target > count[iterIdx] THEN  
+                      SET diffCalc TO target - count[iterIdx]  
+                ELSE  
+                      SET diffCalc TO count[iterIdx] - target  
+                END IF  
+                SET candidate1 TO MIN(delFull, diffCalc + dpList[iterIdx + 1])  
+                IF (iterIdx + 1) < 26 AND count[iterIdx + 1] < target THEN  
+                      SET deficitNext TO target - count[iterIdx + 1]  
+                      IF count[iterIdx] <= target THEN  
+                            SET needChangeVal TO count[iterIdx]  
+                      ELSE  
+                            SET needChangeVal TO count[iterIdx] - target  
+                      END IF  
+                      IF deficitNext > needChangeVal THEN  
+                            SET candidate2 TO needChangeVal + (deficitNext - needChangeVal)  
+                      ELSE  
+                            SET candidate2 TO deficitNext + (needChangeVal - deficitNext)  
+                      END IF  
+                      SET candidate1 TO MIN(candidate1, candidate2 + dpList[iterIdx + 2])  
+                END IF  
+                SET dpList[iterIdx] TO candidate1  
+                SET iterIdx TO iterIdx - 1  
+          UNTIL iterIdx < 0  
+          RETURN dpList[0]  
+    END FUNCTION  
+END CLASS  
+```

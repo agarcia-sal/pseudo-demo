@@ -1,0 +1,104 @@
+CLASS Solution  
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER  
+        FUNCTION is_peak(x INTEGER) RETURNS BOOLEAN  
+            FUNCTION smaller(a INTEGER, b INTEGER) RETURNS BOOLEAN  
+                RETURN a < b  
+            END FUNCTION  
+            FUNCTION larger(a INTEGER, b INTEGER) RETURNS BOOLEAN  
+                RETURN a > b  
+            END FUNCTION  
+            RETURN (smaller( nums[x-1], nums[x] ) AND larger( nums[x], nums[x+1] ))  
+        END FUNCTION  
+        
+        FUNCTION bisect_left(arr LIST OF INTEGER, val INTEGER) RETURNS INTEGER  
+            SET p TO 0  
+            SET q TO LENGTH OF arr  
+            WHILE (p < q)  
+                SET m TO (p + q) DIV 2  
+                IF arr[m] < val  
+                    SET p TO m + 1  
+                ELSE  
+                    SET q TO m  
+                END IF  
+            END WHILE  
+            RETURN p  
+        END FUNCTION  
+        
+        FUNCTION bisect_right(arr LIST OF INTEGER, val INTEGER) RETURNS INTEGER  
+            SET p TO 0  
+            SET q TO LENGTH OF arr  
+            WHILE (p < q)  
+                SET m TO (p + q) DIV 2  
+                IF val < arr[m]  
+                    SET q TO m  
+                ELSE  
+                    SET p TO m + 1  
+                END IF  
+            END WHILE  
+            RETURN p  
+        END FUNCTION  
+        
+        SET A TO empty list  
+        
+        FOR H FROM 1 TO (LENGTH OF nums - 2)  
+            IF is_peak(H) THEN  
+                APPEND H TO A  
+            END IF  
+        END FOR  
+        
+        SET ret TO empty list  
+        
+        FUNCTION insert_into_sorted(LISTQ LIST OF INTEGER, VALUEQ INTEGER)  
+            SET posq TO bisect_left(LISTQ, VALUEQ)  
+            INSERT VALUEQ INTO LISTQ AT posq  
+        END FUNCTION  
+        
+        FUNCTION remove_from_sorted(LISTR LIST OF INTEGER, VALUER INTEGER)  
+            SET leftR TO bisect_left(LISTR, VALUER)  
+            IF leftR < LENGTH OF LISTR AND LISTR[leftR] = VALUER THEN  
+                DELETE ELEMENT AT leftR FROM LISTR  
+            END IF  
+        END FUNCTION  
+        
+        FOR each qE IN queries  
+            IF qE[0] = 1 THEN  
+                SET LQ TO qE[1]  
+                SET RQ TO qE[2]  
+                SET liq TO bisect_left(A, LQ + 1)  
+                SET riq TO bisect_right(A, RQ) - 1  
+                SET diffq TO riq - liq  
+                APPEND diffq TO ret  
+            ELSE  
+                SET idxq TO qE[1]  
+                SET valq TO qE[2]  
+                IF nums[idxq] = valq THEN  
+                    CONTINUE  
+                END IF  
+                SET nums[idxq] TO valq  
+                SET start_pos TO idxq - 1  
+                IF start_pos < 1 THEN  
+                    SET start_pos TO 1  
+                END IF  
+                SET end_pos TO idxq + 1  
+                IF end_pos > (LENGTH OF nums - 2) THEN  
+                    SET end_pos TO LENGTH OF nums - 2  
+                END IF  
+                
+                SET w TO start_pos  
+                WHILE w <= end_pos  
+                    SET ip TO w  
+                    IF is_peak(ip) THEN  
+                        IF bisect_left(A, ip) = bisect_right(A, ip) THEN  
+                            insert_into_sorted(A, ip)  
+                        END IF  
+                    ELSE  
+                        remove_from_sorted(A, ip)  
+                    END IF  
+                    SET w TO w + 1  
+                END WHILE  
+            END IF  
+        END FOR  
+        
+        RETURN ret  
+    END FUNCTION  
+END CLASS

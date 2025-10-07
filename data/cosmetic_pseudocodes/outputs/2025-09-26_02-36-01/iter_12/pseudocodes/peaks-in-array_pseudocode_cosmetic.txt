@@ -1,0 +1,199 @@
+cLaSs Solution
+{
+	FuNcTiOn countOfPeaks(nums LiSt Of INTEGER, queries LiSt Of LiSt Of INTEGER) ReTuRnS LiSt Of INTEGER
+	{
+		FuNcTiOn _checkPeak(position INTEGER) ReTuRnS BOOLEAN
+		{
+			DeClArE _v BOOLEAN
+			_v = (nums[position] > nums[position - 1]) && (nums[position] > nums[position + 1])
+			ReTuRn _v
+		}
+
+		DeClArE _accumulator LiSt Of INTEGER
+		_accumulator = []
+
+		DeClArE _idx INTEGER
+		_idx = 1
+
+		WHiLe (_idx <= (LeNgTh(nums) - 2))
+		{
+			DeClArE _peek BOOLEAN
+			_peek = _checkPeak(_idx)
+			IF _peek == TRUE
+			THEn
+				_accumulator = _accumulator + [_idx]
+			EnDIf
+			_idx = _idx + 1
+		}
+
+		DeClArE _output LiSt Of INTEGER
+		_output = []
+
+		DeClArE _queryPointer INTEGER
+		_queryPointer = 0
+
+		WHiLe (_queryPointer < LeNgTh(queries))
+		{
+			DeClArE _currentQuery LiSt Of INTEGER
+			_currentQuery = queries[_queryPointer]
+
+			IF (_currentQuery[0] == 1)
+			THEn
+				DeClArE _leftBoundary INTEGER
+				_leftBoundary = _currentQuery[1]
+				DeClArE _rightBoundary INTEGER
+				_rightBoundary = _currentQuery[2]
+
+				DeClArE _leftInsertPos INTEGER
+				_leftInsertPos = LeftInsertPosition(_accumulator, _leftBoundary + 1)
+
+				DeClArE _rightInsertPos INTEGER
+				_rightInsertPos = RightInsertPosition(_accumulator, _rightBoundary) - 1
+
+				_output = _output + [(_rightInsertPos - _leftInsertPos)]
+			ElSe
+				DeClArE _idxUpdate INTEGER
+				_idxUpdate = _currentQuery[1]
+				DeClArE _valUpdate INTEGER
+				_valUpdate = _currentQuery[2]
+
+
+				IF (nums[_idxUpdate] == _valUpdate)
+				THEn
+					_queryPointer = _queryPointer + 1
+					CoNtInUe
+				EnDIf
+
+				nums[_idxUpdate] = _valUpdate
+
+				DeClArE _i INTEGER
+				_i = Max(1, _idxUpdate - 1)
+
+				RePeAt
+					IF _i > Min(LeNgTh(nums) - 2, _idxUpdate + 1)
+					ThEn
+						BrEaK
+					EnDIf
+
+					IF _checkPeak(_i) == TRUE
+					ThEn
+						IF Contains(_accumulator, _i) == FALSE
+						ThEn
+							_accumulator = InsertSorted(_accumulator, _i)
+						EnDIf
+					ElSe
+						IF Contains(_accumulator, _i) == TRUE
+						ThEn
+							_accumulator = RemoveValue(_accumulator, _i)
+						EnDIf
+					EnDIf
+
+					_i = _i + 1
+				UnTiL FALSE
+			EnDIf
+
+			_queryPointer = _queryPointer + 1
+		}
+
+		ReTuRn _output
+	}
+
+	// Helper: Binary search insertion left boundary
+	FuNcTiOn LeftInsertPosition(arr LiSt Of INTEGER, val INTEGER) ReTuRnS INTEGER
+	{
+		DeClArE l INTEGER; l = 0
+		DeClArE r INTEGER; r = LeNgTh(arr)
+		WHiLe (l < r)
+		{
+			DeClArE m INTEGER; m = (l + r) / 2
+			IF (arr[m] < val)
+			THEn l = m + 1
+			ElSe r = m
+		}
+		ReTuRn l
+	}
+
+
+	// Helper: Binary search insertion right boundary
+	FuNcTiOn RightInsertPosition(arr LiSt Of INTEGER, val INTEGER) ReTuRnS INTEGER
+	{
+		DeClArE l INTEGER; l = 0
+		DeClArE r INTEGER; r = LeNgTh(arr)
+		WHiLe (l < r)
+		{
+			DeClArE m INTEGER; m = (l + r) / 2
+			IF (arr[m] <= val)
+			THEn l = m + 1
+			ElSe r = m
+		}
+		ReTuRn l
+	}
+
+	// Helper: Check containment
+	FuNcTiOn Contains(arr LiSt Of INTEGER, val INTEGER) ReTuRnS BOOLEAN
+	{
+		DeClArE i INTEGER; i = 0
+		WHiLe (i < LeNgTh(arr))
+		{
+			IF arr[i] == val
+			ThEn ReTuRn TRUE
+			i = i + 1
+		}
+		ReTuRn FALSE
+	}
+
+	// Helper: Insert sorted
+	FuNcTiOn InsertSorted(arr LiSt Of INTEGER, val INTEGER) ReTuRnS LiSt Of INTEGER
+	{
+		DeClArE pos INTEGER
+		pos = LeftInsertPosition(arr, val)
+		DeClArE newArr LiSt Of INTEGER
+		newArr = []
+
+		DeClArE k INTEGER
+		k = 0
+		WHiLe (k < pos)
+		{
+			newArr = newArr + [arr[k]]
+			k = k + 1
+		}
+		newArr = newArr + [val]
+		WHiLe (k < LeNgTh(arr))
+		{
+			newArr = newArr + [arr[k]]
+			k = k + 1
+		}
+		ReTuRn newArr
+	}
+
+	// Helper: Remove value
+	FuNcTiOn RemoveValue(arr LiSt Of INTEGER, val INTEGER) ReTuRnS LiSt Of INTEGER
+	{
+		DeClArE newArr LiSt Of INTEGER
+		newArr = []
+		DeClArE idx INTEGER; idx = 0
+		WHiLe (idx < LeNgTh(arr))
+		{
+			IF arr[idx] != val
+			THEn newArr = newArr + [arr[idx]]
+			idx = idx + 1
+		}
+		ReTuRn newArr
+	}
+
+	// Helper: Maximum of two integers
+	FuNcTiOn Max(a INTEGER, b INTEGER) ReTuRnS INTEGER
+	{
+		IF a > b
+		THEn ReTuRn a
+		ElSe ReTuRn b
+	}
+
+	// Helper: Minimum of two integers
+	FuNcTiOn Min(a INTEGER, b INTEGER) ReTuRnS INTEGER
+	{
+		IF a < b
+		THEn ReTuRn a
+		ElSe ReTuRn b
+	}
+}

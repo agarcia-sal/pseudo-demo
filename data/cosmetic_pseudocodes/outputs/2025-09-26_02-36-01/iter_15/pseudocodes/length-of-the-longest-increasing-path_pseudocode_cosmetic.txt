@@ -1,0 +1,77 @@
+``` 
+CLASS Solution
+    FUNCTION maxPathLength(coordinates, k)
+        SET eta TO coordinates[k][0]
+        SET zeta TO coordinates[k][1]
+        SET omega TO []
+        SET gamma TO 0
+        WHILE gamma < LENGTH(coordinates)
+            SET alpha TO coordinates[gamma][0]
+            SET beta TO coordinates[gamma][1]
+            IF NOT (alpha >= eta OR beta >= zeta)
+                APPEND (alpha, beta) TO omega
+            END IF
+            SET gamma TO gamma + 1
+        END WHILE
+        SET psi TO []
+        SET delta TO 0
+        WHILE delta < LENGTH(coordinates)
+            SET mu TO coordinates[delta][0]
+            SET nu TO coordinates[delta][1]
+            IF (mu > eta AND nu > zeta)
+                APPEND (mu, nu) TO psi
+            END IF
+            SET delta TO delta + 1
+        END WHILE
+        RETURN 1 + self._lengthOfLIS(omega) + self._lengthOfLIS(psi)
+    END FUNCTION
+
+    FUNCTION _lengthOfLIS(coordinates)
+        FUNCTION custom_bisect_left(array, target)
+            SET left_bound TO 0
+            SET right_bound TO LENGTH(array)
+            WHILE left_bound < right_bound
+                SET mid TO left_bound + ((right_bound - left_bound) / 2)
+                IF array[mid] < target
+                    SET left_bound TO mid + 1
+                ELSE
+                    SET right_bound TO mid
+                END IF
+            END WHILE
+            RETURN left_bound
+        END FUNCTION
+
+        SET sortedList TO coordinates
+        REPEAT
+            SET swapped TO FALSE
+            SET idx1 TO 0
+            WHILE idx1 < LENGTH(sortedList) - 1
+                SET c1 TO sortedList[idx1]
+                SET c2 TO sortedList[idx1 + 1]
+                IF (c1[0] > c2[0]) OR (c1[0] = c2[0] AND c1[1] < c2[1])
+                    SET temp TO c2
+                    SET sortedList[idx1 + 1] TO c1
+                    SET sortedList[idx1] TO temp
+                    SET swapped TO TRUE
+                END IF
+                SET idx1 TO idx1 + 1
+            END WHILE
+        UNTIL NOT swapped
+
+        SET accumulator TO []
+        SET walker TO 0
+        WHILE walker < LENGTH(sortedList)
+            SET elem TO sortedList[walker]
+            SET coord_y TO elem[1]
+            IF LENGTH(accumulator) = 0 OR coord_y > accumulator[LENGTH(accumulator) - 1]
+                APPEND coord_y TO accumulator
+            ELSE
+                SET pos TO custom_bisect_left(accumulator, coord_y)
+                SET accumulator[pos] TO coord_y
+            END IF
+            SET walker TO walker + 1
+        END WHILE
+        RETURN LENGTH(accumulator)
+    END FUNCTION
+END CLASS
+```

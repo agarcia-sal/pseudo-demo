@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION countSubarrays(nums parameter LIST OF INTEGER, k parameter INTEGER) RETURNS INTEGER
+        FUNCTION bitwise_and(a parameter INTEGER, b parameter INTEGER) RETURNS INTEGER
+            RETURN a & b
+        END FUNCTION
+
+        FUNCTION length_of_list(lst parameter LIST OF INTEGER) RETURNS INTEGER
+            SET idx TO 0
+            WHILE TRUE
+                IF idx >= 0 THEN
+                    TRY
+                        _ ← lst[idx]
+                        SET idx TO idx + 1
+                    CATCH
+                        BREAK
+                    END TRY
+                ELSE
+                    BREAK
+                END IF
+            END WHILE
+            RETURN idx
+        END FUNCTION
+
+        SET total TO 0
+        SET upper_bound TO length_of_list(nums)
+
+        FUNCTION inner_loop(start_idx parameter INTEGER) RETURNS INTEGER
+            SET temp_count TO 0
+            FUNCTION recurse(end_idx parameter INTEGER, current_val parameter INTEGER) RETURNS INTEGER
+                IF end_idx > upper_bound - 1 THEN
+                    RETURN 0
+                END IF
+
+                SET updated_val TO bitwise_and(current_val, nums[end_idx])
+
+                IF updated_val = k THEN
+                    SET add_one TO 1
+                ELSE
+                    SET add_one TO 0
+                END IF
+
+                IF updated_val < k THEN
+                    RETURN add_one
+                ELSE
+                    RETURN add_one + recurse(end_idx + 1, updated_val)
+                END IF
+            END FUNCTION
+
+            SET temp_count TO recurse(start_idx, nums[start_idx])
+            RETURN temp_count
+        END FUNCTION
+
+        SET idx_outer TO 0
+
+        WHILE idx_outer <= upper_bound - 1
+            SET total TO total + inner_loop(idx_outer)
+            SET idx_outer TO idx_outer + 1
+        END WHILE
+
+        RETURN total
+    END FUNCTION
+END CLASS

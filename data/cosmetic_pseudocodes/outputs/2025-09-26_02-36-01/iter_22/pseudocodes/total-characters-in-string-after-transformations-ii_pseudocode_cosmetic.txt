@@ -1,0 +1,111 @@
+CLASS Solution  
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer  
+        SET modVal TO (1_000_000_000) + 1  
+
+        SET conversion TO list with 26 elements each containing a list of 26 zeros  
+        SET outerIndex TO 0  
+        WHILE outerIndex LESS THAN 26  
+            SET innerLimit TO nums element at outerIndex  
+            SET innerIndex TO 0  
+            LOOP  
+                IF innerIndex GREATER OR EQUAL TO innerLimit THEN  
+                    BREAK  
+                END IF  
+                SET targetCol TO ((outerIndex + innerIndex + 1) MOD 26)  
+                SET conversion element at outerIndex element at targetCol TO (conversion element at outerIndex element at targetCol) + 1  
+                SET innerIndex TO innerIndex + 1  
+            END LOOP  
+            SET outerIndex TO outerIndex + 1  
+        END WHILE  
+
+        FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers  
+            SET dimensions TO 26  
+            SET output TO list with dimensions elements each containing list with dimensions zeros  
+            SET outerI TO 0  
+            repeat  
+                IF outerI EQUALS dimensions THEN  
+                    BREAK  
+                END IF  
+                SET outerJ TO 0  
+                WHILE outerJ LESS THAN dimensions  
+                    SET middleK TO 0  
+                    SET sumAcc TO 0  
+                    WHILE middleK LESS THAN dimensions  
+                        SET productVal TO (A element at outerI element at middleK) * (B element at middleK element at outerJ)  
+                        SET sumAcc TO (sumAcc + productVal) MOD modVal  
+                        SET middleK TO middleK + 1  
+                    END WHILE  
+                    SET output element at outerI element at outerJ TO sumAcc  
+                    SET outerJ TO outerJ + 1  
+                END WHILE  
+                SET outerI TO outerI + 1  
+            until FALSE  
+            RETURN output  
+        END FUNCTION  
+
+        FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers  
+            SET sizeMatrix TO 26  
+            SET identity TO list  
+            SET idxA TO 0  
+            while idxA LESS THAN sizeMatrix  
+                SET row TO list  
+                SET idxB TO 0  
+                WHILE idxB LESS THAN sizeMatrix  
+                    IF idxA EQUALS idxB THEN  
+                        SET row TO row + [1]  
+                    ELSE  
+                        SET row TO row + [0]  
+                    END IF  
+                    SET idxB TO idxB + 1  
+                END WHILE  
+                SET identity TO identity + [row]  
+                SET idxA TO idxA + 1  
+            END WHILE  
+            SET baseMat TO matrix  
+            SET exponent TO power  
+            while exponent GREATER THAN 0  
+                IF (exponent MOD 2) NOT EQUAL TO 0 THEN  
+                    SET identity TO matrix_multiply(identity, baseMat)  
+                END IF  
+                SET baseMat TO matrix_multiply(baseMat, baseMat)  
+                SET exponent TO exponent DIV 2  
+            END WHILE  
+            RETURN identity  
+        END FUNCTION  
+
+        SET raisedMatrix TO matrix_power(trans_matrix, t)  
+
+        SET freqArr TO list of 26 zeros  
+        SET posIdx TO 0  
+        repeat  
+            IF posIdx EQUALS LENGTH of s THEN  
+                BREAK  
+            END IF  
+            SET characterVal TO ORDINAL of s element at posIdx  
+            SET indexPos TO characterVal - ORDINAL of 'a'  
+            SET freqArr element at indexPos TO freqArr element at indexPos + 1  
+            SET posIdx TO posIdx + 1  
+        until FALSE  
+
+        SET finalFreq TO list of 26 zeros  
+        SET outerP TO 0  
+        WHILE outerP LESS THAN 26  
+            SET innerQ TO 0  
+            WHILE innerQ LESS THAN 26  
+                SET partialValue TO (freqArr element at outerP) * (raisedMatrix element at outerP element at innerQ)  
+                SET finalFreq element at innerQ TO (finalFreq element at innerQ + partialValue) MOD modVal  
+                SET innerQ TO innerQ + 1  
+            END WHILE  
+            SET outerP TO outerP + 1  
+        END WHILE  
+
+        SET totalSum TO 0  
+        SET sumIndex TO 0  
+        WHILE sumIndex LESS THAN 26  
+            SET totalSum TO (totalSum + finalFreq element at sumIndex) MOD modVal  
+            SET sumIndex TO sumIndex + 1  
+        END WHILE  
+
+        RETURN totalSum  
+    END FUNCTION  
+END CLASS

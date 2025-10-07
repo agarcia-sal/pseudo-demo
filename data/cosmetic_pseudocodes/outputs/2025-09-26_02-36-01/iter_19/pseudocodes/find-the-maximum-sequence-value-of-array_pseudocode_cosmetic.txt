@@ -1,0 +1,63 @@
+CLASS Solution
+  FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER
+    SET alpha TO 1 SHIFTED LEFT BY 7
+    SET beta TO LENGTH OF nums
+    SET gamma TO ARRAY OF beta + 1 ELEMENTS WHERE EACH IS ARRAY OF k + 2 ELEMENTS WHERE EACH IS ARRAY OF alpha ELEMENTS INITIALIZED TO FALSE
+    SET gamma[0][0][0] TO TRUE
+
+    SET idx_i TO 0
+    WHILE idx_i < beta
+      SET idx_j TO 0
+      WHILE idx_j <= k
+        SET idx_x TO 0
+        WHILE idx_x < alpha
+          SET gamma[idx_i + 1][idx_j][idx_x] TO gamma[idx_i + 1][idx_j][idx_x] OR gamma[idx_i][idx_j][idx_x]
+          SET gamma[idx_i + 1][idx_j + 1][bitwiseOR(idx_x, nums[idx_i])] TO TRUE OR gamma[idx_i][idx_j][idx_x]
+          INCREMENT idx_x BY 1
+        END WHILE
+        INCREMENT idx_j BY 1
+      END WHILE
+      INCREMENT idx_i BY 1
+    END WHILE
+
+    SET delta TO ARRAY OF beta + 1 ELEMENTS WHERE EACH IS ARRAY OF k + 2 ELEMENTS WHERE EACH IS ARRAY OF alpha ELEMENTS INITIALIZED TO FALSE
+    SET delta[beta][0][0] TO TRUE
+
+    SET loop_i TO beta
+    LOOP WHILE loop_i > 0
+      SET loop_j TO 0
+      LOOP WHILE loop_j <= k
+        SET loop_y TO 0
+        LOOP WHILE loop_y < alpha
+          SET delta[loop_i - 1][loop_j][loop_y] TO delta[loop_i - 1][loop_j][loop_y] OR delta[loop_i][loop_j][loop_y]
+          SET delta[loop_i - 1][loop_j + 1][bitwiseOR(loop_y, nums[loop_i -1])] TO TRUE OR delta[loop_i][loop_j][loop_y]
+          INCREMENT loop_y BY 1
+        END LOOP
+        INCREMENT loop_j BY 1
+      END LOOP
+      DECREMENT loop_i BY 1
+    END LOOP
+
+    SET result TO 0
+    FOR u FROM k TO beta - k
+      SET v TO 0
+      WHILE v < alpha
+        IF gamma[u][k][v] == TRUE THEN
+          SET w TO 0
+          WHILE w < alpha
+            IF delta[u][k][w] == TRUE THEN
+              SET tempVal TO v XOR w
+              IF tempVal > result THEN
+                SET result TO tempVal
+              END IF
+            END IF
+            INCREMENT w BY 1
+          END WHILE
+        END IF
+        INCREMENT v BY 1
+      END WHILE
+    END FOR
+
+    RETURN result
+  END FUNCTION
+END CLASS

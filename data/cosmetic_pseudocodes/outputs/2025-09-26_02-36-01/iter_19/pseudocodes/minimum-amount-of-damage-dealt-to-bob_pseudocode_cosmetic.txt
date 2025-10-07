@@ -1,0 +1,56 @@
+CLASS Enemy  
+    FUNCTION __init__(self, gauge, interval)  
+       SET self.damage TO gauge  
+       SET self.timeTakenDown TO interval  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION minDamage(self, force, wounds, vitality)  
+       SET totalScore TO 0  
+       SET aggregateLoss TO 0  
+       FOR idx FROM 0 TO LENGTH OF wounds - 1  
+           SET aggregateLoss TO aggregateLoss + wounds[idx]  
+       END FOR  
+
+       SET adversaries TO []  
+       SET pointer TO 0  
+       WHILE pointer < LENGTH OF wounds  
+           SET tempDamage TO wounds[pointer]  
+           SET tempHealth TO vitality[pointer]  
+           SET cycles TO (tempHealth + force - 1) // force  
+           CREATE adversary AS Enemy(tempDamage, cycles)  
+           APPEND adversary TO adversaries  
+           SET pointer TO pointer + 1  
+       END WHILE  
+
+       FUNCTION compareRatio(a, b)  
+           RETURN (a.damage * b.timeTakenDown) > (b.damage * a.timeTakenDown)  
+       END FUNCTION  
+
+       FOR i FROM 0 TO LENGTH OF adversaries - 2  
+           FOR j FROM 0 TO LENGTH OF adversaries - i - 2  
+               IF NOT compareRatio(adversaries[j], adversaries[j+1]) THEN  
+                   SET tempVar TO adversaries[j]  
+                   SET adversaries[j] TO adversaries[j+1]  
+                   SET adversaries[j+1] TO tempVar  
+               END IF  
+           END FOR  
+       END FOR  
+
+       SET result TO 0  
+       SET indexer TO 0  
+       REPEAT  
+           IF indexer >= LENGTH OF adversaries THEN  
+               BREAK  
+           END IF  
+           SET currentFoe TO adversaries[indexer]  
+           SET increment TO aggregateLoss * currentFoe.timeTakenDown  
+           SET result TO result + increment  
+           SET aggregateLoss TO aggregateLoss - currentFoe.damage  
+           SET indexer TO indexer + 1  
+       UNTIL false  
+
+       RETURN result  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,112 @@
+CLASS Solution
+    FUNCTION mostFrequentIDs(nums PARAMETER, freq PARAMETER)
+        FUNCTION getCount(dct, ky)
+            IF ky IN dct THEN RETURN dct[ky]
+            RETURN 0
+        END FUNCTION
+
+        VAR histo := NEW DICTIONARY()
+        VAR heapContainer := LIST_CREATE()
+        VAR outputList := LIST_CREATE()
+
+        VAR idx := 0
+
+        FUNCTION pushHeap(hp, val)
+            LIST_APPEND(hp, val)
+            VAR pos := LIST_LENGTH(hp) - 1
+            WHILE pos > 0
+                VAR p := (pos - 1) DIV 2
+                IF hp[p][0] <= hp[pos][0] THEN BREAK
+                VAR tmp := hp[p]
+                hp[p] := hp[pos]
+                hp[pos] := tmp
+                pos := p
+            END WHILE
+        END FUNCTION
+
+        FUNCTION popHeap(hp)
+            VAR res := hp[0]
+            VAR last := hp[LIST_LENGTH(hp) - 1]
+            hp[0] := last
+            LIST_REMOVE_AT(hp, LIST_LENGTH(hp) - 1)
+            VAR pos := 0
+            WHILE TRUE
+                VAR l := 2 * pos + 1
+                VAR r := 2 * pos + 2
+                VAR smallest := pos
+                IF l < LIST_LENGTH(hp) AND hp[l][0] < hp[smallest][0] THEN smallest := l
+                IF r < LIST_LENGTH(hp) AND hp[r][0] < hp[smallest][0] THEN smallest := r
+                IF smallest = pos THEN BREAK
+                VAR tmp := hp[pos]
+                hp[pos] := hp[smallest]
+                hp[smallest] := tmp
+                pos := smallest
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        FUNCTION isEmpty(hp)
+            RETURN LIST_LENGTH(hp) = 0
+        END FUNCTION
+
+        FUNCTION topHeap(hp)
+            RETURN hp[0]
+        END FUNCTION
+
+        FUNCTION lenList(lst)
+            RETURN LIST_LENGTH(lst)
+        END FUNCTION
+
+        FUNCTION appendList(lst, val)
+            LIST_APPEND(lst, val)
+        END FUNCTION
+
+        FUNCTION incrementDictDict(dct, ky, v)
+            IF ky IN dct THEN dct[ky] := dct[ky] + v ELSE dct[ky] := v
+        END FUNCTION
+
+        FUNCTION elementAt(lst, index)
+            RETURN lst[index]
+        END FUNCTION
+
+        FUNCTION pairFirst(p)
+            RETURN p[0]
+        END FUNCTION
+
+        FUNCTION pairSecond(p)
+            RETURN p[1]
+        END FUNCTION
+
+        FUNCTION negative(x)
+            RETURN 0 - x
+        END FUNCTION
+
+        FUNCTION tuplesMake(a,b)
+            RETURN [a,b]
+        END FUNCTION
+
+        FUNCTION correspondingIter(listA, listB, fn, idx)
+            IF idx >= lenList(listA) THEN RETURN
+            fn(elementAt(listA, idx), elementAt(listB, idx))
+            correspondingIter(listA, listB, fn, idx + 1)
+        END FUNCTION
+
+        FUNCTION loopBody(nm, fq)
+            incrementDictDict(histo, nm, fq)
+            pushHeap(heapContainer, tuplesMake(negative(histo[nm]), nm))
+            WHILE (NOT isEmpty(heapContainer)) AND 
+                  (negative(pairFirst(topHeap(heapContainer))) <> histo[pairSecond(topHeap(heapContainer))])
+                popHeap(heapContainer)
+            END WHILE
+            IF NOT isEmpty(heapContainer)
+                appendList(outputList, negative(pairFirst(topHeap(heapContainer))))
+            ELSE
+                appendList(outputList, 0)
+            END IF
+        END FUNCTION
+
+        correspondingIter(nums, freq, loopBody, 0)
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

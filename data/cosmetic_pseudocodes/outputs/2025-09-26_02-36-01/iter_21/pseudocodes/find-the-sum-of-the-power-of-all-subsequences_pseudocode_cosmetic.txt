@@ -1,0 +1,95 @@
+CLASS Solution
+    FUNCTION sumOfPower(nums parameter, k parameter)
+    
+    SET C TO (1000000000 + 7)
+    SET L TO LENGTH OF nums
+    
+    FUNCTION helper1(a parameter, b parameter)
+    SET r TO 0
+    SET x TO a
+    SET y TO b
+    WHILE y GREATER THAN 0 DO
+        IF (y AND 1) EQUALS 1 THEN
+            SET r TO r + x
+        END IF
+        SET x TO x + x
+        SET y TO y >> 1
+    END WHILE
+    RETURN r
+    END FUNCTION
+
+    FUNCTION helper2(lst parameter, idx parameter)
+    SET r2 TO 0
+    SET ctr TO 0
+    SET pwr TO 1
+    WHILE ctr LESS THAN idx DO
+        SET pwr TO pwr + pwr
+        SET ctr TO ctr + 1
+    END WHILE
+    FOR v FROM (L - 1) DOWNTO 0 STEP -1 DO
+        IF (lst >> v) AND 1 EQUALS 1 THEN
+            SET r2 TO r2 + nums[L - 1 - v]
+            SET ctr TO ctr + 1
+        END IF
+    END FOR
+    RETURN (r2, ctr, pwr)
+    END FUNCTION
+
+    SET dp TO []
+    SET i_counter TO 0
+    WHILE i_counter LESS THAN (L + 1) DO
+        SET temp_list TO []
+        SET j_counter TO 0
+        WHILE j_counter LESS THAN (k + 1) DO
+            APPEND 0 TO temp_list
+            SET j_counter TO j_counter + 1
+        END WHILE
+        APPEND temp_list TO dp
+        SET i_counter TO i_counter + 1
+    END WHILE
+    SET dp[0][0] TO 1
+    
+    SET i_a TO 1
+    WHILE i_a LESS THAN OR EQUAL TO L DO
+        SET j_a TO 0
+        WHILE j_a LESS THAN OR EQUAL TO k DO
+            SET dp[i_a][j_a] TO dp[i_a - 1][j_a]
+            IF j_a GREATER THAN OR EQUAL TO nums[i_a - 1] THEN
+                SET dp[i_a][j_a] TO dp[i_a][j_a] + dp[i_a - 1][j_a - nums[i_a - 1]]
+            END IF
+            SET dp[i_a][j_a] TO dp[i_a][j_a] % C
+            SET j_a TO j_a + 1
+        END WHILE
+        SET i_a TO i_a + 1
+    END WHILE
+
+    SET acc TO 0
+    SET z TO 1
+    WHILE z LESS THAN (1 << L) DO
+        SET ssum TO 0
+        SET ctcount TO 0
+        SET bpos TO 0
+        WHILE bpos LESS THAN L DO
+            IF ((z >> bpos) & 1) EQUALS 1 THEN
+                SET ssum TO ssum + nums[bpos]
+                SET ctcount TO ctcount + 1
+            END IF
+            SET bpos TO bpos + 1
+        END WHILE
+        IF ssum EQUALS k THEN
+            SET pow_val TO 1
+            SET t_ind TO 0
+            WHILE t_ind LESS THAN (L - ctcount) DO
+                SET pow_val TO pow_val + pow_val
+                SET t_ind TO t_ind + 1
+            END WHILE
+            SET acc TO acc + pow_val
+            SET acc TO acc % C
+        END IF
+        SET z TO z + 1
+    END WHILE
+
+    RETURN acc
+    
+    END FUNCTION
+END CLASS

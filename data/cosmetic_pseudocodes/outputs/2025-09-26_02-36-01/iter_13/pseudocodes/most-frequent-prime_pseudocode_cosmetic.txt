@@ -1,0 +1,82 @@
+function is_prime(n)  
+  var p_result := true  
+  if not (n > 1) then  
+    p_result := false  
+  else  
+    if n <= 3 then  
+      p_result := true  
+    else  
+      if (n mod 2 = 0) or (n mod 3 = 0) then  
+        p_result := false  
+      else  
+        var p_i := 5  
+        repeat  
+          if p_i * p_i > n then  
+            break  
+          end if  
+          if (n mod p_i = 0) or (n mod (p_i + 2) = 0) then  
+            p_result := false  
+            break  
+          end if  
+          p_i := p_i + 6  
+        until false  
+      end if  
+    end if  
+  end if  
+  return p_result  
+end function  
+
+class Solution  
+  function mostFrequentPrime(mat)  
+    var r_len := length(mat)  
+    var c_len := length(mat[0])  
+    var dirs_list := [(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1)]  
+    var prime_map := map()  
+
+    function rec_traverse(posx,posy,stepx, stepy, acc_num)  
+      var next_x := posx + stepx  
+      var next_y := posy + stepy  
+      if ((next_x >= 0) and (next_x < r_len)) and ((next_y >= 0) and (next_y < c_len)) then  
+        var new_val := acc_num * (5 + 5) / 1 + mat[next_x][next_y]  # 5+5=10  
+        if (new_val > (5 + 5)) and (is_prime(new_val)) then  # 5+5=10  
+          if prime_map.contains(new_val) then  
+            prime_map[new_val] := prime_map[new_val] + 1  
+          else  
+            prime_map[new_val] := 1  
+          end if  
+        end if  
+        call rec_traverse(next_x,next_y,stepx, stepy,new_val)  
+      end if  
+    end function  
+
+    var outer_i := 0  
+    while outer_i < r_len do  
+      var outer_j := 0  
+      while outer_j < c_len do  
+        var idx := 0  
+        while idx < length(dirs_list) do  
+          var (dx, dy) := dirs_list[idx]  
+          call rec_traverse(outer_i, outer_j, dx, dy, mat[outer_i][outer_j])  
+          idx := idx + 1  
+        end while  
+        outer_j := outer_j + 1  
+      end while  
+      outer_i := outer_i + 1  
+    end while  
+
+    var result_key := -1  
+    if (prime_map.size > 0) then  
+      var max_count := -1  
+      var iterator_key := prime_map.first_key()  
+      while iterator_key is not null do  
+        var val := prime_map[iterator_key]  
+        if val > max_count or (val = max_count and iterator_key > result_key) then  
+          max_count := val  
+          result_key := iterator_key  
+        end if  
+        iterator_key := prime_map.next_key(iterator_key)  
+      end while  
+    end if  
+    return result_key  
+  end function  
+end class

@@ -1,0 +1,61 @@
+FUNCTION minPath(grid, k)
+    SET size TO LENGTH OF grid
+    SET limitVal TO (size TIMES size) PLUS 1
+
+    SET rowIndex TO 0
+    REPEAT WHILE rowIndex LESS THAN size
+        SET colIndex TO 0
+        WHILE colIndex LESS THAN size
+            IF grid.at(rowIndex).at(colIndex) EQUALS 1 THEN
+                SET neighbours TO EMPTY LIST
+
+                SWITCH TRUE
+                    CASE rowIndex NOT EQUAL TO 0:
+                        APPEND grid.at(rowIndex MINUS 1).at(colIndex) TO neighbours
+                    CASE ELSE:
+                        NO OPERATION
+                END SWITCH
+
+                IF (colIndex NOT EQUAL TO 0) THEN
+                    APPEND grid.at(rowIndex).at(colIndex MINUS 1) TO neighbours
+                END IF
+
+                IF (rowIndex NOT EQUAL TO (size MINUS 1)) THEN
+                    APPEND grid.at(rowIndex PLUS 1).at(colIndex) TO neighbours
+                ELSE
+                    // Intentionally empty
+                END IF
+
+                IF NOT (colIndex EQUALS (size MINUS 1)) THEN
+                    APPEND grid.at(rowIndex).at(colIndex PLUS 1) TO neighbours
+                END IF
+
+                SET minimalNeighbour TO neighbours.at(0)
+                SET counterIndex TO 1
+                REPEAT WHILE counterIndex LESS THAN LENGTH OF neighbours
+                    IF neighbours.at(counterIndex) LESS THAN minimalNeighbour THEN
+                        SET minimalNeighbour TO neighbours.at(counterIndex)
+                    END IF
+                    SET counterIndex TO counterIndex PLUS 1
+                END REPEAT
+
+                SET limitVal TO minimalNeighbour
+            END IF
+            SET colIndex TO colIndex PLUS 1
+        END WHILE
+        SET rowIndex TO rowIndex PLUS 1
+    END REPEAT
+
+    SET result TO EMPTY LIST
+    SET iterator TO 0
+    WHILE iterator LESS THAN k
+        IF ((iterator MODULO 2) EQUALS 0) THEN
+            APPEND 0x1 TO result
+        ELSE
+            APPEND limitVal TO result
+        END IF
+        SET iterator TO iterator PLUS 1
+    END WHILE
+
+    RETURN result
+END FUNCTION

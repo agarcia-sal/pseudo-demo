@@ -1,0 +1,18 @@
+```
+FUNCTION prod_signs(bag_of_values)
+    IF NOT (bag_of_values HAS ELEMENTS)
+        RETURN None
+    END IF
+    SET indicator_zero TO 0 IN bag_of_values
+    SELECT
+        WHEN indicator_zero = True
+            ASSIGN factor_sign <- 0
+        ELSE
+            ASSIGN negative_count <- LENGTH (SELECT v FROM bag_of_values WHERE v < 0)
+            ASSIGN factor_sign <- 1 - 2 * (negative_count MOD 2)
+    END SELECT
+    DEFINE MEASURE as FUNCTION(x) RETURN (x IF x >= 0 ELSE -x)
+    ASSIGN total_sum <- REDUCE ((acc, cur) => acc + MEASURE(cur), bag_of_values, 0)
+    RETURN factor_sign * total_sum
+END FUNCTION
+```

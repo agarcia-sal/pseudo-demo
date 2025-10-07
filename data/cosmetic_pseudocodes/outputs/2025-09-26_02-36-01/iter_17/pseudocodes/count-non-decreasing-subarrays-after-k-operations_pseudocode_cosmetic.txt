@@ -1,0 +1,43 @@
+CLASS Solution
+    FUNCTION countNonDecreasingSubarrays(nums k)
+        SET length_nums TO LENGTH OF nums
+        
+        FUNCTION canMakeNonDecreasing(start length)
+            SET amount TO 0
+            SET highest TO nums[start]
+            SET idx TO 1
+            WHILE idx < length
+                IF nums[start + idx] < highest
+                    SET amount TO amount + (highest - nums[start + idx])
+                END IF
+                SET highest TO MAXIMUM OF highest, nums[start + idx]
+                IF amount > k
+                    RETURN False
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+        
+        SET all_subarrays TO length_nums * (length_nums + 1) / 2
+        SET bad_subarrays TO 0
+        SET position TO 0
+        
+        REPEAT UNTIL position = length_nums
+            SET low TO 1
+            SET high TO length_nums - position
+            REPEAT UNTIL low > high
+                SET middle TO (low + high) // 2
+                IF canMakeNonDecreasing(position middle) = True
+                    SET low TO middle + 1
+                ELSE
+                    SET high TO middle - 1
+                END IF
+            END REPEAT
+            SET bad_subarrays TO bad_subarrays + (length_nums - position - high)
+            SET position TO position + 1
+        END REPEAT
+        
+        RETURN all_subarrays - bad_subarrays
+    END FUNCTION
+END CLASS

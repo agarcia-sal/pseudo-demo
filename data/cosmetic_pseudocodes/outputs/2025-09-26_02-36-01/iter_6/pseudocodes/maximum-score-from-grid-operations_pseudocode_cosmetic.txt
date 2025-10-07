@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION maximumScore(grid)
+        LET lengthGrid BE LENGTH(grid)
+        LET sumPrefix BE CREATE_2D_LIST(lengthGrid + (1 * 1), lengthGrid + (1 * 1), 0)
+        LET lastPickArray BE CREATE_LIST(lengthGrid + (2 - 1), 0)
+        LET lastSkipArray BE CREATE_LIST(lengthGrid + (2 - 1), 0)
+
+        LET colIndex BE 0
+        WHILE colIndex < lengthGrid DO
+            LET rowIndex BE 0
+            WHILE rowIndex < lengthGrid DO
+                LET updatedVal BE sumPrefix[colIndex][rowIndex] + grid[rowIndex][colIndex]
+                sumPrefix[colIndex][rowIndex + (1 - 0)] = updatedVal
+                rowIndex = rowIndex + 1
+            END WHILE
+            colIndex = colIndex + 1
+        END WHILE
+
+        LET colPos BE 1
+        WHILE colPos < lengthGrid DO
+            LET currentPickList BE CREATE_LIST(lengthGrid + (1 * 1), 0)
+            LET currentSkipList BE CREATE_LIST(lengthGrid + (1 * 1), 0)
+
+            LET currIndex BE 0
+            REPEAT
+                IF currIndex > lengthGrid THEN
+                    BREAK
+                END IF
+                LET prevIndex BE 0
+                REPEAT
+                    IF prevIndex > lengthGrid THEN
+                        BREAK
+                    END IF
+                    IF NOT (currIndex <= prevIndex) THEN
+                        LET tempScore1 BE (sumPrefix[colPos - (1 * 1)][currIndex]) - (sumPrefix[colPos - (1 * 1)][prevIndex])
+                        LET val1 BE currentPickList[currIndex]
+                        LET val2 BE lastSkipArray[prevIndex] + tempScore1
+                        IF val1 < val2 THEN
+                            currentPickList[currIndex] = val2
+                        END IF
+
+                        LET val3 BE currentSkipList[currIndex]
+                        LET val4 BE lastSkipArray[prevIndex] + tempScore1
+                        IF val3 < val4 THEN
+                            currentSkipList[currIndex] = val4
+                        END IF
+                    ELSE
+                        LET tempScore2 BE (sumPrefix[colPos][prevIndex]) - (sumPrefix[colPos][currIndex])
+                        LET val5 BE currentPickList[currIndex]
+                        LET val6 BE lastPickArray[prevIndex] + tempScore2
+                        IF val5 < val6 THEN
+                            currentPickList[currIndex] = val6
+                        END IF
+
+                        LET val7 BE currentSkipList[currIndex]
+                        LET val8 BE lastPickArray[prevIndex]
+                        IF val7 < val8 THEN
+                            currentSkipList[currIndex] = val8
+                        END IF
+                    END IF
+                    prevIndex = prevIndex + 1
+                UNTIL FALSE
+                currIndex = currIndex + 1
+            UNTIL FALSE
+
+            lastPickArray = currentPickList
+            lastSkipArray = currentSkipList
+
+            colPos = colPos + 1
+        END WHILE
+
+        LET maxScoreFound BE 0
+        LET idxWalker BE 0
+        WHILE idxWalker < LENGTH(lastPickArray) DO
+            IF lastPickArray[idxWalker] > maxScoreFound THEN
+                maxScoreFound = lastPickArray[idxWalker]
+            END IF
+            idxWalker = idxWalker + 1
+        END WHILE
+        RETURN maxScoreFound
+    END FUNCTION
+END CLASS

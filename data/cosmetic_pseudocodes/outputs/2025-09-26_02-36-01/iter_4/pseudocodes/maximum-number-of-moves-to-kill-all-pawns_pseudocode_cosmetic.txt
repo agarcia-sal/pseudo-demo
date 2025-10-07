@@ -1,0 +1,92 @@
+CLASS Solution  
+    FUNCTION maxMoves(kx, ky, positions)  
+        DECLARE knight_steps AS list = [(1, 2), (2, 1), (-1, 2), (-2, 1), (1, -2), (2, -1), (-1, -2), (-2, -1)]  
+        DECLARE pawns_set AS empty set  
+        
+        INDEX pos_index = 0  
+        WHILE pos_index LESS THAN length of positions  
+            DECLARE current_pos AS tuple = (positions[pos_index][0], positions[pos_index][1])  
+            INSERT current_pos INTO pawns_set  
+            INCREMENT pos_index BY one  
+        END WHILE  
+        
+        DECLARE total_pawns AS size of pawns_set  
+        
+        FUNCTION dp(kx, ky, mask, is_alice)  
+            IF mask EQUAL TO 0 THEN  
+                RETURN 0  
+            END IF  
+            
+            IF is_alice THEN  
+                DECLARE best_moves AS 0  
+            ELSE  
+                DECLARE best_moves AS positive infinity  
+            END IF  
+            
+            DECLARE idx AS 0  
+            WHILE idx LESS THAN total_pawns  
+                DECLARE mask_bit AS 1 LEFT SHIFT idx  
+                IF (mask BITWISE_AND mask_bit) NOT EQUAL TO 0 THEN  
+                    DECLARE pawn_x AS positions[idx][0]  
+                    DECLARE pawn_y AS positions[idx][1]  
+                    
+                    DECLARE nodes_queue AS list containing tuple (kx, ky, 0)  
+                    DECLARE visited_positions AS empty set  
+                    INSERT (kx, ky) INTO visited_positions  
+                    DECLARE reached AS False  
+                    
+                    WHILE length of nodes_queue GREATER THAN 0  
+                        DECLARE current_node AS nodes_queue AT index 0  
+                        REMOVE first element FROM nodes_queue  
+                        DECLARE cx AS current_node[0]  
+                        DECLARE cy AS current_node[1]  
+                        DECLARE steps_count AS current_node[2]  
+                        
+                        IF (cx EQUAL TO pawn_x) AND (cy EQUAL TO pawn_y) THEN  
+                            SET reached TO True  
+                            LEAVE WHILE  
+                        END IF  
+                        
+                        DECLARE move_index AS 0  
+                        WHILE move_index LESS THAN length of knight_steps  
+                            DECLARE dx AS knight_steps[move_index][0]  
+                            DECLARE dy AS knight_steps[move_index][1]  
+                            DECLARE nx AS cx PLUS dx  
+                            DECLARE ny AS cy PLUS dy  
+                            
+                            IF (nx GREATER_THAN_OR_EQUAL 0) AND (nx LESS_THAN 50) AND (ny GREATER_THAN_OR_EQUAL 0) AND (ny LESS_THAN 50) THEN  
+                                IF (nx, ny) NOT IN visited_positions THEN  
+                                    INSERT (nx, ny) INTO visited_positions  
+                                    APPEND (nx, ny, steps_count PLUS 1) TO nodes_queue  
+                                END IF  
+                            END IF  
+                            INCREMENT move_index BY one  
+                        END WHILE  
+                    END WHILE  
+                    
+                    IF reached THEN  
+                        DECLARE updated_mask AS mask BITWISE_XOR mask_bit  
+                        DECLARE next_player AS NOT is_alice  
+                        DECLARE moves_from_here AS steps_count PLUS dp(pawn_x, pawn_y, updated_mask, next_player)  
+                        
+                        IF is_alice THEN  
+                            IF best_moves LESS_THAN moves_from_here THEN  
+                                ASSIGN best_moves TO moves_from_here  
+                            END IF  
+                        ELSE  
+                            IF best_moves GREATER_THAN moves_from_here THEN  
+                                ASSIGN best_moves TO moves_from_here  
+                            END IF  
+                        END IF  
+                    END IF  
+                END IF  
+                INCREMENT idx BY one  
+            END WHILE  
+            
+            RETURN best_moves  
+        END FUNCTION  
+        
+        DECLARE full_mask AS (1 LEFT_SHIFT total_pawns) MINUS 1  
+        RETURN dp(kx, ky, full_mask, True)  
+    END FUNCTION  
+END CLASS

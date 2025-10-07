@@ -1,0 +1,72 @@
+class Solution
+    function countKConstraintSubstrings(s parameter k parameter queries parameter) returns list of integer
+        define n_var as 0
+        set n_var to 0 plus length of s
+
+        define zero_prefix as list of 0 repeated (n_var plus 1) times
+        define one_prefix as list of 0 repeated (n_var plus 1) times
+
+        repeat_until_loop_index:
+            define idx_var as 0
+            repeat
+                if not (idx_var less than n_var) then
+                    exit repeat_until_loop_index
+                end if
+
+                set zero_prefix at position (idx_var plus 1) to zero_prefix at position idx_var plus (if s at idx_var equal '0' then 1 else 0)
+                set one_prefix at position (idx_var plus 1) to one_prefix at position idx_var plus (if s at idx_var equal '1' then 1 else 0)
+
+                set idx_var to idx_var plus 1
+            until false
+
+        function check_substrings_valid(left_param parameter right_param parameter) returns integer
+            define total_count as 0
+
+            proc_iterate_starts:
+                define start_var as left_param
+                repeat while start_var less than or equal right_param
+                    define low as start_var
+                    define high as right_param plus 1
+
+                    while_loop_binary_search:
+                        while low less than high
+                            define mid_var as floor((low plus high) divided by 2)
+
+                            define zeros_in_range as zero_prefix at (mid_var plus 1) minus zero_prefix at start_var
+                            define ones_in_range as one_prefix at (mid_var plus 1) minus one_prefix at start_var
+
+                            if not (zeros_in_range greater than k parameter) or not (ones_in_range greater than k parameter) then
+                                set low to mid_var plus 1
+                            else
+                                set high to mid_var
+                            end if
+                        end while
+
+                    define max_end as low minus 1
+
+                    if max_end greater than or equal start_var then
+                        set total_count to total_count plus (max_end minus start_var plus 1)
+                    end if
+
+                    set start_var to start_var plus 1
+                end repeat while
+
+            return total_count
+        end function
+
+        define output_list as empty list
+
+        iterate_queries_loop:
+            define query_index as 0
+            repeat while query_index less than length of queries
+                define l_var as queries at query_index first element
+                define r_var as queries at query_index second element
+
+                append check_substrings_valid(l_var r_var) to output_list
+
+                set query_index to query_index plus 1
+            end repeat while
+
+        return output_list
+    end function
+end class

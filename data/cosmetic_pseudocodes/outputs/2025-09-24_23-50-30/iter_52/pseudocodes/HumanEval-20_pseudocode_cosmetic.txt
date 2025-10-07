@@ -1,0 +1,46 @@
+```
+FUNCTION find_closest_elements(array_of_values)
+    LET selected_pair BE NULL
+    LET smallest_gap BE NULL
+
+    PROCEDURE traverse_outer(pos_outer)
+        IF pos_outer EQUALS LENGTH OF array_of_values THEN
+            RETURN
+        END IF
+        CALL traverse_inner(pos_outer, 0)
+        CALL traverse_outer(pos_outer + 1)
+    END PROCEDURE
+
+    PROCEDURE traverse_inner(pos_outer, pos_inner)
+        IF pos_inner EQUALS LENGTH OF array_of_values THEN
+            RETURN
+        ELSE
+            IF NOT (pos_outer = pos_inner) THEN
+                LET diff BE (array_of_values[pos_outer] - array_of_values[pos_inner])
+                LET abs_diff BE diff IF diff >= 0 ELSE -diff
+
+                IF smallest_gap IS NULL THEN
+                    SET smallest_gap TO abs_diff
+                    SET selected_pair TO (array_of_values[pos_outer], array_of_values[pos_inner])
+                    IF selected_pair[0] > selected_pair[1] THEN
+                        SET selected_pair TO (selected_pair[1], selected_pair[0])
+                    END IF
+                ELSE
+                    IF abs_diff < smallest_gap THEN
+                        SET smallest_gap TO abs_diff
+                        SET selected_pair TO (array_of_values[pos_outer], array_of_values[pos_inner])
+                        IF selected_pair[0] > selected_pair[1] THEN
+                            SET selected_pair TO (selected_pair[1], selected_pair[0])
+                        END IF
+                    END IF
+                END IF
+            END IF
+            CALL traverse_inner(pos_outer, pos_inner + 1)
+        END IF
+    END PROCEDURE
+
+    CALL traverse_outer(0)
+
+    RETURN selected_pair
+END FUNCTION
+```

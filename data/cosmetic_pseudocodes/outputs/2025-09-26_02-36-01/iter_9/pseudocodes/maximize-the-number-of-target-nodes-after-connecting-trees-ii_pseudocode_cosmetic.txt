@@ -1,0 +1,130 @@
+CLASS Solution
+    FUNCTION maxTargetNodes(edges1, edges2)
+        SET graphA TO a new default dictionary with list as default value
+        SET graphB TO a new default dictionary with list as default value
+
+        SET indexX TO 0
+        WHILE indexX LESS THAN LENGTH of edges1
+            SET nodeP TO edges1[indexX][0]
+            SET nodeQ TO edges1[indexX][1]
+
+            APPEND nodeQ TO graphA[nodeP]
+            APPEND nodeP TO graphA[nodeQ]
+
+            SET indexX TO indexX PLUS 1
+        END WHILE
+
+        SET indexY TO 0
+        WHILE indexY LESS THAN LENGTH of edges2
+            SET nodeR TO edges2[indexY][0]
+            SET nodeS TO edges2[indexY][1]
+
+            APPEND nodeS TO graphB[nodeR]
+            APPEND nodeR TO graphB[nodeS]
+
+            SET indexY TO indexY PLUS 1
+        END WHILE
+
+        SET szA TO LENGTH of KEYS of graphA
+        SET szB TO LENGTH of KEYS of graphB
+
+        FUNCTION traverseBreadthFirst(tree, origin)
+            SET countEven TO 0
+            SET countOdd TO 0
+            SET que TO an empty list
+            APPEND (origin, 0) TO que
+            SET seenNodes TO a new set containing origin
+
+            FUNCTION popFront(queueRef)
+                SET firstElement TO queueRef[0]
+                REMOVE queueRef[0]
+                RETURN firstElement
+            END FUNCTION
+
+            REPEAT
+                IF LENGTH of que EQUALS 0 THEN
+                    BREAK
+                END IF
+
+                SET currentNodeDist TO popFront(que)
+                SET currentNode TO currentNodeDist[0]
+                SET depthVal TO currentNodeDist[1]
+
+                IF (depthVal MOD 2) EQUALS 0 THEN
+                    SET countEven TO countEven PLUS 1
+                ELSE
+                    SET countOdd TO countOdd PLUS 1
+                END IF
+
+                SET posK TO 0
+                WHILE posK LESS THAN LENGTH of tree[currentNode]
+                    SET neigh TO tree[currentNode][posK]
+                    IF neigh NOT IN seenNodes THEN
+                        ADD neigh TO seenNodes
+                        APPEND (neigh, depthVal PLUS 1) TO que
+                    END IF
+                    SET posK TO posK PLUS 1
+                END WHILE
+
+            UNTIL FALSE
+            RETURN countEven, countOdd
+        END FUNCTION
+
+        SET resultsA TO an empty list
+        SET idxA TO 0
+        REPEAT
+            IF idxA EQUALS szA THEN
+                BREAK
+            END IF
+            SET evenCnt1, oddCnt1 TO traverseBreadthFirst(graphA, idxA)
+            APPEND (evenCnt1, oddCnt1) TO resultsA
+            SET idxA TO idxA PLUS 1
+        UNTIL FALSE
+
+        SET resultsB TO a new empty list
+        SET idxB TO 0
+        REPEAT
+            IF idxB EQUALS szB THEN
+                BREAK
+            END IF
+            SET evenPart2, oddPart2 TO traverseBreadthFirst(graphB, idxB)
+            APPEND (evenPart2, oddPart2) TO resultsB
+            SET idxB TO idxB PLUS 1
+        UNTIL FALSE
+
+        SET finalResult TO an empty list
+        SET outerIdx TO 0
+        REPEAT
+            IF outerIdx EQUALS szA THEN
+                BREAK
+            END IF
+            SET ev1, od1 TO resultsA[outerIdx]
+            SET largestCnt TO 0
+
+            SET innerIdx TO 0
+            REPEAT
+                IF innerIdx EQUALS szB THEN
+                    BREAK
+                END IF
+                SET ev2, od2 TO resultsB[innerIdx]
+
+                IF (outerIdx EQUALS innerIdx) OR ((outerIdx MOD 2) EQUALS (innerIdx MOD 2)) THEN
+                    SET candidateVal TO ev2
+                ELSE
+                    SET candidateVal TO od2
+                END IF
+
+                IF candidateVal GREATER THAN largestCnt THEN
+                    SET largestCnt TO candidateVal
+                END IF
+
+                SET innerIdx TO innerIdx PLUS 1
+            UNTIL FALSE
+
+            APPEND (ev1 PLUS largestCnt) TO finalResult
+            SET outerIdx TO outerIdx PLUS 1
+        UNTIL FALSE
+
+        RETURN finalResult
+    END FUNCTION
+END CLASS

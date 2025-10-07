@@ -1,0 +1,46 @@
+```
+FUNCTION words_string(text_data)
+	LOOP PROCESS 0 WITH acc_chars = []
+		IF 0 = LENGTH(text_data) THEN
+			RETURN acc_chars
+		ELSE
+			LET curr_char = text_data[0]
+			LET rest_chars = SUBSTRING(text_data, 1, LENGTH(text_data))
+			LET to_add = IF curr_char = "," THEN " " ELSE curr_char
+			CALL PROCESS(rest_chars, acc_chars + [to_add])
+		END IF
+	END LOOP
+
+	LET transformed_chars = PROCESS(text_data)
+	LET merged_str = ""
+	LOOP JOIN 0
+		IF 0 = LENGTH(transformed_chars) THEN
+			RETURN merged_str
+		ELSE
+			LET merged_str = merged_str + transformed_chars[0]
+			LET transformed_chars = SUBSTRING(transformed_chars, 1, LENGTH(transformed_chars))
+			CALL JOIN(transformed_chars)
+		END IF
+	END LOOP
+
+	LET split_words = []
+	LET idx = 0
+	LET current_word = ""
+	WHILE idx < LENGTH(merged_str)
+		IF merged_str[idx] = " " THEN
+			IF LENGTH(current_word) > 0 THEN
+				split_words = split_words + [current_word]
+				current_word = ""
+			END IF
+		ELSE
+			current_word = current_word + merged_str[idx]
+		END IF
+		idx = idx + 1
+	END WHILE
+	IF LENGTH(current_word) > 0 THEN
+		split_words = split_words + [current_word]
+	END IF
+
+	RETURN split_words
+END FUNCTION
+```

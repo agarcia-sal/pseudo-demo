@@ -1,0 +1,38 @@
+CLASS Solution
+    FUNCTION maximumStrength(nums k)
+        LET total_elements BE LENGTH(nums)
+        LET dp_array BE ARRAY OF SIZE (total_elements + 1) x (k + 1) FILLED WITH NEGATIVE_INFINITY
+        ASSIGN dp_array[0][0] AS 0
+
+        SET outer_index TO 1
+        WHILE outer_index <= total_elements DO
+            SET inner_index TO 1
+            WHILE inner_index <= k DO
+                LET sum_accumulator BE 0
+                LET backward_index BE outer_index
+                WHILE backward_index >= 1 DO
+                    sum_accumulator = sum_accumulator + nums[backward_index - 1]
+
+                    IF (inner_index % 2) != 0 THEN
+                        LET multiplier_sign BE k - inner_index 
+                    ELSE
+                        LET multiplier_sign BE -(k - inner_index)
+                    END IF
+
+                    LET candidate_value BE dp_array[backward_index - 1][inner_index - 1] + multiplier_sign * sum_accumulator
+                    dp_array[outer_index][inner_index] = MAX(dp_array[outer_index][inner_index], candidate_value)
+
+                    backward_index = backward_index - 1
+                END WHILE
+
+                LET alternate_value BE dp_array[outer_index - 1][inner_index]
+                dp_array[outer_index][inner_index] = MAX(dp_array[outer_index][inner_index], alternate_value)
+
+                inner_index = inner_index + 1
+            END WHILE
+            outer_index = outer_index + 1
+        END WHILE
+
+        RETURN dp_array[total_elements][k]
+    END FUNCTION
+END CLASS

@@ -1,0 +1,64 @@
+```
+FUNCTION valid_date(date_string)
+    SET trimmed_date TO ""
+    FOR char IN date_string
+        IF char IS NOT WHITESPACE THEN
+            APPEND char TO trimmed_date
+        END IF
+    END FOR
+
+    SET parts TO DICTIONARY()
+    SET parts["m"] TO ""
+    SET parts["d"] TO ""
+    SET parts["y"] TO ""
+    SET current_key TO "m"
+    FOR char IN trimmed_date
+        IF char EQUALS "-" THEN
+            IF current_key IS "m" THEN
+                SET current_key TO "d"
+            ELSE IF current_key IS "d" THEN
+                SET current_key TO "y"
+            ELSE
+                RETURN False
+            END IF
+        ELSE
+            SET parts[current_key] TO parts[current_key] + char
+        END IF
+    END FOR
+
+    SET nums TO DICTIONARY()
+    FOR key IN ["m","d","y"]
+        SET str_val TO parts[key]
+        SET num_val TO 0
+        FOR c IN str_val
+            IF c < '0' OR c > '9' THEN
+                RETURN False
+            END IF
+            SET num_val TO num_val * 10 + (c - '0')
+        END FOR
+        SET nums[key] TO num_val
+    END FOR
+
+    IF nums["m"] * (nums["m"]-13) >= 0 THEN
+        RETURN False
+    END IF
+
+    IF nums["m"] IN [1,3,5,7,8,10,12] THEN
+        IF nums["d"] * (nums["d"]-32) >= 0 THEN
+            RETURN False
+        END IF
+    ELSE IF nums["m"] IN [4,6,9,11] THEN
+        IF nums["d"] * (nums["d"]-31) >= 0 THEN
+            RETURN False
+        END IF
+    ELSE IF nums["m"] IS 2 THEN
+        IF nums["d"] * (nums["d"]-30) >= 0 THEN
+            RETURN False
+        END IF
+    ELSE
+        RETURN False
+    END IF
+
+    RETURN True
+END FUNCTION
+```

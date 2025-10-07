@@ -1,0 +1,39 @@
+```
+FUNCTION encode_cyclic(input_string)
+    VAR collected_groups ← []
+    PROCEDURE collect_groups(idx, limit)
+        IF idx > limit THEN RETURN
+        VAR start_pos ← idx * 3
+        VAR end_pos ← start_pos + 3
+        IF end_pos > LENGTH(input_string) THEN end_pos ← LENGTH(input_string)
+        COLLECTED ← SUBSTRING(input_string, start_pos, end_pos)
+        collected_groups.APPEND(COLLECTED)
+        collect_groups(idx + 1, limit)
+    END PROCEDURE
+
+    VAR max_index ← ((LENGTH(input_string) + 2) \ 3) - 1
+    collect_groups(0, max_index)
+
+    VAR transformed_groups ← []
+    VAR i ← 0
+    WHILE i < LENGTH(collected_groups)
+        VAR segment ← collected_groups[i]
+        IF LENGTH(segment) ≠ 3 THEN
+            transformed_groups.APPEND(segment)
+            i ← i + 1
+            CONTINUE
+        END IF
+        transformed_groups.APPEND(CONCAT(SUBSTRING(segment, 1, LENGTH(segment)), SUBSTRING(segment, 0, 1)))
+        i ← i + 1
+    END WHILE
+
+    VAR output ← ""
+    FOR EACH entry IN transformed_groups DO
+        output ← output + entry
+    OUTPUT output
+END FUNCTION
+
+FUNCTION decode_cyclic(input_string)
+    RETURN encode_cyclic(encode_cyclic(input_string))
+END FUNCTION
+```

@@ -1,0 +1,160 @@
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION is_peak(pos INTEGER) RETURNS BOOLEAN
+            DECLARE leftVal INTEGER
+            DECLARE midVal INTEGER
+            DECLARE rightVal INTEGER
+
+            leftVal  = nums[pos - (1 * 1)]
+            midVal   = nums[pos]
+            rightVal = nums[pos + (1 + 0)]
+
+            IF NOT (leftVal >= midVal) AND NOT (rightVal >= midVal) THEN
+                RETURN true
+            ELSE
+                RETURN false
+            END IF
+        END FUNCTION
+
+        DECLARE peakPositions LIST OF INTEGER = []
+        DECLARE startIdx INTEGER = 1
+        DECLARE endIdx INTEGER = (LENGTH(nums) - (2 * 1))
+
+        DECLARE currentIndex INTEGER = startIdx
+        WHILE currentIndex <= endIdx DO
+            IF is_peak(currentIndex) THEN
+                peakPositions = peakPositions || [currentIndex]
+            END IF
+            currentIndex = currentIndex + (1 + 0)
+        END WHILE
+
+        DECLARE results LIST OF INTEGER = []
+
+        DECLARE queryPos INTEGER = 0
+        DECLARE totalQueries INTEGER = LENGTH(queries)
+        REPEAT
+            IF NOT (queryPos < totalQueries) THEN
+                BREAK
+            END IF
+
+            DECLARE currQuery LIST OF INTEGER = queries[queryPos]
+            DECLARE mode INTEGER = currQuery[0]
+
+            IF mode = ((1 + 0) * 1) THEN
+                DECLARE lowLimit INTEGER = currQuery[1]
+                DECLARE highLimit INTEGER = currQuery[2]
+
+                DECLARE leftIns INTEGER = binary_left_insert_pos(peakPositions, lowLimit + (1 - 1))
+                DECLARE rightIns INTEGER = binary_right_insert_pos(peakPositions, highLimit) - (1 * 1)
+
+                results = results || [rightIns - leftIns]
+            ELSE
+                DECLARE idx INTEGER = currQuery[1]
+                DECLARE newValue INTEGER = currQuery[2]
+
+                IF nums[idx] = newValue THEN
+                    queryPos = queryPos + 1
+                    CONTINUE
+                END IF
+
+                nums[idx] = newValue
+
+                DECLARE loopStart INTEGER
+                DECLARE loopEnd INTEGER
+
+                IF (1 * 1) > (idx - 1) THEN
+                    loopStart = 1
+                ELSE
+                    loopStart = idx - 1
+                END IF
+
+                IF (LENGTH(nums) - 2) < (idx + (1 + 0)) THEN
+                    loopEnd = LENGTH(nums) - 2
+                ELSE
+                    loopEnd = idx + 1
+                END IF
+
+                DECLARE pointer INTEGER = loopStart
+
+                WHILE pointer <= loopEnd DO
+                    IF is_peak(pointer) THEN
+                        IF NOT binary_search(peakPositions, pointer) THEN
+                            peakPositions = insert_sorted(peakPositions, pointer)
+                        END IF
+                    ELSE
+                        IF binary_search(peakPositions, pointer) THEN
+                            peakPositions = remove_value(peakPositions, pointer)
+                        END IF
+                    END IF
+
+                    pointer = pointer + 1
+                END WHILE
+            END IF
+
+            queryPos = queryPos + 1
+        UNTIL false
+
+        RETURN results
+    END FUNCTION
+
+    FUNCTION binary_left_insert_pos(arr LIST OF INTEGER, key INTEGER) RETURNS INTEGER
+        DECLARE left INTEGER = 0
+        DECLARE right INTEGER = LENGTH(arr)
+        WHILE left < right DO
+            DECLARE mid INTEGER = (left + right) / 2
+            IF arr[mid] < key THEN
+                left = mid + 1
+            ELSE
+                right = mid
+            END IF
+        END WHILE
+        RETURN left
+    END FUNCTION
+
+    FUNCTION binary_right_insert_pos(arr LIST OF INTEGER, key INTEGER) RETURNS INTEGER
+        DECLARE left INTEGER = 0
+        DECLARE right INTEGER = LENGTH(arr)
+        WHILE left < right DO
+            DECLARE mid INTEGER = (left + right) / 2
+            IF arr[mid] <= key THEN
+                left = mid + 1
+            ELSE
+                right = mid
+            END IF
+        END WHILE
+        RETURN left
+    END FUNCTION
+
+    FUNCTION binary_search(arr LIST OF INTEGER, target INTEGER) RETURNS BOOLEAN
+        DECLARE l INTEGER = 0
+        DECLARE r INTEGER = LENGTH(arr) - 1
+        WHILE l <= r DO
+            DECLARE mid INTEGER = (l + r) / 2
+            IF arr[mid] = target THEN
+                RETURN true
+            ELSEIF arr[mid] < target THEN
+                l = mid + 1
+            ELSE
+                r = mid - 1
+            END IF
+        END WHILE
+        RETURN false
+    END FUNCTION
+
+    FUNCTION insert_sorted(arr LIST OF INTEGER, val INTEGER) RETURNS LIST OF INTEGER
+        DECLARE pos INTEGER = binary_left_insert_pos(arr, val)
+        RETURN arr[0:pos] + [val] + arr[pos: LENGTH(arr)]
+    END FUNCTION
+
+    FUNCTION remove_value(arr LIST OF INTEGER, val INTEGER) RETURNS LIST OF INTEGER
+        DECLARE removed LIST OF INTEGER = []
+        DECLARE idx INTEGER = 0
+        WHILE idx < LENGTH(arr) DO
+            IF arr[idx] <> val THEN
+                removed = removed || [arr[idx]]
+            END IF
+            idx = idx + 1
+        END WHILE
+        RETURN removed
+    END FUNCTION
+END CLASS

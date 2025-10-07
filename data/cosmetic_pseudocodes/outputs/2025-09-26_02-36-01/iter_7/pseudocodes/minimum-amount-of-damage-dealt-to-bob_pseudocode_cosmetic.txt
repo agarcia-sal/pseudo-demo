@@ -1,0 +1,52 @@
+CLASS Enemy  
+    FUNCTION __init__(self, damage, timeTakenDown)  
+        SET self.damage TO damage  
+        SET self.timeTakenDown TO timeTakenDown  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION minDamage(self, power, damage, health)  
+        SET resultAccumulator TO 0  
+        SET aggregateDamage TO 0  
+        SET intermediateEnemies TO []  
+        
+        FOR iterator FROM 0 TO (LENGTH OF damage) - 1  
+            SET aggregateDamage TO aggregateDamage + damage[iterator]  
+        END FOR  
+        
+        SET loopCounter TO 0  
+        WHILE loopCounter < LENGTH OF damage  
+            SET singleDamage TO damage[loopCounter]  
+            SET singleHealth TO health[loopCounter]  
+            SET segmentsRequired TO ((singleHealth + power - 1) DIV power)  
+            
+            CREATE tempEnemy AS Enemy(singleDamage, segmentsRequired)  
+            APPEND tempEnemy TO intermediateEnemies  
+            
+            SET loopCounter TO loopCounter + 1  
+        END WHILE  
+        
+        FUNCTION damagePerTimeRatioComparator(a, b)  
+            RETURN ((b.damage * b.timeTakenDown) * (a.timeTakenDown * a.damage)) < ((a.damage * b.timeTakenDown) * (b.timeTakenDown * a.damage)) ? 1 : -1  
+        END FUNCTION  
+        
+        FUNCTION compareByDamageRatio(descLeft, descRight)  
+            RETURN ((descRight.damage * descLeft.timeTakenDown) < (descLeft.damage * descRight.timeTakenDown))  
+        END FUNCTION  
+        
+        intermediateEnemies = SORT(intermediateEnemies, FUNCTION(x, y)  
+            RETURN (y.damage * x.timeTakenDown) > (x.damage * y.timeTakenDown)  
+        END FUNCTION)  
+        
+        SET countdown TO 0  
+        WHILE countdown < LENGTH OF intermediateEnemies  
+            SET currentEnemy TO intermediateEnemies[countdown]  
+            SET resultAccumulator TO resultAccumulator + (aggregateDamage * currentEnemy.timeTakenDown)  
+            SET aggregateDamage TO aggregateDamage - currentEnemy.damage  
+            SET countdown TO countdown + 1  
+        END WHILE  
+        
+        RETURN resultAccumulator  
+    END FUNCTION  
+END CLASS

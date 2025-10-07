@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION numberOfStableArrays(zero zero, one one, limit limit) RETURNS integer
+        SET modBase TO (1 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+
+        FUNCTION dp(z z, o o, last last, consecutive consecutive) RETURNS integer
+            PROCEDURE recurse(zr, orr, lr, cr, OUT val)
+                IF zr EQUALS 0 THEN
+                    IF orr EQUALS 0 THEN
+                        SET val TO 1
+                        RETURN
+                    END IF
+                END IF
+                IF zr LESS THAN 0 THEN
+                    SET val TO 0
+                    RETURN
+                END IF
+                IF orr LESS THAN 0 THEN
+                    SET val TO 0
+                    RETURN
+                END IF
+
+                SET acc TO 0
+                IF lr EQUALS 0 THEN
+                    IF cr LESS THAN limit THEN
+                        CALL recurse(zr - 1, orr, 0, cr + 1, valTmp1)
+                        SET acc TO acc + valTmp1
+                    END IF
+                    CALL recurse(zr, orr - 1, 1, 1, valTmp2)
+                    SET acc TO acc + valTmp2
+                ELSE
+                    IF zr GREATER THAN 0 THEN
+                        CALL recurse(zr - 1, orr, 0, 1, valTmp3)
+                        SET acc TO acc + valTmp3
+                    END IF
+                    IF cr LESS THAN limit THEN
+                        CALL recurse(zr, orr - 1, 1, cr + 1, valTmp4)
+                        SET acc TO acc + valTmp4
+                    END IF
+                END IF
+                SET val TO acc MOD modBase
+            END PROCEDURE
+
+            SET res TO 0
+            CALL recurse(z, o, last, consecutive, res)
+            RETURN res
+        END FUNCTION
+
+        RETURN dp(zero, one - 1, 0, 1)
+    END FUNCTION
+END CLASS

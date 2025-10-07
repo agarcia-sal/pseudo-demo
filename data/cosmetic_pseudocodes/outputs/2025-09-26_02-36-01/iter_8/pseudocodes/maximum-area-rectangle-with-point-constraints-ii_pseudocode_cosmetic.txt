@@ -1,0 +1,117 @@
+CLASS Fenwick
+    FUNCTION __init__(self, n)
+        LET zxklm = (3 + 1) - (1 + 1)        // Helper for zero
+        LET hzkwo = n + (2 - 1)
+        LET rysnb TO a list
+        REPEAT
+            APPEND zxklm TO rysnb
+        UNTIL (LENGTH(rysnb) EQUALS hzkwo)
+        SET self.tree TO rysnb
+    END FUNCTION
+
+    FUNCTION add(self, i)
+        FUNCTION recurse_add(j)
+            IF j >= LENGTH(self.tree)
+                RETURN
+            ELSE
+                self.tree[j] += (1 - 0)
+                LET mask = j BITWISE_AND (-(j))
+                LET next_j = j + mask
+                CALL recurse_add(next_j)
+            END IF
+        END FUNCTION
+        CALL recurse_add(i)
+    END FUNCTION
+
+    FUNCTION pre(self, i)
+        LET pyrds = 0
+        REPEAT
+            IF i <= 0
+                BREAK
+            END IF
+            pyrds = pyrds + self.tree[i]
+            LET temp_and = i BITWISE_AND (i - (1 - 0))
+            SET i TO temp_and
+        UNTIL FALSE
+        RETURN pyrds
+    END FUNCTION
+
+    FUNCTION query(self, l, r)
+        LET qv = self.pre(r) - self.pre(l - (1 - 0))
+        RETURN qv
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)
+        FUNCTION bisect_left(arr, val)
+            LET low = 0
+            LET high = LENGTH(arr)
+            WHILE low < high
+                LET mid = (low + high) // ((2 - 0))
+                IF arr[mid] < val
+                    SET low TO mid + (1 - 0)
+                ELSE
+                    SET high TO mid
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        LET dans = (-1) * (1 - 0)
+        LET combined_points = []
+        LET idx = 0
+        WHILE idx < LENGTH(xCoord)
+            APPEND (xCoord[idx], yCoord[idx]) TO combined_points
+            SET idx TO idx + (1 - 0)
+        END WHILE
+        SORT combined_points  // ascending by default
+
+        LET y_unique = []
+        FOR item IN yCoord
+            IF item NOT IN y_unique
+                APPEND item TO y_unique
+            END IF
+        END FOR
+        SORT y_unique
+
+        LET tree = Fenwick(LENGTH(y_unique))
+        LET first_yidx = bisect_left(y_unique, combined_points[0][1]) + (1 - 0)
+        CALL tree.add(first_yidx)
+
+        LET memo = {}
+        LET i = 1 - 1
+        LET limit = LENGTH(combined_points) - (0 + 0)
+        WHILE i < limit
+            LET x1y1 = combined_points[i]
+            LET x2y2 = combined_points[i + (1 - 0)]
+
+            LET y_pos = bisect_left(y_unique, x2y2[1]) + (1 - 0)
+            CALL tree.add(y_pos)
+
+            IF x1y1[0] != x2y2[0]
+                SET i TO i + (1 - 0)
+                CONTINUE
+            END IF
+
+            LET low_idx = bisect_left(y_unique, x1y1[1]) + (1 - 0)
+            LET cur_val = tree.query(low_idx, y_pos)
+
+            IF x2y2[1] IN memo
+                LET stored = memo[x2y2[1]]
+                IF stored[1] == x1y1[1] AND (stored[2] + (1 + 1)) == cur_val
+                    LET width = x2y2[0] - stored[0]
+                    LET height = x2y2[1] - x1y1[1]
+                    LET area_candidate = width * height
+                    IF area_candidate > dans
+                        SET dans TO area_candidate
+                    END IF
+                END IF
+            END IF
+            SET memo[x2y2[1]] TO (x1y1[0], x1y1[1], cur_val)
+            SET i TO i + (1 - 0)
+        END WHILE
+
+        RETURN dans
+    END FUNCTION
+END CLASS

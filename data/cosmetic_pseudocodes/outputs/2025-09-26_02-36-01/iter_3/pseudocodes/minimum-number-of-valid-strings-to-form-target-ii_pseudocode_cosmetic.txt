@@ -1,0 +1,64 @@
+CLASS Solution
+    FUNCTION minValidStrings(words, target)
+        DECLARE seenPrefixes AS empty set
+        DECLARE idx1 AS integer
+        DECLARE idx2 AS integer
+        DECLARE tempSubstring AS string
+
+        idx1 ← 0
+        WHILE idx1 < LENGTH(words)
+            DECLARE currentWord AS string ← words[idx1]
+            idx2 ← 0
+            REPEAT
+                idx2 ← idx2 + 1
+                tempSubstring ← ""
+                DECLARE k AS integer ← 0
+                WHILE k < idx2
+                    tempSubstring ← tempSubstring + currentWord[k]
+                    k ← k + 1
+                END WHILE
+                seenPrefixes ← seenPrefixes ∪ {tempSubstring}
+            UNTIL idx2 ≥ LENGTH(currentWord)
+            idx1 ← idx1 + 1
+        END WHILE
+
+        DECLARE sizeTarget AS integer ← LENGTH(target)
+        DECLARE resultList AS list OF integer WITH sizeTarget + 1 elements
+        idx1 ← 0
+        WHILE idx1 ≤ sizeTarget
+            resultList[idx1] ← +∞
+            idx1 ← idx1 + 1
+        END WHILE
+
+        resultList[0] ← 0
+
+        idx1 ← 1
+        WHILE idx1 ≤ sizeTarget
+            idx2 ← 1
+            WHILE idx2 <= idx1
+                DECLARE subStrBuilder AS string ← ""
+                DECLARE pos AS integer ← idx2 - 1
+                WHILE pos < idx1
+                    subStrBuilder ← subStrBuilder + target[pos]
+                    pos ← pos + 1
+                END WHILE
+
+                IF subStrBuilder IN seenPrefixes THEN
+                    DECLARE candidate AS integer ← resultList[idx2 - 1] + 1
+                    IF candidate < resultList[idx1] THEN
+                        resultList[idx1] ← candidate
+                    END IF
+                END IF
+
+                idx2 ← idx2 + 1
+            END WHILE
+            idx1 ← idx1 + 1
+        END WHILE
+
+        IF resultList[sizeTarget] ≠ +∞ THEN
+            RETURN resultList[sizeTarget]
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

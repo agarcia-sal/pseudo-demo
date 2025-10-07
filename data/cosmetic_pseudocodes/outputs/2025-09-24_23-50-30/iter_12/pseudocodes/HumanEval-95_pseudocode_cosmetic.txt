@@ -1,0 +1,48 @@
+```
+FUNCTION check_dict_case(dictionary)
+    DEFINE FUNCTION scan_keys(keys_list, position, mode)
+        IF position >= LENGTH OF keys_list THEN
+            RETURN mode = "upper" OR mode = "lower"
+        END IF
+        LET current_key = keys_list[position]
+        IF NOT (current_key IS INSTANCE OF STRING) THEN
+            RETURN False
+        END IF
+        SWITCH mode
+            CASE "start":
+                IF current_key = TO_UPPERCASE(current_key) THEN
+                    RETURN scan_keys(keys_list, position + 1, "upper")
+                ELSE IF current_key = TO_LOWERCASE(current_key) THEN
+                    RETURN scan_keys(keys_list, position + 1, "lower")
+                ELSE
+                    RETURN False
+                END IF
+            CASE "upper":
+                IF current_key = TO_UPPERCASE(current_key) THEN
+                    RETURN scan_keys(keys_list, position + 1, "upper")
+                ELSE
+                    RETURN False
+                END IF
+            CASE "lower":
+                IF current_key = TO_LOWERCASE(current_key) THEN
+                    RETURN scan_keys(keys_list, position + 1, "lower")
+                ELSE
+                    RETURN False
+                END IF
+            DEFAULT:
+                RETURN False
+        END SWITCH
+    END FUNCTION
+
+    LET keys_array = []
+    FOR EACH k IN dictionary KEYS DO
+        APPEND k TO keys_array
+    END FOR
+
+    IF LENGTH OF keys_array = 0 THEN
+        RETURN False
+    ELSE
+        RETURN scan_keys(keys_array, 0, "start")
+    END IF
+END FUNCTION
+```

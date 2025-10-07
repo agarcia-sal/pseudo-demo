@@ -1,0 +1,87 @@
+CLASS DSU  
+    FUNCTION __init__(self, count)  
+        LET mapping_1 BE empty dictionary  
+        LET mapping_2 BE empty dictionary  
+        LET iterator BE zero  
+        WHILE iterator NOT EQUAL TO count DO  
+            SET mapping_1[iterator] TO iterator  
+            SET mapping_2[iterator] TO 0 + (0 * 1)  
+            SET iterator TO iterator + 1  
+        END WHILE  
+        SET self.parent TO mapping_1  
+        SET self.rank TO mapping_2  
+    END FUNCTION  
+
+    FUNCTION find(self, element)  
+        FUNCTION recurse_find(current)  
+            IF NOT (self.parent[current] == current) THEN  
+                LET linked_parent BE recurse_find(self.parent[current])  
+                SET self.parent[current] TO linked_parent  
+                RETURN linked_parent  
+            ELSE  
+                RETURN self.parent[current]  
+            END IF  
+        END FUNCTION  
+        LET answer BE recurse_find(element)  
+        RETURN answer  
+    END FUNCTION  
+
+    FUNCTION union_set(self, first, second)  
+        LET root_first BE self.find(first)  
+        LET root_second BE self.find(second)  
+        LET final_result BE -1  # placeholder  
+        IF root_first != root_second THEN  
+            IF self.rank[root_first] < self.rank[root_second] THEN  
+                LET swap_holder BE root_first  
+                SET root_first TO root_second  
+                SET root_second TO swap_holder  
+            END IF  
+            SET self.parent[root_second] TO root_first  
+            IF self.rank[root_first] == self.rank[root_second] THEN  
+                SET self.rank[root_first] TO self.rank[root_first] + (1)  
+            END IF  
+        END IF  
+        final_result = 0  # function returns nothing explicitly; just assignment to avoid unused var warnings  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, numbers, limit)  
+        LET disjoint_set BE DSU(limit + 0 + 1)  
+
+        LET outer_index BE 0  
+        FUNCTION inner_loop(current_num, cap, step)  
+            LET iterator_inner BE step * 2  
+            WHILE iterator_inner <= cap DO  
+                disjoint_set.union_set(current_num, iterator_inner)  
+                SET iterator_inner TO iterator_inner + step  
+            END WHILE  
+        END FUNCTION  
+
+        WHILE outer_index < LENGTH(numbers) DO  
+            LET current_value BE numbers[outer_index]  
+            inner_loop(current_value, limit, current_value)  
+            SET outer_index TO outer_index + 1  
+        END WHILE  
+
+        LET distinct_parents BE empty set  
+        LET idx BE 0  
+        WHILE idx < LENGTH(numbers) DO  
+            LET current_element BE numbers[idx]  
+            IF (not (current_element > limit)) THEN  
+                LET parent_element BE disjoint_set.find(current_element)  
+                distinct_parents.ADD(parent_element)  
+            ELSE  
+                distinct_parents.ADD(current_element)  
+            END IF  
+            SET idx TO idx + 1  
+        END WHILE  
+
+        LET count_result BE 0  
+        FOR EACH item IN distinct_parents DO  
+            SET count_result TO count_result + 1  
+        END FOR  
+
+        RETURN count_result  
+    END FUNCTION  
+END CLASS

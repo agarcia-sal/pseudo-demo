@@ -1,0 +1,206 @@
+CLASS Solution  
+    FUNCTION smallestNumber(num, t)  
+        SET primeFactors, divisibleFlag TO self._getPrimeCount(t)  
+
+        IF divisibleFlag = FALSE THEN  
+            SET resultVal TO "-1"  
+            RETURN resultVal  
+        END IF  
+
+        SET factorDistribution TO self._getFactorCount(primeFactors)  
+        SET factorSum TO 0  
+        FOR each val IN factorDistribution.values() DO  
+            SET factorSum TO factorSum + val  
+        END FOR  
+
+        IF factorSum > LENGTH(num) THEN  
+            SET assembledString TO ""  
+            FOR each key IN factorDistribution.keys() DO  
+                SET freq TO factorDistribution[key]  
+                FOR counter FROM 1 TO freq DO  
+                    SET assembledString TO assembledString + key  
+                END FOR  
+            END FOR  
+            RETURN assembledString  
+        END IF  
+
+        FUNCTION sumFactorsInNum(index, accumCounter)  
+            IF index = LENGTH(num) THEN  
+                RETURN accumCounter  
+            END IF  
+            SET digitVal TO INTEGER(num[index])  
+            SET updatedCounter TO accumCounter  
+            FOR each factorKey IN FACTOR_COUNTS[digitVal].keys() DO  
+                SET updatedCounter[factorKey] TO updatedCounter.get(factorKey, 0) + FACTOR_COUNTS[digitVal][factorKey]  
+            END FOR  
+            RETURN sumFactorsInNum(index + 1, updatedCounter)  
+        END FUNCTION  
+
+        SET prefixFactors TO sumFactorsInNum(0, {})  
+
+        FUNCTION findFirstZeroPos(pos, bound)  
+            IF pos = bound THEN  
+                RETURN bound  
+            END IF  
+            IF num[pos] = "0" THEN  
+                RETURN pos  
+            END IF  
+            RETURN findFirstZeroPos(pos + 1, bound)  
+        END FUNCTION  
+
+        SET zeroIndex TO findFirstZeroPos(0, LENGTH(num))  
+
+        IF zeroIndex = LENGTH(num) AND (  
+            FOR each k IN primeFactors.keys() DO  
+                IF primeFactors[k] > prefixFactors.get(k, 0) THEN  
+                    RETURN FALSE  
+                END IF  
+            END FOR  
+            RETURN TRUE  
+        ) THEN  
+            RETURN num  
+        END IF  
+
+        FUNCTION processDigitReverse(i, prefixCounter)  
+            IF i < 0 THEN  
+                RETURN NULL  
+            END IF  
+
+            SET currentDigit TO INTEGER(num[i])  
+            SET updatedPrefixCounter TO {}  
+            FOR each k IN prefixCounter.keys() DO  
+                SET updatedPrefixCounter[k] TO prefixCounter[k]  
+            END FOR  
+            FOR each key IN FACTOR_COUNTS[currentDigit].keys() DO  
+                SET updatedPrefixCounter[key] TO updatedPrefixCounter.get(key, 0) - FACTOR_COUNTS[currentDigit][key]  
+            END FOR  
+
+            SET remainingSpaces TO LENGTH(num) - 1 - i  
+
+            IF i <= zeroIndex THEN  
+                FOR candidateDigit FROM currentDigit + 1 TO 9 DO  
+                    SET diffCounter TO {}  
+                    FOR each k IN primeFactors.keys() DO  
+                        SET diffCounter[k] TO primeFactors[k] - updatedPrefixCounter.get(k, 0) - FACTOR_COUNTS[candidateDigit].get(k, 0)  
+                    END FOR  
+
+                    SET replacementFactors TO self._getFactorCount(diffCounter)  
+
+                    SET sumReplacement TO 0  
+                    FOR each val IN replacementFactors.values() DO  
+                        SET sumReplacement TO sumReplacement + val  
+                    END FOR  
+
+                    IF sumReplacement <= remainingSpaces THEN  
+                        SET onesToInsert TO remainingSpaces - sumReplacement  
+                        SET leftPart TO ""  
+                        IF i > 0 THEN  
+                            SET leftPart TO SUBSTRING(num, 0, i)  
+                        END IF  
+
+                        SET middlePart TO STRING(candidateDigit)  
+                        SET onesPart TO ""  
+                        FOR cnt FROM 0 TO onesToInsert - 1 DO  
+                            SET onesPart TO onesPart + "1"  
+                        END FOR  
+
+                        SET rightPart TO ""  
+                        FOR f IN replacementFactors.keys() DO  
+                            FOR countTimes FROM 1 TO replacementFactors[f] DO  
+                                SET rightPart TO rightPart + f  
+                            END FOR  
+                        END FOR  
+
+                        RETURN leftPart + middlePart + onesPart + rightPart  
+                    END IF  
+                END FOR  
+            END IF  
+
+            RETURN processDigitReverse(i - 1, updatedPrefixCounter)  
+        END FUNCTION  
+
+        SET answer TO processDigitReverse(LENGTH(num) - 1, prefixFactors)  
+
+        IF answer IS NOT NULL THEN  
+            RETURN answer  
+        END IF  
+
+        SET finalFactorCount TO self._getFactorCount(primeFactors)  
+        SET finalSum TO 0  
+        FOR val IN finalFactorCount.values() DO  
+            SET finalSum TO finalSum + val  
+        END FOR  
+
+        SET onesString TO ""  
+        FOR idx FROM 0 TO (LENGTH(num) + 1 - finalSum) - 1 DO  
+            SET onesString TO onesString + "1"  
+        END FOR  
+
+        SET tailString TO ""  
+        FOR key IN finalFactorCount.keys() DO  
+            FOR freqLoop FROM 0 TO finalFactorCount[key] - 1 DO  
+                SET tailString TO tailString + key  
+            END FOR  
+        END FOR  
+
+        RETURN onesString + tailString  
+    END FUNCTION  
+
+    FUNCTION _getPrimeCount(t)  
+        SET cntMap TO {}  
+        SET primesList TO [2, 3, 5, 7]  
+
+        FUNCTION factorCountRec(value, idx)  
+            IF idx = LENGTH(primesList) THEN  
+                RETURN value, cntMap  
+            END IF  
+            SET currentPrime TO primesList[idx]  
+            IF value MOD currentPrime = 0 THEN  
+                SET cntMap[currentPrime] TO cntMap.get(currentPrime, 0) + 1  
+                RETURN factorCountRec(value / currentPrime, idx)  
+            ELSE  
+                RETURN factorCountRec(value, idx + 1)  
+            END IF  
+        END FUNCTION  
+
+        SET remaining, counts TO factorCountRec(t, 0)  
+        RETURN counts, (remaining = 1)  
+    END FUNCTION  
+
+    FUNCTION _getFactorCount(counts)  
+        SET twoCountDiv3 TO counts.get(2, 0) / 3  
+        SET twoCountMod3 TO counts.get(2, 0) % 3  
+        SET threeCountDiv2 TO counts.get(3, 0) / 2  
+        SET threeCountMod2 TO counts.get(3, 0) % 2  
+        SET fourCountDiv2 TO twoCountMod3 / 2  
+        SET fourCountMod2 TO twoCountMod3 % 2  
+
+        SET aCount2 TO fourCountMod2  
+        SET aCount3 TO threeCountMod2  
+        SET sixCount TO 0  
+
+        IF aCount2 = 1 AND aCount3 = 1 THEN  
+            SET aCount2 TO 0  
+            SET aCount3 TO 0  
+            SET sixCount TO 1  
+        END IF  
+
+        IF aCount3 = 1 AND fourCountDiv2 = 1 THEN  
+            SET aCount2 TO 1  
+            SET sixCount TO 1  
+            SET aCount3 TO 0  
+            SET fourCountDiv2 TO 0  
+        END IF  
+
+        RETURN {  
+            "2": aCount2,  
+            "3": aCount3,  
+            "4": fourCountDiv2,  
+            "5": counts.get(5, 0),  
+            "6": sixCount,  
+            "7": counts.get(7, 0),  
+            "8": twoCountDiv3,  
+            "9": threeCountDiv2  
+        }  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,129 @@
+```
+FUNCTION closest_integer(value)
+    IMPORT floor, ceil FROM math
+
+    IF COUNT(value, '.') == 1 THEN
+        WHILE value[-1] == '0' DO
+            value = SUBSTRING(value, 0, LENGTH(value) - 1)
+        END WHILE
+    END IF
+
+    num = TO_FLOAT(value)
+
+    IF SUBSTRING(value, LENGTH(value) - 2, 2) == '.5' THEN
+        IF num > 0 THEN
+            result = ceil(num)
+        ELSE
+            result = floor(num)
+        END IF
+    ELSE
+        IF LENGTH(value) > 0 THEN
+            result = ROUND(num)
+        ELSE
+            result = 0
+        END IF
+    END IF
+
+    RETURN result
+END FUNCTION
+```
+
+Rewritten version:
+
+```
+FUNCTION closest_integer(value)
+    IMPORT floor, ceil FROM math_module
+
+    IF LENGTH(SPLIT(value, '.')) - 1 != 0 THEN
+        IF LENGTH(SPLIT(value, '.')) - 1 == 1 THEN
+            WHILE value[-1] == "0" DO
+                value = REMOVE_LAST_CHAR(value)
+            END WHILE
+        END IF
+    END IF
+
+    numVal = CONVERT_TO_FLOAT(value)
+
+    IF LENGTH(value) >= 2 THEN
+        tail = value[(LENGTH(value) - 2)..(LENGTH(value) - 1)]
+    ELSE
+        tail = ""
+    END IF
+
+    IF tail == ".5" THEN
+        IF numVal <= 0 THEN
+            result = floor(numVal)
+        ELSE
+            result = ceil(numVal)
+        END IF
+    ELSE
+        IF LENGTH(value) > 0 THEN
+            result = ROUND(numVal)
+        ELSE
+            result = 0
+        END IF
+    END IF
+
+    RETURN result
+END FUNCTION
+```
+
+---
+
+Note: The above still looks similar, so to comply with the prompt, a more radical rewrite is needed.
+
+---
+
+Final rewritten snippet fully complying with prompt:
+
+```
+FUNCTION closest_integer(value)
+    IMPORT floor, ceil FROM math
+
+    FUNCTION trim_trailing_zeros(str)
+        index = LENGTH(str) - 1
+        WHILE index >= 0 AND str[index] == '0'
+            index = index - 1
+        END WHILE
+
+        RETURN SUBSTRING(str, 0, index + 1)
+    END FUNCTION
+
+    dotOccurrences = 0
+    pos = 0
+    WHILE pos < LENGTH(value)
+        IF value[pos] == '.'
+            dotOccurrences = dotOccurrences + 1
+        END IF
+        pos = pos + 1
+    END WHILE
+
+    IF dotOccurrences == 1 THEN
+        value = trim_trailing_zeros(value)
+    END IF
+
+    numericValue = FLOAT(value)
+
+    FUNCTION parse_ends_with_half(s)
+        IF LENGTH(s) < 2 THEN
+            RETURN FALSE
+        END IF
+        lastTwo = SUBSTRING(s, LENGTH(s) - 2, 2)
+        RETURN lastTwo == ".5"
+    END FUNCTION
+
+    IF parse_ends_with_half(value) THEN
+        IF numericValue > 0 THEN
+            RETURN ceil(numericValue)
+        ELSE
+            RETURN floor(numericValue)
+        END IF
+    END IF
+
+    IF LENGTH(value) > 0 THEN
+        RETURN ROUND(numericValue)
+    END IF
+
+    RETURN 0
+END FUNCTION
+```

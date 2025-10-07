@@ -1,0 +1,67 @@
+CLASS Solution  
+    FUNCTION minimumMoves(nums LIST OF INTEGERS, k INTEGER, maxChanges INTEGER) RETURNS INTEGER  
+        DEFINE ones_indices AS EMPTY LIST  
+        SET length_nums TO LENGTH OF nums  
+        FOR i FROM 0 TO length_nums - 1  
+            IF nums[i] == 1 THEN  
+                ADD i TO ones_indices  
+            END IF  
+        END FOR  
+
+        IF LENGTH OF ones_indices == 0 THEN  
+            RETURN k * 2  
+        END IF  
+
+        SET count_ones TO LENGTH OF ones_indices  
+        INITIALIZE prefix AS ARRAY OF SIZE count_ones + 1 WITH ALL ZEROS  
+
+        FOR j FROM 0 TO count_ones - 1  
+            prefix[j + 1] = prefix[j] + ones_indices[j]  
+        END FOR  
+
+        FUNCTION compute_cost(left INTEGER, right INTEGER) RETURNS INTEGER  
+            SET mid_pos TO (left + right) // 2  
+            SET median_val TO ones_indices[mid_pos]  
+            SET total_cost TO 0  
+
+            FOR idx FROM left TO mid_pos - 1  
+                total_cost += (median_val - ones_indices[idx]) - (mid_pos - idx)  
+            END FOR  
+
+            FOR idx FROM mid_pos + 1 TO right  
+                total_cost += (ones_indices[idx] - median_val) - (idx - mid_pos)  
+            END FOR  
+
+            RETURN total_cost  
+        END FUNCTION  
+
+        SET minimum_moves TO INFINITY  
+
+        FOR start_pos FROM 0 TO count_ones - k  
+            SET end_pos TO start_pos + k - 1  
+            SET moving_cost TO compute_cost(start_pos, end_pos)  
+
+            IF k % 2 == 1 THEN  
+                SET mid_pos TO (start_pos + end_pos) // 2  
+                SET median_value TO ones_indices[mid_pos]  
+                SET needed_changes TO (end_pos - mid_pos) - (median_value - ones_indices[mid_pos] - 1)  
+            ELSE  
+                SET left_mid TO (start_pos + end_pos) // 2  
+                SET right_mid TO left_mid + 1  
+                SET left_median_val TO ones_indices[left_mid]  
+                SET right_median_val TO ones_indices[right_mid]  
+                SET needed_changes TO (right_mid - left_mid - 1) - (right_median_val - left_median_val - 1)  
+            END IF  
+
+            IF needed_changes > maxChanges THEN  
+                moving_cost += (needed_changes - maxChanges)  
+            END IF  
+
+            IF moving_cost < minimum_moves THEN  
+                minimum_moves = moving_cost  
+            END IF  
+        END FOR  
+
+        RETURN minimum_moves  
+    END FUNCTION  
+END CLASS

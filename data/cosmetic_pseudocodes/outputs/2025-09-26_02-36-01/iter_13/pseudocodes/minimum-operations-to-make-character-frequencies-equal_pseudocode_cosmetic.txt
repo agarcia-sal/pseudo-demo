@@ -1,0 +1,120 @@
+CLASS Solution
+    FUNCTION makeStringGood(s)
+        FUNCTION ordDiff(x)
+            RETURN ASCII(x) - ASCII("a")
+        END FUNCTION
+
+        SET freqList TO a new list of length 26 filled with 0
+        FUNCTION iterateChars(str, idx)
+            IF idx EQUALS LENGTH(str) THEN
+                RETURN
+            ELSE
+                SET currentChar TO str[idx]
+                SET pos TO ordDiff(currentChar)
+                freqList[pos] ← freqList[pos] + 1
+                CALL iterateChars(str, idx + 1)
+            END IF
+        END FUNCTION
+        CALL iterateChars(s, 0)
+
+        FUNCTION maxVal(lst)
+            SET maxValInternal TO lst[0]
+            SET j TO 1
+            WHILE j LESS THAN LENGTH(lst)
+                IF lst[j] GREATER THAN maxValInternal THEN
+                    SET maxValInternal TO lst[j]
+                END IF
+                SET j TO j + 1
+            END WHILE
+            RETURN maxValInternal
+        END FUNCTION
+        SET maximumFrequency TO maxVal(freqList)
+
+        FUNCTION rangeList(startV, endV)
+            SET outputList TO []
+            SET currentV TO startV
+            WHILE currentV LESS THAN OR EQUAL TO endV
+                APPEND currentV TO outputList
+                SET currentV TO currentV + 1
+            END WHILE
+            RETURN outputList
+        END FUNCTION
+        SET targetOptions TO rangeList(1, maximumFrequency)
+
+        FUNCTION mapList(lst, fn)
+            SET res TO []
+            SET i TO 0
+            WHILE i LESS THAN LENGTH(lst)
+                APPEND fn(lst[i]) TO res
+                SET i TO i + 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        FUNCTION minNumber(nums)
+            SET minN TO nums[0]
+            SET ii TO 1
+            WHILE ii LESS THAN LENGTH(nums)
+                IF nums[ii] LESS THAN minN THEN
+                    SET minN TO nums[ii]
+                END IF
+                SET ii TO ii + 1
+            END WHILE
+            RETURN minN
+        END FUNCTION
+
+        FUNCTION callGetMinOperations(t)
+            RETURN SELF._getMinOperations(freqList, t)
+        END FUNCTION
+
+        SET transforms TO mapList(targetOptions, callGetMinOperations)
+        SET resultMin TO minNumber(transforms)
+        RETURN resultMin
+    END FUNCTION
+
+    FUNCTION _getMinOperations(count, target)
+        SET dpArray TO list of length 27 filled with 0
+        FUNCTION minVal(a, b)
+            IF a LESS THAN b THEN RETURN a ELSE RETURN b END IF
+        END FUNCTION
+
+        SET iIndex TO 25
+        WHILE iIndex GREATER THAN OR EQUAL TO 0
+            SET deleteAllVal TO count[iIndex]
+
+            IF target GREATER THAN count[iIndex] THEN
+                SET diffVal TO target - count[iIndex]
+            ELSE
+                SET diffVal TO count[iIndex] - target
+            END IF
+
+            SET calcA TO dpArray[iIndex + 1] + count[iIndex] + diffVal
+            SET dpVal TO minVal(deleteAllVal, calcA)
+
+            IF iIndex + 1 LESS THAN 26 THEN
+                IF count[iIndex + 1] LESS THAN target THEN
+                    SET deficit TO target - count[iIndex + 1]
+
+                    IF count[iIndex] LESS THAN OR EQUAL TO target THEN
+                        SET neededToChange TO count[iIndex]
+                    ELSE
+                        SET neededToChange TO count[iIndex] - target
+                    END IF
+
+                    IF deficit GREATER THAN neededToChange THEN
+                        SET changeOp TO neededToChange + (deficit - neededToChange)
+                    ELSE
+                        SET changeOp TO deficit + (neededToChange - deficit)
+                    END IF
+
+                    SET calcB TO dpArray[iIndex + 2] + count[iIndex] + changeOp + 1
+                    SET dpVal TO minVal(dpVal, calcB)
+                END IF
+            END IF
+
+            dpArray[iIndex] ← dpVal
+            SET iIndex TO iIndex - 1
+        END WHILE
+        RETURN dpArray[0]
+    END FUNCTION
+END CLASS

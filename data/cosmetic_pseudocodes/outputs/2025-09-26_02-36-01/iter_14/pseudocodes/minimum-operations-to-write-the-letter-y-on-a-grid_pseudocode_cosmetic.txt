@@ -1,0 +1,75 @@
+CLASS Solution  
+    FUNCTION minimumOperationsToWriteY(grid)  
+    INDENT 2  
+        LET totalRows BE LENGTH(grid)  
+        LET midPoint BE (totalRows DIV 2)  
+        LET specialPositions BE EMPTY SET  
+        
+        LET index1 BE zero  
+        WHILE index1 <= midPoint DO  
+            ADD (index1, index1) TO specialPositions  
+            index1 = index1 + 1  
+        END WHILE  
+        
+        LET index2 BE zero  
+        REPEAT  
+            ADD (index2, (totalRows - index2) - 1) TO specialPositions  
+            index2 = index2 + 1  
+        UNTIL index2 > midPoint  
+        
+        FOR idx FROM midPoint TO (totalRows - 1) BY 1 DO  
+            ADD (idx, midPoint) TO specialPositions  
+        END FOR  
+        
+        FUNCTION countOccurrencesAtPositions(matrix, positions)  
+        INDENT 3  
+            LET tally BE DICTIONARY WITH KEYS 0, 1, 2 AND VALUES 0  
+            FOR EACH (r, c) IN positions DO  
+                LET val BE matrix[r][c]  
+                tally[val] = tally[val] + 1  
+            END FOR  
+            RETURN tally  
+        END FUNCTION  
+        
+        FUNCTION countOccurrencesNotInPositions(matrix, positions)  
+        INDENT 3  
+            LET tally NOT IN DICTIONARY WITH KEYS 0, 1, 2 AND VALUES 0  
+            LET visited BE SET OF positions  
+            FOR row FROM zero TO (totalRows - 1) DO  
+                FOR col FROM zero TO (totalRows - 1) DO  
+                    IF (row, col) NOT IN visited THEN  
+                        LET val BE matrix[row][col]  
+                        tally[val] = tally[val] + 1  
+                    END IF  
+                END FOR  
+            END FOR  
+            RETURN tally  
+        END FUNCTION  
+        
+        LET countSpecialChars BE countOccurrencesAtPositions(grid, specialPositions)  
+        LET countOtherChars BE countOccurrencesNotInPositions(grid, specialPositions)  
+        
+        LET minOpCount BE +∞  
+        
+        LET a BE zero  
+        WHILE a <= 2 DO  
+            LET b BE zero  
+            REPEAT  
+                IF NOT (a = b) THEN  
+                    LET totalYChars BE countSpecialChars[0] + countSpecialChars[1] + countSpecialChars[2]  
+                    LET totalOtherChars BE countOtherChars[0] + countOtherChars[1] + countOtherChars[2]  
+                    
+                    LET opsNeeded BE (totalYChars - countSpecialChars[a]) + (totalOtherChars - countOtherChars[b])  
+                    
+                    IF opsNeeded < minOpCount THEN  
+                        minOpCount = opsNeeded  
+                    END IF  
+                END IF  
+                b = b + 1  
+            UNTIL b > 2  
+            a = a + 1  
+        END WHILE  
+        
+        RETURN minOpCount  
+    END FUNCTION  
+END CLASS

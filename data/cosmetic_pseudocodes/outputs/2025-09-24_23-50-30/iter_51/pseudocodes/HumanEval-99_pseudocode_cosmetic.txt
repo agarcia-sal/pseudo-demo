@@ -1,0 +1,35 @@
+```
+FUNCTION closest_integer(floating_point_repr)
+    IMPORT floor, ceil FROM math
+
+    PROCEDURE strip_trailing_zeroes(str_repr)
+        IF COUNT OF '.' IN str_repr = 1
+            PROCEDURE inner_strip(s)
+                IF s ENDS WITH '0' THEN
+                    RETURN inner_strip(ALL CHARACTERS OF s EXCEPT LAST)
+                ELSE
+                    RETURN s
+                END IF
+            END PROCEDURE
+            RETURN inner_strip(str_repr)
+        ELSE
+            RETURN str_repr
+        END IF
+    END PROCEDURE
+
+    LET cleaned_repr = strip_trailing_zeroes(floating_point_repr)
+    LET numeric_val = FLOAT(cleaned_repr)
+
+    LET len_repr = LENGTH(cleaned_repr)
+    LET last_two = (len_repr >= 2) ? SUBSTRING(cleaned_repr, len_repr - 1, 2) : ""
+
+    LET final_result = SWITCH TRUE
+        CASE last_two = '.5' AND numeric_val > 0: RETURN ceil(numeric_val)
+        CASE last_two = '.5' AND NOT (numeric_val > 0): RETURN floor(numeric_val)
+        CASE len_repr > 0: RETURN ROUND(numeric_val)
+        DEFAULT: RETURN 0
+    END SWITCH
+
+    RETURN final_result
+END FUNCTION
+```

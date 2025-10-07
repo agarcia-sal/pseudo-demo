@@ -1,0 +1,91 @@
+class Solution
+    function minimumOperationsToWriteY(grid)
+        let totalLength := |grid|
+        let midPoint := (totalLength - (totalLength mod 2)) / 2
+        let positionSet := {}
+
+        procedure collectDiagonalIndices(index, limit, step, collector, isPrimary)
+            if step > 0 then
+                if index > limit then return end if
+            else
+                if index < limit then return end if
+            end if
+            if isPrimary then
+                collector := collector ∪ {(index, index)}
+            else
+                collector := collector ∪ {(index, totalLength - index - 1)}
+            end if
+            call collectDiagonalIndices(index + step, limit, step, collector, isPrimary)
+        end procedure
+
+        call collectDiagonalIndices(0, midPoint, 1, positionSet, true)
+        call collectDiagonalIndices(0, midPoint, 1, positionSet, false)
+
+        var row := midPoint
+        while row ≤ totalLength - 1 do
+            positionSet := positionSet ∪ {(row, midPoint)}
+            row := row + 1
+        end while
+
+        function countValuesAtPositions(matrix, positions)
+            var counts := map<int, int> from 0 to 2 with 0 values
+            var idx := 0
+            repeat
+                if idx = |positions| then exit repeat end if
+                let (r, c) := positions[idx]
+                counts[matrix[r][c]] := counts[matrix[r][c]] + 1
+                idx := idx + 1
+            until false
+            return counts
+        end function
+
+        function countValuesOutsidePositions(matrix, positions)
+            var counts := map<int, int> from 0 to 2 with 0 values
+            var allPoints := {}
+            var r_iter := 0
+            while r_iter < totalLength do
+                var c_iter := 0
+                while c_iter < totalLength do
+                    allPoints := allPoints ∪ {(r_iter, c_iter)}
+                    c_iter := c_iter + 1
+                end while
+                r_iter := r_iter + 1
+            end while
+            var excludedPoints := allPoints - positions
+            var pointsList := list(excludedPoints)
+            var idx2 := |pointsList| - 1
+            while idx2 ≥ 0 do
+                let (rr, cc) := pointsList[idx2]
+                counts[matrix[rr][cc]] := counts[matrix[rr][cc]] + 1
+                idx2 := idx2 - 1
+            end while
+            return counts
+        end function
+
+        let yPositionsCount := countValuesAtPositions(grid, toList(positionSet))
+        let otherPositionsCount := countValuesOutsidePositions(grid, positionSet)
+
+        var minOps := +∞
+
+        var candidateY := 0
+        repeat
+            if candidateY > 2 then exit repeat end if
+            var candidateNonY := 0
+            repeat
+                if candidateNonY > 2 then exit repeat end if
+                if not (candidateY = candidateNonY) then
+                    var sumY := yPositionsCount[0] + yPositionsCount[1] + yPositionsCount[2]
+                    var sumNonY := otherPositionsCount[0] + otherPositionsCount[1] + otherPositionsCount[2]
+                    var opsNeeded := (sumY - yPositionsCount[candidateY]) + (sumNonY - otherPositionsCount[candidateNonY])
+                    if opsNeeded < minOps then
+                        minOps := opsNeeded
+                    end if
+                end if
+                candidateNonY := candidateNonY + 1
+            until false
+            candidateY := candidateY + 1
+        until false
+
+        return minOps
+    end function
+end class

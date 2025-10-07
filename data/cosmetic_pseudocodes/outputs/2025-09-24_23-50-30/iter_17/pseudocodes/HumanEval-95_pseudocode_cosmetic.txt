@@ -1,0 +1,41 @@
+```
+FUNCTION check_dict_case(input_map)
+  IF input_map KEYS COUNT = 0 THEN
+    RETURN False
+  END IF
+  DECLARE mode := "start"
+  DECLARE idx := 0
+  DECLARE keys_array := LIST OF input_map KEYS
+  WHILE idx < LENGTH OF keys_array DO
+    DECLARE current_key := keys_array[idx]
+    IF TYPE OF current_key != STRING THEN
+      mode := "mixed"
+      EXIT WHILE
+    END IF
+    SELECT mode
+      CASE "start":
+        IF current_key = TOUPPER(current_key) THEN
+          mode := "upper"
+        ELSE IF current_key = TOLOWER(current_key) THEN
+          mode := "lower"
+        ELSE
+          EXIT WHILE
+        END IF
+      CASE "upper":
+        IF current_key != TOUPPER(current_key) THEN
+          mode := "mixed"
+          EXIT WHILE
+        END IF
+      CASE "lower":
+        IF current_key != TOLOWER(current_key) THEN
+          mode := "mixed"
+          EXIT WHILE
+        END IF
+      OTHERWISE
+        EXIT WHILE
+    END SELECT
+    idx := idx + 1
+  END WHILE
+  RETURN (mode = "upper") OR (mode = "lower")
+END FUNCTION
+```

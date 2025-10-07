@@ -1,0 +1,89 @@
+```pseudocode
+FUNCTION is_prime(alpha)  
+    DECLARE omega AS boolean  
+    IF NOT (alpha > 1) THEN  
+        omega = FALSE  
+    ELSE 
+        IF NOT (alpha > 3) THEN  
+            omega = TRUE  
+        ELSE 
+            IF ( (alpha % 2 = 0) OR (alpha % 3 = 0) ) THEN  
+                omega = FALSE  
+            ELSE 
+                DECLARE theta AS integer  
+                theta := 5  
+                WHILE (theta * theta <= alpha) DO  
+                    IF ((alpha % theta) = 0) OR ((alpha % (theta + 2)) = 0) THEN  
+                        omega = FALSE  
+                        BREAK  
+                    ELSE  
+                        theta := theta + 6  
+                    END IF  
+                END WHILE  
+                IF theta * theta > alpha THEN  
+                    omega = TRUE  
+                END IF  
+            END IF  
+        END IF  
+    END IF  
+    RETURN omega  
+END FUNCTION  
+
+
+CLASS Solution  
+    FUNCTION mostFrequentPrime(matrix)  
+        DECLARE delta_a AS integer  
+        delta_a := LEN(matrix)  
+        DECLARE delta_b AS integer  
+        delta_b := LEN(matrix[0])  
+        DECLARE trajectory AS LIST OF TUPLES OF INTEGER  
+        trajectory := [(-1,0), (-1,1), (0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1)]  
+        
+        DECLARE tally_map AS MAP FROM INTEGER TO INTEGER  
+        tally_map := {}  
+        
+        FUNCTION voyage(p, q, r, s, val)  
+            DECLARE nex_p AS integer  
+            DECLARE nex_q AS integer  
+            nex_p := p + r  
+            nex_q := q + s  
+            IF ( (nex_p >= 0) AND (nex_p < delta_a) AND (nex_q >= 0) AND (nex_q < delta_b) ) THEN  
+                DECLARE constructed AS integer  
+                constructed := val * 10 + matrix[nex_p][nex_q]  
+                IF (constructed > 10) AND (is_prime(constructed) = TRUE) THEN  
+                    IF constructed IN tally_map THEN  
+                        tally_map[constructed] := tally_map[constructed] + 1  
+                    ELSE  
+                        tally_map[constructed] := 1  
+                    END IF  
+                END IF  
+                voyage(nex_p, nex_q, r, s, constructed)  
+            END IF  
+        END FUNCTION  
+        
+        FOR bunk_a FROM 0 TO delta_a - 1 DO  
+            FOR bunk_b FROM 0 TO delta_b - 1 DO  
+                FOR EACH (rdx, rdy) IN trajectory DO  
+                    voyage(bunk_a, bunk_b, rdx, rdy, matrix[bunk_a][bunk_b])  
+                END FOR  
+            END FOR  
+        END FOR  
+        
+        IF LEN(tally_map) = 0 THEN  
+            RETURN -1  
+        ELSE  
+            DECLARE peak_val AS INTEGER  
+            DECLARE peak_key AS INTEGER  
+            peak_val := -1  
+            peak_key := -1  
+            FOR EACH key IN tally_map DO  
+                IF ( (tally_map[key] > peak_val) OR ((tally_map[key] = peak_val) AND (key > peak_key)) ) THEN  
+                    peak_val := tally_map[key]  
+                    peak_key := key  
+                END IF  
+            END FOR  
+            RETURN peak_key  
+        END IF  
+    END FUNCTION  
+END CLASS  
+```

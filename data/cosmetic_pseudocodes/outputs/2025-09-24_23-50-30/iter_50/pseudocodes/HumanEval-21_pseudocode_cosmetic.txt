@@ -1,0 +1,30 @@
+```
+FUNCTION rescale_to_unit(input_sequence)
+    DEFINE FUNCTION range_calc(seq)
+        SET min_val TO seq[0]
+        SET max_val TO seq[0]
+        FOR idx FROM 1 TO LENGTH(seq) - 1
+            IF seq[idx] < min_val THEN
+                SET min_val TO seq[idx]
+            ELSE IF seq[idx] > max_val THEN
+                SET max_val TO seq[idx]
+            END IF
+        END FOR
+        RETURN (min_val, max_val)
+    END FUNCTION
+
+    SET (low_mark, high_mark) TO range_calc(input_sequence)
+
+    DEFINE FUNCTION transform(index, acc)
+        IF index >= LENGTH(input_sequence) THEN
+            RETURN acc
+        ELSE
+            SET diff TO high_mark - low_mark
+            SET normalized_value TO (input_sequence[index] - low_mark) / diff
+            RETURN transform(index + 1, acc + [normalized_value])
+        END IF
+    END FUNCTION
+
+    RETURN transform(0, [])
+END FUNCTION
+```

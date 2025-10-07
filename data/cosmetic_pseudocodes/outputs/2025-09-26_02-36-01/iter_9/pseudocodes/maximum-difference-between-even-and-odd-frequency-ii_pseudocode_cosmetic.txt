@@ -1,0 +1,123 @@
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+        FUNCTION custom_defaultdict WITH PARAMETERS default_val
+            SET store TO empty map
+            FUNCTION inner_get WITH PARAMETERS key
+                IF key NOT IN store THEN
+                    SET store[key] TO default_val
+                END IF
+                RETURN store[key]
+            END FUNCTION
+            FUNCTION inner_set WITH PARAMETERS key val
+                SET store[key] TO val
+            END FUNCTION
+            RETURN (inner_get, inner_set)
+        END FUNCTION
+
+        FUNCTION append_element WITH PARAMETERS lst val
+            SET new_lst TO list COPY OF lst
+            new_lst[length(new_lst)] = val
+            RETURN new_lst
+        END FUNCTION
+
+        FUNCTION remainder_mod_two WITH PARAMETERS x
+            RETURN x - ((x / 2) * 2)
+        END FUNCTION
+
+        SET result TO -9999999999999
+        SET elements TO list ['z', 'e', 'n', 'o', 'r', 'u', 't', 'w', 'h', 'f']
+        SET selected_chars TO ['z', 'e', 'n', 'o', 'r']
+        SET pairs TO empty list
+
+        FUNCTION generate_pairs_with_diff_elements WITH PARAMETERS chars
+            FUNCTION helper WITH PARAMETERS idx1 idx2 acc
+                IF idx1 >= length(chars) THEN
+                    RETURN acc
+                END IF
+                IF idx2 >= length(chars) THEN
+                    RETURN helper(idx1 + 1, 0, acc)
+                END IF
+                IF chars[idx1] != chars[idx2] THEN
+                    SET acc TO acc + [(chars[idx1], chars[idx2])]
+                END IF
+                RETURN helper(idx1, idx2 + 1, acc)
+            END FUNCTION
+            RETURN helper(0, 0, [])
+        END FUNCTION
+
+        SET pairs TO generate_pairs_with_diff_elements(selected_chars)
+
+        FUNCTION enum_iter WITH PARAMETERS iterable
+            SET result_list TO []
+            SET counter TO 0
+            FUNCTION recurse_enum(idx_res)
+                IF idx_res >= length(iterable) THEN
+                    RETURN result_list
+                END IF
+                SET pair_elem TO (counter, iterable[idx_res])
+                result_list = result_list + [pair_elem]
+                SET counter TO counter + 1
+                RETURN recurse_enum(idx_res + 1)
+            END FUNCTION
+            RETURN recurse_enum(0)
+        END FUNCTION
+
+        FOR EACH tup IN pairs DO
+            SET char_a TO tup[0]
+            SET char_b TO tup[1]
+            SET get_min, set_min TO custom_defaultdict(999999999999)
+            SET accPrefixA TO [0]
+            SET accPrefixB TO [0]
+            SET left_ptr TO 0
+
+            FUNCTION process_inner WITH PARAMETERS idx tempAns
+                IF idx >= length(s) THEN
+                    RETURN tempAns
+                END IF
+                SET curr_char TO s[idx]
+                SET lastA TO accPrefixA[length(accPrefixA) - 1]
+                SET lastB TO accPrefixB[length(accPrefixB) - 1]
+                IF curr_char == char_a THEN
+                    SET accPrefixA TO append_element(accPrefixA, lastA + 1)
+                ELSE
+                    SET accPrefixA TO append_element(accPrefixA, 0)
+                END IF
+                IF curr_char == char_b THEN
+                    SET accPrefixB TO append_element(accPrefixB, lastB + 1)
+                ELSE
+                    SET accPrefixB TO append_element(accPrefixB, 0)
+                END IF
+
+                FUNCTION inner_while_loop(l_ref)
+                    IF (idx - l_ref + 1) < k THEN
+                        RETURN l_ref
+                    END IF
+                    IF accPrefixA[l_ref] >= accPrefixA[length(accPrefixA) - 1] THEN
+                        RETURN l_ref
+                    END IF
+                    IF accPrefixB[l_ref] >= accPrefixB[length(accPrefixB) - 1] THEN
+                        RETURN l_ref
+                    END IF
+                    SET key_tuple TO (remainder_mod_two(accPrefixA[l_ref]), remainder_mod_two(accPrefixB[l_ref]))
+                    SET curr_min TO get_min(key_tuple)
+                    IF curr_min > accPrefixA[l_ref] - accPrefixB[l_ref] THEN
+                        set_min(key_tuple, accPrefixA[l_ref] - accPrefixB[l_ref])
+                    END IF
+                    RETURN inner_while_loop(l_ref + 1)
+                END FUNCTION
+
+                left_ptr = inner_while_loop(left_ptr)
+                SET p_key2 TO (remainder_mod_two(accPrefixA[length(accPrefixA) - 1] - 1), remainder_mod_two(accPrefixB[length(accPrefixB) - 1]))
+                SET val_diff TO accPrefixA[length(accPrefixA) - 1] - accPrefixB[length(accPrefixB) - 1] - get_min(p_key2)
+                IF tempAns < val_diff THEN
+                    SET tempAns TO val_diff
+                END IF
+
+                RETURN process_inner(idx + 1, tempAns)
+            END FUNCTION
+
+            result = process_inner(0, result)
+        END FOR
+        RETURN result
+    END FUNCTION
+END CLASS

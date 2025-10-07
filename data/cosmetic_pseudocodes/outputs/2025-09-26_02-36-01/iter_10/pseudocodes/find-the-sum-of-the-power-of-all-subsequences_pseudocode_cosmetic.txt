@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION sumOfPower(nums parameter, k parameter)
+       DEFINE CONST_MODULUS = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+
+       DEFINE LENGTH_VAR = LENGTH OF nums
+       DEFINE MEMORY_TABLE = []
+       DEFINE RECUR_INDEX = 0
+
+       PROCEDURE initializeMemory()
+          MEMORY_TABLE = []
+          PROCEDURE fillRow()
+              RETURN [0 FOR EACH _ IN RANGE(0, k + 1)]
+          END PROCEDURE
+
+          FOR idx FROM 0 TO LENGTH_VAR
+              APPEND fillRow() TO MEMORY_TABLE
+          END FOR
+          MEMORY_TABLE[0][0] = 1
+       END PROCEDURE
+
+       PROCEDURE populateMemory(current int)
+          IF current > LENGTH_VAR THEN RETURN END IF
+
+          SET iterator = 0
+          SET currentRow = MEMORY_TABLE[current]
+          SET previousRow = MEMORY_TABLE[current - 1]
+
+          WHILE iterator <= k DO
+              currentRow[iterator] = previousRow[iterator]
+              IF iterator >= nums[current - 1] THEN
+                 currentRow[iterator] = currentRow[iterator] + previousRow[iterator - nums[current - 1]]
+              END IF
+              currentRow[iterator] = currentRow[iterator] MOD CONST_MODULUS
+              iterator = iterator + 1
+          END WHILE
+
+          populateMemory(current + 1)
+       END PROCEDURE
+
+       PROCEDURE summary()
+          DEFINE accumulator = 0
+          DEFINE subsetIndex = 1
+          DEFINE limit = (2 ^ LENGTH_VAR) - 1
+
+          WHILE subsetIndex <= limit DO
+              DEFINE sumTracker = 0
+              DEFINE elementCounter = 0
+              DEFINE positionPointer = 0
+              DEFINE mask = subsetIndex
+
+              WHILE mask > 0 DO
+                  IF (mask MOD 2) = 1 THEN
+                      sumTracker = sumTracker + nums[positionPointer]
+                      elementCounter = elementCounter + 1
+                  END IF
+                  mask = FLOOR(mask / 2)
+                  positionPointer = positionPointer + 1
+              END WHILE
+
+              IF sumTracker = k THEN
+                  accumulator = accumulator + (2 ^ (LENGTH_VAR - elementCounter))
+                  accumulator = accumulator MOD CONST_MODULUS
+              END IF
+              subsetIndex = subsetIndex + 1
+          END WHILE
+          RETURN accumulator
+       END PROCEDURE
+
+       initializeMemory()
+       populateMemory(1)
+       RETURN summary()
+    END FUNCTION
+END CLASS

@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION minMoves(rooks)
+        SET totalElements TO LENGTH OF rooks
+        SET firstSort TO CustomSort(rooks, getFirst)
+        SET secondSort TO CustomSort(rooks, getSecond)
+        SET aggregateMoves TO 0
+        SET pos TO 0
+        WHILE pos < totalElements
+            SET currentItem TO firstSort[pos]
+            SET tempDiff TO abs(currentItem[0] - pos)
+            SET aggregateMoves TO aggregateMoves + tempDiff
+            SET pos TO pos + 1
+        END WHILE
+        SET columnAccumulator TO 0
+        SET pointer TO 0
+        REPEAT
+            IF pointer = totalElements THEN
+                BREAK
+            END IF
+            SET elementAtPointer TO secondSort[pointer]
+            SET absoluteDelta TO ComputeAbsDifference(elementAtPointer[1], pointer)
+            SET columnAccumulator TO columnAccumulator + absoluteDelta
+            SET pointer TO pointer + 1
+        UNTIL FALSE
+        RETURN aggregateMoves + columnAccumulator
+    END FUNCTION
+
+    FUNCTION CustomSort(collection, keyFunc)
+        RETURN MergeSort(collection, keyFunc)
+    END FUNCTION
+
+    FUNCTION getFirst(pair)
+        RETURN pair[0]
+    END FUNCTION
+
+    FUNCTION getSecond(pair)
+        RETURN pair[1]
+    END FUNCTION
+
+    FUNCTION ComputeAbsDifference(a, b)
+        IF a >= b THEN
+            RETURN a - b
+        ELSE
+            RETURN b - a
+        END IF
+    END FUNCTION
+
+    FUNCTION MergeSort(arr, key)
+        IF LENGTH OF arr <= 1 THEN
+            RETURN arr
+        END IF
+        SET middleIndex TO LENGTH OF arr / 2
+        SET leftArray TO Slice(arr, 0, middleIndex)
+        SET rightArray TO Slice(arr, middleIndex, LENGTH OF arr)
+        SET sortedLeft TO MergeSort(leftArray, key)
+        SET sortedRight TO MergeSort(rightArray, key)
+        RETURN Merge(sortedLeft, sortedRight, key)
+    END FUNCTION
+
+    FUNCTION Merge(leftArr, rightArr, keyFunc)
+        SET resultArr TO empty list
+        SET leftIdx TO 0
+        SET rightIdx TO 0
+        WHILE leftIdx < LENGTH OF leftArr AND rightIdx < LENGTH OF rightArr
+            IF keyFunc(leftArr[leftIdx]) <= keyFunc(rightArr[rightIdx]) THEN
+                APPEND leftArr[leftIdx] TO resultArr
+                SET leftIdx TO leftIdx + 1
+            ELSE
+                APPEND rightArr[rightIdx] TO resultArr
+                SET rightIdx TO rightIdx + 1
+            END IF
+        END WHILE
+        WHILE leftIdx < LENGTH OF leftArr
+            APPEND leftArr[leftIdx] TO resultArr
+            SET leftIdx TO leftIdx + 1
+        END WHILE
+        WHILE rightIdx < LENGTH OF rightArr
+            APPEND rightArr[rightIdx] TO resultArr
+            SET rightIdx TO rightIdx + 1
+        END WHILE
+        RETURN resultArr
+    END FUNCTION
+END CLASS

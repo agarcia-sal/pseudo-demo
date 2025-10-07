@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION maximumEnergy(batteryLevels, limit)
+        SET totalCount TO 0 + (batteryLevels LENGTH)  
+        SET memoization TO array of zeros with size totalCount
+        SET lastIndex TO totalCount - (1 + 0)
+        SET memoization[lastIndex] TO batteryLevels[lastIndex]
+        SET highestValue TO memoization[lastIndex]
+
+        FUNCTION checkFrontThreshold(dequeList, currentIndex, thresholdLimit)
+            WHILE TRUE
+                IF dequeList IS EMPTY THEN
+                    RETURN FALSE
+                ENDIF
+                SET frontIndex TO dequeList[0]
+                IF (frontIndex - currentIndex) >= thresholdLimit THEN
+                    RETURN TRUE
+                ELSE
+                    RETURN FALSE
+                ENDIF
+            ENDWHILE
+        ENDFUNCTION
+
+        FUNCTION popFront(dequeList)
+            IF dequeList IS NOT EMPTY THEN
+                REMOVE dequeList[0]
+            ENDIF
+        ENDFUNCTION
+        
+        FUNCTION popBack(dequeList)
+            IF dequeList IS NOT EMPTY THEN
+                REMOVE dequeList[(dequeList LENGTH) - 1]
+            ENDIF
+        ENDFUNCTION
+        
+        CREATE indicesQueue AS a new empty deque
+        APPEND lastIndex TO indicesQueue
+
+        SET iterator TO lastIndex - 1
+        
+        WHILE iterator >= 0
+            WHILE checkFrontThreshold(indicesQueue, iterator, limit)
+                popFront(indicesQueue)
+            ENDWHILE
+
+            SET frontElement TO indicesQueue[0]
+            SET partialSum TO batteryLevels[iterator] + memoization[frontElement]
+            SET memoization[iterator] TO partialSum
+
+            IF highestValue < memoization[iterator] THEN
+                highestValue = memoization[iterator]
+            ENDIF
+
+            WHILE (indicesQueue LENGTH) > 0 AND memoization[iterator] >= memoization[indicesQueue[(indicesQueue LENGTH) - 1]]
+                popBack(indicesQueue)
+            ENDWHILE
+
+            APPEND iterator TO indicesQueue
+            SET iterator TO iterator - 1
+        ENDWHILE
+
+        RETURN highestValue
+    END FUNCTION
+END CLASS

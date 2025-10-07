@@ -1,0 +1,103 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER
+        PROCEDURE gatherOnes(posList LIST OF INTEGERS numsLst LIST OF INTEGERS idx INTEGER len INTEGER)
+            IF idx GREATER THAN OR EQUAL TO len THEN
+                RETURN
+            END IF
+            IF (numsLst at position idx) = 1 THEN
+                APPEND idx TO posList
+            END IF
+            CALL gatherOnes(posList, numsLst, idx + 1, len)
+        END PROCEDURE
+
+        DECLARE alpha TO empty list
+        DECLARE beta TO 0
+        DECLARE gamma TO LENGTH OF nums
+        CALL gatherOnes(alpha, nums, beta, gamma)
+
+        IF LENGTH OF alpha = 0 THEN
+            RETURN (k * 1) + k
+        END IF
+
+        DECLARE delta TO LENGTH OF alpha
+        DECLARE epsilon TO list initialized with zeros, size delta + 1
+        DECLARE phi TO 0
+
+        PROCEDURE buildPrefix(arr LIST OF INTEGERS prefix LIST OF INTEGERS i INTEGER limit INTEGER)
+            IF i >= limit THEN
+                RETURN
+            END IF
+            prefix at position (i+1) := (prefix at position i) + (arr at position i)
+            CALL buildPrefix(arr, prefix, i + 1, limit)
+        END PROCEDURE
+
+        CALL buildPrefix(alpha, epsilon, phi, delta)
+
+        FUNCTION cost(start INTEGER end INTEGER) RETURNS INTEGER
+            DECLARE kappa TO (start + end) / 2
+            DECLARE lambda TO alpha at position kappa
+            DECLARE mu TO 0
+
+            PROCEDURE leftCost(i INTEGER limit INTEGER center INTEGER ref INTEGER acc INTEGER)
+                IF i >= limit THEN
+                    RETURN acc
+                END IF
+                DECLARE temp TO (lambda - (alpha at position i)) - (center - i)
+                RETURN leftCost(i + 1, limit, center, ref, acc + temp)
+            END PROCEDURE
+
+            PROCEDURE rightCost(i INTEGER limit INTEGER center INTEGER ref INTEGER acc INTEGER)
+                IF i > limit THEN
+                    RETURN acc
+                END IF
+                DECLARE temp TO ((alpha at position i) - lambda) - (i - center)
+                RETURN rightCost(i + 1, limit, center, ref, acc + temp)
+            END PROCEDURE
+
+            DECLARE leftSum TO leftCost(start, kappa, kappa, kappa, 0)
+            DECLARE rightSum TO rightCost(kappa + 1, end, kappa, kappa, 0)
+            RETURN leftSum + rightSum
+        END FUNCTION
+
+        DECLARE omega TO a very large number (e.g. positive infinity)
+        DECLARE xi TO 0
+
+        PROCEDURE loopMain(begin INTEGER endLoop INTEGER limit INTEGER)
+            IF begin > limit THEN
+                RETURN
+            END IF
+            DECLARE zeta TO begin + endLoop - 1
+            DECLARE eta TO cost(begin, zeta)
+
+            IF (k % 2) = 1 THEN
+                DECLARE theta TO (begin + zeta) / 2
+                DECLARE iota TO alpha at position theta
+                DECLARE upsilon TO zeta - theta - (iota - (alpha at position theta - 1))
+                IF upsilon > maxChanges THEN
+                    eta := eta + (upsilon - maxChanges)
+                END IF
+            ELSE
+                DECLARE sigma TO (begin + zeta) / 2
+                DECLARE tau TO sigma + 1
+                DECLARE phi1 TO alpha at position sigma
+                DECLARE chi TO alpha at position tau
+                DECLARE psi TO tau - sigma - 1 - (chi - phi1 - 1)
+                IF psi > maxChanges THEN
+                    eta := eta + (psi - maxChanges)
+                END IF
+            END IF
+
+            IF eta < omega THEN
+                omega := eta
+            END IF
+
+            CALL loopMain(begin + 1, endLoop, limit)
+        END PROCEDURE
+
+        CALL loopMain(0, k, delta - k)
+
+        RETURN omega
+    END FUNCTION
+END CLASS
+```

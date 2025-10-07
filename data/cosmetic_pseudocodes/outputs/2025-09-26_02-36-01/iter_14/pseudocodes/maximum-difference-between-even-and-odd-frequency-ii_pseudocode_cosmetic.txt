@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+        SET bestResult TO smallest possible number
+        SET pairsList TO empty list
+        FOR each x IN ['0', '1', '2', '3', '4']
+            FOR each y IN ['0', '1', '2', '3', '4']
+                IF NOT (x = y)
+                    APPEND (x, y) TO pairsList
+                END IF
+            END FOR
+        END FOR
+
+        PROCEDURE calculateParityKey(aVal, bVal)
+            RETURN (aVal MOD 2, bVal MOD 2)
+        END PROCEDURE
+
+        FOR each tuple pairElement IN pairsList
+            LET firstChar BE pairElement[0]
+            LET secondChar BE pairElement[1]
+
+            SET minDictionary TO dictionary WITH default value infinite
+            SET prefixSumA TO [0]
+            SET prefixSumB TO [0]
+            SET leftIndex TO 0
+
+            FUNCTION getLast(list)
+                RETURN list[length(list) - 1]
+            END FUNCTION
+
+            FUNCTION getLengthSubstring(lIndex, rIndex)
+                RETURN rIndex - lIndex + 1
+            END FUNCTION
+
+            FOR index, character IN enumerate(s)
+                LETTER currentChar IS character
+                SET prevA TO getLast(prefixSumA)
+                SET prevB TO getLast(prefixSumB)
+
+                IF currentChar = firstChar
+                    APPEND prevA + 1 TO prefixSumA
+                ELSE
+                    APPEND 0 TO prefixSumA
+                END IF
+
+                IF currentChar = secondChar
+                    APPEND prevB + 1 TO prefixSumB
+                ELSE
+                    APPEND 0 TO prefixSumB
+                END IF
+
+                WHILE getLengthSubstring(leftIndex, index) >= k
+                      AND prefixSumA[leftIndex] < getLast(prefixSumA)
+                      AND prefixSumB[leftIndex] < getLast(prefixSumB)
+                    LET parityKey BE calculateParityKey(prefixSumA[leftIndex], prefixSumB[leftIndex])
+                    IF minDictionary[parityKey] > prefixSumA[leftIndex] - prefixSumB[leftIndex]
+                        SET minDictionary[parityKey] TO prefixSumA[leftIndex] - prefixSumB[leftIndex]
+                    END IF
+                    SET leftIndex TO leftIndex + 1
+                END WHILE
+
+                LET currentKey BE calculateParityKey((1 - getLast(prefixSumA)) MOD 2, getLast(prefixSumB) MOD 2)
+                LET candidateValue BE getLast(prefixSumA) - getLast(prefixSumB) - minDictionary[currentKey]
+
+                IF candidateValue > bestResult
+                    SET bestResult TO candidateValue
+                END IF
+            END FOR
+        END FOR
+        RETURN bestResult
+    END FUNCTION
+END CLASS

@@ -1,0 +1,175 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+        CONST FALSE_BOOL = (1 = 0)
+        CONST ZERO_INT = 0 * 5
+        CONST ONE_INT = (2 - 1)
+        SET length_graph TO 0
+        SET idx_pointer TO ZERO_INT
+
+        PROCEDURE getLength(list_var)
+            SET count_val TO ZERO_INT
+            WHILE TRUE
+                IF idx_pointer >= length_graph THEN
+                    BREAK
+                END IF
+                SET count_val TO count_val + ONE_INT
+                SET idx_pointer TO idx_pointer + ONE_INT
+            END WHILE
+            RETURN count_val
+        END PROCEDURE
+
+        SET length_graph TO LENGTH OF graph
+        SET visited_nodes TO NEW LIST of Boolean values with size length_graph initialized as FALSE_BOOL
+        SET node_queue TO NEW deque CONTAINING (start, ZERO_INT)
+        SET visited_nodes[start] TO (NOT FALSE_BOOL)
+        SET extremity_node TO start
+        SET maximum_distance TO ZERO_INT
+
+        DEFINE FUNCTION dequeue_left(queue_struct)
+            SET front_data TO NULL
+            SET temp_queue TO NEW deque
+            IF LENGTH OF queue_struct > ZERO_INT THEN
+                SET front_data TO queue_struct[ZERO_INT]
+                FOR counter FROM ONE_INT TO LENGTH OF queue_struct - ONE_INT
+                    APPEND queue_struct[counter] TO temp_queue
+                END FOR
+            END IF
+            RETURN front_data, temp_queue
+        END FUNCTION
+
+        WHILE LENGTH OF node_queue IS NOT ZERO_INT
+            SET temp_tuple, node_queue TO dequeue_left(node_queue)
+            SET current_node TO temp_tuple[ZERO_INT]
+            SET current_distance TO temp_tuple[ONE_INT]
+
+            IF current_distance - maximum_distance > ZERO_INT THEN
+                SET maximum_distance TO current_distance
+                SET extremity_node TO current_node
+            END IF
+
+            FOR each adjacency_node IN graph[current_node]
+                IF visited_nodes[adjacency_node] = FALSE_BOOL THEN
+                    SET visited_nodes[adjacency_node] TO NOT FALSE_BOOL
+                    APPEND (adjacency_node, current_distance + ONE_INT) TO node_queue
+                END IF
+            END FOR
+        END WHILE
+
+        RETURN extremity_node, maximum_distance
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        CONST ZERO_INT = 0 * 7
+        SET anchor_node TO ZERO_INT
+
+        SET node_a, dummy_a TO bfs(graph, anchor_node)
+        SET dummy_b, diameter_result TO bfs(graph, node_a)
+
+        RETURN diameter_result
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, start_node)
+        CONST FALSE_BOOL = (NOT (1 = 1))
+        CONST ZERO_INT = (5 - 5)
+        CONST ONE_INT = (10 / 10)
+        SET len_graph TO LENGTH OF graph
+        SET visited_flag TO NEW LIST with len_graph elements initialized with FALSE_BOOL
+        SET process_queue TO NEW deque containing (start_node, ZERO_INT)
+        SET visited_flag[start_node] TO NOT FALSE_BOOL
+        SET max_dist TO ZERO_INT
+
+        DEFINE FUNCTION pop_left(queue_list)
+            IF LENGTH OF queue_list = ZERO_INT THEN
+                RETURN NULL, queue_list
+            END IF
+            SET first_element TO queue_list[ZERO_INT]
+            SET new_queue TO queue_list[ONE_INT TO LENGTH OF queue_list - ONE_INT]
+            RETURN first_element, new_queue
+        END FUNCTION
+
+        WHILE LENGTH OF process_queue > ZERO_INT
+            SET elem, process_queue TO pop_left(process_queue)
+            SET node_current TO elem[ZERO_INT]
+            SET dist_current TO elem[ONE_INT]
+
+            IF dist_current > max_dist THEN
+                SET max_dist TO dist_current
+            END IF
+
+            FOR each adj_node IN graph[node_current]
+                IF visited_flag[adj_node] = FALSE_BOOL THEN
+                    SET visited_flag[adj_node] TO NOT FALSE_BOOL
+                    APPEND (adj_node, dist_current + ONE_INT) TO process_queue
+                END IF
+            END FOR
+        END WHILE
+
+        RETURN max_dist
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        CONST ZERO_INT = (10 - 10)
+        CONST ONE_INT = (2 - 1)
+
+        SET n_val TO LENGTH OF edges1 + ONE_INT
+        SET m_val TO LENGTH OF edges2 + ONE_INT
+
+        SET graph_structure1 TO NEW LIST OF EMPTY LISTS size n_val
+        SET graph_structure2 TO NEW LIST OF EMPTY LISTS size m_val
+
+        FOR EACH edge_pair IN edges1
+            SET u_val TO edge_pair[ZERO_INT]
+            SET v_val TO edge_pair[ONE_INT]
+            APPEND v_val TO graph_structure1[u_val]
+            APPEND u_val TO graph_structure1[v_val]
+        END FOR
+
+        FOR EACH edge_pair2 IN edges2
+            SET u_val2 TO edge_pair2[ZERO_INT]
+            SET v_val2 TO edge_pair2[ONE_INT]
+            APPEND v_val2 TO graph_structure2[u_val2]
+            APPEND u_val2 TO graph_structure2[v_val2]
+        END FOR
+
+        SET diam1 TO tree_diameter(graph_structure1)
+        SET diam2 TO tree_diameter(graph_structure2)
+
+        SET longest_paths_1 TO EMPTY LIST
+        SET counter_i TO ZERO_INT
+        WHILE counter_i < n_val
+            APPEND maximum_path_length_from_node(graph_structure1, counter_i) TO longest_paths_1
+            SET counter_i TO counter_i + ONE_INT
+        END WHILE
+
+        SET longest_paths_2 TO EMPTY LIST
+        SET counter_j TO ZERO_INT
+        WHILE counter_j < m_val
+            APPEND maximum_path_length_from_node(graph_structure2, counter_j) TO longest_paths_2
+            SET counter_j TO counter_j + ONE_INT
+        END WHILE
+
+        SET min_diam TO 1 / 0  // positive infinity representation
+
+        SET counter_u TO ZERO_INT
+        WHILE counter_u < n_val
+            SET counter_v TO ZERO_INT
+            WHILE counter_v < m_val
+                SET sum_paths TO longest_paths_1[counter_u] + longest_paths_2[counter_v] + ONE_INT
+                SET current_max TO diam1
+                IF diam2 > current_max THEN
+                    SET current_max TO diam2
+                END IF
+                IF sum_paths > current_max THEN
+                    SET current_max TO sum_paths
+                END IF
+                IF current_max < min_diam THEN
+                    SET min_diam TO current_max
+                END IF
+                SET counter_v TO counter_v + ONE_INT
+            END WHILE
+            SET counter_u TO counter_u + ONE_INT
+        END WHILE
+
+        RETURN min_diam
+    END FUNCTION
+END CLASS

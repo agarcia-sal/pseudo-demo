@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        SET CONSTANT_BIG TO 1000000000 PLUS 7
+        SET result_accumulator TO 0
+        SET left_counter TO empty counter mapping elements to counts
+        SET right_counter TO counter mapping elements of nums to counts
+
+        FUNCTION choose2(x)
+            RETURN (x MULTIPLIED BY (x MINUS 1)) DIVIDED BY 2
+        END FUNCTION
+
+        SET partial_sum1 TO 0
+        SET partial_sum2 TO 0
+        SET partial_sum3 TO 0
+        SET total_right_squares TO 0
+        SET partial_sum4 TO 0
+
+        FOR index FROM 0 TO LENGTH(nums) MINUS 1
+            SET current_element TO nums AT position index
+
+            INCREMENT partial_sum1 BY left_counter[current_element] MULTIPLIED BY (NEGATE right_counter[current_element] SQUARED PLUS SQUARE(right_counter[current_element] MINUS 1))
+            INCREMENT partial_sum2 BY NEGATE left_counter[current_element] SQUARED
+            INCREMENT total_right_squares BY NEGATE right_counter[current_element] SQUARED PLUS SQUARE(right_counter[current_element] MINUS 1)
+            INCREMENT partial_sum4 BY NEGATE left_counter[current_element]
+
+            DECREMENT right_counter[current_element] BY 1
+
+            SET left_length TO index
+            SET right_length TO LENGTH(nums) MINUS index MINUS 1
+
+            INCREMENT result_accumulator BY choose2(left_length) MULTIPLIED BY choose2(right_length)
+            DECREMENT result_accumulator BY choose2(left_length MINUS left_counter[current_element]) MULTIPLIED BY choose2(right_length MINUS right_counter[current_element])
+
+            SET ps1_adjusted TO partial_sum1 MINUS left_counter[current_element] MULTIPLIED BY right_counter[current_element] SQUARED
+            SET ps2_adjusted TO partial_sum2 MINUS right_counter[current_element] MULTIPLIED BY left_counter[current_element] SQUARED
+            SET ps3_adjusted TO partial_sum3 MINUS left_counter[current_element] SQUARED
+            SET total_right_squares_adjusted TO total_right_squares MINUS right_counter[current_element] SQUARED
+            SET ps4_adjusted TO partial_sum4 MINUS left_counter[current_element] MULTIPLIED BY right_counter[current_element]
+            SET left_adjusted TO left_length MINUS left_counter[current_element]
+            SET right_adjusted TO right_length MINUS right_counter[current_element]
+
+            DECREMENT result_accumulator BY ps4_adjusted MULTIPLIED BY left_counter[current_element] MULTIPLIED BY (right_length MINUS right_counter[current_element]) PLUS ps1_adjusted MULTIPLIED BY NEGATE left_counter[current_element]
+            DECREMENT result_accumulator BY ps4_adjusted MULTIPLIED BY right_counter[current_element] MULTIPLIED BY (left_length MINUS left_counter[current_element]) PLUS ps2_adjusted MULTIPLIED BY NEGATE right_counter[current_element]
+            DECREMENT result_accumulator BY (ps3_adjusted MINUS left_adjusted) MULTIPLIED BY right_counter[current_element] MULTIPLIED BY (right_length MINUS right_counter[current_element]) DIVIDED BY 2
+            DECREMENT result_accumulator BY (total_right_squares_adjusted MINUS right_adjusted) MULTIPLIED BY left_counter[current_element] MULTIPLIED BY (left_length MINUS left_counter[current_element]) DIVIDED BY 2
+
+            SET result_accumulator TO result_accumulator MOD CONSTANT_BIG
+
+            INCREMENT partial_sum1 BY SQUARE(right_counter[current_element])
+            INCREMENT partial_sum2 BY right_counter[current_element] MULTIPLIED BY (NEGATE left_counter[current_element] SQUARED PLUS SQUARE(left_counter[current_element] PLUS 1))
+            INCREMENT partial_sum3 BY NEGATE left_counter[current_element] SQUARED PLUS SQUARE(left_counter[current_element] PLUS 1)
+            INCREMENT partial_sum4 BY right_counter[current_element]
+
+            INCREMENT left_counter[current_element] BY 1
+        END FOR
+
+        RETURN result_accumulator
+    END FUNCTION
+END CLASS

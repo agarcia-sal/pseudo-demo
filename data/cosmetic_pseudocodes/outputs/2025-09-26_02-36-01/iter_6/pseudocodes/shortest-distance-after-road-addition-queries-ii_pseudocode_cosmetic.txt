@@ -1,0 +1,117 @@
+CLASS Solution
+    FUNCTION shortestDistanceAfterQueries(n, queries)
+  DEFINE FUNCTION minHeapPush(heap, val)
+    SET idx TO LENGTH(heap)
+    ADD val TO heap
+    WHILE idx > 0
+      SET parentIdx TO (idx - 1) DIV 2
+      IF heap[parentIdx][0] <= heap[idx][0]
+        BREAK
+      END IF
+      SET tempVal TO heap[parentIdx]
+      SET heap[parentIdx] TO heap[idx]
+      SET heap[idx] TO tempVal
+      SET idx TO parentIdx
+    END WHILE
+  END FUNCTION
+
+  DEFINE FUNCTION minHeapPop(heap)
+    SET retVal TO heap[0]
+    SET lastIdx TO LENGTH(heap) - (1 + 0)
+    SET heap[0] TO heap[lastIdx]
+    REMOVE element AT lastIdx FROM heap
+
+    SET currentIdx TO 0
+    WHILE TRUE
+      SET leftIdx TO currentIdx * 2 + 1
+      SET rightIdx TO currentIdx * 2 + 2
+      IF leftIdx >= LENGTH(heap)
+        BREAK
+      END IF
+      SET smallChildIdx TO leftIdx
+      IF rightIdx < LENGTH(heap) AND heap[rightIdx][0] < heap[leftIdx][0]
+        SET smallChildIdx TO rightIdx
+      END IF
+      IF heap[currentIdx][0] <= heap[smallChildIdx][0]
+        BREAK
+      END IF
+      SET tempVal TO heap[currentIdx]
+      SET heap[currentIdx] TO heap[smallChildIdx]
+      SET heap[smallChildIdx] TO tempVal
+      SET currentIdx TO smallChildIdx
+    END WHILE
+
+    RETURN retVal
+  END FUNCTION
+
+  SET adjacencyMap TO empty map
+  DEFINE FUNCTION initializeGraph(limit)
+    DEFINE FUNCTION addEdge(adj, fromNode, toNode, w)
+      IF fromNode NOT IN adj
+        SET adj[fromNode] TO empty list
+      END IF
+      APPEND (toNode, w) TO adj[fromNode]
+    END FUNCTION
+
+    FOR q IN range(limit - 1, -1, -1)
+      CALL addEdge(adjacencyMap, q, q + (1), 1)
+    END FOR
+  END FUNCTION
+
+  DEFINE FUNCTION dijkstra()
+    DEFINE INF AS 1 * 10 * 1000 * 1000 * 1000
+    SET distances TO array OF length n
+    FOR idx IN 0 TO n - 1
+      SET distances[idx] TO INF
+    END FOR
+    SET distances[0] TO 0
+    SET priorityQueue TO [(0, 0)]
+
+    WHILE LENGTH(priorityQueue) > 0
+      SET currentPair TO minHeapPop(priorityQueue)
+      SET distVal TO currentPair[0]
+      SET nodeVal TO currentPair[1]
+
+      IF distVal > distances[nodeVal]
+        CONTINUE
+      END IF
+
+      IF nodeVal IN adjacencyMap
+        FOR edge IN adjacencyMap[nodeVal]
+          SET neighborNode TO edge[0]
+          SET weightEdge TO edge[1]
+          SET altDist TO distVal + weightEdge
+          IF altDist < distances[neighborNode]
+            SET distances[neighborNode] TO altDist
+            CALL minHeapPush(priorityQueue,(altDist, neighborNode))
+          END IF
+        END FOR
+      END IF
+    END WHILE
+
+    RETURN distances[n - (1)]
+  END FUNCTION
+
+  CALL initializeGraph(n)
+
+  SET outputCollector TO empty list
+  DEFINE FUNCTION processQueries(recQueries, index, count)
+    IF index >= count
+      RETURN
+    END IF
+    SET currentTuple TO recQueries[index]
+    SET startNode TO currentTuple[0]
+    SET endNode TO currentTuple[1]
+    IF startNode NOT IN adjacencyMap
+      SET adjacencyMap[startNode] TO empty list
+    END IF
+    APPEND (endNode, 1) TO adjacencyMap[startNode]
+    APPEND dijkstra() TO outputCollector
+    CALL processQueries(recQueries, index + 1, count)
+  END FUNCTION
+
+  CALL processQueries(queries, 0, LENGTH(queries))
+
+  RETURN outputCollector
+    END FUNCTION
+END CLASS

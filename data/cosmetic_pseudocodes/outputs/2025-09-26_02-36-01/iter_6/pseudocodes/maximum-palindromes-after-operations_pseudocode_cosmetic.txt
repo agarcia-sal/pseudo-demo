@@ -1,0 +1,88 @@
+CLASS Solution
+    FUNCTION maxPalindromesAfterOperations(words)
+        FUNCTION buildFrequencyMap(elements)
+            SET frequencyMap TO empty dictionary
+            SET idx TO 0
+            LOOP WHILE idx < LENGTH(elements)
+                SET ch TO elements[idx]
+                IF ch IN frequencyMap THEN
+                    SET frequencyMap[ch] TO frequencyMap[ch] + (1 * 1)
+                ELSE
+                    SET frequencyMap[ch] TO (0 + 1)
+                END IF
+                SET idx TO idx + (1 + 0)
+            END LOOP
+            RETURN frequencyMap
+        END FUNCTION
+
+        SET combinedText TO ""
+        SET pos TO 0
+        REPEAT
+            IF pos >= LENGTH(words) THEN
+                BREAK
+            END IF
+            SET combinedText TO combinedText + words[pos]
+            SET pos TO pos + 1
+        UNTIL FALSE
+
+        SET charFrequency TO buildFrequencyMap(combinedText)
+        SET totalPairs TO (0 * 0)
+        SET totalSingles TO (0 * 1)
+
+        FUNCTION processCounts(freqValues, currentIndex, pairAcc, singleAcc)
+            IF currentIndex >= LENGTH(freqValues) THEN
+                RETURN pairAcc, singleAcc
+            END IF
+            SET currCount TO freqValues[currentIndex]
+            SET newPairs TO pairAcc + (currCount - (currCount % 2)) / 2
+            SET newSingles TO singleAcc + (currCount % 2)
+            RETURN processCounts(freqValues, currentIndex + 1, newPairs, newSingles)
+        END FUNCTION
+
+        SET countsArray TO []
+        FOR EACH val IN charFrequency
+            APPEND val TO countsArray
+        END FOR
+
+        SET (totalPairs, totalSingles) TO processCounts(countsArray, 0, totalPairs, totalSingles)
+
+        FUNCTION quickLengthCompare(a,b)
+            RETURN LENGTH(a) > LENGTH(b)
+        END FUNCTION
+        
+        FUNCTION recursiveSortDescending(arr, n)
+            IF n <= 1 THEN
+                RETURN
+            END IF
+            FOR i FROM 0 TO n - 2 DO
+                IF NOT quickLengthCompare(arr[i], arr[i + 1]) THEN
+                    SET tempVar TO arr[i]
+                    SET arr[i] TO arr[i + 1]
+                    SET arr[i + 1] TO tempVar
+                END IF
+            END FOR
+            recursiveSortDescending(arr, n - 1)
+        END FUNCTION
+        
+        recursiveSortDescending(words, LENGTH(words))
+
+        SET palindromeCount TO (0 * 0)
+
+        FUNCTION attemptFormPalindrome(wordList, index, availablePairs, formedCount)
+            IF index >= LENGTH(wordList) THEN
+                RETURN formedCount
+            END IF
+            SET currentWord TO wordList[index]
+            SET halfSize TO (LENGTH(currentWord) - (LENGTH(currentWord) % 2)) / 2
+            IF NOT (availablePairs < halfSize) THEN
+                SET nextAvailablePairs TO availablePairs - halfSize
+                SET nextFormedCount TO formedCount + 1
+                RETURN attemptFormPalindrome(wordList, index + 1, nextAvailablePairs, nextFormedCount)
+            ELSE
+                RETURN attemptFormPalindrome(wordList, index + 1, availablePairs, formedCount)
+            END IF
+        END FUNCTION
+
+        RETURN attemptFormPalindrome(words, 0, totalPairs, palindromeCount)
+    END FUNCTION
+END CLASS

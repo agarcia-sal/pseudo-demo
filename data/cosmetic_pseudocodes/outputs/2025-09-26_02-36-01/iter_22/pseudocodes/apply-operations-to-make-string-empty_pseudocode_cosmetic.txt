@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION lastNonEmptyString(s)
+        PROCEDURE countFrequencies(inputStr, freqMap)
+            SET pos TO 0
+            LOOP WHILE pos < LENGTH(inputStr)
+                SET currentChar TO inputStr[pos]
+                IF currentChar NOT IN freqMap THEN
+                    SET freqMap[currentChar] TO 1
+                ELSE
+                    SET freqMap[currentChar] TO freqMap[currentChar] + 1
+                END IF
+                SET pos TO pos + 1
+            END LOOP
+        END PROCEDURE
+
+        SET frequencies TO EMPTY MAP
+        CALL countFrequencies(s, frequencies)
+
+        SET highestFreq TO 0
+        SET keyIter TO 0
+        WHILE keyIter < LENGTH(frequencies)
+            SET keyList TO KEYS(frequencies)
+            SET currentKey TO keyList[keyIter]
+            IF frequencies[currentKey] > highestFreq THEN
+                SET highestFreq TO frequencies[currentKey]
+            END IF
+            SET keyIter TO keyIter + 1
+        END WHILE
+
+        SET chosenChars TO EMPTY SET
+        FOR EACH k IN KEYS(frequencies)
+            IF frequencies[k] = highestFreq THEN
+                INSERT k INTO chosenChars
+            END IF
+        END FOR
+
+        SET collected TO EMPTY LIST
+        SET idx TO LENGTH(s) - 1
+        WHILE idx >= 0
+            SET elem TO s[idx]
+            IF elem IN chosenChars THEN
+                APPEND elem TO collected
+                REMOVE elem FROM chosenChars
+            END IF
+            SET idx TO idx - 1
+        END WHILE
+
+        FUNCTION reverseConcat(listData)
+            SET acc TO ""
+            SET indexVar TO LENGTH(listData) - 1
+            REPEAT
+                SET acc TO acc + listData[indexVar]
+                SET indexVar TO indexVar - 1
+            UNTIL indexVar < 0
+            RETURN acc
+        END FUNCTION
+
+        RETURN reverseConcat(collected)
+    END FUNCTION
+END CLASS

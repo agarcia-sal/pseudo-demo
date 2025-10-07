@@ -1,0 +1,172 @@
+CLASS Solution
+{
+	FUNCTION bfs(graph, start)
+		DATA lenGraph IS LENGTH(graph)
+		DATA marks IS NEW LIST OF Boolean FALSE OF LENGTH lenGraph
+		DATA deck IS NEW DEQUE CONTAINING (start, 0)
+		marks[start] := TRUE
+		DATA furthestVertex IS start
+		DATA maxDist IS 0
+
+		FUNCTION deque_pop_left(aDeque)
+			DATA ele := aDeque[0]
+			DELETE aDeque[0]
+			RETURN ele
+		END FUNCTION
+
+		FUNCTION enqueue(aDeque, val)
+			APPEND val TO aDeque
+		END FUNCTION
+
+		PROCEDURE recursive_iterate()
+			IF LENGTH(deck) = 0 THEN RETURN
+			END IF
+			DATA currTuple := deque_pop_left(deck)
+			DATA currentNode := currTuple[0]
+			DATA distVal := currTuple[1]
+			IF distVal > maxDist THEN
+				maxDist := distVal
+				furthestVertex := currentNode
+			END IF
+			DATA neighborsList IS graph[currentNode]
+			FUNCTION process_neighbors(index)
+				IF index >= LENGTH(neighborsList) THEN RETURN END IF
+				DATA neigh := neighborsList[index]
+				IF marks[neigh] = FALSE THEN
+					marks[neigh] := TRUE
+					enqueue(deck, (neigh, distVal + 1))
+				END IF
+				process_neighbors(index + 1)
+			END FUNCTION
+			process_neighbors(0)
+			recursive_iterate()
+		END PROCEDURE
+
+		recursive_iterate()
+		RETURN (furthestVertex, maxDist)
+	END FUNCTION
+
+	FUNCTION tree_diameter(graph)
+		DATA zeroNode := 0
+		DATA nodeFarthest, tempUnused := bfs(graph, zeroNode)
+		DATA _, diameterVal := bfs(graph, nodeFarthest)
+		RETURN diameterVal
+	END FUNCTION
+
+	FUNCTION maximum_path_length_from_node(graph, node)
+		DATA sizeG IS LENGTH(graph)
+		DATA visitMask IS NEW LIST OF Boolean FALSE OF LENGTH sizeG
+		DATA dq IS NEW DEQUE CONTAINING (node, 0)
+		visitMask[node] := TRUE
+		DATA maxDistVal IS 0
+
+		FUNCTION pop_left(dq)
+			DATA itm := dq[0]
+			DELETE dq[0]
+			RETURN itm
+		END FUNCTION
+
+		FUNCTION queue_append(dq, val)
+			APPEND val TO dq
+		END FUNCTION
+
+		PROCEDURE recur_loop()
+			IF LENGTH(dq) = 0 THEN RETURN END IF
+			DATA tup := pop_left(dq)
+			DATA currentPoint := tup[0]
+			DATA distNow := tup[1]
+			IF distNow > maxDistVal THEN
+				maxDistVal := distNow
+			END IF
+			DATA neighs IS graph[currentPoint]
+			PROCEDURE process_neighs(i)
+				IF i = LENGTH(neighs) THEN RETURN END IF
+				DATA nNode := neighs[i]
+				IF visitMask[nNode] = FALSE THEN
+					visitMask[nNode] := TRUE
+					queue_append(dq, (nNode, distNow + 1))
+				END IF
+				process_neighs(i + 1)
+			END PROCEDURE
+			process_neighs(0)
+			recur_loop()
+		END PROCEDURE
+
+		recur_loop()
+		RETURN maxDistVal
+	END FUNCTION
+
+	FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+		DATA sizeE1 IS LENGTH(edges1) + 1
+		DATA sizeE2 IS LENGTH(edges2) + 1
+
+		DATA G1 := NEW LIST CONTAINING empty LIST REPEATED sizeE1 TIMES
+		DATA G2 := NEW LIST CONTAINING empty LIST REPEATED sizeE2 TIMES
+
+		PROCEDURE fill_graph(edges, graph)
+			FUNCTION recurse_i(j)
+				IF j = LENGTH(edges) THEN RETURN END IF
+				DATA edgePair := edges[j]
+				DATA x := edgePair[0]
+				DATA y := edgePair[1]
+				APPEND y TO graph[x]
+				APPEND x TO graph[y]
+				recurse_i(j + 1)
+			END FUNCTION
+			recurse_i(0)
+		END PROCEDURE
+
+		fill_graph(edges1, G1)
+		fill_graph(edges2, G2)
+
+		DATA diaOne := tree_diameter(G1)
+		DATA diaTwo := tree_diameter(G2)
+
+		DATA longestPaths1 := NEW LIST
+		DATA idx1 := 0
+		PROCEDURE gather_lp1()
+			IF idx1 = sizeE1 THEN RETURN END IF
+			APPEND maximum_path_length_from_node(G1, idx1) TO longestPaths1
+			idx1 := idx1 + 1
+			gather_lp1()
+		END PROCEDURE
+		gather_lp1()
+
+		DATA longestPaths2 := NEW LIST
+		DATA idx2 := 0
+		PROCEDURE gather_lp2()
+			IF idx2 = sizeE2 THEN RETURN END IF
+			APPEND maximum_path_length_from_node(G2, idx2) TO longestPaths2
+			idx2 := idx2 + 1
+			gather_lp2()
+		END PROCEDURE
+		gather_lp2()
+
+		DATA minDiam := +∞
+
+		DATA uCtr := 0
+		PROCEDURE outer_loop()
+			IF uCtr = sizeE1 THEN RETURN END IF
+			DATA vCtr := 0
+			PROCEDURE inner_loop()
+				IF vCtr = sizeE2 THEN RETURN END IF
+				DATA val1 := diaOne
+				DATA val2 := diaTwo
+				DATA val3 := longestPaths1[uCtr]
+				DATA val4 := longestPaths2[vCtr]
+				DATA candidate := val1
+				IF val2 > candidate THEN candidate := val2 END IF
+				IF val3 + val4 + 1 > candidate THEN candidate := val3 + val4 + 1 END IF
+				IF candidate < minDiam THEN minDiam := candidate END IF
+				vCtr := vCtr + 1
+				inner_loop()
+			END PROCEDURE
+			inner_loop()
+			uCtr := uCtr + 1
+			outer_loop()
+		END PROCEDURE
+		outer_loop()
+
+		RETURN minDiam
+	END FUNCTION
+}

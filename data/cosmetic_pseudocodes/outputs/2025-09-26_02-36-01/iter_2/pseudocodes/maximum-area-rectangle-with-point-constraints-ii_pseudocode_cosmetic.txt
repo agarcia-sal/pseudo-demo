@@ -1,0 +1,59 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, size)  
+        self.tree ← array of zeros with length (size + 1)  
+    END FUNCTION  
+
+    FUNCTION add(self, index)  
+        WHILE index < LENGTH(self.tree)  
+            self.tree[index] ← self.tree[index] + 1  
+            increment ← index BITAND (-index)  
+            index ← index + increment  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION pre(self, index)  
+        accumulator ← 0  
+        WHILE index > 0  
+            accumulator ← accumulator + self.tree[index]  
+            index ← index BITAND (index - 1)  
+        END WHILE  
+        RETURN accumulator  
+    END FUNCTION  
+
+    FUNCTION query(self, left, right)  
+        RETURN self.pre(right) - self.pre(left - 1)  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+        combinedPairs ← zip(xCoord, yCoord) converted to list  
+        SORT combinedPairs BY first element ascending, then second element ascending  
+        uniqueYs ← sorted set from yCoord  
+        maximumArea ← -1  
+        fenw ← Fenwick(LENGTH(uniqueYs))  
+        startIndex ← bisect_left(uniqueYs, combinedPairs[0][1]) + 1  
+        fenw.add(startIndex)  
+        history ← empty map  
+        i ← 0  
+        WHILE i < LENGTH(combinedPairs) - 1  
+            pointA ← combinedPairs[i]  
+            pointB ← combinedPairs[i + 1]  
+            yPos ← bisect_left(uniqueYs, pointB[1]) + 1  
+            fenw.add(yPos)  
+            IF pointA[0] ≠ pointB[0] THEN  
+                i ← i + 1  
+                CONTINUE  
+            END IF  
+            leftBound ← bisect_left(uniqueYs, pointA[1]) + 1  
+            currentSum ← fenw.query(leftBound, yPos)  
+            IF (pointB[1] IN history) AND (history[pointB[1]][1] = pointA[1]) AND ((history[pointB[1]][2] + 2) = currentSum) THEN  
+                candidateArea ← (pointB[0] - history[pointB[1]][0]) * (pointB[1] - pointA[1])  
+                maximumArea ← MAX(maximumArea, candidateArea)  
+            END IF  
+            history[pointB[1]] ← (pointA[0], pointA[1], currentSum)  
+            i ← i + 1  
+        END WHILE  
+        RETURN maximumArea  
+    END FUNCTION  
+END CLASS

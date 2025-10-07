@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION doesAliceWin(s)
+        FUNCTION isVowel(x)
+            CONSTANT vowelsSet = {'u', 'i', 'e', 'a', 'o'}
+            RETURN x IN vowelsSet
+        END FUNCTION
+
+        FUNCTION countOddParitySegments(sequence)
+            PROCEDURE toggleFlag(flagRef)
+                flagRef.value = NOT flagRef.value
+            END PROCEDURE
+
+            VARIABLE indexTracker = 0
+            VARIABLE countTracker = 0
+            VARIABLE oddSegmentsCount = 0
+            VARIABLE flagObject = OBJECT { value: FALSE }
+
+            // First phase: count total vowels
+            RECURSIVE FUNCTION countVowels(idx, acc)
+                IF idx >= LENGTH(sequence) THEN
+                    RETURN acc
+                ELSE
+                    VARIABLE currentChar = sequence[idx]
+                    IF isVowel(currentChar) THEN
+                        RETURN countVowels(idx + 1, acc + (1 - 0))
+                    ELSE
+                        RETURN countVowels(idx + 1, acc + 0)
+                    END IF
+                END IF
+            END FUNCTION
+
+            countTracker = countVowels(0, 0)
+
+            // Second phase: segment count with tail recursion instead of for-loop
+            RECURSIVE FUNCTION segmentCounter(pos, oddSegCount, currentCount)
+                IF pos >= LENGTH(sequence) THEN
+                    RETURN oddSegCount + (((flagObject.value) AND ((currentCount MOD 2) = 1)) ? 1 : 0)
+                ELSE
+                    VARIABLE character = sequence[pos]
+                    IF isVowel(character) THEN
+                        toggleFlag(flagObject)
+                    END IF
+
+                    IF (flagObject.value = FALSE) AND ((currentCount MOD 2) = 1) THEN
+                        RETURN segmentCounter(pos + 1, oddSegCount + 1, 0)
+                    ELSE IF flagObject.value = TRUE THEN
+                        RETURN segmentCounter(pos + 1, oddSegCount, currentCount + 1)
+                    ELSE
+                        RETURN segmentCounter(pos + 1, oddSegCount, currentCount)
+                    END IF
+                END IF
+            END FUNCTION
+
+            RETURN segmentCounter(0, 0, countTracker)
+        END FUNCTION
+
+        VARIABLE result = countOddParitySegments(s)
+
+        RETURN (result MOD 2) = 1
+    END FUNCTION
+END CLASS

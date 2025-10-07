@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+    BEGIN
+        DECLARE priority_queue AS list
+        DECLARE iterator_i, iterator_j, current_val, current_idx AS INTEGER
+        
+        iterator_i ← 0
+        WHILE iterator_i < LENGTH(nums) DO
+            current_val ← nums[iterator_i]
+            current_idx ← iterator_i
+            APPEND (current_val, current_idx) TO priority_queue
+            iterator_i ← iterator_i + 1
+        END WHILE
+        
+        CALL heapify(priority_queue)
+        
+        DECLARE visited_indices AS set
+        visited_indices ← EMPTY SET
+        
+        DECLARE aggregate_sum AS INTEGER
+        aggregate_sum ← 0
+        iterator_j ← 0
+        WHILE iterator_j < LENGTH(nums) DO
+            aggregate_sum ← aggregate_sum + nums[iterator_j]
+            iterator_j ← iterator_j + 1
+        END WHILE
+        
+        DECLARE answers_list AS list
+        answers_list ← EMPTY LIST
+        
+        DECLARE query_pos AS INTEGER
+        query_pos ← 0
+        WHILE query_pos < LENGTH(queries) DO
+            DECLARE pos_query, count_query AS INTEGER
+            pos_query ← queries[query_pos][0]
+            count_query ← queries[query_pos][1]
+            
+            IF NOT (pos_query IN visited_indices) THEN
+                ADD pos_query TO visited_indices
+                aggregate_sum ← aggregate_sum + (-1 * nums[pos_query])
+            END IF
+            
+            DECLARE removal_counter AS INTEGER
+            removal_counter ← 0
+            
+            DECLARE empty_flag AS BOOLEAN
+            empty_flag ← FALSE
+            
+            WHILE removal_counter < count_query AND NOT empty_flag DO
+                IF LENGTH(priority_queue) = 0 THEN
+                    empty_flag ← TRUE
+                ELSE
+                    DECLARE pair_val_idx AS tuple
+                    pair_val_idx ← heappop(priority_queue)
+                    DECLARE popped_val, popped_idx AS INTEGER
+                    popped_val ← pair_val_idx[0]
+                    popped_idx ← pair_val_idx[1]
+                    
+                    IF NOT (popped_idx IN visited_indices) THEN
+                        ADD popped_idx TO visited_indices
+                        aggregate_sum ← aggregate_sum - popped_val
+                        removal_counter ← removal_counter + 1
+                    END IF
+                END IF
+            END WHILE
+            
+            APPEND aggregate_sum TO answers_list
+            query_pos ← query_pos + 1
+        END WHILE
+        
+        RETURN answers_list
+    END FUNCTION
+END CLASS

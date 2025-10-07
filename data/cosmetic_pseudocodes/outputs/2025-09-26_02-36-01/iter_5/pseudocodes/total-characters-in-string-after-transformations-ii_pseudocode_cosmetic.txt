@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+        SET CONST_MOD TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+
+        SET matrix_transform TO list of lists filled with zero integers sized 26 by 26
+        DEFINE proc_fill_transform(i_curr INTEGER, j_curr INTEGER)
+            IF i_curr EQUALS 26 THEN RETURN
+            ENDIF
+            IF j_curr EQUALS nums[i_curr] THEN
+                CALL proc_fill_transform(i_curr + 1, 0)
+            ELSE
+                SET idx_target TO ((i_curr + j_curr + 1) - 26 * ((i_curr + j_curr + 1) / 26))  // modulo 26 via floor division
+                SET matrix_transform[i_curr][idx_target] TO matrix_transform[i_curr][idx_target] + 1
+                CALL proc_fill_transform(i_curr, j_curr + 1)
+            ENDIF
+        END DEFINE
+        CALL proc_fill_transform(0, 0)
+
+        FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+            SET accumulator TO list of lists of zero integers sized 26 by 26
+            DEFINE multiply_cells(x INTEGER, y INTEGER, z INTEGER, running_sum INTEGER) RETURNS integer
+                IF z EQUALS 26 THEN
+                    RETURN running_sum MOD CONST_MOD
+                ELSE
+                    SET product_val TO (A[x][z] * B[z][y]) MOD CONST_MOD
+                    RETURN CALL multiply_cells(x, y, z + 1, (running_sum + product_val) MOD CONST_MOD)
+                ENDIF
+            END DEFINE
+
+            DEFINE fill_row(i_idx INTEGER, j_idx INTEGER)
+                IF i_idx EQUALS 26 THEN RETURN
+                ENDIF
+                IF j_idx EQUALS 26 THEN
+                    CALL fill_row(i_idx + 1, 0)
+                ELSE
+                    SET accumulator[i_idx][j_idx] TO CALL multiply_cells(i_idx, j_idx, 0, 0)
+                    CALL fill_row(i_idx, j_idx + 1)
+                ENDIF
+            END DEFINE
+
+            CALL fill_row(0, 0)
+            RETURN accumulator
+        END FUNCTION
+
+        FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+            SET id_mat TO list of lists sized 26 by 26 where for each i from 0 to 25, j from 0 to 25: element is 1 if i EQUALS j else 0
+            SET base_mat TO matrix
+
+            DEFINE power_iter(exp INTEGER, res_mat LIST OF LIST OF INTEGER, base_mat_inner LIST OF LIST OF INTEGER) RETURNS list of lists of integers
+                IF exp EQUALS 0 THEN
+                    RETURN res_mat
+                ENDIF
+                IF (exp MOD 2) NOT EQUAL to 0 THEN
+                    SET res_mat TO matrix_multiply(res_mat, base_mat_inner)
+                ENDIF
+                SET base_mat_inner TO matrix_multiply(base_mat_inner, base_mat_inner)
+                RETURN power_iter(exp / 2, res_mat, base_mat_inner)
+            END DEFINE
+
+            SET result_matrix TO power_iter(power, id_mat, base_mat)
+            RETURN result_matrix
+        END FUNCTION
+
+        SET powered_matrix TO matrix_power(trans_matrix, t)
+
+        SET count_letters TO list of 26 zeros
+        DEFINE count_chars(index INTEGER)
+            IF index EQUALS LENGTH(s) THEN RETURN
+            ENDIF
+            SET ch_val TO ASCII_CODE(s[index]) - ASCII_CODE('a')
+            SET count_letters[ch_val] TO count_letters[ch_val] + 1
+            CALL count_chars(index + 1)
+        END DEFINE
+        CALL count_chars(0)
+
+        SET output_counts TO list of 26 zeros
+        DEFINE compute_final(i_outer INTEGER, j_inner INTEGER)
+            IF i_outer EQUALS 26 THEN RETURN
+            ENDIF
+            IF j_inner EQUALS 26 THEN
+                CALL compute_final(i_outer + 1, 0)
+            ELSE
+                SET prod_val TO (count_letters[i_outer] * powered_matrix[i_outer][j_inner]) MOD CONST_MOD
+                SET output_counts[j_inner] TO (output_counts[j_inner] + prod_val) MOD CONST_MOD
+                CALL compute_final(i_outer, j_inner + 1)
+            ENDIF
+        END DEFINE
+        CALL compute_final(0, 0)
+
+        SET sum_total TO 0
+        DEFINE sum_values(idx INTEGER)
+            IF idx EQUALS 26 THEN RETURN sum_total
+            ENDIF
+            SET sum_total TO (sum_total + output_counts[idx]) MOD CONST_MOD
+            RETURN sum_values(idx + 1)
+        END DEFINE
+
+        RETURN sum_values(0)
+    END FUNCTION
+END CLASS

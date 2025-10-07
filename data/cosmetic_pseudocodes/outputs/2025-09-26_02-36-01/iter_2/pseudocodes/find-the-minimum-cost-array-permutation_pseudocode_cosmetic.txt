@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION findPermutation(inputList)
+        FUNCTION dfs(usedBits, lastValue)
+            IF usedBits = (1 << LENGTH(inputList)) - 1 THEN
+                VAR difference IS lastValue - inputList[0]
+                RETURN ABS(difference)
+            END IF
+
+            VAR minimumResult ASSIGN TO +∞
+            VAR indexCounter ASSIGN TO 0
+            WHILE indexCounter < LENGTH(inputList)
+                VAR bitCheck IS (usedBits >> indexCounter) & 1
+                IF bitCheck = 0 THEN
+                    VAR costPart IS ABS(lastValue - inputList[indexCounter])
+                    VAR nextCall IS dfs(usedBits | (1 << indexCounter), indexCounter)
+                    VAR totalCost IS costPart + nextCall
+                    IF totalCost < minimumResult THEN
+                        minimumResult = totalCost
+                    END IF
+                END IF
+                indexCounter = indexCounter + 1
+            END WHILE
+            RETURN minimumResult
+        END FUNCTION
+
+        FUNCTION g(maskFlag, previousIndex)
+            APPEND previousIndex TO ans
+            IF maskFlag = (1 << LENGTH(inputList)) - 1 THEN
+                RETURN
+            END IF
+
+            VAR targetValue IS dfs(maskFlag, previousIndex)
+            VAR counter IS 0
+            WHILE counter < LENGTH(inputList)
+                VAR occupied IS (maskFlag >> counter) & 1
+                IF occupied = 0 THEN
+                    VAR diffVal IS ABS(previousIndex - inputList[counter])
+                    VAR retVal IS dfs(maskFlag | (1 << counter), counter)
+                    VAR candidateCost IS diffVal + retVal
+                    IF candidateCost = targetValue THEN
+                        g(maskFlag | (1 << counter), counter)
+                        BREAK
+                    END IF
+                END IF
+                counter = counter + 1
+            END WHILE
+        END FUNCTION
+
+        VAR lengthOfNums := LENGTH(inputList)
+        VAR ans ASSIGN TO []
+        g(1 << 0, 0)
+        RETURN ans
+    END FUNCTION
+END CLASS

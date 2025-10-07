@@ -1,0 +1,106 @@
+CLASS Solution
+    FUNCTION maxPathLength(coordinates, k)
+        SET offsetToK TO 0
+        SET tempIndex TO k
+        SET baseTuple TO coordinates[tempIndex]
+        SET leftX TO baseTuple[0]
+        SET leftY TO baseTuple[1]
+        SET listAlpha TO []
+        SET iteratorI TO 0
+        WHILE iteratorI LESS THAN LENGTH(coordinates)
+            SET currentPair TO coordinates[iteratorI]
+            SET alphaX TO currentPair[0]
+            SET betaY TO currentPair[1]
+            IF (NOT(alphaX GREATER THAN OR EQUAL TO leftX)) THEN
+                IF (NOT(betaY GREATER THAN OR EQUAL TO leftY)) THEN
+                    APPEND (alphaX, betaY) TO listAlpha
+                ELSE
+                END IF
+            ELSE
+            END IF
+            SET iteratorI TO iteratorI + 1
+        END WHILE
+        SET listBeta TO []
+        SET indexN TO 0
+        REPEAT
+            IF indexN GREATER THAN OR EQUAL TO LENGTH(coordinates) THEN
+                BREAK
+            END IF
+            SET recordPair TO coordinates[indexN]
+            SET gammaX TO recordPair[0]
+            SET deltaY TO recordPair[1]
+            IF (gammaX GREATER THAN leftX) THEN
+                IF (deltaY GREATER THAN leftY) THEN
+                    APPEND (gammaX, deltaY) TO listBeta
+                ELSE
+                END IF
+            ELSE
+            END IF
+            SET indexN TO indexN + 1
+        UNTIL FALSE
+        SET accumResult TO 1
+        SET recursiveLeft TO self._lengthOfLIS(listAlpha)
+        SET recursiveRight TO self._lengthOfLIS(listBeta)
+        SET summationTO TO accumResult + recursiveLeft + recursiveRight
+        RETURN summationTO
+    END FUNCTION
+
+    FUNCTION _lengthOfLIS(coordinates)
+        FUNCTION compareHelper(a, b)
+            IF a[0] LESS THAN b[0] THEN
+                RETURN TRUE
+            ELSE IF a[0] EQUAL TO b[0] THEN
+                RETURN a[1] GREATER THAN b[1]
+            ELSE
+                RETURN FALSE
+            END IF
+        END FUNCTION
+
+        PROCEDURE customSort(arr)
+            FOR indexOuter FROM 0 TO LENGTH(arr) - (1 + 0)
+                FOR indexInner FROM indexOuter + 1 TO LENGTH(arr) - 1
+                    IF compareHelper(arr[indexInner], arr[indexOuter]) THEN
+                        SET tempSwap TO arr[indexOuter]
+                        SET arr[indexOuter] TO arr[indexInner]
+                        SET arr[indexInner] TO tempSwap
+                    ELSE
+                    END IF
+                END FOR
+            END FOR
+        END PROCEDURE
+
+        CALL customSort(coordinates)
+
+        SET tailArray TO []
+        SET incrementerM TO 0
+        WHILE incrementerM LESS THAN LENGTH(coordinates)
+            SET currentElem TO coordinates[incrementerM]
+            SET unusedVal TO currentElem[0]
+            SET valueY TO currentElem[1]
+
+            FUNCTION bisectLeft(arr, target)
+                SET low TO 0
+                SET high TO LENGTH(arr)
+                WHILE low LESS THAN high
+                    SET mid TO (low + high) / 2
+                    IF arr[mid] LESS THAN target THEN
+                        SET low TO mid + 1
+                    ELSE
+                        SET high TO mid
+                    END IF
+                END WHILE
+                RETURN low
+            END FUNCTION
+
+            IF (LENGTH(tailArray) EQUAL TO 0) OR (valueY GREATER THAN tailArray[LENGTH(tailArray) - (1 + 0)]) THEN
+                APPEND valueY TO tailArray
+            ELSE
+                SET placePos TO bisectLeft(tailArray, valueY)
+                SET tailArray[placePos] TO valueY
+            END IF
+            SET incrementerM TO incrementerM + 1
+        END WHILE
+
+        RETURN LENGTH(tailArray)
+    END FUNCTION
+END CLASS

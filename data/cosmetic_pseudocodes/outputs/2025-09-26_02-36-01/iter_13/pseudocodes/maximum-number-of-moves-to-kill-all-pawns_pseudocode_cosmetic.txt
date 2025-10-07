@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+        CONST BOARD_LIMIT ← 50
+        knight_offsets ← [[1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1],[-2,1],[-1,2]]
+
+        FUNCTION buildPawnSet(posList)
+            FUNCTION helper(index, acc)
+                IF index EQUALS LENGTH posList THEN
+                    RETURN acc
+                ELSE
+                    current ← (posList[index][0], posList[index][1])
+                    acc_new ← acc UNION {current}
+                    RETURN helper(index + 1, acc_new)
+                END IF
+            END FUNCTION
+            RETURN helper(0, {})
+        END FUNCTION
+
+        pawns ← buildPawnSet(positions)
+        total_pawns ← LENGTH pawns
+
+        FUNCTION dp(current_x, current_y, current_mask, alice_turn)
+            IF current_mask EQUALS 0 THEN
+                RETURN 0
+            END IF
+
+            IF alice_turn THEN
+                best_score ← 0
+            ELSE
+                best_score ← +∞
+            END IF
+
+            FUNCTION processIndex(i, acc)
+                IF i EQUALS total_pawns THEN
+                    RETURN acc
+                END IF
+                current_bit ← 1 << i
+                IF (current_mask & current_bit) ≠ 0 THEN
+                    pos_x ← positions[i][0]
+                    pos_y ← positions[i][1]
+
+                    FUNCTION bfs(queue, visited)
+                        IF EMPTY(queue) THEN
+                            RETURN (False, 0)
+                        END IF
+                        cx, cy, distance ← queue[0]
+                        rest_queue ← queue[1:]
+
+                        IF cx = pos_x AND cy = pos_y THEN
+                            RETURN (True, distance)
+                        END IF
+
+                        FUNCTION neighbors(offsets, q, vis)
+                            IF offsets IS EMPTY THEN
+                                RETURN (q, vis)
+                            ELSE
+                                dx, dy ← offsets[0]
+                                nxt_x ← cx + dx
+                                nxt_y ← cy + dy
+                                q_new ← q
+                                vis_new ← vis
+                                cond ← (0 <= nxt_x < BOARD_LIMIT) AND (0 <= nxt_y < BOARD_LIMIT)
+                                IF cond AND NOT ((nxt_x, nxt_y) IN vis) THEN
+                                    q_new ← q_new + [(nxt_x, nxt_y, distance + 1)]
+                                    vis_new ← vis_new UNION {(nxt_x, nxt_y)}
+                                END IF
+                                RETURN neighbors(offsets[1:], q_new, vis_new)
+                            END IF
+                        END FUNCTION
+
+                        queue_updated, visited_updated ← neighbors(knight_offsets, rest_queue, visited)
+                        RETURN bfs(queue_updated, visited_updated)
+                    END FUNCTION
+
+                    found_flag, step_count ← bfs([(current_x, current_y, 0)], {(current_x, current_y)})
+
+                    IF found_flag THEN
+                        new_mask ← current_mask ^ current_bit
+                        next_turn ← NOT alice_turn
+                        next_score ← step_count + dp(pos_x, pos_y, new_mask, next_turn)
+                        IF alice_turn THEN
+                            IF next_score > acc THEN
+                                acc ← next_score
+                            END IF
+                        ELSE
+                            IF next_score < acc THEN
+                                acc ← next_score
+                            END IF
+                        END IF
+                    END IF
+                END IF
+                RETURN processIndex(i + 1, acc)
+            END FUNCTION
+
+            RETURN processIndex(0, best_score)
+        END FUNCTION
+
+        full_mask ← (1 << total_pawns) - 1
+        RETURN dp(kx, ky, full_mask, TRUE)
+    END FUNCTION
+END CLASS

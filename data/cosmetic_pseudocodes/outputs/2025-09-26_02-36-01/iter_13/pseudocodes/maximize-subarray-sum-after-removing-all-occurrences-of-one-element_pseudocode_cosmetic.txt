@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION maxSubarraySum(nums)
+        FUNCTION kadane(arr)
+            SET result_var TO arr[0]
+            SET current_max TO arr[0]
+            SET index_var TO 1
+            WHILE index_var LESS THAN LENGTH(arr)
+                SET temp_var TO arr[index_var]
+                IF current_max PLUS temp_var LESS THAN temp_var
+                    SET current_max TO temp_var
+                ELSE
+                    SET current_max TO current_max PLUS temp_var
+                END IF
+                IF result_var LESS THAN current_max
+                    SET result_var TO current_max
+                END IF
+                SET index_var TO index_var PLUS 1
+            END WHILE
+            RETURN result_var
+        END FUNCTION
+
+        SET accumulator TO kadane(nums)
+        SET unique_set TO EMPTY SET
+        SET pos_index TO 0
+        WHILE pos_index LESS THAN LENGTH(nums)
+            SET unique_set TO unique_set UNION SET OF nums[pos_index]
+            SET pos_index TO pos_index PLUS 1
+        END WHILE
+
+        FUNCTION filter_out(value, data_list)
+            FUNCTION helper(input_list, acc_list)
+                IF LENGTH(input_list) EQUALS 0
+                    RETURN acc_list
+                ELSE
+                    IF input_list[0] NOT EQUALS value
+                        SET acc_list TO acc_list PLUS [input_list[0]]
+                    END IF
+                    RETURN helper(TAIL(input_list), acc_list)
+                END IF
+            END FUNCTION
+            RETURN helper(data_list, [])
+        END FUNCTION
+
+        SET unique_iterator TO LIST OF unique_set
+        SET current_pos TO 0
+        REPEAT
+            IF current_pos GREATER THAN OR EQUAL TO LENGTH(unique_iterator)
+                BREAK
+            END IF
+            SET candidate TO unique_iterator[current_pos]
+            SET filtered_list TO filter_out(candidate, nums)
+            IF LENGTH(filtered_list) GREATER THAN 0
+                SET candidate_sum TO kadane(filtered_list)
+                IF accumulator LESS THAN candidate_sum
+                    SET accumulator TO candidate_sum
+                END IF
+            END IF
+            SET current_pos TO current_pos PLUS 1
+        UNTIL FALSE
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

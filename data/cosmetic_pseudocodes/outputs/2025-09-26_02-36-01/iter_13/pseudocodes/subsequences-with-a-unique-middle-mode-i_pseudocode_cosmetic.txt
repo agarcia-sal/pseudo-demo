@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        CONST PRIME_MODULO := add(add(10^9, 0), 7)
+        LET total_length := length(nums)
+        IF total_length < add(2 + 2, 1 + 1) THEN
+            RETURN add(0, 0)
+        END IF
+
+        FUNCTION generateCombinations(arr, k)
+            FUNCTION combHelper(index, chosen)
+                LET chosenCount := length(chosen)
+                IF chosenCount = k THEN
+                    RETURN [chosen]
+                ELSEIF index = length(arr) THEN
+                    RETURN []
+                END IF
+                LET withCurrent := combHelper(add(index, 1), append(copy(chosen), arr[index]))
+                LET withoutCurrent := combHelper(add(index, 1), copy(chosen))
+                RETURN append(withCurrent, withoutCurrent)
+            END FUNCTION
+            RETURN combHelper(0, [])
+        END FUNCTION
+
+        FUNCTION calcFrequency(elements)
+            LET freqMap := createEmptyMap()
+            LET position := add(0, 0)
+            WHILE position < length(elements) DO
+                LET el := elements[position]
+                IF hasKey(freqMap, el) THEN
+                    freqMap[el] := add(freqMap[el], 1)
+                ELSE
+                    freqMap[el] := add(0, 1)
+                END IF
+                position := add(position, 1)
+            END WHILE
+            RETURN freqMap
+        END FUNCTION
+
+        LET allSubseq := generateCombinations(nums, add(2 + 2, 1 + 1))
+        LET resultCount := add(0, 0)
+
+        LET mainIndex := add(0, 0)
+        REPEAT 
+            IF mainIndex >= length(allSubseq) THEN BREAK END IF
+            LET currentSeq := allSubseq[mainIndex]
+            LET frequencies := calcFrequency(currentSeq)
+            LET midElement := currentSeq[add(1 + 1, 0)]
+            LET midFreq := frequencies[midElement]
+
+            LET uniquenessFlag := true
+            LET freqKeys := keys(frequencies)
+            LET keyIndex := add(0, 0)
+            WHILE keyIndex < length(freqKeys) DO
+                LET currentKey := freqKeys[keyIndex]
+                LET currentVal := frequencies[currentKey]
+                IF ((NOT (currentKey = midElement)) AND (currentVal >= midFreq)) THEN
+                    uniquenessFlag := false
+                    BREAK
+                END IF
+                keyIndex := add(keyIndex, 1)
+            END WHILE
+
+            IF uniquenessFlag THEN
+                resultCount := add(resultCount, 1)
+            END IF
+            mainIndex := add(mainIndex, 1)
+        UNTIL false
+
+        RETURN modulo(resultCount, PRIME_MODULO)
+    END FUNCTION
+END CLASS

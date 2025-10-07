@@ -1,0 +1,114 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+        PROCEDURE LTE(a, b)
+            RETURN NOT (a > b)
+        END PROCEDURE
+
+        PROCEDURE LEQ(arr)
+            PROCEDURE GO(idx)
+                IF idx >= LENGTH(arr) - 1 THEN
+                    RETURN True
+                ELSE
+                    IF LTE(arr[idx + 1], arr[idx]) THEN
+                        RETURN False
+                    ELSE
+                        RETURN GO(idx + 1)
+                    END IF
+                END IF
+            END PROCEDURE
+            RETURN GO(0)
+        END PROCEDURE
+
+        PROCEDURE ALL_ROWS_SORTED(matrix)
+            FUNCTION CHECK_ROWS(idx)
+                IF idx >= LENGTH(matrix) THEN
+                    RETURN True
+                ELSE
+                    IF LEQ(matrix[idx]) THEN
+                        RETURN False
+                    ELSE
+                        RETURN CHECK_ROWS(idx + 1)
+                    END IF
+                END IF
+            END FUNCTION
+            RETURN CHECK_ROWS(0)
+        END PROCEDURE
+
+        PROCEDURE VALID_ELEM(x)
+            RETURN LTE(x, k)
+        END PROCEDURE
+
+        PROCEDURE ALL_ELEMENTS_VALID(matrix)
+            FUNCTION CHECK_ROWS(idx)
+                IF idx >= LENGTH(matrix) THEN
+                    RETURN True
+                ELSE
+                    FUNCTION CHECK_COLS(jdx)
+                        IF jdx >= LENGTH(matrix[idx]) THEN
+                            RETURN True
+                        ELSE
+                            IF VALID_ELEM(matrix[idx][jdx]) THEN
+                                RETURN CHECK_COLS(jdx + 1)
+                            ELSE
+                                RETURN False
+                            END IF
+                        END IF
+                    END FUNCTION
+                    IF CHECK_COLS(0) THEN
+                        RETURN CHECK_ROWS(idx + 1)
+                    ELSE
+                        RETURN False
+                    END IF
+                END IF
+            END FUNCTION
+            RETURN CHECK_ROWS(0)
+        END PROCEDURE
+
+        m := LENGTH(grid)
+        n := LENGTH(grid[0])
+        total := 0
+
+        FUNCTION LOOP1(i)
+            IF i > m - 1 THEN
+                RETURN
+            ELSE
+                FUNCTION LOOP2(j)
+                    IF j > n - 1 THEN
+                        LOOP1(i + 1)
+                    ELSE
+                        FUNCTION LOOP3(p)
+                            IF p > m - 1 THEN
+                                LOOP2(j + 1)
+                            ELSE
+                                FUNCTION LOOP4(q)
+                                    IF q > n - 1 THEN
+                                        LOOP3(p + 1)
+                                    ELSE
+                                        tempMatrix := []
+                                        FOR r IN i TO p DO
+                                            rowSlice := []
+                                            FOR c IN j TO q DO
+                                                rowSlice := rowSlice + [grid[r][c]]
+                                            END FOR
+                                            tempMatrix := tempMatrix + [rowSlice]
+                                        END FOR
+                                        IF ALL_ELEMENTS_VALID(tempMatrix) AND ALL_ROWS_SORTED(tempMatrix) THEN
+                                            total := total + 1
+                                        END IF
+                                        LOOP4(q + 1)
+                                    END IF
+                                END FUNCTION
+                                LOOP4(j)
+                            END IF
+                        END FUNCTION
+                        LOOP3(i)
+                    END IF
+                END FUNCTION
+                LOOP2(0)
+            END IF
+        END FUNCTION
+
+        LOOP1(0)
+        RETURN total
+    END FUNCTION
+END CLASS

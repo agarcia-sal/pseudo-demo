@@ -1,0 +1,111 @@
+CLASS Solution
+    FUNCTION constructGridLayout(n, edges)
+        FUNCTION buildAdjacency(size, connections)
+            SET matrix TO empty list
+            REPEAT size TIMES
+                APPEND empty list TO matrix
+            END REPEAT
+            RECURSIVE_FILL(connections, matrix, 0)
+            RETURN matrix
+        END FUNCTION
+
+        FUNCTION RECURSIVE_FILL(pairList, graph, idx)
+            IF idx GREATER OR EQUAL TO LENGTH(pairList) THEN
+                RETURN
+            END IF
+            SET a TO pairList[idx][0]
+            SET b TO pairList[idx][1]
+            APPEND b TO graph[a]
+            APPEND a TO graph[b]
+            RECURSIVE_FILL(pairList, graph, idx + 1)
+        END FUNCTION
+
+        FUNCTION findDegrees(graph)
+            SET degreeMap TO list of five elements initialized with -1
+            DEFINE helperProcess(index)
+                IF index EQUALS LENGTH(graph) THEN
+                    RETURN
+                END IF
+                SET currentLength TO LENGTH(graph[index])
+                SET degreeMap[currentLength] TO index
+                helperProcess(index + 1)
+            END FUNCTION
+            helperProcess(0)
+            RETURN degreeMap
+        END FUNCTION
+
+        FUNCTION searchRow(node, visitedNodes, graph)
+            SET path TO empty list
+            SET prevNode TO node
+            SET currentNode TO FIRST_ELEMENT(graph[node])
+            WHILE LENGTH(graph[currentNode]) GREATER THAN 2 DO
+                APPEND currentNode TO path
+                FOR each candidate IN graph[currentNode]
+                    IF candidate NOT EQUAL prevNode AND LENGTH(graph[candidate]) LESS THAN 4 THEN
+                        SET prevNode TO currentNode
+                        SET currentNode TO candidate
+                        BREAK
+                    END IF
+                END FOR
+            END WHILE
+            APPEND currentNode TO path
+            RETURN path
+        END FUNCTION
+
+        FUNCTION getRow(degreeMapping, graph)
+            IF degreeMapping[1] NOT EQUAL -1 THEN
+                RETURN LIST_CONTAINING(degreeMapping[1])
+            ELSE IF degreeMapping[4] EQUAL -1 THEN
+                SET candidate TO degreeMapping[2]
+                FOR each neighbor IN graph[candidate]
+                    IF LENGTH(graph[neighbor]) EQUAL 2 THEN
+                        RETURN LIST_CONTAINING(candidate, neighbor)
+                    END IF
+                END FOR
+                RETURN EMPTY LIST
+            ELSE
+                SET startNode TO degreeMapping[2]
+                SET partialPath TO LIST_CONTAINING(startNode)
+                SET extendedPath TO searchRow(startNode, partialPath, graph)
+                RETURN CONCATENATE(partialPath, extendedPath)
+            END IF
+        END FUNCTION
+
+        FUNCTION markVisited(nodes, visitation)
+            FOR each element IN nodes DO
+                SET visitation[element] TO true
+            END FOR
+        END FUNCTION
+
+        FUNCTION findNextLayer(currentLayer, visitation, graph)
+            SET nextLayer TO empty list
+            FOR each element IN currentLayer DO
+                FOR each neighbor IN graph[element]
+                    IF visitation[neighbor] EQUALS false THEN
+                        APPEND neighbor TO nextLayer
+                        BREAK
+                    END IF
+                END FOR
+            END FOR
+            RETURN nextLayer
+        END FUNCTION
+
+        SET adjacency TO buildAdjacency(n, edges)
+        SET degreeList TO findDegrees(adjacency)
+        SET baseRow TO getRow(degreeList, adjacency)
+        SET resultGrid TO LIST_CONTAINING(baseRow)
+        SET visitedFlags TO LIST_OF_SIZE(n, false)
+        FUNCTION repeatLayers(count, row, visited, grid, accumulator)
+            IF count LESS OR EQUAL 0 THEN
+                RETURN
+            END IF
+            markVisited(row, visited)
+            SET nextRow TO findNextLayer(row, visited, grid)
+            APPEND nextRow TO accumulator
+            repeatLayers(count - 1, nextRow, visited, grid, accumulator)
+        END FUNCTION
+        SET iterations TO n DIVIDED_BY LENGTH(baseRow) MINUS 1
+        repeatLayers(iterations, baseRow, visitedFlags, adjacency, resultGrid)
+        RETURN resultGrid
+    END FUNCTION
+END CLASS

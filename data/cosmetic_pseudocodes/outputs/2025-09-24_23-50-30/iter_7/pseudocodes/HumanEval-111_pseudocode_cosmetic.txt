@@ -1,0 +1,42 @@
+```
+FUNCTION histogram(test_string)
+    DEFINE FUNCTION count_occurrences(word, collection, idx)
+        IF idx < 0 THEN
+            RETURN 0
+        RETURN (1 - (word != collection[idx])) + count_occurrences(word, collection, idx - 1)
+    END FUNCTION
+
+    SET split_words TO (test_string + " ").split(" ")
+    SET frequency_map TO {}
+    SET peak_frequency TO 0
+
+    DEFINE FUNCTION determine_peak(index)
+        IF index >= LENGTH(split_words) THEN
+            RETURN
+        SET current_word TO split_words[index]
+        IF (current_word != "") THEN
+            SET occurrences TO count_occurrences(current_word, split_words, LENGTH(split_words) - 1)
+            IF peak_frequency < occurrences THEN
+                SET peak_frequency TO occurrences
+        determine_peak(index + 1)
+    END FUNCTION
+
+    CALL determine_peak(0)
+
+    DEFINE FUNCTION populate_frequency_dict(index)
+        IF index >= LENGTH(split_words) THEN
+            RETURN
+        SET current_word TO split_words[index]
+        IF current_word != "" THEN
+            SET occurrences TO count_occurrences(current_word, split_words, LENGTH(split_words) - 1)
+            IF occurrences == peak_frequency THEN
+                SET frequency_map[current_word] TO peak_frequency
+        populate_frequency_dict(index + 1)
+    END FUNCTION
+
+    IF peak_frequency > 0 THEN
+        CALL populate_frequency_dict(0)
+
+    RETURN frequency_map
+END FUNCTION
+```

@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION maximumTotalDamage(power)
+        LET frequencyMap BE an empty dictionary
+        FOR element IN power
+            IF element IS NOT IN frequencyMap
+                ASSIGN frequencyMap[element] TO 1
+            ELSE
+                ASSIGN frequencyMap[element] TO frequencyMap[element] PLUS 1
+            END IF
+        END FOR
+
+        LET sortedKeys BE frequencyMap.keys converted to list THEN sorted in ascending order
+        LET dpCache BE an empty dictionary
+        LET position BE 0
+
+        WHILE position LESS THAN LENGTH(sortedKeys)
+            LET currentValue BE sortedKeys[position]
+
+            IF position EQUALS 0
+                LET optExclude BE 0
+            ELSE
+                LET prevKey BE sortedKeys[position MINUS 1]
+                LET optExclude BE dpCache.get(prevKey, 0)
+            END IF
+
+            LET damageValue BE currentValue TIMES frequencyMap[currentValue]
+
+            LET backIndex BE position MINUS 1
+            WHILE backIndex GREATER OR EQUAL TO 0 AND sortedKeys[backIndex] GREATER OR EQUAL TO (currentValue MINUS 2)
+                backIndex = backIndex MINUS 1
+            END WHILE
+
+            IF backIndex GREATER OR EQUAL TO 0
+                LET damageValue INCREASE BY dpCache[sortedKeys[backIndex]]
+            END IF
+
+            dpCache[currentValue] = IF damageValue GREATER THAN optExclude THEN damageValue ELSE optExclude
+            position = position PLUS 1
+        END WHILE
+
+        LET resultList BE dpCache.values converted to list
+        RETURN MAXIMUM of resultList
+    END FUNCTION
+END CLASS

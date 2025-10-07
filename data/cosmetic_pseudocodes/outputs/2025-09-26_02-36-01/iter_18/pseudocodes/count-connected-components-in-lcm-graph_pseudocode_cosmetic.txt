@@ -1,0 +1,78 @@
+```pseudocode
+CLASS DSU
+    FUNCTION __init__(self, z)
+        SET self.parent TO a mapping defined by:
+            INITIALIZE Q TO 0
+            REPEAT
+                IF Q GREATER THAN z MINUS 1 THEN
+                    BREAK
+                END IF
+                MAP Q TO Q
+                INCREMENT Q BY 1
+            UNTIL FALSE
+
+        SET self.rank TO a mapping defined by:
+            INITIALIZE A TO 0
+            REPEAT
+                IF A GREATER THAN z MINUS 1 THEN
+                    BREAK
+                END IF
+                MAP A TO 0
+                INCREMENT A BY 1
+            UNTIL FALSE
+    END FUNCTION
+
+    FUNCTION find(self, Y)
+        INITIALIZE Z TO self.parent[Y]
+        IF NOT (Z EQUALS Y) THEN
+            SET self.parent[Y] TO self.find(Z)
+        END IF
+        RETURN self.parent[Y]
+    END FUNCTION
+
+    FUNCTION union_set(self, B, C)
+        SET P TO self.find(B)
+        SET R TO self.find(C)
+        IF P NOT EQUAL R THEN
+            IF self.rank[P] LESS THAN self.rank[R] THEN
+                SET tmp_var TO P
+                SET P TO R
+                SET R TO tmp_var
+            END IF
+            SET self.parent[R] TO P
+            IF self.rank[P] EQUALS self.rank[R] THEN
+                SET self.rank[P] TO self.rank[P] PLUS 1
+            END IF
+        END IF
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION countComponents(self, L, h)
+        SET structure TO DSU(h PLUS 1)
+
+        INITIALIZE index_1 TO 0
+        WHILE index_1 LESS THAN LENGTH(L)
+            SET val TO L[index_1]
+            SET multiplier TO val TIMES 2
+            WHILE multiplier LESS THAN OR EQUAL h
+                structure.union_set(val, multiplier)
+                SET multiplier TO multiplier PLUS val
+            END WHILE
+            INCREMENT index_1 BY 1
+        END WHILE
+
+        SET parents_set TO a new empty set
+        FOR EACH item IN L
+            IF (item LESS THAN h) OR (item EQUALS h) THEN
+                SET find_res TO structure.find(item)
+                ADD find_res TO parents_set
+            ELSE
+                ADD item TO parents_set
+            END IF
+        END FOR
+
+        RETURN SIZE(parents_set)
+    END FUNCTION
+END CLASS
+```

@@ -1,0 +1,96 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)
+        SET adjMap TO empty mapping integer -> list of integer
+        SET revAdjMap TO empty mapping integer -> list of integer
+
+        SET idxCounter TO 0
+        SET nodeStack TO empty list
+        SET hasStackFlag TO array of size n filled with False
+        SET discoveryTime TO array of size n filled with -1
+        SET lowTime TO array of size n filled with 0
+        SET sccGroups TO empty list
+
+        FOR pair x, y IN zip(flowFrom, flowTo)
+            IF x NOT IN adjMap THEN adjMap[x] = empty list
+            IF y NOT IN revAdjMap THEN revAdjMap[y] = empty list
+            APPEND y TO adjMap[x]
+            APPEND x TO revAdjMap[y]
+        END FOR
+
+        FUNCTION strongConnect(v)
+            SET discoveryTime[v] TO idxCounter
+            SET lowTime[v] TO idxCounter
+            SET idxCounter TO idxCounter + 1
+            APPEND v TO nodeStack
+            SET hasStackFlag[v] TO True
+
+            SET neighbors TO IF v IN adjMap THEN adjMap[v] ELSE empty list
+            FOR each node_u IN neighbors
+                IF discoveryTime[node_u] = -1 THEN
+                    CALL strongConnect(node_u)
+                    SET lowTime[v] TO MINIMUM(lowTime[v], lowTime[node_u])
+                ELSE IF hasStackFlag[node_u] = True THEN
+                    SET lowTime[v] TO MINIMUM(lowTime[v], discoveryTime[node_u])
+                END IF
+            END FOR
+
+            IF lowTime[v] = discoveryTime[v] THEN
+                SET currentSCC TO empty list
+                REPEAT
+                    SET poppedNode TO REMOVE LAST FROM nodeStack
+                    SET hasStackFlag[poppedNode] TO False
+                    APPEND poppedNode TO currentSCC
+                UNTIL poppedNode = v
+                APPEND currentSCC TO sccGroups
+            END IF
+        END FUNCTION
+
+        FOR vertex FROM 0 TO n - 1
+            IF discoveryTime[vertex] = -1 THEN
+                CALL strongConnect(vertex)
+            END IF
+        END FOR
+
+        SET sccMapping TO array of size n filled with -1
+        SET sccHasCrystal TO array of size LENGTH(sccGroups) filled with False
+        SET sccGraph TO empty mapping integer -> list of integer
+
+        FOR index, group IN enumerate(sccGroups)
+            FOR node IN group
+                SET sccMapping[node] TO index
+                IF node IN crystals THEN
+                    SET sccHasCrystal[index] TO True
+                END IF
+            END FOR
+        END FOR
+
+        FOR edgeStart, edgeEnd IN zip(flowFrom, flowTo)
+            SET startGroup TO sccMapping[edgeStart]
+            SET endGroup TO sccMapping[edgeEnd]
+            IF startGroup ≠ endGroup THEN
+                IF startGroup NOT IN sccGraph THEN sccGraph[startGroup] = empty list
+                APPEND endGroup TO sccGraph[startGroup]
+            END IF
+        END FOR
+
+        SET inboundEdgesCount TO array of size LENGTH(sccGroups) filled with 0
+
+        FOR group FROM 0 TO LENGTH(sccGroups) - 1
+            SET adjacents TO IF group IN sccGraph THEN sccGraph[group] ELSE empty list
+            FOR adjGroup IN adjacents
+                SET inboundEdgesCount[adjGroup] TO inboundEdgesCount[adjGroup] + 1
+            END FOR
+        END FOR
+
+        SET requiredAdditions TO 0
+        FOR sc FROM 0 TO LENGTH(sccGroups) - 1
+            IF inboundEdgesCount[sc] = 0 AND sccHasCrystal[sc] = False THEN
+                SET requiredAdditions TO requiredAdditions + 1
+            END IF
+        END FOR
+
+        RETURN requiredAdditions
+    END FUNCTION
+END CLASS
+```

@@ -1,0 +1,58 @@
+CLASS Solution  
+    FUNCTION countOfPairs(nums)  
+        LET modulus BE 10**9 + 7  
+        LET length BE SIZE OF nums  
+        LET highest BE MAXIMUM ELEMENT OF nums  
+        
+        LET dp_table BE ARRAY WITH length ELEMENTS  
+        FOR idx FROM 0 TO length - 1  
+            dp_table[idx] = ARRAY OF (highest + 1) ELEMENTS  
+            FOR m FROM 0 TO highest  
+                dp_table[idx][m] = ARRAY OF (highest + 1) ZEROES  
+            END FOR  
+        END FOR  
+        
+        LET first_val BE nums[0]  
+        LET x BE 0  
+        WHILE x <= first_val DO  
+            LET y BE first_val - x  
+            dp_table[0][x][y] ← 1  
+            x ← x + 1  
+        END WHILE  
+        
+        LET index ← 1  
+        WHILE index < length DO  
+            LET current_val BE nums[index]  
+            LET x_curr ← 0  
+            WHILE x_curr <= current_val DO  
+                LET y_curr ← current_val - x_curr  
+                LET x_prev ← 0  
+                WHILE x_prev <= x_curr DO  
+                    LET y_prev ← y_curr  
+                    WHILE y_prev <= highest DO  
+                        dp_table[index][x_curr][y_curr] ← (dp_table[index][x_curr][y_curr] + dp_table[index - 1][x_prev][y_prev]) MOD modulus  
+                        y_prev ← y_prev + 1  
+                    END WHILE  
+                    x_prev ← x_prev + 1  
+                END WHILE  
+                x_curr ← x_curr + 1  
+            END WHILE  
+            index ← index + 1  
+        END WHILE  
+        
+        LET total ← 0  
+        LET val1 ← 0  
+        WHILE val1 <= highest DO  
+            LET val2 ← 0  
+            WHILE val2 <= highest DO  
+                IF (val1 + val2) == nums[length - 1] THEN  
+                    total ← (total + dp_table[length - 1][val1][val2]) MOD modulus  
+                END IF  
+                val2 ← val2 + 1  
+            END WHILE  
+            val1 ← val1 + 1  
+        END WHILE  
+        
+        RETURN total  
+    END FUNCTION  
+END CLASS

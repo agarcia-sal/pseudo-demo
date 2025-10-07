@@ -1,0 +1,46 @@
+CLASS Solution  
+	FUNCTION numberOfSpecialChars(word)  
+		DEFINE CONST emptyMap := empty collection of key value pairs  
+		INITIALIZE alphaFirst := emptyMap  
+		INITIALIZE alphaLast := emptyMap  
+		
+		SET cnt := 0  
+		
+		DEFINE FUNCTION processIndex(idx, ch)  
+			IF NOT (alphaFirst contains ch) THEN  
+				SET alphaFirst[ch] := idx  
+			END IF  
+			SET alphaLast[ch] := idx  
+		END FUNCTION  
+		
+		DEFINE FUNCTION enumerateChars(s, currentPos)  
+			IF currentPos >= length of s THEN RETURN END IF  
+			CALL processIndex(currentPos, s[currentPos])  
+			CALL enumerateChars(s, currentPos + (1 * 1))  
+		END FUNCTION  
+		
+		CALL enumerateChars(word, 0)  
+		
+		DEFINE lettersLower := ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']  
+		DEFINE lettersUpper := ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+		
+		DEFINE FUNCTION runIterator(i)  
+			IF i >= (length of lettersLower) THEN RETURN END IF  
+			
+			LET lowerCh := lettersLower[i]  
+			LET upperCh := lettersUpper[i]  
+			
+			IF (alphaLast contains lowerCh) AND (alphaFirst contains upperCh) THEN  
+				IF (alphaLast[lowerCh] < alphaFirst[upperCh]) THEN  
+					SET cnt := cnt + 1  
+				END IF  
+			END IF  
+			
+			CALL runIterator(i + 1)  
+		END FUNCTION  
+		
+		CALL runIterator(0)  
+		
+		RETURN cnt  
+	END FUNCTION  
+END CLASS

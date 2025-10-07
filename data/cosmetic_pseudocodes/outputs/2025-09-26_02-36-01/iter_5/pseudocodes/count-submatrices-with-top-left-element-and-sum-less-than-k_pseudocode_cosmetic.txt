@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+        LET resultCounter BE 0
+        IF NOT (grid IS NOT NONE AND grid[0] IS NOT NONE) THEN
+            RETURN resultCounter
+        END IF
+        LET rowCount BE LENGTH(grid)
+        LET colCount BE LENGTH(grid[0])
+        LET aggregatedSums BE NEW LIST OF SIZE rowCount WHERE EACH ELEMENT IS A LIST OF SIZE colCount FILLED WITH 0
+
+        FUNCTION computeCell(r, c)
+            IF r = 0 AND c = 0 THEN
+                RETURN grid[r][c]
+            ELSEIF r = 0 THEN
+                RETURN aggregatedSums[r][c - 1] + grid[r][c]
+            ELSEIF c = 0 THEN
+                RETURN aggregatedSums[r - 1][c] + grid[r][c]
+            ELSE
+                RETURN aggregatedSums[r - 1][c] + aggregatedSums[r][c - 1] - aggregatedSums[r - 1][c - 1] + grid[r][c]
+            END IF
+        END FUNCTION
+
+        FUNCTION rowIter(accRow)
+            IF accRow = rowCount THEN
+                RETURN
+            ELSE
+                FUNCTION colIter(accCol)
+                    IF accCol = colCount THEN
+                        RETURN
+                    ELSE
+                        LET cellSum BE computeCell(accRow, accCol)
+                        aggregatedSums[accRow][accCol] = cellSum
+                        IF cellSum <= k THEN
+                            resultCounter = resultCounter + 1
+                        END IF
+                        colIter(accCol + 1)
+                    END IF
+                END FUNCTION
+                colIter(0)
+                rowIter(accRow + 1)
+            END IF
+        END FUNCTION
+
+        rowIter(0)
+        RETURN resultCounter
+    END FUNCTION
+END CLASS

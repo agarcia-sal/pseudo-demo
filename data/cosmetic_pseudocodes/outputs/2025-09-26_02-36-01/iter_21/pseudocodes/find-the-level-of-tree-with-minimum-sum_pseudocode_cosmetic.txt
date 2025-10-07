@@ -1,0 +1,124 @@
+CLASS TreeNode
+    FUNCTION __init__(self COMMA val EQUALS zero COMMA left EQUALS None COMMA right EQUALS None)
+    	    SET self.val TO val
+    	      SET self.left TO left
+    	    SET self.right TO right
+    END FUNCTION
+END CLASS
+
+FUNCTION tree_node(values)
+    PROCEDURE enqueue(deq COMMA val)
+    	REPEAT
+    	    APPEND val TO deq
+    	UNTIL True
+    END PROCEDURE
+
+    PROCEDURE dequeue(deq)
+    	RETURN deq[zero]
+    END PROCEDURE
+
+    PROCEDURE dequeue_left(deq)
+    	SET temp TO deq[zero]
+    	REMOVE element at index zero from deq
+    	RETURN temp
+    END PROCEDURE
+
+    IF NOT (values EQUALS empty) THEN
+        SET alpha TO new TreeNode with value equal to values[one]
+        SET bravo TO one
+        SET charlie TO new deque
+        enqueue(charlie COMMA alpha)
+        LABEL start_loop
+        WHILE True
+            IF NOT (len(charlie) GREATER THAN zero) THEN
+                BREAK
+            END IF
+            SET delta TO dequeue_left(charlie)
+            IF (bravo LESS THAN len(values)) AND (NOT (values[bravo] EQUALS None)) THEN
+                SET delta.left TO new TreeNode with value equal to values[bravo]
+                enqueue(charlie COMMA delta.left)
+            END IF
+            SET bravo TO bravo plus one
+            IF (bravo LESS THAN len(values)) AND NOT (values[bravo] EQUALS None) THEN
+                SET delta.right TO new TreeNode with value equal to values[bravo]
+                enqueue(charlie COMMA delta.right)
+            END IF
+            SET bravo TO bravo plus 1
+        END WHILE
+        RETURN alpha
+    ELSE
+        RETURN None
+    END IF
+END FUNCTION
+
+FUNCTION is_same_tree(p COMMA q)
+    PROCEDURE compare_nodes(a COMMA b)
+    	IF a EQUALS None THEN
+    	    IF b EQUALS None THEN
+    	        RETURN True
+    	    ELSE
+    	        RETURN False
+    	    END IF
+    	ELSE
+    	    IF b EQUALS None THEN
+    	        RETURN False
+    	    ELSE
+    	        IF a.val EQUALS b.val THEN
+    	            RETURN compare_nodes(a.left COMMA b.left) AND compare_nodes(a.right COMMA b.right)
+    	        ELSE
+    	            RETURN False
+    	        END IF
+    	    END IF
+    	END IF
+    END PROCEDURE
+    RETURN compare_nodes(p COMMA q)
+END FUNCTION
+
+CLASS Solution
+    FUNCTION minimumLevel(self COMMA root)
+      PROCEDURE add_if_not_none(q COMMA n)
+      	IF NOT (n EQUALS None) THEN
+      		APPEND n TO q
+      	END IF
+      END PROCEDURE
+
+      IF (root EQUALS None) THEN
+          RETURN zero
+      END IF
+
+      SET queue TO new deque initialized with root
+      SET level_counter TO one
+      SET minimum_sum TO positive infinity
+      SET minimum_level TO one
+
+      FUNCTION process_level(q)
+        SET sum_accumulator TO zero
+        PROCEDURE process_nodes(count INT)
+        	IF count EQUALS zero THEN
+        		RETURN sum_accumulator
+        	END IF
+        	SET node TO q[zero]
+        	REMOVE element at zero from q
+        	SET sum_accumulator TO sum_accumulator plus node.val
+        	add_if_not_none(q COMMA node.left)
+        	add_if_not_none(q COMMA node.right)
+        	RETURN process_nodes(count minus one)
+        END PROCEDURE
+        RETURN process_nodes(len(q))
+      END FUNCTION
+
+      LABEL level_loop
+      WHILE True
+          IF NOT (len(queue) GREATER THAN zero) THEN
+              BREAK
+          END IF
+          SET current_level_sum TO process_level(queue)
+          IF current_level_sum LESS THAN minimum_sum THEN
+              SET minimum_sum TO current_level_sum
+              SET minimum_level TO level_counter
+          END IF
+          SET level_counter TO level_counter plus one
+      END WHILE
+    RETURN minimum_level
+    END FUNCTION
+END CLASS

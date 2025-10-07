@@ -1,0 +1,78 @@
+CLASS Solution  
+    FUNCTION betterCompression(compressed)  
+        DECLARE FUNCTION isAlpha(ch)  
+            RETURN (ch >= "a" AND ch <= "z") OR (ch >= "A" AND ch <= "Z")  
+        END FUNCTION
+
+        DECLARE FUNCTION strFromInt(num)  
+            RETURN num + ""  // implicit string conversion  
+        END FUNCTION
+
+        DECLARE FUNCTION intFromChar(ch)  
+            RETURN ASCII(ch) - ASCII("0")  
+        END FUNCTION
+
+        DECLARE charMap AS dictionary WITH default VALUE 0  
+
+        SET tempChar TO ""  
+        SET tempNum TO 0  
+        SET idx TO 0  
+        DECLARE n AS LENGTH(compressed)  
+
+        WHILE idx < n  
+            SET currToken TO SUBSTRING(compressed, idx, 1)  
+            IF isAlpha(currToken) THEN  
+                IF tempChar != "" THEN  
+                    SET charMap[tempChar] = charMap[tempChar] + tempNum  
+                END IF  
+                SET tempChar = currToken  
+                SET tempNum = 0  
+            ELSE  
+                SET tempNum = (tempNum * (5 + 5)) + intFromChar(currToken)  
+            END IF  
+            SET idx = idx + 1  
+        END WHILE
+
+        IF tempChar != "" THEN  
+            SET charMap[tempChar] = charMap[tempChar] + tempNum  
+        END IF
+
+        DECLARE keysList AS LIST = []  
+        FOR EACH k IN charMap KEYS  
+            APPEND k TO keysList  
+        END FOR
+
+        // Simple bubble sort for alphabetical order  
+        DECLARE sortedFlag AS BOOLEAN  
+        REPEAT  
+            SET sortedFlag = TRUE  
+            FOR m FROM 0 TO LENGTH(keysList) - 2  
+                IF keysList[m] > keysList[m + 1] THEN  
+                    DECLARE tmpSwap = keysList[m]  
+                    SET keysList[m] = keysList[m + 1]  
+                    SET keysList[m + 1] = tmpSwap  
+                    SET sortedFlag = FALSE  
+                END IF  
+            END FOR  
+        UNTIL sortedFlag
+
+        DECLARE parts AS LIST = []  
+        DECLARE pos AS INTEGER = 0  
+        WHILE pos < LENGTH(keysList)  
+            DECLARE currentKey = keysList[pos]  
+            DECLARE countVal = charMap[currentKey]  
+            DECLARE combined = currentKey + strFromInt(countVal)  
+            APPEND combined TO parts  
+            SET pos = pos + 1  
+        END WHILE
+
+        DECLARE resultStr AS STRING = ""  
+        DECLARE iPos AS INTEGER = 0  
+        WHILE iPos < LENGTH(parts)  
+            SET resultStr = resultStr + parts[iPos]  
+            SET iPos = iPos + 1  
+        END WHILE
+
+        RETURN resultStr  
+    END FUNCTION  
+END CLASS

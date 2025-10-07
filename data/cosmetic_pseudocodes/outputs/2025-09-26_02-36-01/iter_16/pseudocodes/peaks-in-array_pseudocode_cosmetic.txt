@@ -1,0 +1,123 @@
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION is_peak(x INTEGER) RETURNS BOOLEAN
+            SET prev_val TO nums[x] - 1
+            SET curr_val TO nums[x]
+            SET next_val TO nums[x + 1]
+            SET cond1 TO curr_val > prev_val
+            SET cond2 TO curr_val > next_val
+            RETURN cond1 AND cond2
+        END FUNCTION
+
+        SET alpha TO empty list
+        SET beta TO 1
+        WHILE beta <= LENGTH(nums) - 2
+            IF is_peak(beta) = true THEN
+                APPEND beta TO alpha
+            END IF
+            SET beta TO beta + 1
+        END WHILE
+
+        SET gamma TO empty list
+        SET delta TO 0
+        REPEAT
+            IF delta >= LENGTH(queries) THEN
+                EXIT REPEAT
+            END IF
+
+            SET elem TO queries[delta]
+            IF elem[0] = 1 THEN
+                SET a1 TO elem[1]
+                SET a2 TO elem[2]
+
+                FUNCTION lower_bound(arr LIST OF INTEGER, key INTEGER) RETURNS INTEGER
+                    SET low TO 0
+                    SET high TO LENGTH(arr)
+                    WHILE low < high
+                        SET mid TO (low + high) / 2
+                        IF arr[mid] < key THEN
+                            SET low TO mid + 1
+                        ELSE
+                            SET high TO mid
+                        END IF
+                    END WHILE
+                    RETURN low
+                END FUNCTION
+
+                FUNCTION upper_bound(arr LIST OF INTEGER, key INTEGER) RETURNS INTEGER
+                    SET low TO 0
+                    SET high TO LENGTH(arr)
+                    WHILE low < high
+                        SET mid TO (low + high) / 2
+                        IF arr[mid] <= key THEN
+                            SET low TO mid + 1
+                        ELSE
+                            SET high TO mid
+                        END IF
+                    END WHILE
+                    RETURN low
+                END FUNCTION
+
+                SET left_pos TO lower_bound(alpha, a1 + 1)
+                SET right_pos TO upper_bound(alpha, a2) - 1
+
+                SET count_val TO right_pos - left_pos
+                APPEND count_val TO gamma
+            ELSE
+                SET idx TO elem[1]
+                SET val TO elem[2]
+                IF nums[idx] = val THEN
+                    SET delta TO delta + 1
+                    CONTINUE
+                END IF
+
+                SET nums[idx] TO val
+
+                FUNCTION insert_sorted(lst LIST OF INTEGER, val INTEGER)
+                    SET pos TO 0
+                    WHILE pos < LENGTH(lst) AND lst[pos] < val
+                        SET pos TO pos + 1
+                    END WHILE
+                    INSERT val AT pos IN lst
+                END FUNCTION
+
+                FUNCTION remove_element(lst LIST OF INTEGER, val INTEGER)
+                    SET pos TO 0
+                    WHILE pos < LENGTH(lst) AND lst[pos] <> val
+                        SET pos TO pos + 1
+                    END WHILE
+                    IF pos < LENGTH(lst) THEN
+                        REMOVE ELEMENT AT pos FROM lst
+                    END IF
+                END FUNCTION
+
+                SET start_bound TO (idx - 1) * (idx >= 1)
+                IF start_bound < 1 THEN
+                    SET start_bound TO 1
+                END IF
+
+                SET end_bound TO idx + 1
+                IF end_bound > LENGTH(nums) - 2 THEN
+                    SET end_bound TO LENGTH(nums) - 2
+                END IF
+
+                SET i_var TO start_bound
+                WHILE i_var <= end_bound
+                    IF is_peak(i_var) = true THEN
+                        IF NOT (i_var IN alpha) THEN
+                            CALL insert_sorted(alpha, i_var)
+                        END IF
+                    ELSE
+                        IF i_var IN alpha THEN
+                            CALL remove_element(alpha, i_var)
+                        END IF
+                    END IF
+                    SET i_var TO i_var + 1
+                END WHILE
+            END IF
+            SET delta TO delta + 1
+        UNTIL FALSE
+
+        RETURN gamma
+    END FUNCTION
+END CLASS

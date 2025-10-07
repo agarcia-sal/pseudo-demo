@@ -1,0 +1,62 @@
+CLASS Solution  
+    FUNCTION numberOfSubarrays(nums)  
+        DEFINE build_map(arr)  
+            ASSIGN map_dict TO new default dictionary of list  
+            DEFINE recurse_enum(pos)  
+                IF pos EQUALS length of arr THEN  
+                    RETURN  
+                END IF  
+                ASSIGN val TO arr[pos]  
+                APPEND pos TO map_dict[val]  
+                CALL recurse_enum(pos PLUS one)  
+            END DEFINE  
+            CALL recurse_enum(zero)  
+            RETURN map_dict  
+        END DEFINE  
+
+        ASSIGN idx_groups TO build_map(nums)  
+        ASSIGN total_count TO zero  
+        DEFINE process_groups(groups_list)  
+            IF groups_list IS empty THEN  
+                RETURN  
+            END IF  
+            ASSIGN curr_indices TO groups_list[zero]  
+            DEFINE len_indices TO (zero PLUS length of curr_indices)  
+            DEFINE outer_loop(i)  
+                IF i GREATER OR EQUAL TO len_indices THEN  
+                    RETURN  
+                END IF  
+                DEFINE inner_loop(j)  
+                    IF j GREATER OR EQUAL TO len_indices THEN  
+                        RETURN  
+                    END IF  
+                    ASSIGN start_idx TO curr_indices[i]  
+                    ASSIGN end_idx TO curr_indices[j]  
+                    ASSIGN sub_arr TO SLICE nums FROM start_idx TO (end_idx PLUS one)  
+                    ASSIGN max_in_sub TO sub_arr[zero]  
+                    DEFINE find_max(k)  
+                        IF k EQUALS length of sub_arr THEN  
+                            RETURN max_in_sub  
+                        END IF  
+                        IF sub_arr[k] GREATER THAN max_in_sub THEN  
+                            ASSIGN max_in_sub TO sub_arr[k]  
+                        END IF  
+                        RETURN find_max(k PLUS one)  
+                    END DEFINE  
+                    ASSIGN max_in_sub TO find_max(one)  
+                    IF NOT (max_in_sub NOT EQUAL TO nums[start_idx]) THEN  
+                        ASSIGN total_count TO total_count PLUS one  
+                    END IF  
+                    RETURN inner_loop(j PLUS one)  
+                END DEFINE  
+                CALL inner_loop(i)  
+                RETURN outer_loop(i PLUS one)  
+            END DEFINE  
+            CALL outer_loop(zero)  
+            RETURN process_groups(groups_list SLICE from one TO end)  
+        END DEFINE  
+        CALL process_groups(list of all values in idx_groups)  
+        ASSIGN final_result TO total_count  
+        RETURN final_result  
+    END FUNCTION  
+END CLASS

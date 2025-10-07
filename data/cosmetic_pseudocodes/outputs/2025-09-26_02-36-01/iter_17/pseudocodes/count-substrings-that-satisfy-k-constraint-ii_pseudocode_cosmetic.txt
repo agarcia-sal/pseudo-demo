@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+        SET m TO LENGTH OF s
+        SET zero_prefix_accumulator TO LIST WITH VALUE 0 REPEATED (m PLUS 1) TIMES
+        SET one_prefix_accumulator TO LIST WITH VALUE 0 REPEATED (m PLUS 1) TIMES
+        
+        PROCEDURE build_prefix_arrays()
+        BEGIN
+            SET idx TO 0
+            WHILE idx LESS THAN m
+                SET zero_flag TO 0
+                SET one_flag TO 0
+                IF s ELEMENT AT idx EQUALS CHARACTER "0"
+                    SET zero_flag TO 1
+                ELSE
+                    IF s ELEMENT AT idx EQUALS CHARACTER "1"
+                        SET one_flag TO 1
+                    END IF
+                END IF
+                SET zero_prefix_accumulator ELEMENT AT (idx PLUS 1) TO zero_prefix_accumulator ELEMENT AT idx PLUS zero_flag
+                SET one_prefix_accumulator ELEMENT AT (idx PLUS 1) TO one_prefix_accumulator ELEMENT AT idx PLUS one_flag
+                SET idx TO idx PLUS 1
+            END WHILE
+        END
+        
+        CALL build_prefix_arrays()
+        
+        FUNCTION determine_count(start_index parameter end_index parameter) RETURNS INTEGER
+            SET total_substrings TO 0
+            SET current_start TO start_index
+            REPEAT
+                IF current_start GREATER THAN end_index
+                    BREAK
+                END IF
+                SET low_bound TO current_start
+                SET high_bound TO end_index PLUS 1
+                REPEAT
+                    IF low_bound GREATER THAN OR EQUAL TO high_bound
+                        BREAK
+                    END IF
+                    SET mid_point TO (low_bound PLUS high_bound) DIVIDED BY 2
+                    SET zero_count_substring TO zero_prefix_accumulator ELEMENT AT (mid_point PLUS 1) MINUS zero_prefix_accumulator ELEMENT AT current_start
+                    SET one_count_substring TO one_prefix_accumulator ELEMENT AT (mid_point PLUS 1) MINUS one_prefix_accumulator ELEMENT AT current_start
+                    IF zero_count_substring LESS THAN OR EQUAL TO k OR one_count_substring LESS THAN OR EQUAL TO k
+                        SET low_bound TO mid_point PLUS 1
+                    ELSE
+                        SET high_bound TO mid_point
+                    END IF
+                UNTIL FALSE
+                SET max_end TO low_bound MINUS 1
+                IF max_end GREATER THAN OR EQUAL TO current_start
+                    SET total_substrings TO total_substrings PLUS (max_end MINUS current_start PLUS 1)
+                END IF
+                SET current_start TO current_start PLUS 1
+            UNTIL FALSE
+            RETURN total_substrings
+        END FUNCTION
+        
+        SET output_results TO EMPTY LIST
+        FOR EACH pair_element IN queries
+        BEGIN
+            SET left_range TO pair_element ELEMENT AT 0
+            SET right_range TO pair_element ELEMENT AT 1
+            SET result_value TO determine_count WITH PARAMETERS left_range AND right_range
+            APPEND result_value TO output_results
+        END
+        
+        RETURN output_results
+    END FUNCTION
+END CLASS

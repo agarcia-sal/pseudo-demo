@@ -1,0 +1,112 @@
+CLASS Solution
+    FUNCTION minimumAddedInteger(nums1 RETURNS List OF integer, nums2 RETURNS List OF integer) RETURNS integer
+        PROCEDURE arrange(SEQ)
+            DECLARE A AS integer
+            DECLARE B AS integer
+            DECLARE C AS integer
+            DECLARE D AS integer
+            DECLARE TEMPSWAP AS integer
+            SET D TO LENGTH OF SEQ
+            SET B TO 1
+            REC_REARRANGE:
+            IF B GREATER THAN OR EQUAL TO D THEN
+                RETURN
+            END IF
+            SET A TO 0
+            LOOP_START:
+            IF A GREATER THAN OR EQUAL TO D MINUS B THEN
+                INCREMENT B BY 1
+                GOTO REC_REARRANGE
+            END IF
+            IF SEQ[A] GREATER THAN SEQ[A PLUS 1] THEN
+                SET TEMPSWAP TO SEQ[A]
+                SET SEQ[A] TO SEQ[A PLUS 1]
+                SET SEQ[A PLUS 1] TO TEMPSWAP
+            END IF
+            INCREMENT A BY 1
+            GOTO LOOP_START
+        END PROCEDURE
+
+        CALL arrange(nums1)
+        CALL arrange(nums2)
+
+        DECLARE P AS integer
+        DECLARE Q AS integer
+        SET P TO 0
+        UNTIL_LOOP_I:
+        IF P GREATER THAN OR EQUAL TO LENGTH OF nums1 MINUS 1 THEN
+            GOTO FOR_J_END
+        END IF
+
+        SET Q TO P PLUS 1
+        UNTIL_LOOP_J:
+        IF Q GREATER THAN OR EQUAL TO LENGTH OF nums1 THEN
+            INCREMENT P BY 1
+            GOTO UNTIL_LOOP_I
+        END IF
+
+        DECLARE V AS List OF integer
+        SET V TO EMPTY LIST
+
+        DECLARE M AS integer
+        SET M TO 0
+        WHILE_LOOP_1:
+        IF M GREATER THAN OR EQUAL TO P THEN
+            GOTO WHILE_1_END
+        END IF
+        APPEND nums1[M] TO V
+        INCREMENT M BY 1
+        GOTO WHILE_LOOP_1
+        WHILE_1_END:
+
+        SET M TO P PLUS 1
+        WHILE_LOOP_2:
+        IF M GREATER THAN OR EQUAL TO Q THEN
+            GOTO WHILE_2_END
+        END IF
+        APPEND nums1[M] TO V
+        INCREMENT M BY 1
+        GOTO WHILE_LOOP_2
+        WHILE_2_END:
+
+        SET M TO Q PLUS 1
+        WHILE_LOOP_3:
+        IF M GREATER THAN OR EQUAL TO LENGTH OF nums1 THEN
+            GOTO WHILE_3_END
+        END IF
+        APPEND nums1[M] TO V
+        INCREMENT M BY 1
+        GOTO WHILE_LOOP_3
+        WHILE_3_END:
+
+        DECLARE DELTA AS integer
+        SET DELTA TO (nums2[0] MINUS V[0])
+
+        DECLARE SATISFIED AS boolean
+        SET SATISFIED TO TRUE
+
+        DECLARE Z AS integer
+        SET Z TO 0
+        CHECK_LOOP:
+        IF Z GREATER THAN OR EQUAL TO LENGTH OF nums2 THEN
+            GOTO CHECK_END
+        END IF
+
+        IF (V[Z] PLUS DELTA) NOT EQUAL nums2[Z] THEN
+            SET SATISFIED TO FALSE
+            GOTO CHECK_END
+        END IF
+        INCREMENT Z BY 1
+        GOTO CHECK_LOOP
+        CHECK_END:
+
+        IF SATISFIED IS TRUE THEN
+            RETURN DELTA
+        END IF
+
+        INCREMENT Q BY 1
+        GOTO UNTIL_LOOP_J
+        FOR_J_END:
+        RETURN None
+    END FUNCTION
+END CLASS

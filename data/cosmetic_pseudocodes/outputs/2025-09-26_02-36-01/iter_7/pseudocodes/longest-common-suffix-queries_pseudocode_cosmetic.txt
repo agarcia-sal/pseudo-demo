@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+        DECLARE suffixIndexMap AS DICTIONARY OF STRING TO INTEGER = NEW DICTIONARY
+
+        PROCEDURE traverseSuffixes(currentWord STRING, currentIndex INTEGER)
+            DECLARE position INTEGER = LENGTH(currentWord) - 1
+            WHILE position >= 0 DO
+                DECLARE currentSuffix STRING = SUBSTRING(currentWord, position, LENGTH(currentWord) - position)
+                IF NOT suffixIndexMap.CONTAINS_KEY(currentSuffix) THEN
+                    suffixIndexMap[currentSuffix] = currentIndex
+                ELSE
+                    DECLARE previousIndex INTEGER = suffixIndexMap[currentSuffix]
+                    DECLARE previousWord STRING = wordsContainer[previousIndex]
+                    IF (LENGTH(currentWord) < LENGTH(previousWord)) OR ((LENGTH(currentWord) = LENGTH(previousWord)) AND (currentIndex < previousIndex)) THEN
+                        suffixIndexMap[currentSuffix] = currentIndex
+                    END IF
+                END IF
+                position = position - 1
+            END WHILE
+        END PROCEDURE
+
+        DECLARE iterIndex INTEGER = 0
+        DECLARE totalWords INTEGER = LENGTH(wordsContainer)
+        WHILE iterIndex < totalWords DO
+            CALL traverseSuffixes(wordsContainer[iterIndex], iterIndex)
+            iterIndex = iterIndex + 1
+        END WHILE
+
+        FUNCTION get_best_match(query STRING) RETURNS INTEGER
+            DECLARE startPos INTEGER = 0
+            DECLARE queryLength INTEGER = LENGTH(query)
+            DECLARE foundIndex INTEGER = -1
+            WHILE startPos < queryLength DO
+                DECLARE currentSuffix STRING = SUBSTRING(query, startPos, queryLength - startPos)
+                IF suffixIndexMap.CONTAINS_KEY(currentSuffix) THEN
+                    foundIndex = suffixIndexMap[currentSuffix]
+                    RETURN foundIndex
+                END IF
+                startPos = startPos + 1
+            END WHILE
+
+            DECLARE minimalIndex INTEGER = 0
+            DECLARE minimalLength INTEGER = LENGTH(wordsContainer[0])
+            DECLARE searchPos INTEGER = 1
+            WHILE searchPos < totalWords DO
+                DECLARE candidateLength INTEGER = LENGTH(wordsContainer[searchPos])
+                IF (candidateLength < minimalLength) OR ((candidateLength = minimalLength) AND (searchPos < minimalIndex)) THEN
+                    minimalIndex = searchPos
+                    minimalLength = candidateLength
+                END IF
+                searchPos = searchPos + 1
+            END WHILE
+            RETURN minimalIndex
+        END FUNCTION
+
+        DECLARE resultList AS LIST OF INTEGER = EMPTY LIST
+        DECLARE queryIter INTEGER = 0
+        DECLARE queriesCount INTEGER = LENGTH(wordsQuery)
+        REPEAT
+            IF queryIter >= queriesCount THEN BREAK END IF
+            DECLARE currentQuery STRING = wordsQuery[queryIter]
+            APPEND get_best_match(currentQuery) TO resultList
+            queryIter = queryIter + 1
+        UNTIL FALSE
+
+        RETURN resultList
+    END FUNCTION
+END CLASS

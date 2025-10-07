@@ -1,0 +1,95 @@
+CLASS Solution  
+    FUNCTION maxPathLength(coordinates, k)  
+        SET cQ4 AS element at index k of coordinates  
+        SET VxE AS element at index 0 of cQ4  
+        SET rH7 AS element at index 1 of cQ4  
+        SET yUz AS empty list  
+        SET iLp TO 0  
+        WHILE iLp LESS THAN length of coordinates  
+            SET q5G TO element at index iLp of coordinates  
+            SET sJd TO element at index 0 of q5G  
+            SET bNf TO element at index 1 of q5G  
+            IF sJd LESS THAN VxE AND bNf LESS THAN rH7 THEN  
+                APPEND tuple of sJd, bNf TO yUz  
+            END IF  
+            SET iLp TO iLp PLUS 1  
+        END WHILE  
+        SET mRC AS empty list  
+        DEFINE recurseRight(zxB) AS  
+            IF zxB EQUALS length of coordinates THEN RETURN  
+            SET lRu TO element at index zxB of coordinates  
+            SET nWx TO element at index 0 of lRu  
+            SET ERV TO element at index 1 of lRu  
+            IF nWx GREATER THAN VxE AND ERV GREATER THAN rH7 THEN  
+                APPEND tuple of nWx, ERV TO mRC  
+            END IF  
+            recurseRight(zxB PLUS 1)  
+        END DEFINE  
+        recurseRight(0)  
+        RETURN 1 PLUS self CALLS _lengthOfLIS WITH yUz PLUS self CALLS _lengthOfLIS WITH mRC  
+    END FUNCTION  
+
+    FUNCTION _lengthOfLIS(coordinates)  
+        DEFINE compareFn(aJw, bWq) AS  
+            IF element at index 0 of aJw LESS THAN element at index 0 of bWq THEN RETURN true  
+            ELSE IF element at index 0 of aJw EQUALS element at index 0 of bWq THEN  
+                RETURN element at index 1 of aJw GREATER THAN element at index 1 of bWq  
+            ELSE  
+                RETURN false  
+            END IF  
+        END DEFINE  
+        DEFINE sortViaBubble(Lp1) AS
+            SET Be3 TO length of Lp1  
+            SET ZSH TO 1  
+            REPEAT  
+                SET Rcr TO false  
+                SET BiK TO 0  
+                WHILE BiK LESS THAN Be3 MINUS ZSH  
+                    IF NOT compareFn(element at BiK of Lp1, element at BiK PLUS 1 of Lp1) THEN  
+                        SET temp TO element at BiK of Lp1  
+                        SET element at BiK of Lp1 TO element at BiK PLUS 1 of Lp1  
+                        SET element at BiK PLUS 1 of Lp1 TO temp  
+                        SET Rcr TO true  
+                    END IF  
+                    SET BiK TO BiK PLUS 1  
+                END WHILE  
+                SET ZSH TO ZSH PLUS 1  
+            UNTIL NOT Rcr  
+        END DEFINE  
+        CALL sortViaBubble(coordinates)  
+        SET Kl6 AS empty list  
+        DEFINE bisectLeft(arr, val) AS  
+            SET low TO 0  
+            SET high TO length of arr  
+            WHILE low LESS THAN high  
+                SET mid TO (low PLUS high) DIVIDED BY 2  
+                IF element at mid of arr GREATER OR EQUAL TO val THEN  
+                    SET high TO mid  
+                ELSE  
+                    SET low TO mid PLUS 1  
+                END IF  
+            END WHILE  
+            RETURN low  
+        END DEFINE  
+        DEFINE processIndex(wL3) AS  
+            SET Tmp TO element at index 1 of wL3  
+            IF length of Kl6 EQUALS 0 THEN  
+                APPEND Tmp TO Kl6  
+            ELSE  
+                SET uBv TO element at index length of Kl6 MINUS 1 of Kl6  
+                IF Tmp GREATER THAN uBv THEN  
+                    APPEND Tmp TO Kl6  
+                ELSE  
+                    SET MnR TO bisectLeft(Kl6, Tmp)  
+                    SET element at MnR of Kl6 TO Tmp  
+                END IF  
+            END IF  
+        END DEFINE  
+        SET AZM TO 0  
+        WHILE AZM LESS THAN length of coordinates  
+            CALL processIndex(element at AZM of coordinates)  
+            SET AZM TO AZM PLUS 1  
+        END WHILE  
+        RETURN length of Kl6  
+    END FUNCTION  
+END CLASS

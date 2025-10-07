@@ -1,0 +1,31 @@
+FUNCTION compare_one(x_value, y_value)
+  
+  FUNCTION cleanse_string(input_str)
+    EXECUTE do_replace WITH parameters (target=',', substitute='.', source=input_str)
+    RETURN do_replace
+  END FUNCTION
+  
+  ASSIGN alpha TO x_value
+  ASSIGN beta TO y_value
+  
+  IF (type_of(alpha) EQUALS string)
+  THEN alpha ← cleanse_string(alpha)
+  ELSE NO_OP
+  END IF
+  
+  IF ((type_of beta) EQUALS string)
+  THEN beta ← cleanse_string(beta)
+  ELSE NO_OP
+  END IF
+  
+  FUNCTION float_eq(val1, val2)
+    RETURN (to_float(val1) == to_float(val2))
+  END FUNCTION
+  
+  IF float_eq(alpha, beta)
+  THEN EXECUTE BREAK None
+  END IF
+  
+  EXECUTE (IF to_float(alpha) OVER to_float(beta) THEN RETURN x_value ELSE RETURN y_value)
+  
+END FUNCTION

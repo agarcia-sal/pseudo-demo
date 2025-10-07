@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION numberOfSubstrings(s parameter, k parameter)
+        DEFINE FUNCTION incrementCount(mapping, key)
+            IF key IN mapping THEN
+                SET mapping[key] TO mapping[key] + 1
+            ELSE
+                SET mapping[key] TO 1
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION decrementCount(mapping, key)
+            SET mapping[key] TO mapping[key] - 1
+            IF mapping[key] = 0 THEN
+                REMOVE key FROM mapping
+            END IF
+        END FUNCTION
+
+        SET varP TO 0
+        SET varQ TO 0
+        SET varZ TO empty mapping
+
+        DEFINE FUNCTION checkThreshold(map, threshold)
+            FOR EACH element IN map
+                IF map[element] >= threshold THEN
+                    RETURN TRUE
+                END IF
+            END FOR
+            RETURN FALSE
+        END FUNCTION
+
+        DEFINE FUNCTION loopOver(sText, posR, posL, countMap, threshold, acc)
+            IF posR >= LENGTH(sText) THEN
+                RETURN acc
+            ELSE
+                SET currentChar TO sText[posR]
+                CALL incrementCount(countMap, currentChar)
+
+                WHILE checkThreshold(countMap, threshold) = TRUE DO
+                    CALL decrementCount(countMap, sText[posL])
+                    SET posL TO posL + 1
+                END WHILE
+
+                RETURN loopOver(sText, posR + 1, posL, countMap, threshold, acc + posL)
+            END IF
+        END FUNCTION
+
+        SET varQ TO loopOver(s, varP, 0, varZ, k, 0)
+        RETURN varQ
+    END FUNCTION
+END CLASS

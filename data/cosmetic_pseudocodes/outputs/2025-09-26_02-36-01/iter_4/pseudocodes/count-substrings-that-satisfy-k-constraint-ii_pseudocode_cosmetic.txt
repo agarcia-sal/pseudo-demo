@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+        DECLARE length_s AS INTEGER
+        LET length_s BE THE LENGTH OF s
+
+        DECLARE zero_prefix_arr AS LIST OF INTEGER
+        DECLARE one_prefix_arr AS LIST OF INTEGER
+        INITIALIZE zero_prefix_arr WITH zero REPEATED (length_s PLUS one) TIMES
+        INITIALIZE one_prefix_arr WITH zero REPEATED (length_s PLUS one) TIMES
+
+        DECLARE idx AS INTEGER
+        LET idx BE zero
+        WHILE idx LESS THAN length_s
+            LET current_zero_val BE IF s[idx] EQUALS CHARACTER zero THEN one ELSE zero
+            LET current_one_val BE IF s[idx] EQUALS CHARACTER one THEN one ELSE zero
+
+            SET zero_prefix_arr[idx PLUS one] TO zero_prefix_arr[idx] PLUS current_zero_val
+            SET one_prefix_arr[idx PLUS one] TO one_prefix_arr[idx] PLUS current_one_val
+
+            INCREMENT idx BY one
+        END WHILE
+
+        FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER
+            DECLARE total_count AS INTEGER
+            SET total_count TO zero
+
+            DECLARE start_pos AS INTEGER
+            LET start_pos BE l
+            WHILE start_pos LESS THAN OR EQUAL TO r
+                DECLARE low AS INTEGER
+                DECLARE high AS INTEGER
+                SET low TO start_pos
+                SET high TO r PLUS one
+
+                WHILE low LESS THAN high
+                    DECLARE mid_val AS INTEGER
+                    SET mid_val TO (low PLUS high) DIVIDED BY two
+
+                    DECLARE zeros_sub_count AS INTEGER
+                    DECLARE ones_sub_count AS INTEGER
+                    SET zeros_sub_count TO zero_prefix_arr[mid_val PLUS one] MINUS zero_prefix_arr[start_pos]
+                    SET ones_sub_count TO one_prefix_arr[mid_val PLUS one] MINUS one_prefix_arr[start_pos]
+
+                    IF zeros_sub_count LESS THAN OR EQUAL TO k OR ones_sub_count LESS THAN OR EQUAL TO k THEN
+                        SET low TO mid_val PLUS one
+                    ELSE
+                        SET high TO mid_val
+                    END IF
+                END WHILE
+
+                DECLARE substring_end AS INTEGER
+                SET substring_end TO low MINUS one
+
+                IF substring_end GREATER THAN OR EQUAL TO start_pos THEN
+                    LET length_contrib BE substring_end MINUS start_pos PLUS one
+                    SET total_count TO total_count PLUS length_contrib
+                END IF
+
+                INCREMENT start_pos BY one
+            END WHILE
+            RETURN total_count
+        END FUNCTION
+
+        DECLARE answers AS LIST OF INTEGER
+        INITIALIZE answers AS AN EMPTY LIST
+
+        DECLARE query_index AS INTEGER
+        LET query_index BE zero
+        WHILE query_index LESS THAN THE LENGTH OF queries
+            DECLARE left_bound AS INTEGER
+            DECLARE right_bound AS INTEGER
+            SET left_bound TO queries[query_index][zero]
+            SET right_bound TO queries[query_index][one]
+
+            DECLARE current_result AS INTEGER
+            SET current_result TO count_valid_substrings WITH PARAMETERS left_bound AND right_bound
+            APPEND current_result TO answers
+
+            INCREMENT query_index BY one
+        END WHILE
+
+        RETURN answers
+    END FUNCTION
+END CLASS

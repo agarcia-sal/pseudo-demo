@@ -1,0 +1,74 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        DEFINE p AS LENGTH(grid)
+        DEFINE q AS p DIV 2
+        DEFINE r AS EMPTY SET
+
+        SET u TO 0
+        REPEAT
+            INSERT (u, u) INTO r
+            SET u TO u + 1
+        UNTIL u > q
+
+        SET v TO 0
+        REPEAT
+            INSERT (v, (p - v - 1)) INTO r
+            SET v TO v + 1
+        UNTIL v > q
+
+        SET w TO q
+        WHILE w <= (p - 1)
+            INSERT (w, q) INTO r
+            SET w TO w + 1
+        END WHILE
+
+        FUNCTION countValuesAtPositions(collectedPositions)
+            DEFINE dictCount AS EMPTY MAP with default 0
+            SET x TO 0
+            WHILE x < p
+                SET y TO 0
+                WHILE y < p
+                    IF (x, y) IN collectedPositions THEN
+                        INCREMENT dictCount[grid[x][y]] BY 1
+                    END IF
+                    SET y TO y + 1
+                END WHILE
+                SET x TO x + 1
+            END WHILE
+            RETURN dictCount
+        END FUNCTION
+
+        DEFINE mCount AS countValuesAtPositions(r)
+        DEFINE nCount AS countValuesAtPositions(SET_DIFF(SET OF ALL (a,b) WHERE 0 ≤ a,b < p, r))
+
+        DEFINE minOps AS 1.0 / 0.0
+
+        SET aVal TO 0
+        WHILE aVal <= 2
+            SET bVal TO 0
+            WHILE bVal <= 2
+                IF NOT (aVal = bVal) THEN
+                    DEFINE sumM AS 0
+                    FOR EACH k IN KEYS(mCount)
+                        SET sumM TO sumM + mCount[k]
+                    END FOR
+                    SET sumN TO 0
+                    FOR EACH l IN KEYS(nCount)
+                        SET sumN TO sumN + nCount[l]
+                    END FOR
+
+                    SET ops AS (sumM - mCount.get(aVal, 0)) + (sumN - nCount.get(bVal, 0))
+                    IF ops < minOps THEN
+                        SET minOps TO ops
+                    END IF
+                END IF
+                SET bVal TO bVal + 1
+            END WHILE
+            SET aVal TO aVal + 1
+        END WHILE
+
+        RETURN minOps
+    END FUNCTION
+END CLASS
+```

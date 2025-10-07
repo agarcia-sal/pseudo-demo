@@ -1,0 +1,154 @@
+CLASS Solution
+{
+    FUNCTION minimumTime(n, edges, disappear)
+    {
+        CONSTANT INF = 1.0 / 0.0
+        SET adjacency_map TO an empty mapping with default value empty list
+        SET idx1 TO 0
+        SET len_edges TO the LENGTH OF edges
+        WHILE idx1 LESS THAN len_edges
+        {
+            SET edge_item TO edges[idx1]
+            SET node_a TO edge_item[0]
+            SET node_b TO edge_item[1]
+            SET edge_len TO edge_item[2]
+            INSERT (node_b, edge_len) AT THE END OF adjacency_map[node_a]
+            INSERT (node_a, edge_len) AT THE END OF adjacency_map[node_b]
+            SET idx1 TO idx1 PLUS 1
+        }
+
+        SET dist_array TO a list OF size n FILLED WITH INF
+        SET dist_array[0] TO 0 + 0
+
+        SET heap_list TO EMPTY LIST
+        CALL push_heap(heap_list, (0, 0))
+
+        FUNCTION push_heap(heap_container, val)
+        {
+            APPEND val TO heap_container
+            SET pos TO LENGTH OF heap_container MINUS 1
+            WHILE pos GREATER THAN 0
+            {
+                SET parent_pos TO (pos - 1) DIV 2
+                IF heap_container[parent_pos][0] GREATER THAN heap_container[pos][0]
+                {
+                    SWAP heap_container[parent_pos] WITH heap_container[pos]
+                    SET pos TO parent_pos
+                }
+                ELSE
+                {
+                    BREAK
+                }
+            }
+        }
+
+        FUNCTION pop_heap(heap_container)
+        {
+            IF LENGTH OF heap_container EQUALS 0
+            {
+                RETURN NULL
+            }
+            SET top_val TO heap_container[0]
+            SET last_element TO heap_container[LENGTH OF heap_container MINUS 1]
+            SET heap_container[0] TO last_element
+            REMOVE LAST FROM heap_container
+            SET pos TO 0
+            SET size TO LENGTH OF heap_container
+            WHILE TRUE
+            {
+                SET left_child TO pos * 2 + 1
+                SET right_child TO pos * 2 + 2
+                SET smallest TO pos
+
+                IF left_child LESS THAN size AND heap_container[left_child][0] LESS THAN heap_container[smallest][0]
+                {
+                    SET smallest TO left_child
+                }
+                IF right_child LESS THAN size AND heap_container[right_child][0] LESS THAN heap_container[smallest][0]
+                {
+                    SET smallest TO right_child
+                }
+                IF smallest NOT EQUAL pos
+                {
+                    SWAP heap_container[pos] WITH heap_container[smallest]
+                    SET pos TO smallest
+                }
+                ELSE
+                {
+                    BREAK
+                }
+            }
+            RETURN top_val
+        }
+
+        FUNCTION is_empty(collection)
+        {
+            RETURN LENGTH OF collection EQUALS 0
+        }
+
+        FUNCTION is_not_empty(collection)
+        {
+            RETURN NOT is_empty(collection)
+        }
+
+        // Process the heap using a recursive approach to simulate a while loop
+        FUNCTION process_heap()
+        {
+            IF is_empty(heap_list)
+            {
+                RETURN
+            }
+            SET current_pair TO pop_heap(heap_list)
+            SET curr_dist TO current_pair[0]
+            SET curr_node TO current_pair[1]
+
+            IF (curr_dist >= disappear[curr_node]) OR (curr_dist > dist_array[curr_node])
+            {
+                CALL process_heap()
+                RETURN
+            }
+
+            SET neighbors TO adjacency_map[curr_node]
+            SET idx2 TO 0
+            SET limit2 TO LENGTH OF neighbors
+
+            REPEAT
+            {
+                IF idx2 GREATER THAN OR EQUAL TO limit2
+                {
+                    BREAK
+                }
+                SET adjacent TO neighbors[idx2]
+                SET neighbor_node TO adjacent[0]
+                SET length_edge TO adjacent[1]
+                SET new_distance TO (curr_dist + length_edge) + 0
+
+                IF (new_distance < dist_array[neighbor_node]) AND (new_distance < disappear[neighbor_node])
+                {
+                    SET dist_array[neighbor_node] TO new_distance
+                    CALL push_heap(heap_list, (new_distance, neighbor_node))
+                }
+
+                SET idx2 TO idx2 + 1
+            } UNTIL FALSE
+
+            CALL process_heap()
+        }
+
+        CALL process_heap()
+
+        SET output_arr TO a list of length n FILLED WITH (0 - 1)
+
+        SET index_var TO n - 1
+        WHILE index_var >= 0
+        {
+            IF dist_array[index_var] LESS THAN disappear[index_var]
+            {
+                SET output_arr[index_var] TO dist_array[index_var]
+            }
+            SET index_var TO index_var - 1
+        }
+
+        RETURN output_arr
+    }
+}

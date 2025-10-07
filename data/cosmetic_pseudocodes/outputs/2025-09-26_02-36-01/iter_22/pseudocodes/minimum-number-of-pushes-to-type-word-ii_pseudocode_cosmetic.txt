@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION minimumPushes(word)
+        FUNCTION tallyCharacters(inputString)
+            DECLARE countsMap AS empty map
+            DECLARE position AS zero
+            DECLARE lengthLimit AS length of inputString
+            WHILE position < lengthLimit DO
+                DECLARE character AS character at inputString[position]
+                IF NOT (character IN countsMap) THEN
+                    countsMap[character] = 1
+                ELSE
+                    countsMap[character] = countsMap[character] + 1
+                END IF
+                position = position + 1
+            END WHILE
+            RETURN countsMap
+        END FUNCTION
+
+        DECLARE letterCounts AS tallyCharacters(word)
+        DECLARE countsList AS empty list
+        FOR EACH letterKey IN letterCounts
+            APPEND letterCounts[letterKey] TO countsList
+        END FOR
+        DECLARE descendingCounts AS empty list
+        DECLARE index AS 0
+        DECLARE countsLength AS length of countsList
+        WHILE index < countsLength DO
+            DECLARE maxIndex AS index
+            DECLARE scanIndex AS index + 1
+            WHILE scanIndex < countsLength DO
+                IF countsList[scanIndex] > countsList[maxIndex] THEN
+                    maxIndex = scanIndex
+                END IF
+                scanIndex = scanIndex + 1
+            END WHILE
+            DECLARE tempValue AS countsList[index]
+            countsList[index] = countsList[maxIndex]
+            countsList[maxIndex] = tempValue
+            index = index + 1
+        END WHILE
+        descendingCounts = countsList
+
+        DECLARE cumulativePushes AS 0
+        DECLARE strokesPerKey AS 1
+        DECLARE assignedKeysCounter AS 0
+        DECLARE positionCounter AS 0
+        WHILE positionCounter < length of descendingCounts DO
+            cumulativePushes = cumulativePushes + (descendingCounts[positionCounter] * strokesPerKey)
+            assignedKeysCounter = assignedKeysCounter + 1
+            IF NOT (assignedKeysCounter < 8) THEN
+                assignedKeysCounter = 0
+                strokesPerKey = strokesPerKey + 1
+            END IF
+            positionCounter = positionCounter + 1
+        END WHILE
+        RETURN cumulativePushes
+    END FUNCTION
+END CLASS

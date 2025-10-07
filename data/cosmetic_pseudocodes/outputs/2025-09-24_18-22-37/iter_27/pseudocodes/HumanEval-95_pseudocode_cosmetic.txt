@@ -1,0 +1,44 @@
+FUNCTION check_dict_case(flag_map)
+    DECLARE h_flag AS STRING
+    DECLARE idx AS INTEGER
+    DECLARE k AS STRING
+    DECLARE vals_keys AS LIST OF STRING
+
+    SET vals_keys TO flag_map.keys()
+    IF NOT (LENGTH OF vals_keys > 0) THEN
+        RETURN False
+    END IF
+
+    SET h_flag = "start"
+    SET idx = 0
+    WHILE idx < LENGTH OF vals_keys
+        SET k = vals_keys.at(idx)
+
+        IF NOT (TYPE OF k EQUALS STRING) THEN
+            SET h_flag = "mixed"
+            BREAK
+        END IF
+
+        IF h_flag = "start" THEN
+            IF k = UPPERCASE(k) THEN
+                SET h_flag = "upper"
+            ELSE
+                IF k = LOWERCASE(k) THEN
+                    SET h_flag = "lower"
+                ELSE
+                    BREAK
+                END IF
+            END IF
+        ELSE
+            IF (h_flag = "upper" AND k != UPPERCASE(k)) OR (h_flag = "lower" AND k NOT EQUAL TO LOWERCASE(k)) THEN
+                SET h_flag = "mixed"
+                BREAK
+            ELSE
+                BREAK
+            END IF
+        END IF
+        SET idx = idx + 1
+    END WHILE
+
+    RETURN (h_flag = "upper") OR (h_flag = "lower")
+END FUNCTION

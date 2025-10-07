@@ -1,0 +1,43 @@
+CLASS Solution  
+    FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors  
+        DECLARE adjacency AS empty dictionary mapping to empty list  
+        INDEX i TO zero  
+        WHILE i < LENGTH of edges DO  
+            LET a, b BE edges[i][0], edges[i][1]  
+            LET neighborsA BE adjacency.get(a, empty list)  
+            neighborsA APPEND b  
+            SET adjacency[a] TO neighborsA  
+            LET neighborsB BE adjacency.get(b, empty list)  
+            neighborsB APPEND a  
+            SET adjacency[b] TO neighborsB  
+            INCREMENT i BY one  
+        END WHILE  
+        LET bestSize BE 1  
+        FUNCTION dfs WITH PARAMETERS currentNode, parentNode  
+            LET identicalCount BE 1  
+            LET allKidsMatch BE true  
+            FOR EACH adjNode IN adjacency[currentNode] DO  
+                IF NOT(adjNode == parentNode) THEN  
+                    LET subSize BE dfs(adjNode, currentNode)  
+                    IF subSize == 0 THEN  
+                        SET allKidsMatch TO false  
+                    ELSE  
+                        IF colors[adjNode] == colors[currentNode] THEN  
+                            LET identicalCount BE identicalCount PLUS subSize  
+                        ELSE  
+                            SET allKidsMatch TO false  
+                        END IF  
+                    END IF  
+                END IF  
+            END FOR  
+            IF allKidsMatch THEN  
+                LET bestSize BE (bestSize + ((identicalCount - bestSize) ? (identicalCount - bestSize) : 0))  
+                RETURN identicalCount  
+            ELSE  
+                RETURN 0  
+            END IF  
+        END FUNCTION  
+        CALL dfs WITH zero, -1  
+        RETURN bestSize  
+    END FUNCTION  
+END CLASS

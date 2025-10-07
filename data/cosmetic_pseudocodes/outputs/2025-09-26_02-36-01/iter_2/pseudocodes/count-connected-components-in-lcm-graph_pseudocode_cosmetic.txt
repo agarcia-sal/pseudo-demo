@@ -1,0 +1,64 @@
+CLASS DSU  
+    FUNCTION __init__(self, length)  
+        INITIALIZE self.parent AS an empty mapping  
+        INITIALIZE self.rank AS an empty mapping  
+        SET counter TO 0  
+        WHILE counter LESS THAN length  
+            ASSIGN self.parent[counter] TO counter  
+            ASSIGN self.rank[counter] TO 0  
+            INCREMENT counter BY 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION find(self, element)  
+        ASSIGN representative TO self.parent[element]  
+        IF representative NOT EQUAL element THEN  
+            ASSIGN self.parent[element] TO self.find(representative)  
+        END IF  
+        RETURN self.parent[element]  
+    END FUNCTION  
+
+    FUNCTION union_set(self, first, second)  
+        ASSIGN first_root TO self.find(first)  
+        ASSIGN second_root TO self.find(second)  
+        IF first_root IS NOT second_root THEN  
+            IF self.rank[first_root] LESS THAN self.rank[second_root] THEN  
+                ASSIGN temp_var TO first_root  
+                ASSIGN first_root TO second_root  
+                ASSIGN second_root TO temp_var  
+            END IF  
+            ASSIGN self.parent[second_root] TO first_root  
+            IF self.rank[first_root] EQUALS self.rank[second_root] THEN  
+                SET self.rank[first_root] TO self.rank[first_root] PLUS 1  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, numbers, limit)  
+        ASSIGN dsu TO DSU(limit + 1)  
+
+        SET index TO 0  
+        WHILE index LESS THAN THE LENGTH OF numbers  
+            ASSIGN current TO numbers[index]  
+            SET multiple TO current + current  
+            WHILE multiple LESS OR EQUAL limit  
+                CALL dsu.union_set(current, multiple)  
+                SET multiple TO multiple + current  
+            END WHILE  
+            INCREMENT index BY 1  
+        END WHILE  
+
+        DECLARE distinct_roots AS AN EMPTY SET  
+        FOR EACH candidate IN numbers DO  
+            IF candidate GREATER THAN limit THEN  
+                ADD candidate TO distinct_roots  
+            ELSE  
+                ADD dsu.find(candidate) TO distinct_roots  
+            END IF  
+        END FOR  
+
+        RETURN THE CARDINALITY OF distinct_roots  
+    END FUNCTION  
+END CLASS

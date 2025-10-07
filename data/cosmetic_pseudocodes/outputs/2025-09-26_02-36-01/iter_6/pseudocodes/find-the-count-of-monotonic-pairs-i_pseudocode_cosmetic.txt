@@ -1,0 +1,95 @@
+CLASS Solution
+  FUNCTION countOfPairs(numbers)
+    SET CONSTANT_MODULO TO ((500_000_000) + (500_000_000 + 7))
+    SET length_count TO LENGTH OF numbers
+    SET highest_element TO 0
+    SET idx_max TO 0
+    WHILE (idx_max < length_count)
+      IF (numbers[idx_max] > highest_element) THEN
+        SET highest_element TO numbers[idx_max]
+      ENDIF
+      SET idx_max TO idx_max + 1
+    ENDWHILE
+
+    FUNCTION make2DList(rows, cols, val)
+      SET outer_idx TO 0
+      SET full_list TO []
+      WHILE outer_idx < rows
+        SET inner_idx TO 0
+        SET inner_list TO []
+        WHILE inner_idx < cols
+          APPEND val TO inner_list
+          SET inner_idx TO inner_idx + 1
+        ENDWHILE
+        APPEND inner_list TO full_list
+        SET outer_idx TO outer_idx + 1
+      ENDWHILE
+      RETURN full_list
+    END FUNCTION
+
+    FUNCTION make3DList(dim1, dim2, dim3, val)
+      SET layers_idx TO 0
+      SET triple_list TO []
+      WHILE layers_idx < dim1
+        SET matrix_idx TO 0
+        SET matrix_list TO []
+        WHILE matrix_idx < dim2
+          APPEND make2DList(1, dim3, val)[0] TO matrix_list
+          SET matrix_idx TO matrix_idx + 1
+        ENDWHILE
+        APPEND matrix_list TO triple_list
+        SET layers_idx TO layers_idx + 1
+      ENDWHILE
+      RETURN triple_list
+    END FUNCTION
+
+    SET dp_table TO make3DList(length_count, (highest_element + 1), (highest_element + 1), 0)
+
+    FUNCTION initialize_with_first_element()
+      SET temp_j TO numbers[0]
+      SET current_j TO 0
+      REPEAT
+        SET current_k TO numbers[0] - current_j
+        dp_table[0][current_j][current_k] = 1
+        SET current_j TO current_j + 1
+      UNTIL current_j > temp_j
+    END FUNCTION
+
+    CALL initialize_with_first_element()
+
+    SET i_idx TO 1
+    WHILE i_idx < length_count
+      SET outer_j TO 0
+      WHILE outer_j <= numbers[i_idx]
+        SET outer_k TO numbers[i_idx] - outer_j
+        SET prev_j_idx TO 0
+        WHILE prev_j_idx <= outer_j
+          SET prev_k_idx TO (highest_element + 1) - 1
+          WHILE prev_k_idx >= outer_k
+            SET dp_table[i_idx][outer_j][outer_k] = dp_table[i_idx][outer_j][outer_k] + dp_table[i_idx - 1][prev_j_idx][prev_k_idx]
+            SET dp_table[i_idx][outer_j][outer_k] = dp_table[i_idx][outer_j][outer_k] MOD CONSTANT_MODULO
+            SET prev_k_idx TO prev_k_idx - 1
+          ENDWHILE
+          SET prev_j_idx TO prev_j_idx + 1
+        ENDWHILE
+        SET outer_j TO outer_j + 1
+      ENDWHILE
+      SET i_idx TO i_idx + 1
+    ENDWHILE
+
+    SET final_sum TO 0
+    SET idx_j TO highest_element
+    WHILE idx_j >= 0
+      SET idx_k TO highest_element
+      WHILE idx_k >= 0
+        IF (idx_j + idx_k = numbers[length_count - 1]) THEN
+          SET final_sum = (final_sum + dp_table[length_count - 1][idx_j][idx_k]) MOD CONSTANT_MODULO
+        ENDIF
+        SET idx_k TO idx_k - 1
+      ENDWHILE
+      SET idx_j TO idx_j - 1
+    ENDWHILE
+
+    RETURN final_sum
+  END FUNCTION
+END CLASS

@@ -1,0 +1,72 @@
+FUNCTION order_by_points(sequence_of_values)
+  FUNCTION digits_sum(value)
+    EXECUTE abs_adjustment WITH (input_num = value, multiplier = 1)
+
+    FUNCTION abs_adjustment(input_num, multiplier)
+      WHEN NOT (input_num < 0)
+        PASS
+      OTHERWISE
+        input_num = 0 - input_num
+        multiplier = 0 - multiplier
+      END WHEN
+      EXECUTE digits_extraction WITH (num = input_num, sign = multiplier)
+    END FUNCTION
+
+    FUNCTION digits_extraction(num, sign)
+      DECLARE digits_array AS EMPTY LIST
+      DECLARE temp_num = num
+
+      WHILE temp_num > 0
+        APPEND (temp_num MOD 10) TO digits_array
+        temp_num = temp_num DIV 10
+      END WHILE
+
+      IF LENGTH OF digits_array > 0
+        digits_array[0] = digits_array[0] * sign
+      ELSE
+        APPEND 0 TO digits_array
+      END IF
+
+      DECLARE total_sum = 0
+      DECLARE idx = 0
+      REPEAT
+        IF idx >= LENGTH OF digits_array
+          BREAK
+        total_sum = total_sum + digits_array[idx]
+        idx = idx + 1
+      UNTIL FALSE
+
+      BREAK total_sum
+    END FUNCTION
+
+    EXECUTE abs_adjustment WITH (input_num = value, multiplier = 1)
+  END FUNCTION
+
+  DECLARE indexed_sequence = []
+  DECLARE index = 0
+
+  WHILE index < LENGTH OF sequence_of_values
+    APPEND (sequence_of_values[index], index) TO indexed_sequence
+    index = index + 1
+  END WHILE
+
+  FUNCTION comparator(item_a, item_b)
+    DECLARE sum_a = digits_sum(item_a[0])
+    DECLARE sum_b = digits_sum(item_b[0])
+    SELECT CASE
+      WHEN sum_a < sum_b THEN BREAK -1
+      WHEN sum_a > sum_b THEN BREAK 1
+      OTHERWISE BREAK item_a[1] - item_b[1]
+    END SELECT
+  END FUNCTION
+
+  SORT indexed_sequence WITH comparator
+
+  DECLARE sorted_values = []
+
+  FOR EACH pair IN indexed_sequence
+    APPEND pair[0] TO sorted_values
+  END FOR
+
+  BREAK sorted_values
+END FUNCTION

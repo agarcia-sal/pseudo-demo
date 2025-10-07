@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION minimumArea(grid)
+        PROCEDURE countRowsCols(aGrid, out_R, out_C)
+            out_R ← 0
+            out_C ← 0
+            LABEL loop_rows_start
+            IF out_R >= LENGTH(aGrid) THEN GOTO loop_rows_end
+            IF out_C = 0 THEN out_C ← LENGTH(aGrid[0])
+            out_R ← out_R + 1
+            GOTO loop_rows_start
+            LABEL loop_rows_end
+        END PROCEDURE
+
+        FUNCTION isEmpty(collection)
+            RETURN (collection = empty)
+        END FUNCTION
+
+        FUNCTION isOne(value)
+            RETURN (value = 1)
+        END FUNCTION
+
+        FUNCTION infPos()
+            RETURN +(1 * 10 ^ 9 + 7)  // Represent positive infinity as a large number
+        END FUNCTION
+
+        FUNCTION infNeg()
+            RETURN - (1 * 10 ^ 9 + 7)
+        END FUNCTION
+
+        FUNCTION calculateArea(tall, wide)
+            RETURN tall * wide
+        END FUNCTION
+
+        PROCEDURE findBounds(matrix, ROWS, COLS, OUT minR, OUT maxR, OUT minC, OUT maxC)
+            minR ← infPos()
+            maxR ← infNeg()
+            minC ← infPos()
+            maxC ← infNeg()
+
+            PROCEDURE innerRow(L)
+                IF L = ROWS THEN RETURN
+                PROCEDURE innerCol(M)
+                    IF M = COLS THEN RETURN
+                    IF isOne(matrix[L][M]) THEN
+                        IF minR > L THEN minR ← L END IF
+                        IF maxR < L THEN maxR ← L END IF
+                        IF minC > M THEN minC ← M END IF
+                        IF maxC < M THEN maxC ← M END IF
+                    END IF
+                    innerCol(M+1)
+                END PROCEDURE
+
+                innerCol(0)
+                innerRow(L+1)
+            END PROCEDURE
+
+            innerRow(0)
+        END PROCEDURE
+
+        IF (isEmpty(grid) OR isEmpty(grid[0])) THEN RETURN 0 END IF
+
+        VAR totalRows, totalCols
+        countRowsCols(grid, totalRows, totalCols)
+
+        VAR lowRow, highRow, lowCol, highCol
+        findBounds(grid, totalRows, totalCols, lowRow, highRow, lowCol, highCol)
+
+        VAR tall, wide
+        tall ← (highRow - lowRow + 1)
+        wide ← (highCol - lowCol + 1)
+
+        RETURN calculateArea(tall, wide)
+    END FUNCTION
+END CLASS

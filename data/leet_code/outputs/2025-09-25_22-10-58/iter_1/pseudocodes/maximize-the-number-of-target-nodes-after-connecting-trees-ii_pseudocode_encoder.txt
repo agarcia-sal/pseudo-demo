@@ -1,0 +1,78 @@
+CLASS Solution  
+    FUNCTION maxTargetNodes(edges1, edges2)  
+        SET adj1 TO a new default dictionary with list as default value  
+        SET adj2 TO a new default dictionary with list as default value  
+        
+        FOR each pair u and v IN edges1  
+            APPEND v TO the list at key u IN adj1  
+            APPEND u TO the list at key v IN adj1  
+        END FOR  
+        
+        FOR each pair u and v IN edges2  
+            APPEND v TO the list at key u IN adj2  
+            APPEND u TO the list at key v IN adj2  
+        END FOR  
+        
+        SET n TO the number of keys in adj1  
+        SET m TO the number of keys in adj2  
+        
+        FUNCTION bfs(tree, start)  
+            SET even_count TO zero  
+            SET odd_count TO zero  
+            SET queue TO a new deque containing the tuple of start and zero  
+            SET visited TO a new set containing only start  
+            
+            WHILE queue is not empty  
+                REMOVE the first element from queue and assign to node and dist  
+                IF dist MODULO two EQUALS zero  
+                    INCREMENT even_count BY one  
+                ELSE  
+                    INCREMENT odd_count BY one  
+                END IF  
+                
+                FOR each neighbor IN the list at key node IN tree  
+                    IF neighbor is NOT IN visited  
+                        ADD neighbor TO visited  
+                        APPEND the tuple of neighbor and dist PLUS one TO queue  
+                    END IF  
+                END FOR  
+            END WHILE  
+            
+            RETURN even_count and odd_count  
+        END FUNCTION  
+        
+        SET even_odd_counts_1 TO an empty list  
+        FOR i FROM zero TO n MINUS one  
+            APPEND the result of bfs with arguments adj1 and i TO even_odd_counts_1  
+        END FOR  
+        
+        SET even_odd_counts_2 TO an empty list  
+        FOR i FROM zero TO m MINUS one  
+            APPEND the result of bfs with arguments adj2 and i TO even_odd_counts_2  
+        END FOR  
+        
+        SET result TO an empty list  
+        
+        FOR i FROM zero TO n MINUS one  
+            SET even_count_1 and odd_count_1 TO the element at position i of even_odd_counts_1  
+            SET max_targets TO zero  
+            
+            FOR j FROM zero TO m MINUS one  
+                SET even_count_2 and odd_count_2 TO the element at position j of even_odd_counts_2  
+                IF i EQUALS j OR the remainder of i DIVIDED BY two EQUALS the remainder of j DIVIDED BY two  
+                    SET targets_if_connected_to_j TO even_count_2  
+                ELSE  
+                    SET targets_if_connected_to_j TO odd_count_2  
+                END IF  
+                
+                IF targets_if_connected_to_j GREATER THAN max_targets  
+                    SET max_targets TO targets_if_connected_to_j  
+                END IF  
+            END FOR  
+            
+            APPEND even_count_1 PLUS max_targets TO result  
+        END FOR  
+        
+        RETURN result  
+    END FUNCTION  
+END CLASS

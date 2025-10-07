@@ -1,0 +1,48 @@
+CLASS Solution  
+    FUNCTION findPermutation(nums)  
+        FUNCTION aux(depth, last)  
+            IF depth EQUALS 2 TO THE POWER OF LENGTH OF nums MINUS 1 THEN  
+                RETURN ABS(last MINUS nums[0])  
+            END IF  
+
+            SET minimum_val TO POSITIVE_INFINITY  
+            SET index_var TO 0  
+            WHILE index_var LESS THAN LENGTH OF nums DO  
+                IF (depth RIGHT SHIFT index_var) BITWISE_AND 1 EQUALS 0 THEN  
+                    SET temp_result TO ABS(last MINUS nums[index_var]) PLUS aux(depth BITWISE_OR (1 LEFT_SHIFT index_var), index_var)  
+                    IF temp_result LESS THAN minimum_val THEN  
+                        minimum_val = temp_result  
+                    END IF  
+                END IF  
+                INCREMENT index_var BY 1  
+            END WHILE  
+            RETURN minimum_val  
+        END FUNCTION  
+
+        FUNCTION recur(state, prev_indx)  
+            ans APPEND prev_indx  
+            IF state EQUALS 2 TO THE POWER OF LENGTH OF nums MINUS 1 THEN  
+                RETURN  
+            END IF  
+
+            SET current_min TO aux(state, prev_indx)  
+            SET pos_var TO LENGTH OF nums MINUS 1  
+            REPEAT  
+                IF (state RIGHT_SHIFT pos_var) BITWISE_AND 1 EQUALS 0 THEN  
+                    SET possible_val TO ABS(prev_indx MINUS nums[pos_var]) PLUS aux(state BITWISE_OR (1 LEFT_SHIFT pos_var), pos_var)  
+                    IF possible_val EQUALS current_min THEN  
+                        CALL recur(state BITWISE_OR (1 LEFT_SHIFT pos_var), pos_var)  
+                        EXIT LOOP  
+                    END IF  
+                END IF  
+                DECREMENT pos_var BY 1  
+            UNTIL pos_var LESS THAN 0  
+        END FUNCTION  
+
+        SET length_val TO LENGTH OF nums  
+        SET ans TO EMPTY_LIST  
+        SET start_val TO 1 LEFT_SHIFT 0  
+        CALL recur(start_val, 0)  
+        RETURN ans  
+    END FUNCTION  
+END CLASS

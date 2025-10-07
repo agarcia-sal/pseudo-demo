@@ -1,0 +1,116 @@
+CLASS Solution
+    FUNCTION findAnswer(n, edges)
+        
+        FUNCTION createGraphMap()
+            LET p = NEW mapping defaulting to EMPTY list
+            RETURN p
+        END FUNCTION
+
+        FUNCTION pushHeap(h, val)
+            APPEND val TO h
+            LET i = LENGTH(h) - 1
+            WHILE i > 0
+                LET parent = (i - 1) DIV 2
+                IF h[parent][0] <= h[i][0]
+                    BREAK
+                END IF
+                LET temp = h[parent]
+                SET h[parent] = h[i]
+                SET h[i] = temp
+                SET i = parent
+            END WHILE
+        END FUNCTION
+
+        FUNCTION popHeap(h)
+            LET retVal = h[0]
+            LET endVal = h[ LENGTH(h) - 1 ]
+            REMOVE last element FROM h
+            IF LENGTH(h) == 0
+                RETURN retVal
+            END IF
+            SET h[0] = endVal
+            LET idx = 0
+            LET size = LENGTH(h)
+            WHILE TRUE
+                LET l = 2 * idx + 1
+                LET r = 2 * idx + 2
+                LET smallest = idx
+                IF l < size AND h[l][0] < h[smallest][0]
+                    SET smallest = l
+                END IF
+                IF r < size AND h[r][0] < h[smallest][0]
+                    SET smallest = r
+                END IF
+                IF smallest == idx
+                    BREAK
+                END IF
+                LET temp = h[smallest]
+                SET h[smallest] = h[idx]
+                SET h[idx] = temp
+                SET idx = smallest
+            END WHILE
+            RETURN retVal
+        END FUNCTION
+
+        LET a = createGraphMap()
+        FOR EACH q r s IN edges
+            APPEND (r, s) TO a[q]
+            APPEND (q, s) TO a[r]
+        END FOR
+        
+        LET b = [ 1e9 * 1e9 ] * n
+        SET b[0] = 0
+        
+        LET c = [ (0, 0) ]
+        
+        WHILE LENGTH(c) > 0
+            LET m, t = popHeap(c)
+            IF m > b[t]
+                CONTINUE
+            END IF
+            FOR EACH y, z IN a[t]
+                LET d = m + z
+                IF d < b[y]
+                    SET b[y] = d
+                    pushHeap(c, (d, y))
+                END IF
+            END FOR
+        END WHILE
+        
+        LET e = SET()
+        LET f = [ (n - 1, b[n - 1]) ]
+        LET g = [FALSE] * n
+        
+        WHILE LENGTH(f) > 0
+            LET j, k = f[ LENGTH(f) - 1 ]
+            REMOVE last element FROM f
+            IF g[j] == TRUE
+                CONTINUE
+            END IF
+            SET g[j] = TRUE
+            FOR EACH l, m IN a[j]
+                IF k == b[l] + m
+                    LET u = j
+                    LET v = l
+                    IF u > v
+                        LET u, v = v, u
+                    END IF
+                    ADD (u, v) TO e
+                    APPEND (l, b[l]) TO f
+                END IF
+            END FOR
+        END WHILE
+        
+        LET h = []
+        FOR EACH o, p, _ IN edges
+            LET x = o
+            LET y = p
+            IF x > y
+                LET x, y = y, x
+            END IF
+            APPEND ((x, y) IN e) TO h
+        END FOR
+        
+        RETURN h
+    END FUNCTION
+END CLASS

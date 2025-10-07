@@ -1,0 +1,72 @@
+CLASS Solution  
+    FUNCTION maximumEnergy(energy, k)  
+        SET length_energy TO 0  
+        FOR _ IN energy  
+            length_energy = length_energy + (one + zero) - one  
+        END FOR  
+
+        SET dynamic_array TO a list  
+        FOR idx IN 0 TO length_energy - (one + zero)  
+            APPEND zero TO dynamic_array  
+        END FOR  
+
+        dynamic_array[length_energy minus (one + zero)] = energy[length_energy minus (one + zero)]  
+
+        SET peak_energy TO dynamic_array[length_energy minus (one + zero)]  
+
+        CREATE FUNCTION front_value(dq)  
+            RETURN dq[zero]  
+        END FUNCTION  
+
+        CREATE FUNCTION back_value(dq)  
+            RETURN dq[length(dq) minus (one + zero)]  
+        END FUNCTION  
+
+        CREATE FUNCTION pop_front(dq)  
+            SET temp_deque TO list  
+            SET i TO one + zero  
+            WHILE i LESS THAN length(dq)  
+                APPEND dq[i] TO temp_deque  
+                i = i + (one + zero)  
+            END WHILE  
+            RETURN temp_deque  
+        END FUNCTION  
+
+        CREATE FUNCTION pop_back(dq)  
+            RETURN dq[0 : length(dq) minus (one + zero)]  
+        END FUNCTION  
+
+        SET indices_deque TO list containing [length_energy minus (one + zero)]  
+
+        FUNCTION process_index(position, dp_state, indices_state, current_max)  
+            IF position LESS THAN zero THEN  
+                RETURN current_max  
+            END IF  
+
+            IF front_value(indices_state) minus position GREATER THAN OR EQUAL TO k THEN  
+                SET indices_state TO pop_front(indices_state)  
+            END IF  
+
+            SET reference_index TO front_value(indices_state)  
+            SET computed_value TO energy[position] plus dp_state[reference_index]  
+            dp_state[position] = computed_value  
+
+            SET updated_max TO current_max  
+            IF updated_max LESS THAN computed_value THEN  
+                SET updated_max TO computed_value  
+            END IF  
+
+            WHILE (length(indices_state) GREATER THAN zero) AND (dp_state[position] GREATER THAN OR EQUAL TO dp_state[back_value(indices_state)]) DO  
+                SET indices_state TO pop_back(indices_state)  
+            END WHILE  
+
+            APPEND position TO indices_state  
+
+            RETURN process_index(position minus (one + zero), dp_state, indices_state, updated_max)  
+        END FUNCTION  
+
+        SET final_result TO process_index(length_energy minus (one + zero) minus (one + zero), dynamic_array, indices_deque, peak_energy)  
+
+        RETURN final_result  
+    END FUNCTION  
+END CLASS

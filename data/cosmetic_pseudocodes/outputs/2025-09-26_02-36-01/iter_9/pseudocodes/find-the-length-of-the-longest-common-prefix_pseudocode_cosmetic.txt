@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION longestCommonPrefix(arr1 arr1 OF integers arr2 arr2 OF integers) RETURNS integer
+        FUNCTION toString(num integer) RETURNS string
+            RETURN CONCAT("", num)
+        END FUNCTION
+
+        FUNCTION prefixSet(nums ARRAY OF integers) RETURNS set
+            SET tempSet TO {}
+            SET idx1 TO 1
+            WHILE idx1 <= LENGTH(nums)
+                SET strNum TO toString(nums[idx1])
+                SET lenStr TO LENGTH(strNum)
+                PROCEDURE addPrefixes(s STRING, n INTEGER)
+                    IF n = 0 THEN RETURN
+                    END IF
+                    SET tempSubstr TO SUBSTRING(s, 1, n)
+                    IF tempSubstr NOT IN tempSet THEN
+                        tempSet[tempSubstr] = true
+                    END IF
+                    addPrefixes(s, n - 1)
+                END PROCEDURE
+                addPrefixes(strNum, lenStr)
+                SET idx1 TO idx1 + 1
+            END WHILE
+            RETURN tempSet
+        END FUNCTION
+
+        SET setA TO prefixSet(arr1)
+        SET setB TO prefixSet(arr2)
+
+        SET result TO 0
+        FUNCTION maxInt(a INTEGER, b INTEGER) RETURNS integer
+            IF a >= b THEN RETURN a ELSE RETURN b
+            END IF
+        END FUNCTION
+
+        SET keys TO []
+        FOR key IN setA DO
+            keys = keys + [key]
+        END FOR
+
+        PROCEDURE findLongest(lst ARRAY OF strings)
+            SET i TO 0
+            SET n TO LENGTH(lst)
+            PROCEDURE innerLoop()
+                IF i >= n THEN RETURN END IF
+                SET ele TO lst[i + 1]
+                IF ele IN setB THEN
+                    SET result TO maxInt(result, LENGTH(ele))
+                END IF
+                SET i TO i + 1
+                innerLoop()
+            END PROCEDURE
+            innerLoop()
+        END PROCEDURE
+
+        findLongest(keys)
+
+        RETURN result
+    END FUNCTION
+END CLASS

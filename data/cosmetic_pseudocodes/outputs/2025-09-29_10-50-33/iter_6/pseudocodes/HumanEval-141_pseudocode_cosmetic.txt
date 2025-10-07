@@ -1,0 +1,24 @@
+FUNCTION file_name_check(archive_identifier)
+	let suffix_collection := {'dll', 'exe', 'txt'}
+	let components := archive_identifier SPLIT BY '.'
+	
+	WHEN components.LENGTH <> 2 THEN
+		RETURN "No"
+	ALSO WHEN components[1] NOT MEMBER OF suffix_collection THEN
+		RETURN "No"
+	ALSO WHEN components[0].LENGTH = 0 THEN
+		RETURN "No"
+	ALSO WHEN NOT (components[0][0] MATCHES_REGEX '[A-Za-z]') THEN
+		RETURN "No"
+	ALSO
+		let numeric_symbols := 0
+		LOOP_OVER char WITHIN components[0]
+			IF char IS DIGIT
+				numeric_symbols := numeric_symbols + 1
+			END_IF
+		END_LOOP
+		IF numeric_symbols > 3 THEN RETURN "No"
+	END_WHEN
+	
+	RETURN "Yes"
+END FUNCTION

@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+
+        FUNCTION ComputePairs RETURNS LIST OF PAIRS
+            DECLARE letters TO ["zero", "one", "two", "three", "four"]
+            DECLARE result TO EMPTY LIST
+            FUNCTION AddPairs(i, j)
+                IF i >= LENGTH(letters) THEN RETURN
+                IF j >= LENGTH(letters) THEN CALL AddPairs(i + 1, i + 2) RETURN
+                IF letters[i] NOT EQUALS letters[j] THEN APPEND (letters[i], letters[j]) TO result
+                CALL AddPairs(i, j + 1)
+            END FUNCTION
+            CALL AddPairs(0, 1)
+            RETURN result
+        END FUNCTION
+
+        DECLARE answer TO - (10 ^ 9) * 10  // substitute negative infinity with a large negative number
+
+        DECLARE pairsList TO CALL ComputePairs()
+
+        FUNCTION CustomDefaultDictWithInfinity
+            DECLARE storage AS EMPTY MAP
+            FUNCTION get(key)
+                IF key IN storage THEN RETURN storage[key]
+                ELSE RETURN 10 ^ 9 * 10  // substitute infinity with large number
+            END FUNCTION
+            FUNCTION set(key, value)
+                storage[key] = value
+            END FUNCTION
+            RETURN OBJECT WITH METHODS get, set
+        END FUNCTION
+
+        FUNCTION ModTwo(value)
+            RETURN value - 2 * FLOOR(value / 2)
+        END FUNCTION
+
+        FOR EACH tuple (x, y) IN pairsList
+            DECLARE minD TO CALL CustomDefaultDictWithInfinity()
+            DECLARE prefixX TO [0]
+            DECLARE prefixY TO [0]
+            DECLARE startPtr TO 0
+
+            FUNCTION ProcessIndex(index)
+                DECLARE ch TO s[index]
+                IF ch EQUALS x THEN
+                    APPEND prefixX[ LENGTH(prefixX) - 1 ] + 1 TO prefixX
+                ELSE
+                    APPEND 0 TO prefixX
+                END IF
+
+                IF ch EQUALS y THEN
+                    APPEND prefixY[ LENGTH(prefixY) - 1 ] + 1 TO prefixY
+                ELSE
+                    APPEND 0 TO prefixY
+                END IF
+
+                WHILE (index - startPtr + 1) >= k AND prefixX[startPtr] < prefixX[ LENGTH(prefixX) - 1 ] AND prefixY[startPtr] < prefixY[ LENGTH(prefixY) - 1 ]
+                    DECLARE parityKey TO (ModTwo(prefixX[startPtr]), ModTwo(prefixY[startPtr]))
+                    DECLARE currentMin TO minD.get(parityKey)
+                    DECLARE candidate TO prefixX[startPtr] - prefixY[startPtr]
+                    IF candidate < currentMin THEN minD.set(parityKey, candidate)
+                    startPtr = startPtr + 1
+                END WHILE
+
+                DECLARE lastIndex TO LENGTH(prefixX) - 1
+                DECLARE queryKey TO (ModTwo(1 - ModTwo(prefixX[lastIndex])), ModTwo(prefixY[lastIndex]))
+                DECLARE potentialAns TO prefixX[lastIndex] - prefixY[lastIndex] - minD.get(queryKey)
+                IF potentialAns > answer THEN answer = potentialAns
+            END FUNCTION
+
+            DECLARE idx TO 0
+            FUNCTION IterateOverIndices()
+                IF idx >= LENGTH(s) THEN RETURN
+                CALL ProcessIndex(idx)
+                idx = idx + 1
+                CALL IterateOverIndices()
+            END FUNCTION
+            CALL IterateOverIndices()
+        END FOR
+
+        RETURN answer
+    END FUNCTION
+END CLASS

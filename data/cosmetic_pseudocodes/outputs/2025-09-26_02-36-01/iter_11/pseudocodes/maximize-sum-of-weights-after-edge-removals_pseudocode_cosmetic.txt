@@ -1,0 +1,140 @@
+CLASS UnionFind
+    FUNCTION __init__(self, size)
+        SET self.parent TO empty list
+        SET index TO 0
+        WHILE index LESS THAN size
+            APPEND index TO self.parent
+            SET index TO index PLUS 1
+        END WHILE
+
+        SET self.rank TO empty list
+        SET counter TO 0
+        WHILE counter LESS THAN size
+            APPEND 0 TO self.rank
+            SET counter TO counter PLUS 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION find(self, x)
+        IF self.parent[x] NOT EQUAL x
+            SET auxiliary TO self.find(self.parent[x])
+            SET self.parent[x] TO auxiliary
+        END IF
+        RETURN self.parent[x]
+    END FUNCTION
+
+    FUNCTION union(self, a, b)
+        SET rootA TO self.find(a)
+        SET rootB TO self.find(b)
+        IF rootA NOT EQUAL rootB
+            IF self.rank[rootA] GREATER THAN self.rank[rootB]
+                SET self.parent[rootB] TO rootA
+            ELSE 
+                IF self.rank[rootA] LESS THAN self.rank[rootB]
+                    SET self.parent[rootA] TO rootB
+                ELSE
+                    SET self.parent[rootB] TO rootA
+                    SET tempRank TO self.rank[rootA]
+                    SET tempRank TO tempRank PLUS 1
+                    SET self.rank[rootA] TO tempRank
+                END IF
+            END IF
+        END IF
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maximizeSumOfWeights(self, edges, k)
+        SET lengthEdges TO 0
+        SET iterator TO 0
+        REPEAT
+            IF iterator EQUAL TO LENGTH(edges)
+                BREAK
+            END IF
+            SET lengthEdges TO lengthEdges PLUS 1
+            SET iterator TO iterator PLUS 1
+        UNTIL FALSE
+
+        SET n TO lengthEdges PLUS 1
+
+        SET degreeList TO empty list
+        SET pos TO 0
+        WHILE pos LESS THAN n
+            APPEND 0 TO degreeList
+            SET pos TO pos PLUS 1
+        END WHILE
+
+        ASSIGN unionFindInstance TO new UnionFind(n)
+
+        FUNCTION greaterThanComparator(pair1, pair2)
+            RETURN pair1[2] GREATER THAN pair2[2]
+        END FUNCTION
+
+        FUNCTION sortDescending(collection)
+            IF LENGTH(collection) LESS THAN OR EQUAL TO 1
+                RETURN collection
+            END IF
+
+            SET midPoint TO LENGTH(collection) DIVIDED BY 2
+            SET leftPartition TO sortDescending(SUBLIST(collection, 0, midPoint))
+            SET rightPartition TO sortDescending(SUBLIST(collection, midPoint, LENGTH(collection)))
+
+            SET mergedList TO empty list
+            SET i TO 0
+            SET j TO 0
+
+            WHILE i LESS THAN LENGTH(leftPartition) AND j LESS THAN LENGTH(rightPartition)
+                IF greaterThanComparator(leftPartition[i], rightPartition[j])
+                    APPEND leftPartition[i] TO mergedList
+                    SET i TO i PLUS 1
+                ELSE
+                    APPEND rightPartition[j] TO mergedList
+                    SET j TO j PLUS 1
+                END IF
+            END WHILE
+
+            WHILE i LESS THAN LENGTH(leftPartition)
+                APPEND leftPartition[i] TO mergedList
+                SET i TO i PLUS 1
+            END WHILE
+
+            WHILE j LESS THAN LENGTH(rightPartition)
+                APPEND rightPartition[j] TO mergedList
+                SET j TO j PLUS 1
+            END WHILE
+
+            RETURN mergedList
+        END FUNCTION
+
+        SET sortedEdges TO sortDescending(edges)
+
+        SET accumulatedSum TO 0
+
+        FUNCTION processEdges(index)
+            IF index GREATER OR EQUAL LENGTH(sortedEdges)
+                RETURN
+            END IF
+
+            SET currentEdge TO sortedEdges[index]
+            SET firstNode TO currentEdge[0]
+            SET secondNode TO currentEdge[1]
+            SET weightValue TO currentEdge[2]
+
+            IF degreeList[firstNode] LESS THAN k
+                IF degreeList[secondNode] LESS THAN k
+                    IF unionFindInstance.find(firstNode) NOT EQUAL unionFindInstance.find(secondNode)
+                        CALL unionFindInstance.union(firstNode, secondNode)
+                        SET degreeList[firstNode] TO degreeList[firstNode] PLUS 1
+                        SET degreeList[secondNode] TO degreeList[secondNode] PLUS 1
+                        SET nonlocal accumulatedSum TO accumulatedSum PLUS weightValue
+                    END IF
+                END IF
+            END IF
+
+            CALL processEdges(index PLUS 1)
+        END FUNCTION
+
+        CALL processEdges(0)
+        RETURN accumulatedSum
+    END FUNCTION
+END CLASS

@@ -1,0 +1,170 @@
+CLASS Solution
+    FUNCTION smallestNumber(num, t)
+        LET primeFactors, divisibleFlag BE self._getPrimeCount(t)
+        IF divisibleFlag IS false THEN
+            RETURN "-1"
+        END IF
+
+        LET factCount BE self._getFactorCount(primeFactors)
+        LET totalFactorsSum BE 0
+        FOR each frequency IN factCount.values()
+            INCREMENT totalFactorsSum BY frequency
+        END FOR
+        IF totalFactorsSum > LENGTH(num) THEN
+            LET resultString BE ""
+            FOR each primeFactor, freq IN factCount.items()
+                APPEND primeFactor REPEATED freq TIMES TO resultString
+            END FOR
+            RETURN resultString
+        END IF
+
+        LET prefixCountAccumulator BE AN EMPTY Counter
+        LET idx BE 0
+        WHILE idx < LENGTH(num)
+            LET digitVal BE INTEGER(num[idx])
+            prefixCountAccumulator = prefixCountAccumulator + FACTOR_COUNTS[digitVal]
+            INCREMENT idx BY 1
+        END WHILE
+
+        LET zeroPos BE LENGTH(num)
+        LET posIndex BE 0
+        REPEAT WHILE posIndex < LENGTH(num) AND num[posIndex] != '0'
+            INCREMENT posIndex BY 1
+        END REPEAT
+        IF posIndex < LENGTH(num) THEN
+            zeroPos = posIndex
+        END IF
+
+        IF zeroPos = LENGTH(num) AND primeFactors <= prefixCountAccumulator THEN
+            RETURN num
+        END IF
+
+        LET lengthOfNum BE LENGTH(num)
+        LET reverseIdx BE lengthOfNum - 1
+        WHILE reverseIdx >= 0
+            LET digitChar BE num[reverseIdx]
+            LET digitInt BE INTEGER(digitChar)
+            prefixCountAccumulator = prefixCountAccumulator - FACTOR_COUNTS[digitInt]
+            LET tailLength BE (lengthOfNum - 1) - reverseIdx
+            IF reverseIdx <= zeroPos THEN
+                LET biggerDigitGuess BE digitInt + 1
+                WHILE biggerDigitGuess <= 9
+                    LET newFactCount BE self._getFactorCount(primeFactors - prefixCountAccumulator - FACTOR_COUNTS[biggerDigitGuess])
+                    LET sumNewFactCount BE 0
+                    FOR value IN newFactCount.values()
+                        INCREMENT sumNewFactCount BY value
+                    END FOR
+                    IF sumNewFactCount <= tailLength THEN
+                        LET onesToFill BE tailLength - sumNewFactCount
+                        LET resultStart BE ""
+                        IF reverseIdx > 0 THEN
+                            resultStart = SUBSTRING(num, 0, reverseIdx)
+                        END IF
+                        LET onesStr BE ""
+                        LET i BE 0
+                        WHILE i < onesToFill
+                            onesStr = onesStr + "1"
+                            INCREMENT i BY 1
+                        END WHILE
+                        LET factorsStr BE ""
+                        FOR each factorKey, freq IN newFactCount.items()
+                            LET j BE 0
+                            WHILE j < freq
+                                factorsStr = factorsStr + factorKey
+                                INCREMENT j BY 1
+                            END WHILE
+                        END FOR
+                        RETURN resultStart + STRING(biggerDigitGuess) + onesStr + factorsStr
+                    END IF
+                    INCREMENT biggerDigitGuess BY 1
+                END WHILE
+            END IF
+            reverseIdx = reverseIdx - 1
+        END WHILE
+
+        LET finalFactorCount BE self._getFactorCount(primeFactors)
+        LET sumFinalFactorValues BE 0
+        FOR freqVal IN finalFactorCount.values()
+            INCREMENT sumFinalFactorValues BY freqVal
+        END FOR
+        LET oneCharactersCount BE (LENGTH(num) + 1) - sumFinalFactorValues
+
+        LET onesStringFinal BE ""
+        LET counterForOnes BE 0
+        WHILE counterForOnes < oneCharactersCount
+            onesStringFinal = onesStringFinal + "1"
+            INCREMENT counterForOnes BY 1
+        END WHILE
+
+        LET finalString BE onesStringFinal
+        FOR each factorDigit, frequency IN finalFactorCount.items()
+            LET repeatIdx BE 0
+            WHILE repeatIdx < frequency
+                finalString = finalString + factorDigit
+                INCREMENT repeatIdx BY 1
+            END WHILE
+        END FOR
+
+        RETURN finalString
+    END FUNCTION
+
+    FUNCTION _getPrimeCount(t)
+        LET primeList BE [2, 3, 5, 7]
+        LET primeCounter BE AN EMPTY Counter
+        LET remainderVal BE t
+        FOR each primeVal IN primeList
+            WHILE remainderVal MOD primeVal = 0
+                remainderVal = remainderVal DIV primeVal
+                IF primeVal EXISTS IN primeCounter THEN
+                    primeCounter[primeVal] = primeCounter[primeVal] + 1
+                ELSE
+                    primeCounter[primeVal] = 1
+                END IF
+            END WHILE
+        END FOR
+        LET isDivisibleResult BE (remainderVal = 1)
+        RETURN primeCounter, isDivisibleResult
+    END FUNCTION
+
+    FUNCTION _getFactorCount(count)
+        LET twosCount = count[2]
+        LET eightsCount = twosCount DIV 3
+        LET remainingTwos = twosCount MOD 3
+
+        LET threesCount = count[3]
+        LET ninesCount = threesCount DIV 2
+        LET threesRemainder = threesCount MOD 2
+
+        LET foursCount = remainingTwos DIV 2
+        LET twosRemainder = remainingTwos MOD 2
+
+        LET sixesCount = 0
+
+        IF (twosRemainder = 1) AND (threesRemainder = 1) THEN
+            twosRemainder = 0
+            threesRemainder = 0
+            sixesCount = 1
+        ELSE
+            sixesCount = 0
+        END IF
+
+        IF (threesRemainder = 1) AND (foursCount = 1) THEN
+            twosRemainder = 1
+            sixesCount = 1
+            threesRemainder = 0
+            foursCount = 0
+        END IF
+
+        LET resultCounter BE AN EMPTY Counter
+        resultCounter['2'] = twosRemainder
+        resultCounter['3'] = threesRemainder
+        resultCounter['4'] = foursCount
+        resultCounter['5'] = count[5]
+        resultCounter['6'] = sixesCount
+        resultCounter['7'] = count[7]
+        resultCounter['8'] = eightsCount
+        resultCounter['9'] = ninesCount
+
+        RETURN resultCounter
+    END FUNCTION
+END CLASS

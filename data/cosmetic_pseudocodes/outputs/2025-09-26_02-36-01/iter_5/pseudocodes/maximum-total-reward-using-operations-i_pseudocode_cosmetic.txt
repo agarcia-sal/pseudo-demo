@@ -1,0 +1,42 @@
+CLASS Solution  
+    FUNCTION maxTotalReward(rewardValues)  
+        FUNCTION dfs(y)  
+            FUNCTION bisectRight(arr, target, low, high)  
+                IF low >= high THEN  
+                    RETURN low  
+                END IF  
+                SET mid TO (low + high) DIV 2  
+                IF target < arr[mid] OR target = arr[mid] THEN  
+                    RETURN bisectRight(arr, target, mid + 1, high)  
+                ELSE  
+                    RETURN bisectRight(arr, target, low, mid)  
+                END IF  
+            END FUNCTION  
+
+            SET insertionIndex TO bisectRight(rewardValues, y, 0, LENGTH(rewardValues))  
+            SET maxRewardAccumulated TO 0  
+            FUNCTION iterateFrom(idx, currentMax)  
+                IF idx >= LENGTH(rewardValues) THEN  
+                    RETURN currentMax  
+                END IF  
+                SET val TO rewardValues[idx]  
+                SET sumXY TO y + val  
+                SET updatedMax TO currentMax  
+                IF NOT (sumXY <= y) THEN  
+                    SET recResult TO dfs(sumXY)  
+                    SET candidate TO val + recResult  
+                    IF candidate > updatedMax THEN  
+                        SET updatedMax TO candidate  
+                    END IF  
+                END IF  
+                RETURN iterateFrom(idx + 1, updatedMax)  
+            END FUNCTION  
+            SET maxRewardAccumulated TO iterateFrom(insertionIndex, 0)  
+            RETURN maxRewardAccumulated  
+        END FUNCTION  
+
+        CALL rewardValues.SORT()  
+        SET result TO dfs(0)  
+        RETURN result  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,237 @@
+CLASS Solution
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer
+        FUNCTION computeFactorial(m integer) RETURNS integer
+            IF m <= 1 THEN
+                RETURN 1
+            ELSE
+                RETURN m * computeFactorial(m - 1)
+            END IF
+        END FUNCTION
+
+        FUNCTION countCharacters(str string) RETURNS map
+            VAR frequency map
+            SET frequency TO empty map
+            FUNCTION helper(idx integer)
+                IF idx >= LENGTH(str) THEN
+                    RETURN
+                END IF
+                VAR ch char
+                SET ch TO CHAR_AT(str, idx)
+                IF ch IN frequency THEN
+                    SET frequency[ch] TO frequency[ch] + 1
+                ELSE
+                    SET frequency[ch] TO 1
+                END IF
+                CALL helper(idx + 1)
+            END FUNCTION
+            CALL helper(0)
+            RETURN frequency
+        END FUNCTION
+
+        FUNCTION sortStringChars(src string) RETURNS string
+            VAR charsList list
+            SET charsList TO empty list
+            VAR idx integer
+            SET idx TO 0
+            WHILE idx < LENGTH(src) DO
+                APPEND CHAR_AT(src, idx) TO charsList
+                SET idx TO idx + 1
+            END WHILE
+
+            FUNCTION quickSort(arr list, low integer, high integer)
+                IF low < high THEN
+                    VAR p integer
+                    FUNCTION partition(lowP integer, highP integer) RETURNS integer
+                        VAR pivot char
+                        SET pivot TO arr[highP]
+                        VAR i integer
+                        SET i TO lowP - 1
+                        VAR j integer
+                        SET j TO lowP
+                        WHILE j < highP DO
+                            IF arr[j] <= pivot THEN
+                                SET i TO i + 1
+                                VAR temp char
+                                SET temp TO arr[i]
+                                SET arr[i] TO arr[j]
+                                SET arr[j] TO temp
+                            END IF
+                            SET j TO j + 1
+                        END WHILE
+                        SET i TO i + 1
+                        VAR temp2 char
+                        SET temp2 TO arr[i]
+                        SET arr[i] TO arr[highP]
+                        SET arr[highP] TO temp2
+                        RETURN i
+                    END FUNCTION
+                    SET p TO partition(low, high)
+                    CALL quickSort(arr, low, p - 1)
+                    CALL quickSort(arr, p + 1, high)
+                END IF
+            END FUNCTION
+
+            CALL quickSort(charsList, 0, LENGTH(charsList) - 1)
+            VAR resStr string
+            SET resStr TO EMPTY_STRING
+            VAR pos integer
+            SET pos TO 0
+            WHILE pos < LENGTH(charsList) DO
+                SET resStr TO resStr + charsList[pos]
+                SET pos TO pos + 1
+            END WHILE
+            RETURN resStr
+        END FUNCTION
+
+        FUNCTION toString(num integer) RETURNS string
+            IF num = 0 THEN
+                RETURN "0"
+            END IF
+            VAR digits list
+            SET digits TO empty list
+            VAR tmp integer
+            SET tmp TO num
+            WHILE tmp > 0 DO
+                VAR rem integer
+                SET rem TO tmp MOD 10
+                SET tmp TO tmp DIV 10
+                VAR ch char
+                SET ch TO CHAR_FROM_INT(rem + 48)
+                APPEND ch TO digits
+            END WHILE
+            VAR reversed list
+            SET reversed TO empty list
+            VAR dIdx integer
+            SET dIdx TO LENGTH(digits) - 1
+            WHILE dIdx >= 0 DO
+                APPEND digits[dIdx] TO reversed
+                SET dIdx TO dIdx - 1
+            END WHILE
+            VAR result string
+            SET result TO EMPTY_STRING
+            VAR rIdx integer
+            SET rIdx TO 0
+            WHILE rIdx < LENGTH(reversed) DO
+                SET result TO result + reversed[rIdx]
+                SET rIdx TO rIdx + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        FUNCTION reverseString(s string) RETURNS string
+            VAR lengthS integer
+            SET lengthS TO LENGTH(s)
+            VAR rev string
+            SET rev TO EMPTY_STRING
+            VAR idx integer
+            SET idx TO lengthS - 1
+            WHILE idx >= 0 DO
+                SET rev TO rev + CHAR_AT(s, idx)
+                SET idx TO idx - 1
+            END WHILE
+            RETURN rev
+        END FUNCTION
+
+        VAR factorials list
+        SET factorials TO empty list
+        VAR index integer
+        SET index TO 0
+        WHILE index < n + 1 DO
+            APPEND computeFactorial(index) TO factorials
+            SET index TO index + 1
+        END WHILE
+
+        VAR answer integer
+        SET answer TO 0
+        VAR visitedSet set
+        SET visitedSet TO empty set
+
+        VAR baseNum integer
+        SET baseNum TO 1
+        VAR expCount integer
+        SET expCount TO (n - 1) DIV 2
+        VAR expIdx integer
+        SET expIdx TO 0
+        WHILE expIdx < expCount DO
+            SET baseNum TO baseNum * 10
+            SET expIdx TO expIdx + 1
+        END WHILE
+
+        VAR current integer
+        SET current TO baseNum
+        WHILE current < baseNum * 10 DO
+            VAR s1 string
+            SET s1 TO toString(current)
+            VAR revS string
+            SET revS TO reverseString(s1)
+            VAR addPart string
+            SET addPart TO EMPTY_STRING
+            VAR startPos integer
+            SET startPos TO n MOD 2
+            VAR revLen integer
+            SET revLen TO LENGTH(revS)
+            VAR posR integer
+            SET posR TO startPos
+            WHILE posR < revLen DO
+                SET addPart TO addPart + CHAR_AT(revS, posR)
+                SET posR TO posR + 1
+            END WHILE
+            SET s1 TO s1 + addPart
+
+            VAR sInt integer
+            SET sInt TO 0
+            VAR mul integer
+            SET mul TO 1
+            VAR idxS integer
+            SET idxS TO LENGTH(s1) - 1
+            WHILE idxS >= 0 DO
+                VAR digit integer
+                SET digit TO INT_FROM_CHAR(CHAR_AT(s1, idxS)) - 48
+                SET sInt TO sInt + digit * mul
+                SET mul TO mul * 10
+                SET idxS TO idxS - 1
+            END WHILE
+
+            IF (sInt MOD k) <> 0 THEN
+                SET current TO current + 1
+                CONTINUE
+            END IF
+
+            VAR t string
+            SET t TO sortStringChars(s1)
+
+            IF t IN visitedSet THEN
+                SET current TO current + 1
+                CONTINUE
+            END IF
+            ADD t TO visitedSet
+
+            VAR cnt map
+            SET cnt TO countCharacters(t)
+
+            VAR zeroChar char
+            SET zeroChar TO '0'
+            VAR zeroCount integer
+            SET zeroCount TO 0
+            IF zeroChar IN cnt THEN
+                SET zeroCount TO cnt[zeroChar]
+            END IF
+
+            VAR res integer
+            IF zeroCount > 0 THEN
+                SET res TO (n - zeroCount) * factorials[n - 1]
+            ELSE
+                SET res TO factorials[n]
+            END IF
+
+            FOR EACH val IN cnt VALUES DO
+                SET res TO res DIV factorials[val]
+            END FOR
+
+            SET answer TO answer + res
+            SET current TO current + 1
+        END WHILE
+
+        RETURN answer
+    END FUNCTION
+END CLASS

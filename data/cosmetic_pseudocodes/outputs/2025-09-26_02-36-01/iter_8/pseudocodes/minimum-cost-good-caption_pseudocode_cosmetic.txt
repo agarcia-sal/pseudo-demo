@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION minCostGoodCaption(caption)
+    	DECLARE totalChars ASSIGN LENGTH(caption)
+    	
+    	IF ( ( (totalChars < (1 + 1 + 1)) ) )
+    		RETURN ""
+    	END IF
+    	
+    	DEFINE charList ASSIGN []
+    	FOR indexVar IN 0 TO (totalChars - (1))
+    		SET charList[indexVar] TO caption[indexVar]
+    	END FOR
+    	
+    	DECLARE posCounter ASSIGN 0
+    	
+    	WHILE (posCounter < totalChars)
+    		DECLARE blockStart ASSIGN posCounter
+    		
+    		WHILE ((posCounter < totalChars) AND (charList[posCounter] = charList[blockStart]))
+    			SET posCounter TO (posCounter + (1))
+    		END WHILE
+    		
+    		DECLARE groupLen ASSIGN (posCounter - blockStart)
+    		
+    		IF (groupLen < (1 + 1 + 1))
+    			
+    			IF ((blockStart > 0) AND (charList[(blockStart - 1)] = charList[blockStart]))
+    				SET charList[(blockStart - 1)] TO charList[blockStart]
+    				SET blockStart TO (blockStart - (1))
+    				SET groupLen TO (groupLen + (1))
+    			END IF
+    			
+    			IF ((posCounter < totalChars) AND (charList[(posCounter - 1)] = charList[posCounter]))
+    				SET charList[posCounter] TO charList[(posCounter - 1)]
+    				SET posCounter TO (posCounter + (1))
+    				SET groupLen TO (groupLen + (1))
+    			END IF
+    			
+    			IF (groupLen < (1 + 1 + 1))
+    				DECLARE replacementChar 
+    				
+    				IF (blockStart > 0)
+    					SET replacementChar TO charList[(blockStart - 1)]
+    				ELSE
+    					SET replacementChar TO charList[posCounter]
+    				END IF
+    				
+    				IF (replacementChar = "a")
+    					SET replacementChar TO "b"
+    				ELSE IF (replacementChar = "z")
+    					SET replacementChar TO "y"
+    				ELSE
+    					DEFINE asciiCode ASSIGN ASCII_VALUE(replacementChar)
+    					SET asciiCode TO (asciiCode + (1))
+    					SET replacementChar TO CHARACTER(asciiCode)
+    				END IF
+    				
+    				DECLARE iteratorVal ASSIGN blockStart
+    				
+    				WHILE (iteratorVal <= (blockStart + groupLen - (1)))
+    					SET charList[iteratorVal] TO replacementChar
+    					SET iteratorVal TO (iteratorVal + (1))
+    				END WHILE
+    				
+    				SET posCounter TO (blockStart + groupLen)
+    			END IF
+    		END IF
+    	END WHILE
+    	
+    	DEFINE resultStr ASSIGN ""
+    	DECLARE concatIndex ASSIGN 0
+    	
+    	REPEAT
+    		IF (concatIndex >= totalChars)
+    			BREAK
+    		END IF
+    		SET resultStr TO resultStr + charList[concatIndex]
+    		SET concatIndex TO (concatIndex + 1)
+    	UNTIL FALSE
+    	
+    	RETURN resultStr
+    END FUNCTION
+END CLASS

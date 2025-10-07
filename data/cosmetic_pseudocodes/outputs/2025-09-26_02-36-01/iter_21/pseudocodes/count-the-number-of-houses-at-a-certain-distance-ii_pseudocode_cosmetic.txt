@@ -1,0 +1,122 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        IF NOT (x LESS THAN OR EQUAL TO y)
+        THEN
+            SET qrv TO x
+            SET x TO y
+            SET y TO qrv
+        END IF
+
+        FUNCTION bfs(start)
+            PROCEDURE initializeBooleans(sz, val, outList)
+                SET izw TO 0
+                SET outList TO empty list
+                REPEAT
+                    APPEND val TO outList
+                    SET izw TO izw PLUS one
+                UNTIL izw GREATER THAN sz
+            END PROCEDURE
+
+            PROCEDURE initializeZeros(sz, outList)
+                SET ktn TO 0
+                SET outList TO empty list
+                REPEAT
+                    APPEND 0 TO outList
+                    SET ktn TO ktn PLUS one
+                UNTIL ktn GREATER THAN sz
+            END PROCEDURE
+            
+            CALL initializeBooleans(n PLUS one, False, vsd)
+            CALL initializeZeros(n PLUS one, dist)
+
+            PROCEDURE enqueueFront(q, val)
+                SET q TO list with val PREPENDED to q
+            END PROCEDURE
+
+            PROCEDURE dequeueBack(q, outVal)
+                SET outVal TO last element of q
+                REMOVE last element from q
+            END PROCEDURE
+
+            SET que TO list containing start
+            SET vsd at position start TO True
+
+            FUNCTION queueLength(l)
+                SET res TO 0
+                FOR each _ IN l
+                    SET res TO res PLUS one
+                END FOR
+                RETURN res
+            END FUNCTION
+
+            REPEAT
+                IF NOT (queueLength(que) GREATER THAN 0)
+                THEN
+                    BREAK
+                END IF
+
+                SET cur TO que at first position
+                REMOVE first element from que
+
+                FOR each adj IN list cur MINUS one, cur PLUS one
+                    IF (adj GREATER THAN OR EQUAL TO one) AND (adj LESS THAN OR EQUAL TO n) AND (vsd at position adj EQUALS False)
+                    THEN
+                        SET vsd at position adj TO True
+                        SET dist at position adj TO dist at position cur PLUS one
+                        SET que TO que APPENDED with adj
+                    END IF
+                END FOR
+
+                IF (cur EQUALS x) AND (vsd at position y EQUALS False)
+                THEN
+                    SET vsd at position y TO True
+                    SET dist at position y TO dist at position cur PLUS one
+                    SET que TO que APPENDED with y
+                ELSE IF (cur EQUALS y) AND (vsd at position x EQUALS False)
+                THEN
+                    SET vsd at position x TO True
+                    SET dist at position x TO dist at position cur PLUS one
+                    SET que TO que APPENDED with x
+                END IF
+
+            UNTIL False
+
+            PROCEDURE sliceList(lst, startIdx, outSublist)
+                SET outSublist TO empty list
+                SET iuv TO startIdx
+                WHILE iuv LESS THAN OR EQUAL TO (queueLength(lst) MINUS one)
+                    SET outSublist TO outSublist APPENDED with lst at position iuv
+                    SET iuv TO iuv PLUS one
+                END WHILE
+            END PROCEDURE
+
+            CALL sliceList(dist, 1, retDist)
+            RETURN retDist
+        END FUNCTION
+
+        SET wrt TO empty list
+        SET iyg TO 0
+        WHILE iyg LESS THAN n
+            SET wrt TO wrt APPENDED with 0
+            SET iyg TO iyg PLUS one
+        END WHILE
+
+        SET zmd TO 1
+        WHILE zmd LESS THAN OR EQUAL TO n
+            SET dists TO bfs(zmd)
+            PROCEDURE processDistances(ds, outWrt)
+                FOR each val IN ds
+                    IF val GREATER THAN 0
+                    THEN
+                        SET idx TO val MINUS one
+                        SET outWrt at position idx TO outWrt at position idx PLUS one
+                    END IF
+                END FOR
+            END PROCEDURE
+            CALL processDistances(dists, wrt)
+            SET zmd TO zmd PLUS one
+        END WHILE
+
+        RETURN wrt
+    END FUNCTION
+END CLASS

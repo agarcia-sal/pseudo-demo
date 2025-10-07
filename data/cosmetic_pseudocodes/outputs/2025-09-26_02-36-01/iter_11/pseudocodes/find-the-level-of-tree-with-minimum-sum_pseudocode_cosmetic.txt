@@ -1,0 +1,168 @@
+CLASS TreeNode
+    FUNCTION __init__(self COMMA val EQUALS zero COMMA left EQUALS None COMMA right EQUALS None)
+        SET self.val TO val
+        SET self.left TO left
+        SET self.right TO right
+    END FUNCTION
+END CLASS
+
+FUNCTION tree_node(values)
+    FUNCTION make_node(value)
+        RETURN new TreeNode with val equal to value
+    END FUNCTION
+
+    IF values IS empty THEN
+        RETURN None
+    END IF
+
+    SET idx_counter TO one
+    SET node_queue TO new deque
+    SET root TO make_node(element at position one of values)
+    APPEND root TO node_queue
+
+    FUNCTION process_children():
+        IF idx_counter LESS THAN length of values THEN
+            LET val_left BE element at position idx_counter of values
+            IF val_left IS NOT None THEN
+                LET left_child BE make_node(val_left)
+                RETURN left_child
+            END IF
+        END IF
+        RETURN None
+    END FUNCTION
+
+    FUNCTION process_right_child():
+        IF idx_counter LESS THAN length of values THEN
+            LET val_right BE element at position idx_counter of values
+            IF val_right IS NOT None THEN
+                LET right_child BE make_node(val_right)
+                RETURN right_child
+            END IF
+        END IF
+        RETURN None
+    END FUNCTION
+
+    FUNCTION remove_first(deq)
+        LET first_elt BE element removed from the left side of deq
+        RETURN first_elt
+    END FUNCTION
+
+    WHILE TRUE
+        IF node_queue IS empty THEN
+            BREAK
+        END IF
+
+        LET current_node BE remove_first(node_queue)
+
+        LET left_node BE None
+        LET right_node BE None
+
+        IF idx_counter LESS THAN length of values THEN
+            LET potential_left BE process_children()
+            IF potential_left IS NOT None THEN
+                left_node = potential_left
+                APPEND left_node TO node_queue
+            END IF
+            SET idx_counter TO idx_counter + one
+        END IF
+
+        IF idx_counter LESS THAN length of values THEN
+            LET potential_right BE process_right_child()
+            IF potential_right IS NOT None THEN
+                right_node = potential_right
+                APPEND right_node TO node_queue
+            END IF
+            SET idx_counter TO idx_counter + one
+        END IF
+
+        SET current_node.left TO left_node
+        SET current_node.right TO right_node
+    END WHILE
+
+    RETURN root
+END FUNCTION
+
+FUNCTION is_same_tree(p COMMA q)
+    FUNCTION nodes_none(x COMMA y)
+        RETURN (x EQUALS None) AND (y EQUALS None)
+    END FUNCTION
+
+    FUNCTION one_none(x COMMA y)
+        RETURN (x EQUALS None) OR (y EQUALS None)
+    END FUNCTION
+
+    IF nodes_none(p, q) THEN
+        RETURN True
+    ELSE IF one_none(p, q) THEN
+        RETURN False
+    ELSE 
+        LET val_match BE NOT (p.val NOT EQUALS q.val)
+        IF NOT val_match THEN
+            RETURN False
+        ELSE
+            LET left_comp BE is_same_tree(p.left, q.left)
+            LET right_comp BE is_same_tree(p.right, q.right)
+            RETURN left_comp AND right_comp
+        END IF
+    END IF
+END FUNCTION
+
+CLASS Solution
+    FUNCTION minimumLevel(self COMMA root)
+        FUNCTION init_deque_with(item)
+            LET dq BE new deque
+            APPEND item TO dq
+            RETURN dq
+        END FUNCTION
+
+        FUNCTION add_node_if_exists(queue_comma n)
+            IF n IS NOT None THEN
+                APPEND n TO queue_comma
+            END IF
+        END FUNCTION
+
+        IF root IS None THEN
+            RETURN zero
+        END IF
+
+        LET node_q BE init_deque_with(root)
+        LET current_level BE one
+        LET minimal_level BE one
+        LET minimal_sum BE positive infinity
+
+        FUNCTION sum_level(queue_ref)
+            LET acc_sum BE zero
+            LET size BE length of queue_ref
+            
+            FUNCTION recur_sum(accum COMMA rem)
+                IF rem EQUALS 0 THEN
+                    RETURN accum
+                ELSE
+                    LET current_node BE element removed from the left side of queue_ref
+                    LET new_accum BE accum + current_node.val
+                    add_node_if_exists(queue_ref, current_node.left)
+                    add_node_if_exists(queue_ref, current_node.right)
+                    RETURN recur_sum(new_accum, rem - one)
+                END IF
+            END FUNCTION
+
+            RETURN recur_sum(acc_sum, size)
+        END FUNCTION
+
+        WHILE TRUE
+            IF node_q IS empty THEN
+                BREAK
+            END IF
+
+            LET level_total BE sum_level(node_q)
+            IF level_total LESS THAN minimal_sum THEN
+                SET minimal_sum TO level_total
+                SET minimal_level TO current_level
+            END IF
+
+            SET current_level TO current_level + one
+        END WHILE
+
+        RETURN minimal_level
+    END FUNCTION
+END CLASS

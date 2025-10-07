@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer
+        DECLARE factorials AS list INITIALIZED AS empty
+        SET index TO 0
+        WHILE index <= (n + 1) - 1
+            LET computed_factorial BE factorial(index)
+            INSERT computed_factorial TO factorials AT THE END
+            INCREMENT index BY 1
+        END WHILE
+
+        LET result TO 0
+        DECLARE encountered AS empty set
+        LET half_base TO 10 ** ((n - 1) // 2)
+
+        LET iterator TO half_base
+        WHILE iterator < (half_base * 10) 
+            LET num_str TO str(iterator)
+            LET reversed_str TO reverse(num_str)
+            LET suffix_start_pos TO n % 2
+            LET suffix TO substring(reversed_str, suffix_start_pos, LENGTH(reversed_str))
+            LET full_str TO num_str + suffix
+
+            IF (to_integer(full_str) % k) != 0 THEN
+                SET iterator TO iterator + 1
+                CONTINUE
+            END IF
+
+            LET sorted_str TO sort_characters_ascending(full_str)
+
+            IF sorted_str IN encountered THEN
+                SET iterator TO iterator + 1
+                CONTINUE
+            END IF
+
+            ADD sorted_str TO encountered
+
+            LET frequency_map TO character_frequency(sorted_str)
+            IF ('0' IN frequency_map) AND (frequency_map['0'] > 0) THEN
+                LET zero_count TO frequency_map['0']
+                LET adjusted_value TO n - zero_count
+                LET numerator TO factorials[adjusted_value] * zero_count
+                SET res TO numerator - factorials[n - 1]
+            ELSE
+                SET res TO factorials[n]
+            END IF
+
+            FOR EACH count_value IN values(frequency_map)
+                SET res TO res // factorials[count_value]
+            END FOR
+
+            SET result TO result + res
+            SET iterator TO iterator + 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

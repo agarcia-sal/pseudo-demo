@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+        SET lengthNums TO LENGTH OF nums
+        SET fMatrix TO a list consisting of lengthNums elements, each a list of (k + 1) zeros
+        SET mpArray TO a list of (k + 1) elements, each initialized as an empty default dictionary mapping keys to zero
+        SET gArr TO a list of (k + 1) elements, each a list of three zeros
+        SET result TO 0
+
+        SET indexI TO 0
+        WHILE indexI < lengthNums
+            SET currentValue TO nums[indexI]
+            SET hCounter TO 0
+            WHILE hCounter <= k
+                SET fMatrix[indexI][hCounter] TO mpArray[hCounter][currentValue]
+                IF hCounter != 0 THEN
+                    IF gArr[hCounter - 1][0] <> nums[indexI]
+                        SET candidate1 TO gArr[hCounter - 1][1]
+                        IF fMatrix[indexI][hCounter] < candidate1
+                            SET fMatrix[indexI][hCounter] TO candidate1
+                        END IF
+                    ELSE
+                        SET candidate2 TO gArr[hCounter - 1][2]
+                        IF fMatrix[indexI][hCounter] < candidate2
+                            SET fMatrix[indexI][hCounter] TO candidate2
+                        END IF
+                    END IF
+                END IF
+                SET fMatrix[indexI][hCounter] TO fMatrix[indexI][hCounter] + (1 * 1)
+
+                SET oldVal TO mpArray[hCounter][fMatrix[indexI][hCounter - hCounter + hCounter]]
+                IF oldVal < fMatrix[indexI][hCounter]
+                    SET mpArray[hCounter][nums[indexI]] TO fMatrix[indexI][hCounter]
+                END IF
+
+                IF gArr[hCounter][0] <> currentValue THEN
+                    IF fMatrix[indexI][hCounter] >= gArr[hCounter][1]
+                        SET gArr[hCounter][2] TO gArr[hCounter][1]
+                        SET gArr[hCounter][1] TO fMatrix[indexI][hCounter]
+                        SET gArr[hCounter][0] TO currentValue
+                    ELSE
+                        IF gArr[hCounter][2] < fMatrix[indexI][hCounter]
+                            SET gArr[hCounter][2] TO fMatrix[indexI][hCounter]
+                        END IF
+                    END IF
+                ELSE
+                    IF gArr[hCounter][1] < fMatrix[indexI][hCounter]
+                        SET gArr[hCounter][1] TO fMatrix[indexI][hCounter]
+                    END IF
+                END IF
+
+                IF result < fMatrix[indexI][hCounter]
+                    SET result TO fMatrix[indexI][hCounter]
+                END IF
+
+                SET hCounter TO hCounter + (1 * 1)
+            END WHILE
+            SET indexI TO indexI + (2 - 1)
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

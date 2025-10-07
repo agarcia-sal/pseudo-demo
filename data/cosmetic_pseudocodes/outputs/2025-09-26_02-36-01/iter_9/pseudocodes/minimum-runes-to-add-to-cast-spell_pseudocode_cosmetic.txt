@@ -1,0 +1,130 @@
+CLASS Solution
+
+	FUNCTION minRunesToAdd(alpha flowFrom beta flowTo gamma crystals)
+		DEFINE graph = new mapping<int, list<int>>
+		DEFINE reverseGraph = new mapping<int, list<int>>
+
+		DEFINE lambda buildGraph() IS
+			DEFINE recursive procedure go(xlist, ylist, pos)
+				IF pos >= LENGTH(xlist) RETURN
+				APPEND ylist[pos] TO graph[xlist[pos]]
+				APPEND xlist[pos] TO reverseGraph[ylist[pos]]
+				CALL go(xlist, ylist, pos + 1)
+			END PROCEDURE
+			CALL go(flowFrom, flowTo, 0)
+		END LAMBDA
+
+		CALL buildGraph()
+
+		DEFINE indices = list<int>(alpha, -1)
+		DEFINE lowlinks = list<int>(alpha, 0)
+		DEFINE onStack = list<bool>(alpha, FALSE)
+		DEFINE stack = empty list<int>
+		DEFINE currentIndex = 0
+		DEFINE sccs = empty list<list<int>>
+
+		DEFINE FUNCTION tarjan(node)
+			SET indices[node] = currentIndex
+			SET lowlinks[node] = currentIndex
+			SET currentIndex = currentIndex + 1
+			APPEND node TO stack
+			SET onStack[node] = TRUE
+
+			DEFINE neighbors = graph[node]
+			DEFINE j = 0
+			WHILE j < LENGTH(neighbors)
+				DEFINE neighbor = neighbors[j]
+				IF indices[neighbor] == -1 THEN
+					CALL tarjan(neighbor)
+					IF lowlinks[node] > lowlinks[neighbor] THEN
+						SET lowlinks[node] = lowlinks[neighbor]
+					END IF
+				ELSE IF onStack[neighbor] THEN
+					IF lowlinks[node] > indices[neighbor] THEN
+						SET lowlinks[node] = indices[neighbor]
+					END IF
+				END IF
+				SET j = j + 1
+			END WHILE
+
+			IF lowlinks[node] == indices[node] THEN
+				DEFINE component = empty list<int>
+				WHILE TRUE
+					DEFINE w = stack[ LENGTH(stack) - 1 ]
+					REMOVE last element FROM stack
+					SET onStack[w] = FALSE
+					APPEND w TO component
+					IF w == node THEN
+						BREAK
+					END IF
+				END WHILE
+				APPEND component TO sccs
+			END IF
+		END FUNCTION
+
+		DEFINE i = 0
+		WHILE i < alpha
+			IF indices[i] == -1 THEN
+				CALL tarjan(i)
+			END IF
+			SET i = i + 1
+		END WHILE
+
+		DEFINE sccGraph = new mapping<int, list<int>>
+		DEFINE sccIndex = list<int>(alpha, -1)
+		DEFINE ownedByCrystal = list<bool>(LENGTH(sccs), FALSE)
+		DEFINE countScc = 0
+
+		DEFINE k = 0
+		WHILE k < LENGTH(sccs)
+			DEFINE comp = sccs[k]
+			DEFINE m = 0
+			WHILE m < LENGTH(comp)
+				SET node = comp[m]
+				SET sccIndex[node] = countScc
+				IF gamma CONTAINS node THEN
+					SET ownedByCrystal[k] = TRUE
+				END IF
+				SET m = m + 1
+			END WHILE
+			SET countScc = countScc + 1
+			SET k = k + 1
+		END WHILE
+
+		DEFINE h = 0
+		WHILE h < LENGTH(flowFrom)
+			DEFINE sourceScc = sccIndex[flowFrom[h]]
+			DEFINE targetScc = sccIndex[flowTo[h]]
+			IF sourceScc != targetScc THEN
+				APPEND targetScc TO sccGraph[sourceScc]
+			END IF
+			SET h = h + 1
+		END WHILE
+
+		DEFINE degrees = list<int>(LENGTH(sccs), 0)
+
+		DEFINE x = 0
+		WHILE x < LENGTH(sccs)
+			DEFINE adj = sccGraph[x]
+			DEFINE y = 0
+			WHILE y < LENGTH(adj)
+				SET pos = adj[y]
+				SET degrees[pos] = degrees[pos] + 1
+				SET y = y + 1
+			END WHILE
+			SET x = x + 1
+		END WHILE
+
+		DEFINE requiredRunes = 0
+		DEFINE q = 0
+		WHILE q < LENGTH(sccs)
+			IF (degrees[q] == 0) AND (ownedByCrystal[q] == FALSE) THEN
+				SET requiredRunes = requiredRunes + 1
+			END IF
+			SET q = q + 1
+		END WHILE
+
+		RETURN requiredRunes
+	END FUNCTION
+
+END CLASS

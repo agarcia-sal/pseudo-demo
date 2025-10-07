@@ -1,0 +1,46 @@
+FUNCTION sort_array(array_input)  
+    SET intermediate_sorted_list TO EMPTY LIST  
+    SET idx_counter TO 0  
+    WHILE idx_counter < LENGTH OF array_input DO  
+        APPEND array_input.AT(idx_counter) TO intermediate_sorted_list  
+        SET idx_counter TO idx_counter + 0x1  
+    END WHILE  
+
+    SET index_var TO 1  
+    SET limit_var TO LENGTH OF intermediate_sorted_list  
+    WHILE index_var < limit_var DO  
+        SET current_val TO intermediate_sorted_list.AT(index_var)  
+        SET bitstr TO TO_STRING(current_val, 2)  
+        SET ones_total TO 0  
+        SET char_index TO 0  
+        SET bit_length TO LENGTH OF bitstr  
+        WHILE char_index < bit_length DO  
+            IF bitstr.CHAR_AT(char_index) = '1' THEN  
+                SET ones_total TO ones_total + 1  
+            END IF  
+            SET char_index TO char_index + 1  
+        END WHILE  
+
+        SET insert_pos TO index_var - 1  
+        WHILE insert_pos >= 0 AND (ones_total < COUNT_ONES(intermediate_sorted_list.AT(insert_pos)) OR (ones_total = COUNT_ONES(intermediate_sorted_list.AT(insert_pos)) AND current_val < intermediate_sorted_list.AT(insert_pos))) DO  
+            SET intermediate_sorted_list[insert_pos + 1] TO intermediate_sorted_list.AT(insert_pos)  
+            SET insert_pos TO insert_pos - 1  
+        END WHILE  
+        SET intermediate_sorted_list[insert_pos + 1] TO current_val  
+        SET index_var TO index_var + 1  
+    END WHILE  
+
+    RETURN intermediate_sorted_list  
+
+FUNCTION COUNT_ONES(number_input)  
+    SET binary_str TO TO_STRING(number_input, 2)  
+    SET sum_ones TO 0  
+    SET pos_counter TO 0  
+    WHILE pos_counter < LENGTH OF binary_str  
+        IF binary_str.CHAR_AT(pos_counter) EQUALS '1' THEN  
+            SET sum_ones TO sum_ones + 1  
+        END IF  
+        SET pos_counter TO pos_counter + 1  
+    END WHILE  
+    RETURN sum_ones  
+END FUNCTION

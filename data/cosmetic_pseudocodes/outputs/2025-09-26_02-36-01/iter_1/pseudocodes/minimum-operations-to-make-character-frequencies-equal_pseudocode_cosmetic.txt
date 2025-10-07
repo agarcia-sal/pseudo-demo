@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION makeStringGood(s)
+        INITIALIZE freq AS an array of 26 zeros
+        FOR EACH char IN s DO
+            LET index BE ASCII(char) - ASCII('a')
+            freq[index] = freq[index] + 1
+        END FOR
+
+        LET maxFreq BE the greatest number in freq
+        LET results BE an empty collection
+
+        FOR target FROM 1 TO maxFreq DO
+            APPEND _getMinOperations(freq, target) TO results
+        END FOR
+
+        RETURN the smallest number IN results
+    END FUNCTION
+
+    FUNCTION _getMinOperations(freq, target)
+        INITIALIZE dp AS an array of 27 zeros
+
+        FOR position FROM 25 DOWNTO 0 DO
+            LET deleteAllCost BE freq[position]
+
+            IF freq[position] < target THEN
+                LET gapCost BE target - freq[position]
+            ELSE
+                LET gapCost BE freq[position] - target
+            END IF
+
+            LET optionOne BE deleteAllCost
+            LET optionTwo BE gapCost + dp[position + 1]
+
+            LET cost BE the smaller of optionOne and optionTwo
+
+            IF position + 1 < 26 AND freq[position + 1] < target THEN
+                LET nextDeficit BE target - freq[position + 1]
+
+                IF freq[position] <= target THEN
+                    LET needChange BE freq[position]
+                ELSE
+                    LET needChange BE freq[position] - target
+                END IF
+
+                LET altChangeCost
+                IF nextDeficit > needChange THEN
+                    altChangeCost = needChange + (nextDeficit - needChange)
+                ELSE
+                    altChangeCost = nextDeficit + (needChange - nextDeficit)
+                END IF
+
+                LET optionThree BE altChangeCost + dp[position + 2]
+                IF optionThree < cost THEN
+                    cost = optionThree
+                END IF
+            END IF
+
+            dp[position] = cost
+        END FOR
+
+        RETURN dp[0]
+    END FUNCTION
+END CLASS

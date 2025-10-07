@@ -1,0 +1,70 @@
+FUNCTION is_prime(number)
+  IF NOT (number > 1) THEN
+    RETURN false
+  END IF
+  IF number <= 3 THEN
+    RETURN true
+  END IF
+  IF (number % 2 = 0) OR (0 = number MOD 3) THEN
+    RETURN false
+  END IF
+  SET counter TO 5
+  WHILE (counter * counter) <= number DO
+    IF ((number MOD counter) = 0) OR ((number MOD (counter + 2)) = 0) THEN
+      RETURN false
+    END IF
+    counter = counter + 6
+  END WHILE
+  RETURN true
+END FUNCTION
+
+CLASS Solution
+  FUNCTION mostFrequentPrime(mat)
+    SET rows TO LENGTH(mat)
+    SET cols TO LENGTH(mat[0])
+    SET vectors TO [
+        (-1, 0), (-1, 1), (0, 1), (1, 1),
+        (1, 0), (1, -1), (0, -1), (-1, -1)
+    ]
+    SET frequency_map TO EMPTY_MAP
+
+    FUNCTION traverse(x_pos, y_pos, delta_x, delta_y, acc_num)
+      SET next_x TO x_pos + delta_x
+      SET next_y TO y_pos + delta_y
+      IF next_x >= 0 AND next_x < rows AND next_y >= 0 AND next_y < cols THEN
+        SET extended_num TO ((acc_num * 10) + mat[next_x][next_y])
+        IF extended_num > 10 AND is_prime(extended_num) THEN
+          frequency_map[extended_num] = IF extended_num IN frequency_map THEN frequency_map[extended_num] + 1 ELSE 1
+        END IF
+        traverse(next_x, next_y, delta_x, delta_y, extended_num)
+      END IF
+    END FUNCTION
+
+    SET row_idx TO 0
+    WHILE row_idx < rows
+      SET col_idx TO 0
+      WHILE col_idx < cols
+        FOR EACH (dx, dy) IN vectors DO
+          traverse(row_idx, col_idx, dx, dy, mat[row_idx][col_idx])
+        END FOR
+        col_idx = col_idx + 1
+      END WHILE
+      row_idx = row_idx + 1
+    END WHILE
+
+    IF SIZE(frequency_map) = 0 THEN
+      RETURN -1
+    END IF
+
+    SET max_prime TO null
+    SET max_freq TO -1
+    FOR EACH key IN frequency_map DO
+      IF frequency_map[key] > max_freq OR (frequency_map[key] = max_freq AND key > max_prime) THEN
+        max_prime = key
+        max_freq = frequency_map[key]
+      END IF
+    END FOR
+
+    RETURN max_prime
+  END FUNCTION
+END CLASS

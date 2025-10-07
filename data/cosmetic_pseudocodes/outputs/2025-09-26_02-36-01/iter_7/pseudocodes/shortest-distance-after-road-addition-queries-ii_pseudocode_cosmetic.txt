@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION shortestDistanceAfterQueries(n, queries)
+        DEFINE MAX_VALUE AS (1 << 31) - 1
+
+        PROCEDURE buildGraph(size)
+            DECLARE map AS DICTIONARY FROM INTEGER TO LIST OF TUPLES
+            SET idx TO 0
+            LOOP WHILE idx <= size - 2
+                map[idx] = []
+                idx = idx + 1
+            END LOOP
+            idx = 0
+            LOOP WHILE idx <= size - 2
+                LET first = idx + 1
+                LET second = 1
+                map[idx].APPEND((first, second))
+                idx = idx + 1
+            END LOOP
+            RETURN map
+        END PROCEDURE
+
+        DECLARE graph AS buildGraph(n)
+
+        FUNCTION dijkstra()
+            DECLARE distances AS LIST FILLED WITH MAX_VALUE REPEATED n TIMES
+            distances[0] = 0
+            DECLARE priorityQueue AS LIST
+            priorityQueue.APPEND((0, 0))
+
+            FUNCTION popLowest()
+                DECLARE minIndex = 0
+                DECLARE i = 1
+                LOOP WHILE i < LENGTH(priorityQueue)
+                    IF priorityQueue[i][0] < priorityQueue[minIndex][0]
+                        minIndex = i
+                    END IF
+                    i = i + 1
+                END LOOP
+                RETURN priorityQueue.POP(minIndex)
+            END FUNCTION
+
+            LOOP WHILE LENGTH(priorityQueue) > 0
+                LET (currDistance, currNode) = popLowest()
+                IF currDistance > distances[currNode]
+                    CONTINUE
+                END IF
+
+                DECLARE j = 0
+                LOOP WHILE j < LENGTH(graph[currNode])
+                    LET (adjNode, weight) = graph[currNode][j]
+                    LET totalDist = currDistance + weight
+                    IF totalDist < distances[adjNode]
+                        distances[adjNode] = totalDist
+                        priorityQueue.APPEND((totalDist, adjNode))
+                    END IF
+                    j = j + 1
+                END LOOP
+            END LOOP
+
+            RETURN distances[n - 1]
+        END FUNCTION
+
+        DECLARE output AS EMPTY LIST
+        DECLARE ind = 0
+
+        LOOP WHILE ind < LENGTH(queries)
+            LET (x, y) = queries[ind]
+            graph[x].APPEND((y, 1))
+            output.APPEND(dijkstra())
+            ind = ind + 1
+        END LOOP
+
+        RETURN output
+    END FUNCTION
+END CLASS

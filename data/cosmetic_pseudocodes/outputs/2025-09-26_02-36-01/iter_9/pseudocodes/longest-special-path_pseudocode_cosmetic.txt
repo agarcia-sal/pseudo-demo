@@ -1,0 +1,85 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+        FUNCTION buildGraph(edgeList, size)
+            SET adjList TO list of size empty lists
+            SET idx TO 0
+            WHILE idx < length(edgeList)
+                LET fromNode = edgeList[idx][0]
+                LET toNode = edgeList[idx][1]
+                LET weightVal = edgeList[idx][2]
+                CALL addEdge(adjList, fromNode, toNode, weightVal)
+                CALL addEdge(adjList, toNode, fromNode, weightVal)
+                SET idx TO idx + 1
+            END WHILE
+            RETURN adjList
+        END FUNCTION
+
+        FUNCTION addEdge(graphStructure, source, target, wgt)
+            CALL pushPair(graphStructure[source], target, wgt)
+        END FUNCTION
+
+        FUNCTION pushPair(listRef, vertexVal, weightVal)
+            SET pairToAdd TO pair(vertexVal, weightVal)
+            APPEND pairToAdd TO listRef
+        END FUNCTION
+
+        FUNCTION depthFirstSearch(current, previous, boundaryLeft, depthCount)
+            ACCESS maxLength
+            ACCESS minNodes
+            SET prevDepthVal TO 0
+            IF nums[current] IN lastSeenDepth THEN
+                SET prevDepthVal TO lastSeenDepth[nums[current]]
+            END IF
+
+            SET lastSeenDepth[nums[current]] TO depthCount
+
+            IF boundaryLeft < prevDepthVal THEN
+                SET boundaryLeft TO prevDepthVal
+            END IF
+
+            LET segmentLength = prefix[length(prefix) - 1] - prefix[boundaryLeft]
+            LET segmentNodes = depthCount - boundaryLeft
+
+            IF segmentLength > maxLength OR (segmentLength = maxLength AND segmentNodes < minNodes) THEN
+                SET maxLength TO segmentLength
+                SET minNodes TO segmentNodes
+            END IF
+
+            LET idxLocal TO 0
+            WHILE idxLocal < length(graph[current])
+                LET pairElement = graph[current][idxLocal]
+                LET vert = pairElement[0]
+                LET wgt = pairElement[1]
+
+                IF vert = previous THEN
+                    SET idxLocal TO idxLocal + 1
+                    CONTINUE
+                END IF
+
+                CALL appendPrefix(prefix, prefix[length(prefix) - 1] + wgt)
+                CALL depthFirstSearch(vert, current, boundaryLeft, depthCount + 1)
+                CALL popPrefix(prefix)
+                SET idxLocal TO idxLocal + 1
+            END WHILE
+
+            SET lastSeenDepth[nums[current]] TO prevDepthVal
+        END FUNCTION
+
+        FUNCTION appendPrefix(lst, val)
+            APPEND val TO lst
+        END FUNCTION
+
+        FUNCTION popPrefix(lst)
+            REMOVE last element from lst
+        END FUNCTION
+
+        LET graph TO buildGraph(edges, length(nums))
+        SET maxLength TO 0
+        SET minNodes TO 1
+        SET prefix TO [0]
+        SET lastSeenDepth TO empty dictionary
+
+        CALL depthFirstSearch(0, -1, 0, 1)
+        RETURN [maxLength, minNodes]
+    END FUNCTION
+END CLASS

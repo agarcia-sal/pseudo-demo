@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)
+        SET Pql to a map defaulting each key to an empty collection
+        SET Yvh to 0
+        WHILE Yvh LESS THAN LENGTH(edges)
+            SET Okw to edges[Yvh]
+            SET uXr to Okw[0]
+            SET Bjv to Okw[1]
+            SET Qnm to Okw[2]
+            SET Pql[uXr] TO CONCAT(Pql[uXr], [(Bjv, Qnm)])
+            SET Pql[Bjv] TO CONCAT(Pql[Bjv], [(uXr, Qnm)])
+            SET Yvh to Yvh plus 1
+        END WHILE
+        SET Lcn to COUNT_KEYS(Pql)
+        SET ntv TO NEW LIST with size Lcn filled with zeroes
+
+        FUNCTION dfs(yWt, nLp, hzE, mXs)
+            IF (hzE MOD signalSpeed) EQ 0
+                APPEND yWt TO mXs
+            END IF
+            SET Rgu to 0
+            SET Jem to 0
+            WHILE Jem LESS THAN LENGTH(Pql[yWt])
+                SET vDc to Pql[yWt][Jem]
+                SET Cxe to vDc[0]
+                SET bxU to vDc[1]
+                IF Cxe NEQ nLp
+                    SET Rgu TO Rgu plus dfs(Cxe, yWt, hzE plus bxU, mXs)
+                END IF
+                SET Jem to Jem plus 1
+            END WHILE
+            IF (hzE MOD signalSpeed) EQ 0
+                RETURN Rgu plus 1
+            ELSE
+                RETURN Rgu
+            END IF
+        END FUNCTION
+
+        FUNCTION count_pairs_through_c(YuA)
+            SET gnK TO []
+            SET MuB to 0
+            WHILE MuB LESS THAN LENGTH(Pql[YuA])
+                SET nSq to Pql[YuA][MuB]
+                SET gvd to nSq[0]
+                SET LjW to nSq[1]
+                SET Hyk TO []
+                CALL dfs(gvd, YuA, LjW, Hyk)
+                APPEND Hyk TO gnK
+                SET MuB to MuB plus 1
+            END WHILE
+            SET FtO to 0
+            SET Jmy to 0
+            WHILE Jmy LESS THAN LENGTH(gnK)
+                SET xjq to Jmy plus 1
+                WHILE xjq LESS THAN LENGTH(gnK)
+                    SET FtO TO FtO plus (LENGTH(gnK[Jmy]) times LENGTH(gnK[xjq]))
+                    SET xjq to xjq plus 1
+                END WHILE
+                SET Jmy to Jmy plus 1
+            END WHILE
+            RETURN FtO
+        END FUNCTION
+
+        SET Ztl to 0
+        LOOP
+            IF NOT (Ztl LESS THAN Lcn)
+                BREAK
+            END IF
+            SET ntv[Ztl] TO count_pairs_through_c(Ztl)
+            SET Ztl to Ztl plus 1
+        END LOOP
+
+        RETURN ntv
+    END FUNCTION
+END CLASS

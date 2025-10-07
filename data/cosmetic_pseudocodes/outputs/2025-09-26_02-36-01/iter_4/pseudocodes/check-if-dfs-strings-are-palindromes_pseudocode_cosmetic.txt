@@ -1,0 +1,85 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+        DECLARE modValue AS mod  
+        DECLARE lengthS AS LENGTH OF s  
+        CREATE self.h AS ARRAY with (lengthS plus 1) elements initialized TO zero  
+        CREATE self.p AS ARRAY with (lengthS plus 1) elements initialized TO one  
+        DECLARE index AS 1  
+        WHILE index LESS THAN OR EQUAL TO lengthS  
+            LET temp1 BE self.h[index minus 1] TIMES base  
+            LET temp2 BE UNICODE code point of s[index minus 1]  
+            LET sumVal BE temp1 PLUS temp2  
+            SET self.h[index] TO sumVal MODULO modValue  
+            LET tempProd BE self.p[index minus 1] TIMES base  
+            SET self.p[index] TO tempProd MODULO modValue  
+            INCREMENT index BY 1  
+        END WHILE  
+        SET self.mod TO modValue  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        LET diffVal BE self.h[r] MINUS self.h[l minus 1] TIMES self.p[r minus l plus 1]  
+        LET result BE diffVal MODULO self.mod  
+        RETURN result  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+        DECLARE n AS LENGTH OF s  
+        DECLARE graph AS ARRAY OF n ELEMENTS WHERE EACH ELEMENT IS empty LIST  
+        DECLARE dfsStr AS empty LIST  
+        DECLARE pos AS empty DICTIONARY  
+
+        FUNCTION dfs(i)  
+            LET startPos BE LENGTH OF dfsStr PLUS 1  
+            DECLARE idx AS 0  
+            WHILE idx LESS THAN LENGTH OF graph[i]  
+                CALL dfs WITH graph[i][idx]  
+                INCREMENT idx BY 1  
+            END WHILE  
+            APPEND s[i] TO dfsStr  
+            LET endPos BE LENGTH OF dfsStr  
+            SET pos[i] TO PAIR OF startPos AND endPos  
+        END FUNCTION  
+
+        DECLARE counter AS 1  
+        WHILE counter LESS THAN n  
+            APPEND counter TO graph[parent[counter]]  
+            INCREMENT counter BY 1  
+        END WHILE  
+
+        CALL dfs WITH 0  
+
+        DECLARE base AS 33331  
+        DECLARE modVal AS 998244353  
+        CREATE h1 AS NEW Hashing WITH PARAMETERS dfsStr, base, modVal  
+        CREATE h2 AS NEW Hashing WITH PARAMETERS REVERSE OF dfsStr, base, modVal  
+
+        DECLARE answers AS empty LIST  
+        DECLARE idx AS 0  
+        WHILE idx LESS THAN n  
+            LET pairPos BE pos[idx]  
+            LET leftBound BE pairPos.first  
+            LET rightBound BE pairPos.second  
+            LET lengthSeg BE rightBound MINUS leftBound PLUS 1  
+            IF (lengthSeg MODULO 2) EQUALS 0 THEN  
+                LET mid1 BE leftBound  
+                LET mid2 BE leftBound PLUS (lengthSeg DIVIDED BY 2) MINUS 1  
+                LET val1 BE h1.query(mid1, mid2)  
+                LET revLeft BE n MINUS rightBound PLUS 1  
+                LET revRight BE revLeft PLUS (lengthSeg DIVIDED BY 2) MINUS 1  
+                LET val2 BE h2.query(revLeft, revRight)  
+            ELSE  
+                LET val1 BE h1.query(leftBound, leftBound PLUS (lengthSeg DIVIDED BY 2) MINUS 1)  
+                LET revLeft AS n MINUS rightBound PLUS 1  
+                LET revRight AS revLeft PLUS (lengthSeg DIVIDED BY 2) MINUS 1  
+                LET val2 BE h2.query(revLeft, revRight)  
+            END IF  
+            APPEND (val1 EQUALS val2) TO answers  
+            INCREMENT idx BY 1  
+        END WHILE  
+
+        RETURN answers  
+    END FUNCTION  
+END CLASS

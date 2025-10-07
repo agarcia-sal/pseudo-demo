@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION gcdValues(nums, queries)
+        DECLARE maximum_element AS the largest value within nums
+        DECLARE frequency_map AS a counting dictionary derived from nums
+        DECLARE gcd_counts AS an array filled with zeros, sized maximum_element plus one
+
+        DECLARE divisor AS maximum_element
+        WHILE divisor IS GREATER THAN 0
+            DECLARE temp_sum AS zero
+            DECLARE multiple AS divisor
+            WHILE multiple IS LESS THAN OR EQUAL TO maximum_element
+                LET count_at_multiple = frequency_map[multiple] IF multiple EXISTS IN frequency_map ELSE 0
+                LET temp_sum := temp_sum + count_at_multiple
+
+                LET gcd_counts[divisor] := gcd_counts[divisor] - gcd_counts[multiple]
+                LET multiple := multiple + divisor
+            END WHILE
+
+            LET gcd_counts[divisor] := gcd_counts[divisor] + (temp_sum * (temp_sum - 1)) DIV 2
+
+            LET divisor := divisor - 1
+        END WHILE
+
+        DECLARE prefix_sums AS array of length equal to gcd_counts
+        LET running_total := 0
+        FOR index FROM 0 TO LENGTH OF gcd_counts MINUS 1
+            LET running_total := running_total + gcd_counts[index]
+            SET prefix_sums[index] := running_total
+        END FOR
+
+        DECLARE answers AS an empty list
+
+        FUNCTION upper_bound(array, target)
+            DECLARE left := 0
+            DECLARE right := LENGTH OF array
+            WHILE left IS LESS THAN right
+                DECLARE middle := (left + right) DIV 2
+                IF array[middle] IS GREATER THAN target
+                    SET right := middle
+                ELSE
+                    SET left := middle + 1
+                END IF
+            END WHILE
+            RETURN left
+        END FUNCTION
+
+        FOREACH query_element IN queries
+            DECLARE position := upper_bound(prefix_sums, query_element)
+            APPEND position TO answers
+        END FOREACH
+
+        RETURN answers
+    END FUNCTION
+END CLASS

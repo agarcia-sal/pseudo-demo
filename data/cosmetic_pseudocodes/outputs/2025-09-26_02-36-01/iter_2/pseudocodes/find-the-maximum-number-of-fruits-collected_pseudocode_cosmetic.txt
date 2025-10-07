@@ -1,0 +1,66 @@
+CLASS Solution  
+    FUNCTION maxCollectedFruits(fruits)  
+        LET size BE LENGTH fruits  
+        
+        LET movementSet1 BE [[1,1], [0,1]]  
+        LET movementSet2 BE [[1,-1], [1,0], [1,1]]  
+        LET movementSet3 BE [[-1,1], [0,1], [1,1]]  
+        
+        LET cache BE EMPTY MAP  
+        
+        FUNCTION dp(aX, aY, bX, bY, cX, cY)  
+            IF aX < 0 OR aX >= size OR aY < 0 OR aY >= size OR bX < 0 OR bX >= size OR bY < 0 OR bY >= size OR cX < 0 OR cX >= size OR cY < 0 OR cY >= size THEN  
+                RETURN -∞  
+            END IF  
+            
+            LET finalPos BE size - 1  
+            IF aX = aY AND aY = bX AND bX = bY AND bY = cX AND cX = cY AND cY = finalPos THEN  
+                RETURN fruits[finalPos][finalPos]  
+            END IF  
+            
+            LET key BE (aX, aY, bX, bY, cX, cY)  
+            IF key IN cache THEN  
+                RETURN cache[key]  
+            END IF  
+            
+            LET totalCollected BE fruits[aY][aX]  
+            
+            IF (aX = bX AND aY = bY) OR (aX = cX AND aY = cY) THEN  
+                totalCollected = 0  
+            END IF  
+            
+            IF bX = cX AND bY = cY THEN  
+                totalCollected = totalCollected + fruits[bY][bX]  
+            ELSE  
+                totalCollected = totalCollected + fruits[bY][bX] + fruits[cY][cX]  
+            END IF  
+            
+            LET bestGain BE -∞  
+            LET index1 BE 0  
+            WHILE index1 < LENGTH movementSet1 DO  
+                LET dx1, dy1 BE movementSet1[index1][0], movementSet1[index1][1]  
+                LET index2 BE 0  
+                WHILE index2 < LENGTH movementSet2 DO  
+                    LET dx2, dy2 BE movementSet2[index2][0], movementSet2[index2][1]  
+                    LET index3 BE 0  
+                    WHILE index3 < LENGTH movementSet3 DO  
+                        LET dx3, dy3 BE movementSet3[index3][0], movementSet3[index3][1]  
+                        LET trialVal BE dp(aX + dx1, aY + dy1, bX + dx2, bY + dy2, cX + dx3, cY + dy3)  
+                        IF trialVal > bestGain THEN  
+                            bestGain = trialVal  
+                        END IF  
+                        index3 = index3 + 1  
+                    END WHILE  
+                    index2 = index2 + 1  
+                END WHILE  
+                index1 = index1 + 1  
+            END WHILE  
+            
+            LET resultValue BE totalCollected + bestGain  
+            cache[key] = resultValue  
+            RETURN resultValue  
+        END FUNCTION  
+        
+        RETURN dp(0, 0, 0, size - 1, size - 1, 0)  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,30 @@
+FUNCTION file_name_check(input_identifier)
+    DEFINE allowed_extensions AS SET('txt', 'exe', 'dll')
+    DEFINE components AS SEQUENCE()
+    PERFORM components ASSIGN SPLIT BY '.' FROM input_identifier
+    IF NOT (SIZE components EQUALS 2) THEN
+        PERFORM RETURN 'No'
+    FI
+    IF NOT (CONTAINS allowed_extensions, components AT 2) THEN
+        PERFORM RETURN 'No'
+    FI
+    IF LENGTH OF components AT 1 LEFT 0 THEN
+        PERFORM RETURN 'No'
+    FI
+    LET initial_char BE ELEMENT components AT 1 POSITION 1
+    IF initial_char NOT MATCHES REGEX '[A-Za-z]' THEN
+        PERFORM RETURN 'No'
+    FI
+    DEFINE numeric_total AS 0
+    DEFINE index_cursor AS 0
+    WHILE index_cursor < LENGTH OF components AT 1 DO
+        IF characters AT (components AT 1) POSITION (index_cursor + 1) IS DIGIT THEN
+            numeric_total ADD= 1
+        FI
+        index_cursor ADD= 1
+    OD
+    IF numeric_total > 3 THEN
+        PERFORM RETURN 'No'
+    FI
+    PERFORM RETURN 'Yes'
+END FUNCTION

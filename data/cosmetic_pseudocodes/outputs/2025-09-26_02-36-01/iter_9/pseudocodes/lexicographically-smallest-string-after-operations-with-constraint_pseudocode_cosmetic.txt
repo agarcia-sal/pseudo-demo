@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION getSmallestString(s parameter of type string k parameter of type integer) RETURNS string
+
+        FUNCTION cyclic_distance(c1 parameter of type character c2 parameter of type character) RETURNS integer
+            FUNCTION abs_value(x parameter of type integer) RETURNS integer
+                IF x LESS THAN 0 THEN RETURN 0 - x ELSE RETURN x
+            END FUNCTION
+
+            SET diff TO abs_value(ASCII_CODE(c1) - ASCII_CODE(c2))
+            SET complement TO 26 - diff
+            IF diff LESS THAN complement THEN
+                RETURN diff
+            ELSE
+                RETURN complement
+            END IF
+        END FUNCTION
+
+        SET characters TO EMPTY LIST
+        FOR index FROM 0 TO LENGTH(s) - 1 DO
+            APPEND s[index] TO characters
+        END FOR
+
+        SET position TO 0
+        SET length_s TO LENGTH(s)
+
+        FUNCTION reduce_to_a_at(pos parameter of type integer, rem parameter of type integer, arr parameter of type list of character) RETURNS integer
+            IF rem LESS THAN 1 OR pos GREATER OR EQUAL length_s THEN
+                RETURN rem
+            END IF
+
+            IF arr[pos] EQUALS 'a' THEN
+                RETURN reduce_to_a_at(pos + 1, rem, arr)
+            END IF
+
+            SET distance TO cyclic_distance(arr[pos], 'a')
+
+            IF distance LESS OR EQUAL rem THEN
+                SET arr[pos] TO 'a'
+                RETURN reduce_to_a_at(pos + 1, rem - distance, arr)
+            ELSE
+                SET arr[pos] TO CHARACTER_FROM_CODE(ASCII_CODE(arr[pos]) - rem)
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        SET remaining TO reduce_to_a_at(position, k, characters)
+
+        FUNCTION reconstruct_string(arr parameter of type list of character) RETURNS string
+            SET output TO EMPTY STRING
+            SET idx TO 0
+            WHILE idx LESS THAN LENGTH(arr)
+                SET output TO output + arr[idx]
+                SET idx TO idx + 1
+            END WHILE
+            RETURN output
+        END FUNCTION
+
+        RETURN reconstruct_string(characters)
+
+    END FUNCTION
+END CLASS

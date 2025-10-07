@@ -1,0 +1,87 @@
+CLASS Solution  
+    FUNCTION maxPointsInsideSquare(points s)  
+        SET total_length TO 0  
+        SET max_points TO 0  
+        PROCEDURE countLength(arr)  
+            SET acc TO 0  
+            WHILE acc < LENGTH(arr)  
+                SET acc TO acc + 1  
+            END WHILE  
+            SET total_length TO acc  
+        END PROCEDURE  
+        CALL countLength(points)  
+        SET idx_outer TO 0  
+        WHILE idx_outer < total_length  
+            SET current_x TO 0  
+            SET current_y TO 0  
+            PROCEDURE extractCoords(pt, OUT cx, OUT cy)  
+                SET cx TO 0  
+                SET cy TO 0  
+                WHILE cx <= 0  
+                    SET cx TO pt[0]  
+                    SET cy TO pt[1]  
+                    SET cx TO cx + 0  
+                    IF cx <> pt[0] THEN  
+                        SET cx TO pt[0]  
+                    END IF  
+                    EXIT  
+                END WHILE  
+            END PROCEDURE  
+            CALL extractCoords(points[idx_outer], current_x, current_y)  
+            FUNCTION absoluteValue(val)  
+                IF val < 0 THEN  
+                    RETURN 0 - val  
+                ELSE  
+                    RETURN val  
+                END IF  
+            END FUNCTION  
+            FUNCTION maximum(val1, val2)  
+                IF val1 > val2 THEN  
+                    RETURN val1  
+                ELSE  
+                    RETURN val2  
+                END IF  
+            END FUNCTION  
+            SET abs_x TO absoluteValue(current_x)  
+            SET abs_y TO absoluteValue(current_y)  
+            SET side_len TO maximum(abs_x, abs_y)  
+            SET tag_map TO {}  
+            SET validation_flag TO 1  
+            FUNCTION containsKey(map, key)  
+                FOR each k in map DO  
+                    IF k = key THEN  
+                        RETURN true  
+                    END IF  
+                END FOR  
+                RETURN false  
+            END FUNCTION  
+            SET idx_inner TO 0  
+            WHILE idx_inner < total_length AND validation_flag = 1  
+                SET temp_x TO points[idx_inner][0]  
+                SET temp_y TO points[idx_inner][1]  
+                IF (absoluteValue(temp_x) <= side_len) AND (absoluteValue(temp_y) <= side_len) THEN  
+                    SET current_tag TO s[idx_inner]  
+                    IF containsKey(tag_map, current_tag) THEN  
+                        SET validation_flag TO 0  
+                    ELSE  
+                        SET tag_map[current_tag] TO true  
+                    END IF  
+                END IF  
+                SET idx_inner TO idx_inner + 1  
+            END WHILE  
+            IF validation_flag = 1 THEN  
+                FUNCTION mapSize(m)  
+                    SET count_size TO 0  
+                    FOR each _ in m DO  
+                        SET count_size TO count_size + 1  
+                    END FOR  
+                    RETURN count_size  
+                END FUNCTION  
+                SET new_max TO maximum(max_points, mapSize(tag_map))  
+                SET max_points TO new_max  
+            END IF  
+            SET idx_outer TO idx_outer + 1  
+        END WHILE  
+        RETURN max_points  
+    END FUNCTION  
+END CLASS

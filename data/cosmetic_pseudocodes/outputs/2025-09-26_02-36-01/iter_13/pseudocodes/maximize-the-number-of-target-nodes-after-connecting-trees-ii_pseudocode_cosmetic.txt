@@ -1,0 +1,118 @@
+CLASS Solution
+    FUNCTION maxTargetNodes(edges1, edges2)
+        SET adjacencyMapOne TO a new default dictionary with list as default value
+        SET adjacencyMapTwo TO a new default dictionary with list as default value
+        
+        FUNCTION insertEdges(edgeList, adjacencyMap)
+            SET indexCounter TO 0
+            WHILE indexCounter LESS THAN LENGTH of edgeList
+                SET firstNode TO element at indexCounter, 0 in edgeList
+                SET secondNode TO element at indexCounter, 1 in edgeList
+                IF firstNode NOT IN adjacencyMap
+                    SET adjacencyMap[firstNode] TO empty list
+                END IF
+                IF secondNode NOT IN adjacencyMap
+                    SET adjacencyMap[secondNode] TO empty list
+                END IF
+                APPEND secondNode TO adjacencyMap[firstNode]
+                APPEND firstNode TO adjacencyMap[secondNode]
+                INCREMENT indexCounter BY 1
+            END WHILE
+        END FUNCTION
+        
+        CALL insertEdges with edges1 and adjacencyMapOne
+        CALL insertEdges with edges2 and adjacencyMapTwo
+        
+        SET totalNodesOne TO count of keys in adjacencyMapOne
+        SET totalNodesTwo TO count of keys in adjacencyMapTwo
+        
+        FUNCTION breadthFirstSearch(graph, initial)
+            SET countEven TO 0
+            SET countOdd TO 0
+            SET processingQueue TO a new deque containing (initial, 0)
+            SET markedVisited TO a new set containing initial
+            
+            FUNCTION dequeueProcess()
+                IF processingQueue IS empty
+                    RETURN null
+                ELSE
+                    REMOVE first element from processingQueue and RETURN it
+                END IF
+            END FUNCTION
+            
+            REPEAT
+                SET currentPair TO dequeueProcess()
+                IF currentPair IS null
+                    EXIT LOOP
+                END IF
+                SET currentNode, currentDistance TO currentPair
+                IF (currentDistance MOD 2) EQUALS 0
+                    INCREMENT countEven BY 1
+                ELSE
+                    INCREMENT countOdd BY 1
+                END IF
+                SET neighborsList TO graph[currentNode]
+                SET neighborsIndex TO 0
+                WHILE neighborsIndex LESS THAN LENGTH of neighborsList
+                    SET potentialNeighbor TO neighborsList[neighborsIndex]
+                    IF potentialNeighbor NOT IN markedVisited
+                        ADD potentialNeighbor TO markedVisited
+                        APPEND (potentialNeighbor, currentDistance PLUS 1) TO processingQueue
+                    END IF
+                    INCREMENT neighborsIndex BY 1
+                END WHILE
+            UNTIL false
+            
+            RETURN (countEven, countOdd)
+        END FUNCTION
+        
+        FUNCTION gatherCounts(nodeCount, adjMap)
+            SET outputList TO empty list
+            FUNCTION recurseGather(currentIndex)
+                IF currentIndex GREATER OR EQUAL TO nodeCount
+                    RETURN
+                END IF
+                SET countsPair TO breadthFirstSearch(adjMap, currentIndex)
+                APPEND countsPair TO outputList
+                CALL recurseGather with currentIndex PLUS 1
+            END FUNCTION
+            CALL recurseGather starting at 0
+            RETURN outputList
+        END FUNCTION
+        
+        SET countsOne TO gatherCounts(totalNodesOne, adjacencyMapOne)
+        SET countsTwo TO gatherCounts(totalNodesTwo, adjacencyMapTwo)
+        
+        SET finalResultList TO empty list
+        
+        FUNCTION computeResult(indexOne)
+            IF indexOne GREATER OR EQUAL TO totalNodesOne
+                RETURN
+            END IF
+            SET evenCountOne, oddCountOne TO countsOne[indexOne]
+            SET highestTargets TO 0
+            FUNCTION scanIndexTwo(indexTwo)
+                IF indexTwo GREATER OR EQUAL TO totalNodesTwo
+                    RETURN
+                END IF
+                SET evenCountTwo, oddCountTwo TO countsTwo[indexTwo]
+                IF (indexOne EQUALS indexTwo) OR ((indexOne MOD 2) EQUALS (indexTwo MOD 2))
+                    SET targetCount TO evenCountTwo
+                ELSE
+                    SET targetCount TO oddCountTwo
+                END IF
+                IF targetCount GREATER THAN highestTargets
+                    SET highestTargets TO targetCount
+                END IF
+                CALL scanIndexTwo with indexTwo PLUS 1
+            END FUNCTION
+            CALL scanIndexTwo starting at 0
+            APPEND (evenCountOne PLUS highestTargets) TO finalResultList
+            CALL computeResult with indexOne PLUS 1
+        END FUNCTION
+        
+        CALL computeResult starting at 0
+        
+        RETURN finalResultList
+    END FUNCTION
+END CLASS

@@ -1,0 +1,42 @@
+```
+FUNCTION anti_shuffle(input_sequence)
+    SET tokens_collection TO []
+    SET index_counter TO 0
+    WHILE index_counter < LENGTH(input_sequence)
+        SET start_position TO index_counter
+        WHILE index_counter < LENGTH(input_sequence) AND input_sequence[index_counter] ≠ ' '
+            SET index_counter TO index_counter + 1
+        END WHILE
+        IF start_position < index_counter
+            APPEND SUBSTRING(input_sequence, start_position, index_counter) TO tokens_collection
+        END IF
+        SET index_counter TO index_counter + 1
+    END WHILE
+
+    FUNCTION reorder_chars(text)
+        IF LENGTH(text) ≤ 1 THEN RETURN text END IF
+        SET pivot_char TO text[0]
+        SET lesser_chars TO reorder_chars(FILTER text BY (c) => c < pivot_char)
+        SET equal_chars TO FILTER text BY (c) => c = pivot_char
+        SET greater_chars TO reorder_chars(FILTER text BY (c) => c > pivot_char)
+        RETURN CONCATENATE lesser_chars, equal_chars, greater_chars
+    END FUNCTION
+
+    FUNCTION transform_list(collection, acc, pos)
+        IF pos = LENGTH(collection) THEN RETURN acc END IF
+        SET current_element TO collection[pos]
+        SET sorted_element TO reorder_chars(current_element)
+        RETURN transform_list(collection, CONCATENATE(acc, [sorted_element]), pos + 1)
+    END FUNCTION
+
+    SET processed_tokens TO transform_list(tokens_collection, [], 0)
+
+    FUNCTION join_with_space(elements, pos, acc_string)
+        IF pos = LENGTH(elements) THEN RETURN acc_string END IF
+        SET separator TO IF pos > 0 THEN ' ' ELSE '' END IF
+        RETURN join_with_space(elements, pos + 1, CONCATENATE(acc_string, separator, elements[pos]))
+    END FUNCTION
+
+    RETURN join_with_space(processed_tokens, 0, '')
+END FUNCTION
+```

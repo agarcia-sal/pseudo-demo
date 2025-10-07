@@ -1,0 +1,66 @@
+CLASS Solution  
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER  
+        SET one_positions TO an empty list  
+        FOR index FROM zero TO the LENGTH OF nums MINUS one  
+            IF element at position index of nums EQUALS one  
+                APPEND index TO one_positions  
+            END IF  
+        END FOR  
+
+        IF the LENGTH OF one_positions EQUALS zero  
+            RETURN k MULTIPLIED BY two  
+        END IF  
+
+        SET n TO the LENGTH OF one_positions  
+        SET prefix_sum TO a list of zeros with size n PLUS one  
+
+        FOR i FROM zero TO n MINUS one  
+            SET element at position i PLUS one of prefix_sum TO element at position i of prefix_sum PLUS element at position i of one_positions  
+        END FOR  
+
+        FUNCTION cost(start INTEGER end INTEGER) RETURNS INTEGER  
+            SET mid TO start PLUS end DIVIDED BY two  
+            SET median TO element at position mid of one_positions  
+            SET cost TO zero  
+
+            FOR i FROM start TO mid MINUS one  
+                INCREMENT cost BY median MINUS element at position i of one_positions MINUS mid MINUS i  
+            END FOR  
+
+            FOR i FROM mid PLUS one TO end  
+                INCREMENT cost BY element at position i of one_positions MINUS median MINUS i MINUS mid  
+            END FOR  
+
+            RETURN cost  
+        END FUNCTION  
+
+        SET min_moves TO positive infinity  
+
+        FOR start FROM zero TO n MINUS k  
+            SET end TO start PLUS k MINUS one  
+            SET total_cost TO the RESULT OF cost WITH PARAMETERS start AND end  
+
+            IF k MODULO two EQUALS one  
+                SET mid TO start PLUS end DIVIDED BY two  
+                SET median TO element at position mid of one_positions  
+                SET changes_needed TO end MINUS mid MINUS (median MINUS element at position mid of one_positions MINUS one)  
+            ELSE  
+                SET left_mid TO start PLUS end DIVIDED BY two  
+                SET right_mid TO left_mid PLUS one  
+                SET left_median TO element at position left_mid of one_positions  
+                SET right_median TO element at position right_mid of one_positions  
+                SET changes_needed TO right_mid MINUS left_mid MINUS one MINUS (right_median MINUS left_median MINUS one)  
+            END IF  
+
+            IF changes_needed GREATER THAN maxChanges  
+                INCREMENT total_cost BY changes_needed MINUS maxChanges  
+            END IF  
+
+            IF total_cost LESS THAN min_moves  
+                SET min_moves TO total_cost  
+            END IF  
+        END FOR  
+
+        RETURN min_moves  
+    END FUNCTION  
+END CLASS

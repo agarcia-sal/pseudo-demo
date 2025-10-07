@@ -1,0 +1,62 @@
+```
+FUNCTION pluck(array_of_nodes)
+start:
+    IF NOT (LENGTH(array_of_nodes) > 0) THEN
+        RETURN []
+    END IF
+
+    DEFINE FUNCTION extractEven(vals, acc, idx)
+        IF idx >= LENGTH(vals) THEN
+            RETURN acc
+        ELSE
+            LET current = vals[idx]
+            IF (current MOD 2 = 0) THEN
+                CALL extractEven(vals, acc + [current], idx + 1)
+            ELSE
+                CALL extractEven(vals, acc, idx + 1)
+            END IF
+        END IF
+    END FUNCTION
+
+    LET evensList = extractEven(array_of_nodes, [], 0)
+
+    IF NOT (LENGTH(evensList) > 0) THEN
+        RETURN []
+    END IF
+
+    LET minEvenVal = evensList[0]
+    LET minEvenIdxTracking = 0
+
+    DEFINE FUNCTION findMin(valueList, currentMin, currentIdx, pos)
+        IF pos >= LENGTH(valueList) THEN
+            RETURN [currentMin, currentIdx]
+        ELSE
+            LET v = valueList[pos]
+            IF v < currentMin THEN
+                CALL findMin(valueList, v, pos, pos + 1)
+            ELSE
+                CALL findMin(valueList, currentMin, currentIdx, pos + 1)
+            END IF
+        END IF
+    END FUNCTION
+
+    LET tempResults = findMin(evensList, minEvenVal, minEvenIdxTracking, 1)
+
+    LET minEvenValueFinal = tempResults[0]
+    LET minEvenPositionInEvens = tempResults[1]
+
+    DEFINE FUNCTION findOriginalIndex(originalList, searchValue, pos)
+        IF pos >= LENGTH(originalList) THEN
+            RETURN -1
+        ELSE IF originalList[pos] = searchValue THEN
+            RETURN pos
+        ELSE
+            CALL findOriginalIndex(originalList, searchValue, pos + 1)
+        END IF
+    END FUNCTION
+
+    LET originalIndexOfMin = findOriginalIndex(array_of_nodes, minEvenValueFinal, 0)
+
+    RETURN [minEvenValueFinal, originalIndexOfMin]
+END FUNCTION
+```

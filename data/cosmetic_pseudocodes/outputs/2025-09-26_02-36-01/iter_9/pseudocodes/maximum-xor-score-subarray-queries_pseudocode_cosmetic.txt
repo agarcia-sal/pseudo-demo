@@ -1,0 +1,50 @@
+CLASS Solution  
+    FUNCTION maximumSubarrayXor(alist PARAMETER, bqueries PARAMETER)  
+        SET m TO LENGTH OF alist  
+        SET dp1 TO A NEW LIST  
+        SET dp2 TO A NEW LIST  
+        SET p TO 0  
+        WHILE p < m  
+            SET row1 TO A NEW LIST  
+            SET row2 TO A NEW LIST  
+            SET q TO 0  
+            WHILE q < m  
+                APPEND 0 TO row1  
+                APPEND 0 TO row2  
+                SET q TO q + 1  
+            END WHILE  
+            APPEND row1 TO dp1  
+            APPEND row2 TO dp2  
+            SET p TO p + 1  
+        END WHILE  
+        SET r TO m - 1  
+        WHILE r >= 0  
+            SET dp1[r][r] TO alist[r]  
+            SET dp2[r][r] TO alist[r]  
+            SET s TO r + 1  
+            WHILE s < m  
+                SET leftXor TO dp1[r][s - 1]  
+                SET rightXor TO dp1[r + 1][s]  
+                SET dp1[r][s] TO (leftXor XOR rightXor)  
+                SET maxVal TO dp1[r][s]  
+                IF dp2[r][s - 1] > maxVal THEN  
+                    SET maxVal TO dp2[r][s - 1]  
+                END IF  
+                IF dp2[r + 1][s] > maxVal THEN  
+                    SET maxVal TO dp2[r + 1][s]  
+                END IF  
+                SET dp2[r][s] TO maxVal  
+                SET s TO s + 1  
+            END WHILE  
+            SET r TO r - 1  
+        END WHILE  
+        SET outputList TO A NEW LIST  
+        DEFINE FUNCTION getMax(a PARAMETER, b PARAMETER)  
+            RETURN dp2[a][b]  
+        END FUNCTION  
+        FOR EACH (x, y) IN bqueries  
+            APPEND getMax(x, y) TO outputList  
+        END FOR  
+        RETURN outputList  
+    END FUNCTION  
+END CLASS

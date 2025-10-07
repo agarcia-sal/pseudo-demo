@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION constructGridLayout(n, edges)
+      SET graphContainer TO a new collection of size n containing empty lists
+      DEFINE procedure addEdgePair(a, b)
+        ADD b TO graphContainer[a]
+        ADD a TO graphContainer[b]
+      END procedure
+      FOR each sourceNode, targetNode IN edges DO
+        addEdgePair(sourceNode, targetNode)
+      END FOR
+
+      SET degreeList TO a new collection of 5 elements all initialized with (0 - 1)
+      DEFINE idx TO 0
+      WHILE idx LESS THAN LENGTH(graphContainer) DO
+        LET connectedNodes TO graphContainer[idx]
+        SET degreeList[LENGTH(connectedNodes)] TO idx
+        idx = idx + 1
+      END WHILE
+
+      DEFINE startingRow
+      IF degreeList[1] NOT EQUAL (0 - 1) THEN
+        SET startingRow TO new collection containing single element degreeList[1]
+      ELSE IF degreeList[4] EQUAL (0 - 1) THEN
+        LET baseNode TO degreeList[2]
+        DEFINE candidateNode TO NULL
+        FOR each neighborNode IN graphContainer[baseNode] DO
+          IF LENGTH(graphContainer[neighborNode]) EQUALS 2 THEN
+            SET candidateNode TO neighborNode
+            EXIT LOOP
+          END IF
+        END FOR
+        SET startingRow TO collection composed of baseNode followed by candidateNode
+      ELSE
+        LET currentNode TO degreeList[2]
+        SET startingRow TO new collection with element currentNode
+        LET previousNode TO currentNode
+        LET currentNode TO graphContainer[currentNode][0]
+        WHILE LENGTH(graphContainer[currentNode]) GREATER THAN 2 DO
+          APPEND currentNode TO startingRow
+          FOR each neighborNode IN graphContainer[currentNode] DO
+            IF neighborNode NOT EQUAL previousNode AND LENGTH(graphContainer[neighborNode]) LESS THAN 4 THEN
+              SET previousNode TO currentNode
+              SET currentNode TO neighborNode
+              EXIT LOOP
+            END IF
+          END FOR
+        END WHILE
+        APPEND currentNode TO startingRow
+      END IF
+
+      SET answerGrid TO new collection initialized with startingRow inside
+      SET visitedFlags TO a collection of n elements all initialized to false
+      DEFINE repeatCount TO ((n DIV LENGTH(startingRow)) - 1)
+      DEFINE repetition TO 0
+
+      WHILE repetition LESS THAN repeatCount DO
+        FOR each nodeVal IN startingRow DO
+          visitedFlags[nodeVal] = true
+        END FOR
+        DEFINE nextRow TO empty collection
+        FOR each nodeVal IN startingRow DO
+          FOR each adjNode IN graphContainer[nodeVal] DO
+            IF visitedFlags[adjNode] EQUAL false THEN
+              APPEND adjNode TO nextRow
+              EXIT INNER LOOP
+            END IF
+          END FOR
+        END FOR
+        APPEND nextRow TO answerGrid
+        SET startingRow TO nextRow
+        repetition = repetition + 1
+      END WHILE
+
+      RETURN answerGrid
+    END FUNCTION
+END CLASS

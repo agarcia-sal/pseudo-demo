@@ -1,0 +1,48 @@
+CLASS Solution  
+    FUNCTION medianOfUniquenessArray(nums)  
+        FUNCTION countLessOrEqual(limit)  
+            DECLARE tally AS an empty map from elements to integer initialized with zero counts  
+            SET total_subarrays_within_limit TO 0  
+            SET window_start TO 0  
+            SET unique_items TO 0  
+            SET current_index TO 0  
+            WHILE current_index NOT EQUAL TO LENGTH OF nums  
+                LET current_element BE nums AT current_index  
+                IF tally[current_element] EQUALS 0 THEN  
+                    SET unique_items TO unique_items PLUS 1  
+                END IF  
+                SET tally[current_element] TO tally[current_element] PLUS 1  
+                WHILE unique_items GREATER THAN limit  
+                    LET start_element BE nums AT window_start  
+                    SET tally[start_element] TO tally[start_element] MINUS 1  
+                    IF tally[start_element] EQUALS 0 THEN  
+                        SET unique_items TO unique_items MINUS 1  
+                    END IF  
+                    INCREMENT window_start BY 1  
+                END WHILE  
+                SET subarray_count_increment TO current_index MINUS window_start PLUS 1  
+                SET total_subarrays_within_limit TO total_subarrays_within_limit PLUS subarray_count_increment  
+                INCREMENT current_index BY 1  
+            END WHILE  
+            RETURN total_subarrays_within_limit  
+        END FUNCTION  
+        
+        LET length_nums BE LENGTH OF nums  
+        LET total_subarrays BE (length_nums TIMES (length_nums PLUS 1)) DIVIDED BY 2  
+        LET median_cutoff BE (total_subarrays PLUS 1) DIVIDED BY 2  
+        SET lower_bound TO 1  
+        SET upper_bound TO length_nums  
+        
+        WHILE lower_bound LESS THAN upper_bound  
+            LET mid_point BE (lower_bound PLUS upper_bound) DIVIDED BY 2  
+            LET current_count BE countLessOrEqual(mid_point)  
+            IF current_count LESS THAN median_cutoff THEN  
+                SET lower_bound TO mid_point PLUS 1  
+            ELSE  
+                SET upper_bound TO mid_point  
+            END IF  
+        END WHILE  
+        
+        RETURN lower_bound  
+    END FUNCTION  
+END CLASS

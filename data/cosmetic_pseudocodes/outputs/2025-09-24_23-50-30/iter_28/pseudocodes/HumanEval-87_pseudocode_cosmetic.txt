@@ -1,0 +1,37 @@
+```
+FUNCTION get_row(matrix_grid, search_term)
+  DEFINE accumulate_matches(acc_result, current_row_idx)
+    IF current_row_idx >= LENGTH(matrix_grid)
+      RETURN acc_result
+    ELSE
+      DEFINE find_in_row(col_idx, row_data, found_coords)
+        IF col_idx >= LENGTH(row_data)
+          RETURN found_coords
+        ELSE
+          SET updated_coords TO found_coords
+          SWITCH TRUE
+            CASE NOT(row_data[col_idx] != search_term):
+              SET updated_coords TO found_coords + LIST(TUPLE(current_row_idx, col_idx))
+          END SWITCH
+          RETURN find_in_row(col_idx + 1, row_data, updated_coords)
+      END DEFINE
+      SET collected_in_row TO find_in_row(0, matrix_grid[current_row_idx], LIST())
+      RETURN accumulate_matches(acc_result + collected_in_row, current_row_idx + 1)
+  END DEFINE
+
+  SET raw_results TO accumulate_matches(LIST(), 0)
+
+  DEFINE sorting_key_first_asc(coord)
+    RETURN coord[0]
+  END DEFINE
+
+  DEFINE sorting_key_second_desc(coord)
+    RETURN -coord[1]
+  END DEFINE
+
+  SET intermediate_sort TO raw_results SORTED BY sorting_key_second_desc
+  SET final_sort TO intermediate_sort SORTED BY sorting_key_first_asc
+
+  RETURN final_sort
+END FUNCTION
+```

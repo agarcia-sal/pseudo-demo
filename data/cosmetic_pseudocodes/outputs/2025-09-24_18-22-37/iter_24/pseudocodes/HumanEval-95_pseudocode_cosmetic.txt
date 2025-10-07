@@ -1,0 +1,55 @@
+```
+FUNCTION check_dict_case(dict_param)
+    DECLARE is_valid_flag
+    DECLARE key_var
+    DECLARE mode_flag
+    DECLARE all_upper_flag
+    DECLARE all_lower_flag
+    DECLARE keys_list
+    DECLARE idx_counter
+    SET keys_list TO dict_param KEYS
+    SET idx_counter TO 0
+    SET all_upper_flag TO False
+    SET all_lower_flag TO False
+    SET mode_flag TO "start"
+    SET is_valid_flag TO False
+    IF LENGTH OF keys_list IS NOT EQUAL TO 0
+        WHILE idx_counter < LENGTH OF keys_list
+            SET key_var TO keys_list.at(idx_counter)
+            idx_counter ← idx_counter + 1
+            SELECT TRUE
+                CASE NOT (key_var IS INSTANCE OF STRING)
+                    SET mode_flag TO "mixed"
+                    BREAK WHILE
+                CASE TRUE
+                    SELECT TRUE
+                        CASE mode_flag IS "start"
+                            SET all_upper_flag TO key_var IS ALL UPPERCASE
+                            SET all_lower_flag TO key_var IS ALL LOWERCASE
+                            IF all_upper_flag THEN
+                                SET mode_flag TO "upper"
+                            ELSE
+                                IF all_lower_flag THEN
+                                    SET mode_flag TO "lower"
+                                ELSE
+                                    BREAK WHILE
+                                END IF
+                            END IF
+                        CASE (mode_flag IS "upper") ∧ (NOT (key_var IS ALL UPPERCASE))
+                            SET mode_flag TO "mixed"
+                            BREAK WHILE
+                        CASE (mode_flag IS "lower") ∧ (NOT (key_var IS ALL LOWERCASE))
+                            SET mode_flag TO "mixed"
+                            BREAK WHILE
+                        DEFAULT
+                            BREAK WHILE
+                    END SELECT
+            END SELECT
+        END WHILE
+        SET is_valid_flag TO (mode_flag IS "upper") ∨ (mode_flag IS "lower")
+    ELSE
+        SET is_valid_flag TO False
+    END IF
+    RETURN is_valid_flag
+END FUNCTION
+```

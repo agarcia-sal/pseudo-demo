@@ -1,0 +1,77 @@
+CLASS Solution
+  FUNCTION minLength(obfuscated_input, obfuscated_limit)
+    FUNCTION longest_uniform_substring(transformed_sequence)
+      PROCEDURE assign_maximum(REFTARGET, VALUE)
+        IF REFTARGET < VALUE THEN
+          REFTARGET := VALUE
+        END IF
+      END PROCEDURE
+
+      DECLARE max_streak ← 0
+      DECLARE active_streak ← 1
+      DECLARE index ← 1
+      WHILE index < LENGTH(transformed_sequence)
+        IF transformed_sequence[index] = transformed_sequence[index - 1] THEN
+          active_streak ← active_streak + 1
+        ELSE
+          assign_maximum(max_streak, active_streak)
+          active_streak ← 1
+        END IF
+        index ← index + 1
+      END WHILE
+
+      IF max_streak > active_streak THEN
+        RETURN max_streak
+      ELSE
+        RETURN active_streak
+      END IF
+    END FUNCTION
+
+    DECLARE minimum_length ← LENGTH(obfuscated_input)
+    DECLARE iteration_limit ← 1 << LENGTH(obfuscated_input)
+
+    DECLARE i_iterator ← 0
+    WHILE i_iterator < iteration_limit
+      DECLARE bitcount_iterator ← 0
+      DECLARE bitcount ← 0
+      DECLARE temp_bit_pattern ← i_iterator
+      WHILE temp_bit_pattern ≠ 0
+        bitcount ← bitcount + (temp_bit_pattern & 1)
+        temp_bit_pattern ← temp_bit_pattern >> 1
+      END WHILE
+
+      IF bitcount > obfuscated_limit THEN
+        i_iterator ← i_iterator + 1
+        CONTINUE WHILE
+      END IF
+
+      DECLARE modified_sequence ← []  
+      DECLARE idx ← 0
+      WHILE idx < LENGTH(obfuscated_input)
+        APPEND modified_sequence WITH obfuscated_input[idx]
+        idx ← idx + 1
+      END WHILE
+
+      DECLARE pos ← 0
+      WHILE pos < LENGTH(obfuscated_input)
+        IF (i_iterator & (1 << pos)) ≠ 0 THEN
+          IF modified_sequence[pos] = '0' THEN
+            modified_sequence[pos] ← '1'
+          ELSE
+            modified_sequence[pos] ← '0'
+          END IF
+        END IF
+        pos ← pos + 1
+      END WHILE
+
+      DECLARE candidate ← longest_uniform_substring(modified_sequence)
+      IF minimum_length > candidate THEN
+        minimum_length ← candidate
+      END IF
+
+      i_iterator ← i_iterator + 1
+    END WHILE
+
+    RETURN minimum_length
+  END FUNCTION
+END CLASS

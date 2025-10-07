@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION beautifulIndices(s parameter, a parameter, b parameter, k parameter)
+        FUNCTION is_equal_substring(str parameter, start parameter, substr parameter)
+            FUNCTION len(x parameter)
+                SET count TO 0
+                SET pos TO 0
+                WHILE TRUE
+                    IF pos EQUALS x.length
+                        RETURN count
+                    END IF
+                    SET count TO count + 1
+                    SET pos TO pos + 1
+                END WHILE
+            END FUNCTION
+
+            SET length_sub TO len(substr)
+            SET idx_sub TO 0
+            SET idx_str TO start
+
+            WHILE idx_sub NOT EQUAL length_sub
+                IF str[idx_str] NOT EQUAL substr[idx_sub]
+                    RETURN FALSE
+                END IF
+                SET idx_str TO idx_str + 1
+                SET idx_sub TO idx_sub + 1
+            END WHILE
+
+            RETURN TRUE
+        END FUNCTION
+
+        FUNCTION abs_diff(x parameter, y parameter)
+            IF x - y LESS THAN 0
+                RETURN (y - x)
+            ELSE
+                RETURN (x - y)
+            END IF
+        END FUNCTION
+
+        PROCEDURE fill_indices(lst OUT parameter, text parameter, pattern parameter)
+            PROCEDURE to_get_length(val parameter, OUT length OUT parameter)
+                SET length TO 0
+                LOOP
+                    TRY
+                        _ = val[length]
+                        SET length TO length + 1
+                    CATCH
+                        BREAK
+                    END TRY
+                END LOOP
+            END PROCEDURE
+
+            SET length_text TO 0
+            SET length_pattern TO 0
+            CALL to_get_length(text, length_text)
+            CALL to_get_length(pattern, length_pattern)
+
+            SET pos_var TO 0
+            WHILE TRUE
+                IF pos_var GREATER THAN length_text - length_pattern
+                    BREAK
+                END IF
+                IF is_equal_substring(text, pos_var, pattern)
+                    lst.APPEND(pos_var)
+                END IF
+                SET pos_var TO pos_var + 1
+            END WHILE
+        END PROCEDURE
+
+        SET container_a TO EMPTY LIST
+        SET container_b TO EMPTY LIST
+
+        CALL fill_indices(container_a, s, a)
+        CALL fill_indices(container_b, s, b)
+
+        SET result_container TO EMPTY LIST
+
+        FUNCTION iterator_outer(list1 parameter, list2 parameter, limit parameter, OUT output OUT parameter)
+            SET idx1 TO 0
+            WHILE idx1 NOT EQUAL list1.LENGTH
+                SET idx2 TO 0
+                PROCEDURE inner_loop()
+                    WHILE idx2 NOT EQUAL list2.LENGTH
+                        IF abs_diff(list1[idx1], list2[idx2]) LESS OR EQUAL limit
+                            output.APPEND(list1[idx1])
+                            RETURN
+                        END IF
+                        SET idx2 TO idx2 + 1
+                    END WHILE
+                END PROCEDURE
+
+                CALL inner_loop()
+                SET idx1 TO idx1 + 1
+            END WHILE
+        END FUNCTION
+
+        CALL iterator_outer(container_a, container_b, k, result_container)
+
+        RETURN result_container
+    END FUNCTION
+END CLASS

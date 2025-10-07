@@ -1,0 +1,46 @@
+```
+FUNCTION sort_numbers(string_of_number_words)
+    SET map_values TO DICTIONARY WITH PAIRS:
+        'zero': 0,
+        'one': 1,
+        'two': 2,
+        'three': 3,
+        'four': 4,
+        'five': 5,
+        'six': 6,
+        'seven': 7,
+        'eight': 8,
+        'nine': 9
+
+    FUNCTION filter_nonempty_words(list_words, index)
+        IF index == LENGTH(list_words) THEN
+            RETURN []
+        IF list_words[index] == "" THEN
+            RETURN filter_nonempty_words(list_words, index + 1)
+        RETURN [list_words[index]] + filter_nonempty_words(list_words, index + 1)
+    END FUNCTION
+
+    SET intermediate_list TO filter_nonempty_words(SPLIT(string_of_number_words, " "), 0)
+
+    FUNCTION quicksort(list_vals)
+        IF LENGTH(list_vals) <= 1 THEN
+            RETURN list_vals
+        SET pivot_val TO map_values[list_vals[0]]
+        SET less_part TO [x FOR x IN list_vals[1:] IF map_values[x] < pivot_val]
+        SET greater_equal_part TO [x FOR x IN list_vals[1:] IF NOT (map_values[x] < pivot_val)]
+        RETURN quicksort(less_part) + [list_vals[0]] + quicksort(greater_equal_part)
+    END FUNCTION
+
+    SET final_list TO quicksort(intermediate_list)
+
+    FUNCTION join_with_separator(list_to_join, sep, idx)
+        IF idx == LENGTH(list_to_join) THEN
+            RETURN ""
+        IF idx == LENGTH(list_to_join) - 1 THEN
+            RETURN list_to_join[idx]
+        RETURN list_to_join[idx] + sep + join_with_separator(list_to_join, sep, idx + 1)
+    END FUNCTION
+
+    RETURN join_with_separator(final_list, " ", 0)
+END FUNCTION
+```

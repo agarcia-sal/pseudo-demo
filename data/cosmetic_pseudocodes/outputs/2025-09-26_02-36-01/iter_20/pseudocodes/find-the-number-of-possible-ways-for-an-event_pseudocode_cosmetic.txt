@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION numberOfWays(n integer parameter, x integer parameter, y integer parameter) RETURNS integer
+        DECLARE CONSTANT M AS integer = (10 ^ 9) + 7
+        DECLARE f AS array of arrays integer = []
+        DECLARE A AS integer = n + 1
+        DECLARE B AS integer = x + 1
+
+        DECLARE PROCEDURE Initialize2DArray(rows integer, cols integer)
+            DECLARE I AS integer = 0
+            WHILE I < rows
+                DECLARE tempRow AS array integer = []
+                DECLARE J AS integer = 0
+                WHILE J < cols
+                    tempRow.push(0)
+                    SET J = J + 1
+                END WHILE
+                f.push(tempRow)
+                SET I = I + 1
+            END WHILE
+        END PROCEDURE
+
+        CALL Initialize2DArray(A, B)
+
+        SET f[0][0] = 1
+
+        DECLARE PROCEDURE OuterLoop(i integer)
+            IF i > n THEN RETURN END IF
+
+            DECLARE PROCEDURE InnerLoop(j integer)
+                IF j > x THEN RETURN END IF
+
+                DECLARE u AS integer = (f[i - 1][j] * j) % M
+                DECLARE v AS integer = (f[i - 1][j - 1] * ((x - (j -1)))) % M
+                SET f[i][j] = (u + v) % M
+
+                CALL InnerLoop(j + 1)
+            END PROCEDURE
+
+            CALL InnerLoop(1)
+            CALL OuterLoop(i + 1)
+        END PROCEDURE
+
+        CALL OuterLoop(1)
+
+        DECLARE r AS integer = 0
+        DECLARE s AS integer = 1
+
+        DECLARE PROCEDURE Accumulate(j integer)
+            IF j > x THEN RETURN END IF
+
+            SET s = (s * y) % M
+            SET r = (r + (f[n][j] * s) % M) % M
+
+            CALL Accumulate(j + 1)
+        END PROCEDURE
+
+        CALL Accumulate(1)
+
+        RETURN r
+    END FUNCTION
+END CLASS

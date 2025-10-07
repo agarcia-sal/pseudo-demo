@@ -1,0 +1,53 @@
+CLASS Solution
+	FUNCTION gcdValues(nums, queries)
+		SET upperLimit TO nums[0]
+		FOR index FROM 1 TO LENGTH(nums) - 1
+			IF nums[index] > upperLimit THEN 
+				SET upperLimit TO nums[index]
+			END IF
+		END FOR
+
+		SET tally TO NEW counter
+		FOR item IN nums
+			CALL tally.increment(item)
+		END FOR
+
+		SET aggregates TO ARRAY OF SIZE (upperLimit + 1) FILLED WITH 0
+
+		FOR current FROM upperLimit DOWN TO 1 STEP -1
+			SET tempCount TO 0
+			SET step TO current
+			WHILE step <= upperLimit
+				SET tempCount TO tempCount + tally.get(step)
+				SET aggregates[current] TO aggregates[current] - aggregates[step]
+				SET step TO step + current
+			END WHILE
+			SET aggregates[current] TO aggregates[current] + (tempCount * (tempCount - 1)) / 2
+		END FOR
+
+		FOR idx FROM 1 TO LENGTH(aggregates) - 1
+			SET aggregates[idx] TO aggregates[idx] + aggregates[idx - 1]
+		END FOR
+
+		SET output TO EMPTY LIST
+		FUNCTION binarySearchRightBound(array, target)
+			SET lowBound TO 0
+			SET highBound TO LENGTH(array)
+			WHILE lowBound < highBound
+				SET midPoint TO (lowBound + highBound) / 2
+				IF target < array[FLOOR(midPoint)] THEN
+					SET highBound TO FLOOR(midPoint)
+				ELSE
+					SET lowBound TO CEIL(midPoint + 1)
+				END IF
+			END WHILE
+			RETURN lowBound
+		END FUNCTION
+
+		FOR item IN queries
+			APPEND binarySearchRightBound(aggregates, item) TO output
+		END FOR
+
+		RETURN output
+	END FUNCTION
+END CLASS

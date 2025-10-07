@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION maxOperations(nums)
+        FUNCTION helper(alpha, omega, gamma, store)
+            IF alpha >= omega THEN
+                RETURN 0
+            END IF
+
+            key := (alpha, omega, gamma)
+            IF key IN store THEN
+                RETURN store[key]
+            END IF
+
+            result := 0
+
+            FUNCTION sumPair(x, y)
+                RETURN nums[x] + nums[y]
+            END FUNCTION
+
+            FUNCTION maxInt(a, b)
+                IF a > b THEN
+                    RETURN a
+                ELSE
+                    RETURN b
+                END IF
+            END FUNCTION
+
+            IF sumPair(alpha, alpha+1) = gamma THEN
+                temp1 := 1 + helper(alpha + 2, omega, gamma, store)
+                result := maxInt(result, temp1)
+            END IF
+
+            IF sumPair(omega, omega - 1) = gamma THEN
+                temp2 := 1 + helper(alpha, omega - 2, gamma, store)
+                result := maxInt(result, temp2)
+            END IF
+
+            IF sumPair(alpha, omega) = gamma THEN
+                temp3 := 1 + helper(alpha + 1, omega - 1, gamma, store)
+                result := maxInt(result, temp3)
+            END IF
+
+            store[key] := result
+            RETURN result
+        END FUNCTION
+
+        FUNCTION getMax(a, b, c)
+            MAXVAL := a
+            IF b > MAXVAL THEN MAXVAL := b END IF
+            IF c > MAXVAL THEN MAXVAL := c END IF
+            RETURN MAXVAL
+        END FUNCTION
+
+        n := LENGTH(nums)
+
+        r1 := 1 + helper(2, n-1, nums[0] + nums[1], {})
+        r2 := 1 + helper(0, n-3, nums[n-2] + nums[n-1], {})
+        r3 := 1 + helper(1, n-2, nums[0] + nums[n-1], {})
+
+        RETURN getMax(r1, r2, r3)
+    END FUNCTION
+END CLASS

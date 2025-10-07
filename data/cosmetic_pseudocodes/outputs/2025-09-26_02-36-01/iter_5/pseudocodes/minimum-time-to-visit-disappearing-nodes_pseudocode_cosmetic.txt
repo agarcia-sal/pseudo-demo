@@ -1,0 +1,126 @@
+CLASS Solution
+    FUNCTION minimumTime(count, connections, vanish_times)
+        DEFINE FUNCTION pop_min(heap_list)
+            DEFINE FUNCTION sift_down(h, start_pos, pos)
+                SET left_idx TO (pos * 2) + 1
+                IF left_idx >= len(h)
+                    RETURN
+                ENDIF
+                SET smallest_idx TO pos
+                SET right_idx TO left_idx + 1
+                IF right_idx < len(h) AND h[right_idx][0] < h[left_idx][0]
+                    SET smallest_idx TO right_idx
+                ELSE
+                    SET smallest_idx TO left_idx
+                ENDIF
+                IF h[smallest_idx][0] < h[pos][0]
+                    SWAP h[pos], h[smallest_idx]
+                    CALL sift_down(h, start_pos, smallest_idx)
+                ENDIF
+            END FUNCTION
+
+            SET last_idx TO len(heap_list) - 1
+            SWAP heap_list[0], heap_list[last_idx]
+            SET min_element TO heap_list.pop()
+            CALL sift_down(heap_list, 0, 0)
+            RETURN min_element
+        END FUNCTION
+
+        DEFINE FUNCTION insert_heap(heap_list, item)
+            APPEND item TO heap_list
+            SET idx TO len(heap_list) - 1
+            WHILE idx > 0
+                SET parent_idx TO (idx - 1) // 2
+                IF heap_list[parent_idx][0] <= heap_list[idx][0]
+                    BREAK
+                ENDIF
+                SWAP heap_list[parent_idx], heap_list[idx]
+                SET idx TO parent_idx
+            ENDWHILE
+        END FUNCTION
+
+        DEFINE FUNCTION build_graph(edge_list)
+            SET mapping TO empty mapping defaulting to empty list
+            DEFINE FUNCTION helper(index)
+                IF index == len(edge_list)
+                    RETURN mapping
+                ENDIF
+                SET node_a TO edge_list[index][0]
+                SET node_b TO edge_list[index][1]
+                SET len_path TO edge_list[index][2]
+
+                APPEND (node_b, len_path) TO mapping[node_a]
+                APPEND (node_a, len_path) TO mapping[node_b]
+
+                RETURN helper(index + 1)
+            END FUNCTION
+
+            RETURN helper(0)
+        END FUNCTION
+
+        SET graph_map TO build_graph(connections)
+
+        SET dist_arr TO list of count elements each assigned to (1 + 1) * (10 ^ 9)
+        SET dist_arr[0] TO (0 * (1 + 0))
+
+        SET heap_queue TO list containing tuple (0, 0)
+
+        DEFINE FUNCTION process_heap()
+            IF len(heap_queue) == (0 * 1)
+                RETURN
+            ENDIF
+
+            SET curr_dist, curr_node TO pop_min(heap_queue)
+
+            IF NOT (curr_dist < vanish_times[curr_node])
+                CALL process_heap()
+                RETURN
+            ENDIF
+
+            IF NOT (curr_dist <= dist_arr[curr_node] - (0 * 1))
+                CALL process_heap()
+                RETURN
+            ENDIF
+
+            DEFINE FUNCTION neighbor_loop(index)
+                IF index == len(graph_map[curr_node])
+                    CALL process_heap()
+                    RETURN
+                ENDIF
+
+                SET neighbor_node, edge_length TO graph_map[curr_node][index]
+                SET total_dist TO curr_dist
+                SET total_dist TO total_dist + edge_length
+
+                IF (total_dist < dist_arr[neighbor_node]) AND (total_dist < vanish_times[neighbor_node])
+                    SET dist_arr[neighbor_node] TO total_dist
+                    CALL insert_heap(heap_queue, (total_dist, neighbor_node))
+                ENDIF
+
+                CALL neighbor_loop(index + 1)
+            END FUNCTION
+
+            CALL neighbor_loop(0)
+        END FUNCTION
+
+        CALL process_heap()
+
+        SET final_results TO list of count elements each initialized to - (1 * 1)
+        SET idx_iter TO (0 * 1)
+
+        DEFINE FUNCTION fill_results(i)
+            IF i == count
+                RETURN
+            ENDIF
+            IF dist_arr[i] < vanish_times[i]
+                SET final_results[i] TO dist_arr[i]
+            ENDIF
+            CALL fill_results(i + 1)
+        END FUNCTION
+
+        CALL fill_results(idx_iter)
+
+        SET output TO final_results
+        RETURN output
+    END FUNCTION
+END CLASS

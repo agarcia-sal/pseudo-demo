@@ -1,0 +1,65 @@
+```
+FUNCTION sort_array(array_of_integers)
+    DECLARE intermediate_result TO EMPTY LIST
+    DECLARE index_pointer TO 0
+    WHILE index_pointer < LENGTH OF array_of_integers
+        APPEND array_of_integers[index_pointer] TO intermediate_result
+        SET index_pointer TO index_pointer + 1
+    END WHILE
+
+    CALL quick_sort_asc(intermediate_result)
+
+    DECLARE processed_list TO EMPTY LIST
+    FOR EACH item IN intermediate_result
+        DECLARE binary_chars TO CONVERT item TO BINARY STRING
+        DECLARE count_ones TO 0
+        DECLARE char_pos TO 2
+        WHILE char_pos < LENGTH OF binary_chars
+            IF binary_chars[char_pos] == '1'
+                SET count_ones TO count_ones + 1
+            END IF
+            SET char_pos TO char_pos + 1
+        END WHILE
+        APPEND [item, count_ones] TO processed_list
+    END FOR
+
+    DECLARE sorted_by_ones TO EMPTY LIST
+    WHILE LENGTH OF processed_list > 0
+        DECLARE current_min TO processed_list[0]
+        DECLARE min_index TO 0
+        DECLARE scan_index TO 1
+        WHILE scan_index < LENGTH OF processed_list
+            IF processed_list[scan_index][1] < current_min[1] OR (processed_list[scan_index][1] == current_min[1] AND processed_list[scan_index][0] < current_min[0])
+                SET current_min TO processed_list[scan_index]
+                SET min_index TO scan_index
+            END IF
+            SET scan_index TO scan_index + 1
+        END WHILE
+        APPEND current_min[0] TO sorted_by_ones
+        REMOVE processed_list[min_index]
+    END WHILE
+
+    RETURN sorted_by_ones
+END FUNCTION
+
+FUNCTION quick_sort_asc(list_to_sort)
+    IF LENGTH OF list_to_sort <= 1
+        RETURN
+    END IF
+    SET pivot_element TO list_to_sort[0]
+    DECLARE lesser_values TO EMPTY LIST
+    DECLARE greater_values TO EMPTY LIST
+    DECLARE scan_index TO 1
+    WHILE scan_index < LENGTH OF list_to_sort
+        IF list_to_sort[scan_index] < pivot_element
+            APPEND list_to_sort[scan_index] TO lesser_values
+        ELSE
+            APPEND list_to_sort[scan_index] TO greater_values
+        END IF
+        SET scan_index TO scan_index + 1
+    END WHILE
+    CALL quick_sort_asc(lesser_values)
+    CALL quick_sort_asc(greater_values)
+    SET list_to_sort TO CONCATENATION OF lesser_values, [pivot_element], greater_values
+END FUNCTION
+```

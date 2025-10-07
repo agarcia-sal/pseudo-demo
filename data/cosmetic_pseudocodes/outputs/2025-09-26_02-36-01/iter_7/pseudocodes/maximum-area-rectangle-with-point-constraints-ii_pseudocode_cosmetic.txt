@@ -1,0 +1,87 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, n)  
+        LET lengthAugmented BE n PLUS (1 TIMES 1)  
+        SET self.tree TO a new list filled with (0 TIMES 1) REPEATED lengthAugmented times  
+    END FUNCTION  
+
+    FUNCTION add(self, i)  
+        WHILE (i < LENGTH(self.tree)) DO  
+            LET currentValue BE self.tree AT i  
+            SET self.tree[i] TO currentValue PLUS (1 TIMES 1)  
+            LET delta BE (i BITWISE_AND (-i))  
+            SET i TO i PLUS delta  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION pre(self, i)  
+        LET accumulator BE 0  
+        WHILE (i > 0) DO  
+            SET accumulator TO accumulator PLUS self.tree AT i  
+            SET i TO i BITWISE_AND (i MINUS 1)  
+        END WHILE  
+        RETURN accumulator  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        LET rightSum BE self.pre(r)  
+        LET leftSum BE self.pre(l MINUS (1 TIMES 1))  
+        RETURN rightSum MINUS leftSum  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+        LET combinedPoints BE EMPTY LIST  
+        LET indexCounter BE 0  
+        WHILE (indexCounter < LENGTH(xCoord)) DO  
+            LET xElement BE xCoord[indexCounter]  
+            LET yElement BE yCoord[indexCounter]  
+            APPEND (xElement, yElement) TO combinedPoints  
+            SET indexCounter TO indexCounter PLUS (1 TIMES 1)  
+        END WHILE  
+        SORT combinedPoints IN ASCENDING ORDER BY FIRST THEN SECOND ELEMENT  
+        LET uniqueYsTemp BE EMPTY LIST  
+        LET seenYs BE EMPTY SET  
+        LET pointer BE 0  
+        WHILE pointer < LENGTH(yCoord) DO  
+            LET elem BE yCoord[pointer]  
+            IF elem NOT IN seenYs THEN  
+                ADD elem TO seenYs  
+                APPEND elem TO uniqueYsTemp  
+            END IF  
+            SET pointer TO pointer PLUS (1 TIMES 1)  
+        END WHILE  
+        SORT uniqueYsTemp IN ASCENDING ORDER  
+        LET uniqueYs BE uniqueYsTemp  
+        LET answer BEST SO FAR BE (-1)  
+        LET fenwickTree BE Fenwick(LENGTH(uniqueYs))  
+        LET firstYIndex BE bisect_left(uniqueYs, combinedPoints[0][1]) PLUS (1 TIMES 1)  
+        CALL fenwickTree.add(firstYIndex)  
+        LET previousMap BE EMPTY MAP  
+        LET pos1 BE 0  
+        LET pos2 BE 1  
+        WHILE pos2 < LENGTH(combinedPoints) DO  
+            LET (xVal1, yVal1) BE combinedPoints[pos1]  
+            LET (xVal2, yVal2) BE combinedPoints[pos2]  
+            LET mappedY2 BE bisect_left(uniqueYs, yVal2) PLUS (1 TIMES 1)  
+            CALL fenwickTree.add(mappedY2)  
+            IF xVal1 != xVal2 THEN  
+                SET pos1 TO pos2  
+                SET pos2 TO pos2 PLUS (1 TIMES 1)  
+                CONTINUE  
+            END IF  
+            LET mappedY1 BE bisect_left(uniqueYs, yVal1) PLUS (1 TIMES 1)  
+            LET currentQuery BE fenwickTree.query(mappedY1, mappedY2)  
+            IF yVal2 IN previousMap AND previousMap[yVal2][1] == yVal1 AND previousMap[yVal2][2] PLUS (1 TIMES 1) PLUS (1 TIMES 1) == currentQuery THEN  
+                LET candidateArea BE (xVal2 MINUS previousMap[yVal2][0]) MULTIPLY (yVal2 MINUS yVal1)  
+                IF candidateArea > answer BEST SO FAR THEN  
+                    SET answer BEST SO FAR TO candidateArea  
+                END IF  
+            END IF  
+            SET previousMap[yVal2] TO (xVal1, yVal1, currentQuery)  
+            SET pos1 TO pos2  
+            SET pos2 TO pos2 PLUS (1 TIMES 1)  
+        END WHILE  
+        RETURN answer BEST SO FAR  
+    END FUNCTION  
+END CLASS

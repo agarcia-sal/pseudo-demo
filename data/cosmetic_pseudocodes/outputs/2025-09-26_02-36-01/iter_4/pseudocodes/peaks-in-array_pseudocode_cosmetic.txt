@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION is_peak(index INTEGER) RETURNS BOOLEAN
+            LET currentValue TO nums[index]
+            LET beforeValue TO nums[index - 1]
+            LET afterValue TO nums[index + 1]
+            RETURN (currentValue > beforeValue) AND (currentValue > afterValue)
+        END FUNCTION
+
+        DECLARE peakPositions AS empty list
+        LET position TO 1
+        LET limit TO LENGTH(nums) - 2
+        WHILE position <= limit
+            IF is_peak(position) = true THEN
+                INSERT peakPositions END position
+            END IF
+            SET position TO position + 1
+        END WHILE
+
+        LET answers TO list with zero elements
+        FOR EACH operation IN queries
+            IF operation[0] = 1 THEN
+                LET leftBound TO operation[1]
+                LET rightBound TO operation[2]
+
+                LET posLeft TO indexAfterInsertion(leftBound, peakPositions)  // left insertion index for leftBound
+                LET posRight TO indexBeforeInsertion(rightBound, peakPositions)  // right insertion index for rightBound
+
+                LET countBetween TO posRight - posLeft
+                APPEND countBetween TO answers
+            ELSE
+                LET modifyIndex TO operation[1]
+                LET newVal TO operation[2]
+
+                IF nums[modifyIndex] = newVal THEN
+                    CONTINUE TO NEXT iteration
+                END IF
+
+                SET nums[modifyIndex] TO newVal
+
+                LET startCheck TO IF modifyIndex - 1 > 1 THEN modifyIndex - 1 ELSE 1
+                LET endCheck TO IF modifyIndex + 1 < LENGTH(nums) - 2 THEN modifyIndex + 1 ELSE LENGTH(nums) - 2
+                LET checkPos TO startCheck
+
+                WHILE checkPos <= endCheck
+                    IF is_peak(checkPos) = true THEN
+                        IF peakPositions DOES NOT CONTAIN checkPos THEN
+                            INSERT peakPositions AT sortedPosition(checkPos)
+                        END IF
+                    ELSE
+                        IF peakPositions CONTAINS checkPos THEN
+                            REMOVE checkPos FROM peakPositions
+                        END IF
+                    END IF
+                    SET checkPos TO checkPos + 1
+                END WHILE
+            END IF
+        END FOR
+
+        RETURN answers
+    END FUNCTION
+END CLASS

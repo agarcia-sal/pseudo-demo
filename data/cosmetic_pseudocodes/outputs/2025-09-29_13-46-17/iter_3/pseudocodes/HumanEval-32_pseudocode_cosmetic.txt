@@ -1,0 +1,37 @@
+```
+FUNCTION poly(list_of_coefficients, point)
+    FUNCTION powerSum(coeffs, idx)
+        IF idx = LENGTH(coeffs) THEN
+            RETURN 0
+        END IF
+        RETURN coeffs[idx] * (point ^ idx) + powerSum(coeffs, idx + 1)
+    END FUNCTION
+    RETURN powerSum(list_of_coefficients, 0)
+END FUNCTION
+
+FUNCTION find_zero(list_of_coefficients)
+    FUNCTION searchInterval(startVal, endVal)
+        IF poly(list_of_coefficients, startVal) * poly(list_of_coefficients, endVal) > 0 THEN
+            RETURN searchInterval(startVal * 2.0, endVal * 2.0)
+        END IF
+        RETURN (startVal, endVal)
+    END FUNCTION
+
+    FUNCTION binarySearch(beginVal, endVal)
+        IF (endVal - beginVal) <= 1e-10 THEN
+            RETURN beginVal
+        END IF
+        VAR midPoint = (beginVal + endVal) / 2.0
+        IF poly(list_of_coefficients, midPoint) * poly(list_of_coefficients, beginVal) > 0 THEN
+            RETURN binarySearch(midPoint, endVal)
+        ELSE
+            RETURN binarySearch(beginVal, midPoint)
+        END IF
+    END FUNCTION
+
+    VAR startDouble = -1.0
+    VAR endDouble = 1.0
+    (startDouble, endDouble) = searchInterval(startDouble, endDouble)
+    RETURN binarySearch(startDouble, endDouble)
+END FUNCTION
+```

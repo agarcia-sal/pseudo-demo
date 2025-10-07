@@ -1,0 +1,93 @@
+CLASS Solution
+	Function maximumSubarraySum(nums k)
+		DEFINE FUNCTION dictContainsKey(d c)
+			DEFINE FUNCTION containsHelper(dic key acc
+				IF acc EQUALS false THEN
+					IF key EQUALS dic.currentKey THEN
+						RETURN true
+					ELSE
+						RETURN containsHelper(dic.next key false)
+					END IF
+				ELSE
+					RETURN acc
+				END IF
+			END FUNCTION
+			RETURN containsHelper(c k false)
+		END FUNCTION
+
+		DEFINE FUNCTION getDictValue(d key def)
+			DEFINE FUNCTION getHelper(dic k defaultVal)
+				IF dic IS NULL THEN
+					RETURN defaultVal
+				ELSE IF dic.currentKey EQUALS k THEN
+					RETURN dic.currentValue
+				ELSE
+					RETURN getHelper(dic.next k defaultVal)
+				END IF
+			END FUNCTION
+			RETURN getHelper(d key def)
+		END FUNCTION
+
+		DEFINE FUNCTION setDictValue(d key val)
+			DEFINE FUNCTION setHelper(dic k v)
+				IF dic IS NULL THEN
+					RETURN NEW DictionaryNode(k v NULL)
+				ELSE IF dic.currentKey EQUALS k THEN
+					RETURN NEW DictionaryNode(k v dic.next)
+				ELSE
+					RETURN NEW DictionaryNode(dic.currentKey dic.currentValue setHelper(dic.next k v))
+				END IF
+			END FUNCTION
+			RETURN setHelper(d key val)
+		END FUNCTION
+
+		DEFINE FUNCTION maxVal(a b)
+			IF (a GREATER_THAN b) THEN RETURN a ELSE RETURN b END IF
+		END FUNCTION
+
+		DEFINE FUNCTION minVal(a b)
+			IF (a LESS_THAN b) THEN RETURN a ELSE RETURN b END IF
+		END FUNCTION
+
+		PROCEDURE tailRecursiveLoop(idx currSum maxSum minPrefixSumList)
+			IF idx GREATER_OR_EQUAL LENGTH(nums) THEN
+				IF maxSum NOT_EQUALS (-1 MULTIPLY 1E9 MULTIPLY 1E9) THEN
+					RETURN maxSum
+				ELSE
+					RETURN 0
+				END IF
+			ELSE 
+				LET elem = nums[idx]
+				
+				LET candidate1Key = elem MINUS k
+				LET candidate2Key = elem PLUS k
+				
+				LET candidate1Exists = dictContainsKey(minPrefixSumList candidate1Key)
+				LET candidate2Exists = dictContainsKey(minPrefixSumList candidate2Key)
+				LET candidate = maxSum
+				
+				IF candidate1Exists THEN
+					LET retrievedValue1 = getDictValue(minPrefixSumList candidate1Key 0)
+					LET candidate = maxVal(candidate max( currSum MINUS retrievedValue1 PLUS elem, candidate ))
+				END IF
+				
+				IF candidate2Exists THEN
+					LET retrievedValue2 = getDictValue(minPrefixSumList candidate2Key 0)
+					LET candidate = maxVal(candidate max( currSum MINUS retrievedValue2 PLUS elem, candidate ))
+				END IF
+				
+				IF dictContainsKey(minPrefixSumList elem) THEN
+					LET existingVal = getDictValue(minPrefixSumList elem (1E9 MULTIPLY 1E9))
+					LET newVal = minVal(existingVal currSum)
+					LET updatedDict = setDictValue(minPrefixSumList elem newVal)
+					RETURN tailRecursiveLoop(idx PLUS 1 currSum PLUS elem candidate updatedDict)
+				ELSE
+					LET updatedDict = setDictValue(minPrefixSumList elem currSum)
+					RETURN tailRecursiveLoop(idx PLUS 1 currSum PLUS elem candidate updatedDict)
+				END IF
+			END IF
+		END PROCEDURE
+
+		RETURN tailRecursiveLoop(0 0 (-1 MULTIPLY 1E9 MULTIPLY 1E9) NULL)
+	END Function
+END CLASS

@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION sumOfPower(nums parameter, k parameter)
+        DECLARE CONST_MOD AS 1000000007
+        LET lengthNums BE THE LENGTH OF nums
+
+        LET dpTable BE A TWO-DIMENSIONAL ARRAY WITH (lengthNums PLUS 1) ROWS AND (k PLUS 1) COLUMNS FILLED WITH 0
+        ASSIGN dpTable[0][0] TO 1
+
+        LET idxOuter BE 1
+        WHILE idxOuter LESS THAN OR EQUAL TO lengthNums
+            LET idxInner BE 0
+            WHILE idxInner LESS OR EQUAL TO k
+                ASSIGN dpTable[idxOuter][idxInner] TO dpTable[idxOuter - 1][idxInner]
+
+                LET neededVal BE nums[idxOuter - 1]
+                IF idxInner GREATER OR EQUAL TO neededVal
+                    LET additionVal BE dpTable[idxOuter - 1][idxInner - neededVal]
+                    SET dpTable[idxOuter][idxInner] TO dpTable[idxOuter][idxInner] PLUS additionVal
+                END IF
+
+                SET dpTable[idxOuter][idxInner] TO dpTable[idxOuter][idxInner] MOD CONST_MOD
+                INCREMENT idxInner BY 1
+            END WHILE
+            INCREMENT idxOuter BY 1
+        END WHILE
+        
+        LET aggregatePower BE 0
+        LET upperLimit BE (2 TO THE POWER OF lengthNums) MINUS 1
+
+        LET subsetIndicator BE 1
+        WHILE subsetIndicator LESS OR EQUAL TO upperLimit
+            LET partialSum BE 0
+            LET elementCount BE 0
+            LET bitIndex BE 0
+
+            WHILE bitIndex LESS THAN lengthNums
+                IF ((subsetIndicator DIVIDED BY (2 TO THE POWER OF bitIndex)) MOD 2) EQUALS 1
+                    SET partialSum TO partialSum PLUS nums[bitIndex]
+                    SET elementCount TO elementCount PLUS 1
+                END IF
+                SET bitIndex TO bitIndex PLUS 1
+            END WHILE
+
+            IF partialSum EQUALS k
+                LET incrementVal BE 2 TO THE POWER OF (lengthNums MINUS elementCount)
+                SET aggregatePower TO (aggregatePower PLUS incrementVal) MOD CONST_MOD
+            END IF
+
+            SET subsetIndicator TO subsetIndicator PLUS 1
+        END WHILE
+        
+        RETURN aggregatePower
+    END FUNCTION
+END CLASS

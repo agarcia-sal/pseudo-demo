@@ -1,0 +1,43 @@
+CLASS Solution  
+    FUNCTION numberOfSubmatrices(grid)  
+        IF NOT (grid AND grid[0]) THEN RETURN 0 END IF  
+        LET total_rows BE LEN(grid)  
+        LET total_cols BE LEN(grid[0])  
+        LET prefix_sum BE LIST OF total_rows+1 ELEMENTS, EACH IS LIST OF total_cols+1 ELEMENTS, EACH IS [0,0]  
+        LET row_idx BE 1  
+        WHILE row_idx <= total_rows  
+            LET col_idx BE 1  
+            WHILE col_idx <= total_cols  
+                LET prev_x_sum BE prefix_sum[row_idx][col_idx-1][0]  
+                LET above_x_sum BE prefix_sum[row_idx-1][col_idx][0]  
+                LET diag_x_sum BE prefix_sum[row_idx-1][col_idx-1][0]  
+                LET prev_y_sum BE prefix_sum[row_idx][col_idx-1][1]  
+                LET above_y_sum BE prefix_sum[row_idx-1][col_idx][1]  
+                LET diag_y_sum BE prefix_sum[row_idx-1][col_idx-1][1]  
+                LET curr_x_total BE prev_x_sum + above_x_sum - diag_x_sum  
+                LET curr_y_total BE prev_y_sum + above_y_sum - diag_y_sum  
+                LET cell_char BE grid[row_idx-1][col_idx-1]  
+                IF (cell_char = 'X') THEN curr_x_total += 1  
+                ELSE IF (cell_char = 'Y') THEN curr_y_total += 1  
+                END IF  
+                prefix_sum[row_idx][col_idx][0] = curr_x_total  
+                prefix_sum[row_idx][col_idx][1] = curr_y_total  
+                col_idx += 1  
+            END WHILE  
+            row_idx += 1  
+        END WHILE  
+        LET tally BE 0  
+        LET r BE 1  
+        WHILE r <= total_rows  
+            LET c BE 1  
+            WHILE c <= total_cols  
+                LET x_cumulative BE prefix_sum[r][c][0]  
+                LET y_cumulative BE prefix_sum[r][c][1]  
+                IF x_cumulative > 0 AND (x_cumulative = y_cumulative) THEN tally = tally + 1 END IF  
+                c = c + 1  
+            END WHILE  
+            r = r + 1  
+        END WHILE  
+        RETURN tally  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION clearStars(s)
+        DEFINE FUNCTION isAsterisk(x)
+            RETURN (x = '*')
+        END FUNCTION
+
+        DEFINE FUNCTION hasElements(lst)
+            RETURN NOT (lst = [])
+        END FUNCTION
+
+        DEFINE FUNCTION removeLastElement(lst)
+            IF (lst = []) THEN
+                RETURN []
+            ELSE
+                RETURN lst[0 : LENGTH(lst) - 1]
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION appendElement(lst, el)
+            RETURN lst + [el]
+        END FUNCTION
+
+        DEFINE FUNCTION concatListElements(lst)
+            DEFINE FUNCTION concatHelper(accum, idx)
+                IF idx >= LENGTH(lst) THEN
+                    RETURN accum
+                ELSE
+                    RETURN concatHelper(accum + lst[idx], idx + 1)
+                END IF
+            END FUNCTION
+            RETURN concatHelper("", 0)
+        END FUNCTION
+
+        DEFINE FUNCTION processCharacters(src, pos, stk)
+            IF pos >= LENGTH(src) THEN
+                RETURN stk
+            ELSE
+                DEFINE curChar = src[pos]
+                IF isAsterisk(curChar) THEN
+                    DEFINE newStack = stk
+                    IF hasElements(stk) THEN
+                        newStack = removeLastElement(stk)
+                    END IF
+                    RETURN processCharacters(src, pos + 1, newStack)
+                ELSE
+                    RETURN processCharacters(src, pos + 1, appendElement(stk, curChar))
+                END IF
+            END IF
+        END FUNCTION
+
+        DEFINE finalStack = processCharacters(s, 0, [])
+        RETURN concatListElements(finalStack)
+    END FUNCTION
+END CLASS

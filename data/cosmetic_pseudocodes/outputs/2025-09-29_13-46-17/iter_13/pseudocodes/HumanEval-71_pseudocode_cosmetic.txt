@@ -1,0 +1,46 @@
+FUNCTION triangle_area(side_a, side_b, side_c)
+  FUNCTION check_invalid(x1, x2, x3)
+    RETURN NOT ((x1 + x2) > x3)
+  END FUNCTION
+
+  FUNCTION calc_semi(p, q, r)
+    RETURN (p + q + r) / 2
+  END FUNCTION
+
+  FUNCTION recursive_sqrt(value, guess, depth)
+    IF depth = 0 THEN
+      RETURN guess
+    ELSE
+      LET new_guess = 0.5 * (guess + value / guess)
+      RETURN recursive_sqrt(value, new_guess, depth - 1)
+    END IF
+  END FUNCTION
+
+  FUNCTION round_to_two_digits(num)
+    LET scale = 10 * 10
+    LET scaled = num * scale
+    LET int_scaled = FLOOR(scaled + 0.5)
+    RETURN int_scaled / scale
+  END FUNCTION
+
+  FUNCTION compute_area(s1, s2, s3, semi)
+    LET temp1 = semi
+    LET temp2 = semi - s1
+    LET temp3 = semi - s2
+    LET temp4 = semi - s3
+
+    LET mult1 = temp1 * temp2
+    LET mult2 = mult1 * temp3
+    LET total = mult2 * temp4
+
+    LET result = recursive_sqrt(total, total / 2, 10)
+    RETURN round_to_two_digits(result)
+  END FUNCTION
+
+  IF check_invalid(side_a, side_b, side_c) OR check_invalid(side_a, side_c, side_b) OR check_invalid(side_b, side_c, side_a)
+    RETURN -1
+  ELSE
+    LET s = calc_semi(side_a, side_b, side_c)
+    RETURN compute_area(side_a, side_b, side_c, s)
+  END IF
+END FUNCTION

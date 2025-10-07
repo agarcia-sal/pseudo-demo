@@ -1,0 +1,49 @@
+```
+FUNCTION pluck(nodes_collection)
+    DEFINE traverse_filter(current_pos, result_set)
+        IF current_pos = LENGTH(nodes_collection)
+            RETURN result_set
+        ELSE
+            SET current_element TO nodes_collection[current_pos]
+            SET updated_set TO (current_element MOD 2 = 0) ? result_set + [current_element] : result_set
+            RETURN traverse_filter(current_pos + 1, updated_set)
+        END IF
+    END DEFINE
+
+    IF NOT (LENGTH(nodes_collection) > 0)
+        RETURN []
+    END IF
+
+    SET filtered_evens TO traverse_filter(0, [])
+
+    IF NOT (LENGTH(filtered_evens) > 0)
+        RETURN []
+    END IF
+
+    SET candidate_minimum TO filtered_evens[0]
+
+    FUNCTION find_minimum(elements, idx, acc)
+        IF idx = LENGTH(elements)
+            RETURN acc
+        ELSE
+            RETURN (elements[idx] < acc) ? find_minimum(elements, idx + 1, elements[idx]) : find_minimum(elements, idx + 1, acc)
+        END IF
+    END FUNCTION
+
+    SET smallest_even_value TO find_minimum(filtered_evens, 1, candidate_minimum)
+
+    FUNCTION locate_value(value, collection, position)
+        IF position = LENGTH(collection)
+            RETURN -1
+        ELSEIF collection[position] = value
+            RETURN position
+        ELSE
+            RETURN locate_value(value, collection, position + 1)
+        END IF
+    END FUNCTION
+
+    SET smallest_even_index TO locate_value(smallest_even_value, nodes_collection, 0)
+
+    RETURN [smallest_even_value, smallest_even_index]
+END FUNCTION
+```

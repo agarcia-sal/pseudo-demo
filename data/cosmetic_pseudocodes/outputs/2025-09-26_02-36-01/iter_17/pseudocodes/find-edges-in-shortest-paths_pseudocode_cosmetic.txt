@@ -1,0 +1,62 @@
+CLASS Solution  
+    FUNCTION findAnswer(n, edges)  
+        DECLARE adjacency_map AS new mapping defaulting to empty lists  
+        FOR EACH edge_element x y z IN edges DO  
+            INSERT (y, z) INTO adjacency_map[x]  
+            INSERT (x, z) INTO adjacency_map[y]  
+        END FOR  
+  
+        DECLARE distances AS new list sized n FILLED with infinity_value  
+        ASSIGN 0 TO distances[0]  
+  
+        DECLARE priority_queue AS a list CONTAINING (0, 0)  
+  
+        WHILE LENGTH(priority_queue) > 0 DO  
+            DECLARE (current_distance, vertex) AS EXTRACT_MIN(priority_queue)  
+  
+            IF current_distance > distances[vertex] THEN  
+                CONTINUE  
+            END IF  
+  
+            FOR EACH (neighbor, weight) IN adjacency_map[vertex] DO  
+                DECLARE tentative_distance AS current_distance + weight  
+                IF tentative_distance < distances[neighbor] THEN  
+                    ASSIGN tentative_distance TO distances[neighbor]  
+                    PRIORITY_QUEUE_INSERT(priority_queue, (tentative_distance, neighbor))  
+                END IF  
+            END FOR  
+        END WHILE  
+  
+        DECLARE path_edges AS empty set  
+        DECLARE traversal_stack AS list CONTAINING (n - 1, distances[n - 1])  
+        DECLARE visited_flags AS list sized n FILLED with False  
+  
+        WHILE LENGTH(traversal_stack) > 0 DO  
+            DECLARE (current_vertex, curr_dist) AS POP_LAST(traversal_stack)  
+  
+            IF visited_flags[current_vertex] THEN  
+                CONTINUE  
+            END IF  
+  
+            ASSIGN True TO visited_flags[current_vertex]  
+  
+            FOR EACH (adjacent_vertex, edge_weight) IN adjacency_map[current_vertex] DO  
+                IF curr_dist = distances[adjacent_vertex] + edge_weight THEN  
+                    DECLARE min_vertex AS MIN(current_vertex, adjacent_vertex)  
+                    DECLARE max_vertex AS MAX(current_vertex, adjacent_vertex)  
+                    INSERT (min_vertex, max_vertex) TO path_edges  
+                    APPEND (adjacent_vertex, distances[adjacent_vertex]) TO traversal_stack  
+                END IF  
+            END FOR  
+        END WHILE  
+  
+        DECLARE results AS empty list  
+        FOR EACH original_edge a b _ IN edges DO  
+            DECLARE lower_vertex AS MIN(a, b)  
+            DECLARE upper_vertex AS MAX(a, b)  
+            APPEND ((lower_vertex, upper_vertex) IN path_edges) TO results  
+        END FOR  
+  
+        RETURN results  
+    END FUNCTION  
+END CLASS

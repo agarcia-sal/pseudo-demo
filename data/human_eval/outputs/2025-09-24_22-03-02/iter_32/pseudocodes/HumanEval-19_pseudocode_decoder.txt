@@ -1,0 +1,52 @@
+FUNCTION sort_numbers WITH PARAMETER numbers OF TYPE STRING RETURNS STRING
+    SET value_map TO DICTIONARY WITH ELEMENTS
+        'zero' ASSOCIATED WITH 0,
+        'one' ASSOCIATED WITH 1,
+        'two' ASSOCIATED WITH 2,
+        'three' ASSOCIATED WITH 3,
+        'four' ASSOCIATED WITH 4,
+        'five' ASSOCIATED WITH 5,
+        'six' ASSOCIATED WITH 6,
+        'seven' ASSOCIATED WITH 7,
+        'eight' ASSOCIATED WITH 8,
+        'nine' ASSOCIATED WITH 9
+
+    SET split_numbers TO CALL method split ON numbers WITH ARGUMENTS STRING(' ')
+    SET filtered_numbers TO LIST WITH ELEMENTS EMPTY
+    FOR i FROM 0 TO LENGTH OF split_numbers MINUS 1 DO
+        IF ELEMENT AT INDEX i OF split_numbers NOT EQUAL TO EMPTY STRING THEN
+            APPEND ELEMENT AT INDEX i OF split_numbers TO filtered_numbers
+        END IF
+    END FOR
+
+    SET indices_to_sort TO LIST WITH ELEMENTS RANGE FROM 0 TO LENGTH OF filtered_numbers MINUS 1
+    SET sorted_numbers TO LIST WITH ELEMENTS EMPTY
+    SET used_indices TO LIST WITH ELEMENTS EMPTY
+
+    FOR count FROM 0 TO LENGTH OF filtered_numbers MINUS 1 DO
+        SET min_value TO INFINITY
+        SET min_index TO -1
+        FOR j FROM 0 TO LENGTH OF filtered_numbers MINUS 1 DO
+            IF j NOT IN used_indices THEN
+                SET current_value TO value_map AT KEY filtered_numbers AT INDEX j
+                IF current_value LESS THAN min_value THEN
+                    SET min_value TO current_value
+                    SET min_index TO j
+                END IF
+            END IF
+        END FOR
+        APPEND filtered_numbers AT INDEX min_index TO sorted_numbers
+        APPEND min_index TO used_indices
+    END FOR
+
+    SET result TO EMPTY STRING
+    FOR k FROM 0 TO LENGTH OF sorted_numbers MINUS 2 DO
+        SET result TO result CONCATENATED WITH sorted_numbers AT INDEX k
+        SET result TO result CONCATENATED WITH STRING(' ')
+    END FOR
+    IF LENGTH OF sorted_numbers GREATER THAN 0 THEN
+        SET result TO result CONCATENATED WITH sorted_numbers AT INDEX LENGTH OF sorted_numbers MINUS 1
+    END IF
+
+    RETURN result
+END FUNCTION

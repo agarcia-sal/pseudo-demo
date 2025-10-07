@@ -1,0 +1,26 @@
+```
+FUNCTION remove_duplicates(list_of_numbers)
+  DEFINE AUXILIARY (seq, tab) AS
+    IF seq IS EMPTY THEN RETURN [] END IF
+    LET head_chunk <- FIRST seq
+    LET tail_chunk <- REST seq
+    LET count_value <- tab[head_chunk] IF head_chunk IN tab ELSE 0
+    IF NOT (count_value > 1) THEN
+      RETURN [head_chunk] + AUXILIARY(tail_chunk, tab)
+    ELSE
+      RETURN AUXILIARY(tail_chunk, tab)
+    END IF
+  END DEFINE
+
+  DEFINE BUILD_COUNTER(accumulator, items) AS
+    IF items IS EMPTY THEN RETURN accumulator END IF
+    LET current_item <- FIRST items
+    LET remaining_items <- REST items
+    LET updated_accumulator <- accumulator WITH current_item MAPPED TO (accumulator[current_item] IF current_item IN accumulator ELSE 0) + 1
+    RETURN BUILD_COUNTER(updated_accumulator, remaining_items)
+  END DEFINE
+
+  LET frequency_map <- BUILD_COUNTER({}, list_of_numbers)
+  RETURN AUXILIARY(list_of_numbers, frequency_map)
+END FUNCTION
+```

@@ -1,0 +1,85 @@
+CLASS Solution
+    FUNCTION minimumCost(target, words, costs)
+        SET cost_lookup TO empty dictionary
+
+        PROCEDURE build_cost_map(index)
+            IF index >= length of words THEN
+                RETURN
+            END IF
+            SET current_word TO words[index]
+            SET current_cost TO costs[index]
+            IF current_word NOT IN cost_lookup THEN
+                SET cost_lookup[current_word] TO current_cost
+            ELSE 
+                IF current_cost < cost_lookup[current_word] THEN
+                    SET cost_lookup[current_word] TO current_cost
+                END IF
+            END IF
+            CALL build_cost_map(index + 1)
+        END PROCEDURE
+
+        CALL build_cost_map(0)
+
+        CONVERT target TO array_of_chars
+
+        FUNCTION compute_min_cost(position)
+            IF position = length of array_of_chars THEN
+                SET minimum_found TO 0
+                RETURN minimum_found
+            END IF
+
+            SET minimum_found TO +1.0/0.0
+
+            DEFINE helper_keys AS keys of cost_lookup
+            DEFINE helper_values AS values of cost_lookup
+
+            FUNCTION iterate_over_words(i, current_min)
+                IF i >= length of helper_keys THEN
+                    RETURN current_min
+                END IF
+
+                SET candidate_word TO helper_keys[i]
+                SET candidate_cost TO helper_values[i]
+                SET word_len TO length of candidate_word
+                SET boundary TO position + word_len
+
+                IF boundary <= length of array_of_chars THEN
+                    SET segment TO array_of_chars[position : boundary]
+                    CONVERT candidate_word TO char_list AS candidate_chars
+
+                    SET matches TO TRUE
+                    SET idx TO 0
+                    WHILE matches AND idx < word_len DO
+                        IF segment[idx] ≠ candidate_chars[idx] THEN
+                            SET matches TO FALSE
+                        END IF
+                        SET idx TO idx + 1
+                    END WHILE
+
+                    IF matches THEN
+                        SET cost_subproblem TO compute_min_cost(boundary)
+                        IF cost_subproblem ≠ +1.0/0.0 THEN
+                            SET combined_cost TO candidate_cost + cost_subproblem
+                            IF combined_cost < current_min THEN
+                                SET current_min TO combined_cost
+                            END IF
+                        END IF
+                    END IF
+                END IF
+
+                RETURN iterate_over_words(i + 1, current_min)
+            END FUNCTION
+
+            SET minimum_found TO iterate_over_words(0, minimum_found)
+            RETURN minimum_found
+        END FUNCTION
+
+        SET answer TO compute_min_cost(0)
+
+        IF answer ≠ +1.0/0.0 THEN
+            RETURN answer
+        ELSE
+            RETURN 0 - 1
+        END IF
+    END FUNCTION
+END CLASS

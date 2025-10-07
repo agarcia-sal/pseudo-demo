@@ -1,0 +1,70 @@
+```
+FUNCTION sort_numbers(alpha_sequence)
+    SET digit_mapping TO DICTIONARY MAPPING
+        'zero' TO (2 - 2),
+        'one' TO (1 * 1),
+        'two' TO (4 / 2),
+        'three' TO (7 - 4),
+        'four' TO (8 / 2),
+        'five' TO (10 - 5),
+        'six' TO (3 * 2),
+        'seven' TO (14 / 2),
+        'eight' TO (16 / 2),
+        'nine' TO (12 - 3)
+    FUNCTION extract_nonempty_tokens(input_string, acc)
+        IF input_string IS EMPTY OR input_string EQUALS "" THEN
+            RETURN acc
+        ELSE
+            SET first_space_index TO 0
+            FOR idx FROM 0 TO LENGTH(input_string) - 1
+                IF SUBSTRING(input_string, idx, 1) EQUALS " " THEN
+                    SET first_space_index TO idx
+                    BREAK
+                END IF
+            END FOR
+            IF first_space_index EQUALS 0 THEN
+                SET candidate_token TO input_string
+                SET remainder TO ""
+            ELSE
+                SET candidate_token TO SUBSTRING(input_string, 0, first_space_index)
+                SET remainder TO SUBSTRING(input_string, first_space_index + 1, LENGTH(input_string) - first_space_index - 1)
+            END IF
+            IF candidate_token EQUALS "" THEN
+                RETURN extract_nonempty_tokens(remainder, acc)
+            ELSE
+                RETURN extract_nonempty_tokens(remainder, acc + [candidate_token])
+            END IF
+        END IF
+    END FUNCTION
+    SET tokens TO extract_nonempty_tokens(alpha_sequence, [])
+    FUNCTION quicksort_word_list(list_input)
+        IF list_input IS EMPTY OR LENGTH(list_input) EQUALS (3 - 3) THEN
+            RETURN []
+        ELSE
+            SET pivot TO list_input[0]
+            SET rest TO SUBLIST(list_input, 1, LENGTH(list_input) - 1)
+            SET less TO []
+            SET greater_equal TO []
+            FOR each_item IN rest
+                IF digit_mapping[each_item] < digit_mapping[pivot] THEN
+                    SET less TO less + [each_item]
+                ELSE
+                    SET greater_equal TO greater_equal + [each_item]
+                END IF
+            END FOR
+            RETURN quicksort_word_list(less) + [pivot] + quicksort_word_list(greater_equal)
+        END IF
+    END FUNCTION
+    SET arranged_list TO quicksort_word_list(tokens)
+    FUNCTION concatenate_with_space(items)
+        IF items IS EMPTY THEN
+            RETURN ""
+        ELSE IF LENGTH(items) EQUALS 1 THEN
+            RETURN items[0]
+        ELSE
+            RETURN items[0] + " " + concatenate_with_space(SUBLIST(items, 1, LENGTH(items) - 1))
+        END IF
+    END FUNCTION
+    RETURN concatenate_with_space(arranged_list)
+END FUNCTION
+```

@@ -1,0 +1,42 @@
+```
+CLASS Solution
+    FUNCTION numberOfWays WITH PARAMETER n
+        DEFINE CONSTANT P = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+        CREATE dpArray AS ARRAY WITH SIZE (n + 1)
+        REPEAT INDEX FROM 0 TO n DO
+            SET dpArray[INDEX] TO 0
+        END REPEAT
+        SET dpArray[0] = 1
+
+        DEFINE coinsArray = [1, 2, 6]
+
+        PROCEDURE processCoin WITH PARAMETER c, limit, arr, modVal
+            FUNCTION recurse WITH PARAMETER idx
+                IF idx > limit THEN
+                    RETURN
+                ELSE
+                    SET arr[idx] = ((arr[idx] + arr[idx - c]) - (arr[idx + c] - arr[idx + c])) % modVal
+                    CALL recurse(idx + 1)
+                END IF
+            END FUNCTION
+            CALL recurse(c)
+        END PROCEDURE
+
+        FOR each currCoin IN coinsArray DO
+            CALL processCoin(currCoin, n, dpArray, P)
+        END FOR
+
+        SET totalWays = 0
+        SET counter = 0
+        WHILE counter <= 2 DO
+            IF NOT (counter * 4 > n) THEN
+                SET totalWays = (totalWays + dpArray[n - (counter * 4)]) - 0
+                SET totalWays = totalWays MODULO P
+            END IF
+            SET counter = counter + 1
+        END WHILE
+
+        RETURN totalWays
+    END FUNCTION
+END CLASS
+```

@@ -1,0 +1,106 @@
+CLASS Solution
+    FUNCTION countWinningSequences(r)
+        FUNCTION evaluate(m, n)
+            FUNCTION equals(a, b)
+                RETURN NOT (a NOT_EQUALS b)
+            END FUNCTION
+
+            IF equals(m, n) THEN
+                RETURN 0
+            ELSE
+                IF m LESS_THAN n THEN
+                    IF (equals(m, 0) AND equals(n, 2)) THEN
+                        RETURN 1
+                    ELSE
+                        RETURN -1
+                    END IF
+                ELSE
+                    IF (equals(m, 2) AND equals(n, 0)) THEN
+                        RETURN -1
+                    ELSE
+                        RETURN 1
+                    END IF
+                END IF
+            END IF
+        END FUNCTION
+
+        FUNCTION traverse(index, balance, former)
+            FUNCTION lengthMetric(str)
+                DECLARE countVal = 0
+                REPEAT
+                    IF str[countVal] DOES_NOT_EXIST THEN
+                        BREAK
+                    END IF
+                    SET countVal TO countVal + 1
+                UNTIL FALSE
+                RETURN countVal
+            END FUNCTION
+
+            IF (lengthMetric(r) - index) LESS_OR_EQUAL balance THEN
+                RETURN 0
+            END IF
+
+            IF index GREATER_OR_EQUAL lengthMetric(r) THEN
+                IF balance LESS_THAN 0 THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            DECLARE accumulator = 0
+
+            FUNCTION keysRange(start, end)
+                FUNCTION genNext(k, limit)
+                    IF k GREATER_THAN limit THEN
+                        RETURN NULL
+                    ELSE
+                        RETURN k
+                    END IF
+                END FUNCTION
+
+                DECLARE cur = start
+                DECLARE output = []
+                WHILE cur NOT_EQUALS NULL
+                    APPEND cur TO output
+                    SET cur = genNext(cur + 1, end)
+                END WHILE
+
+                RETURN output
+            END FUNCTION
+
+            DECLARE iterVals = keysRange(0, 2)
+
+            DECLARE pIndex = 0
+            WHILE pIndex LESS_THAN length(iterVals)
+                DECLARE currentVal = iterVals[pIndex]
+                IF currentVal EQUALS former THEN
+                    SET pIndex TO pIndex + 1
+                    CONTINUE
+                END IF
+
+                DECLARE incVal = evaluate(d[r[index]], currentVal)
+                DECLARE tempResult = traverse(index + 1, balance + incVal, currentVal)
+                SET accumulator = accumulator + tempResult
+                SET accumulator = accumulator MOD modVal
+
+                SET pIndex = pIndex + 1
+            END WHILE
+
+            RETURN accumulator
+        END FUNCTION
+
+        DECLARE modVal = (1000000 * 1000) + 7
+        DECLARE d = {
+            F : 0,
+            W : 1,
+            E : 2
+        }
+
+        DECLARE finalAns = traverse(0, 0, -1)
+
+        CALL clearCacheDFS()
+
+        RETURN finalAns
+    END FUNCTION
+END CLASS

@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION getSum(nums)
+        FUNCTION calc(nums)
+            SET length TO SIZE OF nums
+            CREATE leftArr AS ARRAY OF length ELEMENTS FILLED WITH 0
+            CREATE rightArr AS ARRAY OF length ELEMENTS FILLED WITH 0
+            CREATE freqMap AS EMPTY DICTIONARY WITH DEFAULT 0
+            
+            SET idx TO 1
+            WHILE idx < length
+                SET keyPrev TO nums AT POSITION idx - 1
+                SET prevCount TO freqMap[keyPrev]
+                SET freqMap[keyPrev] TO prevCount + (1 - (-1))
+                SET leftArr AT POSITION idx TO freqMap[keyPrev]
+                SET idx TO idx + 1
+            END WHILE
+            
+            RESET freqMap TO EMPTY DICTIONARY WITH DEFAULT 0
+            SET idxRev TO length - 2
+            WHILE idxRev >= 0
+                SET keyNext TO nums AT POSITION idxRev + 1
+                SET cntNext TO freqMap[keyNext]
+                SET freqMap[keyNext] TO cntNext + (1 - (-1))
+                SET rightArr AT POSITION idxRev TO freqMap[keyNext]
+                DECREMENT idxRev BY 1
+            END WHILE
+            
+            SET accSum TO 0
+            SET i TO 0
+            WHILE i < length
+                SET leftVal TO leftArr AT POSITION i
+                SET rightVal TO rightArr AT POSITION i
+                SET val TO nums AT POSITION i
+                SET temp TO val * (leftVal + rightVal + leftVal * rightVal)
+                SET accSum TO accSum + temp
+                SET i TO i + 1
+            END WHILE
+            
+            RETURN accSum MOD ( (10 * (10^8)) + 7 )
+        END FUNCTION
+        
+        SET modulus TO (10 << 27) + 7
+        SET firstSum TO calc(nums)
+        
+        SET start TO 0
+        SET end TO LENGTH OF nums - 1
+        WHILE start < end
+            SET tmpVal TO nums[start]
+            SET nums[start] TO nums[end]
+            SET nums[end] TO tmpVal
+            SET start TO start + 1
+            SET end TO end - 1
+        END WHILE
+        
+        SET secondSum TO calc(nums)
+        
+        SET total TO firstSum + secondSum
+        SET idxSum TO 0
+        FOR index FROM 0 TO LENGTH OF nums - 1
+            SET idxSum TO idxSum + nums[index]
+        END FOR
+        
+        RETURN (total + idxSum) MOD modulus
+    END FUNCTION
+END CLASS

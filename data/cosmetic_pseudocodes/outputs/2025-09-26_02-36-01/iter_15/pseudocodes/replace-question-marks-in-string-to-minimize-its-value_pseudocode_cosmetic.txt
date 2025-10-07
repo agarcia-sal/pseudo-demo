@@ -1,0 +1,102 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        DEFINE FUNCTION frequencyMap(str)
+            DECLARE map AS empty dictionary
+            DECLARE idx AS 0
+            WHILE idx < LENGTH(str)
+                DECLARE ch AS str[idx]
+                IF ch IN map THEN
+                    SET map[ch] = map[ch] + 1
+                ELSE
+                    SET map[ch] = 1
+                END IF
+                SET idx = idx + 1
+            END WHILE
+            RETURN map
+        END FUNCTION
+        
+        DECLARE counts AS frequencyMap(s)
+        IF "?" IN counts THEN
+            REMOVE "?" FROM counts
+        END IF
+        
+        DECLARE positions AS empty list
+        DECLARE pos AS 0
+        REPEAT
+            IF s[pos] = "?" THEN
+                APPEND pos TO positions
+            END IF
+            SET pos = pos + 1
+        UNTIL pos >= LENGTH(s)
+        
+        DECLARE substitutes AS empty list
+        
+        DECLARE idx2 AS 0
+        WHILE idx2 < LENGTH(positions)
+            DECLARE current_min_count AS 999999999
+            DECLARE current_min_char AS NULL
+            DECLARE letter_idx AS 0
+            
+            WHILE letter_idx < 26
+                DECLARE candidate AS CHARACTER(LETTER_CODE("a") + letter_idx)
+                IF (candidate IN counts AND counts[candidate] < current_min_count) OR (candidate NOT IN counts AND 0 < current_min_count) THEN
+                    IF candidate IN counts THEN
+                        SET current_min_count = counts[candidate]
+                    ELSE
+                        SET current_min_count = 0
+                    END IF
+                    SET current_min_char = candidate
+                END IF
+                SET letter_idx = letter_idx + 1
+            END WHILE
+            
+            APPEND current_min_char TO substitutes
+            IF current_min_char IN counts THEN
+                SET counts[current_min_char] = counts[current_min_char] + 1
+            ELSE
+                SET counts[current_min_char] = 1
+            END IF
+            SET idx2 = idx2 + 1
+        END WHILE
+        
+        DECLARE sorted_subs AS substitutes
+        /* insertion sort to reorder lex ascending */
+        DECLARE i AS 1
+        WHILE i < LENGTH(sorted_subs)
+            DECLARE key_char AS sorted_subs[i]
+            DECLARE j AS i - 1
+            WHILE j >= 0 AND sorted_subs[j] > key_char
+                SET sorted_subs[j + 1] = sorted_subs[j]
+                SET j = j - 1
+            END WHILE
+            SET sorted_subs[j + 1] = key_char
+            SET i = i + 1
+        END WHILE
+        
+        DECLARE chars AS empty list
+        DECLARE si AS 0
+        WHILE si < LENGTH(s)
+            APPEND s[si] TO chars
+            SET si = si + 1
+        END WHILE
+        
+        DECLARE pair_index AS 0
+        WHILE pair_index < LENGTH(positions)
+            DECLARE replaced_pos AS positions[pair_index]
+            DECLARE replaced_char AS sorted_subs[pair_index]
+            SET chars[replaced_pos] = replaced_char
+            SET pair_index = pair_index + 1
+        END WHILE
+        
+        DECLARE result AS ""
+        DECLARE ri AS 0
+        WHILE ri < LENGTH(chars)
+            SET result = result + chars[ri]
+            SET ri = ri + 1
+        END WHILE
+        
+        RETURN result
+    END FUNCTION
+END CLASS
+```

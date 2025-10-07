@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION maximumScore(grid)
+        LET dimension_value BE THE LENGTH OF grid
+        LET accumulator BE A 2D ARRAY OF SIZE (dimension_value + 1) BY (dimension_value + 1) ALL SET TO zero
+        LET earlier_selection BE AN ARRAY OF SIZE (dimension_value + 1) ALL SET TO zero
+        LET earlier_omission BE AN ARRAY OF SIZE (dimension_value + 1) ALL SET TO zero
+
+        LET column_index BE 0
+        WHILE column_index LESS THAN dimension_value
+            LET row_index BE 0
+            WHILE row_index LESS THAN dimension_value
+                LET updated_value BE accumulator[column_index][row_index + 1] + grid[row_index][column_index]
+                accumulator[column_index][row_index + 1] = updated_value
+                row_index = row_index + 1
+            END WHILE
+            column_index = column_index + 1
+        END WHILE
+
+        LET col_cursor BE 1
+        WHILE col_cursor LESS THAN dimension_value
+            LET fresh_selection BE AN ARRAY OF LENGTH (dimension_value + 1) FILLED WITH zero
+            LET fresh_omission BE AN ARRAY OF LENGTH (dimension_value + 1) FILLED WITH zero
+
+            LET current_pos BE 0
+            WHILE current_pos LESS THAN OR EQUAL TO dimension_value
+                LET previous_pos BE 0
+                WHILE previous_pos LESS THAN OR EQUAL TO dimension_value
+                    IF current_pos > previous_pos THEN
+                        LET segment_score BE accumulator[col_cursor][current_pos - 1] - accumulator[col_cursor][previous_pos - 1]
+                        LET candidate1 BE fresh_selection[current_pos]
+                        LET candidate2 BE earlier_omission[previous_pos] + segment_score
+                        IF candidate1 < candidate2 THEN
+                            fresh_selection[current_pos] = candidate2
+                        END IF
+
+                        LET alt_candidate1 BE fresh_omission[current_pos]
+                        LET alt_candidate2 BE earlier_omission[previous_pos] + segment_score
+                        IF alt_candidate1 < alt_candidate2 THEN
+                            fresh_omission[current_pos] = alt_candidate2
+                        END IF
+                    ELSE
+                        LET segment_score BE accumulator[col_cursor][previous_pos] - accumulator[col_cursor][current_pos]
+                        LET candidate3 BE fresh_selection[current_pos]
+                        LET candidate4 BE earlier_selection[previous_pos] + segment_score
+                        IF candidate3 < candidate4 THEN
+                            fresh_selection[current_pos] = candidate4
+                        END IF
+
+                        LET alt_candidate3 BE fresh_omission[current_pos]
+                        LET alt_candidate4 BE earlier_selection[previous_pos]
+                        IF alt_candidate3 < alt_candidate4 THEN
+                            fresh_omission[current_pos] = alt_candidate4
+                        END IF
+                    END IF
+                    previous_pos = previous_pos + 1
+                END WHILE
+                current_pos = current_pos + 1
+            END WHILE
+
+            earlier_selection = fresh_selection
+            earlier_omission = fresh_omission
+            col_cursor = col_cursor + 1
+        END WHILE
+
+        LET result_value BE earlier_selection[0]
+        LET index_var BE 1
+        WHILE index_var LESS THAN OR EQUAL TO dimension_value
+            IF earlier_selection[index_var] > result_value THEN
+                result_value = earlier_selection[index_var]
+            END IF
+            index_var = index_var + 1
+        END WHILE
+
+        RETURN result_value
+    END FUNCTION
+END CLASS

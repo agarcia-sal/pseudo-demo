@@ -1,0 +1,57 @@
+```
+FUNCTION sort_array(array_of_integers)
+    DEFINE sorted_temp_list AS LIST FROM array_of_integers
+    DEFINE index_counter AS 0
+
+    WHILE index_counter < LENGTH(sorted_temp_list)
+        SET min_idx TO index_counter
+        DEFINE inner_counter AS index_counter + 1
+        WHILE inner_counter < LENGTH(sorted_temp_list)
+            IF sorted_temp_list[inner_counter] < sorted_temp_list[min_idx]
+                SET min_idx TO inner_counter
+            END IF
+            SET inner_counter TO inner_counter + 1
+        END WHILE
+
+        IF min_idx != index_counter
+            SWAP sorted_temp_list[index_counter], sorted_temp_list[min_idx]
+        END IF
+        SET index_counter TO index_counter + 1
+    END WHILE
+
+    DEFINE grouping_dictionary AS EMPTY MAP
+
+    FOR EACH number IN sorted_temp_list
+        SET binary_form TO CONVERT_TO_BINARY(number)
+        SET count_ones TO 0
+        FOR EACH character IN binary_form SUBSTRING FROM 3RD CHARACTER ONWARD
+            IF character == '1' THEN
+                SET count_ones TO count_ones + 1
+            END IF
+        END FOR
+
+        IF grouping_dictionary DOES NOT CONTAIN count_ones
+            SET grouping_dictionary[count_ones] TO EMPTY LIST
+        END IF
+        APPEND number TO grouping_dictionary[count_ones]
+    END FOR
+
+    DEFINE result_list AS EMPTY LIST
+    DEFINE key_values AS LIST OF KEYS IN grouping_dictionary
+    SORT key_values IN ASCENDING ORDER USING WHILE LOOP:
+        SET i TO 0
+        WHILE i < LENGTH(key_values) - 1
+            IF key_values[i] > key_values[i + 1]
+                SWAP key_values[i], key_values[i + 1]
+                SET i TO -1
+            END IF
+            SET i TO i + 1
+        END WHILE
+
+    FOR EACH key IN key_values
+        EXTEND result_list WITH grouping_dictionary[key]
+    END FOR
+
+    RETURN result_list
+END FUNCTION
+```

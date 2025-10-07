@@ -1,0 +1,87 @@
+CLASS Solution  
+    FUNCTION countOfPairs(numList)  
+        DEFINE constantMod AS (10 * 100 * 1000 * 100) + 7  
+        DEFINE lengthCount AS SIZE(numList)  
+        DEFINE upperBound AS MAXIMUM_VALUE(numList)  
+        
+        FUNCTION make3DArray(x, y, z)  
+            IF x IS 0 THEN  
+                RETURN EMPTY_LIST  
+            END IF  
+            DEFINE layer1 AS make3DArray(x - 1, y, z)  
+            DEFINE layer2 AS []  
+            FOR idx_y FROM 0 TO (y - 1)  
+                DEFINE layerRow AS []  
+                FOR idx_z FROM 0 TO (z - 1)  
+                    APPEND 0 TO layerRow  
+                END FOR  
+                APPEND layerRow TO layer2  
+            END FOR  
+            RETURN [layer2] + layer1  
+        END FUNCTION  
+        
+        DEFINE dpTable AS make3DArray(lengthCount + 1, upperBound + 1, upperBound + 1)  
+        
+        DEFINE posZeroVal AS numList[0]  
+        DEFINE valX AS 0  
+        WHILE valX <= posZeroVal DO  
+            dpTable[1][valX][posZeroVal - valX] = 1  
+            valX = valX + 1  
+        END WHILE  
+        
+        DEFINE indexI AS 2  
+        WHILE indexI <= lengthCount DO  
+            DEFINE currNum AS numList[indexI - 1]  
+            DEFINE idxJ AS 0  
+            WHILE idxJ <= currNum DO  
+                DEFINE idxK AS 0  
+                WHILE idxK <= currNum DO  
+                    IF (idxJ + idxK) = currNum THEN  
+                        DEFINE prevJ AS 0  
+                        WHILE prevJ <= idxJ DO  
+                            DEFINE prevK AS idxK  
+                            WHILE prevK <= upperBound DO  
+                                DEFINE currentDpVal AS dpTable[indexI][idxJ][idxK]  
+                                DEFINE additionVal AS dpTable[indexI - 1][prevJ][prevK]  
+                                currentDpVal = currentDpVal + additionVal  
+                                currentDpVal = currentDpVal - (constantMod * (currentDpVal DIV constantMod))  
+                                dpTable[indexI][idxJ][idxK] = currentDpVal  
+                                prevK = prevK + 1  
+                            END WHILE  
+                            prevJ = prevJ + 1  
+                        END WHILE  
+                    END IF  
+                    idxK = idxK + 1  
+                END WHILE  
+                idxJ = idxJ + 1  
+            END WHILE  
+            indexI = indexI + 1  
+        END WHILE  
+        
+        DEFINE accumResult AS 0  
+        DEFINE idxA AS 0  
+        DEFINE loopFunction  
+            IF idxA > upperBound THEN  
+                RETURN  
+            ELSE  
+                DEFINE idxB AS 0  
+                FUNCTION innerLoop()  
+                    IF idxB > upperBound THEN  
+                        RETURN  
+                    ELSE  
+                        accumResult = accumResult + dpTable[lengthCount][idxA][idxB]  
+                        accumResult = accumResult - (constantMod * (accumResult DIV constantMod))  
+                        idxB = idxB + 1  
+                        innerLoop()  
+                    END IF  
+                END FUNCTION  
+                innerLoop()  
+                idxA = idxA + 1  
+                loopFunction()  
+            END IF  
+        END FUNCTION  
+        loopFunction()  
+        
+        RETURN accumResult  
+    END FUNCTION  
+END CLASS

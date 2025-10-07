@@ -1,0 +1,24 @@
+FUNCTION simplify(dividend_str, divisor_str)
+    EXECUTE FUNCTION parseFraction WITH fraction = dividend_str GIVE top_val, bottom_val
+    EXECUTE FUNCTION parseFraction WITH fraction = divisor_str GIVE top_factor, bottom_factor
+
+    EXECUTE FUNCTION parseFraction(fraction)
+        SPLIT fraction INTO parts USING "/"
+        RETURN INTEGER(parts[1]) AND INTEGER(parts[2])
+    END FUNCTION
+
+    SET numerator_product TO top_val * top_factor
+    SET denominator_product TO bottom_val * bottom_factor
+
+    EXECUTE FUNCTION isIntegerDivision(num, den)
+        SET division_result TO num / den
+        IF (division_result - FLOOR(division_result)) = 0 THEN RETURN True
+        OTHERWISE RETURN False
+    END FUNCTION
+
+    IF NOT NOT isIntegerDivision(numerator_product, denominator_product)
+        INVOKE BREAK WITH True
+    ELSE
+        INVOKE BREAK WITH False
+    END IF
+END FUNCTION

@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        DEFINE modulus AS 10^9 + 7
+        ASSIGN length TO SIZE OF nums
+        ASSIGN maximum TO HIGHEST VALUE IN nums
+
+        CREATE dp_matrix OF DIMENSIONS (length + 1) x (maximum + 1) x (maximum + 1) FILLED WITH 0
+
+        LET initial_num BE nums[0]
+        LET idx_j BE 0
+        WHILE idx_j <= initial_num DO
+            dp_matrix[1][idx_j][initial_num - idx_j] = 1
+            idx_j = idx_j + 1
+        END WHILE
+
+        LET current_index BE 2
+        WHILE current_index <= length DO
+            LET current_val BE nums[current_index - 1]
+            LET outer_j BE 0
+            WHILE outer_j <= current_val DO
+                LET outer_k BE 0
+                WHILE outer_k <= current_val DO
+                    IF outer_j + outer_k == current_val THEN
+                        LET prev_j INCR 0 TO outer_j DO
+                            LET prev_k INCR outer_k TO maximum DO
+                                dp_matrix[current_index][outer_j][outer_k] = (dp_matrix[current_index][outer_j][outer_k] + dp_matrix[current_index - 1][prev_j][prev_k]) MOD modulus
+                            END LET
+                        END LET
+                    END IF
+                    outer_k = outer_k + 1
+                END WHILE
+                outer_j = outer_j + 1
+            END WHILE
+            current_index = current_index + 1
+        END WHILE
+
+        SET total_pairs TO 0
+        LET sum_j BE 0
+        WHILE sum_j <= maximum DO
+            LET sum_k BE 0
+            WHILE sum_k <= maximum DO
+                total_pairs = (total_pairs + dp_matrix[length][sum_j][sum_k]) MOD modulus
+                sum_k = sum_k + 1
+            END WHILE
+            sum_j = sum_j + 1
+        END WHILE
+
+        RETURN total_pairs
+    END FUNCTION
+END CLASS

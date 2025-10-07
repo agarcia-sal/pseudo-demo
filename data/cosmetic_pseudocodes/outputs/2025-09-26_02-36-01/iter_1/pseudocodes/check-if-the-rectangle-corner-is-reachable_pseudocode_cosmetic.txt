@@ -1,0 +1,48 @@
+CLASS Solution  
+    FUNCTION canReachCorner(xCorner yCorner circles)  
+        FUNCTION is_inside_circle(px py cx cy radius)  
+            SET dx TO px MINUS cx  
+            SET dy TO py MINUS cy  
+            RETURN (dx TIMES dx PLUS dy TIMES dy) LESS THAN OR EQUAL TO (radius TIMES radius)  
+        END FUNCTION  
+
+        FUNCTION touches_left_or_top_edge(cx cy r)  
+            SET leftEdge TO (ABSOLUTE_VALUE(cx) LESS THAN OR EQUAL TO r) AND (0 LESS THAN OR EQUAL TO cy) AND (cy LESS THAN OR EQUAL TO yCorner)  
+            SET topEdge TO (ABSOLUTE_VALUE(cy MINUS yCorner) LESS THAN OR EQUAL TO r) AND (0 LESS THAN OR EQUAL TO cx) AND (cx LESS THAN OR EQUAL TO xCorner)  
+            RETURN leftEdge OR topEdge  
+        END FUNCTION  
+
+        FUNCTION touches_right_or_bottom_edge(cx cy r)  
+            SET rightEdge TO (ABSOLUTE_VALUE(cx MINUS xCorner) LESS THAN OR EQUAL TO r) AND (0 LESS THAN OR EQUAL TO cy) AND (cy LESS THAN OR EQUAL TO yCorner)  
+            SET bottomEdge TO (ABSOLUTE_VALUE(cy) LESS THAN OR EQUAL TO r) AND (0 LESS THAN OR EQUAL TO cx) AND (cx LESS THAN OR EQUAL TO xCorner)  
+            RETURN rightEdge OR bottomEdge  
+        END FUNCTION  
+
+        FUNCTION explore(i)  
+            EXTRACT x1 y1 r1 FROM circles[i]  
+            IF touches_right_or_bottom_edge(x1 y1 r1) THEN RETURN True END IF  
+            SET vis[i] TO True  
+            FOR j FROM 0 TO LENGTH OF circles MINUS 1  
+                IF vis[j] IS True THEN CONTINUE END IF  
+                EXTRACT x2 y2 r2 FROM circles[j]  
+                SET dist_sq TO (x1 MINUS x2) TIMES (x1 MINUS x2) PLUS (y1 MINUS y2) TIMES (y1 MINUS y2)  
+                SET rad_sum TO r1 PLUS r2  
+                IF dist_sq GREATER THAN (rad_sum TIMES rad_sum) THEN CONTINUE END IF  
+                IF (x1 TIMES r2 PLUS x2 TIMES r1) LESS THAN (rad_sum TIMES xCorner) AND (y1 TIMES r2 PLUS y2 TIMES r1) LESS THAN (rad_sum TIMES yCorner) AND explore(j) THEN  
+                    RETURN True  
+                END IF  
+            END FOR  
+            RETURN False  
+        END FUNCTION  
+
+        SET vis TO ARRAY of False VALUES with LENGTH circles  
+        FOR EACH i IN RANGE LENGTH OF circles  
+            EXTRACT x y r FROM circles[i]  
+            IF is_inside_circle(0 0 x y r) OR is_inside_circle(xCorner yCorner x y r) THEN RETURN False END IF  
+            IF NOT vis[i] AND touches_left_or_top_edge(x y r) AND explore(i) THEN  
+                RETURN False  
+            END IF  
+        END FOR  
+        RETURN True  
+    END FUNCTION  
+END CLASS

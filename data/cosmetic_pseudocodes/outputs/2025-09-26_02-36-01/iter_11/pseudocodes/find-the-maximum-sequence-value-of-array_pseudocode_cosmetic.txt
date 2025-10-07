@@ -1,0 +1,132 @@
+CLASS Solution
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER
+        FUNCTION bitwiseOr(a INTEGER, b INTEGER) RETURNS INTEGER
+            RETURN a BOR b
+        END FUNCTION
+
+        FUNCTION bitwiseXor(a INTEGER, b INTEGER) RETURNS INTEGER
+            RESULT := ZERO
+            RESULT := a BXOR b
+            RETURN RESULT
+        END FUNCTION
+
+        TWO_TO_SEVEN <- 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1  # replaced 2^7 with sum of ones
+        # Actually constructing 2^7 by left shift
+        TWO_TO_SEVEN <- 1
+        REPEAT 7 TIMES
+            TWO_TO_SEVEN <- TWO_TO_SEVEN + TWO_TO_SEVEN
+        END REPEAT
+
+        LEN <- 0
+        WHILE TRUE
+            IF LEN >= LEN_OF nums THEN
+                BREAK
+            END IF
+            LEN <- LEN + 1
+        END WHILE
+
+        DECLARE dpf AS ARRAY[n+1][k+2][TWO_TO_SEVEN] OF BOOLEAN
+        DECLARE dpg AS ARRAY[n+1][k+2][TWO_TO_SEVEN] OF BOOLEAN
+
+        iidx <- 0
+        jidx <- 0
+        xidx <- 0
+
+        # Initialize all dpf and dpg cells with FALSE by nested loops
+        # Since only position [0][0][0] and [n][0][0] set to TRUE
+        # We simulate initializing all to FALSE by default
+        # Then set accordingly
+
+        dpf[0][0][0] <- TRUE
+        dpg[LEN][0][0] <- TRUE
+
+        # Forward dpf with recursive while loops replacing for
+        FUN forward_loop(i INTEGER)
+            IF i > LEN - 1 THEN
+                RETURN
+            END IF
+            DEFINE jptr INTEGER
+            jptr <- 0
+            WHILE jptr <= k DO
+                xptr <- 0
+                REPEAT
+                    IF xptr >= TWO_TO_SEVEN THEN
+                        BREAK
+                    END IF
+                    old_val1 <- dpf[i+1][jptr][xptr]
+                    old_val2 <- dpf[i][jptr][xptr]
+
+                    dpf[i + 1][jptr][xptr] <- old_val1 BOR old_val2
+
+                    bit_or_val <- bitwiseOr(xptr, nums[i])
+                    old_val3 <- dpf[i+1][jptr+1][bit_or_val]
+                    old_val4 <- dpf[i][jptr][xptr]
+
+                    dpf[i+1][jptr+1][bit_or_val] <- old_val3 BOR old_val4
+
+                    xptr <- xptr + 1
+                UNTIL FALSE
+                jptr <- jptr + 1
+            END WHILE
+            forward_loop(i + 1)
+        END FUNCTION
+
+        forward_loop(0)
+
+        # Backward dpg with recursion replacing for i downto 1
+        FUNCTION backward_loop(i INTEGER)
+            IF i < 1 THEN
+                RETURN
+            END IF
+
+            VARIABLE jj INTEGER
+            jj <- 0
+            WHILE jj <= k DO
+                VARIABLE yy INTEGER
+                yy <- 0
+                WHILE yy < TWO_TO_SEVEN DO
+                    val1 <- dpg[i-1][jj][yy]
+                    val2 <- dpg[i][jj][yy]
+                    dpg[i-1][jj][yy] <- val1 BOR val2
+
+                    new_or <- bitwiseOr(yy, nums[i-1])
+                    val3 <- dpg[i-1][jj+1][new_or]
+                    val4 <- dpg[i][jj][yy]
+                    dpg[i-1][jj+1][new_or] <- val3 BOR val4
+
+                    yy <- yy + 1
+                END WHILE
+                jj <- jj + 1
+            END WHILE
+            backward_loop(i - 1)
+        END FUNCTION
+
+        backward_loop(LEN)
+
+        RESULT <- 0
+        idx_i <- k
+        WHILE idx_i <= LEN - k DO
+            idx_x <- 0
+            WHILE idx_x < TWO_TO_SEVEN DO
+                CONDITION_1 <- dpf[idx_i][k][idx_x]
+                IF CONDITION_1 THEN
+                    idx_y <- 0
+                    WHILE idx_y < TWO_TO_SEVEN DO
+                        CONDITION_2 <- dpg[idx_i][k][idx_y]
+                        IF CONDITION_2 THEN
+                            xor_val <- bitwiseXor(idx_x, idx_y)
+                            IF xor_val > RESULT THEN
+                                RESULT <- xor_val
+                            END IF
+                        END IF
+                        idx_y <- idx_y + 1
+                    END WHILE
+                END IF
+                idx_x <- idx_x + 1
+            END WHILE
+            idx_i <- idx_i + 1
+        END WHILE
+
+        RETURN RESULT
+    END FUNCTION
+END CLASS

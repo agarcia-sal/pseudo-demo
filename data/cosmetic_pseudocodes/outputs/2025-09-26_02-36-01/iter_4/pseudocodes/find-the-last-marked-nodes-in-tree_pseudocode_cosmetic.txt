@@ -1,0 +1,98 @@
+CLASS Solution
+    FUNCTION lastMarkedNodes(edges)
+        FUNCTION dfs(currentNode, parentNode, distanceList)
+            SET idx TO 0
+            WHILE idx < LENGTH OF g[currentNode]
+                LET neighbor = g[currentNode][idx]
+                IF NOT (neighbor = parentNode)
+                    LET currentDistance = distanceList[currentNode]
+                    LET updatedDistance = currentDistance + 1
+                    SET distanceList[neighbor] TO updatedDistance
+                    dfs(neighbor, currentNode, distanceList)
+                END IF
+                INCREMENT idx BY 1
+            END WHILE
+        END FUNCTION
+
+        LET totalNodes = LENGTH OF edges + 1
+        LET g TO new list
+        DECLARE tempIndex TO 0
+        WHILE tempIndex < totalNodes
+            APPEND [] TO g
+            INCREMENT tempIndex BY 1
+        END WHILE
+
+        DECLARE index TO 0
+        WHILE index < LENGTH OF edges
+            LET u = edges[index][0]
+            LET v = edges[index][1]
+            APPEND v TO g[u]
+            APPEND u TO g[v]
+            INCREMENT index BY 1
+        END WHILE
+
+        LET dist1 TO []
+        DECLARE count TO 0
+        WHILE count < totalNodes
+            APPEND (-1) TO dist1
+            INCREMENT count BY 1
+        END WHILE
+        SET dist1[0] TO 0
+        dfs(0, -1, dist1)
+
+        LET maxDistance1 TO dist1[0]
+        LET a TO 0
+        DECLARE pos TO 0
+        WHILE pos < totalNodes
+            IF dist1[pos] > maxDistance1
+                LET maxDistance1 = dist1[pos]
+                LET a = pos
+            END IF
+            INCREMENT pos BY 1
+        END WHILE
+
+        LET dist2 TO []
+        DECLARE cnt TO 0
+        WHILE cnt < totalNodes
+            APPEND (-1) TO dist2
+            INCREMENT cnt BY 1
+        END WHILE
+        SET dist2[a] TO 0
+        dfs(a, -1, dist2)
+
+        LET maxDistance2 TO dist2[0]
+        LET b TO 0
+        LET position TO 0
+        WHILE position < totalNodes
+            IF dist2[position] > maxDistance2
+                LET maxDistance2 = dist2[position]
+                LET b = position
+            END IF
+            INCREMENT position BY 1
+        END WHILE
+        
+        LET dist3 TO []
+        DECLARE itr TO 0
+        WHILE itr < totalNodes
+            APPEND (-1) TO dist3
+            INCREMENT itr BY 1
+        END WHILE
+        SET dist3[b] TO 0
+        dfs(b, -1, dist3)
+
+        LET result TO []
+        LET idxToUse TO 0
+        WHILE idxToUse < totalNodes
+            LET valDist2 = dist2[idxToUse]
+            LET valDist3 = dist3[idxToUse]
+            IF valDist2 > valDist3
+                APPEND a TO result
+            ELSE
+                APPEND b TO result
+            END IF
+            INCREMENT idxToUse BY 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER m INTEGER) RETURNS LIST OF INTEGER
+        LET binReprs BE an empty LIST OF STRING
+        LET idxA BE 0
+        WHILE idxA < LENGTH(nums)
+            LET currentNum BE nums[idxA]
+            LET paddedBinary BE ""
+            LET bitPos BE m - 1
+            WHILE bitPos >= 0
+                LET bitVal BE (currentNum >> bitPos) & 1
+                paddedBinary = paddedBinary + TO_STRING(bitVal)
+                DECREMENT bitPos
+            END WHILE
+            binReprs = binReprs + [paddedBinary]
+            idxA = idxA + 1
+        END WHILE
+
+        LET results BE []
+
+        FUNCTION hamming_distance(bin1 STRING bin2 STRING) RETURNS INTEGER
+            LET distCounter BE 0
+            LET pos BE 0
+            WHILE pos < LENGTH(bin1)
+                LET char1 BE bin1[pos]
+                LET char2 BE bin2[pos]
+                IF NOT (char1 = char2) THEN
+                    distCounter = distCounter + 1
+                END IF
+                pos = pos + 1
+            END WHILE
+            RETURN distCounter
+        END FUNCTION
+
+        LET iIdx BE 0
+        WHILE iIdx < LENGTH(nums)
+            LET maxDistFound BE 0
+            LET jIdx BE 0
+            WHILE jIdx < LENGTH(nums)
+                IF iIdx != jIdx THEN
+                    LET computedDist BE hamming_distance(binReprs[iIdx], binReprs[jIdx])
+                    IF maxDistFound < computedDist THEN
+                        maxDistFound = computedDist
+                    END IF
+                END IF
+                jIdx = jIdx + 1
+            END WHILE
+            results = results + [maxDistFound]
+            iIdx = iIdx + 1
+        END WHILE
+
+        RETURN results
+    END FUNCTION
+END CLASS

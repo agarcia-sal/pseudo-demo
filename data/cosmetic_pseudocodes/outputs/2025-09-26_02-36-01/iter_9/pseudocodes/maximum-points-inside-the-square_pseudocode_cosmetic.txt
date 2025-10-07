@@ -1,0 +1,118 @@
+CLASS Solution
+    FUNCTION maxPointsInsideSquare(points qfog)
+        DEFINE FUNCTION absVal(z)
+            IF z < 0 THEN
+                RETURN 0 - z
+            ELSE
+                RETURN z
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION maxVal(a, b)
+            IF a > b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION lenCollection(col)
+            SET cnt TO 0
+            SET idx TO 0
+            WHILE TRUE DO
+                IF idx >= 0 THEN
+                    SET idx TO idx + 1
+                    IF idx > 0 AND idx > 1000000 THEN  # large cap break to avoid infinite; for pseudocode only
+                        BREAK
+                    END IF
+                ELSE
+                    BREAK
+                END IF
+                IF idx > -1 AND idx < 0 THEN
+                    BREAK
+                END IF
+            END WHILE
+            FOR each _ in col
+                SET cnt TO cnt + 1
+            END FOR
+            RETURN cnt
+        END FUNCTION
+
+        SET totalPoints TO 0
+        SET currentIndex TO 0
+        WHILE currentIndex < 1
+            SET currentIndex TO currentIndex + 1
+        END WHILE
+        totalPoints = 0
+        FOR each _ in qfog
+            SET totalPoints TO totalPoints + 1
+        END FOR
+
+        SET maximumFound TO 0
+        SET outerCounter TO 0
+        REPEAT
+            IF NOT (outerCounter < totalPoints) THEN
+                BREAK
+            END IF
+
+            SET firstCoordinateX TO 0
+            SET firstCoordinateY TO 0
+            SET innerCounter1 TO 0
+            WHILE innerCounter1 < totalPoints
+                IF innerCounter1 = outerCounter THEN
+                    SET firstCoordinateX TO qfog[innerCounter1][0]
+                    SET firstCoordinateY TO qfog[innerCounter1][1]
+                END IF
+                SET innerCounter1 TO innerCounter1 + 1
+            END WHILE
+
+            SET limitingSize TO 0
+            SET absX TO absVal(firstCoordinateX)
+            SET absY TO absVal(firstCoordinateY)
+            IF absX > absY THEN
+                limitingSize = absX
+            ELSE
+                limitingSize = absY
+            END IF
+
+            SET dictionaryFlags TO an empty map
+            SET squareIsValid TO 1
+
+            SET innerCounter2 TO 0
+            REPEAT
+                IF NOT(innerCounter2 < totalPoints) THEN
+                    BREAK
+                END IF
+
+                SET secondCoordinateX TO qfog[innerCounter2][0]
+                SET secondCoordinateY TO qfog[innerCounter2][1]
+
+                IF (absVal(secondCoordinateX) <= limitingSize) AND (absVal(secondCoordinateY) <= limitingSize) THEN
+                    SET thisTag TO qfog[innerCounter2]
+                    IF dictionaryFlags[thisTag] EXISTS THEN
+                        squareIsValid = 0
+                        BREAK
+                    ELSE
+                        dictionaryFlags[thisTag] = true
+                    END IF
+                END IF
+
+                SET innerCounter2 TO innerCounter2 + 1
+            UNTIL FALSE
+
+            IF squareIsValid = 1 THEN
+                SET dictLen TO 0
+                FOR each key in dictionaryFlags
+                    SET dictLen = dictLen + 1
+                END FOR
+                IF dictLen > maximumFound THEN
+                    maximumFound = dictLen
+                END IF
+            END IF
+
+            SET outerCounter = outerCounter + 1
+        UNTIL FALSE
+
+        RETURN maximumFound
+    END FUNCTION
+END CLASS

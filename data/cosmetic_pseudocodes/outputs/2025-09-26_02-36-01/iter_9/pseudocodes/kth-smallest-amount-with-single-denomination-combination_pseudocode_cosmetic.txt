@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION findKthSmallest(coins k)
+        FUNCTION count_smaller_or_equal(x)
+            PROCEDURE gcd(a, b)
+                WHILE b ≠ 0
+                    SET temp TO b
+                    SET b TO a MOD b
+                    SET a TO temp
+                END WHILE
+                RETURN a
+            END PROCEDURE
+
+            SET total TO 0
+            SET limit TO (2 ^ LENGTH(coins)) - 1
+            SET index1 TO 1
+
+            WHILE index1 <= limit
+                SET combined_lcm TO 1
+                SET elements_count TO 0
+                SET index2 TO 0
+
+                WHILE index2 < LENGTH(coins)
+                    IF (index1 BITWISE_AND (1 << index2)) ≠ 0
+                        SET current_gcd TO gcd(combined_lcm, coins[index2])
+                        SET combined_lcm TO (combined_lcm * coins[index2]) / current_gcd
+                        SET elements_count TO elements_count + 1
+                    END IF
+                    SET index2 TO index2 + 1
+                END WHILE
+
+                IF (elements_count MOD 2) = 1
+                    SET total TO total + (x \ combined_lcm)
+                ELSE
+                    SET total TO total - (x \ combined_lcm)
+                END IF
+                SET index1 TO index1 + 1
+            END WHILE
+            RETURN total
+        END FUNCTION
+
+        SET low_bound TO 1
+        SET high_bound TO k * MIN(coins)
+        SET mid_val TO 0
+
+        LABEL loop_start:
+            IF low_bound >= high_bound
+                RETURN low_bound
+            END IF
+            SET mid_val TO (low_bound + high_bound) \ 2
+
+            IF count_smaller_or_equal(mid_val) < k
+                SET low_bound TO mid_val + 1
+            ELSE
+                SET high_bound TO mid_val
+            END IF
+            GOTO loop_start
+    END FUNCTION
+END CLASS

@@ -1,0 +1,78 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+        SET self.mod TO mod  
+        SET self.h TO list with length LENGTH OF s PLUS one filled with zeroes  
+        SET self.p TO list with length LENGTH OF s PLUS one filled with ones  
+        SET idx TO 1  
+        WHILE idx <= LENGTH OF s  
+            SET temp1 TO (self.h[idx - 1] * base)  
+            SET temp2 TO UNICODE code point of s[idx - 1]  
+            SET self.h[idx] TO (temp1 + temp2) MOD self.mod  
+            SET self.p[idx] TO (self.p[idx - 1] * base) MOD self.mod  
+            SET idx TO idx + 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        SET diff TO self.h[r] - (self.h[l - 1] * self.p[r - l + 1])  
+        SET result TO diff MOD self.mod  
+        RETURN result  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+        SET pos TO empty dictionary  
+        SET dfsStr TO empty list  
+        SET n TO LENGTH OF s  
+        SET g TO list with n empty lists  
+        SET i TO 1  
+        WHILE i < n  
+            APPEND i TO g[parent[i]]  
+            SET i TO i + 1  
+        END WHILE  
+
+        FUNCTION dfs(i)  
+            SET left_pos TO LENGTH OF dfsStr + 1  
+            FOR EACH child IN g[i]  
+                CALL dfs(child)  
+            END FOR  
+            APPEND s[i] TO dfsStr  
+            SET right_pos TO LENGTH OF dfsStr  
+            SET pos[i] TO (left_pos, right_pos)  
+        END FUNCTION  
+
+        CALL dfs(0)  
+
+        SET base TO 33331  
+        SET mod TO 998244353  
+        SET h1 TO new Hashing(dfsStr, base, mod)  
+        SET reversed_str TO empty list  
+        SET idx_rev TO LENGTH OF dfsStr  
+        WHILE idx_rev > 0  
+            APPEND dfsStr[idx_rev - 1] TO reversed_str  
+            SET idx_rev TO idx_rev - 1  
+        END WHILE  
+        SET h2 TO new Hashing(reversed_str, base, mod)  
+
+        SET ans TO empty list  
+        SET i TO 0  
+        WHILE i < n  
+            SET (l, r) TO pos[i]  
+            SET length_sub TO r - l + 1  
+            IF (length_sub MOD 2) = 0 THEN  
+                SET v1 TO h1.query(l, l + length_sub / 2 - 1)  
+                SET start_h2 TO n - r + 1  
+                SET v2 TO h2.query(start_h2, start_h2 + length_sub / 2 - 1)  
+            ELSE  
+                SET half_len TO length_sub // 2  
+                SET v1 TO h1.query(l, l + half_len - 1)  
+                SET start_h2 TO n - r + 1  
+                SET v2 TO h2.query(start_h2, start_h2 + half_len - 1)  
+            END IF  
+            APPEND (v1 = v2) TO ans  
+            SET i TO i + 1  
+        END WHILE  
+        RETURN ans  
+    END FUNCTION  
+END CLASS

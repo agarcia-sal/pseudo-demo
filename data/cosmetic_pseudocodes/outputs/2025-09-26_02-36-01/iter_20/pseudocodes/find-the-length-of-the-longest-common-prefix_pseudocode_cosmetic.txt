@@ -1,0 +1,87 @@
+CLASS Solution
+    FUNCTION longestCommonPrefix(arr1 arr1 OF integers arr2 arr2 OF integers) RETURNS integer
+        FUNCTION strFromInt(x) RETURNS string
+            SET y TO ""
+            SET z TO x
+            WHILE z GREATER THAN zero
+                SET digit TO (z MOD 10)
+                SET z TO (z DIV 10)
+                SET y TO CHAR_FROM_CODE(48 + digit) + y
+            END WHILE
+            IF y EQUALS "" THEN
+                SET y TO "0"
+            END IF
+            RETURN y
+        END FUNCTION
+
+        FUNCTION substr(s STRING, start INTEGER, end INTEGER) RETURNS string
+            SET result TO ""
+            SET idx TO start
+            WHILE idx LESS THAN OR EQUAL TO end
+                SET result TO result + s[idx]
+                SET idx TO idx + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        FUNCTION length(s STRING) RETURNS integer
+            SET count TO zero
+            SET pos TO 1
+            REPEAT
+                IF pos > SIZE_OF(s) THEN
+                    BREAK
+                END IF
+                SET count TO count + 1
+                SET pos TO pos + 1
+            UNTIL false
+            RETURN count
+        END FUNCTION
+
+        SET alpha TO an empty set
+        SET idx1 TO 1
+        WHILE idx1 LESS THAN OR EQUAL TO SIZE_OF(arr1)
+            SET val1 TO arr1[idx1]
+            SET s1 TO strFromInt(val1)
+            SET idx2 TO 1
+            WHILE idx2 LESS THAN OR EQUAL TO length(s1)
+                SET pfx TO substr(s1, 1, idx2)
+                ADD pfx TO alpha
+                SET idx2 TO idx2 + 1
+            END WHILE
+            SET idx1 TO idx1 + 1
+        END WHILE
+
+        SET beta TO an empty set
+        SET idx3 TO 1
+        WHILE idx3 LESS THAN OR EQUAL TO SIZE_OF(arr2)
+            SET val2 TO arr2[idx3]
+            SET s2 TO strFromInt(val2)
+            SET idx4 TO 1
+            WHILE idx4 LESS THAN OR EQUAL TO length(s2)
+                SET pfx2 TO substr(s2, 1, idx4)
+                ADD pfx2 TO beta
+                SET idx4 TO idx4 + 1
+            END WHILE
+            SET idx3 TO idx3 + 1
+        END WHILE
+
+        SET max_len TO zero
+        SET iterator TO GET_ITERATOR(alpha)
+        LOOP_LABEL:
+            SET current_item TO NEXT_ITEM(iterator)
+            IF current_item IS NULL THEN
+                GOTO END_LOOP
+            END IF
+            SET present_in_beta TO CONTAINS(beta, current_item)
+            IF present_in_beta THEN
+                SET len_p TO length(current_item)
+                IF len_p GREATER THAN max_len THEN
+                    SET max_len TO len_p
+                END IF
+            END IF
+            GOTO LOOP_LABEL
+        END_LOOP:
+
+        RETURN max_len
+    END FUNCTION
+END CLASS

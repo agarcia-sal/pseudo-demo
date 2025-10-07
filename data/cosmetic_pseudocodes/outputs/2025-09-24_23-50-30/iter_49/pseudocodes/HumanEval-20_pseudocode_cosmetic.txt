@@ -1,0 +1,31 @@
+```
+FUNCTION find_closest_elements(input_sequence)
+  PROCEDURE RECURSIVE_SCAN(primary_idx, candidate_idx, current_best, current_least)
+    IF primary_idx >= LENGTH(input_sequence) THEN
+      RETURN current_best
+    ELSE
+      IF candidate_idx >= LENGTH(input_sequence) THEN
+        CALL RECURSIVE_SCAN(primary_idx + 1, 0, current_best, current_least)
+      ELSE
+        VAR a_val <- input_sequence[primary_idx]
+        VAR b_val <- input_sequence[candidate_idx]
+        IF primary_idx <> candidate_idx THEN
+          VAR diff_val <- ABS(a_val - b_val)
+          VAR update_needed <- (current_least IS NULL) OR (diff_val < current_least)
+          IF update_needed THEN
+            VAR new_best <- SORTED_TUPLE(a_val, b_val)
+            VAR new_least <- diff_val
+            CALL RECURSIVE_SCAN(primary_idx, candidate_idx + 1, new_best, new_least)
+          ELSE
+            CALL RECURSIVE_SCAN(primary_idx, candidate_idx + 1, current_best, current_least)
+          END IF
+        ELSE
+          CALL RECURSIVE_SCAN(primary_idx, candidate_idx + 1, current_best, current_least)
+        END IF
+      END IF
+    END IF
+  END PROCEDURE
+
+  RETURN RECURSIVE_SCAN(0, 0, NULL, NULL)
+END FUNCTION
+```

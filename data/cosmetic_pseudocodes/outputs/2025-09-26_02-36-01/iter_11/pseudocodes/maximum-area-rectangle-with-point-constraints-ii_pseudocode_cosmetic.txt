@@ -1,0 +1,64 @@
+CLASS Fenwick  
+  FUNCTION __init__(self, n)  
+      SET self.tree TO a list with (n + 1) elements all assigned 0  
+  END FUNCTION  
+
+  FUNCTION add(self, i)  
+      REPEAT  
+          INCREMENT self.tree at index i BY 1  
+          SET i TO i PLUS (i BITWISE_AND (-i))  
+      UNTIL i IS NOT LESS THAN LENGTH OF self.tree  
+  END FUNCTION  
+
+  FUNCTION pre(self, i)  
+      SET total TO 0  
+      REPEAT  
+          SET total TO total PLUS self.tree at index i  
+          SET i TO i BITWISE_AND (i MINUS 1)  
+      UNTIL i IS NOT GREATER THAN 0  
+      RETURN total  
+  END FUNCTION  
+
+  FUNCTION query(self, l, r)  
+      RETURN (self.pre(r) MINUS self.pre(l MINUS 1))  
+  END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+  FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+      SET combined TO a list of tuples created by pairing each element from xCoord and yCoord  
+      SORT combined IN ASCENDING ORDER  
+      SET uniqueYs TO the sorted list of distinct elements from yCoord  
+      SET maximumArea TO -1  
+      ASSIGN reference fenwTree TO a new Fenwick initialized with LENGTH OF uniqueYs  
+      CALL fenwTree.add WITH ( (binarySearchLeft(uniqueYs, combined[0][1])) PLUS 1 )  
+
+      SET records TO an empty dictionary  
+      
+      FUNCTION processPairs(index)  
+          IF index EQUALS LENGTH OF combined MINUS 1 THEN  
+              RETURN  
+          END IF  
+          LET (px1, py1) TO combined[index]  
+          LET (px2, py2) TO combined[index PLUS 1]  
+          SET yIndex TO (binarySearchLeft(uniqueYs, py2)) PLUS 1  
+          CALL fenwTree.add WITH yIndex  
+          IF px1 NOT_EQUAL px2 THEN  
+              CALL processPairs(index PLUS 1)  
+              RETURN  
+          END IF  
+          LET currentSum TO fenwTree.query( (binarySearchLeft(uniqueYs, py1)) PLUS 1, yIndex )  
+          IF py2 IN records AND records[py2][1] EQUALS py1 AND (records[py2][2] PLUS 2) EQUALS currentSum THEN  
+              SET areaCandidate TO (px2 MINUS records[py2][0]) MULTIPLIED BY (py2 MINUS py1)  
+              IF areaCandidate GREATER THAN maximumArea THEN  
+                  SET maximumArea TO areaCandidate  
+              END IF  
+          END IF  
+          SET records[py2] TO THE TUPLE (px1, py1, currentSum)  
+          CALL processPairs(index PLUS 1)  
+      END FUNCTION  
+      
+      CALL processPairs(0)  
+      RETURN maximumArea  
+  END FUNCTION  
+END CLASS

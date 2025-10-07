@@ -1,0 +1,114 @@
+CLASS Solution
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER
+        SET P TO 1
+        REPEAT
+            SET P TO P * 2
+            SET Q TO 7
+            SET Q TO Q - 1
+        UNTIL Q EQUALS 0
+
+        SET L TO LENGTH OF nums
+        FUNCTION make3DBooleanArray(a INTEGER b INTEGER c INTEGER) RETURNS LIST
+            IF a EQUALS 0 THEN RETURN []
+            SET M TO make3DBooleanArray(a - 1,b,c)
+            SET ROW TO []
+            REPEAT
+                SET S1 TO []
+                REPEAT
+                    SET S2 TO []
+                    REPEAT
+                        INSERT FALSE INTO S2
+                    UNTIL LENGTH OF S2 EQUALS c
+                    INSERT S2 INTO S1
+                UNTIL LENGTH OF S1 EQUALS b
+                INSERT S1 INTO ROW
+            UNTIL LENGTH OF ROW EQUALS 1
+            RETURN [ROW] + M
+        END FUNCTION
+
+        SET V TO make3DBooleanArray(L + 1,k + 2,P)
+        SET I TO 0
+        SET J TO 0
+        SET X TO 0
+        FUNCTION setTrueAt(arr LIST i INTEGER j INTEGER x INTEGER)
+            SET arr[i][j][x] TO TRUE
+        END FUNCTION
+        setTrueAt(V,0,0,0)
+
+        SET I TO 0
+        WHILE I < L
+            SET J TO 0
+            REPEAT
+                SET X TO 0
+                REPEAT
+                    SET V[I+1][J][X] TO (V[I+1][J][X] OR V[I][J][X])
+                    SET OR_VAL TO X OR nums[I]
+                    SET V[I+1][J+1][OR_VAL] TO (V[I+1][J+1][OR_VAL] OR V[I][J][X])
+                    SET X TO X + 1
+                UNTIL X >= P
+                SET J TO J + 1
+            UNTIL J > k
+            SET I TO I + 1
+        END WHILE
+
+        FUNCTION clone3DBooleanArray(a LIST)
+            SET R TO []
+            FOR EACH elem1 IN a
+                SET S1 TO []
+                FOR EACH elem2 IN elem1
+                    SET S2 TO []
+                    FOR EACH elem3 IN elem2
+                        INSERT elem3 INTO S2
+                    END FOR
+                    INSERT S2 INTO S1
+                END FOR
+                INSERT S1 INTO R
+            END FOR
+            RETURN R
+        END FUNCTION
+
+        SET W TO clone3DBooleanArray(V)
+        SET W[L][0][0] TO TRUE
+
+        SET i INTEGER TO L
+        WHILE i > 0
+            SET j INTEGER TO 0
+            REPEAT
+                SET y INTEGER TO 0
+                REPEAT
+                    SET W[i-1][j][y] TO (W[i-1][j][y] OR W[i][j][y])
+                    SET OR_RES INTEGER TO y OR nums[i-1]
+                    SET W[i-1][j+1][OR_RES] TO (W[i-1][j+1][OR_RES] OR W[i][j][y])
+                    SET y TO y + 1
+                UNTIL y >= P
+                SET j TO j + 1
+            UNTIL j > k
+            SET i TO i - 1
+        END WHILE
+
+        SET result INTEGER TO 0
+
+        SET a INTEGER TO k
+        WHILE a <= L - k
+            SET x INTEGER TO 0
+            REPEAT
+                IF V[a][k][x] EQUALS TRUE THEN
+                    SET y INTEGER TO 0
+                    REPEAT
+                        IF W[a][k][y] EQUALS TRUE THEN
+                            SET XOR_VAL INTEGER TO x XOR y
+                            IF XOR_VAL > result THEN
+                                SET result TO XOR_VAL
+                            END IF
+                        END IF
+                        SET y TO y + 1
+                    UNTIL y >= P
+                END IF
+                SET x TO x + 1
+            UNTIL x >= P
+            SET a TO a + 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

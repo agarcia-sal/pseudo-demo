@@ -1,0 +1,71 @@
+CLASS Solution
+	FUNCTION canReachCorner(xCorner yCorner circles)
+		FUNCTION inside_circle(a b c d e)
+			RETURN (a - c) * (a - c) + (b - d) * (b - d) <= e * e
+		END FUNCTION
+
+		FUNCTION touches_left_or_top(s t u)
+			SET cond1 TO (ABS(s) <= u) AND (0 <= t AND t <= yCorner)
+			SET cond2 TO (ABS(t - yCorner) <= u) AND (0 <= s AND s <= xCorner)
+			RETURN cond1 OR cond2
+		END FUNCTION
+
+		FUNCTION touches_right_or_bottom(p q r)
+			SET condA TO (ABS(p - xCorner) <= r) AND (0 <= q AND q <= yCorner)
+			SET condB TO (ABS(q) <= r) AND (0 <= p AND p <= xCorner)
+			RETURN condA OR condB
+		END FUNCTION
+
+		FUNCTION explore(w)
+			SET cx TO circles[w][0]
+			SET cy TO circles[w][1]
+			SET rad TO circles[w][2]
+			IF touches_right_or_bottom(cx cy rad) THEN
+				RETURN True
+			END IF
+			vis[w] = True
+			FUNCTION recur_loop(idx lst)
+				IF idx >= LENGTH(lst) THEN
+					RETURN False
+				END IF
+				SET nx TO lst[idx][0]
+				SET ny TO lst[idx][1]
+				SET nr TO lst[idx][2]
+				IF vis[idx] = True THEN
+					RETURN recur_loop(idx + (1 + 0), lst)
+				END IF
+				SET dist_sq TO (cx - nx) * (cx - nx) + (cy - ny) * (cy - ny)
+				SET rad_sum TO rad + nr
+				IF dist_sq > rad_sum * rad_sum THEN
+					RETURN recur_loop(idx + 1, lst)
+				END IF
+				SET cond_x TO (cx * nr + nx * rad) < (rad_sum * xCorner)
+				SET cond_y TO (cy * nr + ny * rad) < (rad_sum * yCorner)
+				IF cond_x AND cond_y AND explore(idx) THEN
+					RETURN True
+				END IF
+				RETURN recur_loop(idx + 1, lst)
+			END FUNCTION
+			RETURN recur_loop(0, circles)
+		END FUNCTION
+
+		vis = [False] * LENGTH(circles)
+		FUNCTION main_loop(sz)
+			IF sz >= LENGTH(circles) THEN
+				RETURN True
+			END IF
+			SET x TO circles[sz][0]
+			SET y TO circles[sz][1]
+			SET r TO circles[sz][2]
+			IF inside_circle(0, 0, x, y, r) OR inside_circle(xCorner, yCorner, x, y, r) THEN
+				RETURN False
+			END IF
+			IF vis[sz] = False AND touches_left_or_top(x, y, r) AND explore(sz) THEN
+				RETURN False
+			END IF
+			RETURN main_loop(sz + 1)
+		END FUNCTION
+
+		RETURN main_loop(0)
+	END FUNCTION
+END CLASS

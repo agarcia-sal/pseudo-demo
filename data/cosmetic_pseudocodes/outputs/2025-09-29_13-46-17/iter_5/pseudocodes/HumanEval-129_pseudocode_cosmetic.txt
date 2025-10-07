@@ -1,0 +1,63 @@
+```
+FUNCTION minPath(grid, k)
+    LET dim BE LENGTH(grid)
+    LET bound BE (dim * dim) + (1 * 1)
+
+    FUNCTION computeMinForCell(x_idx, y_idx)
+        IF grid[x_idx][y_idx] IS 1 THEN
+            LET neighbors = []
+
+            IF x_idx != 0 THEN
+                neighbors = neighbors + [grid[x_idx - 1][y_idx]]
+            END IF
+
+            IF y_idx != 0 THEN
+                neighbors = neighbors + [grid[x_idx][y_idx - 1]]
+            END IF
+
+            IF x_idx != (dim - 1) THEN
+                neighbors = neighbors + [grid[x_idx + 1][y_idx]]
+            END IF
+
+            IF y_idx != (dim - 1) THEN
+                neighbors = neighbors + [grid[x_idx][y_idx + 1]]
+            END IF
+
+            RETURN MINIMUM(neighbors)
+        ELSE
+            RETURN bound
+        END IF
+    END FUNCTION
+
+    LET row_index = 0
+    WHILE row_index < dim DO
+        LET col_index = 0
+        WHILE col_index < dim DO
+            LET computed_min = computeMinForCell(row_index, col_index)
+            bound = IF computed_min < bound THEN computed_min ELSE bound END IF
+            col_index = col_index + 1
+        END WHILE
+        row_index = row_index + 1
+    END WHILE
+
+    LET resultAccumulator = []
+
+    PROCEDURE fillResults(counter)
+        IF counter >= k THEN
+            RETURN
+        END IF
+
+        IF counter MOD 2 == 0 THEN
+            resultAccumulator = resultAccumulator + [1]
+        ELSE
+            resultAccumulator = resultAccumulator + [bound]
+        END IF
+
+        fillResults(counter + 1)
+    END PROCEDURE
+
+    fillResults(0)
+
+    RETURN resultAccumulator
+END FUNCTION
+```

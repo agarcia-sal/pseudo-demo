@@ -1,0 +1,50 @@
+CLASS Solution  
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER  
+        
+        FUNCTION is_peak(index INTEGER) RETURNS BOOLEAN  
+            RETURN (nums[index] > nums[index - 1]) AND (nums[index] > nums[index + 1])  
+        END FUNCTION  
+        
+        INITIALIZE peaks AS empty LIST  
+        FOR position FROM 1 TO LENGTH(nums) - 2 DO  
+            IF is_peak(position) THEN  
+                ADD position TO peaks  
+            END IF  
+        END FOR  
+        
+        INITIALIZE results AS empty LIST  
+        FOR each query IN queries DO  
+            IF query[0] = 1 THEN  
+                DEFINE left_bound AS query[1]  
+                DEFINE right_bound AS query[2]  
+                
+                DEFINE left_pos AS position to insert left_bound in peaks (left insertion) + 1  
+                DEFINE right_pos AS position to insert right_bound in peaks (right insertion) - 1  
+                
+                ADD (right_pos - left_pos) TO results  
+            ELSE  
+                DEFINE idx AS query[1]  
+                DEFINE new_value AS query[2]  
+                
+                IF nums[idx] = new_value THEN  
+                    CONTINUE  
+                END IF  
+                
+                SET nums[idx] = new_value  
+                
+                DEFINE start_pos AS MAX(1, idx - 1)  
+                DEFINE end_pos AS MIN(LENGTH(nums) - 2, idx + 1)  
+                
+                FOR pos FROM start_pos TO end_pos DO  
+                    IF is_peak(pos) AND pos NOT IN peaks THEN  
+                        INSERT pos INTO peaks AT sorted position  
+                    ELSE IF NOT is_peak(pos) AND pos IN peaks THEN  
+                        REMOVE pos FROM peaks  
+                    END IF  
+                END FOR  
+            END IF  
+        END FOR  
+        
+        RETURN results  
+    END FUNCTION  
+END CLASS

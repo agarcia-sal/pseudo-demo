@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION findPattern(board, pattern)
+        LET total_rows BE LENGTH(board)
+        LET total_cols BE LENGTH(board[0])
+        LET pattern_rows BE LENGTH(pattern)
+        LET pattern_cols BE LENGTH(pattern[0])
+
+        FUNCTION matches(row_start, col_start)
+            LET map_char_to_digit BE DICTIONARY()
+            LET map_digit_to_char BE DICTIONARY()
+
+            LET row_idx BE 0
+            WHILE row_idx < pattern_rows
+                LET col_idx BE 0
+                WHILE col_idx < pattern_cols
+                    LET current_char BE pattern[row_idx][col_idx]
+                    LET current_digit BE board[row_start + row_idx][col_start + col_idx]
+
+                    IF current_char >= '0' AND current_char <= '9'
+                        LET expected_digit BE INTEGER_VALUE(current_char)
+                        IF expected_digit != current_digit
+                            RETURN False
+                        END IF
+                    ELSE
+                        IF current_char IN map_char_to_digit
+                            IF map_char_to_digit[current_char] != current_digit
+                                RETURN False
+                            END IF
+                        ELSE
+                            IF current_digit IN map_digit_to_char
+                                RETURN False
+                            END IF
+                            map_char_to_digit[current_char] = current_digit
+                            map_digit_to_char[current_digit] = current_char
+                        END IF
+                    END IF
+
+                    col_idx = col_idx + 1
+                END WHILE
+                row_idx += 1
+            END WHILE
+
+            RETURN True
+        END FUNCTION
+
+        LET r_index BE 0
+        WHILE r_index <= total_rows - pattern_rows
+            LET c_index BE 0
+            WHILE c_index <= total_cols - pattern_cols
+                IF matches(r_index, c_index)
+                    RETURN [r_index, c_index]
+                END IF
+                c_index = c_index + 1
+            END WHILE
+            r_index = r_index + 1
+        END WHILE
+
+        RETURN [-1, -1]
+    END FUNCTION
+END CLASS

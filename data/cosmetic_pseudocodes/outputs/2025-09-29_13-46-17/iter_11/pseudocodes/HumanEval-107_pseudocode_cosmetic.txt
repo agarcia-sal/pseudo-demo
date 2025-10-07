@@ -1,0 +1,40 @@
+```
+FUNCTION even_odd_palindrome(n)
+	FUNCTION is_palindrome(number)
+		FUNCTION aux(strg, idxl, idxr) RETURNS BOOL
+			IF idxl >= idxr THEN
+				RETURN TRUE
+			ELSE IF strg[idxl] != strg[idxr] THEN
+				RETURN FALSE
+			ELSE
+				RETURN aux(strg, idxl + 1, idxr - 1)
+			END IF
+		END FUNCTION
+
+		RETURN aux(CONCATENATE("", number), 0, LENGTH(CONCATENATE("", number)) - 1)
+	END FUNCTION
+
+	FUNCTION fold_over_range(accum_even, accum_odd, curr) RETURNS TUPLE
+		IF curr > n THEN
+			RETURN TUPLE(accum_even, accum_odd)
+		END IF
+
+		FUNCTION mod_is_one(x) RETURNS BOOL
+			RETURN NOT (x % 2 == 0)
+		END FUNCTION
+
+		FUNCTION mod_is_zero(x) RETURNS BOOL
+			RETURN NOT (x % 2 != 0)
+		END FUNCTION
+
+		LET pal_flag ← is_palindrome(curr)
+
+		LET new_accum_odd ← (mod_is_one(curr) AND pal_flag) ? accum_odd + 1 : accum_odd
+		LET new_accum_even ← (mod_is_zero(curr) AND pal_flag) ? accum_even + 1 : accum_even
+
+		RETURN fold_over_range(new_accum_even, new_accum_odd, curr + 1)
+	END FUNCTION
+
+	RETURN fold_over_range(0, 0, 1)
+END FUNCTION
+```

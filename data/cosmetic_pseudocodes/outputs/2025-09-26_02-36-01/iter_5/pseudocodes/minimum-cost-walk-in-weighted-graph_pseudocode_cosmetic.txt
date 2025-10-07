@@ -1,0 +1,103 @@
+CLASS UnionFind
+	FUNCTION __init__(self, n)
+		LET baseValue TO 0
+		LET upperLimit TO n - 1
+		LET progenitors TO []
+		LET levels TO []
+		WHILE baseValue <= upperLimit
+			progenitors APPEND baseValue
+			levels APPEND 1
+			baseValue = baseValue + 1
+		END WHILE
+		self.parent = progenitors
+		self.rank = levels
+	END FUNCTION
+
+	FUNCTION find(self, position)
+		LET currentRoot BE self.parent[position]
+		IF NOT (currentRoot == position)
+			LET updatedRoot BE self.find(currentRoot)
+			self.parent[position] = updatedRoot
+			currentRoot = updatedRoot
+		END IF
+		RETURN currentRoot
+	END FUNCTION
+
+	FUNCTION union(self, alpha, beta)
+		LET rootAlpha BE self.find(alpha)
+		LET rootBeta BE self.find(beta)
+		LET isDistinct BE rootAlpha != rootBeta
+		IF isDistinct
+			LET rankAlpha BE self.rank[rootAlpha]
+			LET rankBeta BE self.rank[rootBeta]
+			IF rankAlpha > rankBeta
+				self.parent[rootBeta] = rootAlpha
+			ELSE IF rankAlpha < rankBeta
+				self.parent[rootAlpha] = rootBeta
+			ELSE
+				self.parent[rootBeta] = rootAlpha
+				self.rank[rootAlpha] = rankAlpha + 1
+			END IF
+		END IF
+	END FUNCTION
+END CLASS
+
+CLASS Solution
+	FUNCTION minimumCost(self, count, edges, query)
+		LET ufInstance BE UnionFind(count)
+		LET allBitsMask BE (1 << 32) - 1
+		LET accComponents BE []
+		LET idxCounter BE 0
+		WHILE idxCounter < count
+			accComponents APPEND allBitsMask
+			idxCounter = idxCounter + 1
+		END WHILE
+
+		LET edgeIdx BE 0
+		WHILE edgeIdx < LENGTH(edges)
+			LET edgeTriple BE edges[edgeIdx]
+			LET localU BE edgeTriple[0]
+			LET localV BE edgeTriple[1]
+			LET localW BE edgeTriple[2]
+			ufInstance.union(localU, localV)
+			LET componentID BE ufInstance.find(localU)
+			accComponents[componentID] = accComponents[componentID] & localW
+			edgeIdx = edgeIdx + 1
+		END WHILE
+
+		LET costsDict BE {}
+		LET i BE 0
+		WHILE i < count
+			LET leader BE ufInstance.find(i)
+			IF NOT (leader IN costsDict)
+				costsDict[leader] = accComponents[leader]
+			END IF
+			i = i + 1
+		END WHILE
+
+		LET outputList BE []
+		LET qIdx BE 0
+		LET totalQueries BE LENGTH(query)
+		WHILE qIdx < totalQueries
+			LET pairElement BE query[qIdx]
+			LET startNode BE pairElement[0]
+			LET targetNode BE pairElement[1]
+			LET answer
+			IF startNode == targetNode
+				answer = 0
+			ELSE
+				LET rootStart BE ufInstance.find(startNode)
+				LET rootTarget BE ufInstance.find(targetNode)
+				IF rootStart == rootTarget
+					answer = costsDict[rootStart]
+				ELSE
+					answer = -1
+				END IF
+			END IF
+			outputList APPEND answer
+			qIdx = qIdx + 1
+		END WHILE
+
+		RETURN outputList
+	END FUNCTION
+END CLASS

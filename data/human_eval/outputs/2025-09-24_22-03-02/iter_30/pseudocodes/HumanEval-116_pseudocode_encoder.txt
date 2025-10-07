@@ -1,0 +1,38 @@
+FUNCTION sort_array WITH PARAMETER arr
+    SET sorted_arr TO CALL sorted WITH ARGUMENTS arr
+    DEFINE length_arr AS CALL length ON sorted_arr
+    SET result TO LIST WITH ELEMENTS EMPTY
+    FOR index FROM 0 TO length_arr MINUS 1
+        SET min_index TO index
+        FOR j FROM index PLUS 1 TO length_arr MINUS 1
+            SET x_binary TO CALL binary_representation_of INTEGER sorted_arr AT min_index
+            SET count_ones_min TO 0
+            FOR k FROM 2 TO CALL length ON x_binary MINUS 1
+                IF CALL character AT POSITION k IN x_binary EQUALS '1'
+                    INCREMENT count_ones_min BY 1
+            SET y_binary TO CALL binary_representation_of INTEGER sorted_arr AT j
+            SET count_ones_j TO 0
+            FOR k FROM 2 TO CALL length ON y_binary MINUS 1
+                IF CALL character AT POSITION k IN y_binary EQUALS '1'
+                    INCREMENT count_ones_j BY 1
+            IF count_ones_j LESS THAN count_ones_min OR (count_ones_j EQUALS count_ones_min AND sorted_arr AT j LESS THAN sorted_arr AT min_index)
+                SET min_index TO j
+        IF min_index NOT EQUAL TO index
+            SET temp TO sorted_arr AT index
+            SET item_at_min TO sorted_arr AT min_index
+            SET sorted_arr AT index TO item_at_min
+            SET sorted_arr AT min_index TO temp
+    SET result TO sorted_arr
+    RETURN result
+
+FUNCTION binary_representation_of INTEGER x
+    IF x EQUALS 0
+        RETURN STRING '0b0'
+    SET n TO x
+    SET bits TO LIST WITH ELEMENTS EMPTY
+    WHILE n GREATER THAN 0
+        SET remainder TO n MODULO 2
+        PREPEND remainder TO bits
+        SET n TO n DIVIDE BY 2
+    SET binary_string TO CONCATENATE '0b' WITH CONCATENATION OF ELEMENTS IN bits CONVERTED TO STRING
+    RETURN binary_string

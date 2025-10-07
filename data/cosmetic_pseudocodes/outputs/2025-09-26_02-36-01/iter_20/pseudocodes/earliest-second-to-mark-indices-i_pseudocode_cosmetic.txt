@@ -1,0 +1,73 @@
+CLASS Solution  
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)  
+       
+       FUNCTION helper(k)  
+          VAR arr ← new list of size LENGTH(nums)  
+          VAR idx ← 0  
+          WHILE idx < LENGTH(arr)  
+             arr[idx] ← -1  
+             idx ← idx + 1  
+          END WHILE  
+          
+          VAR count ← 0  
+          VAR count2 ← 0  
+          VAR uniqueSet ← EMPTY SET  
+          
+          VAR pos ← 0  
+          REPEAT  
+             EXIT WHEN pos >= k  
+             VAR x ← changeIndices[pos] - 1  
+             arr[x] ← pos  
+             pos ← pos + 1  
+          UNTIL FALSE  
+          
+          VAR sumTotal ← 0  
+          VAR ptr ← 0  
+          WHILE ptr < LENGTH(nums)  
+             sumTotal ← sumTotal + nums[ptr]  
+             ptr ← ptr + 1  
+          END WHILE  
+          
+          pos ← 0  
+          WHILE pos < k  
+             VAR y ← changeIndices[pos] - 1  
+             IF NOT (y IN uniqueSet) THEN
+                IF arr[y] = pos THEN
+                   IF nums[y] <= count2 THEN
+                      count2 ← count2 - nums[y]
+                      uniqueSet.ADD(y)
+                   ELSE
+                      RETURN FALSE
+                   END IF
+                ELSE
+                   count2 ← count2 + 1
+                END IF
+             ELSE
+                count2 ← count2 + 1
+             END IF  
+             pos ← pos + 1  
+          END WHILE  
+          
+          RETURN LENGTH(uniqueSet) = LENGTH(nums)  
+       END FUNCTION  
+       
+       VAR a ← 0  
+       VAR b ← LENGTH(changeIndices) + 1  
+       
+       VAR midVal ← 0  
+       WHILE a < b  
+          midVal ← a + (b - a) DIV 2  
+          IF helper(midVal) THEN
+             b ← midVal
+          ELSE
+             a ← a + 1
+          END IF
+       END WHILE  
+       
+       IF a <= LENGTH(changeIndices) THEN
+          RETURN a
+       ELSE
+          RETURN -1
+       END IF  
+    END FUNCTION  
+END CLASS

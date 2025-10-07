@@ -1,0 +1,65 @@
+```
+FUNCTION prod_signs(vecParam)
+  INDEX := 0
+  RESULT_SIGN <- None
+  ACC_MAGNITUDE <- 0
+
+  IF (LEN(vecParam) = 0) THEN
+    RETURN RESULT_SIGN
+  ELSE
+    PROCEDURE loop_check_zero(i)
+      IF i >= LEN(vecParam) THEN
+        RETURN False
+      ELSE
+        IF NOT (vecParam[i] <> 0) THEN
+          RETURN True
+        ELSE
+          RETURN loop_check_zero(i + 1)
+        END IF
+      END IF
+    END PROCEDURE
+
+    ZERO_PRESENT <- loop_check_zero(INDEX)
+
+    IF ZERO_PRESENT THEN
+      RESULT_SIGN <- 0
+    ELSE
+      PROCEDURE count_negatives(idx, neg_count)
+        IF idx >= LEN(vecParam) THEN
+          RETURN neg_count
+        ELSE
+          IF NOT (vecParam[idx] >= 0) THEN
+            RETURN count_negatives(idx + 1, neg_count + 1)
+          ELSE
+            RETURN count_negatives(idx + 1, neg_count)
+          END IF
+        END IF
+      END PROCEDURE
+
+      NEGATIVE_COUNT <- count_negatives(0, 0)
+
+      PROCEDURE power(base, exp, accum)
+        IF exp <= 0 THEN
+          RETURN accum
+        ELSE
+          RETURN power(base, exp - 1, accum * base)
+        END IF
+      END PROCEDURE
+
+      RESULT_SIGN <- power(-1, NEGATIVE_COUNT, 1)
+    END IF
+
+    PROCEDURE sum_abs_elements(pos, total)
+      IF pos >= LEN(vecParam) THEN
+        RETURN total
+      ELSE
+        ELEM_ABS <- (vecParam[pos] >= 0) * vecParam[pos] + (vecParam[pos] < 0) * (-vecParam[pos])
+        RETURN sum_abs_elements(pos + 1, total + ELEM_ABS)
+      END IF
+    END PROCEDURE
+
+    ACC_MAGNITUDE <- sum_abs_elements(0, 0)
+    RETURN RESULT_SIGN * ACC_MAGNITUDE
+  END IF
+END FUNCTION
+```

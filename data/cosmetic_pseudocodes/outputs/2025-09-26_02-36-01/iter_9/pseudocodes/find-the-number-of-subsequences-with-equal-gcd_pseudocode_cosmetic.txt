@@ -1,0 +1,87 @@
+CLASS Solution
+    FUNCTION subsequencePairCount(zeta)
+        CONSTANT THRESHOLD := 1000000007
+        FUNCTION gcd(alpha, beta)
+            IF beta = 0 THEN
+                RETURN alpha
+            ELSE
+                RETURN gcd(beta, alpha MOD beta)
+            END IF
+        END FUNCTION
+
+        VARIABLE apex := 0
+        FOR iterator FROM 0 TO LENGTH(zeta) - 1 STEP 1
+            IF zeta[iterator] > apex THEN
+                apex := zeta[iterator]
+            END IF
+        END FOR
+
+        VARIABLE grid_a := []
+        VARIABLE row_count := apex + 1
+        VARIABLE col_count := apex + 1
+        VARIABLE i_idx := 0
+        WHILE i_idx < row_count
+            VARIABLE row := []
+            VARIABLE j_idx := 0
+            REPEAT
+                row.APPEND(0)
+                j_idx := j_idx + 1
+            UNTIL j_idx = col_count
+            grid_a.APPEND(row)
+            i_idx := i_idx + 1
+        END WHILE
+        grid_a[0][0] := 1
+
+        FUNCTION mod_add(p, q)
+            RETURN (p + q) MOD THRESHOLD
+        END FUNCTION
+
+        VARIABLE u_counter := 0
+        WHILE u_counter < LENGTH(zeta)
+            VARIABLE current_val := zeta[u_counter]
+
+            VARIABLE grid_b := []
+            VARIABLE s_idx := 0
+            REPEAT
+                VARIABLE temp_row := []
+                VARIABLE t_idx := 0
+                WHILE t_idx < col_count
+                    temp_row.APPEND(0)
+                    t_idx := t_idx + 1
+                END WHILE
+                grid_b.APPEND(temp_row)
+                s_idx := s_idx + 1
+            UNTIL s_idx = row_count
+
+            VARIABLE p_idx := 0
+            REPEAT
+                VARIABLE q_idx := 0
+                WHILE q_idx < col_count
+                    VARIABLE original_val := grid_a[p_idx][q_idx]
+
+                    grid_b[p_idx][q_idx] := mod_add(grid_b[p_idx][q_idx], original_val)
+
+                    VARIABLE gcd_x := gcd(p_idx, current_val)
+                    grid_b[gcd_x][q_idx] := mod_add(grid_b[gcd_x][q_idx], original_val)
+
+                    VARIABLE gcd_y := gcd(q_idx, current_val)
+                    grid_b[p_idx][gcd_y] := mod_add(grid_b[p_idx][gcd_y], original_val)
+
+                    q_idx := q_idx + 1
+                END WHILE
+                p_idx := p_idx + 1
+            UNTIL p_idx = row_count
+
+            grid_a := grid_b
+            u_counter := u_counter + 1
+        END WHILE
+
+        VARIABLE omega := 0
+        VARIABLE v_idx := 1
+        FOR v_idx = 1 TO apex STEP 1
+            omega := (omega + grid_a[v_idx][v_idx]) MOD THRESHOLD
+        END FOR
+
+        RETURN omega
+    END FUNCTION
+END CLASS

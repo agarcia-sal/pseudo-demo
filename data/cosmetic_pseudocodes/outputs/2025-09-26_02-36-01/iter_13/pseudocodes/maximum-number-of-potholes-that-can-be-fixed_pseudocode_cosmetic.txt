@@ -1,0 +1,124 @@
+class Solution
+	func maxPotholes(road STRING, budget INTEGER) RETURNS INTEGER
+		define splitSegments(LIST STRING, input STRING, delimiter CHAR) RETURNS LIST STRING
+			DEFINE recurSplit(result LIST STRING, rem STRING, delim CHAR)
+				IF rem = "" THEN
+					RETURN result
+				END IF
+				DEFINE idx INTEGER
+				SET idx = indexOf(rem, delim)
+				IF idx = -1 THEN
+					APPEND rem TO result
+					RETURN result
+				END IF
+				APPEND substring(rem, 0, idx) TO result
+				RETURN recurSplit(result, substring(rem, idx + 1, length(rem) - (idx + 1)), delim)
+			END DEFINE
+			RETURN recurSplit(LIST(), input, delimiter)
+		END DEFINE
+
+		define indexOf(text STRING, ch CHAR) RETURNS INTEGER
+			DEFINE i INTEGER
+			SET i = 0
+			WHILE i < length(text)
+				IF charAt(text, i) = ch THEN
+					RETURN i
+				END IF
+				SET i = i + 1
+			END WHILE
+			RETURN -1
+		END DEFINE
+
+		define substring(text STRING, start INTEGER, length INTEGER) RETURNS STRING
+			DEFINE result STRING
+			SET result = ""
+			DEFINE i INTEGER
+			SET i = start
+			REPEAT_WHILE i < start + length
+				SET result = result + charAt(text, i)
+				SET i = i + 1
+			END REPEAT_WHILE
+			RETURN result
+		END DEFINE
+
+		define charAt(text STRING, pos INTEGER) RETURNS CHAR
+			RETURN the character at position pos in text
+		END DEFINE
+
+		define length(str STRING) RETURNS INTEGER
+			DEFINE count INTEGER
+			SET count = 0
+			FOR EACH c IN str
+				SET count = count + 1
+			END FOR
+			RETURN count
+		END DEFINE
+
+		define sortAscending(arr LIST STRING) RETURNS LIST STRING
+			DEFINE swapped BOOLEAN
+			REPEAT
+				SET swapped = FALSE
+				FOR i INTEGER FROM 0 TO length(arr) - 2
+					IF length(arr[i]) > length(arr[i + 1]) THEN
+						DEFINE temp STRING
+						SET temp = arr[i]
+						SET arr[i] = arr[i + 1]
+						SET arr[i + 1] = temp
+						SET swapped = TRUE
+					END IF
+				END FOR
+			UNTIL NOT swapped
+			RETURN arr
+		END DEFINE
+
+		define fixedCount INTEGER
+		SET fixedCount = 0
+		define remainingBudget INTEGER
+		SET remainingBudget = budget
+		define segments LIST STRING
+		SET segments = splitSegments([], road, '.')
+
+		SET segments = sortAscending(segments)
+
+		DEFINE processSegment(segmentsList LIST STRING, idx INTEGER) RETURNS NIL
+			IF idx = length(segmentsList) THEN
+				RETURN
+			END IF
+			DEFINE segment STRING
+			SET segment = segmentsList[idx]
+			DEFINE segLen INTEGER
+			SET segLen = length(segment)
+			IF segLen = 0 THEN
+				CALL processSegment(segmentsList, idx + 1)
+				RETURN
+			END IF
+			DEFINE cost INTEGER
+			SET cost = segLen + 1
+			IF cost <= remainingBudget THEN
+				SET fixedCount = fixedCount + segLen
+				SET remainingBudget = remainingBudget - cost
+				CALL processSegment(segmentsList, idx + 1)
+				RETURN
+			END IF
+
+			DEFINE tryReduce(N INTEGER)
+				IF N = 0 OR remainingBudget <= 0 THEN
+					RETURN
+				END IF
+				SET cost = N + 1
+				IF remainingBudget >= cost THEN
+					SET fixedCount = fixedCount + N
+					SET remainingBudget = remainingBudget - cost
+					RETURN
+				END IF
+				CALL tryReduce(N - 1)
+			END DEFINE
+
+			CALL tryReduce(segLen)
+			CALL processSegment(segmentsList, idx + 1)
+		END DEFINE
+
+		CALL processSegment(segments, 0)
+		RETURN fixedCount
+	end func
+end class

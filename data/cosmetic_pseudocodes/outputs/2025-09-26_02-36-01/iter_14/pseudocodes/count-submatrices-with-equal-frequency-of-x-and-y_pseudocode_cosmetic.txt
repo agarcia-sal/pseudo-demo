@@ -1,0 +1,45 @@
+CLASS Solution  
+    FUNCTION numberOfSubmatrices(grid)  
+        IF NOT (grid NOT EQUALS empty AND grid[0] NOT EQUALS empty) THEN  
+            RETURN 0  
+        END IF  
+        SET u TO LENGTH(grid)  
+        SET v TO LENGTH(grid[0])  
+        INITIALIZE auxiliary TO an array FROM 0 TO u+1 EACH containing an array FROM 0 TO v+1 EACH containing [0, 0]  
+        
+        FUNCTION updatePrefix(a, b, c, d, e)  
+            RETURN a + b - c + e  
+        END FUNCTION  
+        
+        SET p TO 1  
+        WHILE p <= u DO  
+            SET q TO 1  
+            REPEAT  
+                SET auxiliary[p][q][0] TO updatePrefix(auxiliary[p][q-1][0], auxiliary[p-1][q][0], auxiliary[p-1][q-1][0], 0, 0)  
+                SET auxiliary[p][q][1] TO updatePrefix(auxiliary[p][q-1][1], auxiliary[p-1][q][1], auxiliary[p-1][q-1][1], 0, 0)  
+                
+                IF grid[p-1][q-1] EQUALS 'X' THEN  
+                    SET auxiliary[p][q][0] TO auxiliary[p][q][0] + 1  
+                ELSE IF grid[p-1][q-1] EQUALS 'Y' THEN  
+                    SET auxiliary[p][q][1] TO auxiliary[p][q][1] + 1  
+                END IF  
+                
+                SET q TO q + 1  
+            UNTIL q > v  
+            SET p TO p + 1  
+        END WHILE  
+        
+        SET totalCount TO 0  
+        FOR r FROM 1 TO u DO  
+            FOR s FROM 1 TO v DO  
+                SET aCount TO auxiliary[r][s][0]  
+                SET bCount TO auxiliary[r][s][1]  
+                IF (aCount > 0) AND (aCount = bCount) THEN  
+                    totalCount = totalCount + 1  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        RETURN totalCount  
+    END FUNCTION  
+END CLASS

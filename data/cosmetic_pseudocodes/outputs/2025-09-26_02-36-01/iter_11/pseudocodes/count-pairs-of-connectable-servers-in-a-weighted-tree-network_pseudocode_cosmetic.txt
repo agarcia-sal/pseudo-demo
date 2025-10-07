@@ -1,0 +1,87 @@
+CLASS Solution
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)
+        PROCEDURE createAdjacencyMap(entries)
+            SET adjacencyMap TO empty mapping with default list
+            PROCEDURE addEdge(a, b, length)
+                CALL addNeighbor(adjacencyMap, a, b, length)
+                CALL addNeighbor(adjacencyMap, b, a, length)
+            END PROCEDURE
+
+            PROCEDURE addNeighbor(map, key, neighborNode, edgeWeight)
+                SET neighborsList TO map[key]
+                INSERT [neighborNode, edgeWeight] AT END OF neighborsList
+                SET map[key] TO neighborsList
+            END PROCEDURE
+
+            FOR EACH triple source target weight IN entries DO
+                CALL addEdge(source, target, weight)
+            END FOR
+            RETURN adjacencyMap
+        END PROCEDURE
+
+        SET mapping TO createAdjacencyMap(edges)
+        SET size TO COUNT OF KEYS(mapping)
+        SET results TO EMPTY LIST
+        FOR idx FROM 0 TO size MINUS 1 DO
+            ADD 0 TO results
+        END FOR
+
+        PROCEDURE traverseDepth(current, predecessor, dist, collected)
+            PROCEDURE isDivisible(num, divisor)
+                RETURN (num - FLOOR(num / divisor)*divisor) == 0
+            END PROCEDURE
+
+            IF isDivisible(dist, signalSpeed) THEN
+                INSERT current AT END OF collected
+            END IF
+
+            SET aggregate TO 0
+            FOR EACH [adjacentNode, edgeLength] IN mapping[current] DO
+                IF adjacentNode IS NOT predecessor THEN
+                    SET aggregate TO aggregate + traverseDepth(adjacentNode, current, dist + edgeLength, collected)
+                END IF
+            END FOR
+
+            IF isDivisible(dist, signalSpeed) THEN
+                RETURN aggregate + 1
+            ELSE
+                RETURN aggregate
+            END IF
+        END PROCEDURE
+
+        PROCEDURE pairCountThrough(nodeC)
+            SET segments TO EMPTY LIST
+            FOR EACH [neighborNode, edgeLen] IN mapping[nodeC] DO
+                SET tray TO EMPTY LIST
+                CALL traverseDepth(neighborNode, nodeC, edgeLen, tray)
+                INSERT tray AT END OF segments
+            END FOR
+
+            SET countPairs TO 0
+            SET limit TO LENGTH(segments)
+            PROCEDURE multiplyLengths(a, b)
+                RETURN LENGTH(a)*LENGTH(b)
+            END PROCEDURE
+
+            SET outer TO 0
+            WHILE outer <= limit - 2
+                SET inner TO outer + 1
+                WHILE inner <= limit - 1
+                    SET countPairs TO countPairs + multiplyLengths(segments[outer], segments[inner])
+                    SET inner TO inner + 1
+                END WHILE
+                SET outer TO outer + 1
+            END WHILE
+
+            RETURN countPairs
+        END PROCEDURE
+
+        SET index TO 0
+        WHILE index <= size - 1
+            SET results[index] TO pairCountThrough(index)
+            SET index TO index + 1
+        END WHILE
+
+        RETURN results
+    END FUNCTION
+END CLASS

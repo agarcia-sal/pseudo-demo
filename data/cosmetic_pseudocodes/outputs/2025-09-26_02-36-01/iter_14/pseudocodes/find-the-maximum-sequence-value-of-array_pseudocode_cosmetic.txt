@@ -1,0 +1,100 @@
+```
+CLASS Solution
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER
+        CONST MAX_BITS = 128 / 2
+        SET length_nums TO 0
+        WHILE length_nums NOT EQUAL TO LENGTH OF nums
+            INCREMENT length_nums BY 1
+        END WHILE
+
+        DEFINE create3DFalseCollection(a INTEGER, b INTEGER, c INTEGER)
+            VAR collection = EMPTY LIST
+            VAR index_a = 0
+            WHILE index_a LESS THAN a
+                VAR sublist_b = EMPTY LIST
+                VAR index_b = 0
+                WHILE index_b LESS THAN b
+                    VAR sublist_c = EMPTY LIST
+                    VAR index_c = 0
+                    WHILE index_c LESS THAN c
+                        ADD FALSE TO sublist_c
+                        INCREMENT index_c BY 1
+                    END WHILE
+                    ADD sublist_c TO sublist_b
+                    INCREMENT index_b BY 1
+                END WHILE
+                ADD sublist_b TO collection
+                INCREMENT index_a BY 1
+            END WHILE
+            RETURN collection
+        END DEFINE
+
+        VAR dp_forward = create3DFalseCollection(length_nums + 1, k + 2, MAX_BITS)
+        SET dp_forward[0][0][0] TO TRUE
+
+        VAR outer_idx = 0
+        WHILE outer_idx LESS THAN length_nums
+            VAR mid_idx = 0
+            WHILE mid_idx LESS THAN k + 1
+                VAR inner_idx = 0
+                WHILE inner_idx LESS THAN MAX_BITS
+                    SET dp_forward[outer_idx + 1][mid_idx][inner_idx] TO (dp_forward[outer_idx + 1][mid_idx][inner_idx] OR dp_forward[outer_idx][mid_idx][inner_idx])
+
+                    VAR bitwise_combined = inner_idx BITWISE_OR nums[outer_idx]
+                    SET dp_forward[outer_idx + 1][mid_idx + 1][bitwise_combined] TO (dp_forward[outer_idx + 1][mid_idx + 1][bitwise_combined] OR dp_forward[outer_idx][mid_idx][inner_idx])
+
+                    INCREMENT inner_idx BY 1
+                END WHILE
+                INCREMENT mid_idx BY 1
+            END WHILE
+            INCREMENT outer_idx BY 1
+        END WHILE
+
+        VAR dp_backward = create3DFalseCollection(length_nums + 1, k + 2, MAX_BITS)
+        SET dp_backward[length_nums][0][0] TO TRUE
+
+        VAR idx_i = length_nums
+        REPEAT
+            DECREMENT idx_i BY 1
+
+            VAR idx_j = 0
+            WHILE idx_j LESS THAN k + 1
+                VAR idx_y = 0
+                WHILE idx_y LESS THAN MAX_BITS
+                    SET dp_backward[idx_i][idx_j][idx_y] TO (dp_backward[idx_i][idx_j][idx_y] OR dp_backward[idx_i + 1][idx_j][idx_y])
+
+                    VAR combined_bits = idx_y BITWISE_OR nums[idx_i]
+                    SET dp_backward[idx_i][idx_j + 1][combined_bits] TO (dp_backward[idx_i][idx_j + 1][combined_bits] OR dp_backward[idx_i + 1][idx_j][idx_y])
+
+                    INCREMENT idx_y BY 1
+                END WHILE
+                INCREMENT idx_j BY 1
+            END WHILE
+        UNTIL idx_i EQUALS 0
+
+        VAR answer = 0
+        VAR scan_index = k
+        WHILE scan_index LESS THAN (length_nums - k)
+            VAR bit_x = 0
+            WHILE bit_x LESS THAN MAX_BITS
+                IF dp_forward[scan_index][k][bit_x] EQUALS TRUE THEN
+                    VAR bit_y = 0
+                    WHILE bit_y LESS THAN MAX_BITS
+                        IF dp_backward[scan_index][k][bit_y] EQUALS TRUE THEN
+                            VAR candidate = bit_x BITWISE_XOR bit_y
+                            IF candidate GREATER THAN answer THEN
+                                SET answer TO candidate
+                            END IF
+                        END IF
+                        INCREMENT bit_y BY 1
+                    END WHILE
+                END IF
+                INCREMENT bit_x BY 1
+            END WHILE
+            INCREMENT scan_index BY 1
+        END WHILE
+
+        RETURN answer
+    END FUNCTION
+END CLASS
+```

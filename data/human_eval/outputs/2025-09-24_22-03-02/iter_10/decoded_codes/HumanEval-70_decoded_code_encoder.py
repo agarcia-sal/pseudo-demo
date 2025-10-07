@@ -1,0 +1,13 @@
+def strange_sort_list(lst):
+    res = []
+    switch = True
+    lst = lst.copy()
+    while lst:
+        if switch:
+            val = min(lst)
+        else:
+            val = max(lst)
+        res.append(val)
+        lst.remove(res[-1])
+        switch = not switch
+    return res

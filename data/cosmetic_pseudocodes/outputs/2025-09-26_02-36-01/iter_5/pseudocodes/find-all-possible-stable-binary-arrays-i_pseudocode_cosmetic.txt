@@ -1,0 +1,39 @@
+CLASS Solution
+    FUNCTION numberOfStableArrays(zero, one, limit)
+        SET MOD_CONST TO 1 + (10 ^ 9)
+
+        FUNCTION dp(remaining_zeros, remaining_ones, prev_char, prev_run_len)
+            FUNCTION recurse(zs, os, pc, prl)
+                IF (zs = 0) AND (os = 0) THEN
+                    RETURN 1
+                ENDIF
+                IF (zs < 0) OR (os < 0) THEN
+                    RETURN 0
+                ENDIF
+
+                SET sum_result TO 0
+
+                IF (pc <> 0) OR (prl < limit) THEN
+                    SET new_len_zero TO (prl + 1) * ((pc = 0) * 1) + ((pc <> 0) * 1)
+                    SET sum_result TO (sum_result + dp(zs - 1, os, 0, new_len_zero)) % MOD_CONST
+                ENDIF
+
+                IF (pc <> 1) OR (prl < limit) THEN
+                    SET new_len_one TO (prl + 1) * ((pc = 1) * 1) + ((pc <> 1) * 1)
+                    SET sum_result TO (sum_result + dp(zs, os - 1, 1, new_len_one)) % MOD_CONST
+                ENDIF
+
+                RETURN sum_result
+            END FUNCTION
+
+            RETURN recurse(remaining_zeros, remaining_ones, prev_char, prev_run_len)
+        END FUNCTION
+
+        SET initial_zeros TO zero
+        SET initial_ones TO one
+        SET initial_prev_char TO -1
+        SET initial_run_length TO 0
+
+        RETURN dp(initial_zeros, initial_ones, initial_prev_char, initial_run_length)
+    END FUNCTION
+END CLASS

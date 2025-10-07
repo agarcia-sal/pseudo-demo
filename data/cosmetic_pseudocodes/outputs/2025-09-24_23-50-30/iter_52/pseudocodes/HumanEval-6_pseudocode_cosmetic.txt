@@ -1,0 +1,55 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        FUNCTION recurse_chars(index, curr_depth, max_depth)
+            IF index >= LENGTH(group_string) THEN
+                RETURN max_depth
+            END IF
+
+            SWITCH group_string[index]
+                CASE '('
+                    LET updated_depth = curr_depth + 1
+                    LET updated_max = IF updated_depth > max_depth THEN updated_depth ELSE max_depth
+                    RETURN recurse_chars(index + 1, updated_depth, updated_max)
+                CASE ')'
+                    RETURN recurse_chars(index + 1, curr_depth - 1, max_depth)
+            END SWITCH
+        END FUNCTION
+
+        RETURN recurse_chars(0, 0, 0)
+    END FUNCTION
+
+    LET tokens_collection = []
+    LET start_idx = 0
+    LET length_str = LENGTH(parentheses_string)
+
+    WHILE start_idx < length_str
+        WHILE start_idx < length_str AND parentheses_string[start_idx] = ' ' DO
+            start_idx = start_idx + 1
+        END WHILE
+
+        LET end_idx = start_idx
+        WHILE end_idx < length_str AND parentheses_string[end_idx] != ' ' DO
+            end_idx = end_idx + 1
+        END WHILE
+
+        IF end_idx > start_idx THEN
+            LET token = ""
+            FOR pos FROM start_idx TO end_idx - 1 DO
+                LET token = token + parentheses_string[pos]
+            END FOR
+            INSERT token INTO tokens_collection
+        END IF
+
+        start_idx = end_idx + 1
+    END WHILE
+
+    LET results_array = []
+    FOR EACH token IN tokens_collection DO
+        LET depth_val = parse_paren_group(token)
+        INSERT depth_val INTO results_array
+    END FOR
+    
+    RETURN results_array
+END FUNCTION
+```

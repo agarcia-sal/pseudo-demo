@@ -1,0 +1,48 @@
+CLASS Solution
+    FUNCTION findMaximumNumber(k, x)
+        FUNCTION count_set_bits(n, bitpos)
+            SET tally TO 0
+            SET segment_length TO 1 * (2 ^ bitpos)
+            SET completed_segments TO n \ segment_length
+            SET partial_segment_full TO completed_segments \ 2
+            SET tally TO partial_segment_full * segment_length
+            IF (completed_segments MOD 2) = 1 THEN
+                SET remainder TO n MOD segment_length
+                SET tally TO tally + remainder + 1
+            END IF
+            RETURN tally
+        END FUNCTION
+
+        FUNCTION accumulated_price(limit)
+            FUNCTION accumulate_recursive(index, accumulator)
+                IF (2 ^ (index * x - 1)) > limit THEN
+                    RETURN accumulator
+                ELSE
+                    SET addition TO count_set_bits(limit, (index * x) - 1)
+                    RETURN accumulate_recursive(index + 1, accumulator + addition)
+                END IF
+            END FUNCTION
+
+            RETURN accumulate_recursive(1, 0)
+        END FUNCTION
+
+        FUNCTION binary_search(low_val, high_val)
+            IF low_val > high_val THEN
+                RETURN high_val
+            ELSE
+                SET middle_val TO low_val + ((high_val - low_val) \ 2)
+                SET price_at_mid TO accumulated_price(middle_val)
+                IF price_at_mid <= k THEN
+                    RETURN binary_search(middle_val + 1, high_val)
+                ELSE
+                    RETURN binary_search(low_val, middle_val - 1)
+                END IF
+            END IF
+        END FUNCTION
+
+        SET start_range TO 1
+        SET end_range TO 1 * (2 ^ 60)
+        SET result TO binary_search(start_range, end_range)
+        RETURN result
+    END FUNCTION
+END CLASS

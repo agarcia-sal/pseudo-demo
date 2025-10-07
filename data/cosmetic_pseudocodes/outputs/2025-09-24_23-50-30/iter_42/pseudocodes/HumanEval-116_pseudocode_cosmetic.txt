@@ -1,0 +1,59 @@
+```
+FUNCTION sort_array(array_of_integers)
+	tabulated_binary_ones := FUNCTION(x)
+		binary_layout := BINARY_REPRESENTATION_OF x
+		count_ones := 0
+		index_counter := 3
+		WHILE index_counter <= LENGTH_OF binary_layout DO
+			IF binary_layout[index_counter] = '1' THEN
+				count_ones := count_ones + 1
+			END IF
+			index_counter := index_counter + 1
+		END WHILE
+		RETURN count_ones
+	END FUNCTION
+
+	first_pass_array := array_of_integers
+	sorted_first_pass := []
+	stack_pointer := 0
+
+	WHILE stack_pointer < LENGTH_OF first_pass_array DO
+		minimal_index := stack_pointer
+		counter := stack_pointer + 1
+		WHILE counter < LENGTH_OF first_pass_array DO
+			IF first_pass_array[counter] < first_pass_array[minimal_index] THEN
+				minimal_index := counter
+			END IF
+			counter := counter + 1
+		END WHILE
+		temp_swap := first_pass_array[stack_pointer]
+		first_pass_array[stack_pointer] := first_pass_array[minimal_index]
+		first_pass_array[minimal_index] := temp_swap
+		stack_pointer := stack_pointer + 1
+	END WHILE
+
+	final_result := []
+	positions_checked := 0
+
+	WHILE positions_checked < LENGTH_OF sorted_first_pass DO
+		current_element := sorted_first_pass[positions_checked]
+		inserted := FALSE
+		loop_marker := 0
+		WHILE loop_marker < LENGTH_OF final_result AND NOT inserted DO
+			criteria_current := tabulated_binary_ones(current_element)
+			criteria_existing := tabulated_binary_ones(final_result[loop_marker])
+			IF criteria_current < criteria_existing THEN
+				final_result := SLICE(final_result, 0, loop_marker) + [current_element] + SLICE(final_result, loop_marker)
+				inserted := TRUE
+			END IF
+			loop_marker := loop_marker + 1
+		END WHILE
+		IF NOT inserted THEN
+			final_result := final_result + [current_element]
+		END IF
+		positions_checked := positions_checked + 1
+	END WHILE
+
+	RETURN final_result
+END FUNCTION
+```

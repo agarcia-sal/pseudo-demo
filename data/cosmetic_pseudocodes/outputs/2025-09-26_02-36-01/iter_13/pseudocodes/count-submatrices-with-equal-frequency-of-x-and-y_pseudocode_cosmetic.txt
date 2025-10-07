@@ -1,0 +1,70 @@
+class Solution
+    function numberOfSubmatrices(grid)
+        set function is_empty_list(lst) =
+            if lst = [] then true else false
+        
+        if is_empty_list(grid) or is_empty_list(grid[0]) then return 0 end if
+        
+        let total_rows be length of grid
+        let total_columns be length of grid[0]
+        
+        function make_2d_array(r, c)
+            if r = 0 then return [] end if
+            define recurse_row = function(x)
+                if x = 0 then return [] end if
+                return [[0, 0]] + recurse_row(x - 1)
+            end function
+            return [recurse_row(c)] + make_2d_array(r - 1, c)
+        end function
+        
+        let prefixSum be make_2d_array(total_rows + 1, total_columns + 1)
+        
+        function update_prefix_sum(rowIdx, colIdx)
+            if rowIdx > total_rows then return end if
+            if colIdx > total_columns then update_prefix_sum(rowIdx + 1, 1); return end if
+            
+            let a = prefixSum[rowIdx][colIdx - 1][0]
+            let b = prefixSum[rowIdx - 1][colIdx][0]
+            let c = prefixSum[rowIdx - 1][colIdx - 1][0]
+            let d = prefixSum[rowIdx][colIdx - 1][1]
+            let e = prefixSum[rowIdx - 1][colIdx][1]
+            let f = prefixSum[rowIdx - 1][colIdx - 1][1]
+            
+            let prefixSumRowCol be prefixSum[rowIdx][colIdx]
+            
+            prefixSumRowCol[0] = ((a + b) - c)
+            prefixSumRowCol[1] = ((d + e) - f)
+            
+            let gridChar be grid[rowIdx - 1][colIdx - 1]
+            if gridChar = "X" then
+                prefixSumRowCol[0] = prefixSumRowCol[0] + 1
+            else if gridChar = "Y" then
+                prefixSumRowCol[1] = prefixSumRowCol[1] + 1
+            end if
+            
+            update_prefix_sum(rowIdx, colIdx + 1)
+        end function
+        
+        update_prefix_sum(1, 1)
+        
+        let result_count be 0
+        
+        function check_and_increment(r, c)
+            if r > total_rows then return end if
+            if c > total_columns then check_and_increment(r + 1, 1); return end if
+            
+            let xCount be prefixSum[r][c][0]
+            let yCount be prefixSum[r][c][1]
+            
+            if xCount > 0 and not (xCount ≠ yCount) then
+                result_count = result_count + 1
+            end if
+            
+            check_and_increment(r, c + 1)
+        end function
+        
+        check_and_increment(1, 1)
+        
+        return result_count
+    end function
+end class

@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION minimumSum(grid)
+        SET coordinates TO new empty list
+        LET x TO 0
+        WHILE x < LENGTH(grid)
+            LET y TO 0
+            WHILE y < LENGTH(grid[x])
+                IF grid[x][y] = 1 THEN
+                    APPEND (x, y) TO coordinates
+                END IF
+                y = y + 1
+            END WHILE
+            x = x + 1
+        END WHILE
+
+        FUNCTION rect_area(points)
+            IF LENGTH(points) = 0 THEN
+                RETURN 0
+            END IF
+
+            LET rows TO [point[0] FOR EACH point IN points]
+            LET cols TO [point[1] FOR EACH point IN points]
+
+            LET min_row TO rows[0]
+            LET max_row TO rows[0]
+            LET min_col TO cols[0]
+            LET max_col TO cols[0]
+
+            LET idx TO 1
+            WHILE idx < LENGTH(rows)
+                IF rows[idx] < min_row THEN
+                    min_row = rows[idx]
+                ELSE IF rows[idx] > max_row THEN
+                    max_row = rows[idx]
+                END IF
+
+                IF cols[idx] < min_col THEN
+                    min_col = cols[idx]
+                ELSE IF cols[idx] > max_col THEN
+                    max_col = cols[idx]
+                END IF
+                idx = idx + 1
+            END WHILE
+
+            LET width TO (max_row - min_row) + 1
+            LET height TO (max_col - min_col) + 1
+
+            RETURN width * height
+        END FUNCTION
+
+        LET minimum_total TO +∞
+        LET total_points TO LENGTH(coordinates)
+
+        LET a TO 1
+        WHILE a < total_points - 1
+            LET b TO a + 1
+            WHILE b < total_points
+                LET c TO b + 1
+                WHILE c <= total_points
+                    FOR EACH subset1 IN combinations(coordinates, a)
+                        LET set_all TO SET(coordinates)
+                        LET set_sub1 TO SET(subset1)
+                        LET leftover_after_sub1 TO set_all - set_sub1
+
+                        FOR EACH subset2 IN combinations(leftover_after_sub1, b - a)
+                            LET set_sub2 TO SET(subset2)
+                            LET subset3 TO leftover_after_sub1 - set_sub2
+
+                            LET area_1 TO rect_area(subset1)
+                            LET area_2 TO rect_area(subset2)
+                            LET area_3 TO rect_area(subset3)
+
+                            IF area_1 > 0 AND area_2 > 0 AND area_3 > 0 THEN
+                                LET sum_areas TO area_1 + area_2 + area_3
+                                IF sum_areas < minimum_total THEN
+                                    minimum_total = sum_areas
+                                END IF
+                            END IF
+                        END FOR
+                    END FOR
+                    c = c + 1
+                END WHILE
+                b = b + 1
+            END WHILE
+            a = a + 1
+        END WHILE
+
+        RETURN minimum_total
+    END FUNCTION
+END CLASS

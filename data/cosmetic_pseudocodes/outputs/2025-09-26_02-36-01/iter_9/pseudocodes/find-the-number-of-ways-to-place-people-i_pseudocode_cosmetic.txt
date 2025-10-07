@@ -1,0 +1,70 @@
+CLASS Solution
+	FUNCTION numberOfPairs(inputList)
+		PROCEDURE isBetween(a, lower, upper) RETURNS BOOLEAN
+			RETURN (a >= lower) AND (a <= upper)
+		END PROCEDURE
+
+		PROCEDURE pointCheck(px, py, qx, qy, rx, ry) RETURNS BOOLEAN
+			RETURN (isBetween(rx, px, qx) AND isBetween(ry, qy, py))
+		END PROCEDURE
+
+		VARIABLE resultCount <- 0
+		VARIABLE size <- LENGTH(inputList)
+		
+		PROCEDURE iterateI(indexI)
+			IF indexI >= size THEN
+				RETURN
+			END IF
+
+			PROCEDURE iterateJ(indexJ)
+				IF indexJ >= size THEN
+					RETURN
+				END IF
+
+				IF NOT (indexI = indexJ) THEN
+					VARIABLE xI <- inputList[indexI][0]
+					VARIABLE yI <- inputList[indexI][1]
+					VARIABLE xJ <- inputList[indexJ][0]
+					VARIABLE yJ <- inputList[indexJ][1]
+
+					IF (xI <= xJ) AND (yI >= yJ) THEN
+						VARIABLE isValid <- TRUE
+
+						PROCEDURE iterateK(indexK)
+							IF indexK >= size THEN
+								RETURN
+							END IF
+
+							IF NOT (indexK = indexI) AND NOT (indexK = indexJ) THEN
+								VARIABLE xK <- inputList[indexK][0]
+								VARIABLE yK <- inputList[indexK][1]
+
+								IF (xI <= xK) AND (xK <= xJ) AND (yI >= yK) AND (yK >= yJ) THEN
+									isValid <- FALSE
+								END IF
+							END IF
+
+							IF (isValid) THEN
+								iterateK(indexK + 1)
+							END IF
+						END PROCEDURE
+
+						iterateK(0)
+
+						IF isValid THEN
+							resultCount <- resultCount + 1
+						END IF
+					END IF
+				END IF
+
+				iterateJ(indexJ + 1)
+			END PROCEDURE
+
+			iterateJ(0)
+			iterateI(indexI + 1)
+		END PROCEDURE
+
+		iterateI(0)
+		RETURN resultCount
+	END FUNCTION
+END CLASS

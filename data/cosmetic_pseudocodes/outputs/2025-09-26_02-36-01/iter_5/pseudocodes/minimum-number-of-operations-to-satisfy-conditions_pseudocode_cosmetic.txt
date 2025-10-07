@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION minimumOperations(grid)
+        LET rowCount BE LENGTH OF grid
+        LET colCount BE LENGTH OF grid[0]
+        LET totalOps BE 0
+
+        PROCEDURE compareAndFix(current, next, col)
+            IF current[col] ≠ next[col]
+                SET totalOps TO totalOps + 1
+                SET next[col] TO current[col]
+            ENDIF
+        END PROCEDURE
+
+        PROCEDURE alterNextValue(row, col)
+            IF col < colCount - 1 AND grid[row][col] = grid[row][col + 1]
+                SET totalOps TO totalOps + 1
+                LET replacementFound BE FALSE
+                LET candidateValue BE 0
+                WHILE NOT replacementFound AND candidateValue ≤ 9
+                    IF candidateValue ≠ grid[row][col]
+                        SET grid[row][col + 1] TO candidateValue
+                        SET replacementFound TO TRUE
+                    ENDIF
+                    SET candidateValue TO candidateValue + 1
+                ENDWHILE
+            ENDIF
+        END PROCEDURE
+
+        LET currentCol BE 0
+        WHILE currentCol ≤ colCount - 1
+            LET currentRow BE 0
+            WHILE currentRow ≤ rowCount - 2
+                CALL compareAndFix(grid[currentRow], grid[currentRow + 1], currentCol)
+                SET currentRow TO currentRow + 1
+            ENDWHILE
+
+            SET currentRow TO 0
+            WHILE currentRow ≤ rowCount - 1
+                CALL alterNextValue(currentRow, currentCol)
+                SET currentRow TO currentRow + 1
+            ENDWHILE
+
+            SET currentCol TO currentCol + 1
+        ENDWHILE
+
+        LET result TO totalOps
+        RETURN result
+    END FUNCTION
+END CLASS

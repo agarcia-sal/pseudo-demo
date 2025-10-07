@@ -1,0 +1,64 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, size)  
+        INITIALIZE self.parent AS empty list  
+        INITIALIZE self.rank AS empty list  
+        FOR index FROM 0 TO size MINUS 1  
+            APPEND index TO self.parent  
+            APPEND 0 TO self.rank  
+        END FOR  
+    END FUNCTION  
+  
+    FUNCTION find(self, u)  
+        WHILE self.parent[u] NOT EQUAL u  
+            SET self.parent[u] TO self.parent[self.parent[u]]  // Path compression step  
+            SET u TO self.parent[u]  
+        END WHILE  
+        RETURN u  
+    END FUNCTION  
+  
+    FUNCTION union(self, u, v)  
+        SET root_u TO self.find(u)  
+        SET root_v TO self.find(v)  
+        IF root_u IS root_v  
+            RETURN  
+        END IF  
+  
+        IF self.rank[root_u] < self.rank[root_v]  
+            SET self.parent[root_u] TO root_v  
+        ELSE IF self.rank[root_v] < self.rank[root_u]  
+            SET self.parent[root_v] TO root_u  
+        ELSE  
+            SET self.parent[root_v] TO root_u  
+            INCREMENT self.rank[root_u] BY 1  
+        END IF  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION maximizeSumOfWeights(self, edges, k)  
+        LET node_count BE LENGTH(edges) PLUS 1  
+        CREATE degree_list WITH node_count ZEROES  
+        CREATE uf_instance AS UnionFind(node_count)  
+  
+        DEFINE comparator(edge1, edge2) AS  
+            RETURN edge1[2] > edge2[2]  
+        END DEFINE  
+        SORT edges USING comparator  
+  
+        INITIALIZE total_weight TO 0  
+  
+        FOR EACH edge IN edges  
+            LET node_u BE edge[0]  
+            LET node_v BE edge[1]  
+            LET weight BE edge[2]  
+            IF degree_list[node_u] < k AND degree_list[node_v] < k AND uf_instance.find(node_u) != uf_instance.find(node_v)  
+                uf_instance.union(node_u, node_v)  
+                INCREMENT degree_list[node_u] BY 1  
+                INCREMENT degree_list[node_v] BY 1  
+                ADD weight TO total_weight  
+            END IF  
+        END FOR  
+  
+        RETURN total_weight  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,43 @@
+FUNCTION separate_paren_groups(string_of_parentheses)
+    SET result_collection TO []
+    SET buffer_chars TO []
+    SET depth_level TO 0
+    SET position_index TO 0
+    SET length_limit TO LENGTH(string_of_parentheses)
+
+    WHILE position_index < length_limit
+        SET current_symbol TO string_of_parentheses.at(position_index)
+
+        SWITCH current_symbol
+            CASE '(':
+                SET temp_depth TO depth_level + 1
+                SET depth_level TO temp_depth
+
+                buffer_chars.APPEND(current_symbol)
+                BREAK
+
+            CASE ')':
+                SET decrement_value TO 1
+                SET depth_level TO depth_level - decrement_value
+
+                buffer_chars.APPEND(current_symbol)
+                IF depth_level == 0 THEN
+                    SET group_string TO ""
+                    FOR i FROM 0 TO LENGTH(buffer_chars) - 1
+                        SET group_string TO group_string + buffer_chars.at(i)
+                    END FOR
+
+                    result_collection.APPEND(group_string)
+                    buffer_chars.CLEAR()
+                END IF
+                BREAK
+
+            DEFAULT:
+                ; // No operation for other characters
+        END SWITCH
+
+        SET position_index TO position_index + 1
+    END WHILE
+
+    RETURN result_collection
+END FUNCTION

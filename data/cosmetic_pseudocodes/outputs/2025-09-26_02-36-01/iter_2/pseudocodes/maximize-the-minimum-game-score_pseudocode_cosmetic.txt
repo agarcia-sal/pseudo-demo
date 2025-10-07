@@ -1,0 +1,44 @@
+CLASS Solution  
+    FUNCTION maxScore(points, m)  
+        FUNCTION isPossible(target, movesAllowed)  
+            SET totalMoves TO 0  
+            SET lastRequired TO 0  
+            SET idx TO 0  
+            WHILE idx < LENGTH(points) DO  
+                SET currPoint TO points[idx]  
+                SET needed TO CEIL(target PLUS currPoint MINUS 1, currPoint)  
+                IF (needed MINUS lastRequired) < 0 THEN  
+                    SET needed TO 0  
+                ELSE  
+                    SET needed TO needed MINUS lastRequired  
+                END IF  
+                IF needed > 0 THEN  
+                    SET totalMoves TO totalMoves PLUS (needed TIMES 2 MINUS 1)  
+                    SET lastRequired TO needed MINUS 1  
+                ELSE IF idx PLUS 1 < LENGTH(points) THEN  
+                    SET totalMoves TO totalMoves PLUS 1  
+                    SET lastRequired TO 0  
+                END IF  
+                IF totalMoves > movesAllowed THEN  
+                    RETURN False  
+                END IF  
+                SET idx TO idx PLUS 1  
+            END WHILE  
+            RETURN True  
+        END FUNCTION  
+
+        SET lowBound TO 0  
+        SET highBound TO ((m PLUS 1) DIV 2) TIMES (points[0] PLUS 1)  
+
+        WHILE lowBound < highBound DO  
+            SET midpoint TO (lowBound PLUS highBound PLUS 1) DIV 2  
+            IF isPossible(midpoint, m) THEN  
+                SET lowBound TO midpoint  
+            ELSE  
+                SET highBound TO midpoint MINUS 1  
+            END IF  
+        END WHILE  
+
+        RETURN lowBound  
+    END FUNCTION  
+END CLASS

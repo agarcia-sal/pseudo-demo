@@ -1,0 +1,7 @@
+def below_zero(ops):
+    balance = 0
+    for op in ops:
+        balance += op
+        if balance < 0:
+            return True
+    return False

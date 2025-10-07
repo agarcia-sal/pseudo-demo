@@ -1,0 +1,134 @@
+CLASS Solution
+
+    FUNCTION bfs(graph, start)
+        SET a3f8b TO LENGTH OF graph
+        SET q9v2p TO list OF Boolean false WITH LENGTH a3f8b
+        SET ql7xo TO a new deque WITH an element (start, 0)
+        SET q9v2p[start] TO true
+        SET r6d0y TO start
+        SET m4tkn TO 0
+
+        FUNCTION dequeue_left(dq)
+            RETURN dq REMOVE LEFTMOST ELEMENT
+        END FUNCTION
+
+        WHILE LENGTH OF ql7xo > 0 DO
+            SET (hw92j, wd51c) TO dequeue_left(ql7xo)
+
+            IF wd51c > m4tkn THEN
+                SET m4tkn TO wd51c
+                SET r6d0y TO hw92j
+            END IF
+
+            FUNCTION mark_and_enqueue(nb, dist)
+                IF q9v2p[nb] = false THEN
+                    SET q9v2p[nb] TO true
+                    APPEND (nb, dist + 1) TO ql7xo
+                END IF
+            END FUNCTION
+
+            FOR EACH neighbor IN graph[hw92j] DO
+                mark_and_enqueue(neighbor, wd51c)
+            END FOR
+        END WHILE
+
+        RETURN r6d0y, m4tkn
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        SET i2rmt TO 0
+        SET v0aqd, _wuzc5 TO bfs(graph, i2rmt)
+        SET _, c8hds TO bfs(graph, v0aqd)
+        RETURN c8hds
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+        SET bxc9f TO LENGTH OF graph
+        SET yn7kr TO list OF Boolean false WITH LENGTH bxc9f
+        SET pqmd5 TO a new deque WITH element (node, 0)
+        SET yn7kr[node] TO true
+        SET kba2l TO 0
+
+        FUNCTION remove_left(d)
+            RETURN d REMOVE FIRST ELEMENT
+        END FUNCTION
+
+        WHILE LENGTH OF pqmd5 > 0 DO
+            SET (mq07o, yuils) TO remove_left(pqmd5)
+
+            IF yuils > kba2l THEN
+                SET kba2l TO yuils
+            END IF
+
+            FUNCTION add_neighbors(nbr, dst)
+                IF yn7kr[nbr] = false THEN
+                    SET yn7kr[nbr] TO true
+                    APPEND (nbr, dst + 1) TO pqmd5
+                END IF
+            END FUNCTION
+
+            FOR EACH neighbor IN graph[mq07o] DO
+                add_neighbors(neighbor, yuils)
+            END FOR
+        END WHILE
+
+        RETURN kba2l
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        SET fqnp7 TO LENGTH OF edges1 + 1
+        SET ixg03 TO LENGTH OF edges2 + 1
+
+        SET hmlyq TO list OF empty lists WITH LENGTH fqnp7
+        SET etmbv TO list OF empty lists WITH LENGTH ixg03
+
+        FUNCTION append_edge(graph, u, v)
+            APPEND v TO graph[u]
+            APPEND u TO graph[v]
+        END FUNCTION
+
+        FOR EACH (xfi35, agvc8) IN edges1 DO
+            append_edge(hmlyq, xfi35, agvc8)
+        END FOR
+
+        FOR EACH (wz6ko, nb4ri) IN edges2 DO
+            append_edge(etmbv, wz6ko, nb4ri)
+        END FOR
+
+        SET idy98 TO tree_diameter(hmlyq)
+        SET zb4pv TO tree_diameter(etmbv)
+
+        SET g7v02 TO empty list
+        FOR i FROM 0 TO fqnp7 - 1 DO
+            APPEND maximum_path_length_from_node(hmlyq, i) TO g7v02
+        END FOR
+
+        SET sycox TO empty list
+        FOR j FROM 0 TO ixg03 - 1 DO
+            APPEND maximum_path_length_from_node(etmbv, j) TO sycox
+        END FOR
+
+        SET mwx10 TO +∞
+
+        FOR u FROM 0 TO fqnp7 - 1 DO
+            FOR v FROM 0 TO ixg03 - 1 DO
+                SET val1 TO idy98
+                SET val2 TO zb4pv
+                SET val3 TO g7v02[u] + sycox[v] + 1
+                SET newd TO val1
+                IF val2 > newd THEN
+                    SET newd TO val2
+                END IF
+                IF val3 > newd THEN
+                    SET newd TO val3
+                END IF
+                IF newd < mwx10 THEN
+                    SET mwx10 TO newd
+                END IF
+            END FOR
+        END FOR
+
+        RETURN mwx10
+    END FUNCTION
+
+END CLASS

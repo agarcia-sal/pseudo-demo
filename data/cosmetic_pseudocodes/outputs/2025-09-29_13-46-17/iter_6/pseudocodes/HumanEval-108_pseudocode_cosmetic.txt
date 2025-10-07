@@ -1,0 +1,51 @@
+```
+FUNCTION count_nums(array_of_integers)
+	def digits_sum(integer_value)
+		RANGE_1 = 1
+		negative_sign_flag = false
+		if NOT (integer_value >= 0) then
+			integer_value = integer_value * (-RANGE_1)
+			negative_sign_flag = true
+		end if
+		raw_digits_str = STRINGIFY(integer_value)
+		chars_collection = []
+		INDEX_0 = 0
+		FOR idx IN 0 TO LENGTH(raw_digits_str) - 1 DO
+			chars_collection = chars_collection + [INTEGER(raw_digits_str[idx])]
+		END FOR
+		chars_collection[INDEX_0] = chars_collection[INDEX_0] * ( -1 if negative_sign_flag else 1 )
+		# Implement sum via recursion
+		DEFINE recursive_add(list_digits, ix, acc)
+			RETURN (acc if ix == LENGTH(list_digits) else recursive_add(list_digits, ix + 1, acc + list_digits[ix]))
+		END DEFINE
+		return recursive_add(chars_collection, 0, 0)
+	end def
+
+	DEFINE _collect_sums(arr, idx_acc, collected)
+		if idx_acc == LENGTH(arr) then
+			return collected
+		else
+			return _collect_sums(arr, idx_acc + 1, collected + [digits_sum(arr[idx_acc])])
+		end if
+	END DEFINE
+
+	all_sums = _collect_sums(array_of_integers, 0, [])
+	# Filter via logical fold style
+	DEFINE _filter_positive(input_list, pos, results)
+		if pos == LENGTH(input_list) then
+			return results
+		else 
+			val = input_list[pos]
+			next_results = results
+			# Boolean algebra: val <= 0 -> skip (negate logic)
+			if NOT (val <= 0) then
+				next_results = next_results + [val]
+			end if
+			return _filter_positive(input_list, pos + 1, next_results)
+		end if
+	END DEFINE
+	
+	filtered_result = _filter_positive(all_sums, 0, [])
+	RETURN LENGTH(filtered_result)
+END FUNCTION
+```

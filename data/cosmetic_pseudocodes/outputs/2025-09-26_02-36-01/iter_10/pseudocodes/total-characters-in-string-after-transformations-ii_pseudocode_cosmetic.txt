@@ -1,0 +1,122 @@
+CLASS Solution  
+	FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer  
+		DEFINE CONST_MOD AS ((10 ^ 9) + 1)  
+		
+		DEFINE FUNCTION zeroMatrix(rows parameter rows IS integer cols parameter cols IS integer) RETURNS list of lists of integers  
+			DEFINE FUNCTION buildRow(count parameter count IS integer) RETURNS list of integers  
+				IF count EQUALS 0 THEN RETURN [] END IF  
+				RETURN [0] + buildRow(count - 1)  
+			END FUNCTION  
+			DEFINE FUNCTION buildMatrix(r parameter r IS integer c parameter c IS integer) RETURNS list of lists of integers  
+				IF r EQUALS 0 THEN RETURN [] END IF  
+				RETURN [buildRow(c)] + buildMatrix(r - 1, c)  
+			END FUNCTION  
+			RETURN buildMatrix(rows, cols)  
+		END FUNCTION  
+		
+		DEFINE TRANS_MATRIX AS zeroMatrix(26, 26)  
+		
+		DEFINE FUNCTION incrementTransMatrix(x parameter x IS integer y parameter y IS integer)  
+			TRANS_MATRIX[x][y] = TRANS_MATRIX[x][y] + 1  
+		END FUNCTION  
+		
+		DEFINE FUNCTION recursionOverJ(i parameter i IS integer j parameter j IS integer limit parameter limit IS integer)  
+			IF j GREATER THAN limit THEN RETURN END IF  
+			incrementTransMatrix(i, ((i + j + 1) MOD 26))  
+			recursionOverJ(i, j + 1, limit)  
+		END FUNCTION  
+		
+		DEFINE FUNCTION recursionOverI(i parameter i IS integer)  
+			IF i GREATER THAN 25 THEN RETURN END IF  
+			recursionOverJ(i, 0, nums[i] - 1)  
+			recursionOverI(i + 1)  
+		END FUNCTION  
+		
+		recursionOverI(0)  
+		
+		DEFINE FUNCTION multiplyMatrices(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers  
+			DEFINE R AS zeroMatrix(26, 26)  
+			DEFINE FUNCTION rLoopI(i parameter i IS integer)  
+				IF i GREATER THAN 25 THEN RETURN END IF  
+				DEFINE FUNCTION rLoopJ(j parameter j IS integer)  
+					IF j GREATER THAN 25 THEN RETURN END IF  
+					DEFINE FUNCTION rLoopK(k parameter k IS integer sum parameter sum IS integer)  
+						IF k GREATER THAN 25 THEN  
+							R[i][j] = sum MOD CONST_MOD  
+							RETURN  
+						END IF  
+						rLoopK(k + 1, sum + ( (A[i][k] * B[k][j]) MOD CONST_MOD))  
+					END FUNCTION  
+					rLoopK(0, 0)  
+					rLoopJ(j + 1)  
+				END FUNCTION  
+				rLoopJ(0)  
+				rLoopI(i + 1)  
+			END FUNCTION  
+			rLoopI(0)  
+			RETURN R  
+		END FUNCTION  
+		
+		DEFINE FUNCTION identityMatrix(size parameter size IS integer) RETURNS list of lists of integers  
+			DEFINE FUNCTION buildRow(r parameter r IS integer c parameter c IS integer) RETURNS list of integers  
+				IF c GREATER THAN size - 1 THEN RETURN [] END IF  
+				RETURN [(IF r EQUALS c THEN 1 ELSE 0 END IF)] + buildRow(r, c + 1)  
+			END FUNCTION  
+			DEFINE FUNCTION buildIdent(r parameter r IS integer) RETURNS list of lists of integers  
+				IF r GREATER THAN size - 1 THEN RETURN [] END IF  
+				RETURN [buildRow(r, 0)] + buildIdent(r + 1)  
+			END FUNCTION  
+			RETURN buildIdent(0)  
+		END FUNCTION  
+		
+		DEFINE FUNCTION matrixPower(mat parameter mat IS list of lists of integers pow parameter pow IS integer) RETURNS list of lists of integers  
+			DEFINE RES AS identityMatrix(26)  
+			DEFINE BASE AS mat  
+			DEFINE FUNCTION powerLoop(exp parameter exp IS integer currentRes parameter currentRes IS list of lists of integers baseMat parameter baseMat IS list of lists of integers) RETURNS list of lists of integers  
+				IF exp EQUALS 0 THEN RETURN currentRes END IF  
+				IF (exp MOD 2) EQUALS 1 THEN  
+					LET NR = multiplyMatrices(currentRes, baseMat)  
+					RETURN powerLoop(exp // 2, NR, multiplyMatrices(baseMat, baseMat))  
+				ELSE  
+					RETURN powerLoop(exp // 2, currentRes, multiplyMatrices(baseMat, baseMat))  
+				END IF  
+			END FUNCTION  
+			RETURN powerLoop(pow, RES, BASE)  
+		END FUNCTION  
+		
+		DEFINE FINAL_MATRIX AS matrixPower(TRANS_MATRIX, t)  
+		
+		DEFINE COUNT_CURR AS list of 26 zeros  
+		
+		DEFINE FUNCTION countChars(index parameter index IS integer)  
+			IF index GREATER THAN (length(s) - 1) THEN RETURN END IF  
+			LET POSITION = ORD(s[index]) - ORD('a')  
+			COUNT_CURR[POSITION] = COUNT_CURR[POSITION] + 1  
+			countChars(index + 1)  
+		END FUNCTION  
+		
+		countChars(0)  
+		
+		DEFINE COUNT_FINAL AS list of 26 zeros  
+		
+		DEFINE FUNCTION accumulateFinal(i parameter i IS integer)  
+			IF i GREATER THAN 25 THEN RETURN END IF  
+			DEFINE FUNCTION accumulateJ(j parameter j IS integer)  
+				IF j GREATER THAN 25 THEN RETURN END IF  
+				COUNT_FINAL[j] = (COUNT_FINAL[j] + (COUNT_CURR[i] * FINAL_MATRIX[i][j])) MOD CONST_MOD  
+				accumulateJ(j + 1)  
+			END FUNCTION  
+			accumulateJ(0)  
+			accumulateFinal(i + 1)  
+		END FUNCTION  
+		
+		accumulateFinal(0)  
+		
+		DEFINE FUNCTION sumList(L parameter L IS list of integers index parameter index IS integer accumulator parameter accumulator IS integer) RETURNS integer  
+			IF index GREATER THAN (length(L) - 1) THEN RETURN accumulator END IF  
+			RETURN sumList(L, index + 1, (accumulator + L[index]) MOD CONST_MOD)  
+		END FUNCTION  
+		
+		RETURN sumList(COUNT_FINAL, 0, 0)  
+	END FUNCTION  
+END CLASS

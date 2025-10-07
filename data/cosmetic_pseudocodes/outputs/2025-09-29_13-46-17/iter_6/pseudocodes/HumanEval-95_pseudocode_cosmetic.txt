@@ -1,0 +1,76 @@
+```
+FUNCTION check_dict_case(dictionary)
+	let T = 0;
+	let Z_ = dictionary.KEYS();
+	let jAlpha = LEN(Z_);
+	
+	IF NOT (jAlpha > 0) THEN
+		RETURN False;
+	END IF
+	
+	RETURN _run_check(T, Z_, 0, jAlpha);
+END FUNCTION
+
+FUNCTION _run_check(state_acc, keys_collection, idx_pos, length_limit)
+	IF idx_pos >= length_limit THEN
+		RETURN (state_acc = "upper") OR (state_acc = "lower");
+	END IF
+	
+	let current_key_xX = keys_collection[idx_pos];
+	
+	IF NOT (current_key_xX instanceof STRING) THEN
+		RETURN False;
+	END IF
+	
+	IF state_acc = 0 THEN
+		IF _all_uppercase(current_key_xX) THEN
+			RETURN _run_check("upper", keys_collection, idx_pos + 1, length_limit);
+		ELSE IF _all_lowercase(current_key_xX) THEN
+			RETURN _run_check("lower", keys_collection, idx_pos + 1, length_limit);
+		ELSE
+			RETURN False;
+		END IF
+	END IF
+	
+	let condA = (state_acc = "upper") AND (NOT _all_uppercase(current_key_xX));
+	let condB = (state_acc = "lower") AND (NOT _all_lowercase(current_key_xX));
+	
+	IF condA OR condB THEN
+		RETURN False;
+	END IF
+	
+	RETURN _run_check(state_acc, keys_collection, idx_pos + 1, length_limit);
+END FUNCTION
+
+FUNCTION _all_uppercase(strArg)
+	let pos = 0;
+	let limit = LEN(strArg);
+	RETURN _all_uppercase_recur(strArg, pos, limit);
+END FUNCTION
+
+FUNCTION _all_uppercase_recur(s, p, l)
+	IF p >= l THEN RETURN True; END IF
+	IF NOT (_is_upper_alpha(s[p])) THEN RETURN False; END IF
+	RETURN _all_uppercase_recur(s, p + 1, l);
+END FUNCTION
+
+FUNCTION _all_lowercase(strArg)
+	let iNdx = 0;
+	let maxV = LEN(strArg);
+	RETURN _all_lowercase_tail(iNdx, maxV, strArg);
+END FUNCTION
+
+FUNCTION _all_lowercase_tail(position, limit, string_data) 
+	IF position >= limit THEN RETURN True; END IF
+	IF NOT (_is_lower_alpha(string_data[position])) THEN RETURN False; END IF
+	RETURN _all_lowercase_tail(position + 1, limit, string_data);
+END FUNCTION
+
+FUNCTION _is_upper_alpha(char)
+	RETURN (char >= 'A') AND (char <= 'Z');
+END FUNCTION
+
+FUNCTION _is_lower_alpha(char)
+	RETURN (char >= 'a') AND (char <= 'z');
+END FUNCTION
+```

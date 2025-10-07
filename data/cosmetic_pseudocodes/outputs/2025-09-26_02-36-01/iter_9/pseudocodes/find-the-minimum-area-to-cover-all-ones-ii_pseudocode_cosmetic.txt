@@ -1,0 +1,137 @@
+CLASS Solution
+    FUNCTION minimumSum(matrix)  
+        SET alpha TO []
+        
+        FUNCTION collectOnes(pos1)
+            IF pos1 >= LENGTH(matrix) THEN
+                RETURN
+            END IF
+            SET pos2 TO 0
+            WHILE pos2 < LENGTH(matrix[pos1])
+                IF matrix[pos1][pos2] == 1 THEN
+                    CALL alpha.APPEND((pos1, pos2))
+                END IF
+                SET pos2 TO pos2 + 1
+            END WHILE
+            CALL collectOnes(pos1 + 1)
+        END FUNCTION
+        
+        CALL collectOnes(0)
+        
+        FUNCTION calc_area(coords)
+            IF LENGTH(coords) == 0 THEN
+                RETURN 0
+            END IF
+
+            SET xi TO 10^9
+            SET xj TO -10^9
+            SET yi TO 10^9
+            SET yj TO -10^9
+            
+            SET idx TO 0
+            WHILE idx < LENGTH(coords)
+                IF coords[idx][0] < xi THEN
+                    SET xi TO coords[idx][0]
+                END IF
+                IF coords[idx][0] > xj THEN
+                    SET xj TO coords[idx][0]
+                END IF
+                IF coords[idx][1] < yi THEN
+                    SET yi TO coords[idx][1]
+                END IF
+                IF coords[idx][1] > yj THEN
+                    SET yj TO coords[idx][1]
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            
+            SET width_val TO (xj - xi + 1)
+            SET height_val TO (yj - yi + 1)
+            RETURN width_val * height_val
+        END FUNCTION
+        
+        FUNCTION to_set(arr)
+            SET out_set TO {}
+            SET counter_z TO 0
+            WHILE counter_z < LENGTH(arr)
+                SET out_set TO out_set UNION {arr[counter_z]}
+                SET counter_z TO counter_z + 1
+            END WHILE
+            RETURN out_set
+        END FUNCTION
+        
+        FUNCTION list_subtract(set_a, set_b)
+            SET result_set TO {}
+            FOR EACH elem IN set_a
+                IF NOT elem IN set_b THEN
+                    SET result_set TO result_set UNION {elem}
+                END IF
+            END FOR
+            RETURN result_set
+        END FUNCTION
+        
+        FUNCTION generate_combinations(arr, count)
+            FUNCTION comb_rec(index, chosen)
+                IF LENGTH(chosen) == count THEN
+                    RETURN [chosen]
+                END IF
+                IF index == LENGTH(arr) THEN
+                    RETURN []
+                END IF
+                
+                SET with_elem TO comb_rec(index + 1, chosen + [arr[index]])
+                SET without_elem TO comb_rec(index + 1, chosen)
+                
+                RETURN with_elem + without_elem
+            END FUNCTION
+            RETURN comb_rec(0, [])
+        END FUNCTION
+        
+        SET result_min TO 1/0
+        SET total_ones TO LENGTH(alpha)
+        
+        SET outer_i TO 1
+        WHILE outer_i <= total_ones - 2
+            SET outer_j TO outer_i + 1
+            WHILE outer_j <= total_ones - 1
+                SET outer_k TO outer_j + 1
+                WHILE outer_k <= total_ones
+                    SET combos_first TO generate_combinations(alpha, outer_i)
+                    
+                    SET idx_first TO 0
+                    WHILE idx_first < LENGTH(combos_first)
+                        SET set_all ONES TO to_set(alpha)
+                        SET set_first_comp TO to_set(combos_first[idx_first])
+                        SET remainder_a TO list_subtract(set_all ONES, set_first_comp)
+                        SET combos_second TO generate_combinations(LIST(remainder_a), outer_j - outer_i)
+                        
+                        SET idx_second TO 0
+                        WHILE idx_second < LENGTH(combos_second)
+                            SET set_second_comp TO to_set(combos_second[idx_second])
+                            SET remainder_b TO list_subtract(remainder_a, set_second_comp)
+                            
+                            SET area_a TO calc_area(combos_first[idx_first])
+                            SET area_b TO calc_area(combos_second[idx_second])
+                            SET area_c TO calc_area(LIST(remainder_b))
+                            
+                            IF area_a > 0 AND area_b > 0 AND area_c > 0 THEN
+                                SET sum_current TO area_a + area_b + area_c
+                                IF sum_current < result_min THEN
+                                    SET result_min TO sum_current
+                                END IF
+                            END IF
+                            SET idx_second TO idx_second + 1
+                        END WHILE
+                        SET idx_first TO idx_first + 1
+                    END WHILE
+                    
+                    SET outer_k TO outer_k + 1
+                END WHILE
+                SET outer_j TO outer_j + 1
+            END WHILE
+            SET outer_i TO outer_i + 1
+        END WHILE
+        
+        RETURN result_min
+    END FUNCTION
+END CLASS

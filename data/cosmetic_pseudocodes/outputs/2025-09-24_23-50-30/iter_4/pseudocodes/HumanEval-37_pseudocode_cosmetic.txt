@@ -1,0 +1,36 @@
+```
+FUNCTION sort_even(list_of_elements)
+    DEFINE split_indices(idx, accumulator_even, accumulator_odd)
+        IF idx >= LENGTH(list_of_elements) THEN
+            RETURN accumulator_even, accumulator_odd
+        ENDIF
+        IF idx MOD 2 = 0 THEN
+            RETURN split_indices(idx + 1, accumulator_even + [list_of_elements[idx]], accumulator_odd)
+        ELSE
+            RETURN split_indices(idx + 1, accumulator_even, accumulator_odd + [list_of_elements[idx]])
+        ENDIF
+    ENDDEFINE
+
+    SET evens, odds TO split_indices(0, [], [])
+    SET sorted_evens TO evens
+    CALL sorted_evens.SORT()
+    SET combined TO []
+
+    FUNCTION interleave_pairs(i)
+        IF i >= LENGTH(odds) THEN
+            RETURN
+        ENDIF
+        combined.APPEND(sorted_evens[i])
+        combined.APPEND(odds[i])
+        CALL interleave_pairs(i + 1)
+    ENDFUNCTION
+
+    CALL interleave_pairs(0)
+
+    IF LENGTH(sorted_evens) > LENGTH(odds) THEN
+        combined.APPEND(sorted_evens[-1])
+    ENDIF
+
+    RETURN combined
+END FUNCTION
+```

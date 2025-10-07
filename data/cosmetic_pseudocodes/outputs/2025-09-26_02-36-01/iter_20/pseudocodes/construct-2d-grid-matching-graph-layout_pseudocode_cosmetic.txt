@@ -1,0 +1,126 @@
+CLASS Solution
+    FUNCTION constructGridLayout(n, edges)
+        FUNCTION createEmptyBuckets(m)
+            SET bucketList TO empty list
+            SET counter TO 0
+            WHILE counter LESS THAN m
+                APPEND empty list TO bucketList
+                SET counter TO counter PLUS 1
+            END WHILE
+            RETURN bucketList
+        END FUNCTION
+
+        FUNCTION listAllFalse(size)
+            SET collection TO empty list
+            SET idxVar TO 0
+            WHILE idxVar LESS THAN size
+                APPEND false TO collection
+                SET idxVar TO idxVar PLUS 1
+            END WHILE
+            RETURN collection
+        END FUNCTION
+
+        FUNCTION findIndexForDegree(array, targetValue)
+            SET finder TO 0
+            WHILE finder LESS THAN LENGTH OF array
+                IF LENGTH OF array[finder] EQUALS targetValue THEN
+                    RETURN finder
+                END IF
+                SET finder TO finder PLUS 1
+            END WHILE
+            RETURN -1
+        END FUNCTION
+
+        SET graphStructure TO createEmptyBuckets(n)
+        SET edgeIterator TO 0
+        WHILE edgeIterator LESS THAN LENGTH OF edges
+            SET nodeM TO edges[edgeIterator][0]
+            SET nodeN TO edges[edgeIterator][1]
+            APPEND nodeN TO graphStructure[nodeM]
+            APPEND nodeM TO graphStructure[nodeN]
+            SET edgeIterator TO edgeIterator PLUS 1
+        END WHILE
+
+        SET degreeIndices TO list containing -1, -1, -1, -1, -1
+        SET positionTracker TO 0
+        WHILE positionTracker LESS THAN n
+            SET currentEdges TO graphStructure[positionTracker]
+            SET idxPosition TO LENGTH OF currentEdges
+            SET degreeIndices[idxPosition] TO positionTracker
+            SET positionTracker TO positionTracker PLUS 1
+        END WHILE
+
+        IF degreeIndices[1] NOT EQUALS -1 THEN
+            SET initialRow TO list containing degreeIndices[1]
+
+        ELSE IF degreeIndices[4] EQUALS -1 THEN
+            SET firstCandidate TO degreeIndices[2]
+            SET foundFlag TO false
+            SET jumpIndex TO 0
+            WHILE foundFlag IS false AND jumpIndex LESS THAN LENGTH OF graphStructure[firstCandidate]
+                SET adjacentNode TO graphStructure[firstCandidate][jumpIndex]
+                IF LENGTH OF graphStructure[adjacentNode] EQUALS 2 THEN
+                    SET initialRow TO list containing firstCandidate, adjacentNode
+                    SET foundFlag TO true
+                END IF
+                SET jumpIndex TO jumpIndex PLUS 1
+            END WHILE
+
+        ELSE
+            SET firstCandidate TO degreeIndices[2]
+            SET initialRow TO list containing firstCandidate
+            SET previousNode TO firstCandidate
+            SET currentNode TO graphStructure[firstCandidate][0]
+            LOOP_START:
+            IF LENGTH OF graphStructure[currentNode] GREATER THAN 2 THEN
+                APPEND currentNode TO initialRow
+                SET innerIter TO 0
+                WHILE innerIter LESS THAN LENGTH OF graphStructure[currentNode]
+                    SET neighbourNode TO graphStructure[currentNode][innerIter]
+                    IF neighbourNode NOT EQUALS previousNode AND LENGTH OF graphStructure[neighbourNode] LESS THAN 4 THEN
+                        SET previousNode TO currentNode
+                        SET currentNode TO neighbourNode
+                        GOTO LOOP_START
+                    END IF
+                    SET innerIter TO innerIter PLUS 1
+                END WHILE
+            END IF
+            APPEND currentNode TO initialRow
+        END IF
+
+        SET resultList TO list containing initialRow
+        SET visitedNodes TO listAllFalse(n)
+        SET repeatCount TO 0
+        SET maxRepeats TO (n DIVIDED BY LENGTH OF initialRow) MINUS 1
+        WHILE repeatCount LESS THAN maxRepeats
+            SET markIndex TO 0
+            WHILE markIndex LESS THAN LENGTH OF initialRow
+                SET visitedNodes[initialRow[markIndex]] TO true
+                SET markIndex TO markIndex PLUS 1
+            END WHILE
+
+            SET nextRowCandidates TO empty list
+            SET outerIndex TO 0
+            WHILE outerIndex LESS THAN LENGTH OF initialRow
+                SET curIndex TO initialRow[outerIndex]
+                SET innerIndex TO 0
+                SET foundInNext TO false
+                WHILE foundInNext IS false AND innerIndex LESS THAN LENGTH OF graphStructure[curIndex]
+                    SET candidateNode TO graphStructure[curIndex][innerIndex]
+                    IF visitedNodes[candidateNode] EQUALS false THEN
+                        APPEND candidateNode TO nextRowCandidates
+                        SET foundInNext TO true
+                    END IF
+                    SET innerIndex TO innerIndex PLUS 1
+                END WHILE
+                SET outerIndex TO outerIndex PLUS 1
+            END WHILE
+
+            APPEND nextRowCandidates TO resultList
+            SET initialRow TO nextRowCandidates
+            SET repeatCount TO repeatCount PLUS 1
+        END WHILE
+
+        RETURN resultList
+    END FUNCTION
+END CLASS

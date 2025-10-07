@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION findWinningPlayer(skills, k)
+        FUNCTION lengthOfList(lst)
+            SET count TO 0
+            FOR EACH _ IN lst
+                SET count TO count + 1
+            END FOR
+            RETURN count
+        END FUNCTION
+
+        FUNCTION removeFirstElement(lst)
+            IF lengthOfList(lst) = 0 THEN RETURN null END IF
+            SET firstElem TO lst[0]
+            SET tempList TO EMPTY LIST
+            SET idx TO 1
+            WHILE idx < lengthOfList(lst)
+                APPEND lst[idx] TO tempList
+                SET idx TO idx + 1
+            END WHILE
+            SET lst TO tempList
+            RETURN firstElem
+        END FUNCTION
+
+        FUNCTION createRangeList(startVal, endVal)
+            SET res TO EMPTY LIST
+            SET i TO startVal
+            WHILE i <= endVal
+                APPEND i TO res
+                SET i TO i + 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        SET totalCount TO lengthOfList(skills)
+        SET playerQueue TO createRangeList(0, totalCount - 1)
+        SET consecutiveWins TO 0
+        SET champion TO removeFirstElement(playerQueue)
+
+        FUNCTION isLessThan(val1, val2)
+            RETURN NOT (val1 >= val2)
+        END FUNCTION
+
+        FUNCTION getSkillAt(pos)
+            RETURN skills[pos]
+        END FUNCTION
+
+        REPEAT
+            IF consecutiveWins >= k THEN BREAK END IF
+            IF lengthOfList(playerQueue) = 0 THEN BREAK END IF
+
+            SET contender TO removeFirstElement(playerQueue)
+
+            IF getSkillAt(champion) > getSkillAt(contender) THEN
+                SET consecutiveWins TO consecutiveWins + 1
+                APPEND contender TO playerQueue
+            ELSE
+                SET consecutiveWins TO 1
+                APPEND champion TO playerQueue
+                SET champion TO contender
+            END IF
+        UNTIL false
+
+        RETURN champion
+    END FUNCTION
+END CLASS

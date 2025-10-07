@@ -1,0 +1,111 @@
+FUNCTION check_dict_case(container)
+  
+  DECLARE status
+  DECLARE iterator
+  DECLARE element
+  DECLARE key_type_correct AS BOOLEAN
+  DECLARE is_uppercase_key AS BOOLEAN
+  DECLARE is_lowercase_key AS BOOLEAN
+  DECLARE length_of_keys AS INTEGER
+
+  length_of_keys = 0
+  FOR each k IN container KEYS
+     length_of_keys = length_of_keys + 1
+  END FOR
+
+  IF NOT (length_of_keys = 0) THEN
+    status = "start"
+    iterator = 0
+    WHILE iterator < length_of_keys
+      element = container KEYS.at(iterator)
+      
+      IF NOT (element INSTANCEOF STRING) THEN
+        status = "mixed"
+        EXIT WHILE
+      END IF
+      
+      key_type_correct = FALSE
+      
+      IF status = "start" THEN
+        is_uppercase_key = TRUE
+        is_lowercase_key = TRUE
+
+        DECLARE char_index AS INTEGER
+        char_index = 0
+        WHILE char_index < LENGTH OF element
+          DECLARE c AS STRING
+          c = element AT char_index
+          IF NOT (c >= "A" AND c <= "Z") THEN
+            is_uppercase_key = FALSE
+          END IF
+          IF NOT (c >= "a" AND c <= "z") THEN
+            is_lowercase_key = FALSE
+          END IF
+          char_index = char_index + 1
+        END WHILE
+        
+        IF is_uppercase_key = TRUE THEN
+          status = "upper"
+          key_type_correct = TRUE
+        ELSE IF is_lowercase_key = TRUE THEN
+          status = "lower"
+          key_type_correct = TRUE
+        END IF
+        
+        IF NOT key_type_correct THEN
+          EXIT WHILE
+        END IF
+        
+      ELSE 
+        IF (status = "upper" AND NOT is_string_all_upper(element)) OR (status = "lower" AND NOT is_string_all_lower(element)) THEN
+          status = "mixed"
+          EXIT WHILE
+        ELSE IF NOT (status = "upper") AND NOT (status = "lower") THEN
+          EXIT WHILE
+        END IF
+      END IF
+      
+      iterator = iterator + 1
+    END WHILE
+    
+    IF status = "upper" OR status = "lower" THEN
+      RETURN True
+    ELSE
+      RETURN False
+    END IF
+
+  ELSE
+    RETURN False
+  END IF
+  
+  
+END FUNCTION
+
+
+FUNCTION is_string_all_upper(str)
+  DECLARE idx AS INTEGER
+  DECLARE ch AS STRING
+  idx = 0
+  WHILE idx < LENGTH OF str
+    ch = str AT idx
+    IF NOT (ch >= "A" AND ch <= "Z") THEN
+      RETURN False
+    END IF
+    idx = idx + 1
+  END WHILE
+  RETURN True
+END FUNCTION
+
+FUNCTION is_string_all_lower(str)
+  DECLARE ix AS INTEGER
+  DECLARE ch AS STRING
+  ix = 0
+  WHILE ix < LENGTH OF str
+    ch = str AT ix
+    IF NOT (ch >= "a" AND ch <= "z") THEN
+      RETURN False
+    END IF
+    ix = ix + 1
+  END WHILE
+  RETURN True
+END FUNCTION

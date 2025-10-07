@@ -1,0 +1,143 @@
+CLASS Solution
+    FUNCTION smallestNumber(num, t)
+        DECLARE prCnt, divFlag AS return FROM self._getPrimeCount(t)
+        IF divFlag = FALSE THEN
+            RETURN "-1"
+        END IF
+
+        DECLARE fctCnt AS self._getFactorCount(prCnt)
+        DECLARE sumFctCnt AS 0
+        FOR EACH val IN fctCnt VALUES DO
+            sumFctCnt = sumFctCnt + val
+        END FOR
+        IF sumFctCnt > LENGTH(num) THEN
+            DECLARE ans AS ""
+            FOR EACH k, v IN fctCnt DO
+                FOR _ FROM 1 TO v DO
+                    ans = ans + k
+                END FOR
+            END FOR
+            RETURN ans
+        END IF
+
+        DECLARE prefixCount AS EMPTY Counter
+        FOR EACH ch IN num DO
+            prefixCount = prefixCount + FACTOR_COUNTS[INTEGER(ch)]
+        END FOR
+
+        DECLARE zeroPos AS LENGTH(num)
+        FOR i FROM 0 TO LENGTH(num) - 1 DO
+            IF num[i] = '0' THEN
+                zeroPos = i
+                BREAK
+            END IF
+        END FOR
+
+        IF zeroPos = LENGTH(num) AND prCnt <= prefixCount THEN
+            RETURN num
+        END IF
+
+        DECLARE idx AS LENGTH(num) - 1
+        WHILE idx >= 0 DO
+            DECLARE curDigit AS INTEGER(num[idx])
+            prefixCount = prefixCount - FACTOR_COUNTS[curDigit]
+            DECLARE freeSpace AS (LENGTH(num) - 1) - idx
+
+            IF idx <= zeroPos THEN
+                DECLARE nextDigit AS curDigit + 1
+                WHILE nextDigit <= 9 DO
+                    DECLARE nextFactors AS self._getFactorCount(prCnt - prefixCount - FACTOR_COUNTS[nextDigit])
+                    DECLARE sumNextFactors AS 0
+                    FOR EACH val IN nextFactors VALUES DO
+                        sumNextFactors = sumNextFactors + val
+                    END FOR
+
+                    IF sumNextFactors <= freeSpace THEN
+                        DECLARE fillOnesCount AS freeSpace - sumNextFactors
+                        DECLARE resultStr AS ""
+                        IF idx > 0 THEN
+                            resultStr = resultStr + num[0:idx]
+                        END IF
+                        resultStr = resultStr + STRING(nextDigit)
+                        FOR _ FROM 1 TO fillOnesCount DO
+                            resultStr = resultStr + '1'
+                        END FOR
+                        FOR EACH factor, freq IN nextFactors DO
+                            FOR _ FROM 1 TO freq DO
+                                resultStr = resultStr + factor
+                            END FOR
+                        END FOR
+                        RETURN resultStr
+                    END IF
+                    nextDigit = nextDigit + 1
+                END WHILE
+            END IF
+            idx = idx - 1
+        END WHILE
+
+        DECLARE finalFactors AS self._getFactorCount(prCnt)
+        DECLARE remainCount AS LENGTH(num) + 1
+        FOR EACH val IN finalFactors VALUES DO
+            remainCount = remainCount - val
+        END FOR
+        DECLARE result AS ""
+        FOR _ FROM 1 TO remainCount DO
+            result = result + '1'
+        END FOR
+        FOR EACH k, v IN finalFactors DO
+            FOR _ FROM 1 TO v DO
+                result = result + k
+            END FOR
+        END FOR
+        RETURN result
+    END FUNCTION
+
+    FUNCTION _getPrimeCount(t)
+        DECLARE primeFactors AS EMPTY Counter
+        DECLARE primes AS [2, 3, 5, 7]
+        DECLARE index AS 0
+        WHILE index < LENGTH(primes) DO
+            WHILE t MOD primes[index] = 0 DO
+                t = t / primes[index]
+                primeFactors[primes[index]] = primeFactors.GET(primes[index], 0) + 1
+            END WHILE
+            index = index + 1
+        END WHILE
+        DECLARE flag AS (t = 1)
+        RETURN primeFactors, flag
+    END FUNCTION
+
+    FUNCTION _getFactorCount(count)
+        DECLARE twoCountThreeDiv AS INTEGER DIV(count[2], 3)
+        DECLARE twoCountRem AS INTEGER MOD(count[2], 3)
+        DECLARE threeCountTwoDiv AS INTEGER DIV(count[3], 2)
+        DECLARE threeCountRem AS INTEGER MOD(count[3], 2)
+        DECLARE fourCountDiv AS INTEGER DIV(twoCountRem, 2)
+        DECLARE twoCountRemFinal AS INTEGER MOD(twoCountRem, 2)
+
+        DECLARE sixCount AS 0
+        IF twoCountRemFinal = 1 AND threeCountRem = 1 THEN
+            twoCountRemFinal = 0
+            threeCountRem = 0
+            sixCount = 1
+        END IF
+
+        IF threeCountRem = 1 AND fourCountDiv = 1 THEN
+            twoCountRemFinal = 1
+            sixCount = 1
+            threeCountRem = 0
+            fourCountDiv = 0
+        END IF
+
+        DECLARE resultCounter AS EMPTY Counter
+        resultCounter["2"] = twoCountRemFinal
+        resultCounter["3"] = threeCountRem
+        resultCounter["4"] = fourCountDiv
+        resultCounter["5"] = count.GET(5, 0)
+        resultCounter["6"] = sixCount
+        resultCounter["7"] = count.GET(7, 0)
+        resultCounter["8"] = twoCountThreeDiv
+        resultCounter["9"] = threeCountTwoDiv
+        RETURN resultCounter
+    END FUNCTION
+END CLASS

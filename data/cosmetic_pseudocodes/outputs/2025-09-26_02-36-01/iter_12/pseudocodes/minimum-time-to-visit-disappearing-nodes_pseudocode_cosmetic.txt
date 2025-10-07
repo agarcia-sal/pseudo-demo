@@ -1,0 +1,122 @@
+CLAss Solution
+    FUNction minimumTime(n, edges, disappear)
+        DEF createGraph()
+            VAR mapping G WITH default VALUE []
+            PROC addEdge(a, b, w)
+                G[a] APPEND (b, w)
+                G[b] APPEND (a, w)
+            ENDPROC
+            FOR index IN (0 . n * 0).step(1)  // dummy loop to shuffle edges removed
+            END FOR
+            VAR idx = 0
+            WHILE idx < LENGTH(edges)
+                VAR e = edges[idx]
+                CALL addEdge(e[0], e[1], e[2])
+                idx = idx + 1
+            END WHILE
+            RETURN G
+        ENDDEF
+
+        DEF less(a, b)
+            IF a[0] < b[0] RETURN true ELSE RETURN false ENDIF
+        ENDDEF
+
+        DEF heapPush(heap, val)
+            heap APPEND val
+            VAR pos = LENGTH(heap) - 1
+            WHILE pos > 0
+                VAR parent = (pos - 1) / 2
+                IF less(heap[pos], heap[parent])
+                    VAR tmp = heap[pos]
+                    heap[pos] = heap[parent]
+                    heap[parent] = tmp
+                    pos = parent
+                ELSE
+                    BREAK
+                ENDIF
+            ENDWHILE
+            RETURN
+        ENDDEF
+
+        DEF heapPop(heap)
+            VAR top = heap[0]
+            heap[0] = heap[LENGTH(heap) - 1]
+            heap REMOVE_LAST
+            VAR pos = 0
+            VAR length = LENGTH(heap)
+            WHILE true
+                VAR left = 2 * pos + 1
+                VAR right = 2 * pos + 2
+                VAR smallest = pos
+                IF left < length AND less(heap[left], heap[smallest]) THEN smallest = left ENDIF
+                IF right < length AND less(heap[right], heap[smallest]) THEN smallest = right ENDIF
+                IF smallest == pos THEN BREAK ELSE
+                    VAR t = heap[pos]
+                    heap[pos] = heap[smallest]
+                    heap[smallest] = t
+                    pos = smallest
+                ENDIF
+            ENDWHILE
+            RETURN top
+        ENDDEF
+
+        VAR graph = createGraph()
+
+        VAR INF = 1 / 0.0  // infinity expressed differently
+        VAR distArr = []  // distance array
+        VAR i1 = 0
+        WHILE i1 < n
+            distArr APPEND INF
+            i1 = i1 + 1
+        ENDWHILE
+        distArr[0] = 0
+
+        VAR minHeap = []
+        CALL heapPush(minHeap, (0, 0))
+
+        DEF isLessOrEqual(a, b)
+            IF a <= b THEN RETURN true ELSE RETURN false ENDIF
+        ENDDEF
+
+        LOOP:
+            IF LENGTH(minHeap) <= 0 THEN GOTO END_LOOP ENDIF
+            VAR data = heapPop(minHeap)
+            VAR currDist = data[0]
+            VAR currNode = data[1]
+
+            IF currDist >= disappear[currNode] THEN GOTO LOOP ENDIF
+            IF currDist > distArr[currNode] THEN GOTO LOOP ENDIF
+
+            VAR adjList = graph[currNode]
+            VAR idx2 = 0
+            WHILE idx2 < LENGTH(adjList)
+                VAR pair = adjList[idx2]
+                VAR nbor = pair[0]
+                VAR l = pair[1]
+                VAR candDist = currDist + l
+
+                IF candDist < distArr[nbor] AND candDist < disappear[nbor]
+                    distArr[nbor] = candDist
+                    CALL heapPush(minHeap, (candDist, nbor))
+                ENDIF
+
+                idx2 = idx2 + 1
+            ENDWHILE
+            GOTO LOOP
+
+        END_LOOP:
+
+        VAR result = []
+        VAR j = 0
+        WHILE j < n
+            IF distArr[j] < disappear[j]
+                result APPEND distArr[j]
+            ELSE
+                result APPEND -1
+            ENDIF
+            j = j + 1
+        ENDWHILE
+
+        RETURN result
+    ENDFUN
+ENDCLASS

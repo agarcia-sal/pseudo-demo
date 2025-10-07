@@ -1,0 +1,59 @@
+CLASS Solution  
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list  
+        LET heapList BE an empty collection  
+        LET position BE zero  
+        LET currentValue BE zero  
+        LET iterator BE zero  
+
+        LET iterator TO zero  
+        LET limit TO LENGTH(nums)  
+        WHILE iterator IS LESS THAN limit  
+            LET currentValue TO nums[iterator]  
+            APPEND (currentValue, iterator) TO heapList  
+            iterator = iterator PLUS one  
+        END WHILE  
+        CALL heapify(heapList)  
+
+        LET excludedIndices BE an empty collection OF type set  
+        LET aggregateSum BE zero  
+        LET accumulated TO zero  
+        LET tempCount TO zero  
+
+        LET aggregateSum TO ZERO  
+        FOR position FROM zero TO LENGTH(nums) MINUS ONE STEP ONE  
+            aggregateSum = aggregateSum PLUS nums[position]  
+        END FOR  
+
+        LET outcome LIST BE an empty list  
+
+        LET queryIndex TO zero  
+        LET totalQueries TO LENGTH(queries)  
+        WHILE queryIndex IS LESS THAN totalQueries  
+            LET currentIndex TO queries[queryIndex][0]  
+            LET requiredCount TO queries[queryIndex][1]  
+
+            IF NOT (currentIndex IS IN excludedIndices) THEN  
+                ADD currentIndex TO excludedIndices  
+                LET aggregateSum TO aggregateSum MINUS nums[currentIndex]  
+            END IF  
+
+            LET tempCount TO zero  
+            WHILE (tempCount LESS THAN requiredCount) AND (heapList NOT EQUAL TO empty)  
+                LET extractedPair TO heappop(heapList)  
+                LET valueExtracted TO extractedPair[0]  
+                LET indexExtracted TO extractedPair[1]  
+
+                IF NOT (indexExtracted IS IN excludedIndices) THEN  
+                    ADD indexExtracted TO excludedIndices  
+                    LET aggregateSum TO aggregateSum MINUS valueExtracted  
+                    tempCount = tempCount PLUS one  
+                END IF  
+            END WHILE  
+
+            APPEND aggregateSum TO outcome  
+            queryIndex = queryIndex PLUS one  
+        END WHILE  
+
+        RETURN outcome  
+    END FUNCTION  
+END CLASS

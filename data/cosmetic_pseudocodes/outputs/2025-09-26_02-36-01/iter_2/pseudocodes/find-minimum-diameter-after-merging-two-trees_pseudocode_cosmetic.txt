@@ -1,0 +1,129 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+        LET length_graph BE LEN(graph)
+        LET visited_nodes BE ARRAY FILLED WITH false OF SIZE length_graph
+        LET deque_queue BE DEQUE INITIALIZED WITH (start, 0)
+        visited_nodes[start] = true
+        LET far_node BE start
+        LET max_dist BE 0
+
+        WHILE LENGTH(deque_queue) != 0 DO
+            LET current_node, current_dist BE deque_queue.POP_LEFT()
+            IF current_dist > max_dist THEN
+                max_dist = current_dist
+                far_node = current_node
+            END IF
+
+            INDEX = 0
+            WHILE INDEX < LEN(graph[current_node]) DO
+                LET next_node BE graph[current_node][INDEX]
+                IF NOT visited_nodes[next_node] THEN
+                    visited_nodes[next_node] = true
+                    deque_queue.APPEND((next_node, current_dist + 1))
+                END IF
+                INDEX = INDEX + 1
+            END WHILE
+        END WHILE
+
+        RETURN far_node, max_dist
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        LET node_zero BE 0
+        LET farthest, unused1 BE bfs(graph, node_zero)
+        LET _, dia BE bfs(graph, farthest)
+        RETURN dia
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+        LET size_graph BE LEN(graph)
+        LET visited_nodes BE ARRAY FILLED WITH false OF SIZE size_graph
+        LET life_queue BE DEQUE WITH (node, 0)
+        visited_nodes[node] = true
+        LET max_length BE 0
+
+        WHILE LENGTH(life_queue) NEQ 0 DO
+            LET curr_node, curr_dist BE life_queue.POP_LEFT()
+            IF curr_dist > max_length THEN
+                max_length = curr_dist
+            END IF
+
+            SET pos = 0
+            WHILE pos < LEN(graph[curr_node]) DO
+                LET adj_node BE graph[curr_node][pos]
+                IF visited_nodes[adj_node] == false THEN
+                    visited_nodes[adj_node] = true
+                    life_queue.APPEND((adj_node, curr_dist + 1))
+                END IF
+                pos = pos + 1
+            END WHILE
+        END WHILE
+
+        RETURN max_length
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        LET size1 BE LEN(edges1) + 1
+        LET size2 BE LEN(edges2) + 1
+
+        LET graph_one BE ARRAY OF EMPTY LISTS OF LENGTH size1
+        LET graph_two BE ARRAY OF EMPTY LISTS OF LENGTH size2
+
+        LET idx1 BE 0
+        WHILE idx1 < LEN(edges1)
+            LET u, v BE edges1[idx1]
+            graph_one[u].APPEND(v)
+            graph_one[v].APPEND(u)
+            idx1 = idx1 + 1
+        END WHILE
+
+        LET idx2 BE 0
+        WHILE idx2 < LEN(edges2)
+            LET u, v BE edges2[idx2]
+            graph_two[u].APPEND(v)
+            graph_two[v].APPEND(u)
+            idx2 = idx2 + 1
+        END WHILE
+
+        LET diameter_one BE tree_diameter(graph_one)
+        LET diameter_two BE tree_diameter(graph_two)
+
+        LET max_paths_from_nodes_one BE EMPTY LIST
+        LET i ONE = 0
+        WHILE i ONE < size1
+            max_paths_from_nodes_one.APPEND(maximum_path_length_from_node(graph_one, i ONE))
+            i ONE = i ONE + 1
+        END WHILE
+
+        LET max_paths_from_nodes_two BE EMPTY LIST
+        LET j TWO = 0
+        WHILE j TWO < size2
+            max_paths_from_nodes_two.APPEND(maximum_path_length_from_node(graph_two, j TWO))
+            j TWO = j TWO + 1
+        END WHILE
+
+        LET min_diam BE +∞
+
+        LET p = 0
+        WHILE p < size1
+            LET q = 0
+            WHILE q < size2
+                LET candidate_diam BE diameter_one
+                IF candidate_diam < diameter_two THEN
+                    candidate_diam = diameter_two
+                END IF
+                LET combined_path BE max_paths_from_nodes_one[p] + max_paths_from_nodes_two[q] + 1
+                IF combined_path > candidate_diam THEN
+                    candidate_diam = combined_path
+                END IF
+                IF candidate_diam < min_diam THEN
+                    min_diam = candidate_diam
+                END IF
+                q = q + 1
+            END WHILE
+            p = p + 1
+        END WHILE
+
+        RETURN min_diam
+    END FUNCTION
+END CLASS

@@ -1,0 +1,69 @@
+CLASS Solution
+    FUNCTION numberOfPairs(points)
+        DECLARE DeltaInteger AS 1
+        DECLARE epsilonBoolean AS True
+        DECLARE zetaBoolean AS False
+        DECLARE alphaCounter AS 0
+        DECLARE betaLimit AS 0
+        DECLARE gammaIndex AS 0
+        DECLARE deltaIndex AS 0
+        DECLARE omegaIndex AS 0
+        DECLARE thetaIndex AS 0
+        DECLARE lambdaCheckFlag AS False
+
+        PROCEDURE customSort(arr)
+            FOR m FROM 1 TO LENGTH(arr) - 1
+                FOR n FROM LENGTH(arr) - 1 DOWNTO m
+                    IF (arr[n].x < arr[n - 1].x) OR (arr[n].x = arr[n - 1].x AND arr[n].y > arr[n - 1].y)
+                        DECLARE tempPoint = arr[n]
+                        arr[n] = arr[n - 1]
+                        arr[n - 1] = tempPoint
+                    END IF
+                END FOR
+            END FOR
+        END PROCEDURE
+
+        CALL customSort(points)
+
+        betaLimit = LENGTH(points)
+        alphaCounter = 0
+
+        PROCEDURE validateRange(startPos, endPos, refX1, refY1, refX2, refY2, OUT isValid)
+            isValid = True
+            DECLARE u AS startPos + DeltaInteger
+            WHILE u <= endPos - DeltaInteger
+                DECLARE xl AS points[u].x
+                DECLARE yl AS points[u].y
+                IF (refX1 <= xl AND xl <= refX2) AND (refY2 <= yl AND yl <= refY1)
+                    isValid = False
+                    EXIT WHILE
+                END IF
+                u = u + DeltaInteger
+            END WHILE
+        END PROCEDURE
+
+        DECLARE iIter AS 0
+        REPEAT UNTIL iIter = betaLimit
+            DECLARE jIter AS iIter + DeltaInteger
+            WHILE jIter < betaLimit
+                DECLARE p1x = points[iIter].x
+                DECLARE p1y = points[iIter].y
+                DECLARE p2x = points[jIter].x
+                DECLARE p2y = points[jIter].y
+
+                DECLARE isValidFlag AS False
+                IF p1x <= p2x AND p1y >= p2y THEN
+                    CALL validateRange(iIter, jIter, p1x, p1y, p2x, p2y, isValidFlag)
+                    IF isValidFlag = True THEN
+                        alphaCounter = alphaCounter + DeltaInteger
+                    END IF
+                END IF
+
+                jIter = jIter + DeltaInteger
+            END WHILE
+            iIter = iIter + DeltaInteger
+        END REPEAT
+
+        RETURN alphaCounter
+    END FUNCTION
+END CLASS

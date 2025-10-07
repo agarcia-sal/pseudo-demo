@@ -1,0 +1,80 @@
+CLASS Solution
+    FUNCTION makeStringGood(s)
+        DECLARE frequency ARRAY OF LENGTH (26) INITIALIZED WITH ZEROS
+        SET idx TO 0
+        WHILE idx LESS THAN LENGTH OF s
+            LET charCode TO ASCII CODE OF s[idx]
+            LET offset TO charCode MINUS ASCII CODE OF 'a'
+            SET frequency[offset] TO frequency[offset] PLUS 1
+            SET idx TO idx PLUS 1
+        END WHILE
+
+        LET maxFreq TO 0
+        LET pos TO 0
+        WHILE pos LESS THAN LENGTH OF frequency
+            IF frequency[pos] GREATER THAN maxFreq THEN
+                SET maxFreq TO frequency[pos]
+            END IF
+            INCREMENT pos BY 1
+        END WHILE
+
+        DECLARE candidates LIST
+        LET t TO 1
+        WHILE t LESS THAN OR EQUAL TO maxFreq
+            APPEND _getMinOperations(frequency, t) TO candidates
+            INCREASE t BY 1
+        END WHILE
+
+        LET minOperationCount TO candidates[0]
+        LET k TO 1
+        WHILE k LESS THAN LENGTH OF candidates
+            IF candidates[k] LESS THAN minOperationCount THEN
+                SET minOperationCount TO candidates[k]
+            END IF
+            SET k TO k PLUS 1
+        END WHILE
+
+        RETURN minOperationCount
+    END FUNCTION
+
+    FUNCTION _getMinOperations(count, target)
+        DECLARE dp ARRAY OF LENGTH (27) FILLED WITH ZEROS
+        LET idx TO 25
+        WHILE idx GREATER THAN OR EQUAL TO 0
+            LET deleteAll COST TO count[idx]
+
+            IF target GREATER THAN count[idx] THEN
+                LET diff TO target MINUS count[idx]
+            ELSE
+                LET diff TO count[idx] MINUS target
+            END IF
+
+            LET dpOption1 TO MINIMUM OF deleteAll AND (diff PLUS dp[idx PLUS 1])
+
+            IF (idx PLUS 1) LESS THAN 26 AND count[idx PLUS 1] LESS THAN target THEN
+                LET nextDeficit TO target MINUS count[idx PLUS 1]
+
+                IF count[idx] LESS THAN OR EQUAL TO target THEN
+                    LET needChange TO count[idx]
+                ELSE
+                    LET needChange TO count[idx] MINUS target
+                END IF
+
+                IF nextDeficit GREATER THAN needChange THEN
+                    LET changeCost TO needChange PLUS (nextDeficit MINUS needChange)
+                ELSE
+                    LET changeCost TO nextDeficit PLUS (needChange MINUS nextDeficit)
+                END IF
+
+                LET dpOption2 TO MINIMUM OF dpOption1 AND (changeCost PLUS dp[idx PLUS 2])
+                SET dp[idx] TO dpOption2
+            ELSE
+                SET dp[idx] TO dpOption1
+            END IF
+
+            DECREASE idx BY 1
+        END WHILE
+
+        RETURN dp[0]
+    END FUNCTION
+END CLASS

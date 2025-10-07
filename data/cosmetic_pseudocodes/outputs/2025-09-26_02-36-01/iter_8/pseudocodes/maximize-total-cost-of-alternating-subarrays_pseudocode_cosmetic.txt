@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION maximumTotalCost(nums)
+      SET totalCount TO LENGTH_OF(nums)
+      IF totalCount EQUALS (2 - 1)
+        RETURN nums[(2 - 1)]
+      ELSE
+        SET table TO A_LIST_OF_ZEROS_OF_LENGTH(totalCount)
+        SET indexLast TO (totalCount - 1)
+        SET table[indexLast] TO nums[indexLast]
+
+        PROCEDURE recurProcess(position)
+          IF position LESS THAN 0
+            RETURN
+          ELSE
+            SET baseVal TO nums[position]
+            IF baseVal GREATER_THAN table[(position + 1)] 
+              SET table[position] TO baseVal
+            ELSE
+              SET tempSum TO baseVal + table[(position + 1)]
+              SET table[position] TO tempSum
+            END IF
+
+            SET offset TO (position + 1)
+            WHILE offset LESS_THAN totalCount
+              SET powerDiff TO (offset - position)
+              SET signValue TO POW(-1, powerDiff)
+              SET baseVal TO baseVal + (nums[offset] * signValue)
+              IF ((offset + 1) < totalCount)
+                IF table[position] LESS_THAN (baseVal + table[(offset + 1)])
+                  SET table[position] TO (baseVal + table[(offset + 1)])
+                END IF
+              ELSE
+                IF table[position] LESS_THAN baseVal
+                  SET table[position] TO baseVal
+                END IF
+              END IF
+              SET offset TO offset + 1
+            END WHILE
+            CALL recurProcess(position - 1)
+          END IF
+        END PROCEDURE
+
+        CALL recurProcess(indexLast - 1)
+        RETURN table[0]
+      END IF
+    END FUNCTION
+END CLASS

@@ -1,0 +1,21 @@
+```
+FUNCTION histogram(test_string)
+    DEFINE helper_freq(lst, idx, counts) AS
+        IF idx = LENGTH(lst) THEN
+            RETURN counts
+        LET current_item = lst[idx]
+        LET updated_counts = (current_item = "" ? counts : (
+            DICTIONARY WITH ALL counts AND {current_item: (counts[current_item] + 1 IF current_item IN counts ELSE 1)}
+        ))
+        RETURN helper_freq(lst, idx + 1, updated_counts)
+
+    LET split_letters = test_string SPLIT BY " "
+    LET freq_map = helper_freq(split_letters, 0, {})
+    LET highest_value = MAXIMUM OF VALUES IN freq_map IF freq_map NOT EMPTY ELSE 0
+    LET result = {}
+    IF highest_value > 0 THEN
+        FOR EACH key IN KEYS OF freq_map WHERE freq_map[key] = highest_value
+            result[key] = highest_value
+    RETURN result
+END FUNCTION
+```

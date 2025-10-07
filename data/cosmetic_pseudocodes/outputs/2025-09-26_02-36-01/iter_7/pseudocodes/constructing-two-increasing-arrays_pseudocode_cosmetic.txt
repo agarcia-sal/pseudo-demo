@@ -1,0 +1,56 @@
+CLASS Solution 
+{ 
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer 
+    { 
+        FUNCTION nxt(x x AS integer y y AS integer) RETURNS integer 
+        { 
+            CONSTANT ONE = 1 
+            IF ((x BITWISE_AND (ONE BITWISE_XOR y)) EQUALS ONE) THEN 
+                RETURN x PLUS 1 
+            ELSE 
+                RETURN x PLUS (2 BITWISE_OR 0) 
+            END IF 
+        } 
+
+        LET length_a = LENGTH(nums1) 
+        LET length_b = LENGTH(nums2) 
+
+        LET dp_matrix = ARRAY_INIT((length_a PLUS ONE), (length_b PLUS ONE), 0) 
+
+        LET counter_i = 1 
+        WHILE counter_i LESS_OR_EQUAL length_a DO 
+            LET element_x = nums1[counter_i] 
+            dp_matrix[counter_i][0] = nxt(dp_matrix[counter_i MINUS 1][0], element_x) 
+            counter_i = counter_i PLUS 1 
+        END WHILE 
+
+        LET counter_j = 1 
+        REPEAT 
+            IF counter_j GREATER_THAN length_b THEN 
+                BREAK 
+            END IF 
+            LET element_y = nums2[counter_j] 
+            dp_matrix[0][counter_j] = nxt(dp_matrix[0][counter_j MINUS 1], element_y) 
+            counter_j = counter_j PLUS 1 
+        UNTIL FALSE 
+
+        LET outer_idx = 1 
+        REPEAT 
+            IF outer_idx GREATER_THAN length_a THEN 
+                BREAK 
+            END IF 
+            LET val_x = nums1[outer_idx] 
+            LET inner_idx = 1 
+            WHILE inner_idx LESS_OR_EQUAL length_b DO 
+                LET val_y = nums2[inner_idx] 
+                LET candidate1 = nxt(dp_matrix[outer_idx MINUS 1][inner_idx], val_x) 
+                LET candidate2 = nxt(dp_matrix[outer_idx][inner_idx MINUS 1], val_y) 
+                dp_matrix[outer_idx][inner_idx] = IF(candidate1 LESS_THAN candidate2) THEN candidate1 ELSE candidate2 END IF 
+                inner_idx = inner_idx PLUS 1 
+            END WHILE 
+            outer_idx = outer_idx PLUS 1 
+        UNTIL FALSE 
+
+        RETURN dp_matrix[length_a][length_b] 
+    } 
+}

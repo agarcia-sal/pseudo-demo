@@ -1,0 +1,48 @@
+```
+FUNCTION encode(input_text)
+    DECLARE vowels_collection AS STRING
+    DECLARE mapping_table AS MAP
+    DECLARE swapped_text AS STRING
+    DECLARE result_builder AS LIST
+
+    vowels_collection <- "aeiouAEIOU"
+    mapping_table <- EMPTY MAP
+
+    FOR index FROM 0 TO LENGTH(vowels_collection) - 1 DO
+        character <- vowels_collection[index]
+        shifted_char <- CHARACTER(ASCII(character) + 2)
+        mapping_table[character] <- shifted_char
+    END FOR
+
+    swapped_text <- EMPTY STRING
+    FOR each_char IN input_text DO
+        IF each_char IS LOWERCASE LETTER THEN
+            swapped_text <- CONCAT(swapped_text, TO_UPPERCASE(each_char))
+        ELSE IF each_char IS UPPERCASE LETTER THEN
+            swapped_text <- CONCAT(swapped_text, TO_LOWERCASE(each_char))
+        ELSE
+            swapped_text <- CONCAT(swapped_text, each_char)
+        END IF
+    END FOR
+
+    DEFINE FUNCTION transform_position(position, text_seq, map_ref, collected) RETURNS VOID
+        IF position EQUALS LENGTH(text_seq) THEN
+            RETURN
+        END IF
+
+        current_character <- text_seq[position]
+
+        IF current_character IN vowels_collection THEN
+            APPEND map_ref[current_character] TO collected
+        ELSE
+            APPEND current_character TO collected
+        END IF
+
+        CALL transform_position(position + 1, text_seq, map_ref, collected)
+    END FUNCTION
+
+    result_builder <- EMPTY LIST
+    CALL transform_position(0, swapped_text, mapping_table, result_builder)
+    RETURN CONCATENATE_ALL(result_builder)
+END FUNCTION
+```

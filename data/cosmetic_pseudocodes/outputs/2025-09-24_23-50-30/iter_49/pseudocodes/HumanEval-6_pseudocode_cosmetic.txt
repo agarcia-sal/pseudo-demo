@@ -1,0 +1,38 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        FUNCTION recur_parse(index_cursor, current_counter, highest_counter)
+            IF index_cursor EQUALS LENGTH(group_string) THEN
+                RETURN highest_counter
+            ELSE
+                SET char_x TO CHAR_AT(group_string, index_cursor)
+                SET next_counter TO
+                    IF char_x EQUALS '(' THEN current_counter + 1 ELSE current_counter - 1
+                SET next_highest TO
+                    IF next_counter > highest_counter THEN next_counter ELSE highest_counter
+                RETURN recur_parse(index_cursor + 1, next_counter, next_highest)
+            END IF
+        END FUNCTION
+        RETURN recur_parse(0, 0, 0)
+    END FUNCTION
+
+    FUNCTION filter_map_nonempty(input_array)
+        FUNCTION helper_loop(pos, acc)
+            IF pos EQUALS LENGTH(input_array) THEN
+                RETURN acc
+            ELSE
+                SET elem_x TO input_array[pos]
+                IF elem_x EQUALS '' THEN
+                    RETURN helper_loop(pos + 1, acc)
+                ELSE
+                    RETURN helper_loop(pos + 1, acc CONCAT [parse_paren_group(elem_x)])
+                END IF
+            END IF
+        END FUNCTION
+        RETURN helper_loop(0, [])
+    END FUNCTION
+
+    SET segments_arr TO SPLIT parentheses_string BY ' '
+    RETURN filter_map_nonempty(segments_arr)
+END FUNCTION
+```

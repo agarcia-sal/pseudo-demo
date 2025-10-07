@@ -1,0 +1,32 @@
+```
+FUNCTION histogram(alphasmash)
+	dictResult ← new map
+	charsQueue ← asQueue(split(alphasmash," "))
+	maxFreq ← 0
+
+	FUNCTION updateMax(freqMap, remQueue, currMax)
+		IF remQueue IS empty THEN RETURN currMax
+		ELSE
+			nextChar ← dequeue(remQueue)
+			freq ← getOrElse(freqMap, nextChar, 0) + 1
+			updatedFreqMap ← put(freqMap, nextChar, freq)
+			newMax ← (freq > currMax) && (nextChar ≠ "") ? freq : currMax
+			RETURN updateMax(updatedFreqMap, remQueue, newMax)
+		ENDIF
+	END FUNCTION
+
+	FUNCTION fillResult(remQueue, freqMap, maxVal, accMap)
+		IF remQueue IS empty THEN RETURN accMap
+		ELSE
+			elem ← dequeue(remQueue)
+			count ← getOrElse(freqMap, elem, 0)
+			updatedMap ← (count = maxVal) ? put(accMap, elem, maxVal) : accMap
+			RETURN fillResult(remQueue, freqMap, maxVal, updatedMap)
+		ENDIF
+	END FUNCTION
+
+	freqMap ← updateMax(new map, charsQueue, maxFreq)
+	finalQueue ← asQueue(split(alphasmash," "))
+	RETURN fillResult(finalQueue, freqMap, freqMap.values().maxOrElse(0), dictResult)
+END FUNCTION
+```

@@ -1,0 +1,97 @@
+CLASS Solution
+ FUNCTION maxTargetNodes(edges1, edges2)
+  SET graphA TO new default dictionary of list
+  SET graphB TO new default dictionary of list
+
+  SET index1 TO 0
+  WHILE index1 < length of edges1
+   SET u1, v1 TO edges1 at index1
+   INSERT v1 INTO graphA[u1] using append
+   INSERT u1 INTO graphA[v1] using append
+   INCREMENT index1 BY 1
+  END WHILE
+
+  SET index2 TO 0
+  WHILE index2 < length of edges2
+   LET x, y BE edges2 at index2
+   INSERT y INTO graphB[x] adding to list
+   INSERT x INTO graphB[y] adding to list
+   index2 += 1
+  END WHILE
+
+  SET sizeA TO count of keys in graphA
+  SET sizeB TO count of keys in graphB
+
+  FUNCTION bfs(tree, root)
+   SET evenLevel TO 0
+   SET oddLevel TO 0
+   SET container TO deque with (root, 0)
+   SET processed TO set containing root
+
+   LOOP
+    IF container IS empty
+     BREAK
+    END IF
+    REMOVE front item from container INTO currentNode, currentDist
+    IF (currentDist bitwise AND 1) EQUALS 0 THEN
+     evenLevel = evenLevel + 1
+    ELSE
+     oddLevel = oddLevel + 1
+    END IF
+
+    FOR each adjNode IN tree[currentNode]
+     IF adjNode NOT IN processed THEN
+      ADD adjNode TO processed
+      APPEND (adjNode, currentDist + 1) TO container
+     END IF
+    END FOR
+   END LOOP
+
+   RETURN evenLevel, oddLevel
+  END FUNCTION
+
+  SET resultsA TO empty array
+  SET idxA TO 0
+  WHILE idxA < sizeA
+   APPEND bfs(graphA, idxA) TO resultsA
+   idxA = idxA + 1
+  END WHILE
+
+  SET resultsB TO empty array
+  SET idxB TO 0
+  WHILE idxB < sizeB
+   INSERT bfs(graphB, idxB) AT END OF resultsB
+   idxB = idxB + 1
+  END WHILE
+
+  SET finalResults TO empty list
+
+  SET posA TO 0
+  WHILE posA < sizeA
+   LET eCountA, oCountA BE resultsA[posA]
+   SET maxVal TO 0
+   SET posB TO 0
+   WHILE posB < sizeB
+    LET eCountB, oCountB BE resultsB[posB]
+
+    SET sameParity TO ((posA MOD 2) == (posB MOD 2))
+    IF (posA == posB) OR sameParity THEN
+     SET candidate TO eCountB
+    ELSE
+     SET candidate TO oCountB
+    END IF
+
+    IF candidate > maxVal THEN
+     maxVal = candidate
+    END IF
+
+    posB += 1
+   END WHILE
+
+   APPEND (eCountA + maxVal) TO finalResults
+   posA = posA + 1
+  END WHILE
+
+  RETURN finalResults
+ END FUNCTION
+END CLASS

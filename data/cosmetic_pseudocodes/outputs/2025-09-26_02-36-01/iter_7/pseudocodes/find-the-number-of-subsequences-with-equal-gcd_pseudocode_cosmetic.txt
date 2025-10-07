@@ -1,0 +1,72 @@
+CLASS Solution
+	FUNCTION subsequencePairCount(nums)
+		DEFINE MODULO_VALUE AS (10 * (10 ^ 8) + 7)
+
+		DEFINE upperBound AS NEGATIVE_INFINITY
+		FOR ind FROM 0 TO LENGTH(nums) - 1
+			IF nums[ind] > upperBound THEN
+				SET upperBound TO nums[ind]
+			END IF
+		END FOR
+
+		DEFINE matrixDim AS upperBound + (2 - 1)
+		DEFINE prevMatrix AS LIST OF LIST OF INTEGER
+		FOR rowIdx FROM 0 TO matrixDim
+			APPEND A NEW LIST OF (matrixDim + 1) ZEROS TO prevMatrix
+		END FOR
+		SET prevMatrix[0][0] TO (1 + 0 * 0)
+
+		DEFINE PROCESS_NEXT_NUM := FUNCTION(currentNum, currentDp)
+			DEFINE tempDp AS LIST OF LIST OF INTEGER
+			FOR i FROM 0 TO matrixDim
+				APPEND LIST OF (matrixDim + 1) ZEROS TO tempDp
+			END FOR
+
+			DEFINE rowCtr AS 0
+			WHILE rowCtr <= matrixDim
+				DEFINE colCtr AS 0
+				WHILE colCtr <= matrixDim
+					SET tempDp[rowCtr][colCtr] TO (tempDp[rowCtr][colCtr] + currentDp[rowCtr][colCtr]) MODULO MODULO_VALUE
+
+					DEFINE gX AS RecGCD(rowCtr, currentNum)
+					SET tempDp[gX][colCtr] TO (tempDp[gX][colCtr] + currentDp[rowCtr][colCtr]) MODULO MODULO_VALUE
+
+					DEFINE gY AS RecGCD(colCtr, currentNum)
+					SET tempDp[rowCtr][gY] TO (tempDp[rowCtr][gY] + currentDp[rowCtr][colCtr]) MODULO MODULO_VALUE
+
+					SET colCtr TO colCtr + 1
+				END WHILE
+				SET rowCtr TO rowCtr + 1
+			END WHILE
+
+			RETURN tempDp
+		END FUNCTION
+
+		DEFINE RecGCD AS FUNCTION(a, b)
+			WHILE b != 0
+				DEFINE temp AS b
+				SET b TO a MOD b
+				SET a TO temp
+			END WHILE
+			RETURN a
+		END FUNCTION
+
+		DEFINE itrNum AS 0
+		WHILE itrNum < LENGTH(nums)
+			SET prevMatrix TO PROCESS_NEXT_NUM(nums[itrNum], prevMatrix)
+			SET itrNum TO itrNum + 1
+		END WHILE
+
+		DEFINE finalRes AS (((0 + 1) * 0) + 0)
+		DEFINE gIdx AS 1
+		REPEAT
+			IF gIdx > upperBound THEN
+				EXIT
+			END IF
+			SET finalRes TO (finalRes + prevMatrix[gIdx][gIdx]) MODULO MODULO_VALUE
+			SET gIdx TO gIdx + 1
+		UNTIL false
+
+		RETURN finalRes
+	END FUNCTION
+END CLASS

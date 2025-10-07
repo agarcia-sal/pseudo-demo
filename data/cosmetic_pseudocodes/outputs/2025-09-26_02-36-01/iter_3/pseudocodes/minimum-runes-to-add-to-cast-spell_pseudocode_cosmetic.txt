@@ -1,0 +1,131 @@
+CLASS Solution  
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)  
+        DECLARE adjacency_map AS new map<int, array<int>>  
+        DECLARE reversed_map AS new map<int, array<int>>  
+
+        SET idx1 TO 0  
+        WHILE idx1 < LENGTH(flowFrom)  
+            DECLARE src_node AS flowFrom[idx1]  
+            DECLARE dst_node AS flowTo[idx1]  
+            IF NOT EXISTS adjacency_map[src_node] THEN  
+                ASSIGN adjacency_map[src_node] TO empty array  
+            END IF  
+            IF NOT EXISTS reversed_map[dst_node] THEN  
+                ASSIGN reversed_map[dst_node] TO empty array  
+            END IF  
+            APPEND dst_node TO adjacency_map[src_node]  
+            APPEND src_node TO reversed_map[dst_node]  
+            SET idx1 TO idx1 + 1  
+        END WHILE  
+
+        DECLARE visit_index AS 0  
+        DECLARE idx_arr AS new array<int>(n) FILLED WITH -1  
+        DECLARE low_arr AS new array<int>(n) FILLED WITH 0  
+        DECLARE stack_flag AS new array<bool>(n) FILLED WITH False  
+        DECLARE node_stack AS empty array<int>  
+        DECLARE components AS empty array<array<int>>  
+
+        FUNCTION tarjan(current_node)  
+            ASSIGN idx_arr[current_node] TO visit_index  
+            ASSIGN low_arr[current_node] TO visit_index  
+            SET visit_index TO visit_index + 1  
+            APPEND current_node TO node_stack  
+            ASSIGN stack_flag[current_node] TO True  
+
+            SET next_pos TO 0  
+            WHILE next_pos < LENGTH(adjacency_map[current_node])  
+                DECLARE adj_node AS adjacency_map[current_node][next_pos]  
+                IF idx_arr[adj_node] < 0 THEN  
+                    CALL tarjan(adj_node)  
+                    SET low_arr[current_node] TO (low_arr[current_node] < low_arr[adj_node]) ? low_arr[current_node] : low_arr[adj_node]  
+                ELSE IF stack_flag[adj_node] == True THEN  
+                    SET low_arr[current_node] TO (low_arr[current_node] < idx_arr[adj_node]) ? low_arr[current_node] : idx_arr[adj_node]  
+                END IF  
+                SET next_pos TO next_pos + 1  
+            END WHILE  
+
+            IF low_arr[current_node] == idx_arr[current_node] THEN  
+                DECLARE temp_component AS empty array<int>  
+                WHILE True  
+                    DECLARE pop_node AS node_stack[-1]  
+                    REMOVE last element FROM node_stack  
+                    ASSIGN stack_flag[pop_node] TO False  
+                    APPEND pop_node TO temp_component  
+                    IF pop_node == current_node THEN  
+                        BREAK  
+                    END IF  
+                END WHILE  
+                APPEND temp_component TO components  
+            END IF  
+        END FUNCTION  
+
+        DECLARE i AS 0  
+        WHILE i < n  
+            IF idx_arr[i] == -1 THEN  
+                CALL tarjan(i)  
+            END IF  
+            SET i TO i + 1  
+        END WHILE  
+
+        DECLARE component_map AS new map<int, array<int>>  
+        DECLARE node_component AS new array<int>(n) FILLED WITH -1  
+        DECLARE component_has_crystal AS new array<bool>(LENGTH(components)) FILLED WITH False  
+        DECLARE comp_id AS 0  
+
+        DECLARE comp_idx AS 0  
+        WHILE comp_idx < LENGTH(components)  
+            DECLARE cluster AS components[comp_idx]  
+            DECLARE elem_idx AS 0  
+            WHILE elem_idx < LENGTH(cluster)  
+                DECLARE node_val AS cluster[elem_idx]  
+                ASSIGN node_component[node_val] TO comp_id  
+                IF CONTAINS(crystals, node_val) THEN  
+                    ASSIGN component_has_crystal[comp_idx] TO True  
+                END IF  
+                SET elem_idx TO elem_idx + 1  
+            END WHILE  
+            SET comp_id TO comp_id + 1  
+            SET comp_idx TO comp_idx + 1  
+        END WHILE  
+
+        DECLARE comp_graph AS new map<int, array<int>>  
+        SET idx2 TO 0  
+        WHILE idx2 < LENGTH(flowFrom)  
+            DECLARE src_c AS node_component[flowFrom[idx2]]  
+            DECLARE dst_c AS node_component[flowTo[idx2]]  
+            IF src_c != dst_c THEN  
+                IF NOT EXISTS comp_graph[src_c] THEN  
+                    ASSIGN comp_graph[src_c] TO empty array  
+                END IF  
+                APPEND dst_c TO comp_graph[src_c]  
+            END IF  
+            SET idx2 TO idx2 + 1  
+        END WHILE  
+
+        DECLARE indegree_arr AS new array<int>(LENGTH(components)) FILLED WITH 0  
+
+        DECLARE c_idx AS 0  
+        WHILE c_idx < LENGTH(components)  
+            IF EXISTS comp_graph[c_idx] THEN  
+                DECLARE adj_i AS 0  
+                WHILE adj_i < LENGTH(comp_graph[c_idx])  
+                    DECLARE nbr AS comp_graph[c_idx][adj_i]  
+                    indegree_arr[nbr] = indegree_arr[nbr] + 1  
+                    SET adj_i TO adj_i + 1  
+                END WHILE  
+            END IF  
+            SET c_idx TO c_idx + 1  
+        END WHILE  
+
+        DECLARE new_runes AS 0  
+        DECLARE cid AS 0  
+        WHILE cid < LENGTH(components)  
+            IF indegree_arr[cid] == 0 AND component_has_crystal[cid] == False THEN  
+                SET new_runes TO new_runes + 1  
+            END IF  
+            SET cid TO cid + 1  
+        END WHILE  
+
+        RETURN new_runes  
+    END FUNCTION  
+END CLASS

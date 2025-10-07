@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION countPrefixSuffixPairs(words)
+        FUNCTION substring(str, startIndex, endIndex)
+            SET result TO ""
+            SET idx TO startIndex
+            REPEAT WHILE idx < endIndex
+                SET result TO result + str[idx]
+                SET idx TO idx + 1
+            END REPEAT
+            RETURN result
+        END FUNCTION
+
+        FUNCTION length(str)
+            SET lenCounter TO 0
+            SET pos TO 0
+            WHILE TRUE
+                IF pos >= len(str)
+                    BREAK
+                END IF
+                SET lenCounter TO lenCounter + 1
+                SET pos TO pos + 1
+            END WHILE
+            RETURN len(str)
+        END FUNCTION
+
+        SET totalPairs TO 0
+        SET frequencyMap TO empty mapping with default zero
+
+        FUNCTION iterateWordsBackward(index)
+            IF index < 0
+                RETURN
+            END IF
+
+            SET currentWord TO words[index]
+
+            FUNCTION iterateKeys(keysList, idxKeys)
+                IF idxKeys >= length(keysList)
+                    RETURN
+                END IF
+
+                SET keyCandidate TO keysList[idxKeys]
+                SET lenKey TO len(keyCandidate)
+                SET lenWord TO len(currentWord)
+
+                FUNCTION extractPrefix()
+                    RETURN substring(keyCandidate, 0, lenWord)
+                END FUNCTION
+
+                FUNCTION extractSuffix()
+                    RETURN substring(keyCandidate, lenKey - lenWord, lenKey)
+                END FUNCTION
+
+                IF (currentWord == extractPrefix()) AND (currentWord == extractSuffix())
+                    SET totalPairs TO totalPairs + frequencyMap[keyCandidate]
+                END IF
+
+                iterateKeys(keysList, idxKeys + 1)
+            END FUNCTION
+
+            SET keysArray TO keys from frequencyMap (order irrelevant)
+            iterateKeys(keysArray, 0)
+
+            IF frequencyMap has key currentWord
+                SET frequencyMap[currentWord] TO frequencyMap[currentWord] + 1
+            ELSE
+                SET frequencyMap[currentWord] TO 1
+            END IF
+
+            iterateWordsBackward(index - 1)
+        END FUNCTION
+
+        iterateWordsBackward(length(words) - 1)
+
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

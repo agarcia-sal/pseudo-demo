@@ -1,0 +1,98 @@
+CLASS Solution
+    FUNCTION findAnswer(n, edges)
+        FUNCTION InsertHeapElement(heap, elem)
+            SET index TO LENGTH of heap
+            APPEND elem TO heap
+            WHILE index GREATER THAN 0
+                SET parent TO (index - 1) DIV 2
+                IF heap[parent][0] LESS THAN OR EQUAL TO heap[index][0]
+                    BREAK
+                END IF
+                SWAP heap[parent] AND heap[index]
+                SET index TO parent
+            END WHILE
+        END FUNCTION
+
+        FUNCTION PopHeapElement(heap)
+            IF LENGTH of heap EQUALS 0
+                RETURN null
+            END IF
+            SET result TO heap[0]
+            SET lastElem TO heap[LENGTH of heap - 1]
+            REMOVE last element from heap
+            IF LENGTH of heap EQUALS 0
+                RETURN result
+            END IF
+            SET heap[0] TO lastElem
+            SET i TO 0
+            WHILE TRUE
+                SET left TO 2 * i + 1
+                SET right TO 2 * i + 2
+                SET smallest TO i
+                IF left LESS THAN LENGTH of heap AND heap[left][0] LESS THAN heap[smallest][0]
+                    SET smallest TO left
+                END IF
+                IF right LESS THAN LENGTH of heap AND heap[right][0] LESS THAN heap[smallest][0]
+                    SET smallest TO right
+                END IF
+                IF smallest EQUALS i
+                    BREAK
+                END IF
+                SWAP heap[i] AND heap[smallest]
+                SET i TO smallest
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        SET adjacencyMap TO empty mapping from keys to empty lists
+        FOR EACH element x y z IN edges DO
+            APPEND tuple(y, z) TO adjacencyMap[x]
+            APPEND tuple(x, z) TO adjacencyMap[y]
+        END FOR
+
+        SET distances TO list of size n FILLED with positive_infinity
+        SET distances[0] TO 0
+        SET priorityQueue TO list containing tuple(0, 0)
+
+        WHILE LENGTH of priorityQueue GREATER THAN 0 DO
+            SET (currDist, node) TO PopHeapElement(priorityQueue)
+            IF currDist GREATER THAN distances[node] THEN
+                CONTINUE
+            END IF
+            FOR EACH (neighbor, weight) IN adjacencyMap[node] DO
+                SET tempDist TO currDist PLUS weight
+                IF tempDist LESS THAN distances[neighbor] THEN
+                    SET distances[neighbor] TO tempDist
+                    InsertHeapElement(priorityQueue, tuple(tempDist, neighbor))
+                END IF
+            END FOR
+        END WHILE
+
+        SET resultEdges TO empty set
+        SET traversalStack TO list containing tuple(n - 1, distances[n - 1])
+        SET seenNodes TO list of size n FILLED with False
+
+        WHILE LENGTH of traversalStack GREATER THAN 0 DO
+            SET (currNode, currDist) TO traversalStack[LENGTH of traversalStack - 1]
+            REMOVE last element from traversalStack
+            IF seenNodes[currNode] THEN
+                CONTINUE
+            END IF
+            SET seenNodes[currNode] TO True
+            FOR EACH (adjNode, wgt) IN adjacencyMap[currNode] DO
+                IF currDist EQUALS distances[adjNode] PLUS wgt THEN
+                    SET edgePair TO tuple(MIN(currNode, adjNode), MAX(currNode, adjNode))
+                    ADD edgePair TO resultEdges
+                    APPEND tuple(adjNode, distances[adjNode]) TO traversalStack
+                END IF
+            END FOR
+        END WHILE
+
+        SET outputList TO empty list
+        FOR EACH element a b _ IN edges DO
+            APPEND ((MIN(a, b), MAX(a, b)) IN resultEdges) TO outputList
+        END FOR
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

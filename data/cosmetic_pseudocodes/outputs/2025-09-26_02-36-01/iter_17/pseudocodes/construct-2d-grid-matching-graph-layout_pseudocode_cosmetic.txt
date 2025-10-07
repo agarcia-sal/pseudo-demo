@@ -1,0 +1,68 @@
+CLASS Solution  
+    FUNCTION constructGridLayout(n, edges)  
+        DECLARE h AS list OF lists INITIALIZED TO empty lists REPEATED n times  
+        FOR EACH pair a, b IN edges DO  
+            INSERT b INTO h[a]  
+            INSERT a INTO h[b]  
+        END FOR  
+
+        DECLARE d AS list OF length 5 FILLED WITH -1  
+        FOR EACH index i AND list neighbors IN h DO  
+            d[LENGTH(neighbors)] = i  
+        END FOR  
+
+        DECLARE r AS list  
+        IF d[1] != -1 THEN  
+            r = [d[1]]  
+        ELSE IF d[4] == -1 THEN  
+            DECLARE v AS d[2]  
+            FOR EACH w IN h[v] DO  
+                IF LENGTH(h[w]) == 2 THEN  
+                    r = [v, w]  
+                    BREAK  
+                END IF  
+            END FOR  
+        ELSE  
+            DECLARE v AS d[2]  
+            r = [v]  
+            DECLARE p AS v  
+            v = h[v][0]  
+            LOOP  
+                EXIT WHEN LENGTH(h[v]) <= 2  
+                APPEND v TO r  
+                FOR EACH w IN h[v] DO  
+                    IF w != p AND LENGTH(h[w]) < 4 THEN  
+                        p = v  
+                        v = w  
+                        BREAK  
+                    END IF  
+                END FOR  
+            END LOOP  
+            APPEND v TO r  
+        END IF  
+
+        DECLARE answer AS list INITIALIZED WITH r  
+        DECLARE visited AS list OF booleans SET TO false REPEATED n times  
+        DECLARE blockCount AS (n / LENGTH(r)) - 1  
+        DECLARE iter AS INTEGER INITIALIZED TO 1  
+        WHILE iter <= blockCount DO  
+            FOR EACH node IN r DO  
+                visited[node] = true  
+            END FOR  
+            DECLARE nextRow AS empty list  
+            FOR EACH node IN r DO  
+                FOR EACH adj IN h[node] DO  
+                    IF NOT visited[adj] THEN  
+                        APPEND adj TO nextRow  
+                        BREAK  
+                    END IF  
+                END FOR  
+            END FOR  
+            APPEND nextRow TO answer  
+            r = nextRow  
+            iter = iter + 1  
+        END WHILE  
+
+        RETURN answer  
+    END FUNCTION  
+END CLASS

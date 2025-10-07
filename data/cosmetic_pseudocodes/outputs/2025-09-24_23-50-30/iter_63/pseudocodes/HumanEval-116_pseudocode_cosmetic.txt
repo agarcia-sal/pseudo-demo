@@ -1,0 +1,52 @@
+```
+FUNCTION sort_array(array_of_integers)
+  FUNCTION count_ones_in_binary(n)
+    SET bit_str TO ""
+    SET quotient TO n
+    WHILE quotient > 0 DO
+      SET bit_str TO (quotient MOD 2) + bit_str
+      SET quotient TO quotient DIV 2
+    END WHILE
+    SET ones_count TO 0
+    FOR EACH digit IN bit_str DO
+      SET ones_count TO ones_count + (digit == 1 ? 1 : 0)
+    END FOR
+    RETURN ones_count
+  END FUNCTION
+
+  SET temp_sorted TO array_of_integers
+  FOR i FROM 1 TO LENGTH(temp_sorted) - 1 DO
+    FOR j FROM 0 TO LENGTH(temp_sorted) - i - 1 DO
+      IF temp_sorted[j] > temp_sorted[j + 1] THEN
+        SET tmp_var TO temp_sorted[j]
+        SET temp_sorted[j] TO temp_sorted[j + 1]
+        SET temp_sorted[j + 1] TO tmp_var
+      END IF
+    END FOR
+  END FOR
+
+  FUNCTION recursive_key_sort(input_list)
+    IF input_list IS EMPTY THEN
+      RETURN []
+    END IF
+    SET pivot TO input_list[0]
+    SET less_partition TO []
+    SET equal_partition TO []
+    SET greater_partition TO []
+    FOR EACH item IN input_list DO
+      SWITCH (count_ones_in_binary(item) > count_ones_in_binary(pivot),
+              count_ones_in_binary(item) == count_ones_in_binary(pivot))
+        CASE (true, _):
+          ADD item TO greater_partition
+        CASE (false, true):
+          ADD item TO equal_partition
+        CASE (false, false):
+          ADD item TO less_partition
+      END SWITCH
+    END FOR
+    RETURN recursive_key_sort(less_partition) + equal_partition + recursive_key_sort(greater_partition)
+  END FUNCTION
+
+  RETURN recursive_key_sort(temp_sorted)
+END FUNCTION
+```

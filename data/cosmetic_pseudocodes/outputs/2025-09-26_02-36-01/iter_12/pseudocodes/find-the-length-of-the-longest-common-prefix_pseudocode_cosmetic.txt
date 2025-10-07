@@ -1,0 +1,118 @@
+CLASS Solution  
+    FUNCTION longestCommonPrefix(arr1 arr1 OF integers, arr2 arr2 OF integers) RETURNS integer  
+        FUNCTION strLen(s STRING) RETURNS integer  
+            SET count TO 0  
+            WHILE TRUE  
+                IF s[count] IS UNDEFINED THEN  
+                    RETURN count  
+                END IF  
+                SET count TO count + 1  
+            END WHILE  
+        END FUNCTION  
+
+        FUNCTION substr(s STRING, start integer, end integer) RETURNS STRING  
+            SET result TO ""  
+            SET index TO start - 1  
+            REPEAT  
+                IF index >= end THEN  
+                    EXIT  
+                END IF  
+                SET result TO result + s[index]  
+                SET index TO index + 1  
+            UNTIL FALSE  
+            RETURN result  
+        END FUNCTION  
+
+        FUNCTION toStr(n integer) RETURNS STRING  
+            IF n IS ZERO THEN  
+                RETURN "0"  
+            END IF  
+            SET digits TO ""  
+            SET number TO n  
+            SET negative TO FALSE  
+            IF number < 0 THEN  
+                SET negative TO TRUE  
+                SET number TO number * (-1)  
+            END IF  
+            WHILE number > 0  
+                SET digit TO (number MOD 10)  
+                SET ch TO CHAR(48 + digit)  
+                SET digits TO ch + digits  
+                SET number TO number DIV 10  
+            END WHILE  
+            IF negative THEN  
+                SET digits TO "-" + digits  
+            END IF  
+            RETURN digits  
+        END FUNCTION  
+
+        FUNCTION setContains(s SET OF STRING, key STRING) RETURNS BOOLEAN  
+            FOR each element IN s  
+                IF element == key THEN  
+                    RETURN TRUE  
+                END IF  
+            END FOR  
+            RETURN FALSE  
+        END FUNCTION  
+
+        SET prefixSetOne TO {}  
+        SET idx1 TO 0  
+        WHILE idx1 < LENGTH(arr1)  
+            SET n1 TO arr1[idx1]  
+            SET strN1 TO toStr(n1)  
+            SET lengthN1 TO strLen(strN1)  
+            SET i1 TO 1  
+            REPEAT  
+                IF i1 > lengthN1 THEN  
+                    BREAK  
+                END IF  
+                SET sub1 TO substr(strN1, 1, i1)  
+                prefixSetOne = prefixSetOne UNION {sub1}  
+                SET i1 TO i1 + 1  
+            UNTIL FALSE  
+            SET idx1 TO idx1 + 1  
+        END WHILE  
+
+        SET prefixSetTwo TO {}  
+        SET idx2 TO 0  
+        WHILE idx2 < LENGTH(arr2)  
+            SET n2 TO arr2[idx2]  
+            SET strN2 TO toStr(n2)  
+            SET lengthN2 TO strLen(strN2)  
+            SET j2 TO 1  
+            REPEAT  
+                IF j2 > lengthN2 THEN  
+                    BREAK  
+                END IF  
+                SET sub2 TO substr(strN2, 1, j2)  
+                prefixSetTwo = prefixSetTwo UNION {sub2}  
+                SET j2 TO j2 + 1  
+            UNTIL FALSE  
+            SET idx2 TO idx2 + 1  
+        END WHILE  
+
+        SET maxCommonLen TO 0  
+        FUNCTION getSetElements(s SET OF STRING) RETURNS LIST OF STRING  
+            SET resultList TO []  
+            FOR each elem IN s  
+                APPEND elem TO resultList  
+            END FOR  
+            RETURN resultList  
+        END FUNCTION  
+
+        SET listPrefixesOne TO getSetElements(prefixSetOne)  
+        SET k TO 0  
+        WHILE k < LENGTH(listPrefixesOne)  
+            SET pfx TO listPrefixesOne[k]  
+            IF setContains(prefixSetTwo, pfx) THEN  
+                SET pfxLen TO strLen(pfx)  
+                IF pfxLen > maxCommonLen THEN  
+                    SET maxCommonLen TO pfxLen  
+                END IF  
+            END IF  
+            SET k TO k + 1  
+        END WHILE  
+
+        RETURN maxCommonLen  
+    END FUNCTION  
+END CLASS

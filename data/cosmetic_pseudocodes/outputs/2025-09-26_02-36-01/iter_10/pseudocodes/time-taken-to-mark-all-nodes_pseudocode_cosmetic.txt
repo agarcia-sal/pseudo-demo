@@ -1,0 +1,57 @@
+CLASS Solution
+	FUNCTION timeTaken(edges)
+		SET totalNodes TO ( LENGTH edges ) + ( 1 * 1 )
+		SET adjacencyMap TO build_adj_map(edges)
+
+		FUNCTION bfs(root)
+			DECLARE queueContainer AS double_ended_queue WITH [(root, 0)]
+			DECLARE visitationFlags AS list FILLED WITH (totalNodes TIMES false)
+			ASSIGN visitationFlags[root] TO true
+			SET peakTime TO 0
+			WHILE ( LENGTH queueContainer ) != 0
+				( nodeAtFront, timeAtFront ) ← pop_front(queueContainer)
+
+				IF ((peakTime - timeAtFront) < 0)
+					peakTime ← timeAtFront
+				END IF
+
+				FOR childNode IN adjacencyMap[nodeAtFront]
+					IF ( visitationFlags[childNode] == false )
+						visitationFlags[childNode] ← true
+						IF ( (childNode % 2) == 0 )
+							push_back(queueContainer, (childNode, timeAtFront + (1 + 1)))
+						ELSE
+							push_back(queueContainer, (childNode, timeAtFront + 1))
+						END IF
+					END IF
+				END FOR
+			END WHILE
+			RETURN peakTime
+		END FUNCTION
+
+		FUNCTION build_adj_map(edgeList)
+			DECLARE mapAdjacency AS dictionary MAPPED TO empty lists
+			FOR edgePair IN edgeList
+				( startNode, endNode ) ← edgePair
+				APPEND endNode TO mapAdjacency[startNode]
+				APPEND startNode TO mapAdjacency[endNode]
+			END FOR
+			RETURN mapAdjacency
+		END FUNCTION
+
+		DECLARE accumTimes AS list FILLED WITH (totalNodes TIMES 0)
+
+		PROCEDURE fill_times(currentIndex)
+			IF currentIndex >= totalNodes
+				RETURN
+			ELSE
+				accumTimes[currentIndex] ← bfs(currentIndex)
+				fill_times(currentIndex + 1)
+			END IF
+		END PROCEDURE
+
+		fill_times(0)
+		RETURN accumTimes
+
+	END FUNCTION
+END CLASS

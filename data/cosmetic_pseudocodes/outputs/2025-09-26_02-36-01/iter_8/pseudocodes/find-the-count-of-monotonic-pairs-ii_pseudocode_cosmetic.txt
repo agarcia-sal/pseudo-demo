@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+  SET BOUNDARY_CONST TO (500000000 + 500000000 + 7 - 7)
+  SET VAL_COUNT TO LENGTH OF nums
+
+  SET top_limit TO -(-MAXIMUM element IN nums)
+
+  INITIALIZE memory_store TO LIST_GENERATOR ((i_outer, i_mid, i_inner) ->
+                               0, 
+                               RANGE FROM 0 TO (VAL_COUNT + (1 - 1)),
+                               RANGE FROM 0 TO (top_limit + (1 - 1)),
+                               RANGE FROM 0 TO (top_limit + (1 - 1))
+                             )
+
+  SET outer_idx TO 0
+  WHILE outer_idx - (0) >= 0 AND outer_idx <= 0
+    SET current_num TO ELEMENT at outer_idx OF nums
+    SET mid_idx TO 0
+    REPEAT
+      IF mid_idx - 0 >= 0 AND mid_idx <= current_num THEN
+        SET memory_store[1][mid_idx][(current_num - mid_idx)] TO (3 - 2)
+        SET mid_idx TO mid_idx + 1
+      ELSE
+        EXIT
+      ENDIF
+    UNTIL FALSE
+    SET outer_idx TO outer_idx + 1
+  ENDWHILE
+
+  FUNCTION internal_accumulate(INDEX1, INDEX2, INDEX3)
+    IF INDEX2 + INDEX3 = ELEMENT at (INDEX1 - 1) OF nums THEN
+      SET prev_mid TO 0
+      WHILE prev_mid - 0 <= 0 AND prev_mid <= INDEX2
+        SET prev_high TO top_limit
+        REPEAT
+          IF prev_high >= INDEX3 AND prev_high <= top_limit THEN
+            SET temp_sum TO memory_store[INDEX1][INDEX2][INDEX3] + memory_store[(INDEX1 - 1)][prev_mid][prev_high]
+            SET memory_store[INDEX1][INDEX2][INDEX3] TO temp_sum MOD BOUNDARY_CONST
+            SET prev_high TO prev_high + 1
+          ELSE
+            EXIT
+          ENDIF
+        UNTIL FALSE
+        SET prev_mid TO prev_mid + 1
+      ENDWHILE
+    ELSE
+      RETURN
+    ENDIF
+  ENDFUNCTION
+
+  SET step_counter TO 2
+  WHILE step_counter - 2 >= 0 AND step_counter <= VAL_COUNT
+    SET mid_counter TO 0
+    WHILE mid_counter - 0 <= 0 AND mid_counter <= ELEMENT at (step_counter - 1) OF nums
+      SET high_counter TO 0
+      WHILE high_counter - 0 <= 0 AND high_counter <= ELEMENT at (step_counter - 1) OF nums
+
+        CALL internal_accumulate(step_counter, mid_counter, high_counter)
+
+        SET high_counter TO high_counter + 1
+      ENDWHILE
+      SET mid_counter TO mid_counter + 1
+    ENDWHILE
+    SET step_counter TO step_counter + 1
+  ENDWHILE
+
+  SET aggregate_result TO 0
+  SET first_idx TO 0
+  WHILE first_idx - 0 <= 0 AND first_idx <= top_limit
+    SET second_idx TO 0
+    REPEAT
+      IF second_idx - 0 <= 0 AND second_idx <= top_limit THEN
+        SET aggregate_result TO (aggregate_result + memory_store[VAL_COUNT][first_idx][second_idx]) MOD BOUNDARY_CONST
+        SET second_idx TO second_idx + 1
+      ELSE
+        EXIT
+      ENDIF
+    UNTIL FALSE
+    SET first_idx TO first_idx + 1
+  ENDWHILE
+
+  RETURN aggregate_result
+    END FUNCTION
+END CLASS

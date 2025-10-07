@@ -1,0 +1,74 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+        DECLARE index TO 0  
+        SET self.parent AS empty mapping  
+        WHILE index IS LESS THAN n DO  
+            ASSIGN self.parent[index] TO index  
+            INCREMENT index BY one  
+        END WHILE  
+
+        DECLARE idx TO 0  
+        SET self.rank AS empty mapping  
+        WHILE idx IS LESS THAN n DO  
+            ASSIGN self.rank[idx] TO zero  
+            INCREMENT idx BY one  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+        WHILE self.parent[x] IS NOT x DO  
+            LET self.parent[x] TO self.find(self.parent[x])  
+        END WHILE  
+        RETURN self.parent[x]  
+    END FUNCTION  
+
+    FUNCTION union_set(self, u, v)  
+        LET u TO self.find(u)  
+        LET v TO self.find(v)  
+        IF u IS DIFFERENT FROM v THEN  
+            IF NOT (self.rank[u] >= self.rank[v]) THEN  
+                DECLARE swap_var AS u  
+                LET u TO v  
+                LET v TO swap_var  
+            END IF  
+            LET self.parent[v] TO u  
+            IF self.rank[u] EQUALS self.rank[v] THEN  
+                LET self.rank[u] TO self.rank[u] + 1  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+        DECLARE dsu TO NEW DSU(threshold + 1)  
+
+        DECLARE idx1 TO 0  
+        WHILE idx1 < LENGTH(nums) DO  
+            LET num TO nums[idx1]  
+            DECLARE multiplier TO 2  
+            DECLARE product TO num * multiplier  
+            WHILE product <= threshold DO  
+                CALL dsu.union_set(num, product)  
+                INCREMENT multiplier BY 1  
+                LET product TO num * multiplier  
+            END WHILE  
+            INCREMENT idx1 BY 1  
+        END WHILE  
+
+        SET unique_parents TO empty set  
+        DECLARE idx2 TO 0  
+        WHILE idx2 < LENGTH(nums) DO  
+            LET number TO nums[idx2]  
+            IF number <= threshold THEN  
+                LET parent_rep TO dsu.find(number)  
+                ADD parent_rep TO unique_parents  
+            ELSE  
+                ADD number TO unique_parents  
+            END IF  
+            INCREMENT idx2 BY 1  
+        END WHILE  
+
+        RETURN SIZE(unique_parents)  
+    END FUNCTION  
+END CLASS

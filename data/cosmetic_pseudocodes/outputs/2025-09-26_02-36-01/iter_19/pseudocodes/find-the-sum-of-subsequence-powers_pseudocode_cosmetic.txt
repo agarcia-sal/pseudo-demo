@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS, k parameter INTEGER) RETURNS INTEGER
+        SET BASE TO 10
+        SET EXPONENT TO 9
+        SET OFFSET TO 7
+        SET MOD TO (BASE ^ EXPONENT) + OFFSET
+        SET aggregate TO 0
+        DEFINE combineIndexList(parameters1 LIST OF INTEGERS, parameters2 INTEGER) RETURNS LIST OF LIST OF INTEGERS
+            PROCEDURE recBuild(combination LIST OF INTEGERS, start INTEGER, depth INTEGER, acc REFERENCE TO LIST OF LIST OF INTEGERS)
+                IF depth = 0 THEN
+                    acc.ADD(combination)
+                    RETURN
+                END IF
+                SET pointer TO start
+                WHILE pointer <= LENGTH(parameters1) - depth DO
+                    DEFINE extendedCombination TO combination + [parameters1[pointer]]
+                    CALL recBuild(extendedCombination, pointer + 1, depth - 1, acc)
+                    SET pointer TO pointer + 1
+                END WHILE
+            END PROCEDURE
+            SET result TO EMPTY LIST
+            CALL recBuild(EMPTY LIST, 0, parameters2, result)
+            RETURN result
+        END DEFINE
+        DEFINE absVal(n INTEGER) RETURNS INTEGER
+            IF n < 0 THEN RETURN -n ELSE RETURN n END IF
+        END DEFINE
+        SET resultSum TO 0
+        SET allChoices TO combineIndexList(nums, k)
+        FOR comboIndex FROM 0 TO LENGTH(allChoices) - 1
+            SET choice TO allChoices[comboIndex]
+            SET minDiff TO 1000000000
+            SET outerIdx TO 0
+            WHILE outerIdx < k
+                SET innerIdx TO outerIdx + 1
+                WHILE innerIdx < k
+                    SET diffCandidate TO absVal(choice[outerIdx] - choice[innerIdx])
+                    IF diffCandidate < minDiff THEN
+                        SET minDiff TO diffCandidate
+                    END IF
+                    SET innerIdx TO innerIdx + 1
+                END WHILE
+                SET outerIdx TO outerIdx + 1
+            END WHILE
+            SET resultSum TO resultSum + minDiff
+            SET resultSum TO resultSum - ((resultSum / MOD) * MOD)
+        END FOR
+        RETURN resultSum
+    END FUNCTION
+END CLASS

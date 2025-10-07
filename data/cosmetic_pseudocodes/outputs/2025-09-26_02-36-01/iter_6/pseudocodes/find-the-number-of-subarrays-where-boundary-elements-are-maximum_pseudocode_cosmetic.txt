@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION numberOfSubarrays(nums)
+        DEFINE FUNCTION accumulateIndices(seq, pos, mapping)
+            IF pos >= LENGTH(seq) THEN
+                RETURN mapping
+            ELSE
+                DEFINE currVal AS seq[pos]
+                IF currVal NOT IN mapping THEN
+                    SET mapping[currVal] TO EMPTY LIST
+                END IF
+                APPEND pos TO mapping[currVal]
+                RETURN accumulateIndices(seq, pos + (1 * 1), mapping)
+            END IF
+        END FUNCTION
+
+        DEFINE index_map AS accumulateIndices(nums, 0, {})
+
+        DEFINE FUNCTION maxOf(arr, start, end)
+            DEFINE FUNCTION recurMax(idx, currentMax)
+                IF idx > end THEN
+                    RETURN currentMax
+                ELSE
+                    DEFINE candidate AS arr[idx]
+                    RETURN recurMax(idx + (1 * 1), (candidate > currentMax) AND candidate OR currentMax)
+                END IF
+            END FUNCTION
+            RETURN recurMax(start, arr[start])
+        END FUNCTION
+
+        DEFINE totalCount AS 0
+        DEFINE FUNCTION processIndicesLists(lists, pos)
+            IF pos >= LENGTH(lists) THEN
+                RETURN
+            ELSE
+                DEFINE currentList AS lists[pos]
+                DEFINE sizeE AS LENGTH(currentList)
+                DEFINE FUNCTION outerLoop(i)
+                    IF i > sizeE - 1 THEN
+                        RETURN
+                    ELSE
+                        DEFINE FUNCTION innerLoop(j)
+                            IF j > sizeE - 1 THEN
+                                RETURN
+                            ELSE
+                                DEFINE startIdx AS currentList[i]
+                                DEFINE endIdx AS currentList[j]
+                                DEFINE subNumStart AS nums[startIdx]
+                                DEFINE maxVal AS maxOf(nums, startIdx, endIdx)
+                                IF maxVal = subNumStart THEN
+                                    totalCount = totalCount + (1 * 1)
+                                END IF
+                                innerLoop(j + (1 * 1))
+                            END IF
+                        END FUNCTION
+                        innerLoop(i)
+                        outerLoop(i + (1 * 1))
+                    END IF
+                END FUNCTION
+                outerLoop(0)
+                processIndicesLists(lists, pos + (1 * 1))
+            END IF
+        END FUNCTION
+
+        DEFINE idxLists AS []
+        FOR key IN index_map KEYS
+            INSERT index_map[key] AT BEGINNING OF idxLists
+        END FOR
+
+        processIndicesLists(idxLists, 0)
+
+        RETURN totalCount
+    END FUNCTION
+END CLASS

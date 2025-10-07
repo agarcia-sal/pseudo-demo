@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION maxPointsInsideSquare(points s)
+        SET total TO LENGTH OF s
+        SET highest TO 0
+        SET outer_loop_index TO 0
+        WHILE outer_loop_index < total
+            SET first_x TO s[outer_loop_index][0]
+            SET first_y TO s[outer_loop_index][1]
+            SET length_side TO (ABS(first_x) > ABS(first_y)) ? ABS(first_x) : ABS(first_y)
+            SET marker_map TO createEmptyAssoc()
+            SET is_valid TO true
+            SET inner_loop_index TO 0
+            REPEAT
+                IF inner_loop_index >= total THEN
+                    BREAK
+                END IF
+                SET current_x TO s[inner_loop_index][0]
+                SET current_y TO s[inner_loop_index][1]
+                IF NOT (ABS(current_x) > length_side OR ABS(current_y) > length_side) THEN
+                    SET current_tag TO s[inner_loop_index]
+                    IF containsKey(marker_map, current_tag) THEN
+                        SET is_valid TO false
+                        BREAK
+                    ELSE
+                        insertKey(marker_map, current_tag, true)
+                    END IF
+                END IF
+                SET inner_loop_index TO inner_loop_index + 1
+            UNTIL FALSE
+            IF is_valid THEN
+                SET highest TO ((highest > LENGTH(marker_map)) ? highest : LENGTH(marker_map))
+            END IF
+            SET outer_loop_index TO outer_loop_index + 1
+        END WHILE
+        RETURN highest
+    END FUNCTION
+
+    FUNCTION createEmptyAssoc()
+        RETURN {}
+    END FUNCTION
+
+    FUNCTION containsKey(dict, key)
+        SET keys_list TO getKeys(dict)
+        SET idx TO 0
+        WHILE idx < LENGTH(keys_list)
+            IF keys_list[idx] == key THEN
+                RETURN true
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+        RETURN false
+    END FUNCTION
+
+    FUNCTION insertKey(dict, key, value)
+        ASSIGN dict[key] = value
+    END FUNCTION
+
+    FUNCTION getKeys(dict)
+        SET collected TO []
+        SET counter TO 0
+        FOR EACH pair IN dict
+            collected[counter] = pair.key
+            SET counter TO counter + 1
+        END FOR
+        RETURN collected
+    END FUNCTION
+END CLASS

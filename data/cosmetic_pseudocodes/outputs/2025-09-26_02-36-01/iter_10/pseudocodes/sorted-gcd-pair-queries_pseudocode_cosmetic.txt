@@ -1,0 +1,104 @@
+CLASS Solution
+    FUNCTION gcdValues(nums, queries)
+  DEFINE FUNCTION findMaximum(numbers)
+    SET totalMax TO numbers[0]
+    SET idx TO 1
+    WHILE idx LESS THAN LENGTH OF numbers
+      IF numbers[idx] GREATER THAN totalMax THEN
+        SET totalMax TO numbers[idx]
+      END IF
+      SET idx TO idx PLUS 1
+    END WHILE
+    RETURN totalMax
+  END FUNCTION
+
+  DEFINE FUNCTION initializeCounter(numbers)
+    SET tally TO EMPTY MAP
+    SET pos TO 0
+    WHILE pos LESS THAN LENGTH OF numbers
+      IF tally CONTAINS KEY numbers[pos] THEN
+        SET tally[numbers[pos]] TO tally[numbers[pos]] PLUS 1
+      ELSE
+        SET tally[numbers[pos]] TO 1
+      END IF
+      SET pos TO pos PLUS 1
+    END WHILE
+    RETURN tally
+  END FUNCTION
+
+  DEFINE FUNCTION makeZeroList(lengthVal)
+    SET zeroList TO EMPTY LIST
+    SET counterIndex TO 0
+    REPEAT
+      APPEND 0 TO zeroList
+      SET counterIndex TO counterIndex PLUS 1
+    UNTIL counterIndex EQUALS lengthVal
+    RETURN zeroList
+  END FUNCTION
+
+  DEFINE FUNCTION bisectRight(accumArr, val)
+    SET low TO 0
+    SET high TO LENGTH OF accumArr
+    WHILE low LESS THAN high
+      SET mid TO (low PLUS high) DIVIDED BY 2
+      IF accumArr[mid] GREATER THAN val THEN
+        SET high TO mid
+      ELSE
+        SET low TO mid PLUS 1
+      END IF
+    END WHILE
+    RETURN low
+  END FUNCTION
+
+  SET maximumValue TO findMaximum(nums)
+  SET counterMap TO initializeCounter(nums)
+  SET counting_gcd TO makeZeroList(maximumValue PLUS 1)
+
+  DEFINE FUNCTION processIndex(currIndex)
+    SET tempVal TO 0
+    DEFINE FUNCTION innerLoop(subIndex)
+      IF subIndex GREATER THAN maximumValue THEN RETURN
+      IF subIndex MODULO currIndex EQUALS 0 THEN
+        IF subIndex IN counterMap THEN
+          SET tempVal TO tempVal PLUS counterMap[subIndex]
+        END IF
+        SET counting_gcd[currIndex] TO counting_gcd[currIndex] MINUS counting_gcd[subIndex]
+      END IF
+      innerLoop(subIndex PLUS currIndex)
+    END FUNCTION
+    innerLoop(currIndex)
+    SET counting_gcd[currIndex] TO counting_gcd[currIndex] PLUS ((tempVal TIMES (tempVal MINUS 1)) DIVIDED BY 2)
+  END FUNCTION
+
+  DEFINE FUNCTION loopDownwards(num)
+    IF num LESS THAN 1 THEN RETURN
+    processIndex(num)
+    loopDownwards(num MINUS 1)
+  END FUNCTION
+
+  loopDownwards(maximumValue)
+
+  DEFINE FUNCTION accumulateList(sourceList)
+    SET accList TO makeZeroList(LENGTH OF sourceList)
+    SET ind TO 1
+    REPEAT
+      SET accList[ind] TO accList[ind MINUS 1] PLUS sourceList[ind]
+      SET ind TO ind PLUS 1
+    UNTIL ind GREATER OR EQUAL TO LENGTH OF sourceList
+    RETURN accList
+  END FUNCTION
+
+  SET accumulator TO accumulateList(counting_gcd)
+
+  SET outputList TO EMPTY LIST
+  DEFINE FUNCTION processQueries(index)
+    IF index GREATER OR EQUAL TO LENGTH OF queries THEN RETURN
+    APPEND bisectRight(accumulator, queries[index]) TO outputList
+    processQueries(index PLUS 1)
+  END FUNCTION
+
+  processQueries(0)
+
+  RETURN outputList
+END FUNCTION
+END CLASS

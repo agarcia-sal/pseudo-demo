@@ -1,0 +1,45 @@
+CLASS Solution
+    FUNCTION maximumTotalCost(nums)
+        DECLARE length_of_nums AS LENGTH(nums)
+        IF NOT (length_of_nums > 1) THEN
+            RETURN nums[1]
+        END IF
+
+        LET dp_array BE AN ARRAY FILLED WITH ZEROES OF SIZE length_of_nums
+        SET dp_array[length_of_nums - 1] AS nums[length_of_nums - 1]
+
+        LET idx BE length_of_nums - 2
+        WHILE idx >= 0 DO
+            LET cost_value BE nums[idx]
+            IF cost_value > dp_array[idx + 1] THEN
+                dp_array[idx] = cost_value
+            ELSE
+                dp_array[idx] = dp_array[idx + 1] + cost_value
+            END IF
+
+            DECLARE inner_index AS idx + 1
+            WHILE inner_index <= length_of_nums - 1 DO
+                LET power_difference BE inner_index - idx
+                LET sign_alternator BE (-1) ^ power_difference
+                LET increment_value BE nums[inner_index] * sign_alternator
+                cost_value = cost_value + increment_value
+
+                IF (inner_index + 1) < length_of_nums THEN
+                    IF dp_array[idx] < cost_value + dp_array[inner_index + 1] THEN
+                        dp_array[idx] = cost_value + dp_array[inner_index + 1]
+                    END IF
+                ELSE
+                    IF dp_array[idx] < cost_value THEN
+                        dp_array[idx] = cost_value
+                    END IF
+                END IF
+
+                inner_index = inner_index + 1
+            END WHILE
+
+            idx = idx - 1
+        END WHILE
+
+        RETURN dp_array[0]
+    END FUNCTION
+END CLASS

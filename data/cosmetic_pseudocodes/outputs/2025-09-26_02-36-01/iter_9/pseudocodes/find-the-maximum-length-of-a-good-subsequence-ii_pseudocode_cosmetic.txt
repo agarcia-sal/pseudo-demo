@@ -1,0 +1,110 @@
+CLASS Solution
+    FUNCTION maximumLength(psi PARAMETER, phi PARAMETER)
+        FUNCTION initMatrix(rowCount, colCount)
+            SET lib TO EMPTY LIST
+            SET count1 TO 0
+            REPEAT
+                IF count1 >= rowCount THEN
+                    BREAK
+                END IF
+                SET tempRow TO EMPTY LIST
+                SET count2 TO 0
+                REPEAT
+                    IF count2 >= colCount THEN
+                        BREAK
+                    END IF
+                    APPEND 0 TO tempRow
+                    SET count2 TO count2 + 1
+                END REPEAT
+                APPEND tempRow TO lib
+                SET count1 TO count1 + 1
+            END REPEAT
+            RETURN lib
+        END FUNCTION
+
+        FUNCTION initListOfDicts(lengthVal)
+            SET outerList TO EMPTY LIST
+            SET idx TO 0
+            REPEAT
+                IF idx >= lengthVal THEN
+                    BREAK
+                END IF
+                APPEND A NEW DEFAULT DICTIONARY MAPPING TO 0 TO outerList
+                SET idx TO idx + 1
+            END REPEAT
+            RETURN outerList
+        END FUNCTION
+
+        FUNCTION maxOfTwo(p, q)
+            IF p > q THEN
+                RETURN p
+            ELSE
+                RETURN q
+            END IF
+        END FUNCTION
+
+        FUNCTION updateG(arr, ind, val, keyVal)
+            IF arr[ind][0] != keyVal THEN
+                IF val >= arr[ind][1] THEN
+                    arr[ind][2] = arr[ind][1]
+                    arr[ind][1] = val
+                    arr[ind][0] = keyVal
+                ELSE
+                    arr[ind][2] = maxOfTwo(arr[ind][2], val)
+                END IF
+            ELSE
+                arr[ind][1] = maxOfTwo(arr[ind][1], val)
+            END IF
+        END FUNCTION
+
+        SET m TO LENGTH OF psi
+        SET q TO phi + 1
+        SET fMatrix TO initMatrix(m, q)
+        SET mpList TO initListOfDicts(q)
+        SET gMatrix TO initMatrix(q, 3)
+
+        SET ultimateAns TO 0
+
+        FUNCTION outerLoopCounter(indOuter)
+            IF indOuter >= m THEN
+                RETURN
+            END IF
+
+            SET currentValue TO psi[indOuter]
+            SET innerIndex TO 0
+
+            FUNCTION innerLoopCounter(indInner)
+                IF indInner > phi THEN
+                    outerLoopCounter(indOuter + 1)
+                    RETURN
+                END IF
+
+                SET fMatrix[indOuter][indInner] = mpList[indInner].GET(currentValue, 0)
+
+                IF indInner > 0 THEN
+                    IF gMatrix[indInner - 1][0] != psi[indOuter] THEN
+                        SET fMatrix[indOuter][indInner] = maxOfTwo(fMatrix[indOuter][indInner], gMatrix[indInner - 1][1])
+                    ELSE
+                        SET fMatrix[indOuter][indInner] = maxOfTwo(fMatrix[indOuter][indInner], gMatrix[indInner - 1][2])
+                    END IF
+                END IF
+
+                SET fMatrix[indOuter][indInner] = fMatrix[indOuter][indInner] + 1
+
+                mpList[indInner][psi[indOuter]] = maxOfTwo(mpList[indInner].GET(psi[indOuter], 0), fMatrix[indOuter][indInner])
+
+                updateG(gMatrix, indInner, fMatrix[indOuter][indInner], psi[indOuter])
+
+                ultimateAns = maxOfTwo(ultimateAns, fMatrix[indOuter][indInner])
+
+                innerLoopCounter(indInner + 1)
+            END FUNCTION
+
+            innerLoopCounter(0)
+        END FUNCTION
+
+        outerLoopCounter(0)
+
+        RETURN ultimateAns
+    END FUNCTION
+END CLASS

@@ -1,0 +1,94 @@
+CLASS UnionFind  
+  FUNCTION __init__(self, size)  
+    SET counter TO 0  
+    SET parentList TO empty list  
+    WHILE counter LESS THAN size  
+      APPEND counter TO parentList  
+      SET counter TO counter PLUS 1  
+    END WHILE  
+    SET self.parent TO parentList  
+    SET self.rank TO list containing size times zero  
+  END FUNCTION  
+  
+  FUNCTION find(self, u)  
+    DEFINE helper(x)  
+      IF self.parent[x] EQUALS x  
+        RETURN x  
+      ELSE  
+        SET self.parent[x] TO helper(self.parent[x])  
+        RETURN self.parent[x]  
+      END IF  
+    END DEFINE  
+    SET resultVar TO helper(u)  
+    RETURN resultVar  
+  END FUNCTION  
+  
+  FUNCTION union(self, u, v)  
+    SET rootUIndex TO self.find(u)  
+    SET rootVIndex TO self.find(v)  
+    IF (rootUIndex NOT EQUAL TO rootVIndex)  
+      SET rankU TO self.rank[rootUIndex]  
+      SET rankV TO self.rank[rootVIndex]  
+      IF (rankU GREATER THAN rankV)  
+        SET self.parent[rootVIndex] TO rootUIndex  
+      ELSE  
+        IF (rankU LESS THAN rankV)  
+          SET self.parent[rootUIndex] TO rootVIndex  
+        ELSE  
+          SET self.parent[rootVIndex] TO rootUIndex  
+          SET oldRank TO self.rank[rootUIndex]  
+          SET self.rank[rootUIndex] TO oldRank PLUS (1 * (1))  
+        END IF  
+      END IF  
+    END IF  
+  END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+  FUNCTION maximizeSumOfWeights(self, edges, k)  
+    SET lengthEdges TO (len(edges) + (1 * (1)))  
+    SET degreesList TO list with lengthEdges times 0  
+    SET uf TO UnionFind(lengthEdges)  
+  
+    DEFINE compareDescending(a, b)  
+      RETURN (b[2] - a[2])  
+    END DEFINE  
+  
+    SET sortedEdges TO empty list  
+    WHILE edges NOT EMPTY  
+      SET maxIndex TO 0  
+      SET indexCounter TO 0  
+      WHILE indexCounter LESS THAN len(edges)  
+        IF edges[indexCounter][2] GREATER THAN edges[maxIndex][2]  
+          SET maxIndex TO indexCounter  
+        END IF  
+        SET indexCounter TO indexCounter PLUS 1  
+      END WHILE  
+      APPEND edges[maxIndex] TO sortedEdges  
+      REMOVE edges[maxIndex] FROM edges  
+    END WHILE  
+  
+    SET maximumSum TO 0  
+    DEFINE processEdge(i)  
+      IF i EQUALS len(sortedEdges)  
+        RETURN  
+      END IF  
+      SET edgeItem TO sortedEdges[i]  
+      SET firstNode TO edgeItem[0]  
+      SET secondNode TO edgeItem[1]  
+      SET weightEdge TO edgeItem[2]  
+  
+      IF (degreesList[firstNode] LESS THAN k) AND (degreesList[secondNode] LESS THAN k) AND (uf.find(firstNode) NOT EQUAL uf.find(secondNode))  
+        CALL uf.union(firstNode, secondNode)  
+        SET degreesList[firstNode] TO degreesList[firstNode] + (1 * (1))  
+        SET degreesList[secondNode] TO degreesList[secondNode] + (1 * (1))  
+        SET newSum TO maximumSum + weightEdge  
+        SET maximumSum TO newSum  
+      END IF  
+      CALL processEdge(i + 1)  
+    END DEFINE  
+  
+    CALL processEdge(0)  
+    RETURN maximumSum  
+  END FUNCTION  
+END CLASS

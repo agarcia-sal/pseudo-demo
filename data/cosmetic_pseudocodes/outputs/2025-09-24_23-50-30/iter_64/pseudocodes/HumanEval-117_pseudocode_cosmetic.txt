@@ -1,0 +1,36 @@
+```
+FUNCTION select_words(text_input, count_target)
+    SET accumulator TO []
+    
+    FUNCTION count_consonants(token, position, tally)
+        IF position >= LENGTH(token) THEN
+            RETURN tally
+        ELSE
+            SWITCH NOT ((TO_LOWER(token[position]) == "a") OR (TO_LOWER(token[position]) == "e") OR (TO_LOWER(token[position]) == "i") OR (TO_LOWER(token[position]) == "o") OR (TO_LOWER(token[position]) == "u"))
+                CASE TRUE:
+                    RETURN count_consonants(token, position + 1, tally + 1)
+                DEFAULT:
+                    RETURN count_consonants(token, position + 1, tally)
+            END SWITCH
+        END IF
+    END FUNCTION
+
+    FUNCTION process_tokens(tokens, index)
+        IF index >= LENGTH(tokens) THEN
+            RETURN
+        ELSE
+            SET current_token TO tokens[index]
+            SET consonant_total TO count_consonants(current_token, 0, 0)
+            IF consonant_total == count_target THEN
+                accumulator.APPEND(current_token)
+            END IF
+            process_tokens(tokens, index + 1)
+        END IF
+    END FUNCTION
+
+    LET word_list BE SPLIT text_input BY " "
+    process_tokens(word_list, 0)
+
+    RETURN accumulator
+END FUNCTION
+```

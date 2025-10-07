@@ -1,0 +1,63 @@
+claSS Solution  
+    functiON maximumScore(grid)  
+      n ← SIZE OF grid  
+      prefix ← ARRAY OF ARRAY SIZE (n + 1) × (n + 1) INIT TO 0  
+      prevPick ← ARRAY SIZE (n + 1) INIT 0  
+      prevSkip ← ARRAY SIZE (n + 1) INIT 0
+
+      Define FUNCTION computePrefixRow(r, c)  
+        IF c > n - 1 RETURN  
+        prefix[c + 1][r] ← prefix[c][r] + grid[r][c]  
+        computePrefixRow(r, c + 1)  
+      END FUNCTION
+
+      Define FUNCTION computePrefixCol(j)  
+        IF j > n - 1 RETURN  
+        computePrefixRow(j, 0)  
+        computePrefixCol(j + 1)  
+      END FUNCTION
+
+      computePrefixCol(0)  
+
+      Define FUNCTION innerLoop(curr, prev, j, currPick, currSkip)  
+        IF prev > n RETURN  
+        IF curr > n THEN  
+          innerLoop(0, prev + 1, j, currPick, currSkip)  
+          RETURN  
+        END IF  
+        IF curr > prev THEN  
+          score ← prefix[j - 1][curr] - prefix[j - 1][prev]  
+          currPick[curr] ← MAX(currPick[curr], prevSkip[prev] + score)  
+          currSkip[curr] ← MAX(currSkip[curr], prevSkip[prev] + score)  
+        ELSE  
+          score ← prefix[j][prev] - prefix[j][curr]  
+          currPick[curr] ← MAX(currPick[curr], prevPick[prev] + score)  
+          currSkip[curr] ← MAX(currSkip[curr], prevPick[prev])  
+        END IF  
+        innerLoop(curr + 1, prev, j, currPick, currSkip)  
+      END FUNCTION
+
+      Define FUNCTION outerLoop(j)  
+        IF j > n - 1 RETURN  
+        currPick ← ARRAY SIZE (n + 1) INIT 0  
+        currSkip ← ARRAY SIZE (n + 1) INIT 0  
+        innerLoop(0, 0, j, currPick, currSkip)  
+        prevPick ← currPick  
+        prevSkip ← currSkip  
+        outerLoop(j + 1)  
+      END FUNCTION  
+
+      outerLoop(1)  
+
+      maxVal ← prevPick[0]  
+      i ← 1  
+      WHILE i <= n DO  
+        IF prevPick[i] > maxVal THEN  
+          maxVal ← prevPick[i]  
+        END IF  
+        i ← i + 1  
+      END WHILE  
+
+      RETURN maxVal  
+    END functiON  
+END claSS

@@ -1,0 +1,74 @@
+CLASS Solution  
+    FUNCTION maxDifference WITH PARAMETERS s k  
+        SET result TO -9999999999  
+        SET chars TO ['zero', 'one', 'two', 'three', 'four']  
+        SET pairs TO []  
+        SET xIndex TO 0  
+        WHILE xIndex < LENGTH(chars)  
+            SET yIndex TO 0  
+            WHILE yIndex < LENGTH(chars)  
+                IF chars[xIndex] != chars[yIndex] THEN  
+                    APPEND (chars[xIndex], chars[yIndex]) TO pairs  
+                END IF  
+                SET yIndex TO yIndex + 1  
+            END WHILE  
+            SET xIndex TO xIndex + 1  
+        END WHILE  
+        SET pairIndex TO 0  
+        WHILE pairIndex < LENGTH(pairs)  
+            SET firstChar TO pairs[pairIndex][0]  
+            SET secondChar TO pairs[pairIndex][1]  
+            SET minimumDifferences TO DICTIONARY() WITH DEFAULT VALUE 9999999999  
+            SET minPrefixA TO 0  
+            SET minPrefixB TO 0  
+            SET prefixListA TO [0]  
+            SET prefixListB TO [0]  
+            SET leftPointer TO 0  
+            SET charIndex TO 0  
+            WHILE charIndex < LENGTH(s)  
+                SET currentChar TO s[charIndex]  
+                IF currentChar == firstChar THEN  
+                    SET newPrefixA TO prefixListA[-1] + 1  
+                ELSE  
+                    SET newPrefixA TO 0  
+                END IF  
+                APPEND newPrefixA TO prefixListA  
+                IF currentChar == secondChar THEN  
+                    SET newPrefixB TO prefixListB[-1] + 1  
+                ELSE  
+                    SET newPrefixB TO 0  
+                END IF  
+                APPEND newPrefixB TO prefixListB  
+                LOOP_START: WHILE (charIndex + 1 - leftPointer) >= k AND prefixListA[leftPointer] < prefixListA[-1] AND prefixListB[leftPointer] < prefixListB[-1] DO  
+                    SET modKeyA TO prefixListA[leftPointer] MOD 2  
+                    SET modKeyB TO prefixListB[leftPointer] MOD 2  
+                    SET keyTuple TO (modKeyA, modKeyB)  
+                    IF minimumDifferences CONTAINS keyTuple THEN  
+                        IF minimumDifferences[keyTuple] > (prefixListA[leftPointer] - prefixListB[leftPointer]) THEN  
+                            SET minimumDifferences[keyTuple] TO prefixListA[leftPointer] - prefixListB[leftPointer]  
+                        END IF  
+                    ELSE  
+                        SET minimumDifferences[keyTuple] TO prefixListA[leftPointer] - prefixListB[leftPointer]  
+                    END IF  
+                    SET leftPointer TO leftPointer + 1  
+                END WHILE  
+                SET parityA TO (1 - (prefixListA[-1] MOD 2))  
+                SET parityB TO (prefixListB[-1] MOD 2)  
+                SET targetKey TO (parityA, parityB)  
+                IF targetKey IN minimumDifferences THEN  
+                    SET candidateValue TO prefixListA[-1] - prefixListB[-1] - minimumDifferences[targetKey]  
+                    IF candidateValue > result THEN  
+                        SET result TO candidateValue  
+                    END IF  
+                ELSE  
+                    IF (prefixListA[-1] - prefixListB[-1]) > result THEN  
+                        SET result TO prefixListA[-1] - prefixListB[-1]  
+                    END IF  
+                END IF  
+                SET charIndex TO charIndex + 1  
+            END WHILE  
+            SET pairIndex TO pairIndex + 1  
+        END WHILE  
+        RETURN result  
+    END FUNCTION  
+END CLASS

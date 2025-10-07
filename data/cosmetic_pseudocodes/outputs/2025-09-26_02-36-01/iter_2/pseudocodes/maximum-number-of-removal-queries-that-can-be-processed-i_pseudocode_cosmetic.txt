@@ -1,0 +1,40 @@
+CLASS Solution  
+    FUNCTION maximumProcessableQueries(parametersNums AS list of integer, parametersQueries AS list of integer) RETURNS integer  
+        FUNCTION process_queries(subsequence AS list of integer, queryList AS list of integer) RETURNS integer  
+            DECLARE positionIndex <- 0  
+            DECLARE lengthSubseq <- LENGTH(subsequence)  
+            DECLARE idx <- 0  
+            WHILE idx < LENGTH(queryList)  
+                IF positionIndex = lengthSubseq THEN  
+                    EXIT WHILE  
+                END IF  
+                DECLARE currentQuery <- queryList[idx]  
+                IF subsequence[positionIndex] >= currentQuery THEN  
+                    positionIndex <- positionIndex + 1  
+                END IF  
+                idx <- idx + 1  
+            END WHILE  
+            RETURN positionIndex  
+        END FUNCTION  
+
+        DECLARE lenNums <- LENGTH(parametersNums)  
+        DECLARE lenQueries <- LENGTH(parametersQueries)  
+        DECLARE maximumCount <- process_queries(parametersNums, parametersQueries)  
+
+        DECLARE counter <- 0  
+        WHILE counter < lenNums DO  
+            DECLARE preList <- parametersNums[0 : counter]  
+            DECLARE sufList <- parametersNums[counter : lenNums]  
+            DECLARE reversedSuffix <- REVERSE(sufList)  
+            DECLARE combinedSubseq <- preList + reversedSuffix  
+            SORT combinedSubseq BY ascending  
+            DECLARE candidate <- process_queries(combinedSubseq, parametersQueries)  
+            IF candidate > maximumCount THEN  
+                maximumCount <- candidate  
+            END IF  
+            counter <- counter + 1  
+        END WHILE  
+
+        RETURN maximumCount  
+    END FUNCTION  
+END CLASS

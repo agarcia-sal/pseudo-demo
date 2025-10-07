@@ -1,0 +1,51 @@
+FUNCTION find_closest_elements(sequence_values)
+    SET pair_closest := None
+    SET dist_minimum := None
+
+    SET idx_outer := 0
+    WHILE idx_outer < LENGTH(sequence_values)
+        SET val_outer := sequence_values[idx_outer]
+
+        SET idx_inner := 0
+        WHILE idx_inner < LENGTH(sequence_values)
+            SET val_inner := sequence_values[idx_inner]
+
+            SWITCH
+                CASE idx_outer = idx_inner
+                    // do nothing, proceed to next iteration
+                DEFAULT
+                    IF dist_minimum IS None THEN
+                        SET diff := val_outer - val_inner
+                        IF diff < 0 THEN
+                            SET diff := -diff
+                        END IF
+                        SET dist_minimum := diff
+                        IF val_outer < val_inner THEN
+                            SET pair_closest := (val_outer, val_inner)
+                        ELSE
+                            SET pair_closest := (val_inner, val_outer)
+                        END IF
+                    ELSE
+                        SET temp_distance := val_outer - val_inner
+                        IF temp_distance < 0 THEN
+                            SET temp_distance := -temp_distance
+                        END IF
+                        IF temp_distance < dist_minimum THEN
+                            SET dist_minimum := temp_distance
+                            IF val_outer < val_inner THEN
+                                SET pair_closest := (val_outer, val_inner)
+                            ELSE
+                                SET pair_closest := (val_inner, val_outer)
+                            END IF
+                        END IF
+                    END IF
+            END SWITCH
+
+            SET idx_inner := idx_inner + 1
+        END WHILE
+
+        SET idx_outer := idx_outer + 1
+    END WHILE
+
+    RETURN pair_closest
+END FUNCTION

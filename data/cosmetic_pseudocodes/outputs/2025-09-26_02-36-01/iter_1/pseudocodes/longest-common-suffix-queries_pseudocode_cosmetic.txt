@@ -1,0 +1,53 @@
+CLASS Solution  
+    FUNCTION stringIndices(wordsContainer TO LIST OF STRING, wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER  
+        DECLARE suffixDictionary AS DICTIONARY WITH STRING KEYS AND INTEGER VALUES INITIALIZED EMPTY  
+        
+        FOR idx FROM 0 TO LENGTH OF wordsContainer MINUS 1  
+            DECLARE currentWord AS wordsContainer AT idx  
+            DECLARE wordLen AS LENGTH OF currentWord  
+            FOR startPos FROM 0 TO wordLen MINUS 1  
+                DECLARE currentSuffix AS SUBSTRING OF currentWord FROM startPos TO wordLen  
+                
+                IF currentSuffix IS NOT A KEY IN suffixDictionary THEN  
+                    ASSIGN suffixDictionary[currentSuffix] = idx  
+                
+                ELSE  
+                    DECLARE existingIndex AS suffixDictionary[currentSuffix]  
+                    DECLARE existingWord AS wordsContainer AT existingIndex  
+                    DECLARE existingWordLen AS LENGTH OF existingWord
+                    
+                    IF (wordLen < existingWordLen) OR (wordLen == existingWordLen AND idx < existingIndex) THEN  
+                        ASSIGN suffixDictionary[currentSuffix] = idx  
+                    END IF  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        FUNCTION get_best_match(query TO STRING) RETURNS INTEGER  
+            DECLARE qLen AS LENGTH OF query  
+            FOR offset FROM 0 TO qLen MINUS 1  
+                DECLARE suffixCandidate AS SUBSTRING OF query FROM offset TO qLen  
+                IF suffixCandidate IS A KEY IN suffixDictionary THEN  
+                    RETURN suffixDictionary[suffixCandidate]  
+                END IF  
+            END FOR  
+            
+            DECLARE smallestIndex AS 0  
+            FOR i FROM 1 TO LENGTH OF wordsContainer MINUS 1  
+                DECLARE candidateWord AS wordsContainer AT i  
+                DECLARE smallestWord AS wordsContainer AT smallestIndex
+                IF (LENGTH OF candidateWord < LENGTH OF smallestWord) OR (LENGTH OF candidateWord == LENGTH OF smallestWord AND i < smallestIndex) THEN  
+                    smallestIndex = i  
+                END IF  
+            END FOR  
+            RETURN smallestIndex  
+        END FUNCTION  
+        
+        DECLARE outputIndices AS EMPTY LIST OF INTEGER  
+        FOR EACH queryElement IN wordsQuery  
+            APPEND get_best_match(queryElement) TO outputIndices  
+        END FOR  
+        
+        RETURN outputIndices  
+    END FUNCTION  
+END CLASS

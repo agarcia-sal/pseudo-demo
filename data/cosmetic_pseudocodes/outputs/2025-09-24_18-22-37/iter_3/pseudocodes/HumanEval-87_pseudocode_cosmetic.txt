@@ -1,0 +1,50 @@
+```
+FUNCTION get_row(two_dimensional_list, target_integer)
+    DEFINE collect_matches(list_2d, target_val, row_idx, col_idx, acc)
+        IF row_idx >= LENGTH(list_2d)
+            RETURN acc
+        ELSE IF col_idx >= LENGTH(list_2d[row_idx])
+            RETURN collect_matches(list_2d, target_val, row_idx + 1, 0, acc)
+        ELSE
+            IF list_2d[row_idx][col_idx] == target_val
+                acc = acc + [(row_idx, col_idx)]
+            END IF
+            RETURN collect_matches(list_2d, target_val, row_idx, col_idx + 1, acc)
+        END IF
+    END DEFINE
+
+    SET found_coords TO collect_matches(two_dimensional_list, target_integer, 0, 0, [])
+
+    DEFINE custom_sort(list_coords)
+        IF LENGTH(list_coords) <= 1 THEN RETURN list_coords
+        SET pivot TO list_coords[0]
+        SET less_first TO []
+        SET equal_first <- []
+        SET greater_first <- []
+        FOR each item IN list_coords DO
+            IF item[0] < pivot[0] THEN APPEND item TO less_first
+            ELSE IF item[0] == pivot[0] THEN APPEND item TO equal_first
+            ELSE APPEND item TO greater_first
+        END FOR
+        SET sorted_less TO custom_sort(less_first)
+        SET sorted_greater TO custom_sort(greater_first)
+
+        DEFINE sort_by_second_desc(sublist)
+            IF LENGTH(sublist) <= 1 THEN RETURN sublist
+            SET p TO sublist[0]
+            SET lds, eds, gds TO [], [], []
+            FOR el IN sublist DO
+                IF el[1] > p[1] THEN APPEND el TO lds
+                ELSE IF el[1] == p[1] THEN APPEND el TO eds
+                ELSE APPEND el TO gds
+            END FOR
+            RETURN sort_by_second_desc(lds) + eds + sort_by_second_desc(gds)
+        END DEFINE
+
+        SET sorted_equal_first TO sort_by_second_desc(equal_first)
+        RETURN sorted_less + sorted_equal_first + sorted_greater
+    END DEFINE
+
+    RETURN custom_sort(found_coords)
+END FUNCTION
+```

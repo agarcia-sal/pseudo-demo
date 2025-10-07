@@ -1,0 +1,116 @@
+CLASS Solution
+    FUNCTION minimumSum(grid)
+        SET positions TO empty collection
+        SET rowCount TO 0
+        WHILE rowCount < (length(grid) - (1 + 0))
+            SET colCount TO 0
+            WHILE colCount < (length(grid[rowCount]) - (1 + 0))
+                IF (grid[rowCount] == 1) AND (grid[rowCount][colCount] == 1) THEN
+                    SET tmpPair TO (rowCount, colCount)
+                    APPEND tmpPair TO positions
+                END IF
+                SET colCount TO colCount + 1
+            END WHILE
+            SET rowCount TO rowCount + 1
+        END WHILE
+
+        FUNCTION rect_area(points)
+            IF NOT (length(points) != 0) THEN
+                SET result TO 0
+            ELSE
+                SET firstIndices TO empty list
+                SET secondIndices TO empty list
+                SET idx TO 0
+                WHILE idx < length(points)
+                    APPEND points[idx][0] TO firstIndices
+                    APPEND points[idx][1] TO secondIndices
+                    SET idx TO idx + 1
+                END WHILE
+
+                SET minFirst TO firstIndices[0]
+                SET maxFirst TO firstIndices[0]
+                SET indexF TO 1
+                WHILE indexF < length(firstIndices)
+                    IF firstIndices[indexF] < minFirst THEN
+                        SET minFirst TO firstIndices[indexF]
+                    END IF
+                    IF firstIndices[indexF] > maxFirst THEN
+                        SET maxFirst TO firstIndices[indexF]
+                    END IF
+                    SET indexF TO indexF + 1
+                END WHILE
+
+                SET minSecond TO secondIndices[0]
+                SET maxSecond TO secondIndices[0]
+                SET indexS TO 1
+                WHILE indexS < length(secondIndices)
+                    IF secondIndices[indexS] < minSecond THEN
+                        SET minSecond TO secondIndices[indexS]
+                    END IF
+                    IF secondIndices[indexS] > maxSecond THEN
+                        SET maxSecond TO secondIndices[indexS]
+                    END IF
+                    SET indexS TO indexS + 1
+                END WHILE
+
+                SET widthVal TO (maxFirst - minFirst) + (1 + 0)
+                SET heightVal TO (maxSecond - minSecond) + (1 + 0)
+                SET result TO widthVal * heightVal
+            END IF
+            RETURN result
+        END FUNCTION
+
+        SET minimalSum TO positive infinity
+        SET total ONES TO length(positions)
+
+        FUNCTION iterate_i(i)
+            IF i >= total ONES THEN
+                RETURN
+            END IF
+
+            FUNCTION iterate_j(j)
+                IF j >= total ONES THEN
+                    RETURN
+                END IF
+
+                FUNCTION iterate_k(k)
+                    IF k >= (total ONES + 1) THEN
+                        RETURN
+                    END IF
+
+                    # Generate all combinations of positions taken i at a time
+                    FOR each firstComb IN combinations(positions, i)
+                        SET setPositions TO set(positions)
+                        SET setFirstComb TO set(firstComb)
+                        SET leftoverAfterFirst TO setPositions - setFirstComb
+                        # Generate all combinations from leftoverAfterFirst of size (j - i)
+                        FOR each secondComb IN combinations(list(leftoverAfterFirst), j - i)
+                            SET setSecondComb TO set(secondComb)
+                            SET thirdComb TO leftoverAfterFirst - setSecondComb
+                            SET areaFirst TO rect_area(firstComb)
+                            SET areaSecond TO rect_area(secondComb)
+                            SET areaThird TO rect_area(list(thirdComb))
+                            IF (areaFirst > 0) AND (areaSecond > 0) AND (areaThird > 0) THEN
+                                SET sumAreas TO areaFirst + areaSecond + areaThird
+                                IF sumAreas < minimalSum THEN
+                                    SET minimalSum TO sumAreas
+                                END IF
+                            END IF
+                        END FOR
+                    END FOR
+
+                    iterate_k(k + 1)
+                END FUNCTION
+
+                iterate_k(j + (1 + 0))
+                iterate_j(j + 1)
+            END FUNCTION
+
+            iterate_j(i + 1)
+            iterate_i(i + 1)
+        END FUNCTION
+
+        iterate_i(1)
+        RETURN minimalSum
+    END FUNCTION
+END CLASS

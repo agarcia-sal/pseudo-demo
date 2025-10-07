@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION minimumMoves(nums LIST OF INTEGERS, k INTEGER, maxChanges INTEGER) RETURNS INTEGER
+        DECLARE positions_of_ones AS new empty collection
+        LET idx TO 0
+        WHILE idx LESS THAN LENGTH(nums)
+            IF nums[idx] == 1 THEN
+                APPEND idx TO positions_of_ones
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+
+        IF LENGTH(positions_of_ones) == 0 THEN
+            RETURN k TIMES 2
+        END IF
+
+        LET count_ones TO LENGTH(positions_of_ones)
+        DECLARE accum_sums AS array of size count_ones + 1 FILLED WITH 0
+
+        LET i TO 0
+        WHILE i LESS THAN count_ones
+            accum_sums[i + 1] = accum_sums[i] + positions_of_ones[i]
+            SET i TO i + 1
+        END WHILE
+
+        FUNCTION cost(start INTEGER, end INTEGER) RETURNS INTEGER
+            LET midpoint TO INTEGER_DIVIDE(start + end, 2)
+            LET median_val TO positions_of_ones[midpoint]
+            DECLARE total_cost TO 0
+
+            LET j TO start
+            WHILE j LESS THAN midpoint
+                LET val1 TO (median_val - positions_of_ones[j]) - (midpoint - j)
+                SET total_cost TO total_cost + val1
+                SET j TO j + 1
+            END WHILE
+
+            LET j TO midpoint + 1
+            WHILE j LESS OR EQUAL end
+                LET val2 TO (positions_of_ones[j] - median_val) - (j - midpoint)
+                SET total_cost TO total_cost + val2
+                SET j TO j + 1
+            END WHILE
+
+            RETURN total_cost
+        END FUNCTION
+
+        LET minimal_moves TO INFINITY
+
+        LET s TO 0
+        WHILE s LESS OR EQUAL count_ones - k
+            LET e TO s + k - 1
+            LET cur_cost TO cost(s, e)
+
+            IF (k MOD 2) != 0 THEN
+                LET mid_idx TO INTEGER_DIVIDE(s + e, 2)
+                LET med_val TO positions_of_ones[mid_idx]
+                LET needed_changes TO (e - mid_idx) - (med_val - positions_of_ones[mid_idx] - 1)
+            ELSE
+                LET left_mid TO INTEGER_DIVIDE(s + e, 2)
+                LET right_mid TO left_mid + 1
+                LET left_med TO positions_of_ones[left_mid]
+                LET right_med TO positions_of_ones[right_mid]
+                LET needed_changes TO (right_mid - left_mid - 1) - (right_med - left_med - 1)
+            END IF
+
+            IF needed_changes > maxChanges THEN
+                SET cur_cost TO cur_cost + (needed_changes - maxChanges)
+            END IF
+
+            IF cur_cost < minimal_moves THEN
+                SET minimal_moves TO cur_cost
+            END IF
+
+            SET s TO s + 1
+        END WHILE
+
+        RETURN minimal_moves
+    END FUNCTION
+END CLASS

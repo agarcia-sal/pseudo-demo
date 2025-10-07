@@ -1,0 +1,74 @@
+CLASS Solution
+
+    FUNCTION minimumPushes(word)
+        DEFINE FUNCTION calculateFrequency(text)
+            DECLARE map = empty map
+            DECLARE idx = 0
+            WHILE idx < length_of(text)
+                DECLARE ch = char_at(text, idx)
+                IF map_contains_key(map, ch)
+                    SET map[ch] = map[ch] + 1
+                ELSE
+                    SET map[ch] = 1
+                END IF
+                SET idx = idx + 1
+            END WHILE
+            RETURN map
+        END FUNCTION
+
+        DEFINE FUNCTION extractValues(m)
+            DECLARE result_list = empty list
+            FOR EACH k IN keys_of(m)
+                APPEND m[k] TO result_list
+            END FOR
+            RETURN result_list
+        END FUNCTION
+
+        DEFINE FUNCTION descendingSort(arr)
+            DECLARE n = length_of(arr)
+            DECLARE i = 0
+            DECLARE j
+            WHILE i < n - 1
+                SET j = 0
+                WHILE j < n - 1 - i
+                    IF arr[j] < arr[j + 1]
+                        DECLARE temp = arr[j]
+                        SET arr[j] = arr[j + 1]
+                        SET arr[j + 1] = temp
+                    END IF
+                    SET j = j + 1
+                END WHILE
+                SET i = i + 1
+            END WHILE
+            RETURN arr
+        END FUNCTION
+
+        DECLARE frequency_map = calculateFrequency(word)
+        DECLARE counts = extractValues(frequency_map)
+        DECLARE ordered_counts = descendingSort(counts)
+
+        DECLARE accumulated_presses = 0
+        DECLARE presses_per_key = 1
+        DECLARE current_key_count = 0
+
+        DECLARE function processIndex(i)
+            IF i >= length_of(ordered_counts)
+                RETURN
+            END IF
+
+            SET accumulated_presses = accumulated_presses + ordered_counts[i] * presses_per_key
+            SET current_key_count = current_key_count + 1
+
+            IF current_key_count >= 8
+                SET presses_per_key = presses_per_key + 1
+                SET current_key_count = 0
+            END IF
+
+            CALL processIndex(i + 1)
+        END FUNCTION
+
+        CALL processIndex(0)
+        RETURN accumulated_presses
+    END FUNCTION
+
+END CLASS

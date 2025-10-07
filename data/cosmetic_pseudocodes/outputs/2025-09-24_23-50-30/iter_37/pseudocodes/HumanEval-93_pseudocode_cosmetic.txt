@@ -1,0 +1,34 @@
+```
+FUNCTION encode(input_text)
+    DECLARE map_char_replacement AS DICTIONARY
+    DECLARE flipped_text AS STRING
+    DECLARE vowel_characters AS STRING
+
+    SET vowel_characters TO "AEIOUaeiou"
+    SET map_char_replacement TO EMPTY DICTIONARY
+
+    FOR EACH char IN SPLIT INTO CHARACTERS(vowel_characters) DO
+        SET map_char_replacement[char] TO CHAR_FROM_ASCII(ASCII_VALUE(char) + 2)
+    END FOR
+
+    SET flipped_text TO JOIN(
+        MAP(SWITCH CASE c
+                CASE IS_UPPERCASE(c): TO_LOWERCASE(c)
+                DEFAULT: TO_UPPERCASE(c)
+            END SWITCH,
+            SPLIT INTO CHARACTERS(input_text)
+        )
+    )
+
+    DECLARE result_chars AS LIST
+    FOR EACH character IN SPLIT INTO CHARACTERS(flipped_text) DO
+        IF character IN map_char_replacement THEN
+            APPEND map_char_replacement[character] TO result_chars
+        ELSE
+            APPEND character TO result_chars
+        END IF
+    END FOR
+
+    RETURN JOIN(result_chars)
+END FUNCTION
+```

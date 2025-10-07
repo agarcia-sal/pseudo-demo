@@ -1,0 +1,62 @@
+```
+FUNCTION minPath(matrix, limit)
+  SET size TO LENGTH OF matrix
+  SET threshold TO (size * size) + 1
+
+  PROCEDURE scanRow(rowIndex, currentThreshold)
+    IF rowIndex >= size THEN
+      RETURN currentThreshold
+    END IF
+
+    PROCEDURE scanColumn(colIndex, currentVal)
+      IF colIndex >= size THEN
+        RETURN currentVal
+      END IF
+
+      IF matrix[rowIndex][colIndex] = 1 THEN
+        SET neighbors TO []
+
+        IF rowIndex <> 0 THEN
+          APPEND matrix[rowIndex - 1][colIndex] TO neighbors
+        END IF
+
+        IF colIndex <> 0 THEN
+          APPEND matrix[rowIndex][colIndex - 1] TO neighbors
+        END IF
+
+        IF rowIndex <> (size - 1) THEN
+          APPEND matrix[rowIndex + 1][colIndex] TO neighbors
+        END IF
+
+        IF colIndex <> (size - 1) THEN
+          APPEND matrix[rowIndex][colIndex + 1] TO neighbors
+        END IF
+
+        SET currentVal TO (minimum of neighbors)
+      END IF
+
+      RETURN scanColumn(colIndex + 1, currentVal)
+    END PROCEDURE
+
+    RETURN scanRow(rowIndex + 1, scanColumn(0, currentThreshold))
+  END PROCEDURE
+
+  SET threshold TO scanRow(0, threshold)
+
+  SET resultSequence TO []
+
+  PROCEDURE buildResult(index)
+    IF index >= limit THEN
+      RETURN
+    END IF
+
+    resultSequence.ADD((index MOD 2 = 0) ? 1 : threshold)
+
+    buildResult(index + 1)
+  END PROCEDURE
+
+  buildResult(0)
+
+  RETURN resultSequence
+END FUNCTION
+```

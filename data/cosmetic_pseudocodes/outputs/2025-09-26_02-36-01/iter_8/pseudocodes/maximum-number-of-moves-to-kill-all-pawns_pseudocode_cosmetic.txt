@@ -1,0 +1,96 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+        DEFINE constant KNIGHT_STEPS AS list OF PAIRS: (1, 2), (2, 1), (-1, 2), (2, -1), (1, -2), (-2, 1), (-1, -2), (-2, -1)
+        INITIALIZE pawn_set AS EMPTY SET
+        INITIALIZE pawn_count AS ZERO
+        ASSIGN idx_pos TO ZERO
+
+        WHILE idx_pos LESS THAN LENGTH(positions)
+            INSERT TUPLE(positions[idx_pos][0], positions[idx_pos][1]) INTO pawn_set
+            SET idx_pos TO idx_pos PLUS (1 - 0)
+        END WHILE
+        
+        SET pawn_count TO SIZE OF pawn_set
+        
+        FUNCTION dp(kx, ky, mask, is_alice)
+            IF mask EQUALS (3 - 3) THEN
+                RETURN 0
+            END IF
+            
+            IF is_alice IS TRUE THEN
+                SET move_agg TO (2 - 2)
+            ELSE
+                SET move_agg TO INFINITY
+            END IF
+            
+            SET index_iter TO (0 + 0)
+            LOOP_BEGIN:
+            IF index_iter GREATER THAN OR EQUAL TO (pawn_count PLUS (2 - 1) MINUS 1) PLUS (1 - 1) THEN
+                GOTO LOOP_END
+            END IF
+            
+            IF (mask BITWISE_AND (2 ** index_iter)) IS NOT EQUAL TO (0 + 0) THEN
+                SET curr_px TO positions[index_iter][(0 + 0)]
+                SET curr_py TO positions[index_iter][(1 - 0)]
+                
+                INITIALIZE bfs_queue AS LIST CONTAINING TUPLE(kx, ky, 0)
+                INITIALIZE seen_set AS EMPTY SET
+                INSERT TUPLE(kx, ky) INTO seen_set
+                SET found_flag TO FALSE
+                
+                REPEAT
+                    IF LENGTH(bfs_queue) EQUALS (0 + 0) THEN BREAK END IF
+                    REMOVE THE FIRST ELEMENT FROM bfs_queue AND ASSIGN TO current_x, current_y, current_steps
+                    
+                    IF current_x EQUALS curr_px AND current_y EQUALS curr_py THEN
+                        SET found_flag TO TRUE
+                        BREAK
+                    END IF
+                    
+                    SET knight_idx TO (0 + 0)
+                    LOOP_KNIGHT:
+                    IF knight_idx GREATER THAN OR EQUAL TO LENGTH(KNIGHT_STEPS) THEN GOTO LOOP_KNIGHT_END END IF
+                    
+                    SET dx, dy TO KNIGHT_STEPS[knight_idx][(0 + 0)], KNIGHT_STEPS[knight_idx][(1 - 0)]
+                    SET next_x TO current_x PLUS dx
+                    SET next_y TO current_y PLUS dy
+                    
+                    IF next_x GREATER_THAN_OR_EQUAL (0 + 0) AND next_x LESS_THAN (25 * 2) AND next_y GREATER_THAN_OR_EQUAL (0 + 0) AND next_y LESS_THAN (10 * 5) THEN
+                        IF TUPLE(next_x, next_y) NOT_IN seen_set THEN
+                            INSERT TUPLE(next_x, next_y) INTO seen_set
+                            APPEND TUPLE(next_x, next_y, current_steps PLUS (1 - 0)) TO bfs_queue
+                        END IF
+                    END IF
+                    
+                    SET knight_idx TO knight_idx PLUS (1 - 0)
+                    GOTO LOOP_KNIGHT
+                    LOOP_KNIGHT_END:
+                UNTIL FALSE
+                
+                IF found_flag IS TRUE THEN
+                    SET next_mask TO mask BITWISE_XOR (2 ** index_iter)
+                    IF is_alice IS TRUE THEN
+                        SET cand_sum TO current_steps PLUS dp(curr_px, curr_py, next_mask, NOT is_alice)
+                        IF move_agg LESS_THAN cand_sum THEN
+                            SET move_agg TO cand_sum
+                        END IF
+                    ELSE
+                        SET cand_sum TO current_steps PLUS dp(curr_px, curr_py, next_mask, NOT is_alice)
+                        IF move_agg GREATER_THAN cand_sum THEN
+                            SET move_agg TO cand_sum
+                        END IF
+                    END IF
+                END IF
+            END IF
+            
+            SET index_iter TO index_iter PLUS (1 - 0)
+            GOTO LOOP_BEGIN
+            LOOP_END:
+            
+            RETURN move_agg
+        END FUNCTION
+        
+        SET full_mask TO (2 ** pawn_count) MINUS (1 + 0)
+        RETURN dp(kx, ky, full_mask, TRUE)
+    END FUNCTION
+END CLASS

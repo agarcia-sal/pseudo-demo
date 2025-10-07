@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION maxCollectedFruits(fruits)  
+        SET n TO the LENGTH OF fruits  
+        
+        SET dir1 TO the LIST of PAIRS consisting of ONE AND ONE PLUS ONE ZERO AND ONE  
+        SET dir2 TO the LIST of PAIRS consisting of ONE AND ONE MINUS ONE ONE AND ZERO ONE AND ONE  
+        SET dir3 TO the LIST of PAIRS consisting of MINUS ONE AND ONE ZERO AND ONE ONE AND ONE  
+        
+        SET memo TO an EMPTY DICTIONARY  
+        
+        FUNCTION dp(x1, y1, x2, y2, x3, y3)  
+            IF x1 LESS THAN ZERO OR x1 GREATER THAN OR EQUAL TO n OR y1 LESS THAN ZERO OR y1 GREATER THAN OR EQUAL TO n OR x2 LESS THAN ZERO OR x2 GREATER THAN OR EQUAL TO n OR y2 LESS THAN ZERO OR y2 GREATER THAN OR EQUAL TO n OR x3 LESS THAN ZERO OR x3 GREATER THAN OR EQUAL TO n OR y3 LESS THAN ZERO OR y3 GREATER THAN OR EQUAL TO n THEN  
+                RETURN negative infinity  
+            END IF  
+            
+            IF x1 EQUALS y1 AND y1 EQUALS x2 AND x2 EQUALS y2 AND y2 EQUALS x3 AND x3 EQUALS y3 AND y3 EQUALS n MINUS ONE THEN  
+                RETURN element at position n MINUS ONE of the element at position n MINUS ONE of fruits  
+            END IF  
+            
+            IF the TUPLE consisting of x1 y1 x2 y2 x3 y3 EXISTS AS A KEY IN memo THEN  
+                RETURN the VALUE ASSOCIATED WITH the TUPLE consisting of x1 y1 x2 y2 x3 y3 IN memo  
+            END IF  
+            
+            SET collected TO the element at position x1 of the element at position y1 of fruits  
+            
+            IF x1 EQUALS x2 AND y1 EQUALS y2 OR x1 EQUALS x3 AND y1 EQUALS y3 THEN  
+                SET collected TO zero  
+            END IF  
+            
+            IF x2 EQUALS x3 AND y2 EQUALS y3 THEN  
+                INCREMENT collected BY the element at position x2 of the element at position y2 of fruits  
+            ELSE  
+                INCREMENT collected BY the element at position x2 of the element at position y2 of fruits  
+                INCREMENT collected BY the element at position x3 of the element at position y3 of fruits  
+            END IF  
+            
+            SET max_fruits TO negative infinity  
+            FOR each dx1 AND dy1 IN dir1  
+                FOR each dx2 AND dy2 IN dir2  
+                    FOR each dx3 AND dy3 IN dir3  
+                        SET candidate TO dp(x1 PLUS dx1, y1 PLUS dy1, x2 PLUS dx2, y2 PLUS dy2, x3 PLUS dx3, y3 PLUS dy3)  
+                        IF candidate GREATER THAN max_fruits THEN  
+                            SET max_fruits TO candidate  
+                        END IF  
+                    END FOR  
+                END FOR  
+            END FOR  
+            
+            SET memo with KEY the TUPLE consisting of x1 y1 x2 y2 x3 y3 TO collected PLUS max_fruits  
+            RETURN collected PLUS max_fruits  
+        END FUNCTION  
+        
+        RETURN dp(zero, zero, zero, n MINUS ONE, n MINUS ONE, zero)  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,27 @@
+FUNCTION fix_spaces(input_string)
+    SET reconstructed_string TO ""
+    SET cursor TO 0
+    SET gap_start TO 0
+    SET gap_limit TO 0
+    PERFORM WHILE cursor < LENGTH(input_string)
+        IF input_string[cursor] == " "
+            gap_limit += 1
+        OTHERWISE
+            SELECT CASE (gap_limit - gap_start)
+                CASE > 2
+                    reconstructed_string += "-" + input_string[cursor]
+                CASE > 0
+                    reconstructed_string += REPEAT("_", gap_limit - gap_start) + input_string[cursor]
+                OTHERWISE
+                    reconstructed_string += input_string[cursor]
+            END SELECT
+            gap_start = cursor + 1
+            gap_limit = cursor + 1
+        cursor += 1
+    END PERFORM
+    IF (gap_limit - gap_start) > 2 THEN
+        reconstructed_string += "-"
+    ELSE IF (gap_limit - gap_start) > 0 THEN
+        reconstructed_string += "_"
+    RETURN reconstructed_string
+END FUNCTION

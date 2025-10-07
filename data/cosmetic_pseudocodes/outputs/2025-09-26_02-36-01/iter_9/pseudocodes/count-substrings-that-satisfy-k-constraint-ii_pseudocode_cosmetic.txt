@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+        SET q TO LENGTH(s)
+        SET arr_zero_counts TO A LIST WITH (q PLUS 1) ELEMENTS ALL INITIALIZED TO 0
+        SET arr_one_counts TO A LIST WITH (q PLUS 1) ELEMENTS ALL INITIALIZED TO 0
+
+        PROCEDURE compute_prefixes()
+            SET idx TO 0
+            WHILE idx LESS THAN q
+                SET arr_zero_counts[idx PLUS 1] TO arr_zero_counts[idx] PLUS (IF s[idx] EQUALS '0' THEN 1 ELSE 0)
+                SET arr_one_counts[idx PLUS 1] TO arr_one_counts[idx] PLUS (IF s[idx] EQUALS '1' THEN 1 ELSE 0)
+                SET idx TO idx PLUS 1
+            END WHILE
+        END PROCEDURE
+
+        FUNCTION compute_valid_substrings(x parameter y parameter) RETURNS INTEGER
+            SET total_valid TO 0
+            PROCEDURE process_start(pos parameter)
+                IF pos GREATER THAN y
+                    RETURN
+                END IF
+                SET low TO pos
+                SET high TO y PLUS 1
+                REPEAT
+                    SET mid_val TO (low PLUS high) DIV 2
+                    SET zero_subcount TO arr_zero_counts[mid_val PLUS 1] MINUS arr_zero_counts[pos]
+                    SET one_subcount TO arr_one_counts[mid_val PLUS 1] MINUS arr_one_counts[pos]
+                    IF zero_subcount LESS THAN OR EQUAL TO k OR one_subcount LESS THAN OR EQUAL TO k
+                        SET low TO mid_val PLUS 1
+                    ELSE
+                        SET high TO mid_val
+                    END IF
+                    IF low GREATER OR EQUAL TO high
+                        BREAK
+                    END IF
+                UNTIL FALSE
+                SET furthest_end TO low MINUS 1
+                IF furthest_end GREATER OR EQUAL TO pos
+                    SET total_valid TO total_valid PLUS (furthest_end MINUS pos PLUS 1)
+                END IF
+            END PROCEDURE
+
+            SET ptr TO x
+            WHILE ptr LESS OR EQUAL y
+                CALL process_start(ptr)
+                SET ptr TO ptr PLUS 1
+            END WHILE
+
+            RETURN total_valid
+        END FUNCTION
+
+        CALL compute_prefixes()
+        SET answer_list TO EMPTY LIST
+        PROCEDURE collect_results()
+            INDEX_LOOP:
+            SET idx_query TO 0
+            WHILE idx_query LESS THAN LENGTH(queries)
+                SET left_bound TO queries[idx_query][0]
+                SET right_bound TO queries[idx_query][1]
+                APPEND compute_valid_substrings(left_bound, right_bound) TO answer_list
+                SET idx_query TO idx_query PLUS 1
+            END WHILE
+        END PROCEDURE
+
+        CALL collect_results()
+        RETURN answer_list
+    END FUNCTION
+END CLASS

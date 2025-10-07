@@ -1,0 +1,101 @@
+CLASS Solution  
+    FUNCTION sumOfPower(nums parameter, k parameter)  
+      SET MODULUS TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7  
+      SET lengthVar TO 0  
+      WHILE lengthVar LESS THAN LENGTH OF nums  
+        INCREMENT lengthVar BY 1  
+      END WHILE  
+      SET dpList TO EMPTY LIST  
+      SET outerIndex TO 0  
+      REPEAT  
+        IF outerIndex GREATER THAN lengthVar THEN  
+          BREAK  
+        END IF  
+        SET innerList TO EMPTY LIST  
+        SET innerIndex TO 0  
+        REPEAT  
+          IF innerIndex GREATER THAN (k + 1) THEN  
+            BREAK  
+          END IF  
+          APPEND 0 TO innerList  
+          INCREMENT innerIndex BY 1  
+        END REPEAT  
+        APPEND innerList TO dpList  
+        INCREMENT outerIndex BY 1  
+      END REPEAT  
+      SET firstList TO dpList AT POSITION 0  
+      SET firstListAtZero TO firstList AT POSITION 0  
+      SET firstListAtZero TO 1  
+      SET dpList AT POSITION 0 TO firstList  
+      SET iCounter TO 1  
+      WHILE iCounter LESS THAN OR EQUAL TO lengthVar  
+        SET jCounter TO 0  
+        WHILE jCounter LESS THAN OR EQUAL TO k  
+          SET prevRow TO dpList AT POSITION (iCounter - 1)  
+          SET currRow TO dpList AT POSITION iCounter  
+          SET valueBefore TO prevRow AT POSITION jCounter  
+          SET currRow AT POSITION jCounter TO valueBefore  
+          SET numAtPrev TO nums AT POSITION (iCounter - 1)  
+          IF jCounter GREATER THAN OR EQUAL TO numAtPrev THEN  
+            SET subtractIndex TO jCounter - numAtPrev  
+            SET addValue TO prevRow AT POSITION subtractIndex  
+            SET oldValue TO currRow AT POSITION jCounter  
+            SET currRow AT POSITION jCounter TO oldValue + addValue  
+          END IF  
+          SET currRow AT POSITION jCounter TO currRow AT POSITION jCounter MODULO MODULUS  
+          SET dpList AT POSITION iCounter TO currRow  
+          INCREMENT jCounter BY 1  
+        END WHILE  
+        INCREMENT iCounter BY 1  
+      END WHILE  
+      SET totalPowerAccum TO 0  
+      SET upperLimit TO 1  
+      SET expCounter TO 0  
+      REPEAT  
+        IF expCounter GREATER THAN lengthVar THEN  
+          BREAK  
+        END IF  
+        SET upperLimit TO upperLimit * 2  
+        INCREMENT expCounter BY 1  
+      END REPEAT  
+      SET iterIndex TO 1  
+      WHILE iterIndex LESS THAN upperLimit  
+        SET currentSumVar TO 0  
+        SET countVar TO 0  
+        SET bitPosition TO 0  
+        WHILE bitPosition LESS THAN lengthVar  
+          SET maskValue TO 1  
+          SET shiftIndex TO 0  
+          REPEAT  
+            IF shiftIndex GREATER THAN bitPosition THEN  
+              BREAK  
+            END IF  
+            SET maskValue TO maskValue * 2  
+            INCREMENT shiftIndex BY 1  
+          END REPEAT  
+          SET maskValue TO maskValue / 2  
+          IF (iterIndex DIV maskValue) MODULO 2 EQUALS 1 THEN  
+            SET currentSumVar TO currentSumVar + nums AT POSITION bitPosition  
+            SET countVar TO countVar + 1  
+          END IF  
+          INCREMENT bitPosition BY 1  
+        END WHILE  
+        IF currentSumVar EQUALS k THEN  
+          SET expBase TO 2  
+          SET powerVal TO 1  
+          SET powerCount TO 0  
+          REPEAT  
+            IF powerCount GREATER THAN (lengthVar - countVar - 1) THEN  
+              BREAK  
+            END IF  
+            SET powerVal TO powerVal * expBase  
+            INCREMENT powerCount BY 1  
+          END REPEAT  
+          SET totalPowerAccum TO totalPowerAccum + powerVal  
+          SET totalPowerAccum TO totalPowerAccum MODULO MODULUS  
+        END IF  
+        INCREMENT iterIndex BY 1  
+      END WHILE  
+      RETURN totalPowerAccum  
+    END FUNCTION  
+END CLASS

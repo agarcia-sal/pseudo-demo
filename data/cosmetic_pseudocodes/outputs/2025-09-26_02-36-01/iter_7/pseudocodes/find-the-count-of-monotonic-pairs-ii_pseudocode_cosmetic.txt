@@ -1,0 +1,94 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        CONSTANT MODULUS ← 1000*1000*1000 + 7
+        VAR totalElements ← LENGTH(nums)
+        VAR highestValue ← nums[0]
+        VAR indexCounter ← 1
+        WHILE indexCounter < totalElements
+            IF highestValue < nums[indexCounter] THEN
+                highestValue ← nums[indexCounter]
+            END IF
+            indexCounter ← indexCounter + (1 * 1)
+        END WHILE
+
+        PROCEDURE zero3dArray(dim1, dim2, dim3)
+            VAR outerList ← []
+            VAR x ← 0
+            WHILE x < dim1
+                VAR middleList ← []
+                VAR y ← 0
+                WHILE y < dim2
+                    VAR innerList ← []
+                    VAR z ← 0
+                    WHILE z < dim3
+                        innerList.APPEND(0)
+                        z ← z + (1)
+                    END WHILE
+                    middleList.APPEND(innerList)
+                    y ← y + 1
+                END WHILE
+                outerList.APPEND(middleList)
+                x ← x + 1
+            END WHILE
+            RETURN outerList
+        END PROCEDURE
+
+        VAR dpTable ← zero3dArray(totalElements + (1), highestValue + (1), highestValue + (1))
+
+        VAR jIndex ← 0
+        VAR firstNum ← nums[0]
+        REPEAT
+            IF jIndex > firstNum THEN
+                BREAK
+            END IF
+            VAR complementaryIndex ← firstNum - jIndex
+            dpTable[1][jIndex][complementaryIndex] ← 1
+            jIndex ← jIndex + (1)
+        UNTIL FALSE
+
+        VAR iIndex ← 2
+        WHILE iIndex <= totalElements
+            VAR currentNum ← nums[iIndex - 1]
+            VAR jSubIndex ← 0
+            WHILE jSubIndex <= currentNum
+                VAR kSubIndex ← 0
+                WHILE kSubIndex <= currentNum
+                    VAR sumCheck ← jSubIndex + kSubIndex
+                    IF sumCheck = currentNum THEN
+                        VAR prevJ ← 0
+                        WHILE prevJ <= jSubIndex
+                            VAR prevK ← kSubIndex
+                            WHILE prevK <= highestValue
+                                dpTable[iIndex][jSubIndex][kSubIndex] ← dpTable[iIndex][jSubIndex][kSubIndex] + dpTable[iIndex - 1][prevJ][prevK]
+                                IF dpTable[iIndex][jSubIndex][kSubIndex] >= MODULUS THEN
+                                    dpTable[iIndex][jSubIndex][kSubIndex] ← dpTable[iIndex][jSubIndex][kSubIndex] - MODULUS
+                                END IF
+                                prevK ← prevK + 1
+                            END WHILE
+                            prevJ ← prevJ + 1
+                        END WHILE
+                    END IF
+                    kSubIndex ← kSubIndex + 1
+                END WHILE
+                jSubIndex ← jSubIndex + 1
+            END WHILE
+            iIndex ← iIndex + 1
+        END WHILE
+
+        VAR accumulationVariable ← 0
+        VAR outerJ ← 0
+        WHILE outerJ <= highestValue
+            VAR innerK ← 0
+            WHILE innerK <= highestValue
+                accumulationVariable ← accumulationVariable + dpTable[totalElements][outerJ][innerK]
+                IF accumulationVariable >= MODULUS THEN
+                    accumulationVariable ← accumulationVariable - MODULUS
+                END IF
+                innerK ← innerK + 1
+            END WHILE
+            outerJ ← outerJ + 1
+        END WHILE
+
+        RETURN accumulationVariable
+    END FUNCTION
+END CLASS

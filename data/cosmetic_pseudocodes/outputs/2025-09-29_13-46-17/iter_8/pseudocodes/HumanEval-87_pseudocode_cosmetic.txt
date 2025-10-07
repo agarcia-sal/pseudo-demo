@@ -1,0 +1,49 @@
+```
+FUNCTION get_row(two_dimensional_list, target_integer)
+  DEFINE helperSortAlpha(betaCoords)
+    FUNCTION ascendByFirst(vec, pos)
+      IF pos >= LENGTH(vec) - 1 THEN RETURN vec
+      ELSE
+        LET l = vec[pos]
+        LET r = ascendByFirst(vec, pos + 1)
+        RETURN concat(
+          [l],
+          filter(x -> x[0] >= l[0], r)
+          ) + filter(x -> x[0] < l[0], r)
+    END FUNCTION
+
+    FUNCTION descendBySecond(vec, pos)
+      IF pos >= LENGTH(vec) - 1 THEN RETURN vec
+      ELSE
+        LET l = vec[pos]
+        LET r = descendBySecond(vec, pos + 1)
+        LET filteredLarge = filter(x -> x[1] <= l[1], r)
+        LET filteredSmall = filter(x -> x[1] > l[1], r)
+        RETURN concat(filteredLarge, [l]) + filteredSmall
+    END FUNCTION
+
+    RETURN ascendByFirst(descendBySecond(betaCoords, 0), 0)
+  END
+
+  FUNCTION gatherCoords(currRow, maxRow, acc)
+    IF currRow > maxRow THEN RETURN acc
+    ELSE
+      FUNCTION gatherColumns(currCol, maxCol, accCols)
+        IF currCol > maxCol THEN RETURN accCols
+        ELSE
+          LET elem = two_dimensional_list[currRow][currCol]
+          LET accUpdated = (elem == target_integer) ? accCols + [(currRow, currCol)] : accCols
+          RETURN gatherColumns(currCol + 1, maxCol, accUpdated)
+      END
+
+      LET rowAccum = gatherColumns(0, LENGTH(two_dimensional_list[currRow]) - 1, [])
+      RETURN gatherCoords(currRow + 1, maxRow, acc + rowAccum)
+  END
+
+  LET rawCoords = gatherCoords(0, LENGTH(two_dimensional_list) - 1, [])
+
+  LET sortedCoords = helperSortAlpha(rawCoords)
+
+  RETURN sortedCoords
+END FUNCTION
+```

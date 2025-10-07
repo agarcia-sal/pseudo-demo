@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION maximumStrength(nums k)
+        SET alpha TO LENGTH(nums)
+        SET omega TO NEW LIST OF LISTS
+        SET idx1 TO 0
+        WHILE idx1 <= alpha
+            SET idx2 TO 0
+            SET line TO EMPTY LIST
+            WHILE idx2 <= k
+                APPEND NEGATIVE_INFINITY TO line
+                SET idx2 TO idx2 + 1
+            END WHILE
+            APPEND line TO omega
+            SET idx1 TO idx1 + 1
+        END WHILE
+        SET omega[0][0] TO 0
+
+        SET outer_i TO 1
+        WHILE outer_i <= alpha
+            SET outer_j TO 1
+            WHILE outer_j <= k
+                SET accumulator TO 0
+                SET inner_x TO outer_i
+                WHILE inner_x >= 1
+                    SET accumulator TO accumulator + nums[inner_x - 1]
+                    IF (outer_j MOD 2) != 0 THEN
+                        SET delta TO (k - outer_j)
+                    ELSE
+                        SET delta TO (-1) * (k - outer_j)
+                    END IF
+                    IF omega[outer_i][outer_j] < omega[inner_x - 1][outer_j - 1] + delta * accumulator THEN
+                        SET omega[outer_i][outer_j] TO omega[inner_x - 1][outer_j - 1] + delta * accumulator
+                    END IF
+                    SET inner_x TO inner_x - 1
+                END WHILE
+                IF omega[outer_i][outer_j] < omega[outer_i - 1][outer_j] THEN
+                    SET omega[outer_i][outer_j] TO omega[outer_i - 1][outer_j]
+                END IF
+                SET outer_j TO outer_j + 1
+            END WHILE
+            SET outer_i TO outer_i + 1
+        END WHILE
+
+        RETURN omega[alpha][k]
+    END FUNCTION
+END CLASS

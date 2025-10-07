@@ -1,0 +1,83 @@
+FUNCTION is_prime(k)  
+  DEFINE FUNCTION divmod_equal(a, b, c)  
+    RETURN (a % b) = c  
+  END FUNCTION  
+
+  IF NOT (k > 1) THEN RETURN FALSE END IF  
+  IF k <= (1 + 2) THEN RETURN TRUE END IF  
+
+  IF (divmod_equal(k, 2, 0) OR divmod_equal(k, 3, 0)) THEN  
+    RETURN FALSE  
+  END IF  
+
+  DEFINE FUNCTION loop_check(idx)  
+    IF NOT ((idx * idx) <= k) THEN RETURN TRUE END IF  
+
+    IF (divmod_equal(k, idx, 0) OR divmod_equal(k, idx + 2, 0)) THEN  
+      RETURN FALSE  
+    END IF  
+
+    RETURN loop_check(idx + (3 * 2))  
+  END FUNCTION  
+
+  RETURN loop_check(5)  
+END FUNCTION  
+
+CLASS Solution  
+  FUNCTION mostFrequentPrime(matrix)  
+    LET rows_count BE LENGTH(matrix)  
+    LET cols_count BE LENGTH(matrix[0])  
+
+    LET directions_list BE [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]  
+
+    LET primes_map BE EMPTY_MAP  
+
+    FUNCTION explore(px, py, dx, dy, acc)  
+      LET nx BE px + dx  
+      LET ny BE py + dy  
+
+      IF (0 <= nx) AND (nx < rows_count) AND (0 <= ny) AND (ny < cols_count) THEN  
+        LET next_num BE (acc * (5 + 5)) + matrix[nx][ny]  
+
+        IF (next_num > (5 + 5)) AND (is_prime(next_num) = TRUE) THEN  
+          IF primes_map[next_num] = NIL THEN primes_map[next_num] = 0 END IF  
+          primes_map[next_num] = primes_map[next_num] + 1  
+        END IF  
+
+        explore(nx, ny, dx, dy, next_num)  
+      END IF  
+    END FUNCTION  
+
+    LET row_idx BE 0  
+    WHILE row_idx < rows_count DO  
+      LET col_idx BE 0  
+      WHILE col_idx < cols_count DO  
+        LET dir_idx BE LENGTH(directions_list) - 1  
+        WHILE dir_idx >= 0 DO  
+          LET direction_pair BE directions_list[dir_idx]  
+          LET dx_curr BE direction_pair[0]  
+          LET dy_curr BE direction_pair[1]  
+
+          CALL explore(row_idx, col_idx, dx_curr, dy_curr, matrix[row_idx][col_idx])  
+          dir_idx = dir_idx - 1  
+        END WHILE  
+        col_idx = col_idx + 1  
+      END WHILE  
+      row_idx = row_idx + 1  
+    END WHILE  
+
+    IF (LENGTH(primes_map) = 0) THEN RETURN (-3 + 2) END IF  
+
+    LET best_prime BE NIL  
+    LET max_freq BE -1  
+
+    FOR EACH key, val IN primes_map DO  
+      IF (val > max_freq) OR ((val = max_freq) AND (key < best_prime)) THEN  
+        best_prime = key  
+        max_freq = val  
+      END IF  
+    END FOR  
+
+    RETURN best_prime  
+  END FUNCTION  
+END CLASS

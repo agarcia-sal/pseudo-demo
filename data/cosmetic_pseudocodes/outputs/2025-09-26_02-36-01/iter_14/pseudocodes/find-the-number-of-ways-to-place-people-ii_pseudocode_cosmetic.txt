@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION numberOfPairs(points)
+      PROCEDURE swapIfNeeded(a, idxA, b, idxB)
+        IF a[idxA] > b[idxB]
+          SET temp TO a[idxA]
+          SET a[idxA] TO b[idxB]
+          SET b[idxB] TO temp
+        END IF
+      END PROCEDURE
+
+      PROCEDURE customSort(arr)
+        SET lenArr TO LENGTH OF arr
+        REPEAT
+          SET changedFlag TO False
+          SET pos TO 0
+          WHILE pos < lenArr - 1 DO
+            IF arr[pos].x > arr[pos + 1].x OR (arr[pos].x = arr[pos + 1].x AND arr[pos].y < arr[pos + 1].y)
+              SET tempPoint TO arr[pos]
+              SET arr[pos] TO arr[pos + 1]
+              SET arr[pos + 1] TO tempPoint
+              SET changedFlag TO True
+            END IF
+            SET pos TO pos + 1
+          END WHILE
+        UNTIL changedFlag = False
+      END PROCEDURE
+
+      CALL customSort(points)
+
+      SET totalPoints TO LENGTH OF points
+      SET combinationCount TO 0
+
+      FUNCTION checkValidRange(startIdx, endIdx)
+        FUNCTION insideBounds(xBound1, xMid, xBound2, yBound1, yMid, yBound2)
+          RETURN (xBound1 <= xMid AND xMid <= xBound2) AND (yBound2 <= yMid AND yMid <= yBound1)
+        END FUNCTION
+
+        FUNCTION innerLoop(indexStart, indexEnd)
+          IF indexStart > indexEnd
+            RETURN True
+          ELSE
+            SET px TO points[indexStart].x
+            SET py TO points[indexStart].y
+            SET refX1 TO points[startIdx].x
+            SET refY1 TO points[startIdx].y
+            SET refX2 TO points[endIdx].x
+            SET refY2 TO points[endIdx].y
+
+            IF insideBounds(refX1, px, refX2, refY1, py, refY2)
+              RETURN False
+            END IF
+
+            RETURN innerLoop(indexStart + 1, indexEnd)
+          END IF
+        END FUNCTION
+
+        RETURN innerLoop(startIdx + 1, endIdx - 1)
+      END FUNCTION
+
+      FUNCTION recursiveOuter(currentIndex)
+        IF currentIndex >= totalPoints - 1
+          RETURN 0
+        ELSE
+          FUNCTION recursiveInner(innerIndex)
+            IF innerIndex > totalPoints - 1
+              RETURN 0
+            ELSE
+              SET startX TO points[currentIndex].x
+              SET startY TO points[currentIndex].y
+              SET innerX TO points[innerIndex].x
+              SET innerY TO points[innerIndex].y
+              SET accumCount TO 0
+
+              IF startX <= innerX AND startY >= innerY
+                IF checkValidRange(currentIndex, innerIndex) = True
+                  SET accumCount TO 1
+                END IF
+              END IF
+
+              RETURN accumCount + recursiveInner(innerIndex + 1)
+            END IF
+          END FUNCTION
+
+          RETURN recursiveInner(currentIndex + 1) + recursiveOuter(currentIndex + 1)
+        END IF
+      END FUNCTION
+
+      SET totalCount TO recursiveOuter(0)
+      RETURN totalCount
+    END FUNCTION
+END CLASS

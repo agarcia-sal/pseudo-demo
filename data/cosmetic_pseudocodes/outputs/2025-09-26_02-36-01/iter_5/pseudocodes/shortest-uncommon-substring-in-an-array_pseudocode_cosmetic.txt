@@ -1,0 +1,80 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        DEFINE record AS dictionary WITH default 0
+        DEFINE processString(str, start, end_)
+            IF start = end_
+                RETURN
+            END IF
+            DEFINE currentEnd AS end_
+            DEFINE subs AS substring str FROM start TO (currentEnd - 1)
+            record[subs] = record[subs] + 1
+            processString(str, start, currentEnd - 1)
+        END FUNCTION
+
+        DEFINE processPositions(str, idx)
+            IF idx = LENGTH(str)
+                RETURN
+            END IF
+            processString(str, idx, LENGTH(str))
+            processPositions(str, idx + 1)
+        END FUNCTION
+
+        DEFINE buildRecord(lst, pos)
+            IF pos = LENGTH(lst)
+                RETURN
+            END IF
+            processPositions(lst[pos], 0)
+            buildRecord(lst, pos + 1)
+        END FUNCTION
+
+        DEFINE isBetterCandidate(cand, best)
+            IF best = ""
+                RETURN TRUE
+            END IF
+            IF LENGTH(cand) < LENGTH(best)
+                RETURN TRUE
+            END IF
+            IF (LENGTH(cand) = LENGTH(best)) AND (cand < best)
+                RETURN TRUE
+            END IF
+            RETURN FALSE
+        END FUNCTION
+
+        DEFINE findShortestUnique(str, idx, currBest)
+            IF idx = LENGTH(str)
+                RETURN currBest
+            END IF
+
+            DEFINE findWithEnd(str_, start_, end_, currBest_)
+                IF end_ = (start_ + 1)
+                    RETURN currBest_
+                END IF
+
+                DEFINE candidateSubstr AS substring str_ FROM start_ TO (end_ - 1)
+                DEFINE nextBest
+                IF record[candidateSubstr] = 1 AND isBetterCandidate(candidateSubstr, currBest_)
+                    nextBest = candidateSubstr
+                ELSE
+                    nextBest = currBest_
+                END IF
+                RETURN findWithEnd(str_, start_, end_ - 1, nextBest)
+            END FUNCTION
+
+            DEFINE bestForCurrent AS findWithEnd(str, idx, LENGTH(str) + 1, currBest)
+            RETURN findShortestUnique(str, idx + 1, bestForCurrent)
+        END FUNCTION
+
+        DEFINE gatherAnswers(lst, pos, acc)
+            IF pos = LENGTH(lst)
+                RETURN acc
+            END IF
+            DEFINE candidate AS findShortestUnique(lst[pos], 0, "")
+            acc = acc + [candidate]
+            RETURN gatherAnswers(lst, pos + 1, acc)
+        END FUNCTION
+
+        buildRecord(arr, 0)
+        DEFINE result AS gatherAnswers(arr, 0, [])
+        RETURN result
+    END FUNCTION
+END CLASS

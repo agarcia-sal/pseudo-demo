@@ -1,0 +1,34 @@
+FUNCTION encode_cyclic WITH PARAMETER s AS str
+    SET groups TO LIST WITH ELEMENTS EMPTY
+    SET total_groups TO (LENGTH OF s PLUS 2) DIVIDED BY 3
+    FOR i FROM 0 TO total_groups MINUS 1
+        SET start_index TO 3 MULTIPLY i
+        IF (3 MULTIPLY i PLUS 3) LESS THAN LENGTH OF s
+            SET end_index TO 3 MULTIPLY i PLUS 3
+        ELSE
+            SET end_index TO LENGTH OF s
+        END IF
+        SET group TO CALL s SUBSTRING FROM start_index TO end_index
+        CALL APPEND group TO groups
+    END FOR
+    SET cycled_groups TO LIST WITH ELEMENTS EMPTY
+    FOR each group IN groups
+        IF LENGTH OF group EQUALS 3
+            SET cycled_group TO CONCATENATE SUBSTRING OF group FROM 1 TO 3 PLUS SUBSTRING OF group FROM 0 TO 1
+        ELSE
+            SET cycled_group TO group
+        END IF
+        CALL APPEND cycled_group TO cycled_groups
+    END FOR
+    SET result TO EMPTY STRING
+    FOR each cycled_group IN cycled_groups
+        SET result TO CONCATENATE result PLUS cycled_group
+    END FOR
+    RETURN result
+END FUNCTION
+
+FUNCTION decode_cyclic WITH PARAMETER s AS str
+    SET first_call TO CALL encode_cyclic WITH ARGUMENT s
+    SET second_call TO CALL encode_cyclic WITH ARGUMENT first_call
+    RETURN second_call
+END FUNCTION

@@ -1,0 +1,46 @@
+CLASS Solution  
+    FUNCTION timeTaken(edges)  
+        LET totalNodes BE edges.LENGTH + 1  
+        LET adjacency BE construct_adjacency_list(edges)  
+        
+        FUNCTION bfs(source)  
+            LET visitedFlags BE ARRAY OF totalNodes FILLED WITH FALSE  
+            visitedFlags[source] ← TRUE  
+            LET processingQueue BE deque WITH [(source, 0)]  
+            LET longestDuration BE 0  
+            
+            WHILE processingQueue NOT EMPTY DO  
+                LET currentNode, currentTime BE processingQueue.popleft()  
+                IF longestDuration < currentTime THEN  
+                    longestDuration ← currentTime  
+                END IF  
+                
+                LET neighborsList BE adjacency[currentNode]  
+                LET idx BE 0  
+                WHILE idx < neighborsList.LENGTH DO  
+                    LET adjNode BE neighborsList[idx]  
+                    IF NOT visitedFlags[adjNode] THEN  
+                        visitedFlags[adjNode] ← TRUE  
+                        IF adjNode MOD 2 = 0 THEN  
+                            processingQueue.append((adjNode, currentTime + 2))  
+                        ELSE  
+                            processingQueue.append((adjNode, currentTime + 1))  
+                        END IF  
+                    END IF  
+                    idx ← idx + 1  
+                END WHILE  
+            END WHILE  
+            
+            RETURN longestDuration  
+        END FUNCTION  
+        
+        LET collectedTimes BE ARRAY OF totalNodes FILLED WITH 0  
+        LET position BE 0  
+        WHILE position < totalNodes DO  
+            collectedTimes[position] ← bfs(position)  
+            position ← position + 1  
+        END WHILE  
+        
+        RETURN collectedTimes  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION maxSelectedElements(nums)
+        DEFINE FUNCTION cmpAsc(a, b)
+            RETURN (a <= b) AND (NOT (a == b))
+        END FUNCTION
+        DEFINE FUNCTION getFromMap(m, k)
+            IF k IN m THEN
+                RETURN m[k]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+        SET sortedNums TO EMPTY LIST
+        SET index TO 0
+        DEFINE FUNCTION insertSorted(arr, val)
+            IF index >= LENGTH(arr) THEN
+                APPEND val TO arr
+                RETURN
+            END IF
+            IF cmpAsc(val, arr[index]) THEN
+                INSERT val AT index IN arr
+                RETURN
+            ELSE
+                SET index TO index + 1
+                CALL insertSorted(arr, val)
+            END IF
+        END FUNCTION
+        FOR i FROM 0 TO LENGTH(nums) - 1
+            SET idxInsert TO 0
+            SET index TO 0
+            CALL insertSorted(sortedNums, nums[i])
+        END FOR
+        SET dp TO EMPTY DICTIONARY
+        SET resultAccum TO 0
+        SET posToVisit TO 0
+        DEFINE FUNCTION updateAnswer(currAns, v1, v2)
+            IF v1 >= v2 THEN
+                IF currAns >= v1 THEN
+                    RETURN currAns
+                ELSE
+                    RETURN v1
+                END IF
+            ELSE
+                IF currAns >= v2 THEN
+                    RETURN currAns
+                ELSE
+                    RETURN v2
+                END IF
+            END IF
+        END FUNCTION
+        DEFINE FUNCTION getValPlusOne(key)
+            RETURN getFromMap(dp, key) + 1
+        END FUNCTION
+        WHILE posToVisit < LENGTH(sortedNums)
+            SET keyCurrent TO sortedNums[posToVisit]
+            SET dp[keyCurrent + 1] TO getValPlusOne(keyCurrent)
+            SET dp[keyCurrent] TO getValPlusOne(keyCurrent - 1)
+            SET resultAccum TO updateAnswer(resultAccum, dp[keyCurrent], dp[keyCurrent + 1])
+            SET posToVisit TO posToVisit + 1
+        END WHILE
+        RETURN resultAccum
+    END FUNCTION
+END CLASS

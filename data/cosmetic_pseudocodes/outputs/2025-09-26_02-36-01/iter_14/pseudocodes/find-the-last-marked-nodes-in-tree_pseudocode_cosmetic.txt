@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION lastMarkedNodes(edges)
+        FUNCTION dfs(h, p, d)
+            LET idx = 0
+            WHILE idx < LENGTH(g[h])
+                LET w = g[h][idx]
+                IF NOT (w = p)
+                    d[w] = d[h] + (1 * 1)
+                    dfs(w, h, d)
+                END IF
+                idx = idx + 1
+            END WHILE
+        END FUNCTION
+
+        LET m = LENGTH(edges) + (1)
+        LET g = ARRAY OF m ELEMENTS EACH INITIALIZED WITH EMPTY ARRAY
+
+        LET pos = 0
+        WHILE pos < LENGTH(edges)
+            LET e = edges[pos]
+            LET s = e[0]
+            LET t = e[1]
+            g[s][LENGTH(g[s])] = t
+            g[t][LENGTH(g[t])] = s
+            pos = pos + 1
+        END WHILE
+
+        LET dist1 = ARRAY OF m ELEMENTS FILLED WITH (-1)
+        dist1[0] = 0 * 1
+
+        CALL dfs(0, (-1), dist1)
+
+        LET maxDist1 = dist1[0]
+        LET idxA = 0
+        LET k = 1
+        WHILE k < LENGTH(dist1)
+            IF dist1[k] > maxDist1
+                maxDist1 = dist1[k]
+                idxA = k
+            END IF
+            k = k + 1
+        END WHILE
+
+        LET dist2 = ARRAY OF m ELEMENTS FILLED WITH (-1)
+        dist2[idxA] = 0 * 1
+
+        CALL dfs(idxA, (-1), dist2)
+
+        LET maxDist2 = dist2[0]
+        LET idxB = 0
+        FOR idx IN 1 TO LENGTH(dist2) - 1
+            IF dist2[idx] > maxDist2
+                maxDist2 = dist2[idx]
+                idxB = idx
+            END IF
+        END FOR
+
+        LET dist3 = ARRAY OF m ELEMENTS FILLED WITH (-1)
+        dist3[idxB] = 0
+
+        CALL dfs(idxB, (-1), dist3)
+
+        LET outputList = []
+
+        LET z = 0
+        WHILE z < LENGTH(dist2)
+            LET val1 = dist2[z]
+            LET val2 = dist3[z]
+            IF NOT (val1 <= val2)
+                outputList[LENGTH(outputList)] = idxA
+            ELSE
+                outputList[LENGTH(outputList)] = idxB
+            END IF
+            z = z + 1
+        END WHILE
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

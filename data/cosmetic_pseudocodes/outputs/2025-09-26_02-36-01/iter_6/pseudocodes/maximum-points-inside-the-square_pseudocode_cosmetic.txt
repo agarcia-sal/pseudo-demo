@@ -1,0 +1,69 @@
+CLASS Solution
+	FUNCTION maxPointsInsideSquare(points s)
+		DEFINE FUNC absoluteValue(num) RETURNS INTEGER
+			IF num < 0 THEN
+				RETURN 0 - num
+			ELSE
+				RETURN num
+			END IF
+		END FUNC
+
+		SET total_points TO 0 + (0 + LENGTH OF s)
+		SET highest_count TO 0 + 0
+		SET idx_primary TO 0
+		WHILE idx_primary < total_points DO
+			SET coordinate_x TO s[idx_primary][0]
+			SET coordinate_y TO s[idx_primary][1]
+
+			SET magnitude_x TO absoluteValue(coordinate_x)
+			SET magnitude_y TO absoluteValue(coordinate_y)
+
+			IF magnitude_x < magnitude_y THEN
+				SET max_side TO magnitude_y
+			ELSE
+				SET max_side TO magnitude_x
+			END IF
+
+			SET observed_tags TO EMPTY MAP
+			SET can_accept TO TRUE
+
+			DEFINE PROCESS_SECONDARY(current) RETURNS VOID
+				IF current >= total_points THEN
+					RETURN
+				END IF
+
+				SET candidate_x TO s[current][0]
+				SET candidate_y TO s[current][1]
+
+				SET abs_candidate_x TO absoluteValue(candidate_x)
+				SET abs_candidate_y TO absoluteValue(candidate_y)
+
+				IF abs_candidate_x <= max_side AND abs_candidate_y <= max_side THEN
+					SET candidate_tag TO s[current]
+					SET tag_identifier TO candidate_tag
+
+					IF tag_identifier IN observed_tags THEN
+						SET can_accept TO FALSE
+						RETURN
+					ELSE
+						SET observed_tags[tag_identifier] TO TRUE
+					END IF
+				END IF
+
+				PROCESS_SECONDARY(current + 1)
+			END DEFINE
+
+			PROCESS_SECONDARY(0)
+
+			IF can_accept THEN
+				IF LENGTH OF observed_tags > highest_count THEN
+					SET highest_count TO LENGTH OF observed_tags
+				END IF
+			END IF
+
+			SET idx_primary TO idx_primary + 1
+		END WHILE
+
+		RETURN highest_count
+	END FUNCTION
+END CLASS

@@ -1,0 +1,100 @@
+CLASS Solution  
+    FUNCTION maxPathLength(coordinates, k)  
+        LET refX = coordinates[k][0]  
+        LET refY = coordinates[k][1]  
+        LET accLeft = []  
+        FUNCTION collectLeft(idx)  
+            IF idx = LENGTH(coordinates) THEN  
+                RETURN  
+            ELSE  
+                LET currX = coordinates[idx][0]  
+                LET currY = coordinates[idx][1]  
+                IF (NOT (currX >= refX)) AND (NOT (currY >= refY)) THEN  
+                    accLeft = accLeft + [(currX, currY)]  
+                END IF  
+                collectLeft(idx + 1)  
+            END IF  
+        END FUNCTION  
+        collectLeft(0)  
+        LET accRight = []  
+        FUNCTION collectRight(pos)  
+            IF pos = LENGTH(coordinates) THEN  
+                RETURN  
+            ELSE  
+                LET valX = coordinates[pos][0]  
+                LET valY = coordinates[pos][1]  
+                IF (valX > refX) AND (valY > refY) THEN  
+                    accRight = accRight + [(valX, valY)]  
+                END IF  
+                collectRight(pos + 1)  
+            END IF  
+        END FUNCTION  
+        collectRight(0)  
+        LET leftLen = SELF._lengthOfLIS(accLeft)  
+        LET rightLen = SELF._lengthOfLIS(accRight)  
+        LET result = 1 + leftLen + rightLen  
+        RETURN result  
+    END FUNCTION  
+
+    FUNCTION _lengthOfLIS(coordinates)  
+        FUNCTION comparePoints(a, b)  
+            IF a[0] < b[0] THEN  
+                RETURN TRUE  
+            ELSE IF a[0] = b[0] THEN  
+                RETURN a[1] > b[1]  
+            ELSE  
+                RETURN FALSE  
+            END IF  
+        END FUNCTION  
+        FUNCTION insertionSort(arr)  
+            LET n = LENGTH(arr)  
+            LET i = 1  
+            WHILE i < n DO  
+                LET key = arr[i]  
+                LET j = i - 1  
+                WHILE j >= 0 AND (NOT comparePoints(arr[j], key)) DO  
+                    arr[j + 1] = arr[j]  
+                    j = j - 1  
+                END WHILE  
+                arr[j + 1] = key  
+                i = i + 1  
+            END WHILE  
+            RETURN arr  
+        END FUNCTION  
+        LET sortedCoords = insertionSort(coordinates)  
+        LET tails = []  
+        FUNCTION bisectLeft(listTails, target)  
+            LET low = 0  
+            LET high = LENGTH(listTails)  
+            WHILE low < high DO  
+                LET mid = (low + high) // 2  
+                IF listTails[mid] < target THEN  
+                    low = mid + 1  
+                ELSE  
+                    high = mid  
+                END IF  
+            END WHILE  
+            RETURN low  
+        END FUNCTION  
+        FUNCTION process(idx)  
+            IF idx = LENGTH(sortedCoords) THEN  
+                RETURN  
+            ELSE  
+                LET __unused = sortedCoords[idx][0]  
+                LET valY = sortedCoords[idx][1]  
+                IF LENGTH(tails) = 0 THEN  
+                    tails = tails + [valY]  
+                ELSE IF valY > tails[ LENGTH(tails) - 1 ] THEN  
+                    tails = tails + [valY]  
+                ELSE  
+                    LET pos = bisectLeft(tails, valY)  
+                    tails[pos] = valY  
+                END IF  
+                process(idx + 1)  
+            END IF  
+        END FUNCTION  
+        process(0)  
+        LET lengthResult = LENGTH(tails)  
+        RETURN lengthResult  
+    END FUNCTION  
+END CLASS

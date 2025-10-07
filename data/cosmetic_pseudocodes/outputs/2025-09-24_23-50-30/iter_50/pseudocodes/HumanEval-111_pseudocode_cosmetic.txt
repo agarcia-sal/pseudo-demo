@@ -1,0 +1,61 @@
+```
+FUNCTION histogram(test_string)
+    LET freq_map BE {}
+    LET tokens BE []
+    LET max_freq BE 0
+
+    PROCEDURE split_into_tokens(str, acc, pos)
+        IF pos >= LENGTH(str) THEN
+            acc APPEND str
+            RETURN acc
+        ELSE IF str[pos] = ' ' THEN
+            acc APPEND str[0..pos-1]
+            RETURN split_into_tokens(str[pos+1..LENGTH(str)-1], acc, 0)
+        ELSE 
+            RETURN split_into_tokens(str, acc, pos + 1)
+        ENDIF
+    END PROCEDURE
+
+    tokens := split_into_tokens(test_string, [], 0)
+
+    FUNCTION count_occurrences(lst, val, idx, cnt)
+        IF idx = LENGTH(lst) THEN
+            RETURN cnt
+        ELSE
+            RETURN count_occurrences(lst, val, idx + 1, cnt + (IF lst[idx] = val THEN 1 ELSE 0))
+        ENDIF
+    END FUNCTION
+
+    FUNCTION update_max(lst, idx, current_max)
+        IF idx = LENGTH(lst) THEN
+            RETURN current_max
+        ELSE
+            LET item = lst[idx]
+            LET item_count = count_occurrences(lst, item, 0, 0)
+            LET new_max = IF (item_count > current_max) AND (item <> "") THEN item_count ELSE current_max
+            RETURN update_max(lst, idx + 1, new_max)
+        ENDIF
+    END FUNCTION
+
+    max_freq := update_max(tokens, 0, 0)
+
+    FUNCTION fill_freq_map(lst, idx, max_val, fmap)
+        IF idx = LENGTH(lst) THEN
+            RETURN fmap
+        ELSE
+            LET key = lst[idx]
+            LET occurrences = count_occurrences(lst, key, 0, 0)
+            IF occurrences = max_val THEN
+                fmap[key] := max_val
+            ENDIF
+            RETURN fill_freq_map(lst, idx + 1, max_val, fmap)
+        ENDIF
+    END FUNCTION
+
+    IF max_freq > 0 THEN
+        freq_map := fill_freq_map(tokens, 0, max_freq, freq_map)
+    ENDIF
+
+    RETURN freq_map
+END FUNCTION
+```

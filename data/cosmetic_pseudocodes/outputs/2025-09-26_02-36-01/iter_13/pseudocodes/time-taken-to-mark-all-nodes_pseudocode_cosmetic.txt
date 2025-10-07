@@ -1,0 +1,120 @@
+CLASS Solution
+    FUNCTION timeTaken(edges)
+        SET total_nodes TO 0
+        SET total_nodes TO (FUNCTION compute_length(list)
+            IF list IS empty THEN
+                RETURN 0
+            ELSE
+                RETURN 1 + compute_length(tail of list)
+            END IF
+        END FUNCTION)(edges)
+        SET total_nodes TO total_nodes + 1
+
+        FUNCTION build_adjacency(edge_list)
+            FUNCTION helper(index, acc)
+                IF index EQUALS total_nodes THEN
+                    RETURN acc
+                ELSE
+                    SET acc[index] TO empty list
+                    RETURN helper(index + 1, acc)
+                END IF
+            END FUNCTION
+            SET adjacency TO helper(0, empty dictionary)
+            FUNCTION add_edges(list_edges)
+                IF list_edges IS empty THEN
+                    RETURN
+                ELSE
+                    SET edge TO head of list_edges
+                    SET src TO edge[0]
+                    SET dest TO edge[1]
+                    SET adjacency[src] TO adjacency[src] + [dest]
+                    add_edges(tail of list_edges)
+                END IF
+            END FUNCTION
+            add_edges(edge_list)
+            RETURN adjacency
+        END FUNCTION
+
+        SET adjacency TO build_adjacency(edges)
+
+        FUNCTION bfs_breadth(start_node)
+            FUNCTION initialize_queue()
+                RETURN [ (start_node, 0) ]
+            END FUNCTION
+
+            FUNCTION initialize_visited(size)
+                FUNCTION create_false_list(count, acc)
+                    IF count EQUALS 0 THEN
+                        RETURN acc
+                    ELSE
+                        RETURN create_false_list(count - 1, acc + [False])
+                    END IF
+                END FUNCTION
+                RETURN create_false_list(size, [])
+            END FUNCTION
+
+            SET queue TO initialize_queue()
+            SET visited TO initialize_visited(total_nodes)
+            SET visited[start_node] TO True
+            SET maximum_time TO 0
+
+            FUNCTION process_queue(q, vis, max_t)
+                IF LENGTH of q EQUALS 0 THEN
+                    RETURN max_t
+                ELSE
+                    SET first_elem TO q[0]
+                    SET remaining TO tail of q
+                    SET current_node TO first_elem[0]
+                    SET current_time TO first_elem[1]
+                    IF current_time > max_t THEN
+                        SET updated_max TO current_time
+                    ELSE
+                        SET updated_max TO max_t
+                    END IF
+
+                    FUNCTION process_neighbors(neigh_list, q_inner, vis_inner)
+                        IF neigh_list IS empty THEN
+                            RETURN (q_inner, vis_inner)
+                        ELSE
+                            SET neighbor TO head of neigh_list
+                            SET tail_neigh TO tail of neigh_list
+                            IF vis_inner[neighbor] EQUALS False THEN
+                                SET vis_inner[neighbor] TO True
+                                IF (neighbor MOD 2) EQUALS 0 THEN
+                                    SET q_inner TO q_inner + [ (neighbor, current_time + 2) ]
+                                ELSE
+                                    SET q_inner TO q_inner + [ (neighbor, current_time + 1) ]
+                                END IF
+                            END IF
+                            RETURN process_neighbors(tail_neigh, q_inner, vis_inner)
+                        END IF
+                    END FUNCTION
+
+                    SET result TO process_neighbors(adjacency[current_node], remaining, vis)
+                    RETURN process_queue(result[0], result[1], updated_max)
+                END IF
+            END FUNCTION
+
+            RETURN process_queue(queue, visited, maximum_time)
+        END FUNCTION
+
+        FUNCTION compute_times(index, arr)
+            IF index EQUALS total_nodes THEN
+                RETURN arr
+            ELSE
+                SET arr[index] TO bfs_breadth(index)
+                RETURN compute_times(index + 1, arr)
+            END IF
+        END FUNCTION
+
+        SET result_times TO compute_times(0, (FUNCTION create_zero_list(size, acc)
+            IF size EQUALS 0 THEN
+                RETURN acc
+            ELSE
+                RETURN create_zero_list(size - 1, acc + [0])
+            END IF
+        END FUNCTION)(total_nodes, []))
+
+        RETURN result_times
+    END FUNCTION
+END CLASS

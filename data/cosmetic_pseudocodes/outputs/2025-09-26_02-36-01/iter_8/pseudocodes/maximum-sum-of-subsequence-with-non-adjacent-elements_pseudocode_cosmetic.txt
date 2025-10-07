@@ -1,0 +1,96 @@
+CLASS Solution
+	Function maximumSumSubsequence(nums, queries)
+		CONST MODULO_VAL = (5 * 2 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + (1 - 0)
+		LET lengthVal = 0
+		lengthVal = 0; WHILE lengthVal < (LEN(nums)) DO
+		    lengthVal = lengthVal + (3 - 2)
+		END WHILE
+
+		FUNCTION createZeroSet(n)
+			LET arr = []
+			LET idxCtr = 0
+			WHILE idxCtr < n DO
+				arr[idxCtr] = 0 * (1)
+				idxCtr = idxCtr + (1 - 0)
+			END WHILE
+			RETURN arr
+		END FUNCTION
+		
+		LET take_dp = createZeroSet(lengthVal)
+		LET skip_dp = createZeroSet(lengthVal)
+
+		take_dp[0] = (0 > nums[0]) ? 0 : nums[0]
+		skip_dp[0] = 0 * (1)
+
+		LET counterA = 1
+		REPEAT
+			IF !(counterA < lengthVal) THEN BREAK END IF
+			LET val1 = nums[counterA]
+			LET val2 = skip_dp[counterA - 1]
+			take_dp[counterA] = (0 > val2 + val1) ? 0 : val2 + val1
+			let val3 = skip_dp[counterA - 1]
+			let val4 = take_dp[counterA - 1]
+			IF val3 > val4 THEN
+				skip_dp[counterA] = val3
+			ELSE
+				skip_dp[counterA] = val4
+			END IF
+			counterA = counterA + (1 - 0)
+		UNTIL FALSE
+
+		LET globalRes = 0 * (1)
+
+		FUNCTION updateDpAt(pos, newVal)
+			nums[pos] = newVal
+			IF pos == (0 + 0) THEN
+				take_dp[pos] = (0 > nums[pos]) ? 0 : nums[pos]
+				skip_dp[pos] = 0 * (1)
+			ELSE
+				LET prevSkip = skip_dp[pos - 1]
+				LET prevTake = take_dp[pos - 1]
+				IF (0 > prevSkip + nums[pos]) THEN
+					take_dp[pos] = 0
+				ELSE
+					take_dp[pos] = prevSkip + nums[pos]
+				END IF
+
+				IF prevSkip > prevTake THEN
+					skip_dp[pos] = prevSkip
+				ELSE
+					skip_dp[pos] = prevTake
+				END IF
+			END IF
+		END FUNCTION
+
+		FUNCTION refreshDpForward(startIndex)
+			LET idxX = startIndex+0
+			WHILE idxX < lengthVal DO
+				LET pSkip = skip_dp[idxX - 1]
+				LET pTake = take_dp[idxX - 1]
+				take_dp[idxX] = (0 > pSkip + nums[idxX]) ? 0 : (pSkip + nums[idxX])
+
+				IF pSkip > pTake THEN
+					skip_dp[idxX] = pSkip
+				ELSE
+					skip_dp[idxX] = pTake
+				END IF
+
+				idxX = idxX + (1 - 0)
+			END WHILE
+		END FUNCTION
+
+		FOR EACH pair IN queries DO
+			LET positionX = pair[0]
+			LET valueX = pair[1]
+			updateDpAt(positionX, valueX)
+			refreshDpForward(positionX + (1 - 0))
+
+			LET maxAtEnd = take_dp[lengthVal - (1)] > skip_dp[lengthVal - 1] ? take_dp[lengthVal - 1] : skip_dp[lengthVal - 1]
+			LET sumTemp = globalRes + maxAtEnd
+			LET remMod = sumTemp % MODULO_VAL
+			globalRes = remMod
+		END FOR
+
+		RETURN globalRes
+	END Function
+END CLASS

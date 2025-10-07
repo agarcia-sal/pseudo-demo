@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+        FUNCTION update_count(count LIST OF integers num integer add integer)
+            SET bit_marker TO 1
+            SET index_counter TO 0
+            WHILE index_counter LESS THAN 32
+                IF (num BITWISE_AND bit_marker) != 0
+                    SET count[index_counter] TO count[index_counter] PLUS add
+                END IF
+                SET bit_marker TO bit_marker LEFT_SHIFT 1
+                SET index_counter TO index_counter PLUS 1
+            END WHILE
+        END FUNCTION
+
+        FUNCTION compute_current_or(count LIST OF integers) RETURNS integer
+            SET accumulated_or TO 0
+            SET idx TO 0
+            WHILE idx NOT_EQUAL 32
+                IF count[idx] GREATER_THAN 0
+                    SET accumulated_or TO accumulated_or BITWISE_OR (1 LEFT_SHIFT idx)
+                END IF
+                SET idx TO idx PLUS 1
+            END WHILE
+            RETURN accumulated_or
+        END FUNCTION
+
+        SET total_elements TO LENGTH(nums)
+        SET bit_counts TO [0 REPEATED 32 TIMES]
+        SET present_or TO 0
+        SET window_start TO 0
+        SET shortest_subarray TO INFINITY
+
+        SET window_end TO 0
+        WHILE window_end LESS_THAN total_elements
+            CALL update_count(bit_counts, nums[window_end], 1)
+            SET present_or TO present_or BITWISE_OR nums[window_end]
+
+            WHILE (present_or GREATER_OR_EQUAL k) AND (window_start LESS_OR_EQUAL window_end)
+                IF shortest_subarray GREATER_THAN (window_end MINUS window_start PLUS 1)
+                    SET shortest_subarray TO (window_end MINUS window_start PLUS 1)
+                END IF
+                CALL update_count(bit_counts, nums[window_start], -1)
+                SET present_or TO compute_current_or(bit_counts)
+                SET window_start TO window_start PLUS 1
+            END WHILE
+
+            SET window_end TO window_end PLUS 1
+        END WHILE
+
+        IF shortest_subarray EQUALS INFINITY
+            RETURN -1
+        ELSE
+            RETURN shortest_subarray
+        END IF
+    END FUNCTION
+END CLASS

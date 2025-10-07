@@ -1,0 +1,93 @@
+CLASS Solution
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER m INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION convert_to_binary_string(value INTEGER length INTEGER) RETURNS STRING
+            SET bits TO an empty list
+            SET count TO 0
+            WHILE count LESS THAN length
+                SET bit_val TO (value MOD 2)
+                PREPEND bit_val TO bits
+                SET value TO (value DIV 2)
+                INCREMENT count BY 1
+            END WHILE
+            RETURN JOIN bits AS STRING
+        END FUNCTION
+
+        FUNCTION compute_hamming(bin_a STRING bin_b STRING) RETURNS INTEGER
+            FUNCTION is_different(char1 CHAR char2 CHAR) RETURNS BOOLEAN
+                RETURN (char1 NOT EQUALS char2)
+            END FUNCTION
+
+            SET idx TO 0
+            SET diff_count TO 0
+            WHILE idx LESS THAN LENGTH(bin_a)
+                IF is_different(bin_a[idx], bin_b[idx]) THEN
+                    SET diff_count TO (diff_count + 1)
+                END IF
+                SET idx TO (idx + 1)
+            END WHILE
+            RETURN diff_count
+        END FUNCTION
+
+        FUNCTION range_indices(start INTEGER end INTEGER) RETURNS LIST OF INTEGER
+            SET res TO an empty list
+            SET curr TO start
+            WHILE curr LESS THAN OR EQUAL TO end
+                APPEND curr TO res
+                SET curr TO (curr + 1)
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        SET binary_representations TO an empty list
+
+        FUNCTION process_nums(input_nums LIST OF INTEGER) RETURNS VOID
+            FUNCTION add_binary(n INTEGER) RETURNS VOID
+                SET bin_str TO convert_to_binary_string(n, m)
+                APPEND bin_str TO binary_representations
+            END FUNCTION
+
+            SET iterator TO 0
+            WHILE iterator LESS THAN LENGTH(input_nums)
+                CALL add_binary(input_nums[iterator])
+                SET iterator TO (iterator + 1)
+            END WHILE
+        END FUNCTION
+
+        CALL process_nums(nums)
+
+        SET result_list TO an empty list
+
+        FUNCTION update_max_distance(current_idx INTEGER) RETURNS INTEGER
+            SET max_distance TO 0
+
+            FUNCTION inner_loop(other_idx INTEGER) RETURNS VOID
+                IF current_idx NOT EQUALS other_idx THEN
+                    SET dist_val TO compute_hamming(binary_representations[current_idx], binary_representations[other_idx])
+                    IF dist_val GREATER THAN max_distance THEN
+                        SET max_distance TO dist_val
+                    END IF
+                END IF
+            END FUNCTION
+
+            SET indices_list TO range_indices(0, LENGTH(nums) - 1)
+            FOR each element IN indices_list
+                CALL inner_loop(element)
+            END FOR
+
+            RETURN max_distance
+        END FUNCTION
+
+        SET pos TO 0
+        LOOP_START:
+            IF pos GREATER THAN OR EQUAL TO LENGTH(nums) THEN
+                GOTO LOOP_END
+            END IF
+            SET maximum_distance TO update_max_distance(pos)
+            APPEND maximum_distance TO result_list
+            SET pos TO (pos + 1)
+            GOTO LOOP_START
+        LOOP_END:
+
+        RETURN result_list
+    END FUNCTION
+END CLASS

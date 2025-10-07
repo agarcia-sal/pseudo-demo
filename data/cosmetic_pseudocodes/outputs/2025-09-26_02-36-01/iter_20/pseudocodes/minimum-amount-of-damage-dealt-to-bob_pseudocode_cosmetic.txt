@@ -1,0 +1,106 @@
+CLASS Enemy  
+    FUNCTION __init__(self, damage, timeTakenDown)  
+        SET self.damage TO damage  
+        SET self.timeTakenDown TO timeTakenDown  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION minDamage(self, power, damage, health)  
+        FUNCTION divide_floor(x, y)  
+            RETURN (x - (x MOD y)) / y  
+        END FUNCTION  
+
+        FUNCTION sum_list(lst)  
+            SET total TO 0  
+            SET i TO 0  
+            WHILE i < LENGTH(lst)  
+                SET total TO total + lst[i]  
+                SET i TO i + 1  
+            END WHILE  
+            RETURN total  
+        END FUNCTION  
+
+        FUNCTION cmp_enemy_ratio(e1, e2)  
+            FUNCTION ratio(enemy)  
+                RETURN enemy.damage * 1.0 / enemy.timeTakenDown  
+            END FUNCTION  
+            IF ratio(e1) < ratio(e2) THEN  
+                RETURN 1  
+            ELSEIF ratio(e1) > ratio(e2) THEN  
+                RETURN -1  
+            ELSE  
+                RETURN 0  
+            END IF  
+        END FUNCTION  
+
+        SET zxfw TO 0  
+        SET fhtq TO sum_list(damage)  
+        SET rnpu TO []  
+
+        FUNCTION createEnemy(dmg, ttd)  
+            RETURN NEW Enemy(dmg, ttd)  
+        END FUNCTION  
+
+        SET kqxv TO 0  
+        WHILE kqxv < LENGTH(damage) DO  
+            SET mdvja TO damage[kqxv]  
+            SET xkpab TO health[kqxv]  
+            SET arto TO divide_floor(xkpab + power - 1, power)  
+            SET pgbq TO createEnemy(mdvja, arto)  
+            APPEND pgbq TO rnpu  
+            SET kqxv TO kqxv + 1  
+        END WHILE  
+
+        PROCEDURE quicksort(arr, left, right)  
+            IF left >= right THEN  
+                RETURN  
+            END IF  
+            SET pivot TO arr[right]  
+            SET i TO left - 1  
+            SET j TO left  
+            WHILE j < right DO  
+                IF cmp_enemy_ratio(arr[j], pivot) <= 0 THEN  
+                    SET i TO i + 1  
+                    SET temp TO arr[i]  
+                    SET arr[i] TO arr[j]  
+                    SET arr[j] TO temp  
+                END IF  
+                SET j TO j + 1  
+            END WHILE  
+            SET temp TO arr[i+1]  
+            SET arr[i+1] TO arr[right]  
+            SET arr[right] TO temp  
+            CALL quicksort(arr, left, i)  
+            CALL quicksort(arr, i + 2, right)  
+        END PROCEDURE  
+
+        CALL quicksort(rnpu, 0, LENGTH(rnpu) - 1)  
+
+        SET utzgpc TO 0  
+
+        PROCEDURE add_mul(a, b)  
+            RETURN a * b  
+        END PROCEDURE  
+
+        PROCEDURE inc_ans(ans_ref, val)  
+            SET ans_ref[0] TO ans_ref[0] + val  
+        END PROCEDURE  
+
+        SET ans_wrapper TO [zxfw]  
+
+        PROCEDURE process_enemies(lst)  
+            IF LENGTH(lst) = 0 THEN  
+                RETURN  
+            END IF  
+            SET first_enemy TO lst[0]  
+            CALL inc_ans(ans_wrapper, add_mul(fhtq, first_enemy.timeTakenDown))  
+            SET fhtq TO fhtq - first_enemy.damage  
+            CALL process_enemies(SUBLIST(lst,1,LENGTH(lst)-1))  
+        END PROCEDURE  
+
+        CALL process_enemies(rnpu)  
+
+        RETURN ans_wrapper[0]  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION countSubmatrices(matrix, limit)
+        SET height TO LENGTH OF matrix
+        SET width TO LENGTH OF matrix AT INDEX zero
+        SET totalCount TO zero
+
+        FUNCTION validateBound(submat)
+            SET rowIndex TO zero
+            WHILE rowIndex LESS THAN LENGTH OF submat
+                SET line TO submat AT INDEX rowIndex
+                SET colIndex TO zero
+                REPEAT
+                    IF line AT INDEX colIndex GREATER THAN limit THEN
+                        RETURN False
+                    END IF
+                    SET colIndex TO colIndex PLUS one
+                UNTIL colIndex EQUALS LENGTH OF line
+                SET rowIndex TO rowIndex PLUS one
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        FUNCTION confirmDescending(submat)
+            SET rowCounter TO zero
+            WHILE rowCounter LESS THAN LENGTH OF submat
+                SET currentLine TO submat AT INDEX rowCounter
+                SET pos TO one
+                WHILE pos LESS THAN LENGTH OF currentLine
+                    IF currentLine AT INDEX pos GREATER THAN currentLine AT INDEX pos MINUS one THEN
+                        RETURN False
+                    END IF
+                    SET pos TO pos PLUS one
+                END WHILE
+                SET rowCounter TO rowCounter PLUS one
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        FUNCTION extractBlock(gridBlock, startR, endR, startC, endC)
+            FUNCTION takeSlice(seq, startIdx, endIdx)
+                SET resultList TO empty list
+                SET idx TO startIdx
+                WHILE idx LESS THAN OR EQUAL TO endIdx
+                    APPEND seq AT INDEX idx TO resultList
+                    SET idx TO idx PLUS one
+                END WHILE
+                RETURN resultList
+            END FUNCTION
+
+            SET segmentRows TO takeSlice(gridBlock, startR, endR)
+            SET slicedSub TO empty list
+            SET rIndex TO zero
+            REPEAT
+                SET selectedRow TO segmentRows AT INDEX rIndex
+                APPEND takeSlice(selectedRow, startC, endC) TO slicedSub
+                SET rIndex TO rIndex PLUS one
+            UNTIL rIndex EQUALS LENGTH OF segmentRows
+            RETURN slicedSub
+        END FUNCTION
+
+        SET rowStart TO zero
+        WHILE rowStart LESS THAN height
+            SET colStart TO zero
+            REPEAT
+                SET rowEnd TO rowStart
+                WHILE rowEnd LESS THAN height
+                    SET colEnd TO colStart
+                    WHILE colEnd LESS THAN width
+                        SET piece TO extractBlock(matrix, rowStart, rowEnd, colStart, colEnd)
+                        IF (validateBound(piece) AND confirmDescending(piece)) THEN
+                            SET totalCount TO totalCount PLUS (1 TIMES 1)
+                        END IF
+                        SET colEnd TO colEnd PLUS one
+                    END WHILE
+                    SET rowEnd TO rowEnd PLUS one
+                END WHILE
+                SET colStart TO colStart PLUS one
+            UNTIL colStart EQUALS width
+            SET rowStart TO rowStart PLUS one
+        END WHILE
+
+        RETURN totalCount
+    END FUNCTION
+END CLASS

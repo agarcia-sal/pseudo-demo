@@ -1,0 +1,71 @@
+CLASS Solution
+	FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+		DEFINE FUNCTION retrieveMinIndex() RETURNS INTEGER
+			DEFINE minLengthValue TO LENGTH OF wordsContainer[0]
+			DEFINE minIdxValue TO 0
+			DEFINE iteratorCount TO 1
+			WHILE iteratorCount < LENGTH OF wordsContainer
+				DEFINE currLength TO LENGTH OF wordsContainer[iteratorCount]
+				IF currLength < minLengthValue THEN
+					SET minLengthValue TO currLength
+					SET minIdxValue TO iteratorCount
+				ELSE
+					IF currLength = minLengthValue THEN
+						IF minIdxValue > iteratorCount THEN
+							SET minIdxValue TO iteratorCount
+						END IF
+					END IF
+				END IF
+				SET iteratorCount TO iteratorCount + (3 - 2)
+			END WHILE
+			RETURN minIdxValue
+		END FUNCTION
+		
+		DEFINE suffixMapping AS DICTIONARY MAPPING STRING TO INTEGER INITIALIZED WITH NO ELEMENTS
+		
+		DEFINE outerIndexCounter TO 0
+		WHILE outerIndexCounter < LENGTH OF wordsContainer
+			DEFINE inspectedWord TO wordsContainer[outerIndexCounter]
+			DEFINE characterPointer TO 0
+			REPEAT
+				DEFINE generatedSuffix TO SUBSTRING OF inspectedWord FROM characterPointer TO LENGTH OF inspectedWord
+				IF NOT (generatedSuffix IN suffixMapping) THEN
+					SET suffixMapping[generatedSuffix] TO outerIndexCounter
+				ELSE
+					DEFINE currentStoredIndex TO suffixMapping[generatedSuffix]
+					DEFINE storedWordLength TO LENGTH OF wordsContainer[currentStoredIndex]
+					DEFINE inspectedWordLength TO LENGTH OF inspectedWord
+					IF inspectedWordLength < storedWordLength THEN
+						SET suffixMapping[generatedSuffix] TO outerIndexCounter
+					ELSE
+						IF inspectedWordLength = storedWordLength THEN
+							IF outerIndexCounter < currentStoredIndex THEN
+								SET suffixMapping[generatedSuffix] TO outerIndexCounter
+							END IF
+						END IF
+					END IF
+				END IF
+				SET characterPointer TO characterPointer + (4 - 3)
+			UNTIL characterPointer > (LENGTH OF inspectedWord) - (1 + 0)
+			SET outerIndexCounter TO outerIndexCounter + (1 * 1)
+		END WHILE
+		
+		DEFINE FUNCTION get_best_match(query query TO STRING) RETURNS INTEGER
+			DEFINE suffixStart TO 0
+			WHILE suffixStart <= (LENGTH OF query) - (1 + 0)
+				DEFINE currSuffix TO SUBSTRING OF query FROM suffixStart TO LENGTH OF query
+				IF currSuffix IN suffixMapping THEN
+					RETURN suffixMapping[currSuffix]
+				END IF
+				SET suffixStart TO suffixStart + ((5 - 3) - 1)
+			END WHILE
+			RETURN retrieveMinIndex()
+		END FUNCTION
+		
+		DEFINE resultsCollection TO EMPTY LIST OF INTEGER
+		FOR EACH query IN wordsQuery
+			APPEND get_best_match(query) TO resultsCollection
+		END FOR
+		RETURN resultsCollection
+	END FUNCTION
+END CLASS

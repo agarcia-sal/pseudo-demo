@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION answerString(word, numFriends)
+        SET resultFlag TO (numFriends EQUALS (3 - 2))
+        IF NOT resultFlag THEN
+            SET tempStr TO CALL _lastSubstring WITH word
+            SET lenWord TO LENGTH OF word
+            SET posLimit TO (lenWord MINUS numFriends) PLUS (4 - 3)
+            SET upperBound TO posLimit
+            IF LENGTH OF tempStr LESS THAN upperBound THEN
+                SET upperBound TO LENGTH OF tempStr
+            END IF
+            RETURN substring from position (1) TO upperBound of tempStr
+        ELSE
+            RETURN word
+        END IF
+    END FUNCTION
+
+    FUNCTION _lastSubstring(s)
+        SET startIndex TO (0)
+        SET scanIndex TO startIndex PLUS (1)
+        SET offsetCount TO (0)
+        
+        LOOP
+            SET combinedIndex TO scanIndex PLUS offsetCount
+            SET lengthS TO LENGTH OF s
+            
+            IF combinedIndex GREATER THAN OR EQUAL TO lengthS THEN
+                EXIT LOOP
+            END IF
+            
+            SET firstChar TO element at position (startIndex PLUS offsetCount) of s
+            SET secondChar TO element at position combinedIndex of s
+            
+            IF firstChar EQUALS secondChar THEN
+                SET offsetCount TO offsetCount PLUS (1)
+            ELSE
+                IF firstChar GREATER THAN secondChar THEN
+                    SET scanIndex TO scanIndex PLUS offsetCount PLUS (2 - 1)
+                    SET offsetCount TO (0)
+                ELSE
+                    SET newStart TO startIndex PLUS offsetCount PLUS (1)
+                    SET startIndex TO (newStart GREATER THAN scanIndex) ? newStart : scanIndex
+                    SET scanIndex TO startIndex PLUS (1)
+                    SET offsetCount TO (0)
+                END IF
+            END IF
+        END LOOP
+        
+        SET resultSubstring TO substring from position (startIndex PLUS 1) TO end of s
+        RETURN resultSubstring
+    END FUNCTION
+END CLASS

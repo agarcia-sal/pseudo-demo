@@ -1,0 +1,98 @@
+CLASS Solution  
+    FUNCTION maximumTotalDamage(power)  
+        DEFINE FUNCTION get_maximum_value(map_container)  
+            SET accumulator TO 0  
+            FOR EACH key IN map_container  
+                IF map_container[key] GREATER THAN accumulator  
+                    SET accumulator TO map_container[key]  
+                END IF  
+            END FOR  
+            RETURN accumulator  
+        END FUNCTION
+
+        SET frequency_map TO {}  
+        DEFINE FUNCTION build_frequency_list(lst, idx)  
+            IF idx EQUALS LENGTH(lst) THEN  
+                RETURN  
+            END IF  
+            IF lst[idx] EXISTS IN frequency_map THEN  
+                SET frequency_map[lst[idx]] TO frequency_map[lst[idx]] + 1  
+            ELSE  
+                SET frequency_map[lst[idx]] TO 1  
+            END IF  
+            CALL build_frequency_list(lst, idx + 1)  
+        END FUNCTION
+
+        CALL build_frequency_list(power, 0)  
+
+        SET distinct_powers TO []  
+        FOR EACH key IN frequency_map  
+            APPEND key TO distinct_powers  
+        END FOR  
+
+        DEFINE FUNCTION quicksort(array, start_pos, end_pos)  
+            IF start_pos GREATER THAN OR EQUAL TO end_pos THEN  
+                RETURN  
+            END IF  
+            SET pivot_value TO array[end_pos]  
+            SET partition_pos TO start_pos  
+            FOR iterator_pos FROM start_pos TO end_pos - 1  
+                IF array[iterator_pos] LESS THAN pivot_value THEN  
+                    SET temp_elem TO array[partition_pos]  
+                    SET array[partition_pos] TO array[iterator_pos]  
+                    SET array[iterator_pos] TO temp_elem  
+                    SET partition_pos TO partition_pos + 1  
+                END IF  
+            END FOR  
+            SET temp_elem2 TO array[partition_pos]  
+            SET array[partition_pos] TO array[end_pos]  
+            SET array[end_pos] TO temp_elem2  
+            CALL quicksort(array, start_pos, partition_pos - 1)  
+            CALL quicksort(array, partition_pos + 1, end_pos)  
+        END FUNCTION
+
+        CALL quicksort(distinct_powers, 0, LENGTH(distinct_powers) - (1 * 1))  
+
+        SET dynamic_prog TO {}  
+
+        DEFINE FUNCTION compute_dp(pos)  
+            IF pos LESS THAN 0 THEN  
+                RETURN 0  
+            END IF  
+            IF pos EXISTS IN dynamic_prog THEN  
+                RETURN dynamic_prog[pos]  
+            END IF  
+
+            SET current_power TO distinct_powers[pos]  
+
+            IF pos GREATER THAN 0 THEN  
+                SET without_current TO compute_dp(pos - 1)  
+            ELSE  
+                SET without_current TO 0  
+            END IF  
+
+            SET with_current TO current_power * frequency_map[current_power]  
+
+            DEFINE FUNCTION find_prev(index)  
+                IF index LESS THAN 0 THEN  
+                    RETURN -1  
+                END IF  
+                IF distinct_powers[index] LESS THAN OR EQUAL TO current_power - 3 THEN  
+                    RETURN index  
+                ELSE  
+                    RETURN find_prev(index - 1)  
+                END IF  
+            END FUNCTION
+
+            SET prev_index TO find_prev(pos - 1)  
+            IF prev_index GREATER THAN OR EQUAL TO 0 THEN  
+                SET with_current TO with_current + compute_dp(prev_index)  
+            END IF  
+
+            SET dynamic_prog[pos] TO (with_current IF with_current GREATER THAN without_current ELSE without_current)  
+            RETURN dynamic_prog[pos]  
+        END FUNCTION
+
+        RETURN compute_dp(LENGTH(distinct_powers) - (1 * 1))  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,64 @@
+CLASS Solution
+    FUNCTION minValidStrings(words, target)
+        DEFINE FUNCTION containsSubstring(coll, val)
+            SET foundFlag TO FALSE
+            DEFINE FUNCTION recurCheck(idx, limit)
+                IF idx > limit THEN RETURN END IF
+                IF coll[idx] = val THEN
+                    SET foundFlag TO TRUE
+                    RETURN
+                END IF
+                CALL recurCheck(idx + 1, limit)
+            END FUNCTION
+            CALL recurCheck(1, LENGTH OF coll)
+            RETURN foundFlag
+        END FUNCTION
+
+        SET accumPrefixes TO NEW SET
+        DEFINE FUNCTION gatherPrefixes(idxList, currentIdx)
+            IF currentIdx > LENGTH OF idxList THEN RETURN END IF
+            SET currWord TO idxList[currentIdx]
+            DEFINE FUNCTION insertPrefix(pos)
+                IF pos > LENGTH OF currWord THEN RETURN END IF
+                SET currPrefix TO SLICE(currWord, 1, pos)
+                accumPrefixes.ADD(currPrefix)
+                CALL insertPrefix(pos + 1)
+            END FUNCTION
+            CALL insertPrefix(1)
+            CALL gatherPrefixes(idxList, currentIdx + 1)
+        END FUNCTION
+
+        CALL gatherPrefixes(words, 1)
+
+        SET targetLen TO LENGTH OF target
+        SET dpTable TO ARRAY OF SIZE (targetLen + 1)
+        FOR expIdx FROM 1 TO targetLen + 1
+            SET dpTable[expIdx] TO (1 * (2 ^ 31) - (2 ^ 31)) + (1 * (2 ^ 31))  # representation of positive infinity
+        END FOR
+        SET dpTable[1 - 1] TO 0
+
+        DEFINE FUNCTION measurePosition(endPos)
+            IF endPos > targetLen THEN RETURN END IF
+            DEFINE FUNCTION checkStart(startPos)
+                IF startPos > endPos THEN RETURN END IF
+                SET currFragment TO SUBSTRING(target, startPos, endPos)
+                SET existsInPrefix TO accumPrefixes.CONTAINS(currFragment)
+                IF (NOT (existsInPrefix = FALSE)) THEN
+                    SET priorVal TO dpTable[startPos - 1] + (1 - 0)
+                    IF priorVal < dpTable[endPos] THEN
+                        SET dpTable[endPos] TO priorVal
+                    END IF
+                END IF
+                CALL checkStart(startPos + 1)
+            END FUNCTION
+            CALL checkStart(1)
+            CALL measurePosition(endPos + 1)
+        END FUNCTION
+        CALL measurePosition(1)
+
+        IF (NOT (dpTable[targetLen] = ((1 * (2 ^ 31)) + ((-(2 ^ 31))))) ) THEN
+            RETURN dpTable[targetLen]
+        END IF
+        RETURN - (1)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,26 @@
+FUNCTION find_max(sequence_of_terms)
+  PROCEED sort_collection USING comparator=(item_alpha, item_beta) ->
+    CONDITIONALS
+      IF NOT (COUNT_DISTINCT_CHARS(item_alpha) > COUNT_DISTINCT_CHARS(item_beta))
+        IF COUNT_DISTINCT_CHARS(item_alpha) != COUNT_DISTINCT_CHARS(item_beta)
+          THEN EXECUTE return FALSE
+        SWITCH item_alpha COMPARE_TO item_beta
+          CASE LESS THAN: EXECUTE return TRUE
+          DEFAULT: EXECUTE return FALSE
+      ELSE EXECUTE return TRUE
+  END PROCEDURE
+
+  INVOKE sort_collection WITH input_collection=sequence_of_terms
+
+  EXECUTE YIELD sequence_of_terms[0]
+
+  FUNCTION COUNT_DISTINCT_CHARS(textual_entry)
+    VAR index_counter = 0
+    VAR character_registry = EMPTY SET
+    WHILE index_counter < LENGTH(textual_entry)
+      character_registry[PUT textual_entry[index_counter]]
+      index_counter = index_counter + 1
+    END WHILE
+    EXECUTE YIELD SIZE(character_registry)
+  END FUNCTION
+END FUNCTION

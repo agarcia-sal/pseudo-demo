@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+        SET mapping_suffixes TO new empty dictionary MAPPING STRING TO INTEGER
+
+        FUNCTION recordSuffixIndex(str_current STRING, idx_cur INTEGER)
+            FUNCTION loop_suffixes(pos INTEGER)
+                IF pos GREATER THAN THE LENGTH OF str_current MINUS one THEN
+                    RETURN
+                ELSE
+                    SET current_suffix TO substring FROM pos TO THE END OF str_current
+                    IF current_suffix IN mapping_suffixes THEN
+                        SET prev_index TO mapping_suffixes AT current_suffix
+                        SET prev_word TO wordsContainer AT prev_index
+                        IF (LENGTH OF str_current LESS THAN LENGTH OF prev_word) OR ((LENGTH OF str_current EQUALS LENGTH OF prev_word) AND (idx_cur LESS THAN prev_index)) THEN
+                            SET mapping_suffixes AT current_suffix TO idx_cur
+                        END IF
+                    ELSE
+                        SET mapping_suffixes AT current_suffix TO idx_cur
+                    END IF
+                    CALL loop_suffixes(pos + 1)
+                END IF
+            END FUNCTION
+            CALL loop_suffixes(0)
+        END FUNCTION
+
+        FUNCTION findOptimalIndex(query_string STRING) RETURNS INTEGER
+            FUNCTION searchSuffix(posq INTEGER)
+                IF posq GREATER THAN LENGTH OF query_string MINUS one THEN
+                    RETURN -1
+                ELSE
+                    SET sub_suf TO substring FROM posq TO THE END OF query_string
+                    IF sub_suf IN mapping_suffixes THEN
+                        RETURN mapping_suffixes AT sub_suf
+                    ELSE
+                        RETURN searchSuffix(posq + 1)
+                    END IF
+                END IF
+            END FUNCTION
+
+            SET found_index TO searchSuffix(0)
+            IF found_index NOT EQUAL -1 THEN
+                RETURN found_index
+            ELSE
+                FUNCTION minIndexByLength(idx_start INTEGER, cur_min_idx INTEGER) RETURNS INTEGER
+                    IF idx_start GREATER THAN LENGTH OF wordsContainer MINUS one THEN
+                        RETURN cur_min_idx
+                    ELSE
+                        SET candidate_word TO wordsContainer AT idx_start
+                        SET best_word TO wordsContainer AT cur_min_idx
+                        IF (LENGTH OF candidate_word LESS THAN LENGTH OF best_word) OR ((LENGTH OF candidate_word EQUALS LENGTH OF best_word) AND (idx_start LESS THAN cur_min_idx)) THEN
+                            RETURN minIndexByLength(idx_start + 1, idx_start)
+                        ELSE
+                            RETURN minIndexByLength(idx_start + 1, cur_min_idx)
+                        END IF
+                    END IF
+                END FUNCTION
+                RETURN minIndexByLength(1, 0)
+            END IF
+        END FUNCTION
+
+        FUNCTION buildMappingFromWords(arr_words LIST OF STRING)
+            FUNCTION iterateWords(i INTEGER)
+                IF i GREATER THAN LENGTH OF arr_words MINUS one THEN
+                    RETURN
+                ELSE
+                    CALL recordSuffixIndex(arr_words AT i, i)
+                    CALL iterateWords(i + 1)
+                END IF
+            END FUNCTION
+            CALL iterateWords(0)
+        END FUNCTION
+
+        CALL buildMappingFromWords(wordsContainer)
+
+        SET accumulator_result TO new empty list OF INTEGER
+
+        FUNCTION collectResults(iq INTEGER)
+            IF iq GREATER THAN LENGTH OF wordsQuery MINUS one THEN
+                RETURN
+            ELSE
+                SET current_query TO wordsQuery AT iq
+                SET matched_idx TO findOptimalIndex(current_query)
+                APPEND matched_idx TO accumulator_result
+                CALL collectResults(iq + 1)
+            END IF
+        END FUNCTION
+        CALL collectResults(0)
+
+        RETURN accumulator_result
+    END FUNCTION
+END CLASS

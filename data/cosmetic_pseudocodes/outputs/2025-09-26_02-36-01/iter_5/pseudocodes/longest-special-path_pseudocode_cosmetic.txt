@@ -1,0 +1,78 @@
+CLASS Solution 
+    FUNCTION longestSpecialPath(edges, nums)
+        DECLARE graph AS list OF lists WITH size = LENGTH(nums)
+        FOR index FROM 0 TO LENGTH(graph) - 1
+            SET graph[index] TO empty list
+        END FOR
+
+        PROCEDURE buildGraph(index)
+            IF index EQUALS LENGTH(edges) THEN
+                RETURN
+            END IF
+            SET edgeData TO edges[index]
+            SET startNode TO edgeData[0]
+            SET endNode TO edgeData[1]
+            SET edgeWeight TO edgeData[2]
+
+            CALL insertEdge(startNode, endNode, edgeWeight)
+            CALL insertEdge(endNode, startNode, edgeWeight)
+            CALL buildGraph(index + 1)
+        END PROCEDURE
+
+        PROCEDURE insertEdge(origin, destination, weight)
+            SET graph[origin] TO graph[origin] CONCATENATED WITH [(destination, weight)]
+        END PROCEDURE
+
+        CALL buildGraph(0)
+
+        DECLARE maxPathLength AS 0
+        DECLARE minNodeCount AS 1
+        DECLARE prefixSums AS [0]
+        DECLARE nodeDepths AS empty dictionary
+
+        FUNCTION dfs(current, previous, leftBound, depthCount)
+            DECLARE depthBefore AS 0
+            IF nums[current] IN nodeDepths THEN
+                SET depthBefore TO nodeDepths[nums[current]]
+            END IF
+
+            SET nodeDepths[nums[current]] TO depthCount
+
+            IF leftBound < depthBefore THEN
+                SET leftBound TO depthBefore
+            END IF
+
+            DECLARE currentLen AS prefixSums[LENGTH(prefixSums) - 1] - prefixSums[leftBound]
+            DECLARE nodeSpan AS depthCount - leftBound
+
+            IF currentLen > maxPathLength THEN
+                SET maxPathLength TO currentLen
+                SET minNodeCount TO nodeSpan
+            ELSE IF currentLen = maxPathLength AND nodeSpan < minNodeCount THEN
+                SET minNodeCount TO nodeSpan
+            END IF
+
+            LOOP_NODES(graph[current], 0)
+
+            PROCEDURE LOOP_NODES(edgeList, idx)
+                IF idx EQUALS LENGTH(edgeList) THEN
+                    RETURN
+                END IF
+                SET nbr TO edgeList[idx][0]
+                SET wght TO edgeList[idx][1]
+                IF nbr <> previous THEN
+                    SET newPrefSum TO prefixSums[LENGTH(prefixSums) - 1] + wght
+                    SET prefixSums TO prefixSums + [newPrefSum]
+                    CALL dfs(nbr, current, leftBound, depthCount + 1)
+                    REMOVE_LAST(prefixSums)
+                END IF
+                CALL LOOP_NODES(edgeList, idx + 1)
+            END PROCEDURE
+
+            SET nodeDepths[nums[current]] TO depthBefore
+        END FUNCTION
+
+        CALL dfs(0, -1, 0, 1)
+        RETURN [maxPathLength, minNodeCount]
+    END FUNCTION
+END CLASS

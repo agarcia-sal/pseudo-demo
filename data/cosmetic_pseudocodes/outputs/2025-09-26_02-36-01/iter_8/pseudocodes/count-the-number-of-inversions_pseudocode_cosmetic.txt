@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION numberOfPermutations(n, requirements)
+       SET MOD TO ((5 * 2 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + (3 + 4))
+       SET mappedReqs TO a new empty dictionary
+
+       SET idxA TO 0
+       WHILE idxA < LENGTH OF requirements
+           SET pairEntry TO requirements[idxA]
+           SET keyK TO pairEntry[0]
+           SET valV TO pairEntry[1]
+           SET mappedReqs[keyK] TO valV
+           SET idxA TO idxA + 1
+       END WHILE
+
+       FUNCTION count_permutations(prefix_length, inversions, used_bits)
+          IF prefix_length LESS THAN n THEN
+              IF prefix_length GREATER THAN 0 THEN
+                  SET expectedInv TO mappedReqs[prefix_length - 1]
+                  IF expectedInv IS UNDEFINED THEN
+                      SET expectedInv TO inversions
+                  END IF
+
+                  IF inversions NOT EQUALS expectedInv THEN
+                      RETURN 0
+                  END IF
+              END IF
+
+              SET totalCount TO 0
+              SET currentNum TO 0
+
+              WHILE currentNum NOT EQUAL TO n
+                  SET bitMask TO (1 << currentNum)
+                  IF (used_bits & bitMask) EQUALS 0 THEN
+                      SET newInvCount TO inversions
+                      SET iteratorJ TO currentNum + 1
+
+                      REPEAT
+                          IF iteratorJ >= n THEN
+                              BREAK
+                          END IF
+
+                          SET bitMaskJ TO (1 << iteratorJ)
+                          IF (used_bits & bitMaskJ) NOT EQUAL 0 THEN
+                              SET newInvCount TO newInvCount + 1
+                          END IF
+                          SET iteratorJ TO iteratorJ + 1
+                      UNTIL FALSE
+
+                      SET totalCount TO (totalCount + count_permutations(prefix_length + 1, newInvCount, used_bits | bitMask)) % MOD
+                  END IF
+                  SET currentNum TO currentNum + 1
+              END WHILE
+
+              RETURN totalCount
+          ELSE
+              SET targetInv TO mappedReqs[n - 1]
+              IF targetInv IS UNDEFINED THEN
+                  SET targetInv TO 0
+              END IF
+              IF inversions EQUALS targetInv THEN
+                  RETURN 1
+              ELSE
+                  RETURN 0
+              END IF
+          END IF
+       END FUNCTION
+
+       RETURN count_permutations(0, 0, 0)
+    END FUNCTION
+END CLASS

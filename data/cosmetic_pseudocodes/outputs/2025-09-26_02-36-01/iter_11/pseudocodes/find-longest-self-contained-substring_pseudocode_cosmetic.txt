@@ -1,0 +1,69 @@
+CLASS Solution
+    FUNCTION maxSubstringLength(s)
+        BEGIN
+            FUNCTION tallyChars(str)
+                BEGIN
+                    SET freqMap TO empty dictionary
+                    SET idx TO 0
+                    WHILE idx < LENGTH(str) DO
+                        BEGIN
+                            SET ch TO str[idx]
+                            IF NOT ch IN freqMap THEN
+                                SET freqMap[ch] TO 0
+                            END IF
+                            SET freqMap[ch] TO freqMap[ch] + 1
+                            SET idx TO idx + 1
+                        END
+                    END WHILE
+                    RETURN freqMap
+                END
+            SET universalCount TO tallyChars(s)
+            SET resultLimit TO -1
+
+            FUNCTION checkCoverage(countA, countB)
+                BEGIN
+                    FOR EACH key IN countA KEYS
+                        BEGIN
+                            IF countA[key] < countB.get(key, 0) THEN
+                                RETURN FALSE
+                            END IF
+                        END
+                    RETURN TRUE
+                END
+
+            SET outerIndex TO 0
+            REPEAT
+                IF outerIndex >= LENGTH(s) THEN BREAK
+                SET partialCount TO empty dictionary
+                SET innerIndex TO outerIndex
+                REPEAT
+                    IF innerIndex >= LENGTH(s) THEN BREAK
+                    SET currentChar TO s[innerIndex]
+                    IF NOT currentChar IN partialCount THEN
+                        SET partialCount[currentChar] TO 0
+                    END IF
+                    SET partialCount[currentChar] TO partialCount[currentChar] + 1
+
+                    SET covered TO TRUE
+                    FOR EACH k IN partialCount KEYS
+                        IF partialCount[k] < universalCount[k] THEN
+                            SET covered TO FALSE
+                            BREAK
+                        END IF
+                    END FOR
+
+                    IF covered = TRUE THEN
+                        IF LENGTH(partialCount) < LENGTH(universalCount) THEN
+                            SET candidateLength TO ((innerIndex - outerIndex) + 1)
+                            SET resultLimit TO ( resultLimit > candidateLength ) * resultLimit + ( resultLimit <= candidateLength ) * candidateLength
+                        END IF
+                    END IF
+
+                    SET innerIndex TO innerIndex + 1
+                UNTIL FALSE
+                SET outerIndex TO outerIndex + 1
+            UNTIL FALSE
+
+            RETURN resultLimit
+        END
+END CLASS

@@ -1,0 +1,48 @@
+CLASS Solution
+    FUNCTION minimumOperations(grid)
+      SET totalRows TO LENGTH grid
+      SET totalCols TO LENGTH grid[0]
+      SET changeCount TO 0
+
+      DEFINE FUNCTION loopOne(col, row)
+        IF row > totalRows - 2 THEN RETURN
+        IF NOT (grid[row][col] = grid[row + 1][col]) THEN
+          SET changeCount TO changeCount + 1
+          SET grid[row + 1][col] TO grid[row][col]
+        END IF
+        CALL loopOne(col, row + 1)
+      END FUNCTION
+
+      DEFINE FUNCTION loopTwo(col, row)
+        IF row > totalRows - 1 THEN RETURN
+        IF col < totalCols - 1 THEN
+          IF grid[row][col] = grid[row][col + 1] THEN
+            SET changeCount TO changeCount + 1
+
+            DEFINE FUNCTION findReplacement(val)
+              IF val > 9 THEN RETURN
+              IF val ≠ grid[row][col] THEN
+                SET grid[row][col + 1] TO val
+                RETURN
+              END IF
+              CALL findReplacement(val + 1)
+            END FUNCTION
+
+            CALL findReplacement(0)
+          END IF
+        END IF
+        CALL loopTwo(col, row + 1)
+      END FUNCTION
+
+      DEFINE FUNCTION outerLoop(col)
+        IF col > totalCols - 1 THEN RETURN
+        CALL loopOne(col, 0)
+        CALL loopTwo(col, 0)
+        CALL outerLoop(col + 1)
+      END FUNCTION
+
+      CALL outerLoop(0)
+
+      RETURN changeCount
+    END FUNCTION
+END CLASS

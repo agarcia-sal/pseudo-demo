@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION beautifulIndices(s parameter a parameter b parameter k)
+      
+      DEFINE FUNCTION checkSubstring(x parameter y parameter z) RETURNS boolean
+        RETURN ((x >= 0) AND ((z + y) <= LENGTH(s))) AND  (SUBSTRING(s, z, z + y - 1) = a)
+      END FUNCTION
+
+      DEFINE FUNCTION checkSubstringB(m parameter n parameter p) RETURNS boolean
+        RETURN ((m >= 0) AND ((p + n) <= LENGTH(s))) AND (SUBSTRING(s, p, p + n - 1) = b)
+      END FUNCTION
+
+      SET X TO 0
+      SET Y TO LENGTH(s) + (0 - LENGTH(a))
+      SET indices_a TO []
+      WHILE (X <> Y)
+        IF (SUBSTRING(s, X, (X + LENGTH(a)) - 1) = a) THEN
+          indices_a = indices_a + [X]
+        END IF
+        X = X + 1
+      END WHILE
+
+      SET P TO 0
+      SET Q TO LENGTH(s) + (0 - LENGTH(b))
+      SET indices_b TO []
+      WHILE (P <> Q)
+        IF NOT (SUBSTRING(s, P, (P + LENGTH(b)) - 1) != b)
+          THEN
+          indices_b = indices_b + [P]
+        END IF
+        P = P + 1
+      END WHILE
+
+      SET result TO []
+
+      DEFINE FUNCTION compareAndAppend(m parameter n parameter o parameter p) RETURNS list
+        IF (ABS(m[o] - n[p]) <= k) THEN
+          RETURN result + [m[o]], o + 1, p
+        ELSE
+          IF (m[o] < n[p]) THEN
+            RETURN result, o + 1, p
+          ELSE
+            RETURN result, o, p + 1
+          END IF
+        END IF
+      END FUNCTION
+
+      SET i TO 0
+      SET j TO 0
+
+      REPEAT
+        IF (i >= LENGTH(indices_a)) OR (j >= LENGTH(indices_b)) THEN
+          LEAVE
+        END IF
+
+        SET old_result TO result
+        (result, i, j) = compareAndAppend(indices_a, indices_b, i, j)
+        
+        IF old_result = result THEN
+          CONTINUE
+        END IF
+      UNTIL FALSE
+
+      RETURN result
+
+    END FUNCTION
+END CLASS

@@ -1,0 +1,66 @@
+CLASS Solution
+functiON findKthSmallest(coins k)
+	def count_smaller_or_equal(x)
+		variable sumValue ← 0
+		variable maskLimit ← (2 ^ length(coins)) - 1
+		procedure recurse(pos, currentLcm, selectedCount)
+			if pos > maskLimit then
+				if (selectedCount mod 2) = 1 then
+					sumValue ← sumValue + (x \ currentLcm)
+				else
+					sumValue ← sumValue - (x \ currentLcm)
+				end if
+				return
+			end if
+
+			bitCheck ← pos & (1 << selectedCount)
+			if bitCheck ≠ 0 then
+				variable gcdVal ← gcd(currentLcm, coins[selectedCount])
+				recurse(pos, (currentLcm * coins[selectedCount]) \ gcdVal, selectedCount + 1)
+			else
+				recurse(pos, currentLcm, selectedCount + 1)
+			end if
+		end procedure
+
+		procedure iterateMasks(i)
+			if i > maskLimit then
+				return
+			end if
+			variable l ← 1
+			variable numberSets ← 0
+			var idx ← 0
+			while idx < length(coins) do
+				if (i & (1 << idx)) ≠ 0 then
+					var gcdValue ← gcd(l, coins[idx])
+					l ← (l * coins[idx]) \ gcdValue
+					numberSets ← numberSets + 1
+				end if
+				idx ← idx + 1
+			end while
+
+			if (numberSets mod 2) = 1 then
+				sumValue ← sumValue + (x \ l)
+			else
+				sumValue ← sumValue - (x \ l)
+			end if
+			iterateMasks(i + 1)
+		end procedure
+
+		iterateMasks(1)
+		return sumValue
+	end
+
+	variable minCoin ← coins[0]
+	variable leftBoundary ← 1
+	variable rightBoundary ← k * minCoin
+	while leftBoundary < rightBoundary
+		variable midpoint ← (leftBoundary + rightBoundary) \ 2
+		if count_smaller_or_equal(midpoint) < k then
+			leftBoundary ← midpoint + 1
+		else
+			rightBoundary ← midpoint
+		end if
+	end while
+	return leftBoundary
+END FUNCTION
+END CLASS

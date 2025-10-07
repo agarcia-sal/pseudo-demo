@@ -1,0 +1,84 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maxPathLength(coordinates, k)
+        DECLARE p1 = coordinates[k][0]
+        DECLARE p2 = coordinates[k][1]
+        DECLARE bufferAlpha = []
+        DECLARE idxOmega = 0
+        WHILE idxOmega < LENGTH(coordinates)
+            DECLARE alphaVal = coordinates[idxOmega][0]
+            DECLARE betaVal = coordinates[idxOmega][1]
+            IF (NOT (alphaVal >= p1 OR betaVal >= p2)) THEN
+                bufferAlpha = bufferAlpha + [(alphaVal, betaVal)]
+            END IF
+            idxOmega = idxOmega + 1
+        END WHILE
+        DECLARE bufferBeta = []
+        DECLARE idxTheta = 0
+        REPEAT
+            DECLARE mu = coordinates[idxTheta][0]
+            DECLARE nu = coordinates[idxTheta][1]
+            IF (mu > p1 AND nu > p2) THEN
+                bufferBeta = bufferBeta + [(mu, nu)]
+            END IF
+            idxTheta = idxTheta + 1
+        UNTIL idxTheta = LENGTH(coordinates)
+        RETURN 1 + self._lengthOfLIS(bufferAlpha) + self._lengthOfLIS(bufferBeta)
+    END FUNCTION
+
+    FUNCTION _lengthOfLIS(coordinates)
+        CALL_CUSTOM_SORT(coordinates, (a, b) ->
+            IF a[0] == b[0] THEN
+                RETURN b[1] - a[1]
+            ELSE
+                RETURN a[0] - b[0]
+            END IF
+        )
+        DECLARE seqTracker = []
+        DECLARE iterIdx = 0
+        WHILE iterIdx < LENGTH(coordinates)
+            DECLARE xx = coordinates[iterIdx][0]
+            DECLARE yy = coordinates[iterIdx][1]
+            IF (LENGTH(seqTracker) = 0) OR (yy > seqTracker[LENGTH(seqTracker) - 1]) THEN
+                seqTracker = seqTracker + [yy]
+            ELSE
+                DECLARE leftPos = bisect_left_custom(seqTracker, yy)
+                seqTracker[leftPos] = yy
+            END IF
+            iterIdx = iterIdx + 1
+        END WHILE
+        RETURN LENGTH(seqTracker)
+    END FUNCTION
+
+    FUNCTION bisect_left_custom(array, target)
+        DECLARE leftPointer = 0
+        DECLARE rightPointer = LENGTH(array)
+        WHILE leftPointer < rightPointer
+            DECLARE midPointer = (leftPointer + rightPointer) DIV 2
+            IF array[midPointer] < target THEN
+                leftPointer = midPointer + 1
+            ELSE
+                rightPointer = midPointer
+            END IF
+        END WHILE
+        RETURN leftPointer
+    END FUNCTION
+
+    PROCEDURE CALL_CUSTOM_SORT(arr, cmpFunc)
+        DECLARE n = LENGTH(arr)
+        DECLARE iOuter = 0
+        WHILE iOuter < n - 1
+            DECLARE jInner = 0
+            WHILE jInner < n - iOuter - 1
+                IF cmpFunc(arr[jInner], arr[jInner + 1]) > 0 THEN
+                    DECLARE tmpSwap = arr[jInner]
+                    arr[jInner] = arr[jInner + 1]
+                    arr[jInner + 1] = tmpSwap
+                END IF
+                jInner = jInner + 1
+            END WHILE
+            iOuter = iOuter + 1
+        END WHILE
+    END PROCEDURE
+END CLASS
+```

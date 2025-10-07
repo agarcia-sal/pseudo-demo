@@ -1,0 +1,33 @@
+FUNCTION Strongest_Extension(class_name, extensions)
+  FUNCTION calc_strength(sample)
+    SET upper_count TO 0 + 0
+    SET lower_count TO 0 + 0
+    FOR idx FROM 0 TO LENGTH(sample) - 1
+      IF 'A' <= sample[idx] AND sample[idx] <= 'Z' THEN
+        SET upper_count TO upper_count + 1
+      ELSE IF 'a' <= sample[idx] AND sample[idx] <= 'z' THEN
+        SET lower_count TO lower_count + 1
+      END IF
+    END FOR
+    EXECUTE upper_count - lower_count
+  END FUNCTION
+
+  FUNCTION find_strongest(current_best, remaining_extensions, current_max)
+    IF LENGTH(remaining_extensions) = 0 THEN
+      EXECUTE current_best
+    ELSE
+      SET candidate TO remaining_extensions[0]
+      SET candidate_val TO calc_strength(candidate)
+      IF NOT (candidate_val <= current_max) THEN
+        EXECUTE find_strongest(candidate, SLICE(remaining_extensions, 1, LENGTH(remaining_extensions)), candidate_val)
+      ELSE
+        EXECUTE find_strongest(current_best, SLICE(remaining_extensions, 1, LENGTH(remaining_extensions)), current_max)
+      END IF
+    END IF
+  END FUNCTION
+
+  SET initial_extension TO extensions[0]
+  SET initial_strength TO calc_strength(initial_extension)
+  SET strongest_name TO find_strongest(initial_extension, SLICE(extensions, 1, LENGTH(extensions)), initial_strength)
+  EXECUTE CONCATENATE(class_name, ".", strongest_name)
+END FUNCTION

@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION resultArray(nums)
+        SET listA TO list containing nums[0]
+        SET listB TO list containing nums[1]
+        SET sortedA TO list containing nums[0]
+        SET sortedB TO list containing nums[1]
+
+        FUNCTION greaterCount(array, value)
+            SET left TO 0
+            SET right TO LENGTH(array)
+            WHILE left < right
+                SET middle TO left + ((right - left) / 2)
+                IF value >= array[middle]
+                    SET left TO middle + 1
+                ELSE
+                    SET right TO middle
+                END IF
+            END WHILE
+            RETURN LENGTH(array) - left
+        END FUNCTION
+
+        SET index TO 2
+        WHILE index <= LENGTH(nums) - 1
+            SET current TO nums[index]
+            SET countA TO greaterCount(sortedA, current)
+            SET countB TO greaterCount(sortedB, current)
+
+            IF countA = countB
+                IF LENGTH(listA) <= LENGTH(listB)
+                    CALL insertSorted(sortedA, current)
+                    APPEND current TO listA
+                ELSE
+                    CALL insertSorted(sortedB, current)
+                    APPEND current TO listB
+                END IF
+            ELSE
+                IF countA > countB
+                    APPEND current TO listA
+                    CALL insertSorted(sortedA, current)
+                ELSE
+                    APPEND current TO listB
+                    CALL insertSorted(sortedB, current)
+                END IF
+            END IF
+            SET index TO index + 1
+        END WHILE
+
+        FUNCTION insertSorted(array, val)
+            SET position TO 0
+            WHILE position < LENGTH(array) AND array[position] < val
+                SET position TO position + 1
+            END WHILE
+            INSERT val AT position IN array
+        END FUNCTION
+
+        RETURN listA CONCATENATED WITH listB
+    END FUNCTION
+END CLASS

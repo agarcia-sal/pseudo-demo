@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION countPairs(nums)
+        CALL nums.sort()
+        SET totalPairs TO 0
+        SET frequencyMap TO dictionary WITH default value 0
+        SET idx TO 0
+        WHILE idx < LENGTH(nums)
+            SET originalNum TO nums[idx]
+            SET candidates TO set OF {originalNum}
+            SET digitsList TO ARRAY OF CHARACTERS FROM STRING(originalNum)
+            SET digitsCount TO LENGTH(digitsList)
+            SET outerIdx TO 0
+            WHILE outerIdx <= digitsCount - 1
+                SET innerIdx TO 0
+                WHILE innerIdx <= outerIdx - 1
+                    SWAP digitsList[innerIdx], digitsList[outerIdx]
+                    SET joinedNumStr TO ""
+                    FOR ch IN digitsList
+                        joinedNumStr = joinedNumStr + ch
+                    END FOR
+                    ADD INTEGER(joinedNumStr) TO candidates
+                    SET secondOuter TO innerIdx + 1
+                    WHILE secondOuter <= digitsCount - 1
+                        SET secondInner TO innerIdx + 1
+                        WHILE secondInner <= secondOuter - 1
+                            SWAP digitsList[secondInner], digitsList[secondOuter]
+                            SET tempStr TO ""
+                            FOR character IN digitsList
+                                tempStr = tempStr + character
+                            END FOR
+                            ADD INTEGER(tempStr) TO candidates
+                            SWAP digitsList[secondInner], digitsList[secondOuter]
+                            secondInner = secondInner + 1
+                        END WHILE
+                        secondOuter = secondOuter + 1
+                    END WHILE
+                    SWAP digitsList[innerIdx], digitsList[outerIdx]
+                    innerIdx = innerIdx + 1
+                END WHILE
+                outerIdx = outerIdx + 1
+            END WHILE
+            SET sumCount TO 0
+            FOR val IN candidates
+                sumCount = sumCount + frequencyMap[val]
+            END FOR
+            totalPairs += sumCount
+            frequencyMap[originalNum] = frequencyMap[originalNum] + 1
+            idx = idx + 1
+        END WHILE
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

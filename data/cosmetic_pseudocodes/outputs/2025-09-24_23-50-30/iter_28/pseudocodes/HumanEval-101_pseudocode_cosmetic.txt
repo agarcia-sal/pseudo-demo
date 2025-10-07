@@ -1,0 +1,56 @@
+```
+FUNCTION words_string(param_str)
+    PROCEDURE proc_transform_chars(src_str, idx, acc_list)
+        IF idx >= LENGTH(src_str)
+            RETURN acc_list
+        ELSE
+            SET current_char TO src_str[idx]
+            SET new_acc TO acc_list
+            SWITCH (current_char)
+                CASE ','
+                    SET new_acc TO acc_list + [ ' ' ]
+                DEFAULT
+                    SET new_acc TO acc_list + [ current_char ]
+            END SWITCH
+            RETURN proc_transform_chars(src_str, idx + 1, new_acc)
+        END IF
+    END PROCEDURE
+
+    IF NOT (LENGTH(param_str) > 0)
+        RETURN []
+    END IF
+
+    SET accumulator TO proc_transform_chars(param_str, 0, [])
+
+    FUNCTION func_join_characters(char_arr)
+        SET res TO ""
+        FOR n FROM 0 TO LENGTH(char_arr) - 1
+            SET res TO res + char_arr[n]
+        END FOR
+        RETURN res
+    END FUNCTION
+
+    SET composed_string TO func_join_characters(accumulator)
+
+    FUNCTION func_split_by_whitespace(s)
+        SET words_temp TO []
+        SET pos_start TO 0
+        SET pos_end TO 0
+        WHILE pos_end < LENGTH(s)
+            IF s[pos_end] = ' ' OR s[pos_end] = '\t' OR s[pos_end] = '\n'
+                IF pos_start < pos_end
+                    SET words_temp TO words_temp + [SUBSTRING(s, pos_start, pos_end)]
+                END IF
+                SET pos_start TO pos_end + 1
+            END IF
+            SET pos_end TO pos_end + 1
+        END WHILE
+        IF pos_start < pos_end
+            SET words_temp TO words_temp + [SUBSTRING(s, pos_start, pos_end)]
+        END IF
+        RETURN words_temp
+    END FUNCTION
+
+    RETURN func_split_by_whitespace(composed_string)
+END FUNCTION
+```

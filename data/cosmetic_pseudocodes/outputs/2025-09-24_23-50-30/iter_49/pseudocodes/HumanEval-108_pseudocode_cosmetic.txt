@@ -1,0 +1,53 @@
+```
+FUNCTION count_nums(array_of_integers)
+    FUNCTION digits_sum(integer_value)
+        SET delta TO 1
+        IF NOT (integer_value >= 0) THEN
+            SET integer_value TO 0 - integer_value
+            SET delta TO 0 - delta
+        ELSE NULL
+        END IF
+
+        FUNCTION decompose_digits(accumulator, position)
+            IF position = LENGTH(TO_STRING(integer_value)) THEN
+                RETURN accumulator
+            ELSE
+                SET char_code TO TO_STRING(integer_value)[position]
+                SET digit_value TO INTEGER(char_code)
+                SET adjusted_digit TO digit_value
+                IF position = 0 THEN
+                    SET adjusted_digit TO digit_value * delta
+                ELSE NULL
+                END IF
+                RETURN decompose_digits(accumulator + adjusted_digit, position + 1)
+            END IF
+        END FUNCTION
+
+        RETURN decompose_digits(0, 0)
+    END FUNCTION
+
+    FUNCTION collect_sums(idx, result_list)
+        IF idx = LENGTH(array_of_integers) THEN
+            RETURN result_list
+        ELSE
+            RETURN collect_sums(idx + 1, APPEND(result_list, digits_sum(array_of_integers[idx])))
+        END IF
+    END FUNCTION
+
+    SET sums_collection TO collect_sums(0, [])
+
+    FUNCTION count_positive(values, position, counter)
+        IF position >= LENGTH(values) THEN
+            RETURN counter
+        ELSE
+            IF values[position] > 0 THEN
+                RETURN count_positive(values, position + 1, counter + 1)
+            ELSE 
+                RETURN count_positive(values, position + 1, counter)
+            END IF
+        END IF
+    END FUNCTION
+
+    RETURN count_positive(sums_collection, 0, 0)
+END FUNCTION
+```

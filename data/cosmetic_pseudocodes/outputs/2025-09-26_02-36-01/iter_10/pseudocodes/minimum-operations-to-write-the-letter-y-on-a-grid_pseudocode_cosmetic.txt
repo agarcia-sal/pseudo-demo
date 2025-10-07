@@ -1,0 +1,110 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        
+        DEFINE FUNCTION accumulateFreqs(coordinates, dataMatrix)
+            VAR idx = 0
+            VAR countMap = EMPTY MAP WITH DEFAULT 0
+            REPEAT
+                IF idx EQUALS SIZE(coordinates)
+                    BREAK
+                END IF
+                VAR position = coordinates[idx]
+                VAR row = position[0]
+                VAR col = position[1]
+                VAR val = dataMatrix[row][col]
+                countMap[val] = (countMap[val] + 1)
+                idx = idx + 1
+            END REPEAT
+            RETURN countMap
+        END FUNCTION
+        
+        VAR length = LENGTH(grid)
+        VAR halfIndex = (length - length MOD 2) / 2
+        VAR yPositions = EMPTY LIST
+
+        PROCEDURE gatherDiagonalPositions(posList, limit)
+            VAR counter = 0
+            WHILE counter LESS OR EQUAL limit
+                posList.ADD([counter, counter])
+                counter = counter + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE gatherAntiDiagonalPositions(posList, boundary)
+            VAR idxer = 0
+            WHILE idxer <= boundary
+                posList.ADD([idxer, (boundary + 1) * 2 - idxer - 2])
+                idxer = idxer + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE gatherMiddleColumnPositions(posList, start, endIndex)
+            VAR cur = start
+            WHILE cur LESS OR EQUAL endIndex
+                posList.ADD([cur, halfIndex])
+                cur = cur + 1
+            END WHILE
+        END PROCEDURE
+
+        CALL gatherDiagonalPositions(yPositions, halfIndex)
+        CALL gatherAntiDiagonalPositions(yPositions, halfIndex)
+        CALL gatherMiddleColumnPositions(yPositions, halfIndex, length - 1)
+
+        VAR yFrequencies = accumulateFreqs(yPositions, grid)
+
+        VAR allPositionsCount = length * length
+        VAR yPositionsSet = EMPTY SET
+        VAR jdx = 0
+        WHILE jdx < LENGTH(yPositions)
+            yPositionsSet.ADD(yPositions[jdx])
+            jdx = jdx + 1
+        END WHILE
+
+        VAR counterNonY = EMPTY MAP WITH DEFAULT 0
+        VAR r = 0
+        VAR c = 0
+        WHILE r < length
+            c = 0
+            WHILE c < length
+                VAR currentPos = [r, c]
+                VAR currentVal = grid[r][c]
+                IF NOT currentPos IN yPositionsSet
+                    counterNonY[currentVal] = (counterNonY[currentVal] + 1)
+                END IF
+                c = c + 1
+            END WHILE
+            r = r + 1
+        END WHILE
+
+        VAR infiniteLarge = 1 / 0
+        VAR minimalOps = infiniteLarge
+
+        VAR primaryVal = 0
+        WHILE primaryVal <= 2
+            VAR secondaryVal = 0
+            WHILE secondaryVal <= 2
+                IF NOT (primaryVal = secondaryVal)
+                    VAR sumYFreqs = 0
+                    VAR sumNonYFreqs = 0
+                    // Compute sums of frequencies for yFrequencies keys 0 to 2
+                    VAR tmpX = 0
+                    WHILE tmpX <= 2
+                        sumYFreqs = sumYFreqs + (yFrequencies.GET(tmpX, 0))
+                        sumNonYFreqs = sumNonYFreqs + (counterNonY.GET(tmpX, 0))
+                        tmpX = tmpX + 1
+                    END WHILE
+
+                    VAR opsNeeded = (sumYFreqs - yFrequencies.GET(primaryVal, 0)) + (sumNonYFreqs - counterNonY.GET(secondaryVal, 0))
+
+                    IF opsNeeded < minimalOps
+                        minimalOps = opsNeeded
+                    END IF
+                END IF
+                secondaryVal = secondaryVal + 1
+            END WHILE
+            primaryVal = primaryVal + 1
+        END WHILE
+
+        RETURN minimalOps
+    END FUNCTION
+END CLASS

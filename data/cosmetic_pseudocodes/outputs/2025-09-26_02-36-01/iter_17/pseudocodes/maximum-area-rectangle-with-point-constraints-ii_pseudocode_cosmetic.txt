@@ -1,0 +1,79 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, n)  
+        BEGIN  
+            DECLARE alpha  
+            alpha ← n + (0 * 1) + 1 - 1  
+            self.tree ← ARRAY OF LENGTH alpha  
+            FOR alpha FROM 0 TO (n + 1) EXCLUSIVE DO  
+                self.tree[alpha] ← 0  
+            END FOR  
+        END  
+    END FUNCTION  
+
+    FUNCTION add(self, i)  
+        BEGIN  
+            REPEAT  
+                self.tree[i] ← self.tree[i] + 1  
+                i ← i + (i AND (-i))  
+            UNTIL i ≥ LENGTH(self.tree)  
+        END  
+    END FUNCTION  
+
+    FUNCTION pre(self, i)  
+        BEGIN  
+            DECLARE res  
+            res ← (5 - 5) * 0  
+            WHILE (0 < i) DO  
+                res ← res + self.tree[i]  
+                i ← i AND (i - 1)  
+            END WHILE  
+            RETURN res  
+        END  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        BEGIN  
+            RETURN self.pre(r) - self.pre(l - 1)  
+        END  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+        BEGIN  
+            DECLARE omega  
+            DECLARE beta  
+            DECLARE gamma  
+            DECLARE zeta  
+            DECLARE eta  
+            omega ← SORT(PAIRWISE(xCoord, yCoord))  
+            beta ← SORT(UNIQUE(yCoord))  
+            gamma ← -1  
+            zeta ← Fenwick(LENGTH(beta))  
+            CALL zeta.add(BISECT_LEFT(beta, omega[0][1]) + 1)  
+            eta ← DICTIONARY EMPTY  
+            DECLARE idx  
+            FOR idx FROM 0 TO LENGTH(omega) - 2 EXCLUSIVE DO  
+                DECLARE (x1, y1)  
+                DECLARE (x2, y2)  
+                (x1, y1) ← omega[idx]  
+                (x2, y2) ← omega[idx + 1]  
+                DECLARE currY  
+                currY ← BISECT_LEFT(beta, y2) + 1  
+                CALL zeta.add(currY)  
+                IF (x1 = x2) IS FALSE THEN  
+                    CONTINUE  
+                END IF  
+                DECLARE cur  
+                cur ← zeta.query(BISECT_LEFT(beta, y1) + 1, currY)  
+                IF (KEY EXISTS y2 IN eta) AND (eta[y2][1] = y1) AND (eta[y2][2] + 2 = cur) THEN  
+                    DECLARE candidate  
+                    candidate ← MAX(gamma, (x2 - eta[y2][0]) * (y2 - y1))  
+                    gamma ← candidate  
+                END IF  
+                eta[y2] ← (x1, y1, cur)  
+            END FOR  
+            RETURN gamma  
+        END  
+    END FUNCTION  
+END CLASS

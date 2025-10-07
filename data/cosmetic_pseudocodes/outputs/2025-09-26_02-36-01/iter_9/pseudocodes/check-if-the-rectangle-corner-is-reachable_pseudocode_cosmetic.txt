@@ -1,0 +1,95 @@
+CLASS Solution
+    FUNCTION canReachCorner(xCorner yCorner circles)
+        FUNCTION isInsideCircle(pX pY cX cY radius)
+            SET deltaX TO (pX - cX)
+            SET deltaY TO (pY - cY)
+            SET distSquared TO (deltaX * deltaX) + (deltaY * deltaY)
+            SET radiusSq TO radius * radius
+            RETURN distSquared <= radiusSq
+        END FUNCTION
+
+        FUNCTION intersectsLeftTop(cX cY r)
+            SET cond1 TO (ABS(cX) <= r) AND (0 <= cY) AND (cY <= yCorner)
+            SET cond2 TO (ABS(cY - yCorner) <= r) AND (0 <= cX) AND (cX <= xCorner)
+            RETURN cond1 OR cond2
+        END FUNCTION
+
+        FUNCTION intersectsRightBottom(cX cY r)
+            SET condA TO (ABS(cX - xCorner) <= r) AND (0 <= cY) AND (cY <= yCorner)
+            SET condB TO (ABS(cY) <= r) AND (0 <= cX) AND (cX <= xCorner)
+            RETURN condA OR condB
+        END FUNCTION
+
+        FUNCTION explore(idx)
+            SET posX TO circles[idx][0]
+            SET posY TO circles[idx][1]
+            SET rad TO circles[idx][2]
+
+            IF intersectsRightBottom(posX posY rad)
+                RETURN TRUE
+            END IF
+
+            SET vis[idx] TO TRUE
+
+            FOR controlIdx INDEX circleData IN ENUMERATE(circles)
+                SET cx TO circleData[0]
+                SET cy TO circleData[1]
+                SET cr TO circleData[2]
+
+                IF vis[controlIdx] = TRUE
+                    CONTINUE
+                END IF
+
+                SET distanceX TO posX - cx
+                SET distanceY TO posY - cy
+                SET sumRadius TO rad + cr
+
+                IF (distanceX * distanceX + distanceY * distanceY) > (sumRadius * sumRadius)
+                    CONTINUE
+                END IF
+
+                SET checkX TO (posX * cr) + (cx * rad)
+                SET limitX TO sumRadius * xCorner
+                SET checkY TO (posY * cr) + (cy * rad)
+                SET limitY TO sumRadius * yCorner
+
+                IF (checkX < limitX) AND (checkY < limitY) AND explore(controlIdx)
+                    RETURN TRUE
+                END IF
+            END FOR
+
+            RETURN FALSE
+        END FUNCTION
+
+        SET vis TO []
+        REPEAT WITH count BEING LENGTH(circles)
+            vis.APPEND(FALSE)
+            IF count = LENGTH(circles)
+                BREAK
+            END IF
+        END REPEAT
+
+        SET iterator TO 0
+        REPEAT
+            IF iterator >= LENGTH(circles)
+                BREAK
+            END IF
+
+            SET circleX TO circles[iterator][0]
+            SET circleY TO circles[iterator][1]
+            SET circleR TO circles[iterator][2]
+
+            IF isInsideCircle(0 0 circleX circleY circleR) OR isInsideCircle(xCorner yCorner circleX circleY circleR)
+                RETURN FALSE
+            END IF
+
+            IF (NOT vis[iterator]) AND intersectsLeftTop(circleX circleY circleR) AND explore(iterator)
+                RETURN FALSE
+            END IF
+
+            SET iterator TO iterator + 1
+        END REPEAT
+
+        RETURN TRUE
+    END FUNCTION
+END CLASS

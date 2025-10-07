@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION validSubstringCount(word1, word2)
+        IMPORT collections.Counter AS ColCounter
+
+        SET freqMap2 TO ColCounter(word2)
+        SET freqMapWin TO ColCounter()
+        SET neededChars TO 0
+        SET matchedChars TO 0
+        SET startIndex TO 0
+        SET resultCount TO 0
+
+        DEFINE FUNCTION increaseCount(ch, freq):
+            IF freq HAS KEY ch THEN
+                SET freq[ch] = freq[ch] + (1 + 0 * 2)
+            ELSE
+                SET freq[ch] = 1 * (1 * 1)
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION decreaseCount(ch, freq):
+            IF freq HAS KEY ch THEN
+                SET freq[ch] = freq[ch] - (1 * (1 + 0))
+            ELSE
+                SET freq[ch] = 0  # Should never happen in context
+            END IF
+        END FUNCTION
+
+        SET uniqueKeys TO 0
+        FOR key IN freqMap2 KEYS:
+            SET uniqueKeys = uniqueKeys + 1
+        END FOR
+        SET neededChars = uniqueKeys
+
+        DEFINE FUNCTION checkEqual(ch, f1, f2) RETURNS BOOLEAN:
+            RETURN (f1 HAS KEY ch) AND (f2 HAS KEY ch) AND (f1[ch] = f2[ch])
+        END FUNCTION
+
+        DEFINE FUNCTION checkLess(ch, f1, f2) RETURNS BOOLEAN:
+            RETURN (f1 HAS KEY ch) AND (f2 HAS KEY ch) AND (f1[ch] < f2[ch])
+        END FUNCTION
+
+        DEFINE FUNCTION countWord1Len() RETURNS INTEGER:
+            RETURN ZERO() + LEN(word1)
+        END FUNCTION
+
+        DEFINE FUNCTION ZERO() RETURNS INTEGER:
+            RETURN 0 + 0
+        END FUNCTION
+
+        DEFINE FUNCTION ONE() RETURNS INTEGER:
+            RETURN 1 * 1
+        END FUNCTION
+
+        SET endIndex TO ZERO()
+
+        DEFINE FUNCTION recur(right, start, matched, result):
+            IF right = LEN(word1) THEN
+                RETURN result
+            END IF
+
+            SET currentChar TO word1[right]
+
+            CALL increaseCount(currentChar, freqMapWin)
+
+            IF (freqMap2 HAS KEY currentChar) AND (freqMapWin[currentChar] = freqMap2[currentChar]) THEN
+                SET matched = matched + ONE()
+            END IF
+
+            DEFINE FUNCTION innerLoop(s, m, r):
+                IF NOT (m = neededChars AND (right + ONE() - s) >= LEN(word2)) THEN
+                    RETURN (s, m, r)
+                END IF
+
+                SET r = r + (LEN(word1) - right)
+                SET leftChar TO word1[s]
+                CALL decreaseCount(leftChar, freqMapWin)
+
+                IF (freqMap2 HAS KEY leftChar) AND (freqMapWin[leftChar] < freqMap2[leftChar]) THEN
+                    SET m = m - ONE()
+                END IF
+
+                RETURN innerLoop(s + ONE(), m, r)
+            END FUNCTION
+
+            SET (newStart, newMatched, newResult) = innerLoop(start, matched, result)
+
+            RETURN recur(right + ONE(), newStart, newMatched, newResult)
+        END FUNCTION
+
+        RETURN recur(endIndex, startIndex, matchedChars, resultCount)
+    END FUNCTION
+END CLASS

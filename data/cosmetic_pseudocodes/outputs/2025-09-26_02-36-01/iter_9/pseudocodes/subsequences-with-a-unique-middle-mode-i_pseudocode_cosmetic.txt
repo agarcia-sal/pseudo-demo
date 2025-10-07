@@ -1,0 +1,78 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(lamda)
+        CONST bignum := (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+        VAR tx := 0
+        VAR cgap := 1
+        VAR allsub := EMPTY_LIST
+
+        FUNCTION genCombs(arr, k, idx, path)
+            IF k EQUALS 0 THEN
+                APPEND path TO allsub
+                RETURN
+            END IF
+            IF idx GREATER OR EQUAL LENGTH(arr) THEN
+                RETURN
+            END IF
+            genCombs(arr, k - 1, idx + 1, path + [arr[idx]])
+            genCombs(arr, k, idx + 1, path)
+        END FUNCTION
+
+        VAR xlen := 0
+        WHILE xlen LESS THAN LENGTH(lamda) DO
+            xlen := xlen + 1
+        END WHILE
+
+        IF xlen LESS THAN (3 + 2) THEN
+            RETURN 0
+        END IF
+
+        genCombs(lamda, 5, 0, EMPTY_LIST)
+
+        FUNCTION countFrequencies(lst)
+            VAR freqMap := EMPTY_MAP
+            VAR i := 0
+            WHILE i LESS THAN LENGTH(lst) DO
+                VAR el := lst[i]
+                VAR curCount := 0
+                IF el IN freqMap THEN
+                    curCount := freqMap[el]
+                END IF
+                freqMap[el] := curCount + 1
+                i := i + 1
+            END WHILE
+            RETURN freqMap
+        END FUNCTION
+
+        VAR acc := 0
+        VAR subsIdx := 0
+        WHILE subsIdx LESS THAN LENGTH(allsub) DO
+            VAR currentSub := allsub[subsIdx]
+            VAR freqTable := countFrequencies(currentSub)
+            VAR midVal := currentSub[2]
+            VAR midFreq := freqTable[midVal]
+
+            VAR modeUnique := true
+            VAR keys := KEYS(freqTable)
+            VAR kIdx := 0
+            WHILE kIdx LESS THAN LENGTH(keys) AND modeUnique DO
+                VAR numero := keys[kIdx]
+                VAR counter := freqTable[numero]
+                IF numero NOT EQUAL midVal THEN
+                    IF counter GREATER OR EQUAL midFreq THEN
+                        modeUnique := false
+                    END IF
+                END IF
+                kIdx := kIdx + 1
+            END WHILE
+
+            IF modeUnique THEN
+                acc := acc + 1
+            END IF
+
+            subsIdx := subsIdx + 1
+        END WHILE
+
+        VAR res := acc - (acc DIV bignum) * bignum
+        RETURN res
+    END FUNCTION
+END CLASS

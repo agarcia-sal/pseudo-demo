@@ -1,0 +1,108 @@
+CLASS Solution  
+	FUNCTION minimumOperationsToWriteY(grid)  
+		PROCEDURE CalculateSum(collection)
+			VAR totalSum := 0
+			VAR iterator := 0
+			WHILE iterator < LENGTH(collection)
+				totalSum := totalSum + collection[iterator]
+				iterator := iterator + 1
+			END WHILE
+			RETURN totalSum
+		END PROCEDURE
+		
+		PROCEDURE IsInSet(pair, container)
+			VAR exists := FALSE
+			VAR position := 0
+			WHILE position < LENGTH(container)
+				IF container[position][0] = pair[0] AND container[position][1] = pair[1]
+					exists := TRUE
+					BREAK
+				END IF
+				position := position + 1
+			END WHILE
+			RETURN exists
+		END PROCEDURE
+
+		VAR sizeGrid := 0
+		sizeGrid := LENGTH(grid)
+		VAR middleIndex := 0
+		middleIndex := sizeGrid DIV 2
+		VAR designatedCells := [ ]
+		
+		VAR indexA := 0
+		LOOP_WHILE indexA <= middleIndex
+			designatedCells := designatedCells + [[indexA, indexA]]
+			indexA := indexA + 1
+		END LOOP_WHILE
+		
+		VAR indexB := 0
+		REPEAT
+			designatedCells := designatedCells + [[indexB, sizeGrid - indexB - 1]]
+			indexB := indexB + 1
+		UNTIL indexB > middleIndex
+		
+		VAR indexC := middleIndex
+		WHILE indexC <= sizeGrid - 1
+			designatedCells := designatedCells + [[indexC, middleIndex]]
+			indexC := indexC + 1
+		END WHILE
+		
+		VAR tallyY := {}
+		VAR tallyNotY := {}
+		
+		VAR r := 0
+		WHILE r < sizeGrid
+			VAR c := 0
+			WHILE c < sizeGrid
+				VAR cellValue := grid[r][c]
+				VAR cellCoordinates := [r, c]
+				IF IsInSet(cellCoordinates, designatedCells)
+					IF NOT (cellValue IN_KEYS tallyY)
+						tallyY[cellValue] := 0
+					END IF
+					tallyY[cellValue] := tallyY[cellValue] + 1
+				ELSE
+					IF NOT (cellValue IN_KEYS tallyNotY)
+						tallyNotY[cellValue] := 0
+					END IF
+					tallyNotY[cellValue] := tallyNotY[cellValue] + 1
+				END IF
+				c := c + 1
+			END WHILE
+			r := r + 1
+		END WHILE
+		
+		VAR infinitePositive := 1.0 / 0.0
+		VAR minimalOperations := infinitePositive
+		
+		VAR possibleYValue := 0
+		WHILE possibleYValue <= 2
+			VAR possibleNotYValue := 0
+			WHILE possibleNotYValue <= 2
+				IF possibleYValue ≠ possibleNotYValue
+					VAR totalY := 0
+					IF LENGTH(tallyY) > 0
+						FOR EACH keyY IN KEYS(tallyY)
+							totalY := totalY + tallyY[keyY]
+						END FOR EACH
+					END IF
+					VAR totalNotY := 0
+					IF LENGTH(tallyNotY) > 0
+						FOR EACH keyNotY IN KEYS(tallyNotY)
+							totalNotY := totalNotY + tallyNotY[keyNotY]
+						END FOR EACH
+					END IF
+					
+					VAR operationsRequired := (totalY - (tallyY[possibleYValue] IF possibleYValue IN_KEYS tallyY ELSE 0)) + (totalNotY - (tallyNotY[possibleNotYValue] IF possibleNotYValue IN_KEYS tallyNotY ELSE 0))
+					IF operationsRequired < minimalOperations
+						minimalOperations := operationsRequired
+					END IF
+				END IF
+				possibleNotYValue := possibleNotYValue + 1
+			END WHILE
+			possibleYValue := possibleYValue + 1
+		END WHILE
+		
+		RETURN minimalOperations  
+	END FUNCTION  
+END CLASS

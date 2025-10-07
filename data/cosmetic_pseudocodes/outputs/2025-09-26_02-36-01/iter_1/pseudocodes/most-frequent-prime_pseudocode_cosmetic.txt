@@ -1,0 +1,66 @@
+FUNCTION is_prime(n)  
+    IF n <= 1 THEN  
+        RETURN false  
+    END IF  
+    IF n <= 3 THEN  
+        RETURN true  
+    END IF  
+    IF (n MOD 2 == 0) OR (n MOD 3 == 0) THEN  
+        RETURN false  
+    END IF  
+    SET i = 5  
+    WHILE i * i <= n DO  
+        IF (n MOD i == 0) OR (n MOD (i + 2) == 0) THEN  
+            RETURN false  
+        END IF  
+        i = i + 6  
+    END WHILE  
+    RETURN true  
+END FUNCTION  
+
+CLASS Solution  
+    FUNCTION mostFrequentPrime(mat)  
+        SET rows = LENGTH(mat)  
+        SET cols = LENGTH(mat[0])  
+        SET steps = [(-1,0), (-1,1), (0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1)]  
+        INITIALIZE prime_freq AS empty dictionary mapping integer to integer  
+        
+        FUNCTION explore(r, c, dr, dc, curr_num)  
+            LET nr = r + dr  
+            LET nc = c + dc  
+            IF nr >= 0 AND nr < rows AND nc >= 0 AND nc < cols THEN  
+                LET new_num = curr_num * 10 + mat[nr][nc]  
+                IF new_num > 10 AND is_prime(new_num) THEN  
+                    IF new_num NOT IN prime_freq THEN  
+                        prime_freq[new_num] = 0  
+                    END IF  
+                    prime_freq[new_num] = prime_freq[new_num] + 1  
+                END IF  
+                CALL explore(nr, nc, dr, dc, new_num)  
+            END IF  
+        END FUNCTION  
+        
+        FOR row FROM 0 TO rows - 1 DO  
+            FOR col FROM 0 TO cols - 1 DO  
+                FOR EACH (dx, dy) IN steps DO  
+                    CALL explore(row, col, dx, dy, mat[row][col])  
+                END FOR  
+            END FOR  
+        END FOR  
+        
+        IF prime_freq IS EMPTY THEN  
+            RETURN -1  
+        END IF  
+        
+        LET result = NULL  
+        LET highest_count = -1  
+        FOR num, count IN prime_freq DO  
+            IF count > highest_count OR (count == highest_count AND num > result) THEN  
+                highest_count = count  
+                result = num  
+            END IF  
+        END FOR  
+        
+        RETURN result  
+    END FUNCTION  
+END CLASS

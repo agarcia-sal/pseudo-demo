@@ -1,0 +1,143 @@
+CLASS Solution
+	FUNCTION minimumSum(grid)
+		DEFINE FUNCTION get_constant_one()
+			RETURN (3 - 2)
+		END FUNCTION
+		
+		DEFINE FUNCTION get_constant_zero()
+			RETURN (2 - 2)
+		END FUNCTION
+		
+		DEFINE FUNCTION get_constant_two()
+			RETURN (1 + 1)
+		END FUNCTION
+		
+		DEFINE FUNCTION get_constant_three()
+			RETURN (get_constant_two() + get_constant_one())
+		END FUNCTION
+		
+		DEFINE FUNCTION get_constant_infinity()
+			RETURN positive infinity
+		END FUNCTION
+		
+		SET collected_ones_list TO new empty list
+		SET grid_len TO length of grid
+		SET zero_idx TO get_constant_zero()
+		SET one_idx TO get_constant_one()
+		SET two_idx TO get_constant_two()
+		SET three_idx TO get_constant_three()
+		SET end_limit_outer TO grid_len - one_idx
+		
+		SET outer_counter TO zero_idx
+		WHILE outer_counter <= end_limit_outer
+			SET inner_counter TO zero_idx
+			SET row_len TO length of grid[outer_counter]
+			SET end_limit_inner TO row_len - one_idx
+			REPEAT
+				IF (grid[outer_counter] = get_constant_one()) THEN
+					IF (grid[outer_counter][inner_counter] = get_constant_one()) THEN
+						APPEND (outer_counter, inner_counter) TO collected_ones_list
+					ELSE
+						// no action
+					END IF
+				END IF
+				
+				SET inner_counter TO inner_counter + one_idx
+				IF inner_counter > end_limit_inner THEN
+					EXIT REPEAT
+				END IF
+			END REPEAT
+			
+			SET outer_counter TO outer_counter + one_idx
+		END WHILE
+		
+		DEFINE FUNCTION rect_area(points_collection)
+			SET zero_value TO get_constant_zero()
+			
+			IF length of points_collection = zero_value THEN
+				RETURN zero_value
+			END IF
+			
+			SET i_values TO new empty list
+			SET j_values TO new empty list
+			FOR each point_element IN points_collection
+				SET idx_i TO point_element[zero_value]
+				SET idx_j TO point_element[one_idx]
+				APPEND idx_i TO i_values
+				APPEND idx_j TO j_values
+			END FOR
+			
+			SET minimum_i TO i_values[0]
+			FOR each candidate_i IN i_values
+				IF candidate_i < minimum_i THEN
+					SET minimum_i TO candidate_i
+				END IF
+			END FOR
+			
+			SET maximum_i TO i_values[0]
+			FOR each candidate_i IN i_values
+				IF candidate_i > maximum_i THEN
+					SET maximum_i TO candidate_i
+				END IF
+			END FOR
+			
+			SET minimum_j TO j_values[0]
+			FOR each candidate_j IN j_values
+				IF candidate_j < minimum_j THEN
+					SET minimum_j TO candidate_j
+				END IF
+			END FOR
+			
+			SET maximum_j TO j_values[0]
+			FOR each candidate_j IN j_values
+				IF candidate_j > maximum_j THEN
+					SET maximum_j TO candidate_j
+				END IF
+			END FOR
+			
+			SET computed_width TO (maximum_i - minimum_i) + get_constant_one()
+			SET computed_height TO (maximum_j - minimum_j) + get_constant_one()
+			
+			RETURN computed_width * computed_height
+		END FUNCTION
+		
+		SET min_sum_tracker TO get_constant_infinity()
+		SET ones_count TO length of collected_ones_list
+		
+		FOR var_i FROM get_constant_one() TO ones_count - get_constant_one()
+			FOR var_j FROM (var_i + get_constant_one()) TO ones_count - get_constant_one()
+				SET var_k TO var_j + get_constant_one()
+				WHILE var_k <= ones_count
+					// generate combinations of collected_ones_list taken var_i at a time
+					SET first_combinations TO all combinations of collected_ones_list TAKEN var_i AT A TIME
+					FOR EACH combination_one IN first_combinations
+						SET set_all TO set of collected_ones_list
+						SET set_comb_one TO set of combination_one
+						SET remainder_after_first TO set_all MINUS set_comb_one
+						// generate combinations for second group from remainder_after_first, choosing (var_j - var_i) elements
+						SET second_combinations TO all combinations of remainder_after_first TAKEN (var_j - var_i) AT A TIME
+						FOR EACH combination_two IN second_combinations
+							SET set_comb_two TO set of combination_two
+							SET combination_three TO remainder_after_first MINUS set_comb_two
+							
+							SET area_calc_one TO rect_area(combination_one)
+							SET area_calc_two TO rect_area(combination_two)
+							SET area_calc_three TO rect_area(combination_three)
+							
+							IF (area_calc_one > get_constant_zero()) AND (area_calc_two > get_constant_zero()) AND (area_calc_three > get_constant_zero()) THEN
+								SET summed_area TO area_calc_one + area_calc_two + area_calc_three
+								IF summed_area < min_sum_tracker THEN
+									SET min_sum_tracker TO summed_area
+								END IF
+							END IF
+						END FOR
+					END FOR
+					
+					SET var_k TO var_k + get_constant_one()
+				END WHILE
+			END FOR
+		END FOR
+		
+		RETURN min_sum_tracker
+	END FUNCTION
+END CLASS

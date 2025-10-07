@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+        CREATE adjacency_map AS an empty mapping with default empty lists
+        FOR index FROM 0 TO LENGTH(edges) - 1
+            SET x TO edges[index][0]
+            SET y TO edges[index][1]
+            APPEND y TO adjacency_map[x]
+            APPEND x TO adjacency_map[y]
+        END FOR
+
+        SET result TO 1
+
+        FUNCTION dfs WITH PARAMETERS current_node parent_node
+            SET counter_same_color TO 1
+            SET flag_all_children_match TO true
+
+            SET iterator_i TO 0
+            WHILE iterator_i < LENGTH(adjacency_map[current_node])
+                SET adjacent_node TO adjacency_map[current_node][iterator_i]
+                IF adjacent_node != parent_node THEN
+                    SET subtree_size TO dfs(adjacent_node, current_node)
+                    IF subtree_size == 0 THEN
+                        SET flag_all_children_match TO false
+                    ELSE
+                        IF colors[adjacent_node] == colors[current_node] THEN
+                            SET counter_same_color TO counter_same_color + subtree_size
+                        ELSE
+                            SET flag_all_children_match TO false
+                        END IF
+                    END IF
+                END IF
+                SET iterator_i TO iterator_i + 1
+            END WHILE
+
+            IF NOT (NOT flag_all_children_match) THEN
+                IF counter_same_color > result THEN
+                    SET result TO counter_same_color
+                END IF
+                RETURN counter_same_color
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        SET start_node TO 0
+        SET no_parent TO -1
+        SET dummy TO dfs(start_node, no_parent)
+        RETURN result
+    END FUNCTION
+END CLASS

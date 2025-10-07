@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION medianOfUniquenessArray(nums)
+        FUNCTION countLessOrEqual(target)
+            DECLARE totalCount ← 0
+            DECLARE startIdx ← 0
+            DECLARE freqMap ← empty dictionary
+            DECLARE uniqueCounter ← 0
+
+            DECLARE currentPos ← 0
+            WHILE currentPos < LENGTH(nums)
+                DECLARE currentVal ← nums[currentPos]
+                IF freqMap[currentVal] = 0 OR NOT EXISTS freqMap[currentVal]
+                    uniqueCounter ← uniqueCounter + 1
+                END IF
+                IF EXISTS freqMap[currentVal]
+                    freqMap[currentVal] ← freqMap[currentVal] + 1
+                ELSE
+                    freqMap[currentVal] ← 1
+                END IF
+
+                WHILE uniqueCounter > target
+                    DECLARE startVal ← nums[startIdx]
+                    freqMap[startVal] ← freqMap[startVal] - 1
+                    IF freqMap[startVal] = 0
+                        uniqueCounter ← uniqueCounter - 1
+                    END IF
+                    startIdx ← startIdx + 1
+                END WHILE
+
+                totalCount ← totalCount + (currentPos - startIdx + 1)
+                currentPos ← currentPos + 1
+            END WHILE
+
+            RETURN totalCount
+        END FUNCTION
+
+        DECLARE n ← LENGTH(nums)
+        DECLARE maxSubarrays ← (n * (n + 1)) / 2
+        DECLARE medianPos ← (maxSubarrays + 1) / 2
+        DECLARE lowBound ← 1
+        DECLARE highBound ← n
+
+        REPEAT
+            DECLARE midVal ← (lowBound + highBound) / 2
+            DECLARE cnt ← countLessOrEqual(midVal)
+            IF cnt < medianPos
+                lowBound ← midVal + 1
+            ELSE
+                highBound ← midVal
+            END IF
+        UNTIL lowBound >= highBound
+
+        RETURN lowBound
+    END FUNCTION
+END CLASS

@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+        DECLARE graph AS mapping of int to list of int INITIALIZED EMPTY
+        FOR EACH pair x y IN edges DO
+            BEGIN
+                LET a = x
+                LET b = y
+                APPEND b TO graph[a]
+                APPEND a TO graph[b]
+            END
+        END FOR
+
+        LET maximum_size = 1
+
+        FUNCTION dfs WITH PARAMETERS current_node parent_node
+            LET count_same_color = 1
+            LET flag_all_children_same = TRUE
+
+            LET idx = 0
+            WHILE idx < LENGTH(graph[current_node]) DO
+                LET neighbor_node = graph[current_node][idx]
+                idx = idx + 1
+
+                IF NOT (neighbor_node = parent_node) THEN
+                    LET subtree_size = dfs(neighbor_node, current_node)
+
+                    IF subtree_size = 0 THEN
+                        flag_all_children_same = FALSE
+                    ELSE
+                        LET colors_match = colors[neighbor_node] = colors[current_node]
+                        IF colors_match THEN
+                            count_same_color = count_same_color + subtree_size
+                        ELSE
+                            flag_all_children_same = FALSE
+                        END IF
+                    END IF
+                END IF
+            END WHILE
+
+            IF flag_all_children_same THEN
+                IF maximum_size < count_same_color THEN
+                    maximum_size = count_same_color
+                END IF
+                RETURN count_same_color
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        dfs(0, -1)
+
+        RETURN maximum_size
+    END FUNCTION
+END CLASS

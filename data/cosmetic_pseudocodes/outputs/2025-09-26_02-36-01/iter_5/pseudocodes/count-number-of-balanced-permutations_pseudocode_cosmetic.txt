@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION countBalancedPermutations(num)
+        SET param_value TO num
+
+        FUNCTION dfs(pos, rem_sum, left_count, right_count)
+            IF pos GREATER THAN ten MINUS one
+                SET condition_check TO (rem_sum EQUALS zero) AND (left_count NOT EQUALS zero OR right_count NOT EQUALS zero) EQUALS FALSE
+                SET return_val TO condition_check
+                RETURN return_val
+            END IF
+
+            IF (left_count EQUALS zero) AND (rem_sum NOT EQUALS zero)
+                RETURN zero
+            END IF
+
+            SET total_answer TO zero
+
+            FUNCTION iterate_loop(k, acc)
+                IF k GREATER THAN MINIMUM(cnt[pos], left_count)
+                    RETURN acc
+                END IF
+
+                SET left_selection TO k
+                SET right_selection TO cnt[pos] MINUS left_selection
+
+                IF (right_selection GREATER THAN OR EQUAL TO zero) AND (right_selection LESS THAN OR EQUAL TO right_count) AND (left_selection MULTIPLIED BY pos LESS THAN OR EQUAL TO rem_sum)
+                    SET combination_left TO combination(left_count, left_selection)
+                    SET combination_right TO combination(right_count, right_selection)
+                    SET next_call TO dfs(pos PLUS one, rem_sum MINUS (left_selection MULTIPLIED BY pos), left_count MINUS left_selection, right_count MINUS right_selection)
+                    SET intermediate_result TO combination_left MULTIPLIED BY combination_right MULTIPLIED BY next_call
+                    SET acc TO acc PLUS intermediate_result
+                END IF
+
+                RETURN iterate_loop(k PLUS one, acc)
+            END FUNCTION
+
+            SET total_answer TO iterate_loop(zero, total_answer)
+
+            SET mod_value TO ten TO THE power nine PLUS seven
+            RETURN total_answer MODULO mod_value
+        END FUNCTION
+
+        SET digits_list TO []
+        FOR idx FROM zero TO LENGTH(param_value) MINUS one
+            APPEND INTEGER(param_value[idx]) TO digits_list
+        END FOR
+
+        SET sum_digits TO zero
+        FOR each element_value IN digits_list
+            SET sum_digits TO sum_digits PLUS element_value
+        END FOR
+
+        IF (sum_digits MODULO two) NOT EQUAL TO zero
+            RETURN zero
+        END IF
+
+        SET n TO LENGTH(digits_list)
+        SET mod TO ten TO THE power nine PLUS seven
+
+        SET cnt TO Counter(digits_list)
+
+        SET half_sum TO sum_digits DIVIDED BY two
+        SET half_n_left TO n DIVIDED BY two
+        SET half_n_right TO (n PLUS one) DIVIDED BY two
+
+        SET answer TO dfs(zero, half_sum, half_n_left, half_n_right)
+
+        RETURN answer
+    END FUNCTION
+END CLASS

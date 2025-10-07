@@ -1,0 +1,31 @@
+CLASS Solution  
+    FUNCTION gcdValues(nums, queries)  
+        LET peakValue BE the largest item inside nums  
+        LET frequencyMap BE a new counter initialized with nums  
+        LET gcdCounts BE a zero-filled list sized peakValue plus 1  
+        LET divisor BE peakValue  
+        WHILE divisor >= 1 DO  
+            LET totalFrequency BE 0  
+            LET multipleIndex BE divisor  
+            WHILE multipleIndex <= peakValue DO  
+                LET currentCount BE frequencyMap[multipleIndex]  
+                totalFrequency = totalFrequency + currentCount  
+                gcdCounts[divisor] = gcdCounts[divisor] - gcdCounts[multipleIndex]  
+                multipleIndex = multipleIndex + divisor  
+            END WHILE  
+            LET pairings BE totalFrequency * (totalFrequency - 1) / 2  
+            gcdCounts[divisor] = gcdCounts[divisor] + pairings  
+            divisor = divisor - 1  
+        END WHILE  
+        LET prefixSums BE an empty list with initial zero  
+        FOR index FROM 0 TO LENGTH(gcdCounts) - 1 DO  
+            ADD (prefixSums[-1] + gcdCounts[index]) TO prefixSums  
+        END FOR  
+        LET outputList BE empty  
+        FOR each queryValue IN queries DO  
+            LET positionFound BE bisect_right(prefixSums, queryValue)  
+            APPEND positionFound TO outputList  
+        END FOR  
+        RETURN outputList  
+    END FUNCTION  
+END CLASS

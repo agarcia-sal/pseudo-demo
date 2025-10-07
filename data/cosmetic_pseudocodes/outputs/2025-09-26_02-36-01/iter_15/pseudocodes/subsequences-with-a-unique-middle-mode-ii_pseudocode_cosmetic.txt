@@ -1,0 +1,77 @@
+```pseudocode
+CLASS Solution  
+    FUNCTION subsequencesWithMiddleMode(nums)  
+        SET constModulus TO 10 TIMES 10 TIMES 10 TIMES 10 TIMES 10 TIMES 10 TIMES 10 TIMES 10 TIMES 10 PLUS 7  
+        SET resultCounter TO 0  
+        SET leftFreq TO empty map defaulting to 0  
+        SET rightFreq TO empty map  
+        FOR each element IN nums DO  
+            INCREMENT rightFreq[element] BY 1  
+        END FOR  
+
+        FUNCTION chooseTwo(x)  
+            RETURN (x * (x - 1)) DIV 2  
+        END FUNCTION  
+
+        SET accPss TO 0  
+        SET accSpp TO 0  
+        SET accPp TO 0  
+        SET sumSquaresS TO 0  
+        SET accPs TO 0  
+
+        FOR each freqValue IN rightFreq.values() DO  
+            SET sumSquaresS TO sumSquaresS + (freqValue * freqValue)  
+        END FOR  
+
+        SET indexPosition TO 0  
+        WHILE indexPosition < LENGTH(nums) DO  
+            SET currentVal TO nums[indexPosition]  
+
+            SET decrementSVal TO rightFreq[currentVal]  
+            SET incrementPVal TO leftFreq[currentVal]  
+
+            SET accPss TO accPss + (incrementPVal * ((-decrementSVal * decrementSVal) + ((decrementSVal - 1) * (decrementSVal - 1))))  
+            SET accSpp TO accSpp + ((-incrementPVal * incrementPVal))  
+            SET sumSquaresS TO sumSquaresS + ((-decrementSVal * decrementSVal) + ((decrementSVal - 1) * (decrementSVal - 1)))  
+            SET accPs TO accPs + (-incrementPVal)  
+
+            DECREMENT rightFreq[currentVal] BY 1  
+
+            SET leftCount TO indexPosition  
+            SET rightCount TO (LENGTH(nums) - indexPosition - 1)  
+
+            SET tempVal1 TO chooseTwo(leftCount) * chooseTwo(rightCount)  
+            SET tempVal2 TO chooseTwo(leftCount - incrementPVal) * chooseTwo(rightCount - rightFreq[currentVal])  
+
+            SET resultCounter TO resultCounter + tempVal1 - tempVal2  
+
+            SET tempPssMinus TO accPss - (incrementPVal * (rightFreq[currentVal] * rightFreq[currentVal]))  
+            SET tempSppMinus TO accSpp - (rightFreq[currentVal] * (incrementPVal * incrementPVal))  
+            SET tempPpMinus TO accPp - (incrementPVal * incrementPVal)  
+            SET tempSsMinus TO sumSquaresS - (rightFreq[currentVal] * rightFreq[currentVal])  
+            SET tempPsMinus TO accPs - (incrementPVal * rightFreq[currentVal])  
+            SET adjustedP TO (leftCount - incrementPVal)  
+            SET adjustedS TO (rightCount - rightFreq[currentVal])  
+
+            SET decr1 TO tempPsMinus * incrementPVal * (rightCount - rightFreq[currentVal]) + tempPssMinus * (-incrementPVal)  
+            SET decr2 TO tempPsMinus * rightFreq[currentVal] * (leftCount - incrementPVal) + tempSppMinus * (-rightFreq[currentVal])  
+            SET decr3 TO (tempPpMinus - adjustedP) * rightFreq[currentVal] * (rightCount - rightFreq[currentVal]) DIV 2  
+            SET decr4 TO (tempSsMinus - adjustedS) * incrementPVal * (leftCount - incrementPVal) DIV 2  
+
+            SET resultCounter TO resultCounter - (decr1 + decr2 + decr3 + decr4)  
+
+            SET resultCounter TO resultCounter MOD constModulus  
+
+            SET accPss TO accPss + (rightFreq[currentVal] * rightFreq[currentVal])  
+            SET accSpp TO accSpp + ((rightFreq[currentVal] * (-incrementPVal * incrementPVal)) + ((incrementPVal + 1) * (incrementPVal + 1)))  
+            SET accPp TO accPp + ((-(incrementPVal * incrementPVal)) + ((incrementPVal + 1) * (incrementPVal + 1)))  
+            SET accPs TO accPs + rightFreq[currentVal]  
+
+            INCREMENT leftFreq[currentVal] BY 1  
+            SET indexPosition TO indexPosition + 1  
+        END WHILE  
+
+        RETURN resultCounter  
+    END FUNCTION  
+END CLASS  
+```

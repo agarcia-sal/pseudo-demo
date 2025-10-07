@@ -1,0 +1,117 @@
+CLASS Solution
+    FUNCTION findAnswer(xray, klmn)
+    {
+      graphMap := mapping {}
+      FOR edge IN klmn DO
+        a := edge[0]
+        b := edge[1]
+        c := edge[2]
+        IF graphMap[a] DOES NOT EXIST THEN
+          graphMap[a] := []
+        END IF
+        IF graphMap[b] DOES NOT EXIST THEN
+          graphMap[b] := []
+        END IF
+        graphMap[a] := graphMap[a] + [(b, c)]
+        graphMap[b] := graphMap[b] + [(a, c)]
+      END FOR
+
+      distances := list of length xray filled with +(∞)
+      distances[0] := 0
+      queueHeap := [(0, 0)]
+
+      FUNCTION popMin(heapList)
+      {
+        minIndex := 0
+        FOR i FROM 1 TO LENGTH(heapList) - 1 DO
+          IF heapList[i][0] < heapList[minIndex][0] THEN
+            minIndex := i
+          END IF
+        END FOR
+        result := heapList[minIndex]
+        heapList := (
+          IF minIndex > 0 THEN
+            heapList[0 TO minIndex - 1]
+          ELSE []
+          END IF
+        ) + (
+          IF minIndex < LENGTH(heapList) - 1 THEN
+            heapList[minIndex + 1 TO END]
+          ELSE []
+          END IF
+        )
+        RETURN result, heapList
+      }
+
+      FUNCTION insertHeap(heapList, elem)
+      {
+        newList := heapList + [elem]
+        RETURN newList
+      }
+
+      WHILE LENGTH(queueHeap) > 0 DO
+        current, queueHeap := popMin(queueHeap)
+        curDist := current[0]
+        node := current[1]
+        IF curDist > distances[node] THEN
+          CONTINUE
+        END IF
+        neighbors := graphMap[node]
+        IF neighbors IS NOT DEFINED THEN
+          neighbors := []
+        END IF
+        FOR edgePair IN neighbors DO
+          neighborNode := edgePair[0]
+          weight := edgePair[1]
+          tentativeDist := curDist + weight
+          IF tentativeDist < distances[neighborNode] THEN
+            distances[neighborNode] := tentativeDist
+            queueHeap := insertHeap(queueHeap, (tentativeDist, neighborNode))
+          END IF
+        END FOR
+      END WHILE
+
+      shortestEdges := set {}
+      trackerStack := [(xray - 1, distances[xray - 1])]
+      visitedFlags := list of length xray filled with False
+
+      WHILE LENGTH(trackerStack) > 0 DO
+        currentPair := trackerStack[ LENGTH(trackerStack) - 1 ]
+        trackerStack := trackerStack[0 TO LENGTH(trackerStack) - 2]
+        currNode := currentPair[0]
+        currDist := currentPair[1]
+        IF visitedFlags[currNode] THEN
+          CONTINUE
+        END IF
+        visitedFlags[currNode] := True
+
+        adjacents := graphMap[currNode]
+        IF adjacents IS NOT DEFINED THEN
+          adjacents := []
+        END IF
+
+        FOR edgePair IN adjacents DO
+          adjNode := edgePair[0]
+          w := edgePair[1]
+          IF currDist == distances[adjNode] + w THEN
+            minNode := IF currNode < adjNode THEN currNode ELSE adjNode END IF
+            maxNode := IF currNode > adjNode THEN currNode ELSE adjNode END IF
+            shortestEdges := shortestEdges + {(minNode, maxNode)}
+            trackerStack := trackerStack + [(adjNode, distances[adjNode])]
+          END IF
+        END FOR
+      END WHILE
+
+      resultList := []
+      FOR eachEdge IN klmn DO
+        s := eachEdge[0]
+        t := eachEdge[1]
+        low := IF s < t THEN s ELSE t END IF
+        high := IF s > t THEN s ELSE t END IF
+        isPresent := (low, high) IN shortestEdges
+        resultList := resultList + [isPresent]
+      END FOR
+
+      RETURN resultList
+    }
+END CLASS

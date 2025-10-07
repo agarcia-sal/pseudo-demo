@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION minimumCost(m n horizontalCut verticalCut)
+        FUNCTION descendingSort(arr)
+            DEFINE procedure quicksort(low high)
+                IF low GREATER OR EQUAL high THEN RETURN ENDIF
+                SET pivot TO arr[low]
+                SET left TO low + 1
+                SET right TO high
+                LOOP
+                    WHILE left LESS OR EQUAL right AND arr[left] GREATER OR EQUAL pivot DO
+                        SET left TO left + 1
+                    ENDWHILE
+                    WHILE left LESS OR EQUAL right AND arr[right] LESS OR EQUAL pivot DO
+                        SET right TO right - 1
+                    ENDWHILE
+                    IF left GREATER right THEN BREAK ENDIF
+                    SWAP arr[left] WITH arr[right]
+                ENDLOOP
+                SWAP arr[low] WITH arr[right]
+                quicksort(low right - 1)
+                quicksort(right + 1 high)
+            ENDDEFINE
+            quicksort(0 LENGTH(arr) - 1)
+        ENDFUNCTION
+
+        SET totalCost TO 0
+        SET p TO 0
+        SET q TO 0
+        SET heightSections TO 1
+        SET widthSections TO 1
+
+        descendingSort(horizontalCut)
+        descendingSort(verticalCut)
+
+        LABEL outerLoopStart
+        IF NOT (p LESS THAN LENGTH(horizontalCut) OR q LESS THAN LENGTH(verticalCut)) THEN GOTO outerLoopEnd ENDIF
+
+        IF q EQUALS LENGTH(verticalCut) OR (p LESS THAN LENGTH(horizontalCut) AND horizontalCut[p] GREATER THAN verticalCut[q]) THEN
+            SET mul TO widthSections
+            SET addend TO horizontalCut[p]
+            SET incrSection TO heightSections + 1
+            SET nextIndex TO p + 1
+            SET totalCost TO totalCost + addend * mul
+            SET heightSections TO incrSection
+            SET p TO nextIndex
+        ELSE
+            SET mul TO heightSections
+            SET addend TO verticalCut[q]
+            SET incrSection TO widthSections + 1
+            SET nextIndex TO q + 1
+            SET totalCost TO totalCost + addend * mul
+            SET widthSections TO incrSection
+            SET q TO nextIndex
+        ENDIF
+
+        GOTO outerLoopStart
+        LABEL outerLoopEnd
+
+        RETURN totalCost
+    END FUNCTION
+END CLASS

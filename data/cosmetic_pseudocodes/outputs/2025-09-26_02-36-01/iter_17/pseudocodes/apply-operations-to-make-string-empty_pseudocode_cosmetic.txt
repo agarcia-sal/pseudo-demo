@@ -1,0 +1,52 @@
+CLASS Solution  
+    FUNCTION lastNonEmptyString(s)  
+        SET freq_map TO EMPTY MAP  
+        SET idx_counter TO 0  
+        WHILE idx_counter < LENGTH(s)  
+            SET ch_tmp TO s[idx_counter]  
+            IF ch_tmp IN freq_map THEN  
+                SET freq_map[ch_tmp] TO freq_map[ch_tmp] + 1  
+            ELSE  
+                SET freq_map[ch_tmp] TO 1  
+            END IF  
+            SET idx_counter TO idx_counter + 1  
+        END WHILE  
+
+        SET highest_freq TO 0  
+        FOR EACH key_element IN KEYS(freq_map)  
+            IF freq_map[key_element] > highest_freq THEN  
+                SET highest_freq TO freq_map[key_element]  
+            END IF  
+        END FOR  
+
+        SET selected_chars TO EMPTY SET  
+        DEFINE temp_iter_keys AS LIST OF KEYS(freq_map)  
+        SET iter_ctr TO 0  
+        REPEAT  
+            EXIT IF iter_ctr >= LENGTH(temp_iter_keys)  
+            SET current_key TO temp_iter_keys[iter_ctr]  
+            IF freq_map[current_key] == highest_freq THEN  
+                ADD current_key TO selected_chars  
+            END IF  
+            SET iter_ctr TO iter_ctr + 1  
+        UNTIL FALSE  
+
+        SET collected_chars TO EMPTY LIST  
+        SET pos_idx TO LENGTH(s) - 1  
+        WHILE pos_idx >= 0  
+            SET current_char TO s[pos_idx]  
+            IF current_char IN selected_chars THEN  
+                APPEND current_char TO collected_chars  
+                REMOVE current_char FROM selected_chars  
+            END IF  
+            SET pos_idx TO pos_idx - 1  
+        END WHILE  
+
+        SET assembled_string TO EMPTY STRING  
+        FOR i FROM LENGTH(collected_chars) - 1 DOWNTO 0 DO  
+            SET assembled_string TO assembled_string + collected_chars[i]  
+        END FOR  
+
+        RETURN assembled_string  
+    END FUNCTION  
+END CLASS

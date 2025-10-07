@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION maximumSumSubsequence(nums, queries)
+let L := LENGTH(nums)
+LET M := (10 ^ 9) + 1
+
+DEFINE FUNCTION check_max(a, b)
+    IF a > b THEN
+        RETURN a
+    ELSE
+        RETURN b
+    ENDIF
+END FUNCTION
+
+let taken := ARRAY of length L, each element set to empty SET
+let skipped := ARRAY of length L, each element set to empty SET
+
+SET taken[0] := check_max(0, nums[0])
+SET skipped[0] := 0
+
+DECLARE PROCEDURE update_dp(i)
+    taken[i] := check_max(0, skipped[i - 1]) + nums[i]
+    skipped[i] := check_max(skipped[i - 1], taken[i - 1])
+END PROCEDURE
+
+FOR index FROM 1 WHILE index < L DO
+    CALL update_dp(index)
+    index := index + 1
+END FOR
+
+LET acc_result := 0
+
+DEFINE PROCEDURE recompute_from(pos)
+    IF pos = 0 THEN
+        taken[0] := check_max(0, nums[0])
+        skipped[0] := 0
+    ELSE
+        CALL update_dp(pos)
+    ENDIF
+    FOR k := pos + 1 TO (L - 1) DO
+        CALL update_dp(k)
+    ENDFOR
+END PROCEDURE
+
+FOR EACH (position, value) IN queries DO
+    nums[position] := value
+    CALL recompute_from(position)
+    LET candidate := check_max(taken[L - 1], skipped[L - 1])
+    acc_result := (acc_result + candidate) MOD M
+END FOR
+
+RETURN acc_result
+    END FUNCTION
+END CLASS

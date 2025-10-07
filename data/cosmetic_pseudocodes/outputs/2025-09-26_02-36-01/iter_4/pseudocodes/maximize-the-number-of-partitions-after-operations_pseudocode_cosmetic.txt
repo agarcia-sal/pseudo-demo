@@ -1,0 +1,67 @@
+CLASS Solution  
+    FUNCTION maxPartitionsAfterOperations(s parameter k parameter)  
+        FUNCTION max_partitions(s parameter k parameter)  
+            DECLARE partition_count AS 0  
+            DECLARE collected_chars AS empty collection  
+            INITIALIZE index_counter AS 0  
+            WHILE index_counter LESS THAN LENGTH OF s parameter DO  
+                LET current_char BE s parameter AT POSITION index_counter  
+                IF SIZE OF collected_chars IS LESS THAN k parameter THEN  
+                    INSERT current_char INTO collected_chars  
+                ELSE  
+                    IF current_char NOT IN collected_chars THEN  
+                        ADD 1 TO partition_count  
+                        REASSIGN collected_chars TO A COLLECTION WITH current_char ONLY  
+                    END IF  
+                    -- ELSE skip increment or modification  
+                END IF  
+                INCREMENT index_counter BY ONE  
+            END WHILE  
+            IF collected_chars IS NOT EMPTY THEN  
+                INCREMENT partition_count BY ONE  
+            END IF  
+            RETURN partition_count  
+        END FUNCTION  
+        
+        SET max_parts TO max_partitions(s parameter, k parameter)  
+        
+        DECLARE pos AS 0  
+        REPEAT WHILE pos LESS OR EQUAL TO LENGTH OF s parameter MINUS 1  
+            DECLARE letter_index AS 0  
+            DECLARE letters AS COLLECTION OF CHARACTERS FROM "a" TO "z"  
+            WHILE letter_index LESS THAN LENGTH OF letters DO  
+                LET substitute_char BE letters AT letter_index  
+                IF substitute_char IS EQUAL TO s parameter AT pos THEN  
+                    INCREMENT letter_index BY 1  
+                    CONTINUE TO NEXT ITERATION OF INNER LOOP  
+                END IF  
+                
+                LET prefix_substring BE EMPTY STRING  
+                LET suffix_substring BE EMPTY STRING  
+                
+                DECLARE prefix_index AS 0  
+                WHILE prefix_index LESS THAN pos DO  
+                    CONCATENATE s parameter AT prefix_index TO prefix_substring  
+                    INCREMENT prefix_index BY 1  
+                END WHILE  
+                
+                DECLARE suffix_index AS pos + 1  
+                WHILE suffix_index LESS THAN LENGTH OF s parameter DO  
+                    CONCATENATE s parameter AT suffix_index TO suffix_substring  
+                    INCREMENT suffix_index BY 1  
+                END WHILE  
+                
+                LET new_s BE prefix_substring CONCATENATED WITH substitute_char CONCATENATED WITH suffix_substring  
+                
+                LET candidate_partition_count BE max_partitions(new_s, k parameter)  
+                IF candidate_partition_count GREATER THAN max_parts THEN  
+                    SET max_parts TO candidate_partition_count  
+                END IF  
+                INCREMENT letter_index BY 1  
+            END WHILE  
+            INCREMENT pos BY 1  
+        END REPEAT  
+        
+        RETURN max_parts  
+    END FUNCTION  
+END CLASS

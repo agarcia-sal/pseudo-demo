@@ -1,0 +1,52 @@
+CLASS Solution  
+    FUNCTION maximumSumSubsequence(nums, queries)  
+        DEFINE FUNC compute_maximum(a, b)  
+            IF a > b THEN RETURN a ELSE RETURN b END IF  
+        END FUNC  
+
+        DEFINE FUNC modular_add(u, v, m)  
+            RETURN (u + v) - m * ((u + v) DIV m)  
+        END FUNC  
+
+        CONSTANT MOD IS (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1  
+        SET length_val TO LENGTH OF nums  
+
+        SET taken_states TO A LIST INCLUDING length_val ZEROES  
+        SET skipped_states TO A LIST INCLUDING length_val ZEROES  
+
+        PROCEDURE update_entry(pos)  
+            IF pos = 0 THEN  
+                SET taken_states[0] TO compute_maximum(0, nums[0])  
+                SET skipped_states[0] TO 0  
+            ELSE  
+                SET taken_states[pos] TO compute_maximum(0, skipped_states[pos - 1]) + nums[pos]  
+                SET taken_states[pos] TO compute_maximum(taken_states[pos], 0)  
+                SET skipped_states[pos] TO compute_maximum(skipped_states[pos - 1], taken_states[pos - 1])  
+            END IF  
+        END PROCEDURE  
+
+        PROCEDURE refresh_from(start_idx)  
+            PROCEDURE recurse(i)  
+                IF i = length_val THEN RETURN END IF  
+                update_entry(i)  
+                recurse(i + 1)  
+            END PROCEDURE  
+            recurse(start_idx)  
+        END PROCEDURE  
+
+        update_entry(0)  
+        refresh_from(1)  
+
+        SET aggregate_result TO 0  
+
+        FOR EACH (pos, val) IN queries DO  
+            SET nums[pos] TO val  
+            update_entry(pos)  
+            refresh_from(pos + 1)  
+            SET last_max TO compute_maximum(taken_states[length_val - 1], skipped_states[length_val - 1])  
+            SET aggregate_result TO modular_add(aggregate_result, last_max, MOD)  
+        END FOR  
+
+        RETURN aggregate_result  
+    END FUNCTION  
+END CLASS

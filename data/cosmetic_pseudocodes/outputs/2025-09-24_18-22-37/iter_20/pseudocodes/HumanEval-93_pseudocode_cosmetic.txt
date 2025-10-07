@@ -1,0 +1,48 @@
+FUNCTION encode(input_text)  
+  LET letters_set BE "AEIOUaeiou"
+  DECLARE shifted_mapping AS EMPTY DICTIONARY  
+  LET idx BE 0  
+  WHILE idx < LENGTH(letters_set)  
+    LET current_symbol BE letters_set.at(idx)  
+    LET original_code BE ASCII_VALUE_OF(current_symbol)  
+    LET incremented_code BE original_code + 0x2  
+    LET substitute_symbol BE CHARACTER_FROM_ASCII(incremented_code)  
+    shifted_mapping[current_symbol] ← substitute_symbol  
+    idx ← idx + 1  
+  END WHILE  
+  
+  DECLARE toggled_text AS EMPTY STRING  
+  LET pos BE 0  
+  
+  WHILE pos < LENGTH(input_text)  
+    LET char_orig BE input_text.at(pos)  
+    IF char_orig >= "a" ∧ char_orig <= "z" THEN  
+      LET char_upper_code BE ASCII_VALUE_OF(char_orig) - 0x20  
+      LET toggled_char BE CHARACTER_FROM_ASCII(char_upper_code)  
+      toggled_text ← CONCATENATE(toggled_text, toggled_char)  
+    ELSE IF char_orig >= "A" ∧ char_orig <= "Z" THEN  
+      LET char_lower_code BE ASCII_VALUE_OF(char_orig) + 32  
+      LET toggled_char BE CHARACTER_FROM_ASCII(char_lower_code)  
+      toggled_text ← CONCATENATE(toggled_text, toggled_char)  
+    ELSE  
+      toggled_text ← CONCATENATE(toggled_text, char_orig)  
+    END IF  
+    pos ← pos + 1  
+  END WHILE  
+  
+  DECLARE result_text BE EMPTY STRING  
+  LET index_var BE 0  
+  
+  WHILE index_var < LENGTH(toggled_text)  
+    LET current_char BE toggled_text.at(index_var)  
+    IF shifted_mapping HAS KEY current_char THEN  
+      LET mapped_char BE shifted_mapping[current_char]  
+      result_text ← result_text + mapped_char  
+    ELSE  
+      result_text ← result_text + current_char  
+    END IF  
+    index_var ← index_var + 1  
+  END WHILE  
+  
+  RETURN result_text  
+END FUNCTION

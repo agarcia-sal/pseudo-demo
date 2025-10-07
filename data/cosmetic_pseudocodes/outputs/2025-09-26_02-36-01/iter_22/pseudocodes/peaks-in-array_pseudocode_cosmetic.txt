@@ -1,0 +1,99 @@
+CLASS Solution  
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER  
+        FUNCTION is_peak(index INTEGER) RETURNS BOOLEAN  
+            SET prev_element TO nums[index MINUS 1]  
+            SET curr_element TO nums[index]  
+            SET next_element TO nums[index PLUS 1]  
+            RETURN (curr_element GREATER THAN prev_element) AND (curr_element GREATER THAN next_element)  
+        END FUNCTION  
+  
+        SET peak_positions TO empty list  
+        SET pos TO 1  
+        WHILE pos LESS THAN OR EQUAL TO LENGTH OF nums MINUS 2  
+            IF is_peak(pos) THEN  
+                APPEND pos TO peak_positions  
+            END IF  
+            SET pos TO pos PLUS 1  
+        END WHILE  
+  
+        SET answers TO empty list  
+  
+        FOR EACH qry IN queries DO  
+            SET type_op TO qry[0]  
+            IF NOT (type_op NOT EQUALS 1) THEN  
+                SET left_bound TO qry[1]  
+                SET right_bound TO qry[2]  
+  
+                SET left_pos TO 0  
+                SET right_pos TO LENGTH OF peak_positions MINUS 1  
+  
+                WHILE left_pos LESS THAN LENGTH OF peak_positions AND peak_positions[left_pos] LESS THAN OR EQUAL TO left_bound DO  
+                    SET left_pos TO left_pos PLUS 1  
+                END WHILE  
+                WHILE right_pos GREATER THAN OR EQUAL TO 0 AND peak_positions[right_pos] GREATER THAN OR EQUAL TO right_bound PLUS 1 DO  
+                    SET right_pos TO right_pos MINUS 1  
+                END WHILE  
+  
+                SET count_peaks TO right_pos MINUS left_pos PLUS 1  
+                IF count_peaks LESS THAN 0 THEN  
+                    SET count_peaks TO 0  
+                END IF  
+                APPEND count_peaks TO answers  
+  
+            ELSE  
+                SET idx TO qry[1]  
+                SET new_val TO qry[2]  
+  
+                IF nums[idx] EQUALS new_val THEN  
+                    CONTINUE  
+                END IF  
+  
+                SET nums[idx] TO new_val  
+  
+                SET start_i TO idx MINUS 1  
+                IF start_i LESS THAN 1 THEN  
+                    SET start_i TO 1  
+                END IF  
+  
+                SET end_i TO idx PLUS 1  
+                IF end_i GREATER THAN LENGTH OF nums MINUS 2 THEN  
+                    SET end_i TO LENGTH OF nums MINUS 2  
+                END IF  
+  
+                SET check_idx TO start_i  
+                WHILE check_idx LESS THAN OR EQUAL TO end_i DO  
+                    SET current_peak_flag TO is_peak(check_idx)  
+  
+                    SET position_found TO false  
+                    SET left_border TO 0  
+                    SET right_border TO LENGTH OF peak_positions MINUS 1  
+                    WHILE left_border LESS THAN OR EQUAL TO right_border DO  
+                        SET middle TO (left_border PLUS right_border) DIVIDE 2  
+                        IF peak_positions[middle] EQUALS check_idx THEN  
+                            SET position_found TO true  
+                            BREAK  
+                        ELSEIF peak_positions[middle] LESS THAN check_idx THEN  
+                            SET left_border TO middle PLUS 1  
+                        ELSE  
+                            SET right_border TO middle MINUS 1  
+                        END IF  
+                    END WHILE  
+  
+                    IF current_peak_flag THEN  
+                        IF NOT position_found THEN  
+                            INSERT check_idx INTO peak_positions AT left_border  
+                        END IF  
+                    ELSE  
+                        IF position_found THEN  
+                            REMOVE peak_positions AT middle  
+                        END IF  
+                    END IF  
+  
+                    SET check_idx TO check_idx PLUS 1  
+                END WHILE  
+            END IF  
+        END FOR  
+  
+        RETURN answers  
+    END FUNCTION  
+END CLASS

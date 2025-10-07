@@ -1,0 +1,53 @@
+CLASS Solution
+	FUNCTION maximumSumSubsequence(nums, queries)
+		CONST MODULO ← (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+		LENGTH nums AS length_nums
+
+		FUNCTION fillArrays(pos)
+			IF pos < 1 THEN
+				dp_take[0] ← (0 > nums[0]) ? 0 : nums[0]
+				dp_skip[0] ← 0
+			ELSE
+				dp_take[pos] ← (0 > dp_skip[pos - 1] ? 0 : dp_skip[pos - 1]) + nums[pos]
+				MAX_prev ← dp_skip[pos - 1] > dp_take[pos - 1] ? dp_skip[pos - 1] : dp_take[pos - 1]
+				dp_skip[pos] ← MAX_prev
+			END IF
+		END FUNCTION
+
+		FUNCTION propagateUpdate(index)
+			IF index >= length_nums THEN RETURN END IF
+			fillArrays(index)
+			propagateUpdate(index + 1)
+		END FUNCTION
+
+		dp_take ← new list of size length_nums FILLED WITH 0
+		dp_skip ← new list of size length_nums FILLED WITH 0
+
+		fillArrays(0)
+		iterator ← 1
+		WHILE iterator < length_nums
+			fillArrays(iterator)
+			iterator ← iterator + 1
+		END WHILE
+
+		accumulator_result ← 0
+
+		FUNCTION processQuery(pos, new_val)
+			nums[pos] ← new_val
+			fillArrays(pos)
+			propagateUpdate(pos + 1)
+			max_end ← dp_take[length_nums - 1] > dp_skip[length_nums - 1] ? dp_take[length_nums - 1] : dp_skip[length_nums - 1]
+			accumulator_result ← (accumulator_result + max_end) - ((MODULO) * ((accumulator_result + max_end) / MODULO))
+		END FUNCTION
+
+		ptr ← 0
+		WHILE ptr < LENGTH queries
+			curr_pos ← queries[ptr][0]
+			value_new ← queries[ptr][1]
+			processQuery(curr_pos, value_new)
+			ptr ← ptr + 1
+		END WHILE
+
+		RETURN accumulator_result
+	END FUNCTION
+END CLASS

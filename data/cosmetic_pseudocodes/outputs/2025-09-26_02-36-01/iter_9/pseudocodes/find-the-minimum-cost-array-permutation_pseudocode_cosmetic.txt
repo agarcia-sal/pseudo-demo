@@ -1,0 +1,59 @@
+CLASS Solution
+  FUNCTION findPermutation(ciphers)
+    FUNCTION jinx(unusedFlags, previous)
+      FUNCTION modulo(a, b)
+        RETURN a - (a / b) * b
+      END FUNCTION
+
+      IF unusedFlags = (1 << LENGTH ciphers) - 1 THEN
+        RETURN ABS(previous - ciphers[0])
+      END IF
+
+      SET threshold TO +∞
+      SET index TO 0
+
+      WHILE index < LENGTH ciphers
+        IF modulo(unusedFlags >> index, 2) = 0 THEN
+          SET option TO ABS(previous - ciphers[index]) + jinx(unusedFlags | (1 << index), index)
+          IF option < threshold THEN
+            threshold = option
+          END IF
+        END IF
+        index = index + 1
+      END WHILE
+
+      RETURN threshold
+    END FUNCTION
+
+    FUNCTION weave(visitedFlags, last)
+      PROCEDURE appendResult(value)
+        ans.ADD(value)
+      END PROCEDURE
+
+      CALL appendResult(last)
+
+      IF visitedFlags = (1 << LENGTH ciphers) - 1 THEN
+        RETURN
+      END IF
+
+      SET minimumCost TO jinx(visitedFlags, last)
+      SET pointer TO 0
+
+      WHILE pointer < LENGTH ciphers
+        IF ((visitedFlags >> pointer) & 1) = 0 THEN
+          SET trial TO ABS(last - ciphers[pointer]) + jinx(visitedFlags | (1 << pointer), pointer)
+          IF trial = minimumCost THEN
+            CALL weave(visitedFlags | (1 << pointer), pointer)
+            BREAK
+          END IF
+        END IF
+        pointer = pointer + 1
+      END WHILE
+    END FUNCTION
+
+    SET total TO LENGTH ciphers
+    SET ans TO []
+    CALL weave(1 << 0, 0)
+    RETURN ans
+  END FUNCTION
+END CLASS

@@ -1,0 +1,75 @@
+FUNCTION rounded_avg(n_param, m_param)  
+    SET temp_sum TO 0  
+    SET iter_index TO n_param  
+
+    WHILE True  
+        IF m_param < n_param THEN  
+            SET early_exit_flag TO 1  
+            BREAK  
+        ELSE  
+            SET early_exit_flag TO 0  
+        ENDIF  
+
+        IF iter_index > m_param THEN  
+            BREAK  
+        ENDIF  
+
+        SET tmp_val TO iter_index  
+        SET temp_sum TO temp_sum + tmp_val  
+        SET iter_index TO iter_index + 1  
+    ENDWHILE  
+
+    IF early_exit_flag = 1 THEN  
+        RETURN -1  
+    ENDIF  
+
+    SET length_val TO m_param - n_param  
+    SET length_val TO length_val + 1  
+
+    SET div_result TO temp_sum / length_val  
+
+    SET rounded_result TO div_result  
+
+    SET floor_val TO INTEGER_PART_OF(div_result)  
+
+    SET decimal_fraction TO div_result - floor_val  
+
+    IF decimal_fraction >= 0.5 THEN  
+        SET rounded_result TO floor_val + 1  
+    ELSE  
+        SET rounded_result TO floor_val  
+    ENDIF  
+
+    SET binary_str TO ""  
+    SET abs_val TO rounded_result  
+
+    IF abs_val = 0 THEN  
+        SET binary_str TO "0"  
+    ELSE  
+        IF abs_val < 0 THEN  
+            SET abs_val TO -abs_val  
+            SET is_negative TO 1  
+        ELSE  
+            SET is_negative TO 0  
+        ENDIF  
+
+        SET bits_stack TO EMPTY LIST  
+
+        WHILE abs_val > 0  
+            SET remainder_val TO abs_val % 2  
+            INSERT remainder_val AT FRONT OF bits_stack  
+            SET abs_val TO abs_val / 2  
+        ENDWHILE  
+
+        FOR each bit_value IN bits_stack  
+            SET str_bit TO bit_value  
+            SET binary_str TO binary_str + STRING(str_bit)  
+        ENDFOR  
+
+        IF is_negative = 1 THEN  
+            SET binary_str TO "-" + binary_str  
+        ENDIF  
+    ENDIF  
+
+    RETURN binary_str  
+END FUNCTION

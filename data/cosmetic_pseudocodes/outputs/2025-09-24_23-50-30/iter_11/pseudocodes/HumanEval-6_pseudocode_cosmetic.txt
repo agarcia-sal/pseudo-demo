@@ -1,0 +1,43 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        SET alpha TO 0
+        SET beta TO 0
+        SET idx TO 1
+        WHILE idx <= LENGTH(group_string)
+            SET ch TO group_string[idx]
+            IF ch = '(' THEN
+                SET alpha TO alpha + 1
+                IF beta < alpha THEN
+                    SET beta TO alpha
+                END IF
+            ELSE
+                SET alpha TO alpha - 1
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+        RETURN beta
+    END FUNCTION
+
+    SET tokens TO []
+    SET start_pos TO 1
+    SET end_pos TO 1
+    WHILE end_pos <= LENGTH(parentheses_string) + 1
+        IF end_pos = LENGTH(parentheses_string) + 1 OR parentheses_string[end_pos] = ' ' THEN
+            IF end_pos > start_pos THEN
+                APPEND SUBSTRING(parentheses_string, start_pos, end_pos - 1) TO tokens
+            END IF
+            SET start_pos TO end_pos + 1
+        END IF
+        SET end_pos TO end_pos + 1
+    END WHILE
+
+    SET result TO []
+    FOR EACH tok IN tokens
+        IF LENGTH(tok) > 0 THEN
+            APPEND parse_paren_group(tok) TO result
+        END IF
+    END FOR
+    RETURN result
+END FUNCTION
+```

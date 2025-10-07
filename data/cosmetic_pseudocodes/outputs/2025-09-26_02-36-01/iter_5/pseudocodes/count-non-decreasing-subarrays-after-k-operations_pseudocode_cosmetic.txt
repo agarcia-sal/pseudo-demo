@@ -1,0 +1,52 @@
+CLASS Solution  
+    FUNCTION countNonDecreasingSubarrays(nums k)  
+        SET length_nums TO LENGTH OF nums  
+        
+        FUNCTION canMakeNonDecreasing(start_pos segment_len)  
+            SET acc_cost TO 0  
+            SET max_so_far TO nums[start_pos]  
+            
+            FUNCTION recurseCheck(index)  
+                IF index EQUALS segment_len  
+                    RETURN True  
+                END IF
+                SET current_val TO nums[start_pos + index]  
+                SET diff TO 0  
+                IF current_val LESS THAN max_so_far  
+                    SET diff TO max_so_far MINUS current_val  
+                END IF  
+                SET acc_cost TO acc_cost + diff  
+                IF acc_cost GREATER THAN k  
+                    RETURN False  
+                END IF  
+                SET max_so_far TO (IF max_so_far GREATER THAN current_val THEN max_so_far ELSE current_val)  
+                RETURN recurseCheck(index + 1)  
+            END FUNCTION  
+            
+            RETURN recurseCheck(1)  
+        END FUNCTION  
+        
+        SET total_subarrays TO (length_nums * (length_nums + 1)) INTEGER_DIV 2  
+        SET count_invalid TO 0  
+        
+        FUNCTION binarySearchCurr(start_index low_bound high_bound)  
+            IF low_bound GREATER THAN high_bound  
+                RETURN high_bound  
+            END IF  
+            SET midpoint TO (low_bound + high_bound) INTEGER_DIV 2  
+            IF (canMakeNonDecreasing(start_index midpoint) EQUALS True)  
+                RETURN binarySearchCurr(start_index midpoint + 1 high_bound)  
+            ELSE  
+                RETURN binarySearchCurr(start_index low_bound midpoint - 1)  
+            END IF  
+        END FUNCTION  
+        
+        FOR pos FROM 0 TO length_nums - 1  
+            SET valid_len TO binarySearchCurr(pos 1 length_nums - pos)  
+            SET count_invalid TO count_invalid + ((length_nums - pos) - valid_len)  
+        END FOR  
+        
+        SET result TO total_subarrays - count_invalid  
+        RETURN result  
+    END FUNCTION  
+END CLASS

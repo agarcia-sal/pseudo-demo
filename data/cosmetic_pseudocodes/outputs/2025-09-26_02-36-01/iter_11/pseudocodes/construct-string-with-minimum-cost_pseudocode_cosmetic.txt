@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION minimumCost(target, words, costs)
+      SET acc_map TO an empty dictionary
+      SET idx_a TO 0
+      WHILE idx_a < LENGTH(words)
+        SET wv TO words[idx_a]
+        SET cv TO costs[idx_a]
+        IF NOT (wv IN acc_map)
+          SET acc_map[wv] TO cv
+        ELSE
+          IF acc_map[wv] > cv
+            SET acc_map[wv] TO cv
+          END IF
+        END IF
+        SET idx_a TO idx_a + 1
+      END WHILE
+
+      SET tgt_chars TO []
+      SET ix_c TO 0
+      REPEAT
+        APPEND target[ix_c] TO tgt_chars
+        SET ix_c TO ix_c + 1
+      UNTIL ix_c = LENGTH(target)
+
+      FUNCTION min_cost_to_form_target(pos)
+        IF pos = LENGTH(tgt_chars)
+          RETURN 0
+        ELSE
+          SET min_val TO +∞
+
+          SET keys_list TO KEYS(acc_map)
+          SET idx_d TO 0
+          WHILE idx_d < LENGTH(keys_list)
+            SET current_word TO keys_list[idx_d]
+            SET current_cost TO acc_map[current_word]
+            SET left_pos TO pos
+            SET right_pos TO pos + LENGTH(current_word)
+
+            IF right_pos <= LENGTH(tgt_chars)
+              SET slice_chars TO []
+              SET ix_e TO left_pos
+              REPEAT
+                APPEND tgt_chars[ix_e] TO slice_chars
+                SET ix_e TO ix_e + 1
+              UNTIL ix_e = right_pos
+
+              SET word_char_list TO []
+              SET ix_f TO 0
+              WHILE ix_f < LENGTH(current_word)
+                APPEND current_word[ix_f] TO word_char_list
+                SET ix_f TO ix_f + 1
+              END WHILE
+
+              SET equal_flag TO TRUE
+              SET ix_g TO 0
+              WHILE ix_g < LENGTH(word_char_list) AND equal_flag
+                IF word_char_list[ix_g] != slice_chars[ix_g]
+                  SET equal_flag TO FALSE
+                END IF
+                SET ix_g TO ix_g + 1
+              END WHILE
+
+              IF equal_flag
+                SET recursion_res TO min_cost_to_form_target(right_pos)
+                IF recursion_res != +∞
+                  SET sum_tmp TO current_cost + recursion_res
+                  IF sum_tmp < min_val
+                    SET min_val TO sum_tmp
+                  END IF
+                END IF
+              END IF
+            END IF
+            SET idx_d TO idx_d + 1
+          END WHILE
+
+          IF min_val != +∞
+            RETURN min_val
+          ELSE
+            RETURN +∞
+          END IF
+        END IF
+      END FUNCTION
+
+      SET final_result TO min_cost_to_form_target(0)
+      IF final_result != +∞
+        RETURN final_result
+      ELSE
+        RETURN -1
+      END IF
+    END FUNCTION
+END CLASS

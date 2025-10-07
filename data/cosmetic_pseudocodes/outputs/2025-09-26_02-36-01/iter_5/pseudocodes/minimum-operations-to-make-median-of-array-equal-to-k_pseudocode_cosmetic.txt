@@ -1,0 +1,63 @@
+CLASS Solution  
+    FUNCTION minOperationsToMakeMedianK(nums k)  
+        DEFINE procedure sortListAscending(arr)  
+            SET i TO 0  
+            SET lengthArr TO LENGTH OF arr  
+            WHILE i LESS THAN lengthArr MINUS one  
+                SET j TO i PLUS one  
+                WHILE j LESS THAN lengthArr  
+                    IF arr[i] GREATER THAN arr[j]  
+                        SET tempVal TO arr[i]  
+                        SET arr[i] TO arr[j]  
+                        SET arr[j] TO tempVal  
+                    END IF  
+                    INCREMENT j BY 1  
+                END WHILE  
+                INCREMENT i BY 1  
+            END WHILE  
+        END PROCEDURE  
+
+        CALL sortListAscending(nums)  
+
+        SET sizeCount TO LENGTH OF nums  
+        SET medPos TO sizeCount DIVIDED BY (ONE PLUS ONE)  
+
+        IF NOT (nums[medPos] NOT EQUAL TO k) THEN  
+            SET resultCount TO 0  
+            SET finalResult TO resultCount  
+            RETURN finalResult  
+        END IF  
+
+        SET changeCount TO ZERO  
+        IF nums[medPos] LESS THAN k THEN  
+            SET medCur TO medPos  
+            DEFINE FUNCTION increaseOps(currentMedian, accumOps)  
+                IF currentMedian GREATER THAN OR EQUAL TO sizeCount THEN  
+                    RETURN accumOps  
+                END IF  
+                IF nums[currentMedian] GREATER THAN OR EQUAL TO k THEN  
+                    RETURN accumOps  
+                END IF  
+                SET diffVal TO k MINUS nums[currentMedian]  
+                RETURN increaseOps(currentMedian PLUS ONE, accumOps PLUS diffVal)  
+            END FUNCTION  
+            SET changeCount TO increaseOps(medCur, ZERO)  
+        ELSE  
+            SET medCur TO medPos  
+            DEFINE FUNCTION decreaseOps(currentMedian, accumOps)  
+                IF currentMedian LESS THAN ZERO THEN  
+                    RETURN accumOps  
+                END IF  
+                IF nums[currentMedian] LESS THAN OR EQUAL TO k THEN  
+                    RETURN accumOps  
+                END IF  
+                SET diffVal TO nums[currentMedian] MINUS k  
+                RETURN decreaseOps(currentMedian MINUS ONE, accumOps PLUS diffVal)  
+            END FUNCTION  
+            SET changeCount TO decreaseOps(medCur, ZERO)  
+        END IF  
+
+        SET finalResult TO changeCount  
+        RETURN finalResult  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,63 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+        FUNCTION update_count(cnt LIST OF integers, val integer, delta integer)
+            SET bit_mask TO 1
+            SET idx TO 0
+            WHILE idx LESS THAN 32
+                IF (val BITWISE-AND bit_mask) NOT EQUAL 0 THEN
+                    SET cnt AT idx TO cnt AT idx PLUS delta
+                END IF
+                SET bit_mask TO bit_mask TIMES 2
+                SET idx TO idx PLUS 1
+            END WHILE
+        END FUNCTION
+
+        FUNCTION compute_current_or(cnt LIST OF integers) RETURNS integer
+            SET result TO 0
+            SET pos TO 0
+            REPEAT
+                IF cnt AT pos GREATER THAN 0 THEN
+                    SET result TO result BITWISE-OR (1 LEFT SHIFT pos)
+                END IF
+                SET pos TO pos PLUS 1
+            UNTIL pos EQUAL 32
+            RETURN result
+        END FUNCTION
+
+        SET length_nums TO LENGTH(nums)
+        SET counts TO EMPTY LIST
+        SET counter TO 0
+        WHILE counter LESS THAN 32
+            APPEND 0 TO counts
+            SET counter TO counter PLUS 1
+        END WHILE
+
+        SET curr_or TO 0
+        SET l_ptr TO 0
+        SET minimal_len TO +∞
+
+        SET r_ptr TO 0
+        WHILE r_ptr LESS THAN length_nums
+            CALL update_count(counts, nums AT r_ptr, 1)
+            SET curr_or TO curr_or BITWISE-OR nums AT r_ptr
+
+            WHILE curr_or GREATER OR EQUAL k AND l_ptr LESS OR EQUAL r_ptr
+                IF minimal_len GREATER THAN (r_ptr MINUS l_ptr) PLUS 1 THEN
+                    SET minimal_len TO (r_ptr MINUS l_ptr) PLUS 1
+                END IF
+                CALL update_count(counts, nums AT l_ptr, -1)
+                SET curr_or TO compute_current_or(counts)
+                SET l_ptr TO l_ptr PLUS 1
+            END WHILE
+            SET r_ptr TO r_ptr PLUS 1
+        END WHILE
+
+        IF minimal_len EQUAL +∞ THEN
+            RETURN -1
+        ELSE
+            RETURN minimal_len
+        END IF
+    END FUNCTION
+END CLASS
+```

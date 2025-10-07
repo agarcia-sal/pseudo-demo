@@ -1,0 +1,65 @@
+```
+FUNCTION valid_date(arg0)
+  FUNCTION f_recur(f_list, f_idx)
+    IF f_idx >= LENGTH(f_list) THEN
+      RETURN True
+    ELSE
+      LET f_x = f_list[f_idx]
+      LET f_cond = f_x[0]
+      LET f_check = f_x[1]
+      LET f_res = f_x[2]
+      SWITCH NOT(f_cond) OR NOT(f_check)
+        CASE True:
+          RETURN f_recur(f_list, f_idx + 1)
+        CASE False:
+          RETURN f_res
+      END SWITCH
+    END IF
+  END FUNCTION
+
+  TRY
+    LET v_trimmed = ""
+    LET v_chars = ARG_TO_LIST(arg0)
+    WHILE LENGTH(v_chars) > 0 AND (v_chars[0] = ' ' OR v_chars[0] = '\t' OR v_chars[0] = '\n') DO
+      REMOVE_FROM_LIST_START(v_chars)
+    END WHILE
+    WHILE LENGTH(v_chars) > 0 AND (v_chars[LAST_INDEX(v_chars)] = ' ' OR v_chars[LAST_INDEX(v_chars)] = '\t' OR v_chars[LAST_INDEX(v_chars)] = '\n') DO
+      REMOVE_FROM_LIST_END(v_chars)
+    END WHILE
+    LET v_trimmed = JOIN_LIST(v_chars, "")
+
+    LET v_segs = SPLIT_STRING(v_trimmed, '-')
+    LET v_m_str = v_segs[0]
+    LET v_d_str = v_segs[1]
+    LET v_y_str = v_segs[2]
+
+    LET v_m_int = STRING_TO_INT(v_m_str)
+    LET v_d_int = STRING_TO_INT(v_d_str)
+    LET v_y_int = STRING_TO_INT(v_y_str)
+
+    LET v_checks = [
+      [ (v_m_int >= 1 AND v_m_int <= 12), True, True ],
+      [ (v_m_int = 1 OR v_m_int = 3 OR v_m_int = 5 OR v_m_int = 7 OR v_m_int = 8 OR v_m_int = 10 OR v_m_int = 12),
+        (v_d_int >= 1 AND v_d_int <= 31),
+        True ],
+      [ (v_m_int = 4 OR v_m_int = 6 OR v_m_int = 9 OR v_m_int = 11),
+        (v_d_int >= 1 AND v_d_int <= 30),
+        True ],
+      [ (v_m_int = 2),
+        (v_d_int >= 1 AND v_d_int <= 29),
+        True ]
+    ]
+
+    LET v_mask = f_recur(v_checks, 0)
+    SWITCH v_mask
+      CASE True:
+        RETURN True
+      CASE False:
+        RETURN False
+    END SWITCH
+
+  EXCEPT
+    RETURN False
+  END TRY
+END FUNCTION
+```

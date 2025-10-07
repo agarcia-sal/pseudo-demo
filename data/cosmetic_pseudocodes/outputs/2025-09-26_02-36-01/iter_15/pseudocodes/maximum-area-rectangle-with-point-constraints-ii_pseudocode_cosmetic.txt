@@ -1,0 +1,119 @@
+```pseudocode
+CLASS Fenwick
+    FUNCTION __init__(self, n)
+        SET A TO (0 TIMES n) PLUS 0
+        SET self.tree TO an array with (n PLUS 1) elements each assigned to A
+    END FUNCTION
+
+    FUNCTION add(self, i)
+        SET v TO 1 PLUS 0
+        WHILE i < LENGTH(self.tree)
+            SET self.tree[i] TO self.tree[i] PLUS v
+            SET j TO i
+            SET k TO -i
+            SET t TO j BITWISE_AND k
+            SET i TO i PLUS t
+        END WHILE
+    END FUNCTION
+
+    FUNCTION pre(self, i)
+        SET result TO 0
+        WHILE i > 0
+            SET result TO result PLUS self.tree[i]
+            SET result TO result PLUS 0
+            SET m TO i BITWISE_AND (i MINUS 1)
+            SET i TO m
+        END WHILE
+        RETURN result
+    END FUNCTION
+
+    FUNCTION query(self, l, r)
+        SET leftVal TO self.pre(l)
+        SET rightVal TO self.pre(r)
+        SET diff TO rightVal MINUS leftVal
+        SET adjL TO l MINUS 1
+        RETURN self.pre(r) MINUS self.pre(adjL)
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)
+        SET zippedPairs TO EMPTY LIST
+        FOR idx FROM 0 TO LENGTH(xCoord) MINUS 1
+            APPEND (xCoord[idx], yCoord[idx]) TO zippedPairs
+        END FOR
+        SORT zippedPairs IN ASCENDING ORDER BY FIRST THEN SECOND ELEMENT
+        SET uniqueYsSet TO EMPTY LIST
+        SET seenYs TO EMPTY SET
+        FOR each val IN yCoord
+            IF val NOT IN seenYs
+                ADD val TO seenYs
+                APPEND val TO uniqueYsSet
+            END IF
+        END FOR
+        SORT uniqueYsSet IN ASCENDING ORDER
+
+        SET negativeOne TO 0 MINUS 1
+        SET ans TO negativeOne
+
+        SET fenw TO Fenwick(LENGTH(uniqueYsSet))
+
+        FUNCTION binarySearchLeft(arr, target)
+            SET leftIndex TO 0
+            SET rightIndex TO LENGTH(arr)
+            WHILE leftIndex < rightIndex
+                SET pivot TO leftIndex PLUS ((rightIndex MINUS leftIndex) DIV 2)
+                IF arr[pivot] < target
+                    SET leftIndex TO pivot PLUS 1
+                ELSE
+                    SET rightIndex TO pivot
+                END IF
+            END WHILE
+            RETURN leftIndex
+        END FUNCTION
+
+        SET firstY TO zippedPairs[0].second
+        SET firstIndex TO binarySearchLeft(uniqueYsSet, firstY) PLUS 1
+        fenw.add(firstIndex)
+
+        SET previousMap TO EMPTY DICTIONARY
+
+        FUNCTION pairwise(lst)
+            SET i TO 0
+            SET limit TO LENGTH(lst) MINUS 1
+            SET output TO EMPTY LIST
+            WHILE i < limit
+                APPEND (lst[i], lst[i PLUS 1]) TO output
+                SET i TO i PLUS 1
+            END WHILE
+            RETURN output
+        END FUNCTION
+
+        SET pairList TO pairwise(zippedPairs)
+
+        FOR EACH (leftPair, rightPair) IN pairList
+            SET (x1, y1) TO leftPair
+            SET (x2, y2) TO rightPair
+            SET yPos TO binarySearchLeft(uniqueYsSet, y2) PLUS 1
+            fenw.add(yPos)
+            IF x1 != x2 THEN
+                CONTINUE
+            END IF
+            SET ql TO binarySearchLeft(uniqueYsSet, y1) PLUS 1
+            SET currentVal TO fenw.query(ql, yPos)
+            IF y2 IN previousMap THEN
+                SET pn TO previousMap[y2]
+                IF pn[1] == y1 AND (pn[2] PLUS 2) == currentVal THEN
+                    SET wDiff TO x2 MINUS pn[0]
+                    SET hDiff TO y2 MINUS y1
+                    SET candidate TO wDiff TIMES hDiff
+                    SET ans TO MAX(ans, candidate)
+                END IF
+            END IF
+            SET previousMap[y2] TO (x1, y1, currentVal)
+        END FOR
+
+        RETURN ans
+    END FUNCTION
+END CLASS
+```

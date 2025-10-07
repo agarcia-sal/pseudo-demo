@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER
+        CONST P = 1 << 7
+        LET totalNums BE LENGTH(nums)
+        DECLARE dpForward AS ARRAY OF ARRAY OF ARRAY OF BOOLEAN WITH DIMENSIONS (totalNums + 1, k + 2, P) INITIALIZED TO FALSE
+        SET dpForward[0][0][0] TO TRUE
+
+        PROCEDURE iterateForward(index INTEGER)
+            IF index = totalNums THEN RETURN
+            FOR taken FROM 0 TO k DO
+                FOR state FROM 0 TO P - 1 DO
+                    LET carryOver1 BOOLEAN = dpForward[index + 1][taken][state] OR dpForward[index][taken][state]
+                    SET dpForward[index + 1][taken][state] TO carryOver1
+                    IF taken + 1 <= k + 1 THEN
+                        LET newState INTEGER = state BITWISE_OR nums[index]
+                        LET carryOver2 BOOLEAN = dpForward[index + 1][taken + 1][newState] OR dpForward[index][taken][state]
+                        SET dpForward[index + 1][taken + 1][newState] TO carryOver2
+                    END IF
+                END FOR
+            END FOR
+            iterateForward(index + 1)
+        END PROCEDURE
+
+        CALL iterateForward(0)
+
+        DECLARE dpBackward AS ARRAY OF ARRAY OF ARRAY OF BOOLEAN WITH DIMENSIONS (totalNums + 1, k + 2, P) INITIALIZED TO FALSE
+        SET dpBackward[totalNums][0][0] TO TRUE
+
+        PROCEDURE iterateBackward(position INTEGER)
+            IF position = 0 THEN RETURN
+            LET posMinusOne INTEGER = position - 1
+            FOR taken FROM 0 TO k DO
+                FOR state FROM 0 TO P - 1 DO
+                    LET carryOver1 BOOLEAN = dpBackward[posMinusOne][taken][state] OR dpBackward[position][taken][state]
+                    SET dpBackward[posMinusOne][taken][state] TO carryOver1
+                    IF taken + 1 <= k + 1 THEN
+                        LET newState INTEGER = state BITWISE_OR nums[posMinusOne]
+                        LET carryOver2 BOOLEAN = dpBackward[posMinusOne][taken + 1][newState] OR dpBackward[position][taken][state]
+                        SET dpBackward[posMinusOne][taken + 1][newState] TO carryOver2
+                    END IF
+                END FOR
+            END FOR
+            iterateBackward(posMinusOne)
+        END PROCEDURE
+
+        CALL iterateBackward(totalNums)
+
+        LET result INTEGER = 0
+        FOR index FROM k TO totalNums - k DO
+            FOR fstState FROM 0 TO P - 1 DO
+                IF dpForward[index][k][fstState] = TRUE THEN
+                    FOR sndState FROM 0 TO P - 1 DO
+                        IF dpBackward[index][k][sndState] = TRUE THEN
+                            LET candidate INTEGER = fstState BITWISE_XOR sndState
+                            IF candidate > result THEN
+                                SET result TO candidate
+                            END IF
+                        END IF
+                    END FOR
+                END IF
+            END FOR
+        END FOR
+        RETURN result
+    END FUNCTION
+END CLASS

@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        IF (NOT (x LESS THAN OR EQUAL TO y))
+            SET swap_helper TO x
+            SET x TO y
+            SET y TO swap_helper
+        END IF
+
+        FUNCTION bfs(origin)
+            SET visited_flags TO ARRAY OF BOOLEAN WITH SIZE (n PLUS ONE) FILLED WITH FALSE
+            SET dist_values TO ARRAY OF INTEGER WITH SIZE (n PLUS ONE) FILLED WITH ZERO
+            INITIALIZE dequeue_structure WITH origin AS ONLY ELEMENT
+            SET visited_flags[origin] TO TRUE
+
+            FUNCTION processQueue(dq)
+                IF LENGTH OF dq EQUALS ZERO
+                    RETURN
+                END IF
+                REMOVE front_element FROM dq
+                SET current_node TO front_element
+
+                SET adjacents TO ARRAY WITH ELEMENTS (current_node MINUS ONE, current_node PLUS ONE)
+
+                FOR EACH neighbor_candidate IN adjacents
+                    IF (neighbor_candidate GREATER THAN OR EQUAL TO ONE) AND (neighbor_candidate LESS THAN OR EQUAL TO n) AND (visited_flags[neighbor_candidate] EQUALS FALSE)
+                        SET visited_flags[neighbor_candidate] TO TRUE
+                        SET dist_values[neighbor_candidate] TO dist_values[current_node] PLUS ONE
+                        APPEND neighbor_candidate TO dq
+                    END IF
+                END FOR
+
+                IF (current_node EQUALS x) AND (visited_flags[y] EQUALS FALSE)
+                    SET visited_flags[y] TO TRUE
+                    SET dist_values[y] TO dist_values[current_node] PLUS ONE
+                    APPEND y TO dq
+                ELSE IF (current_node EQUALS y) AND (visited_flags[x] EQUALS FALSE)
+                    SET visited_flags[x] TO TRUE
+                    SET dist_values[x] TO dist_values[current_node] PLUS ONE
+                    APPEND x TO dq
+                END IF
+
+                CALL processQueue(dq)
+            END FUNCTION
+
+            CALL processQueue(dequeue_structure)
+
+            SET sliced_distance_list TO EMPTY ARRAY
+            FOR index FROM ONE TO n
+                APPEND dist_values[index] TO sliced_distance_list
+            END FOR
+
+            RETURN sliced_distance_list
+        END FUNCTION
+
+        SET frequency_counts TO ARRAY OF INTEGER WITH SIZE n FILLED WITH ZERO
+
+        FUNCTION iterateIndices(current_index)
+            IF current_index GREATER THAN n
+                RETURN
+            END IF
+
+            SET distance_results TO CALL bfs(current_index)
+
+            FUNCTION updateFrequencies(lst, idx)
+                IF idx GREATER THAN LENGTH OF lst
+                    RETURN
+                END IF
+                SET individual_distance TO lst[idx MINUS ONE]
+                IF individual_distance GREATER THAN ZERO
+                    SET previous_count TO frequency_counts[individual_distance MINUS ONE]
+                    SET frequency_counts[individual_distance MINUS ONE] TO previous_count PLUS ONE
+                END IF
+                CALL updateFrequencies(lst, idx PLUS ONE)
+            END FUNCTION
+
+            CALL updateFrequencies(distance_results, ONE)
+            CALL iterateIndices(current_index PLUS ONE)
+        END FUNCTION
+
+        CALL iterateIndices(ONE)
+
+        RETURN frequency_counts
+    END FUNCTION
+END CLASS

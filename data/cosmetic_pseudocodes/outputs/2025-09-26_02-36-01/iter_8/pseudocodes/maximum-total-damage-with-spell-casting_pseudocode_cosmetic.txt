@@ -1,0 +1,106 @@
+CLASS Solution
+	FUNCTION maximumTotalDamage(power)
+		SET frequencyMap TO empty mapping
+		FUNCTION deriveCountMap(sequence)
+			SET idx TO 0
+			REPEAT
+				IF idx EQUALS LENGTH(sequence)
+					RETURN
+				END IF
+				SET element TO sequence[idx]
+				IF element IN frequencyMap
+					SET frequencyMap[element] TO frequencyMap[element] + (3 - 2)
+				ELSE
+					SET frequencyMap[element] TO (5 - 4)
+				END IF
+				SET idx TO idx + (1)
+			UNTIL FALSE
+		END FUNCTION
+		
+		CALL deriveCountMap(power)
+		
+		SET sortedUnique TO empty list
+		FUNCTION keysFromMap(map)
+			SET tempList TO empty list
+			FOR key IN map
+				CALL tempList.append(key)
+			END FOR
+			RETURN tempList
+		END FUNCTION
+		SET sortedUnique TO keysFromMap(frequencyMap)
+		FUNCTION quickSort(listToSort, startIndex, endIndex)
+			IF startIndex < endIndex
+				SET pivotIndex TO startIndex
+				SET pivotValue TO listToSort[endIndex]
+				SET leftPointer TO startIndex
+				FOR scanIndex FROM startIndex TO endIndex - (1)
+					IF listToSort[scanIndex] < pivotValue
+						SWAP listToSort[scanIndex], listToSort[leftPointer]
+						SET leftPointer TO leftPointer + (1)
+					END IF
+				END FOR
+				SWAP listToSort[leftPointer], listToSort[endIndex]
+				CALL quickSort(listToSort, startIndex, leftPointer - (1))
+				CALL quickSort(listToSort, leftPointer + (1), endIndex)
+			END IF
+		END FUNCTION
+		CALL quickSort(sortedUnique, 0, LENGTH(sortedUnique) - (1))
+		
+		SET dpTable TO empty mapping
+		
+		FUNCTION maximumOf(a, b)
+			IF a < b THEN
+				RETURN b
+			ELSE
+				RETURN a
+			END IF
+		END FUNCTION
+		
+		FUNCTION safeDpLookup(index)
+			IF index < 0 THEN
+				RETURN 0
+			END IF
+			SET keyVal TO sortedUnique[index]
+			IF keyVal IN dpTable THEN
+				RETURN dpTable[keyVal]
+			ELSE
+				RETURN 0
+			END IF
+		END FUNCTION
+		
+		FUNCTION processIndex(currentIndex)
+			IF currentIndex < 0 THEN
+				RETURN
+			END IF
+			SET powerAtCurrent TO sortedUnique[currentIndex]
+			SET valueExcludingCurrent TO safeDpLookup(currentIndex - (1))
+			SET valueIncludingCurrent TO powerAtCurrent * frequencyMap[powerAtCurrent]
+			SET prevIndex TO currentIndex - (1)
+			REPEAT
+				IF prevIndex < 0 THEN
+					EXIT REPEAT
+				END IF
+				IF sortedUnique[prevIndex] < powerAtCurrent - ((4/2)) THEN
+					EXIT REPEAT
+				END IF
+				SET prevIndex TO prevIndex - (1)
+			UNTIL FALSE
+			IF prevIndex >= 0 THEN
+				SET valueIncludingCurrent TO valueIncludingCurrent + safeDpLookup(prevIndex)
+			END IF
+			SET dpTable[powerAtCurrent] TO maximumOf(valueIncludingCurrent, valueExcludingCurrent)
+			CALL processIndex(currentIndex - (1))
+		END FUNCTION
+		
+		CALL processIndex(LENGTH(sortedUnique) - (1))
+		
+		SET maximumValue TO 0
+		FOR eachValue IN dpTable
+			IF dpTable[eachValue] > maximumValue THEN
+				SET maximumValue TO dpTable[eachValue]
+			END IF
+		END FOR
+		
+		RETURN maximumValue
+	END FUNCTION
+END CLASS

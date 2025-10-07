@@ -1,0 +1,81 @@
+CLASS Solution
+{
+    FUNCTION maxSubstringLength(s)
+    {
+        FUNCTION freqMap(t)
+        {
+            LET map = {}
+            LET p = 0
+            WHILE p < LENGTH(t)
+            {
+                LET u = t[p]
+                IF u IN map THEN map[u] = map[u] + 1 ELSE map[u] = 1
+                p = p + 1
+            }
+            RETURN map
+        }
+
+        LET fullFreq = freqMap(s)
+        LET bestLen = -1
+
+        FUNCTION checkKeys(freqA, freqB)
+        {
+            LET iterKeys = GET_KEYS(freqA)
+            LET q = 0
+            WHILE q < LENGTH(iterKeys)
+            {
+                LET k = iterKeys[q]
+                IF freqA[k] < freqB[k]
+                {
+                    RETURN false
+                }
+                q = q + 1
+            }
+            RETURN true
+        }
+
+        LET startIndex = 0
+
+        FUNCTION loopInner(currentFreq, startInner, accBest)
+        {
+            IF startInner >= LENGTH(s) THEN
+            {
+                RETURN accBest
+            }
+            currentFreq[s[startInner]] = IF currentFreq[s[startInner]] IS_DEFINED THEN currentFreq[s[startInner]] + 1 ELSE 1
+            LET keysCur = GET_KEYS(currentFreq)
+            LET flagContained = true
+            LET idx = 0
+            WHILE idx < LENGTH(keysCur)
+            {
+                LET ch = keysCur[idx]
+                IF currentFreq[ch] < fullFreq[ch]
+                {
+                    flagContained = false
+                    BREAK
+                }
+                idx = idx + 1
+            }
+            IF flagContained = true AND LENGTH(keysCur) < LENGTH(GET_KEYS(fullFreq))
+            {
+                LET lengthCandidate = (startInner - startIndex) + 1
+                accBest = IF lengthCandidate > accBest THEN lengthCandidate ELSE accBest
+            }
+            RETURN loopInner(currentFreq, startInner + 1, accBest)
+        }
+
+        FUNCTION loopOuter(pos)
+        {
+            IF pos >= LENGTH(s) THEN
+            {
+                RETURN bestLen
+            }
+            LET freqCurrent = {}
+            bestLen = loopInner(freqCurrent, pos, bestLen)
+            startIndex = startIndex + 1
+            RETURN loopOuter(pos + 1)
+        }
+
+        RETURN loopOuter(0)
+    }
+}

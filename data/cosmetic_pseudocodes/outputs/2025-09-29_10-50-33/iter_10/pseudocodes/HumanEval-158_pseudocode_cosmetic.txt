@@ -1,0 +1,44 @@
+FUNCTION find_max(list_of_words)
+{
+    DEFINE FUNCTION longest_unique_chars(word)
+    {
+        DEFINE SET unique_chars := {}
+        DEFINE INDEX pos := 0
+        REPEAT
+            IF pos >= LENGTH(word) THEN HALT
+            unique_chars ADD word[pos]
+            pos := pos + 1
+        UNTIL FALSE
+        HALT LENGTH(unique_chars)
+    }
+
+    DEFINE ARRAY indexed := []
+    DEFINE INDEX i := 0
+    WHILE i < LENGTH(list_of_words) DO
+        indexed[i] := TUPLE(word := list_of_words[i], score := - longest_unique_chars(list_of_words[i]))
+        i := i + 1
+    END WHILE
+
+    DEFINE PROCEDURE swap(a, b)
+    {
+        DEFINE TEMP := indexed[a]
+        indexed[a] := indexed[b]
+        indexed[b] := TEMP
+    }
+
+    DEFINE INDEX j := 0
+    WHILE j < LENGTH(indexed) - 1 DO
+        DEFINE INDEX k := 0
+        WHILE k < LENGTH(indexed) - j - 1 DO
+            IF NOT (
+                (indexed[k].score < indexed[k + 1].score)
+                OR (indexed[k].score = indexed[k + 1].score AND indexed[k].word <= indexed[k + 1].word)
+            )
+            THEN swap(k, k + 1)
+            k := k + 1
+        END WHILE
+        j := j + 1
+    END WHILE
+
+    RETURN indexed[0].word
+}

@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION maxScore(originList, limit)
+        FUNCTION checkFeasibility(threshold, capacity)
+            SET stepCount TO 0
+            SET backupCount TO 0
+
+            SET idx TO 0
+            LOOP
+                IF idx IS EQUAL TO LENGTH(originList) THEN
+                    EXIT LOOP
+                END IF
+
+                SET currentPoint TO originList[idx]
+                SET calcReq TO CEIL_DIVIDE(threshold + currentPoint - 1, currentPoint)
+
+                IF calcReq - backupCount < 0 THEN
+                    SET adjustedReq TO 0
+                ELSE
+                    SET adjustedReq TO calcReq - backupCount
+                END IF
+
+                IF adjustedReq > 0 THEN
+                    SET stepCount TO stepCount + (2 * adjustedReq - 1)
+                    SET backupCount TO adjustedReq - 1
+                ELSE
+                    IF idx + 1 < LENGTH(originList) THEN
+                        SET stepCount TO stepCount + 1
+                        SET backupCount TO 0
+                    END IF
+                END IF
+
+                IF stepCount > capacity THEN
+                    RETURN False
+                END IF
+
+                SET idx TO idx + 1
+            END LOOP
+
+            RETURN True
+        END FUNCTION
+
+        FUNCTION CEIL_DIVIDE(a, b)
+            RETURN (a + b - 1) DIV b
+        END FUNCTION
+
+        SET lowerBound TO 0
+        SET upperBound TO ((limit + 1) DIV 2) * (originList[0] + 1)
+
+        SET done TO False
+        WHILE NOT done
+            IF lowerBound >= upperBound THEN
+                SET done TO True
+            ELSE
+                SET pivot TO (lowerBound + upperBound + 1) DIV 2
+                IF checkFeasibility(pivot, limit) THEN
+                    SET lowerBound TO pivot
+                ELSE
+                    SET upperBound TO pivot - 1
+                END IF
+            END IF
+        END WHILE
+
+        RETURN lowerBound
+    END FUNCTION
+END CLASS

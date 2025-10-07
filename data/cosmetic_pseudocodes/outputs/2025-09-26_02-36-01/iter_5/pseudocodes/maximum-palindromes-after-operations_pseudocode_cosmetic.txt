@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION maxPalindromesAfterOperations(words)
+        DEFINE FUNCTION countPairsAndSingles(charsList, idx, pairsAcc, singlesAcc)
+            IF idx EQUALS LENGTH(charsList)
+                RETURN pairsAcc, singlesAcc
+            END IF
+            LET currentVal BE charsList[idx]
+            LET divResult BE currentVal DIV 2
+            LET modResult BE currentVal - (divResult * 2)
+            LET updatedPairs BE pairsAcc + divResult
+            LET updatedSingles BE singlesAcc + modResult
+            RETURN countPairsAndSingles(charsList, idx + 1, updatedPairs, updatedSingles)
+        END FUNCTION
+
+        LET allCharacters BE EMPTY LIST
+        LET wordIndex BE 0
+        WHILE wordIndex LESS THAN LENGTH(words)
+            LET currentWord BE words[wordIndex]
+            LET charPos BE 0
+            WHILE charPos LESS THAN LENGTH(currentWord)
+                APPEND currentWord[charPos] TO allCharacters
+                SET charPos TO charPos + 1
+            END WHILE
+            SET wordIndex TO wordIndex + 1
+        END WHILE
+
+        LET character_count_map BE EMPTY MAP
+        LET charIndex BE 0
+        WHILE charIndex LESS THAN LENGTH(allCharacters)
+            LET ch BE allCharacters[charIndex]
+            IF ch IN character_count_map
+                SET character_count_map[ch] TO character_count_map[ch] + 1
+            ELSE
+                SET character_count_map[ch] TO 1
+            END IF
+            SET charIndex TO charIndex + 1
+        END WHILE
+
+        LET charCountValues BE EMPTY LIST
+        FOR EACH key IN character_count_map KEYS
+            APPEND character_count_map[key] TO charCountValues
+        END FOR
+
+        LET initialPairs BE 0
+        LET initialSingles BE 0
+        LET pairsCount, singlesCount BE countPairsAndSingles(charCountValues, 0, initialPairs, initialSingles)
+
+        DEFINE FUNCTION sortByLengthAsc(arr)
+            IF LENGTH(arr) LESS THAN OR EQUAL TO 1 THEN
+                RETURN arr
+            END IF
+            LET pivot BE arr[0]
+            LET lesser BE EMPTY LIST
+            LET greaterOrEqual BE EMPTY LIST
+            LET indexSort BE 1
+            WHILE indexSort LESS THAN LENGTH(arr)
+                IF LENGTH(arr[indexSort]) LESS THAN LENGTH(pivot) THEN
+                    APPEND arr[indexSort] TO lesser
+                ELSE
+                    APPEND arr[indexSort] TO greaterOrEqual
+                END IF
+                SET indexSort TO indexSort + 1
+            END WHILE
+            RETURN sortByLengthAsc(lesser) + [pivot] + sortByLengthAsc(greaterOrEqual)
+        END FUNCTION
+
+        LET orderedWords BE sortByLengthAsc(words)
+
+        LET palindromeCounter BE 0
+
+        DEFINE FUNCTION processWords(idx, pairsAvailable, palindromeSoFar)
+            IF idx EQUALS LENGTH(orderedWords)
+                RETURN palindromeSoFar
+            END IF
+            LET currentStr BE orderedWords[idx]
+            LET halfLen BE (LENGTH(currentStr) - (LENGTH(currentStr) MOD 2)) DIV 2
+            IF pairsAvailable GREATER THAN OR EQUAL TO halfLen THEN
+                LET updatedPairs BE pairsAvailable - halfLen
+                LET updatedPalindromes BE palindromeSoFar + 1
+                RETURN processWords(idx + 1, updatedPairs, updatedPalindromes)
+            ELSE
+                RETURN processWords(idx + 1, pairsAvailable, palindromeSoFar)
+            END IF
+        END FUNCTION
+
+        LET finalResult BE processWords(0, pairsCount, palindromeCounter)
+
+        RETURN finalResult
+    END FUNCTION
+END CLASS

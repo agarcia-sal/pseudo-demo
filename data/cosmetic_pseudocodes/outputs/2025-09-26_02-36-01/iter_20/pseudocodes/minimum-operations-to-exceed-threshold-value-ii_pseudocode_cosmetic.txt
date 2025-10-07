@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION minOperations(nums parameter k parameter)
+        DEFINE FUNCTION customHeapify(collection parameter)
+            FOR index FROM (LENGTH(collection) DIV 2) DOWNTO 0 STEP -1
+                CALL customSiftDown(collection, index)
+            END FOR
+        END FUNCTION
+        
+        DEFINE FUNCTION customSiftDown(heap parameter, start parameter)
+            SET heapSize TO LENGTH(heap)
+            SET idx TO start
+            REPEAT
+                SET leftChild TO (2 * idx) + 1
+                SET rightChild TO leftChild + 1
+                SET smallest TO idx
+
+                IF leftChild < heapSize AND heap[leftChild] < heap[smallest]
+                    SET smallest TO leftChild
+                END IF
+                IF rightChild < heapSize AND heap[rightChild] < heap[smallest]
+                    SET smallest TO rightChild
+                END IF
+
+                IF smallest == idx
+                    BREAK
+                END IF
+
+                SWAP heap[idx], heap[smallest]
+                SET idx TO smallest
+            UNTIL FALSE
+        END FUNCTION
+        
+        DEFINE FUNCTION customHeappop(heap parameter)
+            SET root TO heap[0]
+            SET lastElement TO heap[LENGTH(heap) - 1]
+            SET heap[0] TO lastElement
+            REMOVE last element from heap
+            CALL customSiftDown(heap, 0)
+            RETURN root
+        END FUNCTION
+
+        DEFINE FUNCTION customHeappush(heap parameter, val parameter)
+            ADD val TO end of heap
+            SET currentIdx TO LENGTH(heap) - 1
+            WHILE currentIdx > 0
+                SET parentIdx TO (currentIdx - 1) DIV 2
+                IF heap[parentIdx] <= heap[currentIdx]
+                    EXIT WHILE
+                END IF
+                SWAP heap[parentIdx], heap[currentIdx]
+                SET currentIdx TO parentIdx
+            END WHILE
+        END FUNCTION
+
+        CALL customHeapify(nums)
+        SET countOps TO 0
+
+        REPEAT
+            IF NOT (nums[0] < k AND LENGTH(nums) > 1)
+                BREAK
+            END IF
+
+            SET firstVal TO customHeappop(nums)
+            SET secondVal TO customHeappop(nums)
+            SET computedVal TO (MINIMUM(firstVal, secondVal) * 2) + MAXIMUM(firstVal, secondVal)
+            CALL customHeappush(nums, computedVal)
+            SET countOps TO countOps + 1
+        UNTIL FALSE
+
+        RETURN countOps
+    END FUNCTION
+END CLASS

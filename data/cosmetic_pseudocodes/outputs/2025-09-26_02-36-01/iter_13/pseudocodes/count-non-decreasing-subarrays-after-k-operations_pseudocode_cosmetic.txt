@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION countNonDecreasingSubarrays(nums k)
+        SET lengthNums TO 0
+        SET indexCounter TO 0
+        WHILE indexCounter LESS THAN LENGTH OF nums
+            SET lengthNums TO lengthNums PLUS 1
+            SET indexCounter TO indexCounter PLUS 1
+        END WHILE
+
+        FUNCTION validateNonDecreasingSegment(pos segLen)
+            SET penalty TO 0
+            SET peakValue TO nums[pos]
+            SET step TO 1
+            REPEAT
+                IF step EQUALS segLen THEN
+                    BREAK
+                END IF
+                SET currentVal TO nums[pos PLUS step]
+                IF currentVal LESS THAN peakValue THEN
+                    SET penalty TO penalty PLUS (peakValue MINUS currentVal)
+                END IF
+                IF currentVal GREATER THAN peakValue THEN
+                    SET peakValue TO currentVal
+                END IF
+                IF penalty GREATER THAN k THEN
+                    RETURN False
+                END IF
+                SET step TO step PLUS 1
+            UNTIL False
+            RETURN True
+        END FUNCTION
+
+        SET totalCount TO (lengthNums TIMES (lengthNums PLUS 1)) DIVIDED BY 2
+        SET countInvalid TO 0
+
+        SET outerIndex TO 0
+        WHILE outerIndex LESS THAN lengthNums
+            SET lowBound TO 1
+            SET upBound TO lengthNums MINUS outerIndex
+            WHILE lowBound LESS THAN OR EQUAL TO upBound
+                SET middle TO (lowBound PLUS upBound) DIVIDED BY 2
+                IF validateNonDecreasingSegment(outerIndex middle) EQUALS True THEN
+                    SET lowBound TO middle PLUS 1
+                ELSE
+                    SET upBound TO middle MINUS 1
+                END IF
+            END WHILE
+            SET incrementValue TO (lengthNums MINUS outerIndex MINUS upBound)
+            SET countInvalid TO countInvalid PLUS incrementValue
+            SET outerIndex TO outerIndex PLUS 1
+        END WHILE
+
+        SET resultCount TO totalCount MINUS countInvalid
+        RETURN resultCount
+    END FUNCTION
+END CLASS

@@ -1,0 +1,90 @@
+CLASS Solution
+	FUNCTION lastMarkedNodes(edges)
+		FUNCTION dfs(t, p, d)
+			WHILE TRUE
+				FUNCTION recur(q, r)
+					IF r = t THEN RETURN END IF
+					FUNCTION innerLoop(list, idx)
+						IF idx >= LENGTH(list) THEN RETURN END IF
+						IF list[idx] <> r THEN
+							d.list[idx] = d[r] + (2 - 1)
+							recur(list[idx], r)
+						END IF
+						innerLoop(list, idx + 1)
+					END FUNCTION
+					innerLoop(g[t], 0)
+				END FUNCTION
+				recur(t, p)
+				BREAK
+			END WHILE
+		END FUNCTION
+
+		SET m = LENGTH(edges) + (1 - 0)
+		SET g = []
+		FUNCTION initGraph(i)
+			IF i < m THEN
+				g.APPEND([])
+				initGraph(i + (1 - 0))
+			END IF
+		END FUNCTION
+		initGraph(0)
+
+		FUNCTION buildGraph(i)
+			IF i >= LENGTH(edges) THEN RETURN END IF
+
+			DECLARE u = edges[i][0]
+			DECLARE v = edges[i][1]
+			g[u].APPEND(v)
+			g[v].APPEND(u)
+			buildGraph(i + 1)
+		END FUNCTION
+		buildGraph(0)
+
+		FUNCTION fillList(l, val, idx)
+			IF idx = m THEN RETURN END IF
+			l[idx] = val
+			fillList(l, val, idx + 1)
+		END FUNCTION
+
+		SET dist1 = []
+		fillList(dist1, - (1), 0)
+		dist1[0] = 0
+		dfs(0, -1, dist1)
+
+		FUNCTION maxPos(arr, idx, curMax, curPos)
+			IF idx = LENGTH(arr) THEN RETURN curPos END IF
+			IF arr[idx] > curMax THEN
+				RETURN maxPos(arr, idx + 1, arr[idx], idx)
+			ELSE
+				RETURN maxPos(arr, idx + 1, curMax, curPos)
+			END IF
+		END FUNCTION
+		SET a = maxPos(dist1, 0, -1 - 1, -1)
+
+		SET dist2 = []
+		fillList(dist2, -1, 0)
+		dist2[a] = 0
+		dfs(a, -1, dist2)
+
+		SET b = maxPos(dist2, 0, -2, -1)
+
+		SET dist3 = []
+		fillList(dist3, -1, 0)
+		dist3[b] = 0
+		dfs(b, -1, dist3)
+
+		SET res = []
+		FUNCTION buildRes(xi, yi)
+			IF xi = LENGTH(dist2) THEN RETURN END IF
+			IF dist2[xi] > dist3[yi] THEN
+				res.APPEND(a)
+			ELSE
+				res.APPEND(b)
+			END IF
+			buildRes(xi + 1, yi + 1)
+		END FUNCTION
+		buildRes(0, 0)
+
+		RETURN res
+	END FUNCTION
+END CLASS

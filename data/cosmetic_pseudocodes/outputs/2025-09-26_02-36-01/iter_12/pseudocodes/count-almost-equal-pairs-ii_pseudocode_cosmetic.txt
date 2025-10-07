@@ -1,0 +1,103 @@
+CLASS Solution
+    FUNCTION countPairs(nums)
+        DEFINE FUNCTION replicateSort(array)
+            DEFINE FUNCTION quickPartition(arr, low, high)
+                SET pivot_val TO arr[high]
+                SET pointer TO low
+                DEFINE FUNCTION swapElements(arr, idx1, idx2)
+                    SET temp_var TO arr[idx1]
+                    SET arr[idx1] = arr[idx2]
+                    SET arr[idx2] = temp_var
+                END FUNCTION
+                FOR walker FROM low TO high - 1
+                    IF arr[walker] <= pivot_val THEN
+                        CALL swapElements(arr, walker, pointer)
+                        pointer = pointer + 1
+                    END IF
+                END FOR
+                CALL swapElements(arr, pointer, high)
+                RETURN pointer
+            END FUNCTION
+            DEFINE FUNCTION quickSortHelper(arr, left, right)
+                IF left < right THEN
+                    SET split_point TO quickPartition(arr, left, right)
+                    CALL quickSortHelper(arr, left, split_point - 1)
+                    CALL quickSortHelper(arr, split_point + 1, right)
+                END IF
+            END FUNCTION
+            CALL quickSortHelper(array, 0, LENGTH(array) - 1)
+        END FUNCTION
+
+        CALL replicateSort(nums)
+
+        SET totalPairs TO 0
+        SET frequencyMap TO empty map WITH DEFAULT 0
+        DEFINE FUNCTION integerJoin(charList)
+            SET composedString TO EMPTY_STRING
+            FOR each character IN charList
+                composedString = composedString + character
+            END FOR
+            RETURN CONVERT_TO_INTEGER(composedString)
+        END FUNCTION
+
+        DEFINE FUNCTION swapByIndices(collection, idxA, idxB)
+            SET temp_storage TO collection[idxA]
+            collection[idxA] = collection[idxB]
+            collection[idxB] = temp_storage
+        END FUNCTION
+
+        DEFINE FUNCTION addAllFromSetToSum(freqMap, valuesSet)
+            SET accumulatedTotal TO 0
+            FOR each item IN valuesSet
+                IF freqMap CONTAINS item THEN
+                    accumulatedTotal = accumulatedTotal + freqMap[item]
+                END IF
+            END FOR
+            RETURN accumulatedTotal
+        END FUNCTION
+
+        DEFINE FUNCTION generateAllVariations(numStr, currentIndex, visSet)
+            IF currentIndex >= LENGTH(numStr) THEN
+                RETURN
+            END IF
+            FOR forwardIdx FROM LENGTH(numStr) - 1 DOWNTO currentIndex + 1
+                CALL swapByIndices(numStr, currentIndex, forwardIdx)
+                ADD integerJoin(numStr) TO visSet
+
+                FOR backwardIdx FROM currentIndex + 1 TO forwardIdx - 1
+                    CALL swapByIndices(numStr, backwardIdx, forwardIdx)
+                    ADD integerJoin(numStr) TO visSet
+                    CALL swapByIndices(numStr, backwardIdx, forwardIdx)
+                END FOR
+
+                CALL swapByIndices(numStr, currentIndex, forwardIdx)
+            END FOR
+
+            CALL generateAllVariations(numStr, currentIndex + 1, visSet)
+        END FUNCTION
+
+        DEFINE FUNCTION iterateOverElements(collection)
+            SET next_index TO 0
+            WHILE next_index < LENGTH(collection)
+                YIELD collection[next_index]
+                next_index = next_index + 1
+            END WHILE
+        END FUNCTION
+
+        FOR element IN iterateOverElements(nums)
+            SET visitedValues TO new empty set
+            ADD element TO visitedValues
+            SET elementStringList TO list(CONVERT_TO_STRING(element))
+            CALL generateAllVariations(elementStringList, 0, visitedValues)
+            totalPairs = totalPairs + addAllFromSetToSum(frequencyMap, visitedValues)
+
+            IF element IN frequencyMap THEN
+                frequencyMap[element] = frequencyMap[element] + 1
+            ELSE
+                frequencyMap[element] = 1
+            END IF
+        END FOR
+
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

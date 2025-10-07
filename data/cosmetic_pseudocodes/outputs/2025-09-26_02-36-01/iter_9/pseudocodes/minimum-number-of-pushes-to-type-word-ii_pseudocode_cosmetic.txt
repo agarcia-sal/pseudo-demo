@@ -1,0 +1,65 @@
+CLASS Solution
+  FUNCTION minimumPushes(word)
+    FUNCTION tallyLetters(text)
+      DECLARE frequencies AS DICTIONARY<char, int> INITIALIZED EMPTY
+      DECLARE index AS int
+      SET index TO 0
+      WHILE index LESS THAN LENGTH(text)
+        DECLARE currentChar AS char
+        SET currentChar TO text[index]
+        IF NOT (currentChar IN frequencies)
+          SET frequencies[currentChar] TO 1
+        ELSE
+          SET frequencies[currentChar] TO frequencies[currentChar] PLUS 1
+        ENDIF
+        SET index TO index PLUS 1
+      END WHILE
+      RETURN frequencies
+    END FUNCTION
+
+    FUNCTION sortDescending(values)
+      DECLARE listCopy AS LIST<int> ASSIGNED TO values
+      DECLARE i AS int, j AS int, temp AS int
+      SET i TO 0
+      WHILE i LESS THAN LENGTH(listCopy) MINUS 1
+        SET j TO 0
+        WHILE j LESS THAN LENGTH(listCopy) MINUS 1 MINUS i
+          IF listCopy[j] LESS THAN listCopy[j PLUS 1]
+            SET temp TO listCopy[j]
+            SET listCopy[j] TO listCopy[j PLUS 1]
+            SET listCopy[j PLUS 1] TO temp
+          ENDIF
+          SET j TO j PLUS 1
+        END WHILE
+        SET i TO i PLUS 1
+      END WHILE
+      RETURN listCopy
+    END FUNCTION
+
+    DECLARE frequencyMap AS DICTIONARY<char, int> ASSIGNED TO tallyLetters(word)
+    DECLARE freqValues AS LIST<int> ASSIGNED TO EMPTY LIST
+    FOR EACH key IN frequencyMap KEYS
+      APPEND frequencyMap[key] TO freqValues
+    END FOR
+    DECLARE orderedFreqs AS LIST<int> ASSIGNED TO sortDescending(freqValues)
+
+    DECLARE aggregatePushes AS int INITIALIZED TO 0
+    DECLARE pressCount AS int INITIALIZED TO 1
+    DECLARE assignedKeys AS int INITIALIZED TO 0
+
+    DECLARE idx AS int INITIALIZED TO 0
+    WHILE idx LESS THAN LENGTH(orderedFreqs)
+      DECLARE currentCount AS int
+      SET currentCount TO orderedFreqs[idx]
+      SET aggregatePushes TO aggregatePushes PLUS (currentCount MULTIPLIED BY pressCount)
+      SET assignedKeys TO assignedKeys PLUS 1
+      IF assignedKeys EQUALS 8
+        SET assignedKeys TO 0
+        SET pressCount TO pressCount PLUS 1
+      ENDIF
+      SET idx TO idx PLUS 1
+    END WHILE
+
+    RETURN aggregatePushes
+  END FUNCTION
+END CLASS

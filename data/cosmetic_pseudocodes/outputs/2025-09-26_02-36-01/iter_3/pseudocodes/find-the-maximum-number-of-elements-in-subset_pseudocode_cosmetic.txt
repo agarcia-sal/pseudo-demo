@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION maximumLength(nums)
+        LET frequency = {}
+        LET results = {}
+        LET process
+        LET highest = 1
+
+        FOR i = 0 TO LENGTH(nums) - 1
+            LET val = nums[i]
+            IF val IN frequency THEN
+                frequency[val] = frequency[val] + 1
+            ELSE
+                frequency[val] = 1
+            END IF
+        END FOR
+
+        FUNCTION process(x)
+            IF NOT (x IN frequency) OR frequency[x] < 2 THEN
+                IF (x IN frequency) AND frequency[x] >= 1 THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            IF x IN results THEN
+                RETURN results[x]
+            END IF
+
+            LET squared = x * x
+            LET res = process(squared) + 2
+            results[x] = res
+            RETURN res
+        END FUNCTION
+
+        LET keys = []
+        FOR key IN frequency
+            keys.APPEND(key)
+        END FOR
+
+        LET index = 0
+        WHILE index < LENGTH(keys)
+            LET k = keys[index]
+            IF k == 1 THEN
+                LET countOne = frequency[k]
+                LET pairCount = countOne - (countOne % 2)
+                LET candidate = pairCount - 1
+                IF highest < candidate THEN
+                    highest = candidate
+                END IF
+            ELSE
+                LET candidate = process(k)
+                IF highest < candidate THEN
+                    highest = candidate
+                END IF
+            END IF
+            index = index + 1
+        END WHILE
+
+        RETURN highest
+    END FUNCTION
+END CLASS

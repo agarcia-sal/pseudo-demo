@@ -1,0 +1,64 @@
+CLASS Solution
+    FUNCTION minOperationsToMakeMedianK(nums k)
+        DEFINE swapper(a b) = (temp = a; a = b; b = temp)
+        DEFINE sortList(lst)
+            REPEAT
+                SET changed = FALSE
+                SET idx = 0
+                WHILE idx < LENGTH(lst) - 1
+                    IF lst[idx] > lst[idx + 1]
+                        swapper(lst[idx], lst[idx + 1])
+                        SET changed = TRUE
+                    END IF
+                    SET idx = idx + 1
+                END WHILE
+            UNTIL NOT changed
+            RETURN lst
+        END FUNCTION
+
+        SET processedList TO sortList(nums)
+        SET totalElements TO LENGTH(processedList)
+        SET medPosition TO 0
+        REPEAT
+            IF medPosition + 1 > totalElements DIV 2
+                BREAK
+            END IF
+            SET medPosition = medPosition + 1
+        UNTIL FALSE
+        SET medPosition = medPosition - 1
+
+        SET resultVal TO 0
+
+        IF processedList[medPosition] == k THEN
+            RETURN 0
+        ELSE
+            IF NOT (processedList[medPosition] >= k)
+                WHILE TRUE
+                    IF NOT (processedList[medPosition] < k)
+                        BREAK
+                    END IF
+                    SET addVal TO k + (- processedList[medPosition])
+                    SET resultVal = resultVal + addVal
+                    SET medPosition = medPosition + 1
+                    IF medPosition >= totalElements
+                        BREAK
+                    END IF
+                END WHILE
+            ELSE
+                REPEAT
+                    IF NOT (processedList[medPosition] > k)
+                        BREAK
+                    END IF
+                    SET subtractVal TO processedList[medPosition] + (-k)
+                    SET resultVal = resultVal + subtractVal
+                    SET medPosition = medPosition - 1
+                    IF medPosition < 0
+                        BREAK
+                    END IF
+                UNTIL FALSE
+            END IF
+        END IF
+
+        RETURN resultVal
+    END FUNCTION
+END CLASS

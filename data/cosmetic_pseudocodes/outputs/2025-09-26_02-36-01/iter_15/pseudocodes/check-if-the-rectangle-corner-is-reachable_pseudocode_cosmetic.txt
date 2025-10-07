@@ -1,0 +1,75 @@
+```pseudocode
+CLASS Solution
+    FUNCTION canReachCorner(xCorner yCorner circles)
+        FUNCTION in_circle(alpha beta gamma delta epsilon)
+            SET part1 TO (alpha - gamma) * (alpha - gamma)
+            SET part2 TO (beta - delta) * (beta - delta)
+            SET limit TO epsilon * epsilon
+            RETURN (part1 + part2) <= limit
+        END FUNCTION
+
+        FUNCTION cross_left_top(chi psi rho)
+            SET cond1 TO (ABS(chi) <= rho) AND (0 <= psi) AND (psi <= yCorner)
+            SET cond2 TO (ABS(psi - yCorner) <= rho) AND (0 <= chi) AND (chi <= xCorner)
+            RETURN cond1 OR cond2
+        END FUNCTION
+
+        FUNCTION cross_right_bottom(zeta eta theta)
+            SET cond3 TO (ABS(zeta - xCorner) <= theta) AND (0 <= eta) AND (eta <= yCorner)
+            SET cond4 TO (ABS(eta) <= theta) AND (0 <= zeta) AND (zeta <= xCorner)
+            RETURN cond3 OR cond4
+        END FUNCTION
+
+        FUNCTION dfs(m)
+            SET A TO circles[m][0]
+            SET B TO circles[m][1]
+            SET C TO circles[m][2]
+            IF cross_right_bottom(A B C)
+                RETURN True
+            END IF
+            vis[m] = True
+
+            SET n TO 0
+            WHILE n < LENGTH(circles)
+                SET D TO circles[n][0]
+                SET E TO circles[n][1]
+                SET F TO circles[n][2]
+
+                IF vis[n] = True
+                    SET n TO n + 1
+                    CONTINUE
+                END IF
+
+                SET dist_sq TO (A - D) * (A - D) + (B - E) * (B - E)
+                SET rad_sum TO C + F
+                IF dist_sq > rad_sum * rad_sum
+                    SET n TO n + 1
+                    CONTINUE
+                END IF
+
+                SET condX TO (A * F + D * C) < rad_sum * xCorner
+                SET condY TO (B * F + E * C) < rad_sum * yCorner
+
+                IF condX AND condY AND dfs(n)
+                    RETURN True
+                END IF
+
+                SET n TO n + 1
+            END WHILE
+            RETURN False
+        END FUNCTION
+
+        SET vis TO an array of False of length LENGTH(circles)
+        FOR idx, (p, q, r) IN ENUMERATE(circles)
+            IF in_circle(0 0 p q r) OR in_circle(xCorner yCorner p q r)
+                RETURN False
+            END IF
+
+            IF NOT vis[idx] AND cross_left_top(p q r) AND dfs(idx)
+                RETURN False
+            END IF
+        END FOR
+        RETURN True
+    END FUNCTION
+END CLASS
+```

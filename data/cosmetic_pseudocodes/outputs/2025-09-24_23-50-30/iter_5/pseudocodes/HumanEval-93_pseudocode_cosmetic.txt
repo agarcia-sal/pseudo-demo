@@ -1,0 +1,32 @@
+```
+FUNCTION encode(data)
+    LET swaps ← MAP EACH element IN "aeiouAEIOU" TO CHAR(ORD(element) + 2)
+    LET substitute ← EMPTY DICTIONARY
+    FOR index FROM 0 TO LENGTH("aeiouAEIOU") - 1 DO
+        substitute["aeiouAEIOU"[index]] ← swaps[index]
+    END FOR
+
+    FUNCTION swapCase(text, position, accumulator)
+        IF position >= LENGTH(text) THEN
+            RETURN accumulator
+        END IF
+        LET current ← text[position]
+        LET swapped ← IF current >= 'a' AND current <= 'z' THEN TO_UPPER(current) ELSE IF current >= 'A' AND current <= 'Z' THEN TO_LOWER(current) ELSE current
+        RETURN swapCase(text, position + 1, accumulator + swapped)
+    END FUNCTION
+
+    LET toggled ← swapCase(data, 0, "")
+
+    FUNCTION replaceChars(text, idx, result)
+        IF idx = LENGTH(text) THEN RETURN result END IF
+        LET chr ← text[idx]
+        IF chr IN substitute THEN
+            RETURN replaceChars(text, idx + 1, result + substitute[chr])
+        ELSE
+            RETURN replaceChars(text, idx + 1, result + chr)
+        END IF
+    END FUNCTION
+
+    RETURN replaceChars(toggled, 0, "")
+END FUNCTION
+```

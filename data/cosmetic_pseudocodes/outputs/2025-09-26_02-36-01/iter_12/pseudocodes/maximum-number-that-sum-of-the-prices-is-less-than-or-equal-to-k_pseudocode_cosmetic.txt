@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION findMaximumNumber(k, x)
+        FUNCTION count_set_bits(n, pos)
+            FUNCTION power_of_two(exp)
+                SET result TO 1
+                SET counter TO 0
+                REPEAT
+                    IF counter EQUALS exp
+                        EXIT
+                    END IF
+                    SET result TO result MULTIPLIED BY 2
+                    SET counter TO counter PLUS 1
+                UNTIL false
+                RETURN result
+            END FUNCTION
+
+            SET accumulator TO 0
+            SET segment TO power_of_two(pos)
+            SET blocks TO FLOOR_DIVIDE(n, segment)
+            SET accumulator TO accumulator PLUS (FLOOR_DIVIDE(blocks, 2) MULTIPLIED BY segment)
+
+            IF (blocks MOD 2) EQUALS 1 THEN
+                SET remainder TO (n MOD segment) PLUS 1
+                SET accumulator TO accumulator PLUS remainder
+            END IF
+
+            RETURN accumulator
+        END FUNCTION
+
+        FUNCTION accumulated_price(n)
+            FUNCTION is_power_condition(i_local, base, value_n)
+                SET exponent TO (i_local MULTIPLIED BY base) MINUS 1
+                SET pow TO 1
+                SET idx TO 0
+                WHILE idx NOT EQUAL TO exponent
+                    SET pow TO pow MULTIPLIED BY 2
+                    SET idx TO idx PLUS 1
+                END WHILE
+                RETURN pow LESS OR EQUAL value_n
+            END FUNCTION
+
+            SET total_price TO 0
+            SET index_var TO 1
+            WHILE is_power_condition(index_var, x, n)
+                SET bit_position TO (index_var MULTIPLIED BY x) MINUS 1
+                SET increment_value TO count_set_bits(n, bit_position)
+                SET total_price TO total_price PLUS increment_value
+                SET index_var TO index_var PLUS 1
+            END WHILE
+            RETURN total_price
+        END FUNCTION
+
+        FUNCTION floor_divide(a, b)
+            RETURN (a MINUS (a MOD b)) DIVIDED BY b
+        END FUNCTION
+
+        SET lower_bound TO 1
+        SET upper_bound TO 1
+        SET exponent_counter TO 0
+        WHILE exponent_counter NOT EQUAL TO 60
+            SET upper_bound TO upper_bound MULTIPLIED BY 2
+            SET exponent_counter TO exponent_counter PLUS 1
+        END WHILE
+
+        PROCEDURE rec_binary_search(low_param, high_param, OUT result_value)
+            IF low_param GREATER THAN high_param THEN
+                SET result_value TO high_param
+                RETURN
+            END IF
+
+            SET middle TO low_param PLUS floor_divide((high_param MINUS low_param), 2)
+
+            IF accumulated_price(middle) LESS OR EQUAL k THEN
+                CALL rec_binary_search((middle PLUS 1), high_param, result_value)
+            ELSE
+                CALL rec_binary_search(low_param, (middle MINUS 1), result_value)
+            END IF
+        END PROCEDURE
+
+        SET answer TO 0
+        CALL rec_binary_search(lower_bound, upper_bound, answer)
+        RETURN answer
+    END FUNCTION
+END CLASS

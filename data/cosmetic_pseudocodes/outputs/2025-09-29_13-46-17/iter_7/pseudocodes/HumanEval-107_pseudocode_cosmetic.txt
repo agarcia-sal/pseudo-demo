@@ -1,0 +1,36 @@
+```
+FUNCTION even_odd_palindrome(n)
+	TYPE PalindromeCounts AS RECORD
+		even_count: INTEGER
+		odd_count: INTEGER
+	END RECORD
+
+	FUNCTION is_palindrome(number)
+		FUNCTION recursive_compare(start_index, end_index)
+			IF start_index >= end_index THEN RETURN TRUE END IF
+			RETURN (TO_CHAR(number, start_index) = TO_CHAR(number, end_index)) AND recursive_compare(start_index + 1, end_index - 1)
+		END FUNCTION
+		RETURN recursive_compare(0, LENGTH(TO_STRING(number)) - 1)
+	END FUNCTION
+
+	FUNCTION fold_over_range(current, limit, acc)
+		IF current > limit THEN RETURN acc END IF
+		LET mod_value = current % 2
+		LET acc1 =
+			IF is_palindrome(current) THEN
+				IF mod_value = 1 THEN RECORD(even_count = acc.even_count, odd_count = acc.odd_count + 1)
+				ELSE IF mod_value = 0 THEN RECORD(even_count = acc.even_count + 1, odd_count = acc.odd_count)
+				ELSE acc
+				END IF
+			ELSE acc
+			END IF
+		RETURN fold_over_range(current + 1, limit, acc1)
+	END FUNCTION
+
+	LET initial_accumulator = RECORD(even_count = 0, odd_count = 0)
+
+	LET final_result = fold_over_range(1, n, initial_accumulator)
+
+	RETURN TUPLE(final_result.even_count, final_result.odd_count)
+END FUNCTION
+```

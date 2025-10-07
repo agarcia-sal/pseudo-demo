@@ -1,0 +1,93 @@
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+        DEFINE pairs AS FUNCTION()
+            DEFINE collection AS [‘0’, ‘1’, ‘2’, ‘3’, ‘4’]
+            DEFINE idx1 AS 0
+            DEFINE result AS []
+            WHILE idx1 < LENGTH(collection)
+                DEFINE idx2 AS 0
+                WHILE idx2 < LENGTH(collection)
+                    IF NOT (collection[idx1] = collection[idx2])
+                        APPEND (collection[idx1], collection[idx2]) TO result
+                    END IF
+                    SET idx2 TO idx2 + 1
+                END WHILE
+                SET idx1 TO idx1 + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        DEFINE minDefaultDict AS FUNCTION(defaultValue)
+            DEFINE dict AS {}
+            DEFINE getKey AS FUNCTION(key)
+                IF key IN dict
+                    RETURN dict[key]
+                ELSE
+                    SET dict[key] TO defaultValue
+                    RETURN dict[key]
+                END IF
+            END FUNCTION
+            DEFINE setKey AS FUNCTION(key, val)
+                SET dict[key] TO val
+            END FUNCTION
+            RETURN (getKey, setKey)
+        END FUNCTION
+
+        SET maximumDifference TO - (1 << 30)  ; negative infinity simulated
+        DEFINE pairsList AS pairs()
+
+        DEFINE length_s AS LENGTH(s)
+        FOR EACH element IN pairsList DO
+            SET charA TO element[0]
+            SET charB TO element[1]
+
+            DEFINE (getMinDiff, setMinDiff) AS minDefaultDict(1 << 30)
+
+            DEFINE prefixCountA AS [0]
+            DEFINE prefixCountB AS [0]
+            DEFINE leftIdx AS 0
+
+            DEFINE PROCEDURE processIndex(currentIndex, currCharA, currCharB)
+                DEFINE incrementA AS IF currCharA = charA THEN 1 ELSE 0 END IF
+                DEFINE incrementB AS IF currCharB = charB THEN 1 ELSE 0 END IF
+
+                APPEND prefixCountA[LENGTH(prefixCountA) - 1] + incrementA TO prefixCountA
+                APPEND prefixCountB[LENGTH(prefixCountB) - 1] + incrementB TO prefixCountB
+
+                WHILE (currentIndex + 1 - leftIdx) >= k
+                    AND prefixCountA[leftIdx] < prefixCountA[LENGTH(prefixCountA) - 1]
+                    AND prefixCountB[leftIdx] < prefixCountB[LENGTH(prefixCountB) - 1] DO
+
+                    DEFINE keyTuple AS (prefixCountA[leftIdx] % 2, prefixCountB[leftIdx] % 2)
+
+                    DEFINE pairMinDiff AS getMinDiff(keyTuple)
+                    DEFINE currentDiff AS (prefixCountA[leftIdx] - prefixCountB[leftIdx])
+                    IF currentDiff < pairMinDiff
+                        setMinDiff(keyTuple, currentDiff)
+                    END IF
+
+                    SET leftIdx TO leftIdx + 1
+                END WHILE
+
+                DEFINE lastIndex AS LENGTH(prefixCountA) - 1
+                DEFINE modA AS prefixCountA[lastIndex] % 2
+                DEFINE modB AS prefixCountB[lastIndex] % 2
+                DEFINE lookupKey AS ((1 - modA), modB)
+
+                DEFINE candidateDiff AS prefixCountA[lastIndex] - prefixCountB[lastIndex] - getMinDiff(lookupKey)
+                IF candidateDiff > maximumDifference
+                    SET maximumDifference TO candidateDiff
+                END IF
+            END PROCEDURE
+
+            DEFINE pos AS 0
+            WHILE pos < length_s
+                CALL processIndex(pos, s[pos], s[pos])
+                SET pos TO pos + 1
+            END WHILE
+
+        END FOR
+
+        RETURN maximumDifference
+    END FUNCTION
+END CLASS

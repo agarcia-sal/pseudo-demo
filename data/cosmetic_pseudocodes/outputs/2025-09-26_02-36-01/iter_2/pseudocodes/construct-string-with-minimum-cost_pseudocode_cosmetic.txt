@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION minimumCost(target, words, costs)
+        DECLARE cost_map = {}
+        DECLARE idx = 0
+        WHILE idx < LENGTH(words)
+            DECLARE current_word = words[idx]
+            DECLARE current_cost = costs[idx]
+            IF NOT current_word IN cost_map
+                ASSIGN cost_map[current_word] = current_cost
+            ELSE
+                IF cost_map[current_word] > current_cost
+                    ASSIGN cost_map[current_word] = current_cost
+                END IF
+            END IF
+            ADD idx BY 1
+        END WHILE
+
+        DECLARE tgt_chars = []
+        FOR i FROM 0 TO LENGTH(target)-1
+            APPEND tgt_chars, STRING(target[i])
+        END FOR
+
+        FUNCTION min_cost_to_form_target(position)
+            IF position == LENGTH(tgt_chars)
+                RETURN 0
+            END IF
+
+            DECLARE minimum_val = 1/0
+
+            FOR EACH pair IN cost_map
+                DECLARE word_str = pair.KEY
+                DECLARE word_cost_val = pair.VALUE
+                DECLARE word_len = LENGTH(word_str)
+
+                IF position + word_len <= LENGTH(tgt_chars)
+                    DECLARE segment = tgt_chars[position : position + word_len]
+                    DECLARE word_array = []
+                    FOR c_idx FROM 0 TO word_len - 1
+                        APPEND word_array, STRING(word_str[c_idx])
+                    END FOR
+
+                    IF segment == word_array
+                        DECLARE recursive_cost = min_cost_to_form_target(position + word_len)
+                        IF recursive_cost != 1/0
+                            DECLARE total_cost = word_cost_val + recursive_cost
+                            IF total_cost < minimum_val
+                                ASSIGN minimum_val = total_cost
+                            END IF
+                        END IF
+                    END IF
+                END IF
+            END FOR
+
+            IF minimum_val != 1/0
+                RETURN minimum_val
+            ELSE
+                RETURN 1/0
+            END IF
+        END FUNCTION
+
+        DECLARE answer = min_cost_to_form_target(0)
+        IF answer != 1/0
+            RETURN answer
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

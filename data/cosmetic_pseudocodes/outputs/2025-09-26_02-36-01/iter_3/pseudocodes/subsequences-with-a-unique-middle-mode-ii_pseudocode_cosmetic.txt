@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        MOD <- 10^9 + 7
+        outcome <<- 0
+        prefixCounts <- empty mapping with default 0
+        suffixCounts <- mapping with counts from nums
+
+        FUNCTION comb2(x)
+            temp1 <- x
+            temp2 <- (temp1 - 1)
+            product <- temp1 * temp2
+            result <- product / 2
+            RETURN result
+        END FUNCTION
+
+        val_pss <- 0
+        val_spp <- 0
+        val_pp <- 0
+        acc_ss <- 0
+        val_ps <- 0
+
+        FOR idx IN 0 TO (length(nums) - 1) DO
+            elem <- nums[idx]
+
+            squaresfx <- suffixCounts[elem]
+            squaresfx_prev <- squaresfx - 1
+            val_pss <- val_pss + prefixCounts[elem] * (-(squaresfx * squaresfx) + (squaresfx_prev * squaresfx_prev))
+            val_spp <- val_spp + (-(prefixCounts[elem] * prefixCounts[elem]))
+            acc_ss <- acc_ss + (-(squaresfx * squaresfx)) + (squaresfx_prev * squaresfx_prev)
+            val_ps <- val_ps + (-(prefixCounts[elem]))
+
+            suffixCounts[elem] <- suffixCounts[elem] - 1
+
+            left_length <- idx
+            right_length <- (length(nums) - idx - 1)
+
+            outcome <- outcome + comb2(left_length) * comb2(right_length)
+            outcome <- outcome - comb2(left_length - prefixCounts[elem]) * comb2(right_length - suffixCounts[elem])
+
+            val_pss_adj <- val_pss - prefixCounts[elem] * (suffixCounts[elem]*suffixCounts[elem])
+            val_spp_adj <- val_spp - suffixCounts[elem] * (prefixCounts[elem]*prefixCounts[elem])
+            val_pp_adj <- val_pp - (prefixCounts[elem]*prefixCounts[elem])
+            acc_ss_adj <- acc_ss - (suffixCounts[elem]*suffixCounts[elem])
+            val_ps_adj <- val_ps - prefixCounts[elem] * suffixCounts[elem]
+            prefix_adj <- left_length - prefixCounts[elem]
+            suffix_adj <- right_length - suffixCounts[elem]
+
+            outcome <- outcome - val_ps_adj * prefixCounts[elem] * (right_length - suffixCounts[elem]) + val_pss_adj * (-prefixCounts[elem])
+            outcome <- outcome - val_ps_adj * suffixCounts[elem] * (left_length - prefixCounts[elem]) + val_spp_adj * (-suffixCounts[elem])
+            outcome <- outcome - (val_pp_adj - prefix_adj) * suffixCounts[elem] * (right_length - suffixCounts[elem]) / 2
+            outcome <- outcome - (acc_ss_adj - suffix_adj) * prefixCounts[elem] * (left_length - prefixCounts[elem]) / 2
+
+            outcome <- outcome % MOD
+
+            val_pss <- val_pss + (suffixCounts[elem]*suffixCounts[elem])
+            val_spp <- val_spp + suffixCounts[elem] * (-(prefixCounts[elem]*prefixCounts[elem])) + (prefixCounts[elem] + 1) * (prefixCounts[elem] + 1)
+            val_pp <- val_pp + (-(prefixCounts[elem]*prefixCounts[elem])) + (prefixCounts[elem] + 1) * (prefixCounts[elem] + 1)
+            val_ps <- val_ps + suffixCounts[elem]
+
+            prefixCounts[elem] <- prefixCounts[elem] + 1
+        END FOR
+
+        RETURN outcome
+    END FUNCTION
+END CLASS

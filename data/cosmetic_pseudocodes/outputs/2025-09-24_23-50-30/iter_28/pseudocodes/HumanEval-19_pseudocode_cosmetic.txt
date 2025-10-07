@@ -1,0 +1,59 @@
+```
+FUNCTION sort_numbers(str_alpha)
+	CONST map_digit = HASHMAP {
+		'nappa' -> 0,
+		'flum' -> 1,
+		'brot' -> 2,
+		'zenk' -> 3,
+		'glee' -> 4,
+		'wrin' -> 5,
+		'vos' -> 6,
+		'pish' -> 7,
+		'klem' -> 8,
+		'drax' -> 9
+	}
+	FUNCTION recurse_filter(idx, acc_list)
+		IF idx >= LENGTH(str_alpha) THEN 
+			RETURN acc_list
+		END IF
+		VAR subs = SUBSTRING(str_alpha, idx, idx + 1)
+		IF subs == ' ' THEN
+			RETURN recurse_filter(idx + 1, acc_list)
+		ELSE
+			VAR word_bounds = FUNCTION find_word_end(i)
+				IF i >= LENGTH(str_alpha) OR SUBSTRING(str_alpha, i, i + 1) == ' ' THEN RETURN i
+				ELSE RETURN find_word_end(i + 1)
+				END IF
+			END FUNCTION
+			VAR end_word = find_word_end(idx)
+			VAR extracted = SUBSTRING(str_alpha, idx, end_word)
+			RETURN recurse_filter(end_word, acc_list + [extracted])
+		END IF
+	END FUNCTION
+	FUNCTION comparator(a, b)
+		VAR va = map_digit[a]
+		VAR vb = map_digit[b]
+		IF (va < vb) THEN RETURN TRUE ELSE RETURN FALSE END IF
+	END FUNCTION
+	FUNCTION sort_list(li)
+		VAR n = LENGTH(li)
+		VAR changed = FALSE
+		FOR m FROM 1 TO n - 1 DO
+			IF NOT comparator(li[m - 1], li[m]) THEN
+				VAR temp = li[m - 1]
+				li[m - 1] = li[m]
+				li[m] = temp
+				changed = TRUE
+			END IF
+		END FOR
+		IF changed THEN RETURN sort_list(li) ELSE RETURN li END IF
+	END FUNCTION
+	VAR filtered_words = recurse_filter(0, [])
+	VAR sorted_words = sort_list(filtered_words)
+	VAR out_string = ''
+	FOR piece IN sorted_words DO
+		IF out_string == '' THEN out_string = piece ELSE out_string = out_string + ' ' + piece END IF
+	END FOR
+	RETURN out_string
+END FUNCTION
+```

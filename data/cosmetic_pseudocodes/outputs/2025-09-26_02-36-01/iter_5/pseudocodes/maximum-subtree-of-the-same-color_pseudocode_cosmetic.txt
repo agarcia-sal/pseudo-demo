@@ -1,0 +1,67 @@
+CLASS Solution  
+    FUNCTION maximumSubtreeSize(edges, colors)  
+        INITIALIZE adjacency = empty dictionary mapping keys to lists  
+        DEFINE FUNCTION add_edge(a, b)  
+            IF a NOT IN adjacency THEN  
+                adjacency[a] = empty list  
+            END IF  
+            IF b NOT IN adjacency THEN  
+                adjacency[b] = empty list  
+            END IF  
+            APPEND b TO adjacency[a]  
+            APPEND a TO adjacency[b]  
+        END FUNCTION  
+        
+        FOR index = 0 TO LENGTH(edges) - 1  
+            LET origin = edges[index][0]  
+            LET target = edges[index][1]  
+            CALL add_edge(origin, target)  
+        END FOR  
+
+        LET maximum_result BE 1  
+
+        FUNCTION dfs(current_node, ancestor_node)  
+            LET uniform_color_nodes = 1  
+            LET children_uniform_color_flag = true  
+            LET neighbor_index = 0  
+
+            FUNCTION iterate_neighbors()  
+                IF neighbor_index >= LENGTH(adjacency[current_node]) THEN  
+                    RETURN  
+                END IF  
+                LET adjacent_node = adjacency[current_node][neighbor_index]  
+                neighbor_index = neighbor_index + 1  
+                IF adjacent_node != ancestor_node THEN  
+                    LET subtree_size = dfs(adjacent_node, current_node)  
+                    IF subtree_size == 0 THEN  
+                        children_uniform_color_flag = false  
+                    ELSE  
+                        IF colors[adjacent_node] == colors[current_node] THEN  
+                            LET temp_sum = uniform_color_nodes + subtree_size  
+                            uniform_color_nodes = temp_sum  
+                        ELSE  
+                            children_uniform_color_flag = false  
+                        END IF  
+                    END IF  
+                END IF  
+                CALL iterate_neighbors()  
+            END FUNCTION  
+            CALL iterate_neighbors()  
+
+            IF children_uniform_color_flag THEN  
+                LET current_best = maximum_result  
+                LET candidate = uniform_color_nodes  
+                LET compare_result = IF candidate > current_best THEN candidate ELSE current_best  
+                maximum_result = compare_result  
+                RETURN uniform_color_nodes  
+            ELSE  
+                RETURN 0  
+            END IF  
+        END FUNCTION  
+
+        LET start_node = 0  
+        LET root_parent = -1  
+        LET final_output = dfs(start_node, root_parent)  
+        RETURN maximum_result  
+    END FUNCTION  
+END CLASS

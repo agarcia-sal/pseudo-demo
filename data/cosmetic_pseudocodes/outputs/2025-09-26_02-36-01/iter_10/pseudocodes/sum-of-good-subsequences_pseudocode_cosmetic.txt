@@ -1,0 +1,36 @@
+CLASS Solution
+	FUNCTION sumOfGoodSubsequences(nums)
+		CONST M ← 10 ^ 9 + 7
+
+		DECLARATION freqF : MAP default 0
+		DECLARATION freqG : MAP default 0
+
+		PROC ProcessIdx(I)
+			VAR current ← nums[I]
+
+			freqG[current] ← ((freqG[current] + 1) MOD M)
+
+			freqF[current] ← ((freqF[current] + current) MOD M)
+
+			freqF[current] ← (freqF[current] + freqF[current - 1] + (freqG[current - 1] * current)) MOD M
+			freqG[current] ← (freqG[current] + freqG[current - 1]) MOD M
+
+			freqF[current] ← (freqF[current] + freqF[current + 1] + (freqG[current + 1] * current)) MOD M
+			freqG[current] ← (freqG[current] + freqG[current + 1]) MOD M
+		END PROC
+
+		VAR i ← 0
+		LOOP WHILE i < LENGTH(nums)
+			ProcessIdx(i)
+			i ← i + 1
+		END LOOP
+
+		VAR accumulator ← 0
+
+		FOR EACH val IN freqF
+			accumulator ← accumulator + val
+		END FOR
+
+		RETURN accumulator MOD M
+	END FUNCTION
+END CLASS

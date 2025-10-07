@@ -1,0 +1,72 @@
+CLASS Solution  
+    FUNCTION subsequencesWithMiddleMode(nums)  
+        SET ALPHA TO 1000000000 + 7  
+        SET BETA TO LENGTH(nums)  
+        IF BETA < 5 THEN  
+            RETURN 0  
+        END IF  
+
+        FUNCTION generateCombinations(arr, k)  
+            FUNCTION innerComb(idx, path, result)  
+                IF LENGTH(path) = k THEN  
+                    APPEND path TO result  
+                    RETURN  
+                END IF  
+                IF idx >= LENGTH(arr) THEN  
+                    RETURN  
+                END IF  
+                innerComb(idx + 1, path, result)  
+                innerComb(idx + 1, path + [arr[idx]], result)  
+            END FUNCTION  
+            DECLARE RES AS empty list  
+            innerComb(0, [], RES)  
+            RETURN RES  
+        END FUNCTION  
+
+        SET GAMMA TO generateCombinations(nums, 5)  
+        SET DELTA TO 0  
+
+        DECLARE SUB_FUNC freqCount(lst)  
+            DECLARE MAPPING AS empty dictionary  
+            SET EPSILON TO 0  
+            WHILE EPSILON < LENGTH(lst) DO  
+                SET CURRENT TO lst[EPSILON]  
+                IF CURRENT IN MAPPING THEN  
+                    SET MAPPING[CURRENT] TO MAPPING[CURRENT] + 1  
+                ELSE  
+                    SET MAPPING[CURRENT] TO 1  
+                END IF  
+                SET EPSILON TO EPSILON + 1  
+            END WHILE  
+            RETURN MAPPING  
+        END SUB_FUNC  
+
+        DECLARE IDX TO 0  
+        WHILE IDX < LENGTH(GAMMA) DO  
+            SET OMEGA TO GAMMA[IDX]  
+            SET PHI TO freqCount(OMEGA)  
+            SET MIDDLE_IDX TO 2  
+            SET MIDDLE_VAL TO OMEGA[MIDDLE_IDX]  
+            SET MIDDLE_FREQ TO PHI[MIDDLE_VAL]  
+            SET UNIQUE_MODE_FLAG TO true  
+
+            DECLARE KEYS AS list of keys in PHI  
+            DECLARE J AS 0  
+            WHILE J < LENGTH(KEYS) AND UNIQUE_MODE_FLAG DO  
+                SET KEY_VAL TO KEYS[J]  
+                SET CNT_VAL TO PHI[KEY_VAL]  
+                IF KEY_VAL != MIDDLE_VAL AND CNT_VAL >= MIDDLE_FREQ THEN  
+                    SET UNIQUE_MODE_FLAG TO false  
+                END IF  
+                SET J TO J + 1  
+            END WHILE  
+
+            IF UNIQUE_MODE_FLAG THEN  
+                SET DELTA TO DELTA + 1  
+            END IF  
+            SET IDX TO IDX + 1  
+        END WHILE  
+
+        RETURN DELTA MOD ALPHA  
+    END FUNCTION  
+END CLASS

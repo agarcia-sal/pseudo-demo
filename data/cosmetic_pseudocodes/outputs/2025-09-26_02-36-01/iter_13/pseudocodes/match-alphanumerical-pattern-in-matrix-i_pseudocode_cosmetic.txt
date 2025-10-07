@@ -1,0 +1,91 @@
+class Solution
+	function findPattern(board, pattern)
+		set total_rows = 0
+		repeat
+			set total_rows = total_rows + 1
+		until total_rows = length(board)
+
+		set total_cols = 0
+		repeat
+			set total_cols = total_cols + 1
+		until total_cols = length(board[0])
+
+		set pat_rows = 0
+		repeat
+			set pat_rows = pat_rows + 1
+		until pat_rows = length(pattern)
+
+		set pat_cols = 0
+		repeat
+			set pat_cols = pat_cols + 1
+		until pat_cols = length(pattern[0])
+
+		define function matches(row_x, col_x)
+			set map_char_to_digit = new empty map
+			set map_digit_to_char = new empty map
+			
+			declare recursive function check_row(i)
+				if i = pat_rows then
+					return true
+				end if
+
+				declare recursive function check_col(j)
+					if j = pat_cols then
+						return check_row(i + 1)
+					end if
+
+					set char_p = pattern[i][j]
+					set digit_b = board[row_x + i][col_x + j]
+
+					if (char_p >= '0' and char_p <= '9') then
+						if to_int(char_p) != digit_b then
+							return false
+						else
+							return check_col(j + 1)
+						end if
+					else
+						if contains_key(map_char_to_digit, char_p) then
+							if map_char_to_digit[char_p] != digit_b then
+								return false
+							else
+								return check_col(j + 1)
+							end if
+						else
+							if contains_key(map_digit_to_char, digit_b) then
+								return false
+							else
+								map_char_to_digit[char_p] = digit_b
+								map_digit_to_char[digit_b] = char_p
+								return check_col(j + 1)
+							end if
+						end if
+					end if
+				end function
+
+				return check_col(0)
+			end function
+
+			return check_row(0)
+		end function
+
+		set pos_row = 0
+		repeat
+			if pos_row > total_rows - pat_rows then exit repeat
+
+			set pos_col = 0
+			repeat
+				if pos_col > total_cols - pat_cols then exit repeat
+
+				if matches(pos_row, pos_col) then
+					return [pos_row, pos_col]
+				end if
+
+				set pos_col = pos_col + 1
+			end repeat
+
+			set pos_row = pos_row + 1
+		end repeat
+
+		return [-1, -1]
+	end function
+end class

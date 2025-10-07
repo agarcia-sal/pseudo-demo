@@ -1,0 +1,59 @@
+CLASS Solution
+	FUNCTION maxScore(grid)
+		PROCEDURE computeMin(a, b)
+			RETURN (a + b - ABS(a - b)) / 2
+		END PROCEDURE
+
+		PROCEDURE computeMax(a, b)
+			RETURN (a + b + ABS(a - b)) / 2
+		END PROCEDURE
+
+		SET totalRows TO LENGTH OF grid
+		SET totalCols TO LENGTH OF grid[0]
+
+		SET minVals TO ARRAY totalRows OF ARRAYS totalCols FILLED WITH POSITIVE_INFINITY
+
+		SET tempX TO grid[0][0]
+		SET minVals[0][0] TO tempX
+
+		SET idxCol TO 1
+		WHILE idxCol <= totalCols - 1
+			SET prevMin TO minVals[0][idxCol - 1]
+			SET currGrid TO grid[0][idxCol]
+			SET minVals[0][idxCol] TO computeMin(prevMin, currGrid)
+			SET idxCol TO idxCol + 1
+		END WHILE
+
+		SET idxRow TO 1
+		WHILE idxRow <= totalRows - 1
+			SET prevMin TO minVals[idxRow - 1][0]
+			SET currGrid TO grid[idxRow][0]
+			SET minVals[idxRow][0] TO computeMin(prevMin, currGrid)
+			SET idxRow TO idxRow + 1
+		END WHILE
+
+		SET outerRow TO 1
+		WHILE outerRow <= totalRows - 1
+			SET innerCol TO 1
+			WHILE innerCol <= totalCols - 1
+				SET topVal TO minVals[outerRow - 1][innerCol]
+				SET leftVal TO minVals[outerRow][innerCol - 1]
+
+				SET minVals[outerRow][innerCol] TO computeMin(topVal, leftVal)
+
+				SET curScore TO grid[outerRow][innerCol] - minVals[outerRow][innerCol]
+
+				IF outerRow == 1 AND innerCol == 1
+					SET maxScore TO curScore
+				ELSE
+					SET maxScore TO computeMax(maxScore, curScore)
+				END IF
+
+				SET innerCol TO innerCol + 1
+			END WHILE
+			SET outerRow TO outerRow + 1
+		END WHILE
+
+		RETURN maxScore
+	END FUNCTION
+END CLASS

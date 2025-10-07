@@ -1,0 +1,47 @@
+CLASS Solution
+	FUNCTION maxScore(points, m)
+		FUNCTION isPossible(minVal, m)
+			LET moveCounter = 0
+			LET priorMove = 0
+			LET idx = 0
+			WHILE idx < LENGTH(points)
+				LET pt = points[idx]
+				LET neededSegment = CEIL((minVal + pt - 1) / pt)
+				IF (neededSegment - priorMove) < 0 THEN
+					LET neededSegment = 0
+				ELSE
+					LET neededSegment = neededSegment - priorMove
+				END IF
+				IF neededSegment > 0 THEN
+					SET moveCounter = moveCounter + (2 * neededSegment - 1)
+					SET priorMove = neededSegment - 1
+				ELSE IF (idx + 1) < LENGTH(points) THEN
+					SET moveCounter = moveCounter + 1
+					SET priorMove = 0
+				END IF
+				IF moveCounter > m THEN
+					RETURN False
+				END IF
+				SET idx = idx + 1
+			END WHILE
+			RETURN True
+		END FUNCTION
+
+		LET leftBound = 0
+		LET rightBound = ((m + 1) \ 2) * (points[0] + 1)
+
+		PROCEDURE binarySearch()
+			IF leftBound >= rightBound THEN RETURN
+			LET midpoint = ((leftBound + rightBound + 1) \ 2)
+			IF isPossible(midpoint, m) THEN
+				SET leftBound = midpoint
+			ELSE
+				SET rightBound = midpoint - 1
+			END IF
+			CALL binarySearch()
+		END PROCEDURE
+
+		CALL binarySearch()
+		RETURN leftBound
+	END FUNCTION
+END CLASS

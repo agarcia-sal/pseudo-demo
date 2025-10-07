@@ -1,0 +1,77 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minLength(s parameter, numOps parameter)
+        FUNCTION longest_uniform_substring(s parameter)
+            SET peak TO 0
+            SET streak TO 1
+            SET idx TO 1
+            WHILE idx < LENGTH OF s
+                IF NOT (s[idx] NOT EQUALS s[idx - 1])
+                    SET streak TO streak + 1
+                ELSE
+                    IF peak < streak THEN peak = streak END IF
+                    SET streak TO 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            SET ret_val TO 0
+            IF peak > streak
+                SET ret_val TO peak
+            ELSE
+                SET ret_val TO streak
+            END IF
+            RETURN ret_val
+        END FUNCTION
+
+        SET result_length TO LENGTH OF s
+        SET bound_limit TO 1
+        SET shift_idx TO 0
+        WHILE shift_idx < LENGTH OF s
+            SET bound_limit TO bound_limit * 2
+            SET shift_idx TO shift_idx + 1
+        END WHILE
+
+        SET iter_i TO 0
+        REPEAT UNTIL iter_i >= bound_limit
+            # Count number of set bits in iter_i
+            SET bit_count TO 0
+            SET temp_val TO iter_i
+            WHILE temp_val > 0
+                SET bit_count TO bit_count + (temp_val AND 1)
+                SET temp_val TO temp_val >> 1
+            END WHILE
+            # Skip if bit_count > numOps
+            IF NOT (bit_count <= numOps)
+                SET iter_i TO iter_i + 1
+                CONTINUE
+            END IF
+
+            SET replica TO an empty list
+            SET pos_j TO 0
+            WHILE pos_j < LENGTH OF s
+                APPEND s[pos_j] TO replica
+                SET pos_j TO pos_j + 1
+            END WHILE
+
+            SET pos_j TO 0
+            WHILE pos_j < LENGTH OF s
+                IF ((iter_i AND (1 << pos_j)) <> 0)
+                    IF replica[pos_j] = '0'
+                        SET replica[pos_j] TO '1'
+                    ELSE
+                        SET replica[pos_j] TO '0'
+                    END IF
+                END IF
+                SET pos_j TO pos_j + 1
+            END WHILE
+
+            SET candidate TO longest_uniform_substring(replica)
+            IF result_length > candidate THEN result_length = candidate END IF
+
+            SET iter_i TO iter_i + 1
+        END REPEAT
+
+        RETURN result_length
+    END FUNCTION
+END CLASS
+```

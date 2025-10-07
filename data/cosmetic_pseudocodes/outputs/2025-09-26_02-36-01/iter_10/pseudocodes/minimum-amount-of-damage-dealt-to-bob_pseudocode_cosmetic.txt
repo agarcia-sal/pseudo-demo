@@ -1,0 +1,80 @@
+CLASS Enemy
+    FUNCTION __init__(self, damage, timeTakenDown)
+        self.damage = damage
+        self.timeTakenDown = timeTakenDown
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION minDamage(self, power, damage, health)
+        SET resultAccumulator TO 0
+        SET aggregateSum TO 0
+
+        FUNCTION accumulateTotal(dataList)
+            SET accumulator TO 0
+            SET iterator TO 0
+            WHILE iterator < LENGTH(dataList)
+                accumulator = accumulator + dataList[iterator]
+                iterator = iterator + 1
+            END WHILE
+            RETURN accumulator
+        END FUNCTION
+
+        aggregateSum = accumulateTotal(damage)
+
+        SET entityCollection TO []
+        SET positionTracker TO 0
+
+        FUNCTION integerDivide(dividend, divisor)
+            RETURN FLOOR(dividend / divisor)
+        END FUNCTION
+
+        WHILE positionTracker < LENGTH(damage)
+            SET damageValue TO damage[positionTracker]
+            SET healthValue TO health[positionTracker]
+            SET computedTime TO integerDivide((healthValue + power - 1), power)
+            SET enemyInstance TO NEW Enemy(damageValue, computedTime)
+            APPEND enemyInstance TO entityCollection
+            positionTracker = positionTracker + 1
+        END WHILE
+
+        FUNCTION compareRatio(enemyA, enemyB)
+            IF (enemyA.damage * enemyB.timeTakenDown) > (enemyB.damage * enemyA.timeTakenDown)
+                RETURN TRUE
+            ELSE
+                RETURN FALSE
+            END IF
+        END FUNCTION
+
+        FUNCTION sortDescendingByRatio(listToSort)
+            SET lengthVar TO LENGTH(listToSort)
+            SET outerIndex TO 0
+            WHILE outerIndex < lengthVar - 1
+                SET innerIndex TO 0
+                WHILE innerIndex < lengthVar - outerIndex - 1
+                    IF NOT compareRatio(listToSort[innerIndex], listToSort[innerIndex + 1])
+                        SET tempHolder TO listToSort[innerIndex]
+                        listToSort[innerIndex] = listToSort[innerIndex + 1]
+                        listToSort[innerIndex + 1] = tempHolder
+                    END IF
+                    innerIndex = innerIndex + 1
+                END WHILE
+                outerIndex = outerIndex + 1
+            END WHILE
+        END FUNCTION
+
+        CALL sortDescendingByRatio(entityCollection)
+
+        FUNCTION processEntities(entities)
+            IF LENGTH(entities) = 0 THEN RETURN END IF
+            SET firstEntity TO entities[0]
+            resultAccumulator = resultAccumulator + aggregateSum * firstEntity.timeTakenDown
+            aggregateSum = aggregateSum - firstEntity.damage
+            CALL processEntities(SLICE(entities, 1, LENGTH(entities)))
+        END FUNCTION
+
+        CALL processEntities(entityCollection)
+
+        RETURN resultAccumulator
+    END FUNCTION
+END CLASS

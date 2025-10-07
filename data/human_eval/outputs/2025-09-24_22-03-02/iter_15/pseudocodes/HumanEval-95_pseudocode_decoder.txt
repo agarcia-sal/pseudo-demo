@@ -1,0 +1,31 @@
+FUNCTION check_dict_case(dict)
+    IF LENGTH OF KEYS OF dict EQUALS 0 THEN
+        RETURN False
+    ELSE
+        SET state TO "start"
+        FOR EACH key IN KEYS OF dict DO
+            IF key IS NOT INSTANCE OF STRING THEN
+                SET state TO "mixed"
+                BREAK LOOP
+            END IF
+            IF state EQUALS "start" THEN
+                IF CALL isupper METHOD OF key RETURNS True THEN
+                    SET state TO "upper"
+                ELSE IF CALL islower METHOD OF key RETURNS True THEN
+                    SET state TO "lower"
+                ELSE
+                    BREAK LOOP
+                END IF
+            ELSE IF state EQUALS "upper" AND CALL isupper METHOD OF key RETURNS False THEN
+                SET state TO "mixed"
+                BREAK LOOP
+            ELSE IF state EQUALS "lower" AND CALL islower METHOD OF key RETURNS False THEN
+                SET state TO "mixed"
+                BREAK LOOP
+            ELSE
+                BREAK LOOP
+            END IF
+        END FOR
+        RETURN (state EQUALS "upper") OR (state EQUALS "lower")
+    END IF
+END FUNCTION

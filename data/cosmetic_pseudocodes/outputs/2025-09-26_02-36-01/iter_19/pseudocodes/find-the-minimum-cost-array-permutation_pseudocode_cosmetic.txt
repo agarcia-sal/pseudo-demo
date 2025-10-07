@@ -1,0 +1,74 @@
+CLASS Solution
+  FUNCTION findPermutation(nums)
+      FUNCTION recursiveSearch(stateFlag, lastElement)
+          VAR infinityValue ← 1.0 / 0.0
+          
+          FUNCTION isAllSelected(flag)
+              RETURN flag = ((1 << LENGTH(nums)) - 1)
+          END FUNCTION
+
+          IF isAllSelected(stateFlag) THEN
+              VAR diff ← lastElement - nums[0]
+              IF diff < 0 THEN
+                  SET diff ← -diff
+              END IF
+              RETURN diff
+          END IF
+
+          VAR minimumResult ← infinityValue
+          VAR indexPointer ← 0
+          WHILE indexPointer < LENGTH(nums)
+              VAR maskCheck ← (stateFlag >> indexPointer) & 1
+              IF maskCheck = 0 THEN
+                  VAR currentDiff ← lastElement - nums[indexPointer]
+                  IF currentDiff < 0 THEN
+                      SET currentDiff ← -currentDiff
+                  END IF
+                  VAR totalCost ← currentDiff + recursiveSearch(stateFlag | (1 << indexPointer), indexPointer)
+                  IF totalCost < minimumResult THEN
+                      SET minimumResult ← totalCost
+                  END IF
+              END IF
+              SET indexPointer ← indexPointer + 1
+          END WHILE
+
+          RETURN minimumResult
+      END FUNCTION
+
+      FUNCTION gatherAnswers(selections, lastValue)
+          VAR resultList ← ans
+          CALL resultList.APPEND(lastValue)
+          
+          FUNCTION isComplete(selectedMask)
+              RETURN selectedMask = ((1 << LENGTH(nums)) - 1)
+          END FUNCTION
+
+          IF isComplete(selections) THEN
+              RETURN
+          END IF
+
+          VAR target ← recursiveSearch(selections, lastValue)
+          VAR iterator ← 0
+          WHILE iterator < LENGTH(nums)
+              VAR checkBit ← (selections >> iterator) & 1
+              IF checkBit = 0 THEN
+                  VAR diffValue ← lastValue - nums[iterator]
+                  IF diffValue < 0 THEN
+                      SET diffValue ← -diffValue
+                  END IF
+                  VAR candidateCost ← diffValue + recursiveSearch(selections | (1 << iterator), iterator)
+                  IF candidateCost = target THEN
+                      CALL gatherAnswers(selections | (1 << iterator), iterator)
+                      BREAK
+                  END IF
+              END IF
+              SET iterator ← iterator + 1
+          END WHILE
+      END FUNCTION
+
+      VAR count ← LENGTH(nums)
+      VAR ans ← []
+      CALL gatherAnswers(1 << 0, 0)
+      RETURN ans
+  END FUNCTION
+END CLASS

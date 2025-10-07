@@ -1,0 +1,91 @@
+CLASS Solution  
+    FUNCTION minimumOperationsToWriteY(grid)  
+        DECLARE lengthGrid ASSIGN LENGTH(grid)  
+        DECLARE midPoint ASSIGN lengthGrid DIVIDED BY 2  
+        DECLARE positionsInY AS EMPTY SET  
+        
+        DECLARE idx ASSIGN 0  
+        WHILE idx IS LESS THAN OR EQUAL TO midPoint  
+            positionsInY ADD (idx, idx)  
+            idx ASSIGN idx PLUS 1  
+        END WHILE  
+        
+        idx ASSIGN 0  
+        WHILE idx IS LESS THAN OR EQUAL TO midPoint  
+            DECLARE revIndex ASSIGN lengthGrid MINUS idx MINUS 1  
+            positionsInY ADD (idx, revIndex)  
+            idx ASSIGN idx PLUS 1  
+        END WHILE  
+        
+        idx ASSIGN midPoint  
+        WHILE idx IS LESS THAN OR EQUAL TO lengthGrid MINUS 1  
+            positionsInY ADD (idx, midPoint)  
+            idx ASSIGN idx PLUS 1  
+        END WHILE  
+        
+        DECLARE yPositionsCount AS A MAPPING FROM element TO count INITIALIZED EMPTY  
+        DECLARE nonYPositionsCount AS A MAPPING FROM element TO count INITIALIZED EMPTY  
+        
+        DECLARE rowPos ASSIGN 0  
+        WHILE rowPos IS LESS THAN lengthGrid  
+            DECLARE colPos ASSIGN 0  
+            WHILE colPos IS LESS THAN lengthGrid  
+                DECLARE currentValue ASSIGN grid[rowPos][colPos]  
+                DECLARE coordPair ASSIGN (rowPos, colPos)  
+                IF coordPair IS IN positionsInY  
+                    IF currentValue EXISTS IN yPositionsCount  
+                        yPositionsCount[currentValue] ASSIGN yPositionsCount[currentValue] PLUS 1  
+                    ELSE  
+                        yPositionsCount[currentValue] ASSIGN 1  
+                    END IF  
+                ELSE  
+                    IF currentValue EXISTS IN nonYPositionsCount  
+                        nonYPositionsCount[currentValue] ASSIGN nonYPositionsCount[currentValue] PLUS 1  
+                    ELSE  
+                        nonYPositionsCount[currentValue] ASSIGN 1  
+                    END IF  
+                END IF  
+                colPos ASSIGN colPos PLUS 1  
+            END WHILE  
+            rowPos ASSIGN rowPos PLUS 1  
+        END WHILE  
+        
+        DECLARE minimalOperations ASSIGN POSITIVE_INFINITY  
+        
+        DECLARE yCandidate ASSIGN 0  
+        WHILE yCandidate IS LESS THAN OR EQUAL TO 2  
+            DECLARE nonYCandidate ASSIGN 0  
+            WHILE nonYCandidate IS LESS THAN OR EQUAL TO 2  
+                IF NOT (yCandidate EQUALS nonYCandidate)  
+                    DECLARE totalYCount ASSIGN 0  
+                    FOR EACH val IN yPositionsCount KEYS  
+                        totalYCount ASSIGN totalYCount PLUS yPositionsCount[val]  
+                    END FOR  
+                    DECLARE yCandidateCount ASSIGN 0  
+                    IF yCandidate EXISTS IN yPositionsCount  
+                        yCandidateCount ASSIGN yPositionsCount[yCandidate]  
+                    END IF  
+                    
+                    DECLARE totalNonYCount ASSIGN 0  
+                    FOR EACH val IN nonYPositionsCount KEYS  
+                        totalNonYCount ASSIGN totalNonYCount PLUS nonYPositionsCount[val]  
+                    END FOR  
+                    DECLARE nonYCandidateCount ASSIGN 0  
+                    IF nonYCandidate EXISTS IN nonYPositionsCount  
+                        nonYCandidateCount ASSIGN nonYPositionsCount[nonYCandidate]  
+                    END IF  
+                    
+                    DECLARE currentOperations ASSIGN (totalYCount MINUS yCandidateCount) PLUS (totalNonYCount MINUS nonYCandidateCount)  
+                    
+                    IF currentOperations LESS THAN minimalOperations  
+                        minimalOperations ASSIGN currentOperations  
+                    END IF  
+                END IF  
+                nonYCandidate ASSIGN nonYCandidate PLUS 1  
+            END WHILE  
+            yCandidate ASSIGN yCandidate PLUS 1  
+        END WHILE  
+        
+        RETURN minimalOperations  
+    END FUNCTION  
+END CLASS

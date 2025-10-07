@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION lastNonEmptyString(inputString)
+        FUNCTION gatherFrequencies(index, freqMap)
+            IF index < 0 THEN
+                RETURN freqMap
+            ELSE
+                tempMap ← freqMap
+                currentChar ← inputString[index]
+                IF currentChar IN tempMap THEN
+                    tempMap[currentChar] ← tempMap[currentChar] + 1
+                ELSE
+                    tempMap[currentChar] ← 1
+                END IF
+                RETURN gatherFrequencies(index - 1, tempMap)
+            END IF
+        END FUNCTION
+
+        FUNCTION findMaxValue(freqDictionary)
+            maxVal ← 0
+            FOR key IN freqDictionary
+                candidate ← freqDictionary[key]
+                IF candidate > maxVal THEN
+                    maxVal ← candidate
+                END IF
+            END FOR
+            RETURN maxVal
+        END FUNCTION
+        
+        FUNCTION accumulateResults(position, charsSet, collected)
+            IF position = LENGTH(inputString) THEN
+                RETURN collected
+            ELSE
+                currentElement ← inputString[position]
+                updatedCollected ← collected
+                updatedCharsSet ← charsSet
+                IF currentElement IN charsSet THEN
+                    updatedCollected ← collected + [currentElement]
+                    updatedCharsSet ← charsSet - {currentElement}
+                END IF
+                RETURN accumulateResults(position + 1, updatedCharsSet, updatedCollected)
+            END IF
+        END FUNCTION
+
+        freqCounter ← gatherFrequencies(LENGTH(inputString) - 1, {})
+        peakFreq ← findMaxValue(freqCounter)
+
+        setOfMaxChars ← {}
+        FOR elementKey IN freqCounter
+            IF freqCounter[elementKey] = peakFreq THEN
+                setOfMaxChars ← setOfMaxChars ∪ {elementKey}
+            END IF
+        END FOR
+
+        reversedString ← ""
+        collectedChars ← accumulateResults(0, setOfMaxChars, [])
+
+        i ← LENGTH(collectedChars) - 1
+        WHILE i >= 0
+            reversedString ← reversedString + collectedChars[i]
+            i ← i - 1
+        END WHILE
+
+        RETURN reversedString
+    END FUNCTION
+END CLASS

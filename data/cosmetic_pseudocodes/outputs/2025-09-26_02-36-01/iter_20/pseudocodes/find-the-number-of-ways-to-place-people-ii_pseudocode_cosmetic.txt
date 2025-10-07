@@ -1,0 +1,64 @@
+CLASS Solution  
+  FUNCTION numberOfPairs(points)  
+    PROCEDURE CustomSort(arr)  
+      DECLARE swappedFlag  
+      DECLARE idxA, idxB, tempP, tempQ  
+      DECLARE lengthArr  
+      SET lengthArr TO LENGTH OF arr  
+      REPEAT  
+        SET swappedFlag TO False  
+        SET idxA TO 1  
+        WHILE idxA LESS THAN lengthArr  
+          SET idxB TO idxA MINUS 1  
+          SET tempP TO arr[idxB].x  
+          SET tempQ TO arr[idxB].y  
+          IF (tempP GREATER THAN arr[idxA].x) OR ((tempP EQUALS arr[idxA].x) AND (tempQ LESS THAN arr[idxA].y))  
+            SET arr[idxB], arr[idxA] TO arr[idxA], arr[idxB]  
+            SET swappedFlag TO True  
+          END IF  
+          SET idxA TO idxA PLUS 1  
+        END WHILE  
+      UNTIL NOT swappedFlag  
+    END PROCEDURE
+
+    PROCEDURE CheckIntermediate(xStart, yStart, xEnd, yEnd, startI, endI)  
+      DECLARE idxC, dx, dy, conditionFlag  
+      SET conditionFlag TO True  
+      FOR idxC FROM startI TO endI  
+        SET dx TO points[idxC].x  
+        SET dy TO points[idxC].y  
+        IF NOT((xStart GREATER THAN dx OR dx GREATER THAN xEnd) OR (yEnd GREATER THAN dy OR dy GREATER THAN yStart))  
+          SET conditionFlag TO False  
+          EXIT PROCEDURE  
+        END IF  
+      END FOR  
+      RETURN conditionFlag  
+    END PROCEDURE
+
+    CALL CustomSort(points)
+    DECLARE total, idxI, idxJ, xA, yA, xB, yB, pairValid
+    SET total TO 0
+    SET idxI TO 0
+    WHILE idxI LESS THAN LENGTH OF points MINUS 1
+      SET idxJ TO idxI PLUS 1
+      REPEAT
+        IF idxJ GREATER OR EQUAL LENGTH OF points
+          BREAK
+        END IF
+        SET xA TO points[idxI].x
+        SET yA TO points[idxI].y
+        SET xB TO points[idxJ].x
+        SET yB TO points[idxJ].y
+        IF (xA LESS OR EQUAL xB) AND (yA GREATER OR EQUAL yB) THEN
+          SET pairValid TO CheckIntermediate(xA, yA, xB, yB, idxI PLUS 1, idxJ MINUS 1)
+          IF pairValid 
+            SET total TO total PLUS 1
+          END IF
+        END IF
+        SET idxJ TO idxJ PLUS 1
+      UNTIL idxJ GREATER OR EQUAL LENGTH OF points
+      SET idxI TO idxI PLUS 1
+    END WHILE
+    RETURN total
+  END FUNCTION  
+END CLASS

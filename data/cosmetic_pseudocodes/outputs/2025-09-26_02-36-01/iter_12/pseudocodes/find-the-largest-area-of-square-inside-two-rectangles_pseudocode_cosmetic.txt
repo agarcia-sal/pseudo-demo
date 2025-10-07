@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION largestSquareArea(bottomLeft, topRight)
+        FUNCTION intersecting_square_area(bl1, tr1, bl2, tr2)
+            FUNCTION choose_max(a, b)
+                IF a > b THEN RETURN a ELSE RETURN b END IF
+            END FUNCTION
+            FUNCTION choose_min(a, b)
+                IF a < b THEN RETURN a ELSE RETURN b END IF
+            END FUNCTION
+
+            SET x_left_candidate1 TO bl1[0]
+            SET x_left_candidate2 TO bl2[0]
+            SET x_left TO choose_max(x_left_candidate1, x_left_candidate2)
+
+            SET x_right_candidate1 TO tr1[0]
+            SET x_right_candidate2 TO tr2[0]
+            SET x_right TO choose_min(x_right_candidate1, x_right_candidate2)
+
+            SET y_bottom_candidate1 TO bl1[1]
+            SET y_bottom_candidate2 TO bl2[1]
+            SET y_bottom TO choose_max(y_bottom_candidate1, y_bottom_candidate2)
+
+            SET y_top_candidate1 TO tr1[1]
+            SET y_top_candidate2 TO tr2[1]
+            SET y_top TO choose_min(y_top_candidate1, y_top_candidate2)
+
+            IF NOT (x_left < x_right AND y_bottom < y_top)
+                RETURN 0
+            END IF
+
+            SET horizontal_diff TO x_right + (- x_left)
+            SET vertical_diff TO y_top + (- y_bottom)
+
+            FUNCTION min_of_two(p, q)
+                IF p < q THEN RETURN p ELSE RETURN q END IF
+            END FUNCTION
+
+            SET square_side TO min_of_two(horizontal_diff, vertical_diff)
+            SET square_side_squared TO 0
+            REPEAT
+                SET temp_var TO square_side * square_side
+                SET square_side_squared TO temp_var
+                BREAK
+            UNTIL TRUE
+
+            RETURN square_side_squared
+        END FUNCTION
+
+        FUNCTION len_of_list(lst)
+            SET count TO 0
+            WHILE TRUE
+                IF count = len(lst) THEN BREAK END IF
+                SET count TO count + 1
+            END WHILE
+            RETURN count
+        END FUNCTION
+
+        SET highest_area TO 0
+        SET total_points TO len_of_list(bottomLeft)
+
+        FUNCTION recursive_outer_loop(a)
+            IF a > (total_points - 1) THEN RETURN END IF
+            FUNCTION recursive_inner_loop(b, current_max)
+                IF b > (total_points - 1) THEN RETURN current_max END IF
+                SET area_result TO intersecting_square_area(bottomLeft[a], topRight[a], bottomLeft[b], topRight[b])
+                SET updated_max TO 0
+                IF area_result > current_max THEN
+                    SET updated_max TO area_result
+                ELSE
+                    SET updated_max TO current_max
+                END IF
+                RETURN recursive_inner_loop(b + 1, updated_max)
+            END FUNCTION
+
+            SET highest_area TO recursive_inner_loop(a + 1, highest_area)
+            recursive_outer_loop(a + 1)
+        END FUNCTION
+        
+        recursive_outer_loop(0)
+        RETURN highest_area
+    END FUNCTION
+END CLASS

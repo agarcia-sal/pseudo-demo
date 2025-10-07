@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION maximumScore(grid)
+    n← LENGTH(grid)
+    prefix← MATRIX(n+1, n+1, 0)
+    prevPick← ARRAY(n+1, 0)
+    prevSkip← ARRAY(n+1, 0)
+
+    PROCEDURE fillPrefix(r, c)
+        IF r > n-1 THEN RETURN
+        IF c > n-1 THEN fillPrefix(r+1, 0); RETURN
+        prefix[c][r+1] ← prefix[c][r] + grid[r][c]
+        fillPrefix(r, c+1)
+    END PROCEDURE
+    fillPrefix(0, 0)
+
+    PROCEDURE evalRow(j)
+        IF j > n-1 THEN RETURN
+        currPick← ARRAY(n+1, 0)
+        currSkip← ARRAY(n+1, 0)
+        PROCEDURE innerCurr(curr)
+            IF curr > n THEN RETURN
+            PROCEDURE innerPrev(prev)
+                IF prev > n THEN RETURN
+                IF curr > prev THEN
+                    score ← prefix[j][curr-1] - prefix[j][prev]
+                    IF currPick[curr] < prevSkip[prev] + score THEN currPick[curr] ← prevSkip[prev] + score
+                    IF currSkip[curr] < prevSkip[prev] + score THEN currSkip[curr] ← prevSkip[prev] + score
+                ELSE
+                    score ← prefix[j][prev] - prefix[j][curr]
+                    IF currPick[curr] < prevPick[prev] + score THEN currPick[curr] ← prevPick[prev] + score
+                    IF currSkip[curr] < prevPick[prev] THEN currSkip[curr] ← prevPick[prev]
+                END IF
+                innerPrev(prev+1)
+            END PROCEDURE
+            innerPrev(0)
+            innerCurr(curr+1)
+        END PROCEDURE
+        innerCurr(0)
+
+        prevPick ← currPick
+        prevSkip ← currSkip
+        evalRow(j+1)
+    END PROCEDURE
+    evalRow(1)
+
+    maxVal← prevPick[0]
+    PROCEDURE findMax(idx)
+        IF idx > n THEN RETURN
+        IF prevPick[idx] > maxVal THEN maxVal ← prevPick[idx]
+        findMax(idx+1)
+    END PROCEDURE
+    findMax(1)
+
+    RETURN maxVal
+    END FUNCTION
+END CLASS

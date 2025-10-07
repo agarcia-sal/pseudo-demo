@@ -1,0 +1,42 @@
+CLASS Solution
+    FUNCTION findMaximumNumber(k, x)
+        FUNCTION count_set_bits(n, pos)
+            SET tally TO 0
+            SET segment_len TO 1 << pos
+            SET completed_cycles TO n \ segment_len
+            SET tally TO tally + (completed_cycles \ 2) * segment_len
+            IF (completed_cycles % 2) != 0
+                SET remainder TO (n % segment_len) + 1
+                SET tally TO tally + remainder
+            END IF
+            RETURN tally
+        END FUNCTION
+
+        FUNCTION accumulated_price(n)
+            SET total_cost TO 0
+            SET index TO 1
+            WHILE True
+                SET exponent TO (index * x) - 1
+                SET power_val TO 2 ^ exponent
+                IF power_val > n
+                    BREAK
+                END IF
+                SET total_cost TO total_cost + count_set_bits(n, exponent)
+                SET index TO index + 1
+            END WHILE
+            RETURN total_cost
+        END FUNCTION
+
+        SET left TO 1
+        SET right TO 2 ^ 60
+        WHILE left <= right
+            SET middle TO left + (right - left) \ 2
+            IF accumulated_price(middle) <= k
+                SET left TO middle + 1
+            ELSE
+                SET right TO middle - 1
+            END IF
+        END WHILE
+        RETURN right
+    END FUNCTION
+END CLASS

@@ -1,0 +1,129 @@
+FUNCTION is_prime(num)  
+    CONST ONE <- 0 + 1  
+    CONST TWO <- (1 + 1)  
+    CONST THREE <- 1 + TWO  
+    CONST FIVE <- 2 * 2 + 1  
+    CONST SIX <- TWO + FOUR()  
+      
+    FUNCTION FOUR()  
+        RETURN TWO * TWO  
+    END FUNCTION  
+  
+    IF NOT (num > ONE) THEN  
+        RETURN FALSE  
+    ELSEIF NOT (num > THREE) THEN  
+        RETURN TRUE  
+    ELSEIF ((num MOD TWO) = 0) OR ((num MOD THREE) = 0) THEN  
+        RETURN FALSE  
+    END IF  
+  
+    VAR index <- FIVE  
+    REPEAT   
+        IF (index * index) > num THEN  
+            EXIT LOOP  
+        END IF  
+  
+        IF ((num MOD index) = 0) OR ((num MOD (index + TWO)) = 0) THEN  
+            RETURN FALSE  
+        END IF  
+  
+        index <- index + SIX  
+    UNTIL FALSE  
+  
+    RETURN TRUE  
+END FUNCTION  
+  
+CLASS Solution  
+    FUNCTION mostFrequentPrime(mat)  
+        VAR rowCount <- LENGTH(mat)  
+        VAR colCount <- LENGTH(mat[0])  
+  
+        VAR dirSet <- LIST()  
+        APPEND dirSet, (-1,  0)  
+        APPEND dirSet, (-1,  1)  
+        APPEND dirSet, ( 0,  1)  
+        APPEND dirSet, ( 1,  1)  
+        APPEND dirSet, ( 1,  0)  
+        APPEND dirSet, ( 1, -1)  
+        APPEND dirSet, ( 0, -1)  
+        APPEND dirSet, (-1, -1)  
+  
+        VAR primeFrequency <- EMPTY MAP<Key=INTEGER, Value=INTEGER>  
+  
+        PROCEDURE traverse(px, py, vx, vy, currentVal)  
+            VAR nextX <- px + vx  
+            VAR nextY <- py + vy  
+  
+            IF (nextX >= 0) THEN  
+                IF (nextX < rowCount) THEN  
+                    IF (nextY >= 0) THEN  
+                        IF (nextY < colCount) THEN  
+  
+                            VAR constructedNum <- (currentVal * 10) + mat[nextX][nextY]  
+                            IF (constructedNum > 10) THEN  
+                                IF is_prime(constructedNum) THEN  
+  
+                                    IF constructedNum IN primeFrequency THEN  
+                                        primeFrequency[constructedNum] <- primeFrequency[constructedNum] + 1  
+                                    ELSE  
+                                        primeFrequency[constructedNum] <- 1  
+                                    END IF  
+  
+                                END IF  
+                            END IF  
+  
+                            CALL traverse(nextX, nextY, vx, vy, constructedNum)  
+  
+                        END IF  
+                    END IF  
+                END IF  
+            END IF  
+        END PROCEDURE  
+  
+        VAR rowIndex <- 0  
+        OUTER_LOOP: REPEAT  
+            IF rowIndex >= rowCount THEN BREAK OUTER_LOOP END IF  
+            VAR colIndex <- 0  
+  
+            INNER_LOOP: REPEAT  
+                IF colIndex >= colCount THEN BREAK INNER_LOOP END IF  
+  
+                FOR EACH (deltaX, deltaY) IN dirSet DO  
+                    CALL traverse(rowIndex, colIndex, deltaX, deltaY, mat[rowIndex][colIndex])  
+                END FOR  
+  
+                colIndex <- colIndex + 1  
+            END REPEAT  
+  
+            rowIndex <- rowIndex + 1  
+        END REPEAT  
+  
+        IF LENGTH(primeFrequency) = 0 THEN  
+            RETURN -1  
+        END IF  
+  
+        VAR maxCount <- -1  
+        VAR resultPrime <- -1  
+  
+        VAR kvPairs <- LIST()  
+        FOR EACH key IN primeFrequency KEYS DO  
+            APPEND kvPairs, (key, primeFrequency[key])  
+        END FOR  
+  
+        VAR pairIndex <- 0  
+        WHILE pairIndex < LENGTH(kvPairs) DO  
+            VAR keyValTuple <- kvPairs[pairIndex]  
+            VAR keyElem <- keyValTuple[0]  
+            VAR keyCount <- keyValTuple[1]  
+  
+            IF (keyCount > maxCount) OR ((keyCount = maxCount) AND (keyElem < resultPrime)) THEN  
+                maxCount <- keyCount  
+                resultPrime <- keyElem  
+            END IF  
+  
+            pairIndex <- pairIndex + 1  
+        END WHILE  
+  
+        RETURN resultPrime  
+    END FUNCTION  
+END CLASS

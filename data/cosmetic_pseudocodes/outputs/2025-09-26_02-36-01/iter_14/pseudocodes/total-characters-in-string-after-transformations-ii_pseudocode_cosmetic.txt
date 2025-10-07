@@ -1,0 +1,113 @@
+CLASS Solution  
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer  
+        
+        SET CONSTANT_MODULAR TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1  
+
+        SET transposed_matrix TO a two-dimensional list with 26 rows and 26 columns initialized to 0  
+        SET outer_index TO 0  
+        WHILE outer_index LESS THAN 26  
+            SET inner_index TO 0  
+            WHILE inner_index LESS THAN (element at position outer_index of nums)  
+                SET target_col TO (outer_index + inner_index + 1) MOD 26  
+                SET value_at_cell TO element at position outer_index and position target_col of transposed_matrix  
+                SET element at position outer_index and position target_col of transposed_matrix TO value_at_cell + 1  
+                SET inner_index TO inner_index + 1  
+            END WHILE  
+            SET outer_index TO outer_index + 1  
+        END WHILE  
+
+        FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers  
+            SET dimension TO 26  
+            SET product TO a new 26x26 matrix filled with zeros  
+            SET x TO 0  
+            REPEAT UNTIL x EQUALS dimension  
+                SET y TO 0  
+                REPEAT UNTIL y EQUALS dimension  
+                    SET z TO 0  
+                    SET accumulator TO 0  
+                    REPEAT UNTIL z EQUALS dimension  
+                        SET accumulator TO (accumulator + ((element at position x and position z of A) * (element at position z and position y of B)) MOD CONSTANT_MODULAR) MOD CONSTANT_MODULAR  
+                        SET z TO z + 1  
+                    END REPEAT  
+                    SET element at position x and position y of product TO accumulator  
+                    SET y TO y + 1  
+                END REPEAT  
+                SET x TO x + 1  
+            END REPEAT  
+            RETURN product  
+        END FUNCTION  
+
+        FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers  
+            SET size TO 26  
+            SET identity_matrix TO empty list  
+            SET row_counter TO 0  
+            WHILE row_counter LESS THAN size  
+                SET current_row TO empty list  
+                SET col_counter TO 0  
+                WHILE col_counter LESS THAN size  
+                    IF row_counter EQUALS col_counter THEN  
+                        APPEND 1 TO current_row  
+                    ELSE  
+                        APPEND 0 TO current_row  
+                    END IF  
+                    SET col_counter TO col_counter + 1  
+                END WHILE  
+                APPEND current_row TO identity_matrix  
+                SET row_counter TO row_counter + 1  
+            END WHILE  
+
+            SET base_matrix TO matrix  
+            SET exponent TO power  
+
+            FUNCTION halve_integer(x parameter x IS integer) RETURNS integer  
+                RETURN x DIV 2  
+            END FUNCTION  
+
+            FUNCTION is_odd(x parameter x IS integer) RETURNS boolean  
+                RETURN (x MOD 2) NOT EQUAL TO 0  
+            END FUNCTION  
+
+            REPEAT WHILE exponent GREATER THAN 0  
+                IF is_odd(exponent) THEN  
+                    SET identity_matrix TO matrix_multiply(identity_matrix, base_matrix)  
+                END IF  
+                SET base_matrix TO matrix_multiply(base_matrix, base_matrix)  
+                SET exponent TO halve_integer(exponent)  
+            END REPEAT  
+
+            RETURN identity_matrix  
+        END FUNCTION  
+
+        SET raised_matrix TO matrix_power(transposed_matrix, t)  
+
+        SET counts TO list containing twenty six zeros  
+        SET char_index TO 0  
+        WHILE char_index LESS THAN LENGTH of s  
+            SET unicode_value TO numeric representation of character at position char_index in s  
+            SET position_in_alphabet TO unicode_value - numeric representation of 'a'  
+            SET counts element at position position_in_alphabet TO (element at position position_in_alphabet of counts) + 1  
+            SET char_index TO char_index + 1  
+        END WHILE  
+
+        SET accumulated_counts TO list initialized with 26 zeros  
+        SET i_counter TO 0  
+        WHILE i_counter LESS THAN 26  
+            SET j_counter TO 0  
+            WHILE j_counter LESS THAN 26  
+                SET prod_term TO (element at position i_counter of counts) * (element at position i_counter and position j_counter of raised_matrix)  
+                SET accumulated_counts element at position j_counter TO (element at position j_counter of accumulated_counts + prod_term) MOD CONSTANT_MODULAR  
+                SET j_counter TO j_counter + 1  
+            END WHILE  
+            SET i_counter TO i_counter + 1  
+        END WHILE  
+
+        SET result_accumulator TO 0  
+        SET idx TO 0  
+        WHILE idx LESS THAN 26  
+            SET result_accumulator TO (result_accumulator + element at position idx of accumulated_counts) MOD CONSTANT_MODULAR  
+            SET idx TO idx + 1  
+        END WHILE  
+
+        RETURN result_accumulator  
+    END FUNCTION  
+END CLASS

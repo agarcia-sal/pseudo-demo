@@ -1,0 +1,112 @@
+CLASS Solution
+	 FUNCTION countOfPairs(nums)
+		 CONST bigMod IS ((1000 * 1000 * 1000) + 7)
+		 LET lengthNums BE LENGTH(nums)
+		 LET highestNum BE -∞
+		 # Find max_val equivalent
+		 LET idxMaxFound BE 0
+		 LET cursorVal BE 0
+		 WHILE cursorVal < lengthNums
+			 IF nums[cursorVal] > highestNum THEN
+				 highestNum ← nums[cursorVal]
+				 idxMaxFound ← cursorVal
+			 END IF
+			 cursorVal ← cursorVal + 1
+		 END WHILE
+		 LET rangeLimit BE highestNum + 1
+
+		 FUNCTION zeroInitList(count)
+			 LET resList BE []
+			 LET counterLoop BE 0
+			 REPEAT
+				 IF counterLoop >= count THEN
+					 BREAK
+				 END IF
+				 resList ← resList + [0]
+				 counterLoop ← counterLoop + 1
+			 END REPEAT
+			 RETURN resList
+		 END FUNCTION
+
+		 FUNCTION zeroInitMatrix(rows, cols)
+			 LET outMatrix BE []
+			 LET i idx BE 0
+			 REPEAT
+				 IF i idx >= rows THEN
+					 BREAK
+				 END IF
+				 LET thisRow BE zeroInitList(cols)
+				 outMatrix ← outMatrix + [thisRow]
+				 i idx ← i idx + 1
+			 END REPEAT
+			 RETURN outMatrix
+		 END FUNCTION
+
+		 FUNCTION zeroInit3D(dimA, dimB, dimC)
+			 LET arr3D BE []
+			 LET pCnt BE 0
+			 REPEAT
+				 IF pCnt >= dimA THEN
+					 BREAK
+				 END IF
+				 LET new2D BE zeroInitMatrix(dimB, dimC)
+				 arr3D ← arr3D + [new2D]
+				 pCnt ← pCnt + 1
+			 END REPEAT
+			 RETURN arr3D
+		 END FUNCTION
+
+		 LET dpArr BE zeroInit3D(lengthNums, rangeLimit, rangeLimit)
+
+		 LET mAtZero BE nums[0]
+		 LET mIterJ BE 0
+		 WHILE mIterJ <= mAtZero
+			 LET diffK BE mAtZero + (-1 * mIterJ)
+			 dpArr[0][mIterJ][diffK] ← 1
+			 mIterJ ← mIterJ + 1
+		 END WHILE
+
+		 LET iOutterIdx BE 1
+		 WHILE iOutterIdx <= (lengthNums - 1)
+			 LET valHere BE nums[iOutterIdx]
+
+			 LET jInnerPos BE 0
+			 WHILE jInnerPos <= valHere
+				 LET kInnerVal BE valHere + (-1 * jInnerPos)
+
+				 LET jPrevIndex BE 0
+				 WHILE jPrevIndex <= jInnerPos
+					 LET kPrevIndex BE kInnerVal
+					 WHILE kPrevIndex <= highestNum
+						 dpArr[iOutterIdx][jInnerPos][kInnerVal] ← dpArr[iOutterIdx][jInnerPos][kInnerVal] + dpArr[iOutterIdx - 1][jPrevIndex][kPrevIndex]
+						 dpArr[iOutterIdx][jInnerPos][kInnerVal] ← dpArr[iOutterIdx][jInnerPos][kInnerVal] % bigMod
+						 kPrevIndex ← kPrevIndex + 1
+					 END WHILE
+					 jPrevIndex ← jPrevIndex + 1
+				 END WHILE
+				 jInnerPos ← jInnerPos + 1
+			 END WHILE
+			 iOutterIdx ← iOutterIdx + 1
+		 END WHILE
+
+		 LET accResult BE 0
+		 LET jCheck BE 0
+		 WHILE jCheck <= highestNum
+			 LET kCheck BE 0
+			 REPEAT
+				 IF kCheck > highestNum THEN
+					 BREAK
+				 END IF
+				 DETERMINE sumMatch AS (jCheck + kCheck) = nums[lengthNums - 1]
+				 IF sumMatch THEN
+					 accResult ← accResult + dpArr[lengthNums - 1][jCheck][kCheck]
+					 accResult ← accResult % bigMod
+				 END IF
+				 kCheck ← kCheck + 1
+			 END REPEAT
+			 jCheck ← jCheck + 1
+		 END WHILE
+
+		 RETURN accResult
+	 END FUNCTION
+END CLASS

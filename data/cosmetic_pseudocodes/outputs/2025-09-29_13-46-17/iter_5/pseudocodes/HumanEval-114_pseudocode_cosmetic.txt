@@ -1,0 +1,29 @@
+```
+FUNCTION minSubArraySum(list_of_integers)
+    DEFINE recurse_negative_max(iter_list, idx, cum_sum, peak) 
+        IF idx >= LENGTH(iter_list)
+            IF peak == 0
+                LET neg_vals = MAP(iter_list, LAMBDA elem : -elem)
+                LET peak_calc = neg_vals[0]
+                FOR j FROM 1 TO LENGTH(neg_vals) - 1
+                    IF neg_vals[j] > peak_calc
+                        SET peak_calc TO neg_vals[j]
+                    END IF
+                END FOR
+                RETURN peak_calc
+            ELSE
+                RETURN peak
+            END IF
+        ELSE
+            LET updated_sum = cum_sum + (-iter_list[idx])
+            LET new_sum = updated_sum * (updated_sum >= 0)  // zero if negative
+            LET new_peak = (peak * (new_sum <= peak)) + (new_sum * (new_sum > peak))
+            RETURN recurse_negative_max(iter_list, idx + 1, new_sum, new_peak)
+        END IF
+    END DEFINE
+
+    LET result_peak = recurse_negative_max(list_of_integers, 0, 0, 0)
+    LET minimal_value = -result_peak
+    RETURN minimal_value
+END FUNCTION
+```

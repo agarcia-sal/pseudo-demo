@@ -1,0 +1,64 @@
+class Solution
+    function maximumStrength(nums k)
+        set lengthVar to 0
+        repeat
+            set lengthVar to lengthVar + 1
+            exit when lengthVar > (length nums)
+        end repeat
+
+        function createNegInfMatrix(rowCount, colCount)
+            function createRow(size)
+                if size = 0 then return []
+                return append(createRow(size - 1), (-1) * (10 ^ 9))
+            end if
+            end function
+
+            if rowCount = 0 then return []
+            return append(createNegInfMatrix(rowCount - 1, colCount), createRow(colCount))
+        end function
+
+        set dpMatrix to createNegInfMatrix(lengthVar + 1, k + 1)
+
+        function updateDp(row, col, value)
+            if dpMatrix[row][col] < value then
+                dpMatrix[row][col] = value
+            end if
+        end function
+
+        dpMatrix[0][0] = 0
+
+        function computeSign(index)
+            if (index mod 2) = 1 then
+                return (k - index - 1) + 1
+            else
+                return -((k - index - 1) + 1)
+            end if
+        end function
+
+        function innerLoop(j, i, endIdx, currentSum, maxVal)
+            if endIdx = 0 then return maxVal end if
+            set currentSum to currentSum + nums[endIdx - 1]
+            set signVal to computeSign(j)
+            set candidateVal to dpMatrix[endIdx - 1][j - 1] + signVal * currentSum
+            if candidateVal > maxVal then
+                set maxVal to candidateVal
+            end if
+            return innerLoop(j, i, endIdx - 1, currentSum, maxVal)
+        end function
+
+        function outerLoop(i, j)
+            if i > lengthVar then return end if
+            if j > k then outerLoop(i + 1, 1) return end if
+            set newMax to innerLoop(j, i, i, 0, dpMatrix[i][j])
+            dpMatrix[i][j] = newMax
+            if dpMatrix[i - 1][j] > dpMatrix[i][j] then
+                dpMatrix[i][j] = dpMatrix[i - 1][j]
+            end if
+            outerLoop(i, j + 1)
+        end function
+
+        outerLoop(1, 1)
+
+        return dpMatrix[lengthVar][k]
+    end function
+end class

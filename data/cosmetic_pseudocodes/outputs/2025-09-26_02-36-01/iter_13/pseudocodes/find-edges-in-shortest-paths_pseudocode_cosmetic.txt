@@ -1,0 +1,192 @@
+class Solution
+    function findAnswer(n, edges)
+        function heapPop(h)
+            if length(h) = 0 then return null end if
+            local i, m, x = 1, 1, h[1]
+            local last = h[length(h)]
+            h[1] = last
+            h.pop()
+            local left = function(i) return 2*i end
+            local right = function(i) return 2*i + 1 end
+            while left(i) <= length(h) do
+                local smallest = left(i)
+                if right(i) <= length(h) and h[right(i)][1] < h[left(i)][1] then
+                    smallest = right(i)
+                end if
+                if h[i][1] <= h[smallest][1] then break end if
+                h[i], h[smallest] = h[smallest], h[i]
+                i = smallest
+            end while
+            return x
+        end function
+
+        function heapPush(h, val)
+            h.append(val)
+            local i = length(h)
+            while i > 1 do
+                local parent = i // 2
+                if h[parent][1] <= h[i][1] then break end if
+                h[i], h[parent] = h[parent], h[i]
+                i = parent
+            end while
+        end function
+
+        function min(a, b)
+            if a < b then return a else return b end if
+        end function
+
+        function max(a, b)
+            if a > b then return a else return b end if
+        end function
+
+        local adjacencyMap = map()
+        local indexCounter = 0
+        local edgeIterator = function()
+            if indexCounter >= length(edges) then return null end if
+            local e = edges[indexCounter+1]
+            indexCounter = indexCounter + 1
+            return e
+        end function
+
+        repeat
+            local edgeTriplet = edgeIterator()
+            if edgeTriplet = null then break end if
+            local fromNode, toNode, edgeWeight = edgeTriplet[1], edgeTriplet[2], edgeTriplet[3]
+            if not adjacencyMap.containsKey(fromNode) then adjacencyMap[fromNode] = list() end if
+            if not adjacencyMap.containsKey(toNode) then adjacencyMap[toNode] = list() end if
+            adjacencyMap[fromNode].append([toNode, edgeWeight])
+            adjacencyMap[toNode].append([fromNode, edgeWeight])
+        until false
+
+        local INF = 1 / 0
+        local distances = list()
+        local distBuildIndex = 0
+        repeat
+            if distBuildIndex >= n then break end if
+            distances.append(INF)
+            distBuildIndex = distBuildIndex + 1
+        until false
+
+        distances[1] = 0
+        local priorityQueue = list()
+        priorityQueue.append([0, 0])
+
+        local function tailRecursiveDijkstra()
+            if length(priorityQueue) = 0 then return end if
+            local currentDist, currentVertex = heapPop(priorityQueue)[1], heapPop(priorityQueue)[2]
+            if currentDist > distances[currentVertex + 1] then
+                tailRecursiveDijkstra()
+                return
+            end if
+            local neighbors = adjacencyMap[currentVertex]
+            local neighborIndex = 0
+            repeat
+                if neighborIndex >= (neighbors != null and length(neighbors) or 0) then break end if
+                local neighborTuple = neighbors[neighborIndex + 1]
+                local neighborVert, neighborWeight = neighborTuple[1], neighborTuple[2]
+                local candidateDistance = currentDist + neighborWeight
+                if candidateDistance < distances[neighborVert + 1] then
+                    distances[neighborVert + 1] = candidateDistance
+                    heapPush(priorityQueue, [candidateDistance, neighborVert])
+                end if
+                neighborIndex = neighborIndex + 1
+            until false
+            tailRecursiveDijkstra()
+        end function
+
+        local function alwaysTrue() return true end function
+
+        -- Replace while-loop with manual recursion
+        local function recurseWhileNonEmptyPq(queue)
+            if length(queue) = 0 then return end if
+            local pair = heapPop(queue)
+            if pair = null then return end if
+            local cd, uv = pair[1], pair[2]
+            local u = uv
+            if cd > distances[u + 1] then
+                recurseWhileNonEmptyPq(queue)
+            else
+                local neighbors = adjacencyMap[u]
+                if neighbors != null then
+                    local ni = 0
+                    repeat
+                        if ni >= length(neighbors) then break end if
+                        local v, w = neighbors[ni+1][1], neighbors[ni+1][2]
+                        local candidate = cd + w
+                        if candidate < distances[v+1] then
+                            distances[v+1] = candidate
+                            heapPush(queue, [candidate, v])
+                        end if
+                        ni = ni + 1
+                    until false
+                end if
+                recurseWhileNonEmptyPq(queue)
+            end if
+        end function
+
+        recurseWhileNonEmptyPq(priorityQueue)
+
+        local shortestPathEdges = set()
+        local dfsStack = list()
+        dfsStack.append([n-1, distances[n]])
+        local visitedFlags = list()
+        local vfIndex = 0
+        repeat
+            if vfIndex >= n then break end if
+            visitedFlags.append(false)
+            vfIndex = vfIndex + 1
+        until false
+
+        local function dfsProcess()
+            if length(dfsStack) = 0 then return end if
+            local currentPair = dfsStack.pop()
+            local u = currentPair[1]
+            local distU = currentPair[2]
+            if visitedFlags[u + 1] then
+                dfsProcess()
+                return
+            end if
+            visitedFlags[u + 1] = true
+            local adjacents = adjacencyMap[u]
+            local iteratorIndex = 0
+            repeat
+                if adjacents = null or iteratorIndex >= length(adjacents) then break end if
+                local v, w = adjacents[iteratorIndex+1][1], adjacents[iteratorIndex+1][2]
+                if distU = distances[v + 1] + w then
+                    local x = min(u, v)
+                    local y = max(u, v)
+                    shortestPathEdges.insert([x, y])
+                    dfsStack.append([v, distances[v + 1]])
+                end if
+                iteratorIndex = iteratorIndex + 1
+            until false
+            dfsProcess()
+        end function
+
+        dfsProcess()
+
+        local resultList = list()
+        local edgeInd = 0
+        repeat
+            if edgeInd >= length(edges) then break end if
+            local u, v, _ = edges[edgeInd + 1][1], edges[edgeInd + 1][2], edges[edgeInd + 1][3]
+            local lesserNode = min(u, v)
+            local greaterNode = max(u, v)
+            local contained = false
+            local inSetIndex = 0
+            repeat
+                if inSetIndex >= shortestPathEdges.size() then break end if
+                local val = shortestPathEdges.toList()[inSetIndex + 1]
+                if val[1] = lesserNode and val[2] = greaterNode then
+                    contained = true
+                    break
+                end if
+                inSetIndex = inSetIndex + 1
+            until false
+            resultList.append(contained)
+            edgeInd = edgeInd + 1
+        until false
+
+        return resultList
+    end function
+end class

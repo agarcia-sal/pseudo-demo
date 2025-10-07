@@ -1,0 +1,57 @@
+CLASS Solution  
+    FUNCTION maxCollectedFruits(fruits)  
+        LET size BE THE LENGTH OF fruits  
+        
+        LET moves1 BE [(1,1), (0,1)]  
+        LET moves2 BE [(1,-1), (1,0), (1,1)]  
+        LET moves3 BE [(-1,1), (0,1), (1,1)]  
+        
+        DICTIONARY cache INITIALIZED EMPTY  
+        
+        FUNCTION dp(x1, y1, x2, y2, x3, y3)  
+            IF x1 < 0 OR x1 >= size OR y1 < 0 OR y1 >= size OR  
+               x2 < 0 OR x2 >= size OR y2 < 0 OR y2 >= size OR  
+               x3 < 0 OR x3 >= size OR y3 < 0 OR y3 >= size THEN  
+                RETURN -∞  
+            END IF  
+            
+            IF x1 == y1 == x2 == y2 == x3 == y3 == size - 1 THEN  
+                RETURN fruits[size - 1][size - 1]  
+            END IF  
+            
+            LET key BE (x1, y1, x2, y2, x3, y3)  
+            IF key IN cache THEN  
+                RETURN cache[key]  
+            END IF  
+            
+            LET total = fruits[x1][y1]  
+            
+            IF (x1 == x2 AND y1 == y2) OR (x1 == x3 AND y1 == y3) THEN  
+                total = 0  
+            END IF  
+            
+            IF x2 == x3 AND y2 == y3 THEN  
+                total += fruits[x2][y2]  
+            ELSE  
+                total += fruits[x2][y2] + fruits[x3][y3]  
+            END IF  
+            
+            LET best = -∞  
+            FOR (dx1, dy1) IN moves1 DO  
+                FOR (dx2, dy2) IN moves2 DO  
+                    FOR (dx3, dy3) IN moves3 DO  
+                        LET candidate = dp(x1 + dx1, y1 + dy1, x2 + dx2, y2 + dy2, x3 + dx3, y3 + dy3)  
+                        IF candidate > best THEN  
+                            best = candidate  
+                        END IF  
+                    END FOR  
+                END FOR  
+            END FOR  
+            
+            cache[key] = total + best  
+            RETURN total + best  
+        END FUNCTION  
+        
+        RETURN dp(0, 0, 0, size - 1, size - 1, 0)  
+    END FUNCTION  
+END CLASS

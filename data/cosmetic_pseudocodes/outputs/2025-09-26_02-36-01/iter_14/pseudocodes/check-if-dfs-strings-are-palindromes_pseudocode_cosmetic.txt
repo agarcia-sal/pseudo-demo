@@ -1,0 +1,75 @@
+```  
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+      SET self.mod TO mod  
+      SET self.h TO array_of_length(LENGTH(s) + 1) FILLED_WITH 0  
+      SET self.p TO array_of_length(LENGTH(s) + 1) FILLED_WITH 1  
+      SET x TO 1  
+      WHILE x <= LENGTH(s)  
+        SET self.h[x] TO ((self.h[x - 1] * base) + UNICODE(s[x - 1])) % mod  
+        SET self.p[x] TO (self.p[x - 1] * base) % mod  
+        INCREMENT x BY 1  
+      END WHILE  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+      SET diff_val TO (self.h[r] - (self.h[l - 1] * self.p[r - l + 1]))  
+      IF diff_val < 0  
+        SET diff_val TO diff_val + self.mod  
+      END IF  
+      RETURN diff_val % self.mod  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+      SET n TO LENGTH(s)  
+      SET links TO ARRAY_OF_LENGTH(n) FILLED_WITH empty_list  
+      SET idx TO 1  
+      WHILE idx < n  
+        APPEND idx TO links[parent[idx]]  
+        SET idx TO idx + 1  
+      END WHILE  
+
+      SET collected TO empty_list  
+      SET boundaries TO empty_dictionary  
+
+      FUNCTION traverseTree(node)  
+        SET start_pos TO LENGTH(collected) + 1  
+        FOR EACH child IN links[node]  
+          CALL traverseTree(child)  
+        END FOR  
+        APPEND s[node] TO collected  
+        SET end_pos TO LENGTH(collected)  
+        SET boundaries[node] TO (start_pos, end_pos)  
+      END FUNCTION  
+
+      CALL traverseTree(0)  
+
+      SET BASE_CONST TO 33331  
+      SET MOD_CONST TO 998244353  
+
+      SET fwd_hash TO NEW Hashing(collected, BASE_CONST, MOD_CONST)  
+      SET rev_hash TO NEW Hashing(REVERSE(collected), BASE_CONST, MOD_CONST)  
+
+      SET results TO empty_list  
+      SET z TO 0  
+      WHILE z < n  
+        SET st TO boundaries[z][0]  
+        SET en TO boundaries[z][1]  
+        SET length_sub TO (en - st + 1)  
+        IF (length_sub % 2) == 0  
+          SET val1 TO fwd_hash.query(st, st + (length_sub / 2) - 1)  
+          SET val2 TO rev_hash.query(n - en + 1, n - en + 1 + (length_sub / 2) - 1)  
+        ELSE  
+          SET val1 TO fwd_hash.query(st, st + (length_sub // 2) - 1)  
+          SET val2 TO rev_hash.query(n - en + 1, n - en + 1 + (length_sub // 2) - 1)  
+        END IF  
+        APPEND (val1 == val2) TO results  
+        SET z TO z + 1  
+      END WHILE  
+
+      RETURN results  
+    END FUNCTION  
+END CLASS  
+```

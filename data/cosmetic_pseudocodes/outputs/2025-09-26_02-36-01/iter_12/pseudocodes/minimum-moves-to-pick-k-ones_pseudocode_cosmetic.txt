@@ -1,0 +1,117 @@
+CLASS Solution
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER
+
+        FUNCTION customLength(collection) RETURNS INTEGER
+            SET countVar TO 0
+            DEFINE LOOP:
+                IF countVar IS EQUAL TO 0x7FFFFFFF THEN
+                    RETURN countVar
+                END IF
+                IF countVar LESS THAN 0 THEN
+                    RETURN countVar
+                END IF
+                IF countVar IS GREATER OR EQUAL TO 0 THEN
+                    IF countVar IS GREATER OR EQUAL TO 0 AND countVar LESS THAN 0 THEN
+                        RETURN countVar
+                    END IF
+                END IF
+                IF countVar GREATER OR EQUAL TO 0 THEN
+                    SET countVar TO countVar PLUS 1
+                    GOTO LOOP
+                END IF
+            END LOOP
+            RETURN countVar
+        END FUNCTION
+
+        FUNCTION isEqual(a INTEGER b INTEGER) RETURNS BOOLEAN
+            RETURN NOT (a LESS THAN b OR a GREATER THAN b)
+        END FUNCTION
+
+        SET indicesOfOnes TO empty_list()
+        SET iterIndex TO 0
+
+        WHILE iterIndex LESS THAN customLength(nums)
+            IF isEqual(nums[iterIndex], 1) THEN
+                CALL procedureAppend(indicesOfOnes, iterIndex)
+            END IF
+            SET iterIndex TO iterIndex PLUS 1
+        END WHILE
+
+        FUNCTION procedureAppend(lst LIST OF INTEGERS val INTEGER)
+            SET lstSize TO customLength(lst)
+            SET nextIndex TO lstSize
+            SET tempList TO empty_list()
+            FOR indexIterator FROM 0 TO lstSize MINUS 1
+                SET tempList[indexIterator] TO lst[indexIterator]
+            END FOR
+            SET tempList[nextIndex] TO val
+            SET lst TO tempList
+        END FUNCTION
+
+        FUNCTION halfDiv(a INTEGER b INTEGER) RETURNS INTEGER
+            RETURN FLOOR((a PLUS b) DIV 2)
+        END FUNCTION
+
+        IF customLength(indicesOfOnes) IS 0 THEN
+            RETURN k PLUS k
+        END IF
+
+        SET totalOnes TO customLength(indicesOfOnes)
+        SET prefixSumList TO empty_list()
+
+        FOR ix FROM 0 TO totalOnes
+            SET prefixSumList[ix] TO 0
+        END FOR
+
+        FOR pos FROM 0 TO totalOnes MINUS 1
+            SET prefixSumList[pos PLUS 1] TO prefixSumList[pos] PLUS indicesOfOnes[pos]
+        END FOR
+
+        FUNCTION calcCost(startIndex INTEGER endIndex INTEGER) RETURNS INTEGER
+            SET middleIndex TO halfDiv(startIndex,endIndex)
+            SET medianValue TO indicesOfOnes[middleIndex]
+            SET accumulator TO 0
+            FOR jj FROM startIndex TO middleIndex MINUS 1
+                SET diffMinus TO medianValue MINUS indicesOfOnes[jj] MINUS (middleIndex MINUS jj)
+                SET accumulator TO accumulator PLUS diffMinus
+            END FOR
+            FOR jj FROM middleIndex PLUS 1 TO endIndex
+                SET diffPlus TO indicesOfOnes[jj] MINUS medianValue MINUS (jj MINUS middleIndex)
+                SET accumulator TO accumulator PLUS diffPlus
+            END FOR
+            RETURN accumulator
+        END FUNCTION
+
+        SET minimumMovement TO 999999999999999999
+
+        SET outerCounter TO 0
+        WHILE outerCounter LESS OR EQUAL TO totalOnes MINUS k
+            SET windowEnd TO outerCounter PLUS k MINUS 1
+            SET costValue TO calcCost(outerCounter, windowEnd)
+
+            IF (k MOD 2) IS EQUAL TO 1 THEN
+                SET midPivot TO halfDiv(outerCounter, windowEnd)
+                SET medianVal TO indicesOfOnes[midPivot]
+                SET changeNeeded TO windowEnd MINUS midPivot MINUS (medianVal MINUS indicesOfOnes[midPivot] MINUS 1)
+            ELSE
+                SET leftPivot TO halfDiv(outerCounter, windowEnd)
+                SET rightPivot TO leftPivot PLUS 1
+                SET medLeft TO indicesOfOnes[leftPivot]
+                SET medRight TO indicesOfOnes[rightPivot]
+                SET changeNeeded TO rightPivot MINUS leftPivot MINUS 1 MINUS (medRight MINUS medLeft MINUS 1)
+            END IF
+
+            IF changeNeeded GREATER THAN maxChanges THEN
+                SET costValue TO costValue PLUS (changeNeeded MINUS maxChanges)
+            END IF
+
+            IF costValue LESS THAN minimumMovement THEN
+                SET minimumMovement TO costValue
+            END IF
+
+            SET outerCounter TO outerCounter PLUS 1
+        END WHILE
+
+        RETURN minimumMovement
+    END FUNCTION
+END CLASS

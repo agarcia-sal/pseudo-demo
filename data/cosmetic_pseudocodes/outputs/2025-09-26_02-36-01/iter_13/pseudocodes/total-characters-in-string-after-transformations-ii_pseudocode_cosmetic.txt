@@ -1,0 +1,131 @@
+CLASS Solution
+  FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+    SET CONST_MODULO TO (5 * 2 * 100000000) + 1
+
+    SET matrix_transformation TO empty list
+    REPEAT
+      SET temp_row TO empty list
+      REPEAT 26 TIMES
+        APPEND 0 TO temp_row
+      END REPEAT
+      APPEND temp_row TO matrix_transformation
+    UNTIL LENGTH of matrix_transformation EQUALS 26
+
+    SET counter_i TO 0
+    REPEAT UNTIL counter_i > 25
+      SET counter_j TO 0
+      WHILE counter_j < nums ELEMENT AT counter_i
+        SET target_pos TO (counter_i + counter_j + 1) MOD 26
+        SET current_value TO matrix_transformation ELEMENT AT counter_i ELEMENT AT target_pos
+        SET matrix_transformation ELEMENT AT counter_i ELEMENT AT target_pos TO current_value + 1
+        SET counter_j TO counter_j + 1
+      END WHILE
+      SET counter_i TO counter_i + 1
+    END REPEAT
+
+    FUNCTION multiply_matrices(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+      SET temp_result TO empty list
+      REPEAT 26 TIMES
+        APPEND list of 26 zeros TO temp_result
+      END REPEAT
+
+      SET idx_i TO 0
+      WHILE idx_i <= 25
+        SET idx_j TO 0
+        WHILE idx_j <= 25
+          SET idx_k TO 0
+          WHILE idx_k <= 25
+            SET prev_val TO temp_result ELEMENT AT idx_i ELEMENT AT idx_j
+            SET multiplied_val TO A ELEMENT AT idx_i ELEMENT AT idx_k * B ELEMENT AT idx_k ELEMENT AT idx_j
+            SET sum_val TO prev_val + multiplied_val
+            SET temp_result ELEMENT AT idx_i ELEMENT AT idx_j TO sum_val MOD CONST_MODULO
+            SET idx_k TO idx_k + 1
+          END WHILE
+          SET idx_j TO idx_j + 1
+        END WHILE
+        SET idx_i TO idx_i + 1
+      END WHILE
+
+      RETURN temp_result
+    END FUNCTION
+
+    FUNCTION power_matrix(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+      SET identity_matrix TO empty list
+      REPEAT 26 TIMES
+        SET row_identity TO empty list
+        REPEAT 26 TIMES
+          APPEND 0 TO row_identity
+        END REPEAT
+        APPEND row_identity TO identity_matrix
+      END REPEAT
+      SET pos_idx TO 0
+      WHILE pos_idx <= 25
+        SET identity_matrix ELEMENT AT pos_idx ELEMENT AT pos_idx TO 1
+        SET pos_idx TO pos_idx + 1
+      END WHILE
+
+      SET base_matrix TO matrix
+      SET exponent TO power
+      WHILE exponent > 0
+        IF (exponent MOD 2) = 1
+          SET identity_matrix TO multiply_matrices(identity_matrix, base_matrix)
+        END IF
+        SET base_matrix TO multiply_matrices(base_matrix, base_matrix)
+        SET exponent TO exponent DIV 2
+      END WHILE
+
+      RETURN identity_matrix
+    END FUNCTION
+
+    SET result_matrix TO power_matrix(matrix_transformation, t)
+
+    SET counts_initial TO empty list
+    REPEAT 26 TIMES
+      APPEND 0 TO counts_initial
+    END REPEAT
+
+    PROCEDURE count_chars(text parameter text IS string counts parameter counts IS list of integers)
+      FUNCTION recurse_chars(index parameter index IS integer)
+        IF index >= LENGTH of text
+          RETURN
+        END IF
+        SET current_char TO text CHARACTER AT index
+        SET alpha_pos TO ASCII(current_char) - ASCII('a')
+        SET counts ELEMENT AT alpha_pos TO counts ELEMENT AT alpha_pos + 1
+        recurse_chars(index + 1)
+      END FUNCTION
+      CALL recurse_chars(0)
+    END PROCEDURE
+
+    CALL count_chars(s, counts_initial)
+
+    SET counts_final TO empty list
+    REPEAT 26 TIMES
+      APPEND 0 TO counts_final
+    END REPEAT
+
+    SET idx_outer TO 0
+    WHILE idx_outer <= 25
+      SET idx_inner TO 0
+      WHILE idx_inner <= 25
+        SET prev_sum TO counts_final ELEMENT AT idx_inner
+        SET addition TO counts_initial ELEMENT AT idx_outer * result_matrix ELEMENT AT idx_outer ELEMENT AT idx_inner
+        SET counts_final ELEMENT AT idx_inner TO (prev_sum + addition) MOD CONST_MODULO
+        SET idx_inner TO idx_inner + 1
+      END WHILE
+      SET idx_outer TO idx_outer + 1
+    END WHILE
+
+    FUNCTION sum_values(numbers parameter numbers IS list of integers) RETURNS integer
+      FUNCTION recurse_sum(position parameter position IS integer, accumulator parameter accumulator IS integer) RETURNS integer
+        IF position >= LENGTH of numbers
+          RETURN accumulator MOD CONST_MODULO
+        END IF
+        RETURN recurse_sum(position + 1, accumulator + numbers ELEMENT AT position)
+      END FUNCTION
+      RETURN recurse_sum(0, 0)
+    END FUNCTION
+
+    RETURN sum_values(counts_final)
+  END FUNCTION
+END CLASS

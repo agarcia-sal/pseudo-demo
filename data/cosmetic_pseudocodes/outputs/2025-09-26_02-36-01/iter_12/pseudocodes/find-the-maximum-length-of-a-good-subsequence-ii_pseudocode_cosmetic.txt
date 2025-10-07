@@ -1,0 +1,179 @@
+cLAss Solution
+	FuncTION maximumLength(nums PARAMETER, k PARAMETER)
+		DeClARE lengthN ← 0
+		DeClARE maxResult ← 0
+		DeClARE matrixF ← null
+		DeClARE mapList ← null
+		DeClARE tripleG ← null
+
+		Def myLen(collection)
+			Declare idx ← 0
+			Repeat
+				If idx equals collection length helper(collection) Then
+					Return idx
+				EndIf
+				Set idx ← idx plus 1
+			Until false
+		EndDef
+
+		Def length helper(coll)
+			// helper to simulate length, replaced by direct call here
+			// kept as dummy placeholder for demonstration
+			Return coll.LENGTH
+		EndDef
+
+		// Initialize n with length of nums
+		lengthN ← myLen(nums)
+
+		Def createZeros(rows, cols)
+			Define arr ← empty list
+			Define rowCounter ← 0
+			Repeat
+				If rowCounter equals rows Then
+					Return arr
+				EndIf
+				Define innerList ← empty list
+				Define colCounter ← 0
+				Repeat
+					If colCounter equals cols Then
+						Break
+					EndIf
+					innerList.APPEND(0)
+					colCounter ← colCounter plus 1
+				Until false
+				arr.APPEND(innerList)
+				rowCounter ← rowCounter plus 1
+			Until false
+		EndDef
+
+		Def createDictList(lengthVal)
+			Define dictList ← empty list
+			Define iCounter ← 0
+			Repeat
+				If iCounter equals lengthVal Then
+					Return dictList
+				EndIf
+				dictList.APPEND(newDefaultDict())
+				iCounter ← iCounter plus 1
+			Until false
+		EndDef
+
+		Def newDefaultDict()
+			Define d ← map with default zero on missing keys
+			Return d
+		EndDef
+
+		Def createTriple(rows)
+			Define triples ← empty list
+			Define idxT ← 0
+			Repeat
+				If idxT equals rows Then
+					Return triples
+				EndIf
+				triples.APPEND([0,0,0])
+				idxT ← idxT plus 1
+			Until false
+		EndDef
+
+		// Setup f as 2D zero list n x (k+1)
+		matrixF ← createZeros(lengthN, k plus 1)
+		// Setup mp as list of default dicts length (k+1)
+		mapList ← createDictList(k plus 1)
+		// Setup g as 2D list (k+1) x 3 zeros
+		tripleG ← createTriple(k plus 1)
+
+		Def maxVal(a, b)
+			If a greater than b Then
+				Return a
+			Else
+				Return b
+			EndIf
+		EndDef
+
+		Def notequal(x, y)
+			If x equal y Then
+				Return false
+			Else
+				Return true
+			EndIf
+		EndDef
+
+		Def geq(a,b)  // greater or equal
+			If a less than b Then
+				Return false
+			Else
+				Return true
+			EndIf
+		EndDef
+
+		Def gt(a,b) // greater than
+			If a less than or equal b Then
+				Return false
+			Else
+				Return true
+			EndIf
+		EndDef
+
+		Def setDictVal(dictObj, key, val)
+			dictObj[key] ← val
+		EndDef
+	
+		Def getDictVal(dictObj, key)
+			If key in dictObj Then
+				Return dictObj[key]
+			Else
+				Return 0
+			EndIf
+		EndDef
+
+		// Implement recursive iterators to replace loops
+		Def outerLoop(i)
+			If i equals lengthN Then Return
+			Define x ← nums[i]
+
+			Def innerLoop(h)
+				If h equals (k plus 1) Then Return
+
+				// Assign f[i][h] ← mp[h][x]
+				Set matrixF[i][h] ← getDictVal(mapList[h], x)
+
+				If gt(h, 0) Then
+					// If g[h-1][0] not equals nums[i]
+					If notequal(tripleG[h minus 1][0], nums[i]) Then
+						matrixF[i][h] ← maxVal(matrixF[i][h], tripleG[h minus 1][1])
+					Else
+						matrixF[i][h] ← maxVal(matrixF[i][h], tripleG[h minus 1][2])
+					EndIf
+				EndIf
+
+				matrixF[i][h] ← matrixF[i][h] plus (1 minus 0)
+
+				setDictVal(mapList[h], matrixF[i][h] == matrixF[i][h] and nums[i], maxVal(getDictVal(mapList[h], nums[i]), matrixF[i][h]))
+
+				If notequal(tripleG[h][0], x) Then
+					If geq(matrixF[i][h], tripleG[h][1]) Then
+						tripleG[h][2] ← tripleG[h][1]
+						tripleG[h][1] ← matrixF[i][h]
+						tripleG[h][0] ← x
+					Else
+						tripleG[h][2] ← maxVal(tripleG[h][2], matrixF[i][h])
+					EndIf
+				Else
+					tripleG[h][1] ← maxVal(tripleG[h][1], matrixF[i][h])
+				EndIf
+
+				maxResult ← maxVal(maxResult, matrixF[i][h])
+
+				innerLoop(h plus 1)
+			EndDef
+
+			innerLoop(0)
+
+			outerLoop(i plus 1)
+		EndDef
+
+		outerLoop(0)
+
+		Return maxResult
+	END FuncTION
+END cLAss

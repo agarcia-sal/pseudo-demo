@@ -1,0 +1,69 @@
+FUNCTION anti_shuffle(obtained_text)
+  SET extracted_tokens TO EMPTY LIST
+  SET temp_string TO EMPTY STRING
+  SET position TO 0
+  SET length_to_process TO LENGTH(obtained_text)
+  WHILE position < length_to_process
+    SET current_char TO obtained_text.at(position)
+    IF current_char = " "
+      ADD temp_string TO extracted_tokens
+      SET temp_string TO ""
+    ELSE
+      SET temp_string TO temp_string + current_char
+    END IF
+    SET position TO position + 1
+  END WHILE
+  IF temp_string != ""
+    ADD temp_string TO extracted_tokens
+  END IF
+
+  SET reordered_tokens TO EMPTY LIST
+  SET index_in_tokens TO 0
+  WHILE index_in_tokens < LENGTH(extracted_tokens)
+    SET token_to_sort TO extracted_tokens.at(index_in_tokens)
+    SET characters_list TO EMPTY LIST
+    SET char_index TO 0
+    SET length_token TO LENGTH(token_to_sort)
+    WHILE char_index < length_token
+      ADD token_to_sort.at(char_index) TO characters_list
+      SET char_index TO char_index + 1
+    END WHILE
+
+    SET swap_occurred TO TRUE
+    WHILE swap_occurred = TRUE
+      SET swap_occurred TO FALSE
+      SET j TO 0
+      WHILE j < LENGTH(characters_list) - 1
+        IF ASCII(characters_list.at(j)) > ASCII(characters_list.at(j+1))
+          SET temp_char TO characters_list.at(j)
+          SET characters_list[j] TO characters_list.at(j+1)
+          SET characters_list[j+1] TO temp_char
+          SET swap_occurred TO TRUE
+        END IF
+        SET j TO j + 1
+      END WHILE
+    END WHILE
+
+    SET assembled_word TO ""
+    SET k TO 0
+    WHILE k < LENGTH(characters_list)
+      SET assembled_word TO assembled_word + characters_list.at(k)
+      SET k TO k + 1
+    END WHILE
+
+    ADD assembled_word TO reordered_tokens
+    SET index_in_tokens TO index_in_tokens + 1
+  END WHILE
+
+  SET final_result TO ""
+  SET m TO 0
+  SET length_reordered TO LENGTH(reordered_tokens)
+  WHILE TRUE
+    IF m = length_reordered THEN BREAK END IF
+    SET final_result TO final_result + reordered_tokens.at(m)
+    IF m < length_reordered - 1 THEN SET final_result TO final_result + " " END IF
+    SET m TO m + 1
+  END WHILE
+
+  RETURN final_result
+END FUNCTION

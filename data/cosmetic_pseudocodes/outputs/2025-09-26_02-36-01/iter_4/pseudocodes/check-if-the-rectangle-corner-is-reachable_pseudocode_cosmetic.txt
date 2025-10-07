@@ -1,0 +1,113 @@
+CLASS Solution
+    FUNCTION canReachCorner(xCorner yCorner circles)
+        FUNCTION in_circle(x y cx cy r)
+            LET deltaX = x - cx
+            LET deltaY = y - cy
+            LET distSquared = (deltaX * deltaX) + (deltaY * deltaY)
+            LET radiusSquared = r * r
+            IF distSquared <= radiusSquared THEN
+                RETURN True
+            ELSE
+                RETURN False
+            ENDIF
+        END FUNCTION
+
+        FUNCTION cross_left_top(cx cy r)
+            LET condOne = (ABS(cx) <= r) AND (0 <= cy) AND (cy <= yCorner)
+            LET diffCyTop = ABS(cy - yCorner)
+            LET condTwo = (diffCyTop <= r) AND (0 <= cx) AND (cx <= xCorner)
+            IF (condOne OR condTwo) THEN
+                RETURN True
+            ELSE
+                RETURN False
+            ENDIF
+        END FUNCTION
+
+        FUNCTION cross_right_bottom(cx cy r)
+            LET diffCxRight = ABS(cx - xCorner)
+            LET condA = (diffCxRight <= r) AND (0 <= cy) AND (cy <= yCorner)
+            LET condB = (ABS(cy) <= r) AND (0 <= cx) AND (cx <= xCorner)
+            IF (condA OR condB) THEN
+                RETURN True
+            ELSE
+                RETURN False
+            ENDIF
+        END FUNCTION
+
+        FUNCTION dfs(i)
+            LET circle_i = circles[i]
+            LET cx_i = circle_i[0]
+            LET cy_i = circle_i[1]
+            LET radius_i = circle_i[2]
+
+            IF cross_right_bottom(cx_i cy_i radius_i) THEN
+                RETURN True
+            ENDIF
+
+            vis[i] = True
+
+            LET index = 0
+            WHILE index < LENGTH(circles)
+                LET circle_j = circles[index]
+                LET cx_j = circle_j[0]
+                LET cy_j = circle_j[1]
+                LET radius_j = circle_j[2]
+
+                IF vis[index] THEN
+                    index = index + 1
+                    SKIP TO next iteration
+                ENDIF
+
+                LET dx = cx_i - cx_j
+                LET dy = cy_i - cy_j
+                LET distSqr = (dx * dx) + (dy * dy)
+                LET radiusSum = radius_i + radius_j
+                LET radiusSumSqr = radiusSum * radiusSum
+
+                IF distSqr > radiusSumSqr THEN
+                    index = index + 1
+                    SKIP TO next iteration
+                ENDIF
+
+                LET condX = (cx_i * radius_j) + (cx_j * radius_i) < radiusSum * xCorner
+                LET condY = (cy_i * radius_j) + (cy_j * radius_i) < radiusSum * yCorner
+
+                IF condX AND condY AND dfs(index) THEN
+                    RETURN True
+                ENDIF
+
+                index = index + 1
+            ENDWHILE
+
+            RETURN False
+        END FUNCTION
+
+        LET vis = []
+        LET totalCircles = LENGTH(circles)
+        LET counter = 0
+        WHILE counter < totalCircles
+            vis = vis + [False]
+            counter = counter + 1
+        ENDWHILE
+
+        LET idx = 0
+        WHILE idx < totalCircles
+            LET currCircle = circles[idx]
+            LET cX = currCircle[0]
+            LET cY = currCircle[1]
+            LET rC = currCircle[2]
+
+            IF in_circle(0 0 cX cY rC) OR in_circle(xCorner yCorner cX cY rC) THEN
+                RETURN False
+            ENDIF
+
+            IF (NOT vis[idx]) AND cross_left_top(cX cY rC) AND dfs(idx) THEN
+                RETURN False
+            ENDIF
+
+            idx = idx + 1
+        ENDWHILE
+
+        RETURN True
+    END FUNCTION
+END CLASS

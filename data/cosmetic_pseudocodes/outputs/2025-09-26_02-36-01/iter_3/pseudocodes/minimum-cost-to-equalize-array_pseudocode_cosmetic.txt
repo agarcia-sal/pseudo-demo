@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION minCostToEqualizeArray(nums cost1 cost2)
+        LET MODULO_VALUE = 10^9 + 7
+        LET lengthArr = LENGTH(nums)
+        LET smallest = nums[0]
+        LET largest = nums[0]
+        LET totalSum = 0
+
+        LET idx = 0
+        WHILE idx < lengthArr
+            LET val = nums[idx]
+            IF val < smallest THEN
+                smallest = val
+            END IF
+            IF val > largest THEN
+                largest = val
+            END IF
+            totalSum += val
+            idx = idx + 1
+        END WHILE
+
+        IF (cost1 << 1) <= cost2 OR lengthArr < 3 THEN
+            LET diffSum = (largest * lengthArr) - totalSum
+            RETURN ((cost1 * diffSum) MOD MODULO_VALUE)
+        END IF
+
+        FUNCTION getMinCost(targetVal)
+            LET gapMax = targetVal - smallest
+            LET gapTotal = (targetVal * lengthArr) - totalSum
+            LET halfGap = gapTotal // 2
+            LET smallerPair = IF halfGap < (gapTotal - gapMax) THEN halfGap ELSE (gapTotal - gapMax)
+            RETURN (cost1 * gapTotal - 2 * cost1 * smallerPair + cost2 * smallerPair)
+        END FUNCTION
+
+        LET minimumResult = NULL
+        LET candidate = largest
+        LET limit = (2 * largest) - 1
+
+        WHILE candidate <= limit
+            LET currentCost = getMinCost(candidate)
+            IF minimumResult IS NULL OR currentCost < minimumResult THEN
+                minimumResult = currentCost
+            END IF
+            candidate = candidate + 1
+        END WHILE
+
+        RETURN (minimumResult MOD MODULO_VALUE)
+    END FUNCTION
+END CLASS

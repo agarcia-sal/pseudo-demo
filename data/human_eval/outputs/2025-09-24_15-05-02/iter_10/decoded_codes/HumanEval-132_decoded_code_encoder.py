@@ -1,0 +1,19 @@
+from typing import List
+
+def is_nested(string: str) -> bool:
+    opening_bracket_index: List[int] = []
+    closing_bracket_index: List[int] = []
+    for i in range(len(string)):
+        if string[i] == '[':
+            opening_bracket_index.append(i)
+        else:
+            closing_bracket_index.append(i)
+    closing_bracket_index.reverse()
+    count = 0
+    i = 0
+    length = len(closing_bracket_index)
+    for opening_idx in opening_bracket_index:
+        if i < length and opening_idx < closing_bracket_index[i]:
+            count += 1
+            i += 1
+    return count >= 2

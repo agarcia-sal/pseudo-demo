@@ -1,0 +1,62 @@
+CLASS Solution
+	FUNCTION lastNonEmptyString(inputStr)
+		DEFINE FUNCTION countChars(str, idx, freqMap)
+			IF idx > LENGTH(str)
+				RETURN freqMap
+			ELSE
+				LET currentChar = str[idx]
+				IF currentChar IN freqMap
+					freqMap[currentChar] = freqMap[currentChar] + 1
+				ELSE
+					freqMap[currentChar] = 1
+				END IF
+				RETURN countChars(str, idx + 1, freqMap)
+			END IF
+		END FUNCTION
+		
+		LET frequencies = countChars(inputStr, 1, {})
+		
+		DEFINE FUNCTION maxValueInMap(map)
+			LET keysList = KEYS(map)
+			LET i = 1
+			LET maxVal = - (1 * (2 ^ 31))
+			WHILE i <= LENGTH(keysList)
+				IF map[keysList[i]] > maxVal THEN
+					maxVal = map[keysList[i]]
+				END IF
+				i = i + 1
+			END WHILE
+			RETURN maxVal
+		END FUNCTION
+		
+		LET highestFrequency = maxValueInMap(frequencies)
+		
+		LET charsWithMaxFreq = {}
+		FOR EACH key IN KEYS(frequencies)
+			IF frequencies[key] = highestFrequency THEN
+				charsWithMaxFreq[key] = TRUE
+			END IF
+		END FOR
+		
+		LET collected = []
+		
+		DEFINE FUNCTION traverseFromEnd(idx)
+			IF idx < 1 THEN RETURN END IF
+			LET currentChar = inputStr[idx]
+			IF currentChar IN charsWithMaxFreq THEN
+				collected = APPEND(collected, currentChar)
+				DELETE charsWithMaxFreq[currentChar]
+			END IF
+			traverseFromEnd(idx - 1)
+		END FUNCTION
+		
+		traverseFromEnd(LENGTH(inputStr))
+		
+		DEFINE FUNCTION reverseConcat(lst, i, acc)
+			IF i < 1 THEN RETURN acc END IF
+			RETURN reverseConcat(lst, i - 1, acc + lst[i])
+		END FUNCTION
+		
+		RETURN reverseConcat(collected, LENGTH(collected), "")
+	END FUNCTION
+END CLASS

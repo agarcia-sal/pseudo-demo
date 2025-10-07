@@ -1,0 +1,42 @@
+CLASS Solution  
+    FUNCTION minValidStrings(words, target)  
+        DECLARE prefixSet AS empty set  
+        DECLARE wordIndex AS zero  
+        WHILE wordIndex LESS THAN LENGTH(words)  
+            DECLARE currentWord AS words[wordIndex]  
+            DECLARE lengthTracker AS 1  
+            WHILE lengthTracker LESS OR EQUAL LENGTH(currentWord)  
+                DECLARE prefixSlice AS substring(currentWord, 1, lengthTracker)  
+                INSERT prefixSlice INTO prefixSet  
+                lengthTracker = lengthTracker + 1  
+            END WHILE  
+            wordIndex = wordIndex + 1  
+        END WHILE  
+
+        DECLARE targetLength AS LENGTH(target)  
+        DECLARE dpArray AS list OF SIZE (targetLength + 1) FILLED WITH a very large number  
+        dpArray[0] = 0  
+
+        DECLARE outerCounter AS 1  
+        WHILE outerCounter LESS OR EQUAL targetLength  
+            DECLARE innerCounter AS 1  
+            WHILE innerCounter LESS OR EQUAL outerCounter  
+                DECLARE segment AS substring(target, innerCounter, outerCounter)  
+                IF segment IS CONTAINED IN prefixSet THEN  
+                    DECLARE candidate AS dpArray[innerCounter - 1] + 1  
+                    IF candidate LESS THAN dpArray[outerCounter] THEN  
+                        dpArray[outerCounter] = candidate  
+                    END IF  
+                END IF  
+                innerCounter = innerCounter + 1  
+            END WHILE  
+            outerCounter = outerCounter + 1  
+        END WHILE  
+
+        IF dpArray[targetLength] IS NOT EQUAL TO a very large number THEN  
+            RETURN dpArray[targetLength]  
+        ELSE  
+            RETURN -1  
+        END IF  
+    END FUNCTION  
+END CLASS

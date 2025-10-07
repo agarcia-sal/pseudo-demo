@@ -1,0 +1,69 @@
+CLASS Solution
+	FUNCTION minChanges(nums k)
+		DEFINE PROCEDURE addValue(lst idx val)
+			lst[idx] ← lst[idx] + val
+		END PROCEDURE
+
+		DEFINE PROCEDURE subValue(lst idx val)
+			lst[idx] ← lst[idx] - val
+		END PROCEDURE
+
+		DEFINE FUNCTION sumPrefix(arr)
+			DEFINE FUNCTION recursePrefix(arr i acc)
+				IF i >= LENGTH(arr) THEN RETURN acc END IF
+				RETURN recursePrefix(arr, i+1, acc + arr[i])
+			END FUNCTION
+			RETURN recursePrefix(arr, 0, 0)
+		END FUNCTION
+
+		// initialize differential array d: length k+2 filled with 0
+		d ← ARRAY of (k + 2) zeros
+
+		n ← LENGTH(nums)
+
+		DEFINE FUNCTION loopProcess(idx)
+			IF idx > ((n // 2) - 1) THEN RETURN END IF
+
+			a ← nums[idx]
+			b ← nums[(n - 1) - idx]
+
+			DEFINE FUNCTION orderPair(x y)
+				IF x > y THEN RETURN y, x END IF
+				RETURN x, y
+			END FUNCTION
+
+			p, q ← orderPair(a, b)
+
+			addValue(d, 0, 1)
+			subValue(d, q - p, 1)
+			addValue(d, (q - p) + 1, 1)
+			subValue(d, MAX(q, (k - p)) + 1, 1)
+			addValue(d, MAX(q, (k - p)) + 2, 1)
+
+			loopProcess(idx + 1)
+		END FUNCTION
+
+		loopProcess(0)
+
+		DEFINE FUNCTION accumulate(arr)
+			acc ← 0
+			RESULT ← ARRAY of LENGTH(arr)
+			FOR j FROM 0 TO LENGTH(arr)-1
+				acc ← acc + arr[j]
+				RESULT[j] ← acc
+			END FOR
+			RETURN RESULT
+		END FUNCTION
+
+		accumulated ← accumulate(d)
+
+		mini ← accumulated[0]
+		FOR z FROM 1 TO LENGTH(accumulated)-1
+			IF accumulated[z] < mini THEN
+				mini ← accumulated[z]
+			END IF
+		END FOR
+
+		RETURN mini
+	END FUNCTION
+END CLASS

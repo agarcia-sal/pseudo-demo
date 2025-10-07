@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION maximumSumSubsequence(inputList, updatePairs)
+        LET MODULUS BE (1_000_000_000 + 1)
+        LET lengthVal BE SIZE OF inputList
+
+        LET takeDP BE ARRAY FILLED WITH 0 OF SIZE lengthVal
+        LET skipDP BE ARRAY FILLED WITH 0 OF SIZE lengthVal
+
+        SET takeDP[0] TO MAXIMUM OF 0 AND inputList[0]
+        SET skipDP[0] TO 0
+
+        LET idx BE 1
+        WHILE idx < lengthVal
+            SET prevSkip TO skipDP[idx - 1]
+            SET currentNum TO inputList[idx]
+            LET valTake BE prevSkip + currentNum
+            IF valTake < 0
+                valTake = 0
+            END IF
+            takeDP[idx] = valTake
+
+            LET prevSkipVal TO skipDP[idx - 1]
+            LET prevTakeVal TO takeDP[idx - 1]
+            IF prevSkipVal > prevTakeVal
+                skipDP[idx] = prevSkipVal
+            ELSE
+                skipDP[idx] = prevTakeVal
+            END IF
+
+            idx = idx + 1
+        END WHILE
+
+        LET runningSum BE 0
+        FOR EACH (position, newVal) IN updatePairs
+            inputList[position] = newVal
+
+            IF position IS 0
+                IF inputList[0] > 0
+                    takeDP[0] = inputList[0]
+                ELSE
+                    takeDP[0] = 0
+                END IF
+                skipDP[0] = 0
+            ELSE
+                LET prevSkipVal = skipDP[position - 1]
+                LET valTake = prevSkipVal + inputList[position]
+                IF valTake < 0
+                    valTake = 0
+                END IF
+                takeDP[position] = valTake
+
+                LET valSkipLeft = skipDP[position - 1]
+                LET valTakeLeft = takeDP[position - 1]
+                IF valSkipLeft > valTakeLeft
+                    skipDP[position] = valSkipLeft
+                ELSE
+                    skipDP[position] = valTakeLeft
+                END IF
+            END IF
+
+            LET j = position + 1
+            WHILE j < lengthVal
+                LET prevSkipVal = skipDP[j - 1]
+                LET valTake = prevSkipVal + inputList[j]
+                IF valTake < 0
+                    valTake = 0
+                END IF
+                takeDP[j] = valTake
+
+                LET skipLeft = skipDP[j - 1]
+                LET takeLeft = takeDP[j - 1]
+                skipDP[j] = (skipLeft > takeLeft) ? skipLeft : takeLeft
+
+                j = j + 1
+            END WHILE
+
+            LET lastIdx = lengthVal - 1
+            LET maxVal = (takeDP[lastIdx] > skipDP[lastIdx]) ? takeDP[lastIdx] : skipDP[lastIdx]
+            runningSum = (runningSum + maxVal) MODULUS
+        END FOR
+
+        RETURN runningSum
+    END FUNCTION
+END CLASS

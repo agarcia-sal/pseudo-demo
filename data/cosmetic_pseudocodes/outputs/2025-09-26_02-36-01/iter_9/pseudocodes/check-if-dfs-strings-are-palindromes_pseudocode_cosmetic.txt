@@ -1,0 +1,131 @@
+CLASS Hashing  
+    FUNCTION __init__(self, strInput, baseVal, modulus)  
+        SET self.mod TO modulus  
+        SET self.h TO an array filled with 0, size LENGTH(strInput) + 1  
+        SET self.p TO an array filled with 1, size LENGTH(strInput) + 1  
+
+        PROCEDURE computeHashAndPower(idx)  
+            IF idx > LENGTH(strInput) THEN  
+                RETURN  
+            END IF  
+            SET prevHash TO self.h[idx - 1]  
+            SET currCharCode TO UNICODE_CODE(strInput[idx - 1])  
+            SET hashVal TO (prevHash * baseVal + currCharCode) MOD modulus  
+            SET self.h[idx] TO hashVal  
+
+            SET prevPower TO self.p[idx - 1]  
+            SET powerVal TO (prevPower * baseVal) MOD modulus  
+            SET self.p[idx] TO powerVal  
+
+            CALL computeHashAndPower(idx + 1)  
+        END PROCEDURE  
+
+        CALL computeHashAndPower(1)  
+    END FUNCTION  
+
+    FUNCTION query(self, leftBound, rightBound)  
+        SET diffHash TO self.h[rightBound] - (self.h[leftBound - 1] * self.p[rightBound - leftBound + 1]) MOD self.mod  
+        IF diffHash < 0 THEN  
+            SET diffHash TO diffHash + self.mod  
+        END IF  
+        RETURN diffHash MOD self.mod  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parentList, strVal)  
+        SET graphSize TO LENGTH(strVal)  
+        SET adjacency TO array of empty arrays, size graphSize  
+
+        PROCEDURE buildGraph(index)  
+            IF index >= graphSize THEN  
+                RETURN  
+            END IF  
+            SET currentParent TO parentList[index]  
+            IF currentParent != -1 THEN  
+                APPEND index TO adjacency[currentParent]  
+            END IF  
+            CALL buildGraph(index + 1)  
+        END PROCEDURE  
+        CALL buildGraph(1)  
+
+        SET traversalSequence TO empty array  
+        SET positionsMap TO empty dictionary  
+
+        PROCEDURE depthFirstSearch(node)  
+            SET leftIdx TO LENGTH(traversalSequence) + 1  
+
+            PROCEDURE visitChildren(childIdxList, pos)  
+                IF pos >= LENGTH(childIdxList) THEN  
+                    RETURN  
+                END IF  
+                CALL depthFirstSearch(childIdxList[pos])  
+                CALL visitChildren(childIdxList, pos + 1)  
+            END PROCEDURE  
+            CALL visitChildren(adjacency[node], 0)  
+
+            APPEND strVal[node] TO traversalSequence  
+
+            SET rightIdx TO LENGTH(traversalSequence)  
+            SET positionsMap[node] TO PAIR(leftIdx, rightIdx)  
+        END PROCEDURE  
+        CALL depthFirstSearch(0)  
+
+        SET baseConst TO 33331  
+        SET modConst TO 998244353  
+        SET forwardHasher TO NEW Hashing(traversalSequence, baseConst, modConst)  
+
+        FUNCTION reverseList(originalList)  
+            SET reversedArr TO empty array  
+            SET idx TO LENGTH(originalList) - 1  
+            WHILE idx >= 0  
+                APPEND originalList[idx] TO reversedArr  
+                SET idx TO idx - 1  
+            END WHILE  
+            RETURN reversedArr  
+        END FUNCTION  
+
+        SET reversedTraversal TO reverseList(traversalSequence)  
+        SET backwardHasher TO NEW Hashing(reversedTraversal, baseConst, modConst)  
+
+        SET results TO empty list  
+
+        PROCEDURE processNode(i)  
+            IF i >= graphSize THEN  
+                RETURN  
+            END IF  
+
+            SET leftPos TO positionsMap[i].first  
+            SET rightPos TO positionsMap[i].second  
+            SET segmentLength TO rightPos - leftPos + 1  
+
+            FUNCTION isEven(num)  
+                RETURN (num MOD 2) = 0  
+            END FUNCTION  
+
+            SET value1 TO 0  
+            SET value2 TO 0  
+
+            IF isEven(segmentLength) THEN  
+                SET halfLen TO segmentLength / 2  
+                SET value1 TO forwardHasher.query(leftPos, leftPos + halfLen - 1)  
+                SET revStart TO graphSize - rightPos + 1  
+                SET revEnd TO revStart + halfLen - 1  
+                SET value2 TO backwardHasher.query(revStart, revEnd)  
+            ELSE  
+                SET halfLen TO segmentLength // 2  
+                SET value1 TO forwardHasher.query(leftPos, leftPos + halfLen - 1)  
+                SET revStart TO graphSize - rightPos + 1  
+                SET revEnd TO revStart + halfLen - 1  
+                SET value2 TO backwardHasher.query(revStart, revEnd)  
+            END IF  
+
+            APPEND (value1 = value2) TO results  
+
+            CALL processNode(i + 1)  
+        END PROCEDURE  
+        CALL processNode(0)  
+
+        RETURN results  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,134 @@
+CLASS Solution
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)
+    MAP_INT_LIST graphMap := empty mapping
+    MAP_INT_LIST reverseMap := empty mapping
+
+    PROCEDURE populateGraphs()
+        INTEGER posA := 0
+        REPEAT
+            IF posA >= SIZE(flowFrom) THEN BREAK
+            INTEGER valR := flowFrom[posA]
+            INTEGER valS := flowTo[posA]
+            IF NOT HAS_KEY(graphMap valR) THEN SET graphMap[valR] := empty list
+            IF NOT HAS_KEY(reverseMap valS) THEN SET reverseMap[valS] := empty list
+            APPEND valS TO graphMap[valR]
+            APPEND valR TO reverseMap[valS]
+            SET posA := posA + 1
+        UNTIL FALSE
+    END PROCEDURE
+
+    LIST indices := LIST_REPEAT(n -1)
+    LIST lowLinks := LIST_REPEAT(0 n)
+    LIST onStack := LIST_REPEAT(FALSE n)
+    LIST stack := empty list
+    INTEGER idxCounter := 0
+    LIST sccs := empty list
+
+    PROCEDURE tarjanRec(node)
+        SET indices[node] := idxCounter
+        SET lowLinks[node] := idxCounter
+        SET idxCounter := idxCounter + 1
+        APPEND node TO stack
+        SET onStack[node] := TRUE
+
+        INTEGER iter := 0
+        LIST neighbors := GET_VALUE_OR_LIST(graphMap node)
+        WHILE iter < SIZE(neighbors)
+            INTEGER nbr := neighbors[iter]
+            IF indices[nbr] < 0 THEN
+                CALL tarjanRec(nbr)
+                SET lowLinks[node] := MINIMUM(lowLinks[node], lowLinks[nbr])
+            ELSE IF onStack[nbr] = TRUE THEN
+                SET lowLinks[node] := MINIMUM(lowLinks[node], indices[nbr])
+            ENDIF
+            SET iter := iter + 1
+        ENDWHILE
+
+        IF lowLinks[node] = indices[node] THEN
+            LIST component := empty list
+            LOOP
+                INTEGER w := REMOVE_LAST(stack)
+                SET onStack[w] := FALSE
+                APPEND w TO component
+                IF w = node THEN BREAK
+            ENDLOOP
+            APPEND component TO sccs
+        ENDIF
+    END PROCEDURE
+
+    PROCEDURE initializeIndices()
+        INTEGER i := 0
+        WHILE i < n
+            SET indices[i] := -1
+            SET lowLinks[i] := 0
+            SET onStack[i] := FALSE
+            SET i := i + 1
+        ENDWHILE
+    END PROCEDURE
+
+    CALL initializeIndices()
+    CALL populateGraphs()
+
+    INTEGER i := 0
+    WHILE i < n
+        IF indices[i] < 0 THEN CALL tarjanRec(i)
+        SET i := i + 1
+    ENDWHILE
+
+    MAP_INT_LIST sccGraph := empty mapping
+    LIST sccIndex := LIST_REPEAT(-1 n)
+    LIST sccHasCrystal := LIST_REPEAT(FALSE SIZE(sccs))
+    INTEGER currScc := 0
+    INTEGER outerIdx := 0
+
+    WHILE outerIdx < SIZE(sccs)
+        LIST currComponent := sccs[outerIdx]
+        INTEGER inner := 0
+        WHILE inner < SIZE(currComponent)
+            INTEGER nd := currComponent[inner]
+            SET sccIndex[nd] := currScc
+            IF CONTAINS(crystals, nd) THEN SET sccHasCrystal[outerIdx] := TRUE
+            SET inner := inner + 1
+        ENDWHILE
+        SET currScc := currScc + 1
+        SET outerIdx := outerIdx + 1
+    ENDWHILE
+
+    INTEGER pos := 0
+    WHILE pos < SIZE(flowFrom)
+        INTEGER valU := flowFrom[pos]
+        INTEGER valV := flowTo[pos]
+        INTEGER idU := sccIndex[valU]
+        INTEGER idV := sccIndex[valV]
+        IF idU != idV THEN
+            IF NOT HAS_KEY(sccGraph idU) THEN SET sccGraph[idU] := empty list
+            APPEND idV TO sccGraph[idU]
+        ENDIF
+        SET pos := pos + 1
+    ENDWHILE
+
+    LIST indegreeList := LIST_REPEAT(0 SIZE(sccs))
+    INTEGER si := 0
+    WHILE si < SIZE(sccs)
+        LIST adjList := GET_VALUE_OR_LIST(sccGraph si)
+        INTEGER pi := 0
+        WHILE pi < SIZE(adjList)
+            INTEGER neighb := adjList[pi]
+            SET indegreeList[neighb] := indegreeList[neighb] + 1
+            SET pi := pi + 1
+        ENDWHILE
+        SET si := si + 1
+    ENDWHILE
+
+    INTEGER additions := 0
+    INTEGER sj := 0
+    WHILE sj < SIZE(sccs)
+        IF indegreeList[sj] = 0 AND sccHasCrystal[sj] = FALSE THEN
+            SET additions := additions + 1
+        ENDIF
+        SET sj := sj + 1
+    ENDWHILE
+
+    RETURN additions
+    END FUNCTION
+END CLASS

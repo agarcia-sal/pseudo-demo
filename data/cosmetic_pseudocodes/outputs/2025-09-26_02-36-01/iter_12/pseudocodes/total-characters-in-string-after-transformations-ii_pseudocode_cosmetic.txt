@@ -1,0 +1,99 @@
+CLASS Solution
+	Function lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+		CONSt MOD = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 + 1)
+
+		Var alphaSize = 26
+		Var deltaMatrix = new list of lists of integers alphaSize by alphaSize
+		Var xEmp = 0
+		WHILE (xEmp < alphaSize)
+			Var yEmu = 0
+			WHILE (yEmu < (nums[xEmp]))
+				Var targetIndex = ((xEmp + yEmu + 1) % alphaSize)
+				deltaMatrix[xEmp][targetIndex] = deltaMatrix[xEmp][targetIndex] + 1
+				yEmu = yEmu + 1
+			END WHILE
+			xEmp = xEmp + 1
+		END WHILE
+
+		FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+			Var dim = 26
+			Var product = new list of lists of integers dim by dim
+			Var outerIdx = 0
+			WHILE (outerIdx < dim)
+				Var innerIdx = 0
+				WHILE (innerIdx < dim)
+					Var sum = 0
+					Var deepIdx = 0
+					WHILE (deepIdx < dim)
+						sum = (sum + (A[outerIdx][deepIdx] * B[deepIdx][innerIdx])) % MOD
+						deepIdx = deepIdx + 1
+					END WHILE
+					product[outerIdx][innerIdx] = sum
+					innerIdx = innerIdx + 1
+				END WHILE
+				outerIdx = outerIdx + 1
+			END WHILE
+			RETURN product
+		END FUNCTION
+
+		FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+			Var size = 26
+			Var ident = new list of lists of integers size by size
+			Var pwr = power
+			Var curBase = matrix
+			Var idx1 = 0
+			WHILE (idx1 < size)
+				Var idx2 = 0
+				WHILE (idx2 < size)
+					ident[idx1][idx2] = (1 IF (idx1 == idx2) ELSE 0)
+					idx2 = idx2 + 1
+				END WHILE
+				idx1 = idx1 + 1
+			END WHILE
+
+			Var continueLooping = true
+			WHILE (continueLooping)
+				IF pwr <= 0
+					continueLooping = false
+				ELSE
+					IF (pwr % 2) != 0
+						ident = matrix_multiply(ident, curBase)
+					END IF
+					curBase = matrix_multiply(curBase, curBase)
+					pwr = (pwr // 2)
+				END IF
+			END WHILE
+			RETURN ident
+		END FUNCTION
+
+		Var raisedMatrix = matrix_power(trans_matrix = deltaMatrix, t)
+
+		Var freqArr = new list of integers 26
+		Var pos = 0
+		WHILE pos < s.length
+			Var charValue = s[pos]
+			Var idxVal = (charValue <= 'Z' AND charValue >= 'A' ? (charValue - 'A') : (charValue - 'a'))
+			freqArr[idxVal] = freqArr[idxVal] + 1
+			pos = pos + 1
+		END WHILE
+
+		Var resultFreq = new list of integers 26
+		Var i = 0
+		WHILE i < 26
+			Var j = 0
+			WHILE j < 26
+				resultFreq[j] = (resultFreq[j] + ((freqArr[i] * raisedMatrix[i][j]) % MOD)) % MOD
+				j = j + 1
+			END WHILE
+			i = i + 1
+		END WHILE
+
+		Var finalSum = 0
+		Var idxSum = 0
+		WHILE idxSum < 26
+			finalSum = (finalSum + resultFreq[idxSum]) % MOD
+			idxSum = idxSum + 1
+		END WHILE
+		RETURN finalSum
+	END Function
+END CLASS

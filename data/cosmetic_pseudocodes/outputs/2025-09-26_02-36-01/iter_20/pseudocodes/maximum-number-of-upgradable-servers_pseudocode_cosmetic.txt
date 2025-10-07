@@ -1,0 +1,88 @@
+CLASS Solution
+
+    FUNCTION maxUpgrades(count LIST OF INTEGER upgrade LIST OF INTEGER sell LIST OF INTEGER money LIST OF INTEGER) RETURNS LIST OF INTEGER
+
+        FUNCTION multiply(a INTEGER, b INTEGER) RETURNS INTEGER
+            SET res TO 0
+            SET i TO 0
+            WHILE i LESS THAN b
+                SET res TO res PLUS a
+                SET i TO i PLUS 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        FUNCTION divide(dividend INTEGER, divisor INTEGER) RETURNS INTEGER
+            SET quotient TO 0
+            SET remainder TO dividend
+            WHILE remainder GREATER THAN OR EQUAL TO divisor
+                SET remainder TO remainder MINUS divisor
+                SET quotient TO quotient PLUS 1
+            END WHILE
+            RETURN quotient
+        END FUNCTION
+
+        FUNCTION minval(x INTEGER, y INTEGER) RETURNS INTEGER
+            IF x LESS THAN y THEN
+                RETURN x
+            ELSE
+                RETURN y
+            END IF
+        END FUNCTION
+
+        SET result_list TO EMPTY LIST
+        SET outer_idx TO 0
+
+        FUNCTION process_element(i INTEGER)
+            IF i GREATER THAN EQUAL TO (LENGTH OF count) THEN
+                RETURN
+            END IF
+
+            SET c_count TO count[i]
+            SET c_upgrade TO upgrade[i]
+            SET c_sell TO sell[i]
+            SET c_money TO money[i]
+
+            SET best_upgrade TO 0
+            SET rem_cash TO c_money
+
+            SET current_sell TO 0
+
+            FUNCTION inner_loop(j INTEGER)
+                IF j GREATER THAN c_count THEN
+                    RETURN
+                END IF
+
+                SET leftover_servers TO c_count MINUS j
+
+                SET sell_earnings TO multiply(j, c_sell)
+
+                SET total_cash TO rem_cash PLUS sell_earnings
+
+                SET possible_upg TO divide(total_cash, c_upgrade)
+
+                IF possible_upg GREATER THAN leftover_servers THEN
+                    SET possible_upg TO leftover_servers
+                END IF
+
+                IF possible_upg GREATER THAN best_upgrade THEN
+                    SET best_upgrade TO possible_upg
+                END IF
+
+                inner_loop(j PLUS 1)
+            END FUNCTION
+
+            inner_loop(0)
+
+            APPEND best_upgrade TO result_list
+
+            process_element(i PLUS 1)
+        END FUNCTION
+
+        process_element(0)
+
+        RETURN result_list
+
+    END FUNCTION
+
+END CLASS

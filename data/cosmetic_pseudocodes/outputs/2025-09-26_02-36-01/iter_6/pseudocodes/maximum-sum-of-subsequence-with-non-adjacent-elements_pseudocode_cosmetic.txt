@@ -1,0 +1,76 @@
+CLASS Solution
+	FUNCTION maximumSumSubsequence(nums, queries)
+		CONST MODULO = (((10 * 10 * 10) * 10 * 10 * 10 * 10 * 10 * 10) + 1)
+		SET length_value TO 0
+		SET length_value TO lengthOf(nums)
+
+		FUNCTION maxVal(a, b)
+			IF a > b THEN
+				RETURN a
+			ELSE
+				RETURN b
+			END IF
+		END FUNCTION
+
+		FUNCTION updateDp(arr_take, arr_skip, idx)
+			LET val1 = maxVal(0, arr_skip[idx - 1]) + nums[idx]
+			LET val2 = maxVal(arr_skip[idx - 1], arr_take[idx - 1])
+			arr_take[idx] = maxVal(0, val1)
+			arr_skip[idx] = val2
+		END FUNCTION
+
+		FUNCTION processRange(start_idx, arr_take, arr_skip)
+			LET idx = start_idx
+			WHILE (idx < length_value)
+				CALL updateDp(arr_take, arr_skip, idx)
+				idx = idx + 1
+			END WHILE
+		END FUNCTION
+
+		LET dp_take = []
+		LET dp_skip = []
+		FOR k FROM 0 TO (length_value - 1)
+			dp_take[k] = 0
+			dp_skip[k] = 0
+		END FOR
+
+		dp_take[0] = ( (nums[0] >= 0) ? nums[0] : 0 )
+		dp_skip[0] = 0
+
+		LET iterator_i = 1
+		WHILE (iterator_i < length_value)
+			CALL updateDp(dp_take, dp_skip, iterator_i)
+			iterator_i = iterator_i + 1
+		END WHILE
+
+		LET aggregate_result = 0
+		FUNCTION maxAtEnd(arr_take, arr_skip)
+			RETURN maxVal(arr_take[length_value - 1], arr_skip[length_value - 1])
+		END FUNCTION
+
+		FUNCTION processQuery(position, new_value, arr_take, arr_skip)
+			LET pos = position
+			LET val = new_value
+			nums[pos] = val
+			IF (pos == 0)
+				arr_take[0] = (val >= 0) ? val : 0
+				arr_skip[0] = 0
+			ELSE
+				CALL updateDp(arr_take, arr_skip, pos)
+			END IF
+			CALL processRange(pos + 1, arr_take, arr_skip)
+		END FUNCTION
+
+		FUNCTION recurseQueries(ix, queries_list, current_result, arr_take, arr_skip)
+			IF ix >= lengthOf(queries_list) THEN
+				RETURN current_result
+			END IF
+			LET (position, new_val) = queries_list[ix]
+			CALL processQuery(position, new_val, arr_take, arr_skip)
+			LET updated = (current_result + maxAtEnd(arr_take, arr_skip)) % MODULO
+			RETURN recurseQueries(ix + 1, queries_list, updated, arr_take, arr_skip)
+		END FUNCTION
+
+		RETURN recurseQueries(0, queries, aggregate_result, dp_take, dp_skip)
+	END FUNCTION
+END CLASS

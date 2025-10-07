@@ -1,0 +1,102 @@
+CLASS Solution
+  FUNCTION maxTargetNodes(edges1, edges2)
+    SET graphA TO a new default dictionary with list as default value
+    SET graphB TO a new default dictionary with list as default value
+
+    SET idx1 TO 0
+    WHILE idx1 < LENGTH of edges1
+      SET pairA TO edges1[idx1]
+      SET xA TO pairA[0]
+      SET yA TO pairA[1]
+      APPEND yA TO graphA[xA]
+      APPEND xA TO graphA[yA]
+      SET idx1 TO idx1 + 1
+    END WHILE
+
+    SET idx2 TO 0
+    WHILE idx2 < LENGTH of edges2
+      SET pairB TO edges2[idx2]
+      SET xB TO pairB[0]
+      SET yB TO pairB[1]
+      APPEND yB TO graphB[xB]
+      APPEND xB TO graphB[yB]
+      SET idx2 TO idx2 + 1
+    END WHILE
+
+    SET sizeA TO 0
+    FOR EACH key IN graphA
+      SET sizeA TO sizeA + 1
+    END FOR
+    SET sizeB TO 0
+    FOR EACH key IN graphB
+      SET sizeB TO sizeB + 1
+    END FOR
+
+    FUNCTION bfs(tree, origin)
+      SET evens TO 0
+      SET odds TO 0
+      SET FIFO TO a new deque containing a tuple (origin, 0)
+      SET inspected TO a new set with origin included
+
+      REPEAT
+        IF LENGTH of FIFO = 0 THEN EXIT REPEAT
+        REMOVE FIRST element of FIFO AND ASSIGN TO current, depth
+        IF (depth MOD 2) = 0 THEN
+          SET evens TO evens + 1
+        ELSE
+          SET odds TO odds + 1
+        END IF
+
+        FOR EACH neighborNode IN tree[current]
+          IF neighborNode NOT IN inspected THEN
+            ADD neighborNode TO inspected
+            APPEND (neighborNode, depth + 1) TO FIFO
+          END IF
+        END FOR
+      UNTIL FALSE
+
+      RETURN evens, odds
+    END FUNCTION
+
+    SET distribution1 TO empty list
+    SET index1 TO 0
+    WHILE index1 < sizeA
+      APPEND bfs(graphA, index1) TO distribution1
+      SET index1 TO index1 + 1
+    END WHILE
+
+    SET distribution2 TO empty list
+    SET index2 TO 0
+    WHILE index2 < sizeB
+      APPEND bfs(graphB, index2) TO distribution2
+      SET index2 TO index2 + 1
+    END WHILE
+
+    SET answer OUT TO empty list
+    SET outerIdx TO 0
+    WHILE outerIdx < sizeA
+      SET evEven, evOdd TO distribution1[outerIdx]
+      SET maxFound TO 0
+      SET innerIdx TO 0
+      WHILE innerIdx < sizeB
+        SET evEven2, evOdd2 TO distribution2[innerIdx]
+        SET candidateValue TO 0
+        IF outerIdx = innerIdx OR (outerIdx MOD 2) = (innerIdx MOD 2) THEN
+          SET candidateValue TO evEven2
+        ELSE
+          SET candidateValue TO evOdd2
+        END IF
+        
+        IF candidateValue > maxFound THEN
+          SET maxFound TO candidateValue
+        END IF
+
+        SET innerIdx TO innerIdx + 1
+      END WHILE
+      APPEND evEven + maxFound TO answer OUT
+      SET outerIdx TO outerIdx + 1
+    END WHILE
+
+    RETURN answer OUT
+  END FUNCTION
+END CLASS

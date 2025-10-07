@@ -1,0 +1,128 @@
+CLASS Solution
+
+    FUNCTION numberOfSpecialChars(word)
+    
+        FUNCTION containsKey(collection, keyToFind)
+            DECLARE idx_checker = 0
+            DECLARE found_flag = FALSE
+            DECLARE keys_list = getKeys(collection)
+            
+            WHILE idx_checker < LENGTH(keys_list) AND NOT found_flag
+                IF keys_list[idx_checker] = keyToFind THEN
+                    found_flag = TRUE
+                END IF
+                idx_checker = idx_checker + 1
+            END WHILE
+            
+            RETURN found_flag
+        END FUNCTION
+
+        FUNCTION getKeys(coll)
+            DECLARE key_accum = []
+            DECLARE idx_col = 0
+            WHILE idx_col < LENGTH(coll)
+                APPEND key_accum WITH coll[idx_col].key
+                idx_col = idx_col + 1
+            END WHILE
+            RETURN key_accum
+        END FUNCTION
+
+        FUNCTION zipLists(list1, list2)
+            DECLARE zipped_result = []
+            DECLARE idx_zip = 0
+            DECLARE min_length = LENGTH(list1)
+            IF LENGTH(list2) < min_length THEN
+                min_length = LENGTH(list2)
+            END IF
+            WHILE idx_zip < min_length
+                APPEND zipped_result WITH (list1[idx_zip], list2[idx_zip])
+                idx_zip = idx_zip + 1
+            END WHILE
+            RETURN zipped_result
+        END FUNCTION
+
+        DECLARE key_positions_first = []
+        DECLARE key_positions_last = []
+
+        DECLARE position_counter = 0
+
+        DECLARE length_word = LENGTH(word)
+
+        WHILE position_counter < length_word
+            DECLARE current_letter = word[position_counter]
+            IF NOT containsKey(key_positions_first, current_letter)
+                APPEND key_positions_first WITH (current_letter, position_counter)
+            END IF
+            
+            DECLARE last_index = 0
+            DECLARE found_in_last = FALSE
+            DECLARE keys_last = getKeys(key_positions_last)
+            WHILE last_index < LENGTH(keys_last) AND NOT found_in_last
+                IF keys_last[last_index] = current_letter THEN
+                    key_positions_last[last_index].value = position_counter
+                    found_in_last = TRUE
+                END IF
+                last_index = last_index + 1
+            END WHILE
+            
+            IF NOT found_in_last THEN
+                APPEND key_positions_last WITH (current_letter, position_counter)
+            END IF
+
+            position_counter = position_counter + 1
+        END WHILE
+
+        DECLARE count_special = 0
+
+        DECLARE lower_alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+        DECLARE upper_alphabet = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+
+        DECLARE pairs_list = zipLists(lower_alphabet, upper_alphabet)
+
+        DECLARE idx_pair = LENGTH(pairs_list) - 1
+
+        WHILE idx_pair >= 0
+            DECLARE lower_char = pairs_list[idx_pair][0]
+            DECLARE upper_char = pairs_list[idx_pair][1]
+
+            DECLARE found_in_last_upper = containsKey(key_positions_last, lower_char)
+            DECLARE found_in_first_lower = containsKey(key_positions_first, upper_char)
+            
+            IF (found_in_last_upper AND found_in_first_lower)
+                DECLARE pos_last = 0
+                DECLARE pos_first = 0
+                DECLARE last_found = FALSE
+                DECLARE first_found = FALSE
+
+                WHILE pos_last < LENGTH(key_positions_last) AND NOT last_found
+                    IF key_positions_last[pos_last].key = lower_char THEN
+                        last_found = TRUE
+                    ELSE
+                        pos_last = pos_last + 1
+                    END IF
+                END WHILE
+
+                WHILE pos_first < LENGTH(key_positions_first) AND NOT first_found
+                    IF key_positions_first[pos_first].key = upper_char THEN
+                        first_found = TRUE
+                    ELSE
+                        pos_first = pos_first + 1
+                    END IF
+                END WHILE
+
+                DECLARE last_value = key_positions_last[pos_last].value
+                DECLARE first_value = key_positions_first[pos_first].value
+
+                IF (last_value < first_value)
+                    count_special = count_special + 1
+                END IF
+            END IF
+
+            idx_pair = idx_pair - 1
+        END WHILE
+
+        RETURN count_special
+
+    END FUNCTION
+
+END CLASS

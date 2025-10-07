@@ -1,0 +1,77 @@
+FUNCTION sort_array(array_of_integers)
+    DECLARE temp_sorted_list
+    DECLARE result_array
+    temp_sorted_list = array_of_integers
+    SET index = 0
+    WHILE index < LENGTH(temp_sorted_list) - 1
+        DECLARE swap_occurred = FALSE
+        DECLARE j = 0
+        WHILE j < LENGTH(temp_sorted_list) - 1 - index
+            IF temp_sorted_list[j] > temp_sorted_list[j + 1]
+                DECLARE tmp = temp_sorted_list[j]
+                temp_sorted_list[j] = temp_sorted_list[j + 1]
+                temp_sorted_list[j + 1] = tmp
+                swap_occurred = TRUE
+            ENDIF
+            j = j + 1
+        ENDWHILE
+        IF NOT swap_occurred THEN BREAK
+        index = index + 1
+    ENDWHILE
+
+    DECLARE buckets AS DICTIONARY MAPPING FROM INTEGER TO LIST
+    DECLARE k = 0
+    WHILE k < LENGTH(temp_sorted_list)
+        DECLARE binary_form = CONVERT_TO_BINARY_STRING(temp_sorted_list[k])
+        DECLARE count_ones = 0
+        DECLARE m = 0
+        WHILE m < LENGTH(binary_form)
+            IF CHAR_AT(binary_form, m) == '1'
+                count_ones = count_ones + 1
+            ENDIF
+            m = m + 1
+        ENDWHILE
+        IF count_ones NOT IN buckets
+            buckets[count_ones] = EMPTY LIST
+        ENDIF
+        APPEND temp_sorted_list[k] TO buckets[count_ones]
+        k = k + 1
+    ENDWHILE
+
+    DECLARE sorted_keys = KEYS(buckets)
+    DECLARE sorted_keys_list = EMPTY LIST
+    FOR EACH key IN sorted_keys
+        APPEND key TO sorted_keys_list
+    ENDFOR
+    DECLARE p = 0
+    WHILE p < LENGTH(sorted_keys_list) - 1
+        DECLARE swapped = FALSE
+        DECLARE q = 0
+        WHILE q < LENGTH(sorted_keys_list) - 1 - p
+            IF sorted_keys_list[q] > sorted_keys_list[q + 1]
+                DECLARE tmp_key = sorted_keys_list[q]
+                sorted_keys_list[q] = sorted_keys_list[q + 1]
+                sorted_keys_list[q + 1] = tmp_key
+                swapped = TRUE
+            ENDIF
+            q = q + 1
+        ENDWHILE
+        IF NOT swapped THEN BREAK
+        p = p + 1
+    ENDWHILE
+
+    result_array = EMPTY LIST
+    DECLARE r = 0
+    WHILE r < LENGTH(sorted_keys_list)
+        DECLARE current_key = sorted_keys_list[r]
+        DECLARE val_list = buckets[current_key]
+        DECLARE s = 0
+        WHILE s < LENGTH(val_list)
+            APPEND val_list[s] TO result_array
+            s = s + 1
+        ENDWHILE
+        r = r + 1
+    ENDWHILE
+
+    RETURN result_array
+END FUNCTION

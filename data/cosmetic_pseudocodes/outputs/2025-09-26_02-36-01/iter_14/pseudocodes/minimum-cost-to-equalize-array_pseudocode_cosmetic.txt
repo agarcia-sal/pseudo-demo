@@ -1,0 +1,48 @@
+CLASS Solution
+    FUNCTION minCostToEqualizeArray(nums cost1 cost2)
+       DECLARE MODULO_VAL AS 1000000007
+       DECLARE cnt AS LENGTH OF nums
+       DECLARE lowestVal AS INFINITY
+       DECLARE highestVal AS -INFINITY
+       DECLARE totalSum AS 0
+
+       INDEX = 0
+       WHILE INDEX < cnt
+           IF nums[INDEX] < lowestVal THEN
+               lowestVal = nums[INDEX]
+           END IF
+           IF nums[INDEX] > highestVal THEN
+               highestVal = nums[INDEX]
+           END IF
+           totalSum = totalSum + nums[INDEX]
+           INDEX = INDEX + 1
+       END WHILE
+
+       IF (cost1 * 2) <= cost2 OR cnt < 3 THEN
+           DECLARE cumulativeGap AS highestVal * cnt - totalSum
+           RETURN (cost1 * cumulativeGap) MOD MODULO_VAL
+       END IF
+
+       FUNCTION calcCostForTarget(paramTarget)
+           DECLARE gapMax AS paramTarget - lowestVal
+           DECLARE gapSum AS paramTarget * cnt - totalSum
+           DECLARE minPairs AS MINIMUM OF (gapSum / 2) AND (gapSum - gapMax)
+           DECLARE computedVal AS cost1 * gapSum - 2 * cost1 * minPairs + cost2 * minPairs
+           RETURN computedVal
+       END FUNCTION
+
+       DECLARE currentVal AS highestVal
+       DECLARE upperLimit AS 2 * highestVal - 1
+       DECLARE minResult AS INFINITY
+
+       REPEAT
+           DECLARE tempCalc AS calcCostForTarget(currentVal)
+           IF tempCalc < minResult THEN
+               minResult = tempCalc
+           END IF
+           currentVal = currentVal + 1
+       UNTIL currentVal > upperLimit
+
+       RETURN minResult MOD MODULO_VAL
+    END FUNCTION
+END CLASS

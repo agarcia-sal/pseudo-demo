@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+        SET result TO -1 << 60
+        SET digits TO "01234"
+        SET pairs TO empty list
+        FOR i FROM 0 TO LENGTH OF digits - 1
+            FOR j FROM 0 TO LENGTH OF digits - 1
+                IF digits[i] IS NOT digits[j]
+                    APPEND (digits[i], digits[j]) TO pairs
+                END IF
+            END FOR
+        END FOR
+        SET idx TO 0
+        WHILE idx < LENGTH OF pairs
+            SET x TO pairs[idx][0]
+            SET y TO pairs[idx][1]
+            SET lowestDiff TO dictionary with default value 1 << 60
+            SET countX TO [0]
+            SET countY TO [0]
+            SET start TO 0
+            FOR pos FROM 0 TO LENGTH OF s - 1
+                IF s[pos] EQUALS x THEN
+                    APPEND countX[-1] + 1 TO countX
+                ELSE
+                    APPEND 0 TO countX
+                END IF
+                IF s[pos] EQUALS y THEN
+                    APPEND countY[-1] + 1 TO countY
+                ELSE
+                    APPEND 0 TO countY
+                END IF
+                WHILE (pos - start + 1) >= k AND countX[start] < countX[-1] AND countY[start] < countY[-1]
+                    SET parityKey TO (countX[start] MOD 2, countY[start] MOD 2)
+                    SET lowestDiff[parityKey] TO MINIMUM OF lowestDiff[parityKey] AND (countX[start] - countY[start])
+                    INCREMENT start BY 1
+                END WHILE
+                SET currentParity TO ((1 - (countX[-1] MOD 2)), (countY[-1] MOD 2))
+                SET candidate TO (countX[-1] - countY[-1]) - lowestDiff[currentParity]
+                IF candidate > result THEN
+                    SET result TO candidate
+                END IF
+            END FOR
+            INCREMENT idx BY 1
+        END WHILE
+        RETURN result
+    END FUNCTION
+END CLASS

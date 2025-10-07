@@ -1,0 +1,94 @@
+CLASS Solution
+    FUNCTION maxTargetNodes(edges1, edges2)
+  SET graphA TO a new default dictionary with list as default value
+  SET graphB TO a new default dictionary with list as default value
+
+  FOR each pair x, y IN edges1 DO
+    APPEND y TO the list at key x IN graphA
+    APPEND x TO the list at key y IN graphA
+  END FOR
+
+  FOR each pair p, q IN edges2 DO
+    APPEND q TO the list at key p IN graphB
+    APPEND p TO the list at key q IN graphB
+  END FOR
+
+  SET sizeA TO length of keys in graphA
+  SET sizeB TO length of keys in graphB
+
+  FUNCTION bfs(treeMap, origin)
+    SET countEven TO 0
+    SET countOdd TO 0
+    SET line TO a new deque with [(origin, 0)]
+    SET encountered TO a new set with {origin}
+
+    REPEAT
+      IF line is empty THEN
+        BREAK
+      END IF
+
+      REMOVE front element from line INTO currNode, currDist
+
+      IF currDist MOD 2 == 0 THEN
+        INCREASE countEven by 1
+      ELSE
+        INCREASE countOdd by 1
+      END IF
+
+      FOR each neighborNode IN treeMap[currNode] DO
+        IF neighborNode NOT IN encountered THEN
+          ADD neighborNode TO encountered
+          APPEND (neighborNode, currDist + 1) TO line
+        END IF
+      END FOR
+    UNTIL FALSE
+
+    RETURN countEven, countOdd
+  END FUNCTION
+
+  SET countsA TO empty list
+  SET indexA TO 0
+  WHILE indexA < sizeA DO
+    SET pairCount TO bfs(graphA, indexA)
+    APPEND pairCount TO countsA
+    SET indexA TO indexA + 1
+  END WHILE
+
+  SET countsB TO []
+  SET idxB TO 0
+  WHILE idxB < sizeB DO
+    APPEND bfs(graphB, idxB) TO countsB
+    SET idxB TO idxB + 1
+  END WHILE
+
+  SET finalResults TO []
+
+  SET outerIdx TO 0
+  WHILE outerIdx < sizeA DO
+    SET evA, odA TO countsA[outerIdx]
+    SET highestTarget TO 0
+
+    SET innerIdx TO 0
+    WHILE innerIdx < sizeB DO
+      SET evB, odB TO countsB[innerIdx]
+
+      IF outerIdx == innerIdx OR (outerIdx MOD 2) == (innerIdx MOD 2) THEN
+        SET candidate TO evB
+      ELSE
+        SET candidate TO odB
+      END IF
+
+      IF candidate > highestTarget THEN
+        SET highestTarget TO candidate
+      END IF
+
+      SET innerIdx TO innerIdx + 1
+    END WHILE
+
+    APPEND evA + highestTarget TO finalResults
+    SET outerIdx TO outerIdx + 1
+  END WHILE
+
+  RETURN finalResults
+    END FUNCTION
+END CLASS

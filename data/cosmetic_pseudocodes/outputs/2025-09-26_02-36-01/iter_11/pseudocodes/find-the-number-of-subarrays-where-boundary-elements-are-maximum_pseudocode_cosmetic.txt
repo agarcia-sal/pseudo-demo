@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION numberOfSubarrays(nums)
+        DEFINE groupings AS empty map WITH default value being empty list
+        ASSIGN idx_outer TO 0
+        WHILE idx_outer < LENGTH(nums)
+            DEFINE current_number AS nums[idx_outer]
+            APPEND idx_outer TO groupings[current_number]
+            SET idx_outer TO idx_outer + 1
+        END WHILE
+
+        ASSIGN total_count TO 0
+        DEFINE function max_in_region(arr, start_pos, end_pos)
+            SET local_max TO arr[start_pos]
+            DEFINE pos_scan AS start_pos + 1
+            REPEAT
+                IF pos_scan > end_pos THEN
+                    BREAK
+                END IF
+                IF arr[pos_scan] > local_max THEN
+                    SET local_max TO arr[pos_scan]
+                END IF
+                SET pos_scan TO pos_scan + 1
+            UNTIL FALSE
+            RETURN local_max
+        END FUNCTION
+
+        FOR EACH index_list IN groupings.values()
+            ASSIGN length_indices TO (LENGTH index_list) + 0
+            DEFINE i_loop AS 0
+            WHILE i_loop <= length_indices - 1
+                DEFINE j_loop AS i_loop
+                REPEAT
+                    IF j_loop > length_indices - 1 THEN
+                        BREAK
+                    END IF
+                    DEFINE start_pos AS index_list[i_loop]
+                    DEFINE end_pos AS index_list[j_loop]
+                    DEFINE slice_region AS EMPTY LIST
+                    FOR SET pos_iter TO start_pos TO end_pos
+                        APPEND nums[pos_iter] TO slice_region
+                    END FOR
+                    IF max_in_region(slice_region, 0, LENGTH(slice_region) - 1) = nums[start_pos] THEN
+                        SET total_count TO total_count + 1
+                    END IF
+                    SET j_loop TO j_loop + 1
+                UNTIL FALSE
+                SET i_loop TO i_loop + 1
+            END WHILE
+        END FOR
+        RETURN total_count
+    END FUNCTION
+END CLASS

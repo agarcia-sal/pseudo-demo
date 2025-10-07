@@ -1,0 +1,35 @@
+CLASS Solution  
+    FUNCTION countPrefixSuffixPairs(words)  
+        SET accumulator TO 0  
+        SET frequencyMap TO a map with default 0  
+        
+        FUNCTION compareSubstrings(candidate, pattern)  
+            RETURN (substring(candidate, 0, length(pattern)) = pattern) AND (substring(candidate, length(candidate) - length(pattern), length(candidate)) = pattern)  
+        END FUNCTION  
+        
+        FUNCTION iterateWordsDescending(index)  
+            IF index < 0 THEN  
+                RETURN  
+            END IF  
+            
+            FUNCTION checkKeys(keysList, idx)  
+                IF idx >= length(keysList) THEN  
+                    RETURN  
+                END IF  
+                SET currentKey TO keysList[idx]  
+                IF compareSubstrings(currentKey, words[index]) THEN  
+                    accumulator <- accumulator + frequencyMap[currentKey]  
+                END IF  
+                checkKeys(keysList, idx + 1)  
+            END FUNCTION  
+            
+            SET keysSnapshot TO keys(frequencyMap)  
+            checkKeys(keysSnapshot, 0)  
+            frequencyMap[words[index]] <- frequencyMap[words[index]] + 1  
+            iterateWordsDescending(index - 1)  
+        END FUNCTION  
+        
+        iterateWordsDescending(length(words) - 1)  
+        RETURN accumulator  
+    END FUNCTION  
+END CLASS

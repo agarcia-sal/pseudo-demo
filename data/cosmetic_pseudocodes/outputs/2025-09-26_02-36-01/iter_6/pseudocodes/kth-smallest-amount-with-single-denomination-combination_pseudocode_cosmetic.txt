@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION findKthSmallest(coins k)
+        FUNCTION count_smaller_or_equal(xd)
+            SET uh TO 0
+            SET lv TO 1
+            SET hb TO (2 * 1) ^ (LENGTH coins) - 1
+            FUNCTION inner_loop(wy, cfe, zba)
+                IF wy > hb THEN
+                    RETURN cfe
+                END IF
+                SET iwn TO 1
+                SET jns TO 0
+                FUNCTION inner_inner_loop(wym, bvn, rtu)
+                    IF bvn = LENGTH coins THEN
+                        RETURN {iwn, jns}
+                    END IF
+                    SET grf TO (wym & (1 << bvn)) = 0
+                    IF NOT grf THEN
+                        SET tmp_lcm TO iwn * coins[bvn] / gcd(iwn, coins[bvn])
+                        SET rtu TO rtu + 1
+                        RETURN inner_inner_loop(wym, bvn + 1, rtu) WITH iwn = tmp_lcm, jns = rtu
+                    ELSE
+                        RETURN inner_inner_loop(wym, bvn + 1, rtu)
+                    END IF
+                END FUNCTION
+                SET res_inner TO inner_inner_loop(wy, 0, 0)
+                SET iwn TO res_inner[0]
+                SET jns TO res_inner[1]
+                IF (jns % 2) = 1 THEN
+                    SET cfe TO cfe + (xd DIV iwn)
+                ELSE
+                    SET cfe TO cfe - (xd DIV iwn)
+                END IF
+                RETURN inner_loop(wy + 1, cfe, zba)
+            END FUNCTION
+            RETURN inner_loop(lv, uh, 0)
+        END FUNCTION
+
+        SET p LEFT TO 1
+        SET p RIGHT TO k * (MIN coins)
+        FUNCTION bisect(la, kb)
+            IF la >= kb THEN
+                RETURN la
+            END IF
+            SET nm TO (la + kb) DIV 2
+            SET val TO count_smaller_or_equal(nm)
+            IF val < k THEN
+                RETURN bisect(nm + 1, kb)
+            ELSE
+                RETURN bisect(la, nm)
+            END IF
+        END FUNCTION
+        RETURN bisect(p LEFT, p RIGHT)
+    END FUNCTION
+END CLASS

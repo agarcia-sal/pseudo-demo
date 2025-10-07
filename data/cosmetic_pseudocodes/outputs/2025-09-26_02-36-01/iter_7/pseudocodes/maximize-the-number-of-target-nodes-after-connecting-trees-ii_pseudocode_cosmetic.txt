@@ -1,0 +1,86 @@
+CLASS Solution  
+  FUNCTION maxTargetNodes(edges1, edges2)  
+    SET neighborsA TO new default dictionary with default list  
+    SET neighborsB TO new default dictionary with default list  
+    
+    FOR each (x, y) IN edges1 DO  
+      APPEND y TO neighborsA[x]  
+      APPEND x TO neighborsA[y]  
+    END FOR  
+    
+    FOR each (p, q) IN edges2 DO  
+      APPEND q TO neighborsB[p]  
+      APPEND p TO neighborsB[q]  
+    END FOR  
+    
+    SET sizeA TO LENGTH of keys in neighborsA  
+    SET sizeB TO LENGTH of keys in neighborsB  
+    
+    FUNCTION traverseBreadth(graph, origin)  
+      SET countEven TO 0  
+      SET countOdd TO 0  
+      SET waitingList TO new deque initialized with tuple (origin, 0)  
+      SET visitedNodes TO set containing origin  
+      
+      WHILE LENGTH of waitingList GREATER THAN 0  
+        SET currentNode, depth TO DEQUEUE first element of waitingList  
+        
+        IF (depth MOD 2) EQUALS 0 THEN  
+          SET countEven TO countEven + 1  
+        ELSE  
+          SET countOdd TO countOdd + 1  
+        END IF  
+        
+        FOR EACH adjacentNode IN graph[currentNode] DO  
+          IF adjacentNode NOT IN visitedNodes THEN  
+            INSERT adjacentNode INTO visitedNodes  
+            ENQUEUE tuple (adjacentNode, depth + 1) INTO waitingList  
+          END IF  
+        END FOR  
+      END WHILE  
+      
+      RETURN (countEven, countOdd)  
+    END FUNCTION  
+    
+    SET recordA TO empty list  
+    SET indexA TO 0  
+    WHILE indexA LESS THAN sizeA  
+      APPEND traverseBreadth(neighborsA, indexA) TO recordA  
+      SET indexA TO indexA + 1  
+    END WHILE  
+    
+    SET recordB TO empty list  
+    SET indexB TO 0  
+    WHILE indexB LESS THAN sizeB  
+      APPEND traverseBreadth(neighborsB, indexB) TO recordB  
+      SET indexB TO indexB + 1  
+    END WHILE  
+    
+    SET finalResult TO empty list  
+    SET outerIndex TO 0  
+    WHILE outerIndex LESS THAN sizeA  
+      SET evensA, oddsA TO recordA[outerIndex]  
+      SET localMax TO 0  
+      
+      SET innerIndex TO 0  
+      WHILE innerIndex LESS THAN sizeB  
+        SET evensB, oddsB TO recordB[innerIndex]  
+        IF (outerIndex EQUALS innerIndex) OR ((outerIndex MOD 2) EQUALS (innerIndex MOD 2)) THEN  
+          SET candidate TO evensB  
+        ELSE  
+          SET candidate TO oddsB  
+        END IF  
+        
+        IF candidate GREATER THAN localMax THEN  
+          SET localMax TO candidate  
+        END IF  
+        SET innerIndex TO innerIndex + 1  
+      END WHILE  
+      
+      APPEND (evensA + localMax) TO finalResult  
+      SET outerIndex TO outerIndex + 1  
+    END WHILE  
+    
+    RETURN finalResult  
+  END FUNCTION  
+END CLASS

@@ -1,0 +1,36 @@
+CLASS Solution
+    FUNCTION maxFrequency(nums, k, numOperations)
+        DECLARE reference frequencyMap AS new dictionary with default 0
+        DECLARE reference diffMap AS new dictionary with default 0
+
+        INDEX currentIndex IS 0
+        WHILE currentIndex < LENGTH(nums)
+            ASSIGN num TO nums[currentIndex]
+            ASSIGN frequencyMap[num] TO frequencyMap[num] + 1
+            ASSIGN diffMap[num] TO diffMap[num] + 0
+            ASSIGN diffMap[num - k] TO diffMap[num - k] + 1
+            ASSIGN diffMap[num + k + 1] TO diffMap[num + k + 1] - 1
+            INCREMENT currentIndex BY 1
+        END WHILE
+
+        ASSIGN maxCount TO 0
+        ASSIGN cumulativeSum TO 0
+        DECLARE sortedKeysList AS SORTED LIST of KEYS(diffMap)
+
+        DECLARE position AS 0
+        WHILE position < LENGTH(sortedKeysList)
+            ASSIGN keyValue TO sortedKeysList[position]
+            ASSIGN incrementVal TO diffMap[keyValue]
+            ASSIGN cumulativeSum TO cumulativeSum + incrementVal
+
+            DECLARE tempVal AS MINIMUM of cumulativeSum and (frequencyMap[keyValue] + numOperations)
+            IF tempVal > maxCount THEN
+                ASSIGN maxCount TO tempVal
+            END IF
+
+            INCREMENT position BY 1
+        END WHILE
+
+        RETURN maxCount
+    END FUNCTION
+END CLASS

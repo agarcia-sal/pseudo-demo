@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION maxSubstringLength(s)  
+        DECLARE outerPos TO 0  
+        DECLARE entireFrequency TO EMPTY_MAP  
+        DECLARE maxLen TO -1  
+
+        REPEAT WHILE outerPos < LENGTH(s)  
+            DECLARE innerPos TO outerPos  
+            DECLARE currentFrequency TO EMPTY_MAP  
+
+            REPEAT WHILE innerPos < LENGTH(s)  
+                DECLARE currentChar TO s[innerPos]  
+                IF currentChar NOT_IN currentFrequency THEN  
+                    SET currentFrequency[currentChar] TO 0  
+                END IF  
+                SET currentFrequency[currentChar] TO currentFrequency[currentChar] + 1  
+                SET innerPos TO innerPos + 1  
+
+                IF outerPos EQUALS 0 THEN  
+                    DECLARE tempPos TO 0  
+                    WHILE tempPos < LENGTH(s) DO  
+                        DECLARE c TO s[tempPos]  
+                        IF c NOT_IN entireFrequency THEN  
+                            SET entireFrequency[c] TO 0  
+                        END IF  
+                        SET entireFrequency[c] TO entireFrequency[c] + 1  
+                        SET tempPos TO tempPos + 1  
+                    END WHILE  
+                END IF  
+
+                DECLARE isValid TO true  
+                DECLARE charList TO KEYS_OF(currentFrequency)  
+                DECLARE idx TO 0  
+                WHILE idx < LENGTH(charList) AND isValid DO  
+                    DECLARE ch TO charList[idx]  
+                    IF currentFrequency[ch] < entireFrequency[ch] THEN  
+                        SET isValid TO false  
+                    END IF  
+                    SET idx TO idx + 1  
+                END WHILE  
+
+                IF isValid AND LENGTH(charList) < LENGTH(KEYS_OF(entireFrequency)) THEN  
+                    DECLARE windowLength TO innerPos - outerPos  
+                    IF maxLen < windowLength THEN  
+                        SET maxLen TO windowLength  
+                    END IF  
+                END IF  
+            END REPEAT  
+
+            SET outerPos TO outerPos + 1  
+        END REPEAT  
+
+        RETURN maxLen  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,54 @@
+CLASS Solution
+	FUNCTION maxScore(grid)
+		PROCEDURE recursive_search(a, b, c)
+			IF a = LENGTH(grid) THEN
+				SET global_max TO (global_max + c + ABS(global_max - c)) / 2
+				RETURN
+			ELSE
+				CALL recursive_search(a + 1, b, c)
+				SET d TO 0
+				REPEAT
+					IF d = LENGTH(grid[a]) THEN BREAK
+					IF NOT (grid[a][d] IN b) THEN
+						CALL add_element(b, grid[a][d])
+						PROCEDURE add_element(set_obj, item)
+							SET set_obj TO set_obj UNION {item}
+						END PROCEDURE
+						CALL recursive_search(a + 1, b, c + grid[a][d])
+						CALL remove_element(b, grid[a][d])
+						PROCEDURE remove_element(set_obj, item)
+							SET set_obj TO set_obj DIFFERENCE {item}
+						END PROCEDURE
+					END IF
+					SET d TO d + 1
+				UNTIL FALSE
+			END IF
+		END PROCEDURE
+		SET global_max TO 0
+		FOR idx FROM 0 TO LENGTH(grid) - 1 DO
+			CALL sort_desc(grid[idx])
+			PROCEDURE sort_desc(arr)
+				IF LENGTH(arr) > 1 THEN
+					PROCEDURE swap(i, j)
+						SET temp_var TO arr[i]
+						SET arr[i] TO arr[j]
+						SET arr[j] TO temp_var
+					END PROCEDURE
+					SET p TO 0
+					REPEAT
+						SET q TO 0
+						REPEAT
+							IF q = LENGTH(arr) - p - 1 THEN BREAK
+							IF arr[q] < arr[q + 1] THEN CALL swap(q, q + 1)
+							SET q TO q + 1
+						UNTIL FALSE
+						SET p TO p + 1
+						IF p = LENGTH(arr) - 1 THEN BREAK
+					UNTIL FALSE
+				END IF
+			END PROCEDURE
+		END FOR
+		CALL recursive_search(0, {}, 0)
+		RETURN global_max
+	END FUNCTION
+END CLASS

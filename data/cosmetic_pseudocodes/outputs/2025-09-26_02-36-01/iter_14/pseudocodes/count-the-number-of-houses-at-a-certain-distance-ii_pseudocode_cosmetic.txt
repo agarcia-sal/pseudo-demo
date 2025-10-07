@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        IF NOT (x LESS THAN OR EQUAL TO y)
+            SET alpha TO x
+            SET x TO y
+            SET y TO alpha
+        END IF
+
+        FUNCTION bfs(start)
+            SET visited TO array FILLED WITH False OF LENGTH (n PLUS 1)
+            SET dist TO array FILLED WITH 0 OF LENGTH (n PLUS 1)
+            SET queue TO new deque CONTAINING start
+            SET visited[start] TO True
+
+            REPEAT
+                IF queue IS EMPTY
+                    BREAK
+                END IF
+                SET curr TO REMOVE_ELEMENT_FROM_START(queue)
+
+                FOR neighbor IN [curr MINUS 1, curr PLUS 1]
+                    IF (neighbor GREATER THAN OR EQUAL TO 1) AND (neighbor LESS THAN OR EQUAL TO n) AND (visited[neighbor] EQUALS False)
+                        SET visited[neighbor] TO True
+                        SET dist[neighbor] TO dist[curr] PLUS (1 TIMES 1)
+                        APPEND neighbor TO queue
+                    END IF
+                END FOR
+
+                IF curr EQUALS x
+                    IF visited[y] EQUALS False
+                        SET visited[y] TO True
+                        SET dist[y] TO dist[curr] PLUS 1
+                        APPEND y TO queue
+                    END IF
+                ELSE
+                    IF curr EQUALS y AND visited[x] EQUALS False
+                        SET visited[x] TO True
+                        SET dist[x] TO dist[curr] PLUS 1
+                        APPEND x TO queue
+                    END IF
+                END IF
+            UNTIL False
+
+            RETURN SUBARRAY(dist, 1, n)
+        END FUNCTION
+
+        SET output TO array FILLED WITH 0 OF LENGTH n
+
+        PROCEDURE processDistances(arr)
+            SET idx TO 0
+            WHILE idx LESS THAN LENGTH(arr)
+                IF arr[idx] GREATER THAN 0
+                    SET output[arr[idx] MINUS 1] TO output[arr[idx] MINUS 1] PLUS 1
+                END IF
+                SET idx TO idx PLUS 1
+            END WHILE
+        END PROCEDURE
+
+        FOR iterator FROM 1 TO n
+            SET valList TO bfs(iterator)
+            CALL processDistances(valList)
+        END FOR
+
+        RETURN output
+    END FUNCTION
+END CLASS

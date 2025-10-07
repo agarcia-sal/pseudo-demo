@@ -1,0 +1,61 @@
+CLASS Solution  
+    FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer  
+        FUNCTION update_count(counter LIST OF integers value integer delta integer)  
+            DECLARE bitMask AS integer WITH initial value one  
+            DECLARE idx AS integer WITH initial value zero  
+            WHILE idx LESS THAN OR EQUAL TO thirty-one  
+                IF (value BITWISE_AND bitMask) NOT_EQUALS zero  
+                    SET counter AT idx TO counter AT idx PLUS delta  
+                END IF  
+                SET bitMask TO bitMask TIMES two  
+                SET idx TO idx PLUS one  
+            END WHILE  
+        END FUNCTION  
+
+        FUNCTION compute_current_or(counter LIST OF integers) RETURNS integer  
+            LET res TO zero  
+            LET position TO zero  
+            WHILE position LESS_THAN_OR_EQUAL thirty-one  
+                IF counter AT position GREATER_THAN zero THEN  
+                    LET shiftedBit TO (one BITWISE_SHIFT_LEFT position)  
+                    SET res TO (res BITWISE_OR shiftedBit)  
+                END IF  
+                SET position TO position PLUS one  
+            END WHILE  
+            RETURN res  
+        END FUNCTION  
+
+        LET lengthNums TO LENGTH_OF nums  
+        LET bitCount TO EMPTY LIST  
+        DECLARE indexCounter AS integer WITH initial value zero  
+        WHILE indexCounter LESS_THAN thirty-two  
+            APPEND integer zero TO bitCount  
+            SET indexCounter TO indexCounter PLUS one  
+        END WHILE  
+        LET accumulatedOr TO zero  
+        LET startIndex TO zero  
+        LET shortestLen TO a very large number (positive infinity)  
+
+        DECLARE endIndex AS integer WITH initial value zero  
+        WHILE endIndex LESS_THAN lengthNums  
+            CALL update_count WITH bitCount nums AT endIndex one  
+            SET accumulatedOr TO accumulatedOr BITWISE_OR nums AT endIndex  
+
+            WHILE accumulatedOr GREATER_THAN_OR_EQUAL k AND startIndex LESS_THAN_OR_EQUAL endIndex  
+                IF shortestLen GREATER_THAN (endIndex MINUS startIndex PLUS one) THEN  
+                    SET shortestLen TO (endIndex MINUS startIndex PLUS one)  
+                END IF  
+                CALL update_count WITH bitCount nums AT startIndex NEGATIVE one  
+                SET accumulatedOr TO CALL compute_current_or WITH bitCount  
+                SET startIndex TO startIndex PLUS one  
+            END WHILE  
+            SET endIndex TO endIndex PLUS one  
+        END WHILE  
+
+        IF shortestLen EQUALS positive infinity THEN  
+            RETURN negative one  
+        ELSE  
+            RETURN shortestLen  
+        END IF  
+    END FUNCTION  
+END CLASS

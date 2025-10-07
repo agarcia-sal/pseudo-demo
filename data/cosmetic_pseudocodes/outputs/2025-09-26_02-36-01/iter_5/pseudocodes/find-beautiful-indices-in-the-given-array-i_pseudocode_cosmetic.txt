@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION beautifulIndices(s parameter, a parameter, b parameter, k parameter)
+        DEFINE FUNCTION collectMatches(sourceString, pattern, patternLen, pos, accList)
+            IF pos > LENGTH(sourceString) - patternLen
+                RETURN accList
+            ELSE
+                SET currentSubstring TO SUBSTRING(sourceString, pos, pos + patternLen - 1)
+                SET updatedList TO accList
+                IF currentSubstring == pattern
+                    SET tempList TO accList
+                    SET tempList TO tempList + [pos]
+                    SET updatedList TO tempList
+                END IF
+                RETURN collectMatches(sourceString, pattern, patternLen, pos + 1, updatedList)
+            END IF
+        END FUNCTION
+
+        SET lengthS TO LENGTH(s)
+        SET lengthA TO LENGTH(a)
+        SET indicesA_initial TO []
+        SET indicesA TO collectMatches(s, a, lengthA, 0, indicesA_initial)
+
+        SET lengthB TO LENGTH(b)
+        SET indicesB_initial TO []
+        SET indicesB TO collectMatches(s, b, lengthB, 0, indicesB_initial)
+
+        SET compiledBeautifulIndices TO []
+        
+        DEFINE FUNCTION checkPairs(iList, jList, iIdx, jIdx, result)
+            IF iIdx >= LENGTH(iList)
+                RETURN result
+            ELSE IF jIdx >= LENGTH(jList)
+                RETURN checkPairs(iList, jList, iIdx + 1, 0, result)
+            ELSE
+                SET firstIndex TO iList[iIdx]
+                SET secondIndex TO jList[jIdx]
+                SET difference TO firstIndex - secondIndex
+                SET differenceAbs TO difference * (difference / ABS(difference)) * -1
+                IF differenceAbs < 0
+                    SET differenceAbs TO differenceAbs * -1
+                END IF
+                IF differenceAbs <= k
+                    SET newResult TO result + [firstIndex]
+                    RETURN checkPairs(iList, jList, iIdx + 1, 0, newResult)
+                ELSE
+                    RETURN checkPairs(iList, jList, iIdx, jIdx + 1, result)
+                END IF
+            END IF
+        END FUNCTION
+
+        SET finalResult TO checkPairs(indicesA, indicesB, 0, 0, compiledBeautifulIndices)
+        RETURN finalResult
+    END FUNCTION
+END CLASS

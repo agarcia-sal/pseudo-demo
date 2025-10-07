@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+  SET suffix_dictionary TO empty dictionary mapping STRING to INTEGER
+
+  DEFINE FUNCTION compute_suffixes(idx_current INTEGER, word_current STRING)
+    IF idx_current >= LENGTH(word_current)
+      RETURN
+    END IF
+    SET suffix_extracted TO SUBSTRING(word_current, idx_current, LENGTH(word_current) - idx_current)
+    IF NOT(CONTAINS_KEY(suffix_dictionary, suffix_extracted))
+      suffix_dictionary[suffix_extracted] = idx_current
+    ELSE
+      SET existing_index TO suffix_dictionary[suffix_extracted]
+      SET existing_word TO wordsContainer[existing_index]
+      SET current_word_length TO LENGTH(word_current)
+      SET existing_word_length TO LENGTH(existing_word)
+      IF (current_word_length < existing_word_length) OR ((current_word_length = existing_word_length) AND (idx_current < existing_index))
+        suffix_dictionary[suffix_extracted] = idx_current
+      END IF
+    END IF
+    CALL compute_suffixes(idx_current + 1, word_current)
+  END FUNCTION
+
+  DEFINE FUNCTION process_all_words(reverse_idx INTEGER)
+    IF reverse_idx < 0
+      RETURN
+    END IF
+    CALL compute_suffixes(0, wordsContainer[reverse_idx])
+    CALL process_all_words(reverse_idx - 1)
+  END FUNCTION
+
+  CALL process_all_words(LENGTH(wordsContainer) - 1)
+
+  FUNCTION get_best_match(query STRING) RETURNS INTEGER
+    DEFINE FUNCTION search_suffix(i INTEGER) RETURNS INTEGER
+      IF i < 0
+        RETURN -1
+      END IF
+      SET suffix_query TO SUBSTRING(query, i, LENGTH(query) - i)
+      IF CONTAINS_KEY(suffix_dictionary, suffix_query)
+        RETURN suffix_dictionary[suffix_query]
+      ELSE
+        RETURN search_suffix(i - 1)
+      END IF
+    END FUNCTION
+
+    SET found_index TO search_suffix(LENGTH(query) - 1)
+    IF found_index != -1
+      RETURN found_index
+    END IF
+
+    SET min_idx TO 0
+    SET min_len TO LENGTH(wordsContainer[0])
+
+    SET j TO 1
+    WHILE j < LENGTH(wordsContainer)
+      SET curr_len TO LENGTH(wordsContainer[j])
+      IF (curr_len < min_len) OR ((curr_len = min_len) AND (j < min_idx))
+        min_len = curr_len
+        min_idx = j
+      END IF
+      j = j + 1
+    END WHILE
+    RETURN min_idx
+  END FUNCTION
+
+  SET output_results TO empty list of integer
+
+  DEFINE FUNCTION process_queries(indexq INTEGER)
+    IF NOT(indexq < LENGTH(wordsQuery))
+      RETURN
+    END IF
+    SET query_item TO wordsQuery[indexq]
+    SET matched_index TO get_best_match(query_item)
+    APPEND matched_index TO output_results
+    CALL process_queries(indexq + 1)
+  END FUNCTION
+
+  CALL process_queries(0)
+  RETURN output_results
+END FUNCTION
+END CLASS

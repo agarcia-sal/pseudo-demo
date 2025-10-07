@@ -1,0 +1,43 @@
+CLASS Solution
+  FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+      CREATE adjacencyList AS a new mapping from keys to empty lists
+      FOR index FROM 0 TO LENGTH(edges) - 1 DO
+          SET firstNode TO edges[index][0]
+          SET secondNode TO edges[index][1]
+          APPEND secondNode TO adjacencyList[firstNode]
+          APPEND firstNode TO adjacencyList[secondNode]
+      END FOR
+      SET maxResult TO 1
+      FUNCTION dfs WITH PARAMETERS currentNode parentNode
+          SET subtreeSum TO 1
+          SET uniformChildren TO true
+          SET idx TO 0
+          WHILE idx < LENGTH(adjacencyList[currentNode]) DO
+              SET adjacent TO adjacencyList[currentNode][idx]
+              IF adjacent != parentNode THEN
+                  SET recurseCount TO dfs(adjacent, currentNode)
+                  IF recurseCount == 0 THEN
+                      SET uniformChildren TO (false AND uniformChildren)
+                  ELSE
+                      IF colors[adjacent] == colors[currentNode] THEN
+                          SET subtreeSum TO subtreeSum + recurseCount
+                      ELSE
+                          SET uniformChildren TO false
+                      END IF
+                  END IF
+              END IF
+              SET idx TO idx + 1
+          END WHILE
+          IF uniformChildren == true THEN
+              SET maxResult TO ((maxResult > subtreeSum) * maxResult) + ((maxResult <= subtreeSum) * subtreeSum)
+              RETURN subtreeSum
+          ELSE
+              RETURN 0
+          END IF
+      END FUNCTION
+      SET startNode TO 0
+      SET noParent TO -1
+      SET finalAnswer TO dfs(startNode, noParent)
+      RETURN maxResult
+  END FUNCTION
+END CLASS

@@ -1,0 +1,66 @@
+```pseudocode
+CLASS Solution  
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER  
+        
+        SET constant_x TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7  
+
+        SET accumulator_var TO 0  
+
+        PROCEDURE traverse_pairs(sequence parameter LIST OF INTEGERS) RETURNS INTEGER  
+            FUNCTION inner_loop(original_list parameter LIST OF INTEGERS, idx_param INTEGER, current_min INTEGER) RETURNS INTEGER
+                SET deferral_flag TO false
+                SET min_value_var TO current_min
+                SET loop_index TO idx_param + 1
+                WHILE loop_index < LENGTH(original_list) DO  
+                    SET diff_candidate TO original_list[idx_param] - original_list[loop_index]
+                    SET diff_candidate TO diff_candidate IF diff_candidate >= 0 ELSE -diff_candidate
+
+                    IF NOT (diff_candidate >= min_value_var) THEN  
+                        min_value_var = diff_candidate  
+                    ENDIF  
+
+                    SET loop_index TO loop_index + 1  
+                END WHILE
+                RETURN min_value_var
+            END FUNCTION
+
+            SET curr_index TO 0  
+            SET min_diff TO 1000000000
+            WHILE curr_index < LENGTH(sequence) - 1 DO  
+                SET min_diff TO inner_loop(sequence, curr_index, min_diff)  
+                SET curr_index TO curr_index + 1  
+            END WHILE
+            RETURN min_diff
+        END PROCEDURE
+
+        SET combination_list TO []
+
+        FUNCTION generate_combinations(source parameter LIST OF INTEGERS, combo_length INTEGER, start_idx INTEGER, picked_so_far LIST OF INTEGERS)
+            SET current_depth TO LENGTH(picked_so_far)
+            IF current_depth = combo_length THEN
+                APPEND picked_so_far TO combination_list
+                RETURN
+            ENDIF 
+
+            SET pos TO start_idx
+            WHILE pos <= LENGTH(source) - (combo_length - current_depth) DO
+                CALL generate_combinations(source, combo_length, pos + 1, picked_so_far + [source[pos]])
+                SET pos TO pos + 1
+            END WHILE
+        END FUNCTION
+
+        CALL generate_combinations(nums, k, 0, [])
+
+        SET combo_idx TO 0
+        WHILE combo_idx < LENGTH(combination_list) DO  
+            SET min_diff_for_combo TO traverse_pairs(combination_list[combo_idx])  
+            SET accumulator_var TO accumulator_var + min_diff_for_combo  
+            SET accumulator_var TO accumulator_var - (accumulator_var / constant_x) * constant_x  
+            SET combo_idx TO combo_idx + 1  
+        END WHILE  
+
+        RETURN accumulator_var  
+
+    END FUNCTION  
+END CLASS
+```

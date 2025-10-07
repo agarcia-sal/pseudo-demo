@@ -1,0 +1,114 @@
+```pseudocode
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        SET CONSTANT_ONE TO 1
+        SET CONSTANT_ZERO TO 0
+        SET CONSTANT_BILLION TO 1000000000
+        SET MOD TO CONSTANT_BILLION + 7
+
+        SET LENGTH_OF_nums TO LENGTH OF nums
+        SET max_element TO nums[0]
+        PROCEDURE FindMax AT index = 1
+            IF index LESS THAN LENGTH_OF_nums THEN
+                IF nums[index] GREATER THAN max_element THEN
+                    SET max_element TO nums[index]
+                END IF
+                CALL FindMax AT index + CONSTANT_ONE
+            END IF
+        END PROCEDURE
+        CALL FindMax AT CONSTANT_ONE
+
+        SET dp TO []
+        PROCEDURE InitializeDP AT position = 0
+            IF position LESS THAN LENGTH_OF_nums THEN
+                SET inner_list_outer TO []
+                PROCEDURE InitializeJOuter AT j_outer = 0
+                    IF j_outer LESS THAN OR EQUAL max_element THEN
+                        SET inner_list_inner TO []
+                        PROCEDURE InitializeJInner AT j_inner = 0
+                            IF j_inner LESS THAN OR EQUAL max_element THEN
+                                ADD 0 TO inner_list_inner
+                                CALL InitializeJInner AT j_inner + CONSTANT_ONE
+                            END IF
+                        END PROCEDURE
+                        CALL InitializeJInner AT CONSTANT_ZERO
+                        ADD inner_list_inner TO inner_list_outer
+                        CALL InitializeJOuter AT j_outer + CONSTANT_ONE
+                    END IF
+                END PROCEDURE
+                CALL InitializeJOuter AT CONSTANT_ZERO
+                ADD inner_list_outer TO dp
+                CALL InitializeDP AT position + CONSTANT_ONE
+            END IF
+        END PROCEDURE
+        CALL InitializeDP AT CONSTANT_ZERO
+
+        SET first_num TO nums[0]
+        PROCEDURE InitializeFirstDP_J AT current_j = 0
+            IF current_j LESS THAN OR EQUAL first_num THEN
+                SET current_k TO first_num - current_j
+                SET dp[0][current_j][current_k] TO CONSTANT_ONE
+                CALL InitializeFirstDP_J AT current_j + CONSTANT_ONE
+            END IF
+        END PROCEDURE
+        CALL InitializeFirstDP_J AT CONSTANT_ZERO
+
+        SET index_i TO 1
+        PROCEDURE OuterLoopI
+            IF index_i LESS THAN LENGTH_OF_nums THEN
+                SET current_num_i TO nums[index_i]
+                SET index_j TO 0
+                PROCEDURE InnerLoopJ
+                    IF index_j LESS THAN OR EQUAL current_num_i THEN
+                        SET current_k TO current_num_i - index_j
+                        SET prev_j TO 0
+                        PROCEDURE InnerLoopPrevJ
+                            IF prev_j LESS THAN OR EQUAL index_j THEN
+                                SET prev_k TO current_k
+                                PROCEDURE InnerLoopPrevK
+                                    IF prev_k LESS THAN OR EQUAL max_element THEN
+                                        SET sum_value TO dp[index_i][index_j][current_k] + dp[index_i - 1][prev_j][prev_k]
+                                        SET dp[index_i][index_j][current_k] TO sum_value MOD MOD
+                                        CALL InnerLoopPrevK AT prev_k + CONSTANT_ONE
+                                    END IF
+                                END PROCEDURE
+                                CALL InnerLoopPrevK AT prev_k
+                                CALL InnerLoopPrevJ AT prev_j + CONSTANT_ONE
+                            END IF
+                        END PROCEDURE
+                        CALL InnerLoopPrevJ AT prev_j
+                        CALL InnerLoopJ AT index_j + CONSTANT_ONE
+                    END IF
+                END PROCEDURE
+                CALL InnerLoopJ 
+                SET index_i TO index_i + CONSTANT_ONE
+                CALL OuterLoopI
+            END IF
+        END PROCEDURE
+        CALL OuterLoopI
+
+        SET aggregate_result TO CONSTANT_ZERO
+        SET final_index TO LENGTH_OF_nums - CONSTANT_ONE
+        SET final_num TO nums[final_index]
+        SET sum_j TO 0
+        PROCEDURE FinalLoopJ
+            IF sum_j LESS THAN OR EQUAL max_element THEN
+                SET sum_k TO 0
+                PROCEDURE FinalLoopK
+                    IF sum_k LESS THAN OR EQUAL max_element THEN
+                        IF sum_j + sum_k EQUALS final_num THEN
+                            SET aggregate_result TO (aggregate_result + dp[final_index][sum_j][sum_k]) MOD MOD
+                        END IF
+                        CALL FinalLoopK AT sum_k + CONSTANT_ONE
+                    END IF
+                END PROCEDURE
+                CALL FinalLoopK AT sum_k
+                CALL FinalLoopJ AT sum_j + CONSTANT_ONE
+            END IF
+        END PROCEDURE
+        CALL FinalLoopJ AT sum_j
+
+        RETURN aggregate_result
+    END FUNCTION
+END CLASS
+```

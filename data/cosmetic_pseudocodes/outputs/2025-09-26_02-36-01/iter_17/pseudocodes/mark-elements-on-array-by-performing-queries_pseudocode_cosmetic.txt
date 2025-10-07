@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        DECLARE priority_queue AS LIST = []
+        DECLARE already_flagged AS SET = {}
+        DECLARE acc_sum AS INTEGER = 0
+        DECLARE answers AS LIST = []
+        DECLARE p AS INTEGER = 0
+        DECLARE q AS INTEGER = 0
+        DECLARE extracted_val AS INTEGER = 0
+        DECLARE extracted_idx AS INTEGER = 0
+        DECLARE current_count AS INTEGER = 0
+
+        acc_sum = 0
+        FOR each element IN nums DO
+            acc_sum = acc_sum + element
+        END FOR
+
+        p = 0
+        WHILE p LESS THAN LENGTH(nums) DO
+            priority_queue.APPEND( (nums[p], p) )
+            p = p + 1
+        END WHILE
+
+        CALL heapify ON priority_queue
+
+        q = 0
+        REPEAT
+            IF q GREATER OR EQUAL TO LENGTH(queries) THEN
+                BREAK
+            END IF
+
+            DECLARE idx_query AS INTEGER = queries[q][0]
+            DECLARE k_query AS INTEGER = queries[q][1]
+
+            IF NOT (idx_query IN already_flagged) THEN
+                already_flagged.ADD(idx_query)
+                acc_sum = acc_sum - nums[idx_query]
+            END IF
+
+            current_count = 0
+            WHILE current_count LESS THAN k_query AND LENGTH(priority_queue) GREATER THAN 0 DO
+                (extracted_val, extracted_idx) = heappop(priority_queue)
+
+                IF NOT (extracted_idx IN already_flagged) THEN
+                    already_flagged.ADD(extracted_idx)
+                    acc_sum = acc_sum - extracted_val
+                    current_count = current_count + 1
+                END IF
+            END WHILE
+
+            answers.APPEND(acc_sum)
+            q = q + 1
+        UNTIL FALSE
+
+        RETURN answers
+    END FUNCTION
+END CLASS

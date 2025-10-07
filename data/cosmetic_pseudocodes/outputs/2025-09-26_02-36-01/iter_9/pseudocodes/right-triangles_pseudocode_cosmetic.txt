@@ -1,0 +1,61 @@
+CLASS Solution  
+    FUNCTION numberOfRightTriangles(grid)  
+        SET totalTriangles TO 0  
+        SET maxRowIndex TO LENGTH(grid) - 1  
+        SET maxColIndex TO LENGTH(grid[0]) - 1  
+  
+        FUNCTION sumRowExceptIndex(arr, excludedIndex)  
+            SET sumResult TO 0  
+            SET currentIndex TO 0  
+            WHILE currentIndex <= maxColIndex  
+                IF NOT (currentIndex = excludedIndex) THEN  
+                    SET sumResult TO sumResult + arr[currentIndex]  
+                END IF  
+                SET currentIndex TO currentIndex + 1  
+            END WHILE  
+            RETURN sumResult  
+        END FUNCTION  
+  
+        FUNCTION sumColExceptIndex(matrix, colIndex, excludedRow)  
+            SET accSum TO 0  
+            SET rowCounter TO 0  
+            REPEAT  
+                IF NOT (rowCounter = excludedRow) THEN  
+                    SET accSum TO accSum + matrix[rowCounter][colIndex]  
+                END IF  
+                SET rowCounter TO rowCounter + 1  
+            UNTIL rowCounter > maxRowIndex  
+            RETURN accSum  
+        END FUNCTION  
+  
+        FUNCTION processCell(rowIdx, colIdx, gridData)  
+            IF gridData[rowIdx][colIdx] = 1 THEN  
+                SET countAlongRow TO sumRowExceptIndex(gridData[rowIdx], colIdx)  
+                SET countAlongCol TO sumColExceptIndex(gridData, colIdx, rowIdx)  
+                RETURN countAlongRow * countAlongCol  
+            ELSE  
+                RETURN 0  
+            END IF  
+        END FUNCTION  
+  
+        FUNCTION iterateRows(rIndex)  
+            IF rIndex > maxRowIndex THEN  
+                RETURN 0  
+            ELSE  
+                RETURN iterateCols(rIndex, 0) + iterateRows(rIndex + 1)  
+            END IF  
+        END FUNCTION  
+  
+        FUNCTION iterateCols(rIdx, cIdx)  
+            IF cIdx > maxColIndex THEN  
+                RETURN 0  
+            ELSE  
+                RETURN processCell(rIdx, cIdx, grid) + iterateCols(rIdx, cIdx + 1)  
+            END IF  
+        END FUNCTION  
+  
+        SET totalTriangles TO iterateRows(0)  
+  
+        RETURN totalTriangles  
+    END FUNCTION  
+END CLASS

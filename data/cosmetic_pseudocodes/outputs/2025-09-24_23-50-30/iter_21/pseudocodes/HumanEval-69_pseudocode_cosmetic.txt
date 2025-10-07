@@ -1,0 +1,43 @@
+```
+FUNCTION search(input_sequence)
+    DEFINE freq_array AS LIST
+    LET limit_value BE maximum_element_in input_sequence
+    SET freq_array TO list_of_zeros_of_length (limit_value + 1)
+    
+    DEFINE PROCEDURE increment_frequency(pos, seq)
+        IF seq IS EMPTY
+            RETURN
+        ENDIF
+        freq_array[pos[0]] := freq_array[pos[0]] + 1
+        increment_frequency(REST_OF(seq), freq_array)
+    END PROCEDURE
+    
+    DEFINE PROCEDURE increment_frequency(seq, freq_array)
+        IF seq IS EMPTY
+            RETURN
+        ENDIF
+        freq_array[HEAD(seq)] := freq_array[HEAD(seq)] + 1
+        increment_frequency(TAIL(seq), freq_array)
+    END PROCEDURE
+
+    DEFINE PROCEDURE increment_frequency(seq)
+        FOR element IN seq DO
+            freq_array[element] := freq_array[element] + 1
+        END FOR
+    END PROCEDURE
+
+    CALL increment_frequency(input_sequence)
+
+    DEFINE FUNCTION find_answer(index, max_idx, current_answer)
+        IF index > max_idx
+            RETURN current_answer
+        ENDIF
+        IF NOT (freq_array[index] < index)
+            SET current_answer TO index
+        ENDIF
+        RETURN find_answer(index + 1, max_idx, current_answer)
+    END FUNCTION
+    
+    RETURN find_answer(1, LENGTH(freq_array) - 1, -1)
+END FUNCTION
+```

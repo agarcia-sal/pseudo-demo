@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+        SET lengthVal TO LENGTH OF fruits
+
+        SET directionsA TO LIST OF PAIRS: (1,1), (1,0)
+        SET directionsB TO LIST OF PAIRS: (1,-1), (1,0), (1,1)
+        SET directionsC TO LIST OF PAIRS: (-1,1), (0,1), (1,1)
+
+        SET cache TO EMPTY DICTIONARY
+
+        FUNCTION recursiveSearch(aX, aY, bX, bY, cX, cY)
+            IF NOT (aX >= 0 AND aX < lengthVal AND aY >= 0 AND aY < lengthVal AND bX >= 0 AND bX < lengthVal AND bY >= 0 AND bY < lengthVal AND cX >= 0 AND cX < lengthVal AND cY >= 0 AND cY < lengthVal) THEN
+                RETURN NEGATIVE_INFINITY
+            END IF
+
+            IF aX = aY AND aY = bX AND bX = bY AND bY = cX AND cX = cY AND cY = lengthVal - 1 THEN
+                RETURN fruits[lengthVal - 1][lengthVal - 1]
+            END IF
+
+            SET keyTuple TO (aX, aY, bX, bY, cX, cY)
+
+            IF keyTuple IS IN cache THEN
+                RETURN cache[keyTuple]
+            END IF
+
+            SET fruitsCollected TO fruits[aX][aY]
+
+            IF (aX = bX AND aY = bY) OR (aX = cX AND aY = cY) THEN
+                SET fruitsCollected TO 0
+            END IF
+
+            IF bX = cX AND bY = cY THEN
+                SET fruitsCollected TO fruitsCollected + fruits[bX][bY]
+            ELSE
+                SET fruitsCollected TO fruitsCollected + fruits[bX][bY] + fruits[cX][cY]
+            END IF
+
+            SET bestTotal TO NEGATIVE_INFINITY
+            FOR direction1Index FROM 0 TO LENGTH OF directionsA - 1
+                SET offsetA TO directionsA[direction1Index]
+                FOR direction2Index FROM 0 TO LENGTH OF directionsB - 1
+                    SET offsetB TO directionsB[direction2Index]
+                    FOR direction3Index FROM 0 TO LENGTH OF directionsC - 1
+                        SET offsetC TO directionsC[direction3Index]
+
+                        SET nextA_X TO aX + offsetA[0]
+                        SET nextA_Y TO aY + offsetA[1]
+                        SET nextB_X TO bX + offsetB[0]
+                        SET nextB_Y TO bY + offsetB[1]
+                        SET nextC_X TO cX + offsetC[0]
+                        SET nextC_Y TO cY + offsetC[1]
+
+                        SET tentative TO recursiveSearch(nextA_X, nextA_Y, nextB_X, nextB_Y, nextC_X, nextC_Y)
+
+                        IF tentative > bestTotal THEN
+                            SET bestTotal TO tentative
+                        END IF
+                    END FOR
+                END FOR
+            END FOR
+
+            SET cache[keyTuple] TO fruitsCollected + bestTotal
+            RETURN fruitsCollected + bestTotal
+        END FUNCTION
+
+        RETURN recursiveSearch(0, 0, 0, lengthVal - 1, lengthVal - 1, 0)
+    END FUNCTION
+END CLASS

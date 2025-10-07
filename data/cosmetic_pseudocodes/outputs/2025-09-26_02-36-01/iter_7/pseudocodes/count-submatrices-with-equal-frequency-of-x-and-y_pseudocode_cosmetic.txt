@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION numberOfSubmatrices(grid)
+        CONSTANT EMPTY_GRID_REPLACEMENT ← 0 + 0
+        CONSTANT ONE ← 1
+        CONSTANT ZERO ← 0
+        CONSTANT CHAR_X ← "X"
+        CONSTANT CHAR_Y ← "Y"
+
+        IF (NOT (grid ≠ []) OR NOT (grid[ZERO] ≠ [])) THEN
+            RETURN EMPTY_GRID_REPLACEMENT
+        END IF
+
+        LET total_rows BE LENGTH(grid)
+        LET total_cols BE LENGTH(grid[ZERO])
+
+        DEFINE prefixArrays BE NEW ARRAY [INDEX FROM ZERO TO total_rows + ONE]
+        FOR ix FROM ZERO TO total_rows + ONE DO
+            SET prefixArrays[ix] TO NEW ARRAY [INDEX FROM ZERO TO total_cols + ONE]
+            FOR jx FROM ZERO TO total_cols + ONE DO
+                SET prefixArrays[ix][jx] TO [ZERO, ZERO]
+            END FOR
+        END FOR
+
+        FUNCTION calculatePrefix(rowItr, colItr)
+            IF rowItr > total_rows THEN
+                RETURN
+            ELSEIF colItr > total_cols THEN
+                CALL calculatePrefix(rowItr + ONE, ONE)
+                RETURN
+            ELSE
+                LET a0 = prefixArrays[rowItr][colItr - ONE][ZERO]
+                LET a1 = prefixArrays[rowItr - ONE][colItr][ZERO]
+                LET a2 = prefixArrays[rowItr - ONE][colItr - ONE][ZERO]
+                LET b0 = prefixArrays[rowItr][colItr - ONE][ONE]
+                LET b1 = prefixArrays[rowItr - ONE][colItr][ONE]
+                LET b2 = prefixArrays[rowItr - ONE][colItr - ONE][ONE]
+
+                prefixArrays[rowItr][colItr][ZERO] ← (a0 + a1) - a2
+                prefixArrays[rowItr][colItr][ONE] ← (b0 + b1) - b2
+
+                LET current_char ← grid[rowItr - ONE][colItr - ONE]
+                IF current_char = CHAR_X THEN
+                    prefixArrays[rowItr][colItr][ZERO] ← prefixArrays[rowItr][colItr][ZERO] + ONE
+                ELSEIF current_char = CHAR_Y THEN
+                    prefixArrays[rowItr][colItr][ONE] ← prefixArrays[rowItr][colItr][ONE] + ONE
+                END IF
+
+                CALL calculatePrefix(rowItr, colItr + ONE)
+            END IF
+        END FUNCTION
+
+        CALL calculatePrefix(ONE, ONE)
+
+        LET result_counter BE ZERO
+
+        FUNCTION tallyMatches(rowInd, colInd)
+            IF rowInd > total_rows THEN
+                RETURN
+            ELSEIF colInd > total_cols THEN
+                CALL tallyMatches(rowInd + ONE, ONE)
+                RETURN
+            ELSE
+                LET px_count = prefixArrays[rowInd][colInd][ZERO]
+                LET py_count = prefixArrays[rowInd][colInd][ONE]
+                IF (px_count > ZERO) AND (px_count = py_count) THEN
+                    result_counter ← result_counter + ONE
+                END IF
+                CALL tallyMatches(rowInd, colInd + ONE)
+            END IF
+        END FUNCTION
+
+        CALL tallyMatches(ONE, ONE)
+
+        RETURN result_counter
+    END FUNCTION
+END CLASS

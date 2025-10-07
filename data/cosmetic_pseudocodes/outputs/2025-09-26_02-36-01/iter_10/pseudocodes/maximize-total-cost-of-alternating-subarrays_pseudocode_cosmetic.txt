@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION maximumTotalCost(nums)
+        PROCEDURE RevLoop(idx, lim, cont)
+            IF idx < lim THEN cont()
+            ELSE RETURN
+        END PROCEDURE
+
+        PROCEDURE PowNeg(e, RES)
+            IF e = 0 THEN 
+                RES <- 1
+            ELSE IF e MOD 2 = 0 THEN
+                POWNEG(e - 1, TMP)
+                RES <- -TMP
+            ELSE
+                POWNEG(e - 1, TMP)
+                RES <- TMP
+            END IF
+        END PROCEDURE
+
+        PROCEDURE EvaluateInner(cidx, jdx, ccost, n, dp, nums)
+            IF jdx >= n THEN RETURN END IF
+            PowNeg(jdx - cidx, signVal)
+            TMP1 <- nums[jdx] * signVal
+            ccost <- ccost + TMP1
+            IF jdx + 1 < n THEN
+                IF dp[cidx] < ccost + dp[jdx + 1] THEN dp[cidx] <- ccost + dp[jdx + 1] END IF
+            ELSE
+                IF dp[cidx] < ccost THEN dp[cidx] <- ccost END IF
+            END IF
+            EvaluateInner(cidx, jdx + 1, ccost, n, dp, nums)
+        END PROCEDURE
+
+        PROCEDURE WalkC(i, n, dp, nums)
+            IF i < 0 THEN RETURN END IF
+
+            curc <- nums[i]
+            IF curc > dp[i + 1] THEN dp[i] <- curc ELSE dp[i] <- dp[i + 1] + curc END IF
+            EvaluateInner(i, i + 1, curc, n, dp, nums)
+            WalkC(i - 1, n, dp, nums)
+        END PROCEDURE
+
+        LEN <- LENGTH(nums)
+        IF LEN = 1 THEN RETURN nums[0] END IF
+
+        ARR <- ARRAY OF SIZE LEN FILLED WITH 0
+        dp <- ARR
+        dp[LEN - 1] <- nums[LEN - 1]
+        WalkC(LEN - 2, LEN, dp, nums)
+
+        RETURN dp[0]
+    END FUNCTION
+END CLASS

@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION countSubmatrices(cells, limit)
+        IF cells IS NO VALUE OR element_at(cells, 0) IS NO VALUE THEN
+            RETURN 0
+        END IF
+
+        SET rows TO length_of(cells)
+        SET columns TO length_of(element_at(cells, 0))
+        SET sums TO list_construct(rows, FUNCTION() RETURN list_construct(columns, 0) END FUNCTION)
+        SET total TO 0
+
+        FUNCTION element_at(lst, idx)
+            RETURN lst[idx]
+        END FUNCTION
+
+        FUNCTION length_of(lst)
+            SET len_counter TO 0
+            WHILE TRUE DO
+                IF EXISTS lst[len_counter] THEN
+                    SET len_counter TO len_counter + 1
+                ELSE
+                    BREAK
+                END IF
+            END WHILE
+            RETURN len_counter
+        END FUNCTION
+
+        PROCEDURE compute_prefix(x, y)
+            IF x = 0 AND y = 0 THEN
+                sums[x][y] = cells[x][y]
+            ELSE IF x = 0 THEN
+                sums[x][y] = sums[x][y - 1] + cells[x][y]
+            ELSE IF y = 0 THEN
+                sums[x][y] = sums[x - 1][y] + cells[x][y]
+            ELSE
+                sums[x][y] = sums[x - 1][y] + sums[x][y - 1] - sums[x - 1][y - 1] + cells[x][y]
+            END IF
+        END PROCEDURE
+
+        FUNCTION is_not_above_threshold(value)
+            RETURN NOT (value > limit)
+        END FUNCTION
+
+        PROCEDURE count_if_valid(x, y)
+            IF is_not_above_threshold(sums[x][y]) THEN
+                total = total + 1
+            END IF
+        END PROCEDURE
+
+        FUNCTION for_loop(counter0, limit_val, body_fun)
+            IF counter0 > limit_val THEN
+                RETURN
+            ELSE
+                CALL body_fun(counter0)
+                CALL for_loop(counter0 + 1, limit_val, body_fun)
+            END IF
+        END FUNCTION
+
+        PROCEDURE inner_loop(row_index, col_index)
+            compute_prefix(row_index, col_index)
+            count_if_valid(row_index, col_index)
+        END PROCEDURE
+
+        PROCEDURE outer_loop(row_idx)
+            CALL for_loop(0, columns - 1, FUNCTION(col_idx)
+                inner_loop(row_idx, col_idx)
+            END FUNCTION)
+        END PROCEDURE
+
+        CALL for_loop(0, rows - 1, outer_loop)
+
+        RETURN total
+    END FUNCTION
+END CLASS

@@ -1,0 +1,35 @@
+```
+FUNCTION sort_numbers(string_of_number_words)
+    DEFINE lookups AS ARRAY ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+    DEFINE extract_words(index, words_accum)
+        IF index >= LENGTH(string_of_number_words) THEN
+            RETURN words_accum
+        ELSE
+            VAR start_pos = index
+            WHILE index < LENGTH(string_of_number_words) AND string_of_number_words[index] != ' ' DO
+                index = index + 1
+            END WHILE
+            VAR current_word = SUBSTRING(string_of_number_words, start_pos, index - start_pos)
+            RETURN extract_words(index + 1, words_accum + (IF current_word != '' THEN [current_word] ELSE []))
+        END IF
+    END DEFINE
+    VAR tokens = extract_words(0, [])
+    VAR numeric_sort = FUNCTION(a, b)
+        RETURN INDEX_OF(a IN lookups) < INDEX_OF(b IN lookups)
+    END FUNCTION
+    VAR sorted_tokens = []
+    FOR each_word IN tokens DO
+        APPEND each_word TO sorted_tokens
+    END FOR
+    FOR i FROM 0 TO LENGTH(sorted_tokens) - 2 DO
+        FOR j FROM i + 1 TO LENGTH(sorted_tokens) - 1 DO
+            IF NOT numeric_sort(sorted_tokens[i], sorted_tokens[j]) THEN
+                VAR temp = sorted_tokens[i]
+                sorted_tokens[i] = sorted_tokens[j]
+                sorted_tokens[j] = temp
+            END IF
+        END FOR
+    END FOR
+    RETURN CONCATENATE_WITH_SEPARATOR(sorted_tokens, ' ')
+END FUNCTION
+```

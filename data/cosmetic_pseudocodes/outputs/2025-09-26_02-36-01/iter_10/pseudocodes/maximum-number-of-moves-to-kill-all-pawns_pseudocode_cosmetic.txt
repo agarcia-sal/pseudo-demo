@@ -1,0 +1,103 @@
+CLASS Solution
+	FUNCTION maxMoves(kx, ky, positions)
+		knight_moves ← [(1+1, 2-1), (2-1, 1+1), (1+1, -2+1), (-2+1, 1+1), (-1-1, -2+1), (-2+1, -1-1), (-1-1, 2-1), (2-1, -1-1)]
+		pawn_positions ← empty set
+		PROCEDURE to_set(poses, accum)
+			INDEX i ← 0
+			PROC next()
+				IF i ≥ length(poses) THEN RETURN
+				accum ADD (poses[i][0], poses[i][1])
+				i ← i + 1
+				next()
+			END
+			next()
+		END PROCEDURE
+		to_set(positions, pawn_positions)
+		num_pawns ← size(pawn_positions)
+
+		FUNCTION dp(kx, ky, mask, is_alice)
+			IF mask = 0 THEN
+				RETURN 0
+			END IF
+
+			VAR max_min_moves ← IF is_alice THEN 0 ELSE +∞ ENDIF
+
+			FUNCTION bit_check(m, idx)
+				RETURN (m BITWISE_AND (1 << idx)) ≠ 0
+			END FUNCTION
+
+			FUNCTION toggle_bit(m, idx)
+				RETURN m XOR (1 << idx)
+			END FUNCTION
+
+			FUNCTION coords_match(x1, y1, x2, y2)
+				RETURN (x1 = x2) AND (y1 = y2)
+			END FUNCTION
+
+			FUNCTION bfs(start_x, start_y, target_x, target_y)
+				queue ← [(start_x, start_y, 0)]
+				visited ← empty set
+				visited ADD (start_x, start_y)
+
+				PROCEDURE traverse()
+					IF length(queue) = 0 THEN RETURN -1 ENDIF
+					current ← queue REMOVE_FIRST
+					cx ← current[0]
+					cy ← current[1]
+					steps ← current[2]
+
+					IF coords_match(cx, cy, target_x, target_y) THEN RETURN steps ENDIF
+
+					FUNCTION process_knight_moves(idx)
+						IF idx = 8 THEN RETURN ENDIF
+						dx ← knight_moves[idx][0]
+						dy ← knight_moves[idx][1]
+						nx ← cx + dx
+						ny ← cy + dy
+						cond_range ← (nx ≥ 0) AND (nx < 50) AND (ny ≥ 0) AND (ny < 50)
+						not_visited ← NOT ((nx, ny) IN visited)
+						IF cond_range AND not_visited THEN
+							visited ADD (nx, ny)
+							queue APPEND (nx, ny, steps + 1)
+						END IF
+						process_knight_moves(idx + 1)
+					END FUNCTION
+
+					process_knight_moves(0)
+					RETURN traverse()
+				END PROCEDURE
+
+				RETURN traverse()
+			END FUNCTION
+
+			idx ← 0
+			PROCEDURE loop_pawns()
+				IF idx = num_pawns THEN RETURN max_min_moves ENDIF
+				if bit_check(mask, idx) THEN
+					px ← positions[idx][0]
+					py ← positions[idx][1]
+
+					dist ← bfs(kx, ky, px, py)
+					IF dist ≠ -1 THEN
+						new_mask ← toggle_bit(mask, idx)
+						next_val ← dp(px, py, new_mask, NOT is_alice)
+						total ← dist + next_val
+						IF is_alice THEN
+							IF max_min_moves < total THEN max_min_moves ← total ENDIF
+						ELSE
+							IF max_min_moves > total THEN max_min_moves ← total ENDIF
+						END IF
+					END IF
+				END IF
+				idx ← idx + 1
+				loop_pawns()
+			END PROCEDURE
+
+			loop_pawns()
+			RETURN max_min_moves
+		END FUNCTION
+
+		all_pawns_mask ← (1 << num_pawns) - 1
+		RETURN dp(kx, ky, all_pawns_mask, TRUE)
+	END FUNCTION
+END CLASS

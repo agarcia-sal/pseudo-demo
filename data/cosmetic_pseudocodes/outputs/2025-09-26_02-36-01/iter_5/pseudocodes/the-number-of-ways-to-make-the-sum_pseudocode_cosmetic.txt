@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION numberOfWays WITH PARAMETER m
+        SET constantModulus TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+        SET counterList TO an array filled with zero values OF length (m + 1)
+        ASSIGN 1 TO counterList[0]
+
+        FUNCTION processCoin WITH PARAMETER idx
+            IF idx GREATER THAN OR EQUAL TO 3 THEN
+                RETURN
+            END IF
+
+            SET coinsArray TO [1, 2, 6]
+            SET currentCoin TO coinsArray[idx]
+            
+            FUNCTION loopIncrement WITH PARAMETER pos
+                IF pos GREATER THAN m THEN
+                    RETURN
+                END IF
+                
+                SET leftValue TO counterList[pos]
+                SET rightValue TO counterList[pos - currentCoin]
+                SET counterList[pos] TO ((leftValue + rightValue) - ((leftValue + rightValue) DIV constantModulus) * constantModulus)
+                
+                CALL loopIncrement WITH (pos + 1)
+            END FUNCTION
+            
+            CALL loopIncrement WITH currentCoin
+            CALL processCoin WITH (idx + 1)
+        END FUNCTION
+        
+        CALL processCoin WITH 0
+
+        SET accumulatorResult TO 0
+
+        FUNCTION sumOverK WITH PARAMETER kVal
+            IF kVal GREATER THAN 2 THEN
+                RETURN
+            END IF
+
+            IF NOT (kVal * 4 > m) THEN
+                SET tempIndex TO m - (4 * kVal)
+                SET accumulatorResult TO ((accumulatorResult + counterList[tempIndex]) - (((accumulatorResult + counterList[tempIndex]) DIV constantModulus) * constantModulus))
+            END IF
+
+            CALL sumOverK WITH (kVal + 1)
+        END FUNCTION
+        
+        CALL sumOverK WITH 0
+
+        RETURN accumulatorResult
+    END FUNCTION
+END CLASS

@@ -1,0 +1,55 @@
+CLASS Solution
+{
+    FUNCTION countNonDecreasingSubarrays(nums k)
+    {
+        SET lengthNums TO LENGTH(nums)
+        
+        FUNCTION canMakeNonDecreasing(startIdx lenSegment)
+        {
+            SET adjustmentCost TO 0
+            SET maxVal TO nums[startIdx]
+            
+            SET indexCounter TO 1
+            WHILE indexCounter < lenSegment
+            {
+                SET currentVal TO nums[startIdx + indexCounter]
+                IF currentVal < maxVal
+                {
+                    SET adjustmentCost TO adjustmentCost + (maxVal - currentVal)
+                }
+                SET maxVal TO (maxVal > currentVal) ? maxVal : currentVal
+                IF adjustmentCost > k
+                {
+                    RETURN False
+                }
+                SET indexCounter TO indexCounter + 1
+            }
+            RETURN True
+        }
+        
+        SET allSubarraysCount TO (lengthNums * (lengthNums + 1)) / 2
+        SET excludedSubarraysCount TO 0
+        
+        SET outerIdx TO 0
+        WHILE outerIdx <= lengthNums - 1
+        {
+            SET lowBound TO 1
+            SET highBound TO lengthNums - outerIdx
+            REPEAT
+                SET middle TO (lowBound + highBound) \ 2
+                IF canMakeNonDecreasing(outerIdx middle)
+                {
+                    SET lowBound TO middle + 1
+                }
+                ELSE
+                {
+                    SET highBound TO middle - 1
+                }
+            UNTIL lowBound > highBound
+            SET excludedSubarraysCount TO excludedSubarraysCount + (lengthNums - outerIdx - highBound)
+            SET outerIdx TO outerIdx + 1
+        }
+        
+        RETURN allSubarraysCount - excludedSubarraysCount
+    }
+}

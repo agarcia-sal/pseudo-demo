@@ -1,0 +1,57 @@
+CLASS Fenwick  
+	FUNCTION __init__(self, n)  
+		LET alpha BE a list of zeros with length (n + 1)  
+		SET self.tree TO alpha  
+	END FUNCTION  
+
+	FUNCTION add(self, i)  
+		WHILE i < LENGTH(self.tree)  
+			self.tree[i] = self.tree[i] + 1  
+			i = i + (i & (-i))  
+		END WHILE  
+	END FUNCTION  
+
+	FUNCTION pre(self, i)  
+		SET omega TO 0  
+		REPEAT WHILE i > 0  
+			omega = omega + self.tree[i]  
+			i = i & (i - 1)  
+		UNTIL i = 0  
+		RETURN omega  
+	END FUNCTION  
+
+	FUNCTION query(self, l, r)  
+		LET pi = self.pre(r)  
+		LET sigma = self.pre(l - 1)  
+		RETURN pi - sigma  
+	END FUNCTION  
+END CLASS  
+
+
+
+CLASS Solution  
+	FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+		LET zeta BE SORTED list of pairs zipped from xCoord and yCoord ascendingly  
+		LET phi BE SORTED list of unique elements of yCoord  
+		SET upsilon TO -1  
+		LET delta BE Fenwick(LENGTH(phi))  
+		LET theta BE 1 + bisect_left(phi, zeta[0][1])  
+		CALL delta.add(theta)  
+		LET iota BE empty map  
+		FOR index FROM 0 TO LENGTH(zeta) - 2  
+			LET (xi, yi) = zeta[index]  
+			LET (xj, yj) = zeta[index + 1]  
+			LET tau = 1 + bisect_left(phi, yj)  
+			CALL delta.add(tau)  
+			IF xi != xj THEN  
+				CONTINUE  
+			END IF  
+			LET kappa = delta.query(1 + bisect_left(phi, yi), tau)  
+			IF yj IN iota AND iota[yj][1] = yi AND iota[yj][2] + 2 = kappa THEN  
+				LET upsilon = MAX(upsilon, (xj - iota[yj][0]) * (yj - yi))  
+			END IF  
+			iota[yj] = (xi, yi, kappa)  
+		END FOR  
+		RETURN upsilon  
+	END FUNCTION  
+END CLASS

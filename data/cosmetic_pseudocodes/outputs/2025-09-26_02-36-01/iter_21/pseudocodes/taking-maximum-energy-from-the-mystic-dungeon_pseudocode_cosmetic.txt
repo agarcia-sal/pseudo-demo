@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION maximumEnergy(energy, k)
+  SET m TO LENGTH(energy)
+  SET array TO LIST OF ZEROS WITH LENGTH m
+  SET array[m - 1] TO energy[m - 1]
+  SET topValue TO array[m - 1]
+  SET dq TO A DEQUE INITIALIZED WITH [m - 1]
+
+  FUNCTION popFrontIfNeeded(refDeque, currentIndex, limit)
+    WHILE NOT (refDeque[0] - currentIndex < limit) 
+      REMOVE refDeque[0]
+    END WHILE
+  END FUNCTION
+
+  FUNCTION updateMax(val, currentMax)
+   IF currentMax < val
+     RETURN val
+   ELSE
+     RETURN currentMax
+   END IF
+  END FUNCTION
+
+  FUNCTION shouldPop(currentVal, refDeque, arr)
+    RETURN (NOT IS_EMPTY(refDeque)) AND (arr[currentVal] >= arr[refDeque[LAST_INDEX(refDeque)]])
+  END FUNCTION
+
+  FUNCTION popWhileCondition(refDeque, arr, idx)
+    WHILE NOT IS_EMPTY(refDeque)
+      IF arr[idx] < arr[refDeque[LAST_INDEX(refDeque)]]
+        BREAK
+      END IF
+      REMOVE refDeque[LAST_INDEX(refDeque)]
+    END WHILE
+  END FUNCTION
+
+  FUNCTION addIndex(refDeque, idx)
+    APPEND idx TO refDeque
+  END FUNCTION
+
+  FUNCTION recursiveLoop(index, dq, maxE, dpArr, en, step)
+    IF index < 0
+      RETURN maxE
+    END IF
+    CALL popFrontIfNeeded(dq, index, k)
+    SET dpArr[index] TO en[index] + dpArr[dq[0]]
+    SET newMax TO updateMax(dpArr[index], maxE)
+    CALL popWhileCondition(dq, dpArr, index)
+    CALL addIndex(dq, index)
+    RETURN recursiveLoop(index - step, dq, newMax, dpArr, en, step)
+  END FUNCTION
+
+  RETURN recursiveLoop(m - 2, dq, topValue, array, energy, 1)
+    END FUNCTION
+END CLASS

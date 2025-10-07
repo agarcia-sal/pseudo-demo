@@ -1,0 +1,59 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minimumCost(target, words, costs)
+        SET storageMap TO dictionary with no entries
+        SET indexA TO 0
+        WHILE indexA LESS THAN length of words
+            SET currentKey TO words at indexA
+            SET currentVal TO costs at indexA
+            IF currentKey NOT IN storageMap THEN
+                ASSIGN storageMap[currentKey] TO currentVal
+            ELSE 
+                IF currentVal LESS THAN storageMap[currentKey] THEN
+                    ASSIGN storageMap[currentKey] TO currentVal
+                END IF
+            END IF
+            SET indexA TO indexA PLUS 1
+        END WHILE
+        
+        SET targetChars TO array of characters in target
+        
+        FUNCTION helperFunc(position)
+            IF position GREATER THAN OR EQUAL TO length of targetChars THEN
+                RETURN 0
+            ELSE
+                SET leastCost TO REAL_MAX
+                FOR EACH keyValPair IN storageMap DO
+                    SET wordStr TO keyValPair.key
+                    SET wordVal TO keyValPair.value
+                    IF (position PLUS length of wordStr) LESS THAN OR EQUAL TO length of targetChars THEN
+                        SET segment TO slice of targetChars FROM position TO position PLUS length of wordStr
+                        SET wordChars TO array of characters in wordStr
+                        IF NOT (segment NOT EQUAL TO wordChars) THEN
+                            SET remainingCost TO helperFunc(position PLUS length of wordStr)
+                            IF remainingCost NOT EQUAL TO REAL_MAX THEN
+                                IF (wordVal PLUS remainingCost) LESS THAN leastCost THEN
+                                    ASSIGN leastCost TO wordVal PLUS remainingCost
+                                END IF
+                            END IF
+                        END IF
+                    END IF
+                END FOR
+                
+                IF leastCost EQUALS REAL_MAX THEN
+                    RETURN REAL_MAX
+                ELSE 
+                    RETURN leastCost
+                END IF
+            END IF
+        END FUNCTION
+        
+        SET totalCost TO helperFunc(0)
+        IF totalCost NOT EQUAL TO REAL_MAX THEN
+            RETURN totalCost
+        ELSE 
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS
+```

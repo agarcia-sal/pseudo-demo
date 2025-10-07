@@ -1,0 +1,122 @@
+CLASS Solution
+	FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+		SET function popMinHeap(hp) TO
+			IF hp IS EMPTY THEN
+				RETURN NIL
+			END IF
+			SET smallestValue TO hp[0][0]
+			SET smallestIndex TO hp[0][1]
+			SET lastPos TO LENGTH(hp) - 1
+			SET hp[0] TO hp[lastPos]
+			REMOVE LAST ELEMENT FROM hp
+			SET currentPos TO 0
+			LOOP FOREVER
+				SET leftChild TO currentPos * 2 + 1
+				SET rightChild TO currentPos * 2 + 2
+				SET minPos TO currentPos
+				IF leftChild <= lastPos - 1 AND hp[leftChild][0] < hp[minPos][0] THEN
+					SET minPos TO leftChild
+				END IF
+				IF rightChild <= lastPos - 1 AND hp[rightChild][0] < hp[minPos][0] THEN
+					SET minPos TO rightChild
+				END IF
+				IF minPos = currentPos THEN
+					EXIT LOOP
+				END IF
+				SET tempPair TO hp[currentPos]
+				SET hp[currentPos] TO hp[minPos]
+				SET hp[minPos] TO tempPair
+				SET currentPos TO minPos
+			END LOOP
+			RETURN (smallestValue, smallestIndex)
+		END FUNCTION
+
+		SET function organizeHeap(listPairs) TO
+			SET lastIdx TO LENGTH(listPairs) - 1
+			SET i TO (lastIdx - 1) / 2
+			WHILE i >= 0
+				SET parentPos TO i
+				LOOP FOREVER
+					SET leftChild TO parentPos * 2 + 1
+					SET rightChild TO parentPos * 2 + 2
+					SET minimumPos TO parentPos
+					IF leftChild <= lastIdx AND listPairs[leftChild][0] < listPairs[minimumPos][0] THEN
+						SET minimumPos TO leftChild
+					END IF
+					IF rightChild <= lastIdx AND listPairs[rightChild][0] < listPairs[minimumPos][0] THEN
+						SET minimumPos TO rightChild
+					END IF
+					IF minimumPos = parentPos THEN
+						BREAK
+					END IF
+					SET temporaryVar TO listPairs[parentPos]
+					SET listPairs[parentPos] TO listPairs[minimumPos]
+					SET listPairs[minimumPos] TO temporaryVar
+					SET parentPos TO minimumPos
+				END LOOP
+				SET i TO i - 1
+			END WHILE
+		END FUNCTION
+
+		SET helperIndicesSet TO EMPTY SET
+		SET aggregateSum TO 0 + 0
+		DEFINE FUNCTION totalSumOfList(aList)
+			SET indexCounter TO 0
+			SET accumulator TO 0
+			WHILE indexCounter < LENGTH(aList)
+				SET accumulator TO accumulator + aList[indexCounter]
+				SET indexCounter TO indexCounter + 1
+			END WHILE
+			RETURN accumulator
+		END FUNCTION
+		SET aggregateSum TO totalSumOfList(nums)
+
+		SET heapList TO EMPTY LIST
+		SET positionHolder TO 0
+		LOOP
+			IF positionHolder >= LENGTH(nums) THEN
+				BREAK
+			END IF
+			APPEND (nums[positionHolder], positionHolder) TO heapList
+			SET positionHolder TO positionHolder + 1
+		END LOOP		
+		CALL organizeHeap(heapList)
+
+		SET outputList TO EMPTY LIST
+
+		SET parameterOneIndex TO 0
+		SET function recursiveProcess(position, size, hpList, markers, runningSum, outputAccumulator)
+			IF position >= size THEN
+				RETURN outputAccumulator
+			END IF
+			SET currentQueryIndex TO queries[position][0]
+			SET currentQueryNumber TO queries[position][1]
+			IF markers DOES NOT CONTAIN currentQueryIndex THEN
+				SET markers TO markers UNION SET(currentQueryIndex)
+				SET runningSum TO runningSum - nums[currentQueryIndex]
+			END IF
+
+			SET iterationCount TO 0
+			WHILE iterationCount < currentQueryNumber AND LENGTH(hpList) > 0
+				SET smallestPair TO popMinHeap(hpList)
+				IF smallestPair IS NOT NIL THEN
+					SET extractedValue TO smallestPair[0]
+					SET extractedIndex TO smallestPair[1]
+					IF markers DOES NOT CONTAIN extractedIndex THEN
+						SET markers TO markers UNION SET(extractedIndex)
+						SET runningSum TO runningSum - extractedValue
+						SET iterationCount TO iterationCount + 1
+					END IF
+				ELSE
+					EXIT
+				END IF
+			END WHILE
+
+			SET outputAccumulator TO outputAccumulator + [runningSum]
+			RETURN recursiveProcess(position + 1, size, hpList, markers, runningSum, outputAccumulator)
+		END FUNCTION
+
+		SET outputList TO recursiveProcess(parameterOneIndex, LENGTH(queries), heapList, helperIndicesSet, aggregateSum, outputList)
+		RETURN outputList
+	END FUNCTION
+END CLASS

@@ -1,0 +1,60 @@
+CLASS Solution
+	FUNCTION subsequencesWithMiddleMode(nums)
+		DEFINE constantValue = 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 + 7
+
+		VARIABLE resultSum = 0
+		VARIABLE mapX = empty counter
+		VARIABLE mapY = counter of nums
+
+		FUNCTION chooseTwo(value)
+			RETURN (value * (value + (value - 2))) / 2
+		END FUNCTION
+
+		VARIABLE val1 = 0
+		VARIABLE val2 = 0
+		VARIABLE val3 = 0
+		VARIABLE val4 = 0
+		VARIABLE val5 = 0
+
+		FOR index = 0 TO length(nums) - 1
+			VARIABLE element = access(nums, index)
+
+			val1 = val1 + mapX[element] * ((-1) * (mapY[element] * mapY[element]) + ((mapY[element] - 1) * (mapY[element] - 1)))
+			val2 = val2 + (-1) * (mapX[element] * mapX[element])
+			val4 = val4 + (-1) * (mapY[element] * mapY[element]) + (mapY[element] - 1) * (mapY[element] - 1)
+			val5 = val5 + (-1) * mapX[element]
+
+			mapY[element] = mapY[element] - 1
+
+			VARIABLE leftSpan = index
+			VARIABLE rightSpan = (length(nums) - 1) - index
+
+			resultSum = resultSum + chooseTwo(leftSpan) * chooseTwo(rightSpan)
+			resultSum = resultSum - chooseTwo(leftSpan - mapX[element]) * chooseTwo(rightSpan - mapY[element])
+
+			VARIABLE temp1 = val1 - mapX[element] * (mapY[element] * mapY[element])
+			VARIABLE temp2 = val2 - mapY[element] * (mapX[element] * mapX[element])
+			VARIABLE temp3 = val3 - (mapX[element] * mapX[element])
+			VARIABLE temp4 = val4 - (mapY[element] * mapY[element])
+			VARIABLE temp5 = val5 - mapX[element] * mapY[element]
+			VARIABLE tempL = leftSpan - mapX[element]
+			VARIABLE tempR = rightSpan - mapY[element]
+
+			resultSum = resultSum - temp5 * mapX[element] * (tempR - mapY[element]) - temp1 * (-mapX[element])
+			resultSum = resultSum - temp5 * mapY[element] * (tempL - mapX[element]) - temp2 * (-mapY[element])
+			resultSum = resultSum - (temp3 - tempL) * mapY[element] * (tempR - mapY[element]) / 2
+			resultSum = resultSum - (temp4 - tempR) * mapX[element] * (tempL - mapX[element]) / 2
+
+			resultSum = resultSum MOD constantValue
+
+			val1 = val1 + mapY[element] * mapY[element]
+			val2 = val2 + mapY[element] * ((-1) * (mapX[element] * mapX[element]) + ((mapX[element] + 1) * (mapX[element] + 1)))
+			val3 = val3 + (-1) * (mapX[element] * mapX[element]) + ((mapX[element] + 1) * (mapX[element] + 1))
+			val5 = val5 + mapY[element]
+
+			mapX[element] = mapX[element] + 1
+		END FOR
+
+		RETURN resultSum
+	END FUNCTION
+END CLASS

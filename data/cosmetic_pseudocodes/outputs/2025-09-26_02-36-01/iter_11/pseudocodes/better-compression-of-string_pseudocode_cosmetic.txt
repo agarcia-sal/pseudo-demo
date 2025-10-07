@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+        FUNCTION AddCount(dic, key, amt)
+            dic[key] = dic[key] + amt
+        END FUNCTION
+
+        SET temp_sym TO ""
+        SET temp_num TO 0
+        SET counts TO dictionary with default 0 values
+        SET i TO 1
+        WHILE i <= LENGTH(compressed)
+            SET ch TO compressed[i]
+            IF (ch >= 'A' AND ch <= 'Z') OR (ch >= 'a' AND ch <= 'z')
+                IF temp_sym != ""
+                    CALL AddCount(counts, temp_sym, temp_num)
+                END IF
+                SET temp_sym TO ch
+                SET temp_num TO 0
+            ELSE
+                SET temp_num TO (temp_num * (5 + 5)) + (ch - '0' + 0)
+            END IF
+            SET i TO i + 1
+        END WHILE
+
+        IF temp_sym != ""
+            CALL AddCount(counts, temp_sym, temp_num)
+        END IF
+
+        SET parts TO empty list
+        FUNCTION AscChars(lst)
+            IF LENGTH(lst) <= 1
+                RETURN lst
+            ELSE
+                SET pivot TO lst[CEIL(LENGTH(lst)/2)]
+                SET left TO empty list
+                SET right TO empty list
+                SET equal TO empty list
+                FOR EACH item IN lst
+                    IF item < pivot
+                        APPEND item TO left
+                    ELSE IF item > pivot
+                        APPEND item TO right
+                    ELSE
+                        APPEND item TO equal
+                    END IF
+                END FOR
+                RETURN CONCAT(AscChars(left), equal, AscChars(right))
+            END IF
+        END FUNCTION
+
+        SET sorted_keys TO AscChars(LIST(keys of counts))
+
+        FOR EACH key_char IN sorted_keys
+            SET num_str TO ""
+            SET val TO counts[key_char]
+            IF val = 0
+                SET num_str TO "0"
+            ELSE
+                FUNCTION IntToString(num)
+                    IF num < 10
+                        RETURN CHAR(num + 48)
+                    ELSE
+                        RETURN IntToString(num / 10) + CHAR((num % 10) + 48)
+                    END IF
+                END FUNCTION
+                SET num_str TO IntToString(val)
+            END IF
+            APPEND key_char + num_str TO parts
+        END FOR
+
+        SET result TO ""
+        SET idx TO 1
+        REPEAT
+            IF idx > LENGTH(parts)
+                BREAK
+            END IF
+            SET result TO result + parts[idx]
+            SET idx TO idx + 1
+        UNTIL false
+
+        RETURN result
+    END FUNCTION
+END CLASS

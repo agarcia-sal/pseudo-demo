@@ -1,0 +1,36 @@
+CLASS Solution  
+    FUNCTION countBalancedPermutations(num)  
+        SET mod TO 10^9 + 7  
+        SET digits TO list of integers parsed from characters in num  
+        SET total_sum TO sum of digits  
+        IF total_sum MOD 2 IS NOT 0  
+            RETURN 0  
+        END IF  
+        SET length TO length of digits  
+        SET countMap TO frequency map (Counter) of digits  
+
+        FUNCTION dfs(index, remaining_sum, count_a, count_b)  
+            IF index > 9  
+                RETURN 1 IF remaining_sum IS 0 AND count_a IS 0 AND count_b IS 0 ELSE 0  
+            END IF  
+            IF count_a IS 0 AND remaining_sum != 0  
+                RETURN 0  
+            END IF
+
+            SET result TO 0  
+            FOR x IN 0 TO MIN(countMap[index], count_a)  
+                SET y TO countMap[index] - x  
+                IF y >= 0 AND y <= count_b AND x * index <= remaining_sum  
+                    SET ways_a TO combination(count_a, x)  
+                    SET ways_b TO combination(count_b, y)  
+                    SET sub_result TO dfs(index + 1, remaining_sum - x * index, count_a - x, count_b - y)  
+                    SET total_ways TO (ways_a * ways_b * sub_result) MOD mod  
+                    SET result TO (result + total_ways) MOD mod  
+                END IF  
+            END FOR
+            RETURN result  
+        END FUNCTION
+  
+        RETURN dfs(0, total_sum / 2, length // 2, (length + 1) // 2)  
+    END FUNCTION  
+END CLASS

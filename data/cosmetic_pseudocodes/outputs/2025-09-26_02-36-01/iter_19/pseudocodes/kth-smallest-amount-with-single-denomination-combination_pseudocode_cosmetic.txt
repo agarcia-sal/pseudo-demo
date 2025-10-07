@@ -1,0 +1,36 @@
+CLASS Solution
+    FUNCTION findKthSmallest(coins k)
+        FUNCTION count_smaller_or_equal(p)
+            SET total TO 0
+            FOR mask FROM 1 TO (2 ^ LENGTH(coins)) - 1
+                SET product TO 1
+                SET setsCount TO 0
+                FOR pos FROM 0 TO LENGTH(coins) - 1
+                    IF (mask & (1 << pos)) != 0 THEN
+                        SET gcdValue TO FUNCTION gcd(product, coins[pos])
+                        SET product TO (product * coins[pos]) / gcdValue
+                        SET setsCount TO setsCount + 1
+                    END IF
+                END FOR
+                IF (setsCount % 2) == 1 THEN
+                    SET total TO total + (p / product) // integer division
+                ELSE
+                    SET total TO total - (p / product) // integer division
+                END IF
+            END FOR
+            RETURN total
+        END FUNCTION
+
+        SET low TO 1
+        SET high TO k * MIN(coins)
+        WHILE low < high
+            SET middle TO (low + high) / 2 // integer division
+            IF count_smaller_or_equal(middle) < k THEN
+                SET low TO middle + 1
+            ELSE
+                SET high TO middle
+            END IF
+        END WHILE
+        RETURN low
+    END FUNCTION
+END CLASS

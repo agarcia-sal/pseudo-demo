@@ -1,0 +1,205 @@
+CLASS Solution
+    FUNCTION smallestNumber(num, t)
+      SET alphaDelta_gar TO self._getPrimeCount(t)
+      SET lambOmega_vex TO alphaDelta_gar[0]
+      SET phiBeta_orb TO alphaDelta_gar[1]
+      
+      IF phiBeta_orb == false
+          RETURN "-1"
+      END IF
+      
+      SET gammaTheta_sip TO self._getFactorCount(lambOmega_vex)
+      
+      SET omegaSum_lambda TO 0
+      FOR EACH value IN gammaTheta_sip VALUES
+          SET omegaSum_lambda TO omegaSum_lambda + value
+      END FOR
+
+      IF omegaSum_lambda > LENGTH(num)
+          SET etaRho_yen TO ""
+          FOR EACH key IN gammaTheta_sip KEYS
+              FOR deltaPsi_vow FROM 1 TO gammaTheta_sip[key]
+                  SET etaRho_yen TO etaRho_yen + key
+              END FOR
+          END FOR
+          RETURN etaRho_yen
+      END IF
+      
+      FUNCTION accumulateFactorCount(str_input)
+          SET betaSigma_rim TO NEW Counter()
+          FOR EACH char IN str_input
+              SET intVal TO INTEGER(char)
+              SET countVals TO FACTOR_COUNTS[intVal]
+              FOR EACH k IN countVals KEYS
+                  IF betaSigma_rim[k] IS UNDEFINED
+                      SET betaSigma_rim[k] TO 0
+                  END IF
+                  SET betaSigma_rim[k] TO betaSigma_rim[k] + countVals[k]
+              END FOR
+          END FOR
+          RETURN betaSigma_rim
+      END FUNCTION
+      
+      SET primeCountPrefix_psi TO accumulateFactorCount(num)
+      
+      FUNCTION findFirstZero(s)
+          SET idx_mu TO 0
+          WHILE idx_mu < LENGTH(s)
+              IF s[idx_mu] == "0"
+                  RETURN idx_mu
+              END IF
+              SET idx_mu TO idx_mu + 1
+          END WHILE
+          RETURN LENGTH(s)
+      END FUNCTION
+
+      SET firstZeroIndex_zet TO findFirstZero(num)
+  
+      IF firstZeroIndex_zet == LENGTH(num) AND lambOmega_vex <= primeCountPrefix_psi
+          RETURN num
+      END IF
+      
+      FUNCTION sumCounts(counter_obj)
+          SET total_tau TO 0
+          FOR EACH val IN counter_obj VALUES
+              SET total_tau TO total_tau + val
+          END FOR
+          RETURN total_tau
+      END FUNCTION
+
+      SET lenNum_psi TO LENGTH(num)
+      SET zeroChar_const TO "0"
+      SET oneChar_const TO "1"
+
+      FUNCTION strRepeat(char_in, times_in)
+          SET acc_str TO ""
+          SET iter_i TO 0
+          WHILE iter_i < times_in
+              SET acc_str TO acc_str + char_in
+              SET iter_i TO iter_i + 1
+          END WHILE
+          RETURN acc_str
+      END FUNCTION
+
+      FOR revIndex FROM LENGTH(num) - 1 DOWNTO 0 STEP -1
+          SET charCurrent TO num[revIndex]
+          SET digit_du TO INTEGER(charCurrent)
+          
+          FOR EACH key IN primeCountPrefix_psi KEYS
+              SET primeCountPrefix_psi[key] TO primeCountPrefix_psi[key] - FACTOR_COUNTS[digit_du].GET(key, 0)
+          END FOR
+          
+          SET remainingSpace_mu TO lenNum_psi - 1 - revIndex
+          
+          IF revIndex <= firstZeroIndex_zet
+              SET higherDigit_delta TO digit_du + 1
+              WHILE higherDigit_delta <= 9
+                  SET needed_prime TO lambOmega_vex
+                  FOR EACH key IN primeCountPrefix_psi KEYS
+                      SET needed_prime TO needed_prime - primeCountPrefix_psi[key] - FACTOR_COUNTS[higherDigit_delta].GET(key, 0)
+                  END FOR
+                  SET factorsAfterReplacement_li TO self._getFactorCount(needed_prime)
+                  SET sumFactorsAfter_sigma TO 0
+                  FOR EACH valX IN factorsAfterReplacement_li VALUES
+                      SET sumFactorsAfter_sigma TO sumFactorsAfter_sigma + valX
+                  END FOR
+                  
+                  IF sumFactorsAfter_sigma <= remainingSpace_mu
+                      SET fillOnesCount_nr TO remainingSpace_mu - sumFactorsAfter_sigma
+
+                      SET retval_psi TO ""
+                      IF revIndex > 0
+                          SET retval_psi TO num[0 : revIndex]
+                      END IF
+                      SET retval_psi TO retval_psi + STRING(higherDigit_delta)
+                      SET retval_psi TO retval_psi + strRepeat(oneChar_const, fillOnesCount_nr)
+                      FOR EACH key IN factorsAfterReplacement_li KEYS
+                          FOR times_it FROM 1 TO factorsAfterReplacement_li[key]
+                              SET retval_psi TO retval_psi + key
+                          END FOR
+                      END FOR
+                      
+                      RETURN retval_psi
+                  END IF
+                  SET higherDigit_delta TO higherDigit_delta + 1
+              END WHILE
+          END IF
+      END FOR
+      
+      SET factorCountFinal_sig TO self._getFactorCount(lambOmega_vex)
+      SET sumFactorVal_psi TO 0
+      FOR EACH vl IN factorCountFinal_sig VALUES
+          SET sumFactorVal_psi TO sumFactorVal_psi + vl
+      END FOR
+      
+      SET onesCount_wal TO LENGTH(num) + 1 - sumFactorVal_psi
+      
+      SET ans_out TO strRepeat(oneChar_const, onesCount_wal)
+      FOR EACH ky IN factorCountFinal_sig KEYS
+          FOR iter_yy FROM 1 TO factorCountFinal_sig[ky]
+              SET ans_out TO ans_out + ky
+          END FOR
+      END FOR
+      RETURN ans_out
+    END FUNCTION
+
+    FUNCTION _getPrimeCount(t)
+        SET countMap_lat TO NEW Counter()
+        SET primes_arr TO [2, 3, 5, 7]
+        FOR EACH pr IN primes_arr
+            WHILE (t MOD pr) == 0
+                SET t TO t DIV pr
+                IF countMap_lat[pr] IS UNDEFINED
+                    SET countMap_lat[pr] TO 0
+                END IF
+                SET countMap_lat[pr] TO countMap_lat[pr] + 1
+            END WHILE
+        END FOR
+        RETURN [countMap_lat, (t == 1)]
+    END FUNCTION
+
+    FUNCTION _getFactorCount(count)
+        SET valTwo TO count[2] OR 0
+        SET valThree TO count[3] OR 0
+        SET valFive TO count[5] OR 0
+        SET valSeven TO count[7] OR 0
+
+        SET q8 TO valTwo DIV 3
+        SET rem2 TO valTwo MOD 3
+
+        SET q9 TO valThree DIV 2
+        SET rem3 TO valThree MOD 2
+
+        SET q4 TO rem2 DIV 2
+        SET rem4 TO rem2 MOD 2
+
+        SET cnt2 TO rem4
+        SET cnt3 TO rem3
+        SET cnt6 TO 0
+
+        IF cnt2 == 1 AND cnt3 == 1
+            SET cnt2 TO 0
+            SET cnt3 TO 0
+            SET cnt6 TO 1
+        END IF
+
+        IF cnt3 == 1 AND q4 == 1
+            SET cnt2 TO 1
+            SET cnt6 TO 1
+            SET cnt3 TO 0
+            SET q4 TO 0
+        END IF
+
+        SET resultCount_sko TO NEW Counter()
+        SET resultCount_sko["2"] TO cnt2
+        SET resultCount_sko["3"] TO cnt3
+        SET resultCount_sko["4"] TO q4
+        SET resultCount_sko["5"] TO valFive
+        SET resultCount_sko["6"] TO cnt6
+        SET resultCount_sko["7"] TO valSeven
+        SET resultCount_sko["8"] TO q8
+        SET resultCount_sko["9"] TO q9
+
+        RETURN resultCount_sko
+    END FUNCTION
+END CLASS

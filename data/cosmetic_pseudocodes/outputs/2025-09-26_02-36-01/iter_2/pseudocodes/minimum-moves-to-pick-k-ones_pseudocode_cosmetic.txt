@@ -1,0 +1,77 @@
+CLASS Solution  
+    FUNCTION minimumMoves(nums LIST OF INTEGERS, k INTEGER, maxChanges INTEGER) RETURNS INTEGER  
+        DECLARE onesIndices AS EMPTY LIST  
+        DECLARE iterator AS INTEGER <- 0  
+        WHILE iterator < LENGTH(nums)  
+            IF nums[iterator] = 1 THEN  
+                APPEND onesIndices, iterator  
+            END IF  
+            SET iterator <- iterator + 1  
+        END WHILE  
+
+        IF LENGTH(onesIndices) = 0 THEN  
+            RETURN k * 2  
+        END IF  
+
+        DECLARE totalOnes AS INTEGER <- LENGTH(onesIndices)  
+        DECLARE prefix AS LIST OF INTEGER WITH (totalOnes + 1) ZEROS  
+
+        DECLARE idx AS INTEGER <- 0  
+        WHILE idx < totalOnes  
+            prefix[idx + 1] <- prefix[idx] + onesIndices[idx]  
+            SET idx <- idx + 1  
+        END WHILE  
+
+        FUNCTION cost(start INTEGER, finish INTEGER) RETURNS INTEGER  
+            DECLARE midpoint AS INTEGER <- (start + finish) DIV 2  
+            DECLARE medianValue AS INTEGER <- onesIndices[midpoint]  
+            DECLARE accruedCost AS INTEGER <- 0  
+
+            DECLARE leftPos AS INTEGER <- start  
+            WHILE leftPos < midpoint  
+                SET accruedCost <- accruedCost + (medianValue - onesIndices[leftPos]) - (midpoint - leftPos)  
+                SET leftPos <- leftPos + 1  
+            END WHILE  
+
+            DECLARE rightPos AS INTEGER <- midpoint + 1  
+            WHILE rightPos <= finish  
+                SET accruedCost <- accruedCost + (onesIndices[rightPos] - medianValue) - (rightPos - midpoint)  
+                SET rightPos <- rightPos + 1  
+            END WHILE  
+
+            RETURN accruedCost  
+        END FUNCTION  
+
+        DECLARE minimumMoves AS INFINITY  
+
+        DECLARE startPos AS INTEGER <- 0  
+        WHILE startPos <= totalOnes - k  
+            DECLARE endPos AS INTEGER <- startPos + k - 1  
+            DECLARE segmentCost AS INTEGER <- cost(startPos, endPos)  
+
+            IF k MOD 2 = 1 THEN  
+                DECLARE midIndex AS INTEGER <- (startPos + endPos) DIV 2  
+                DECLARE medianVal AS INTEGER <- onesIndices[midIndex]  
+                DECLARE requiredChanges AS INTEGER <- endPos - midIndex - (medianVal - onesIndices[midIndex] - 1)  
+            ELSE  
+                DECLARE leftMid AS INTEGER <- (startPos + endPos) DIV 2  
+                DECLARE rightMid AS INTEGER <- leftMid + 1  
+                DECLARE leftMedian AS INTEGER <- onesIndices[leftMid]  
+                DECLARE rightMedian AS INTEGER <- onesIndices[rightMid]  
+                DECLARE requiredChanges AS INTEGER <- rightMid - leftMid - 1 - (rightMedian - leftMedian - 1)  
+            END IF  
+
+            IF requiredChanges > maxChanges THEN  
+                SET segmentCost <- segmentCost + (requiredChanges - maxChanges)  
+            END IF  
+
+            IF segmentCost < minimumMoves THEN  
+                SET minimumMoves <- segmentCost  
+            END IF  
+
+            SET startPos <- startPos + 1  
+        END WHILE  
+
+        RETURN minimumMoves  
+    END FUNCTION  
+END CLASS

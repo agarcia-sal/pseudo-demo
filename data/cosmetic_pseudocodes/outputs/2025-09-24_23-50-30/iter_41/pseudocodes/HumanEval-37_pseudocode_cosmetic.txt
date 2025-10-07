@@ -1,0 +1,32 @@
+``` 
+FUNCTION sort_even(preserved_parameter)
+    SET temp_storage_a TO EMPTY LIST
+    SET temp_storage_b TO EMPTY LIST
+    SET idx TO 0
+
+    WHILE idx < LENGTH(preserved_parameter)
+        IF idx MOD 2 = 0 THEN
+            APPEND preserved_parameter[idx] TO temp_storage_a
+        ELSE
+            APPEND preserved_parameter[idx] TO temp_storage_b
+        END IF
+        SET idx TO idx + 1
+    END WHILE
+
+    CALL sort(temp_storage_a)
+
+    FUNCTION interleave_rec(a_list, b_list, acc)
+        IF LENGTH(a_list) = 0 AND LENGTH(b_list) = 0 THEN
+            RETURN acc
+        ELSE IF LENGTH(a_list) > 0 AND LENGTH(b_list) > 0 THEN
+            RETURN interleave_rec(SUBLIST(a_list, 1, LENGTH(a_list)), SUBLIST(b_list, 1, LENGTH(b_list)), CONCATENATE(acc, [a_list[0], b_list[0]]))
+        ELSE IF LENGTH(a_list) > 0 THEN
+            RETURN interleave_rec(SUBLIST(a_list, 1, LENGTH(a_list)), b_list, CONCATENATE(acc, [a_list[0]]))
+        ELSE
+            RETURN interleave_rec(a_list, SUBLIST(b_list, 1, LENGTH(b_list)), CONCATENATE(acc, [b_list[0]]))
+        END IF
+    END FUNCTION
+
+    RETURN interleave_rec(temp_storage_a, temp_storage_b, EMPTY LIST)
+END FUNCTION
+```

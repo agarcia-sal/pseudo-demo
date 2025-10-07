@@ -1,0 +1,168 @@
+```pseudocode
+CLASS Solution
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+        SET MOD TO (5 TIMES 2 TIMES 10 RAISED TO 8) PLUS 1
+
+        FUNCTION buildZeroMatrix(rows parameter rows IS integer cols parameter cols IS integer) RETURNS list of lists of integers
+            FUNCTION buildZeroRow(size parameter size IS integer) RETURNS list of integers
+                IF size EQUALS 0 THEN
+                    RETURN empty list
+                ELSE
+                    RETURN 0 CONCATENATED WITH buildZeroRow(size MINUS 1)
+                END IF
+            END FUNCTION
+            IF rows EQUALS 0 THEN
+                RETURN empty list
+            ELSE
+                RETURN buildZeroRow(cols) CONCATENATED WITH buildZeroMatrix(rows MINUS 1, cols)
+            END IF
+        END FUNCTION
+
+        SET cxcqw TO buildZeroMatrix(26, 26)
+
+        FUNCTION loopJ(mexfvw parameter mexfvw IS integer iwjq parameter iwjq IS integer)
+            IF iwjq GREATER OR EQUAL TO mexfvw THEN
+                RETURN
+            ELSE
+                SET mwtoi TO ((iwjq PLUS iwjq PLUS 1 PLUS iwjq) PLUS iwjq PLUS iwjq PLUS iwjq) // 6   # rewritten i + j + 1 modulo 26
+                SET mwtoi TO (mwtoi MOD 26)
+                SET cxcqw element at position iwjq AND position mwtoi TO cxcqw element at position iwjq AND position mwtoi PLUS 1
+                CALL loopJ(mexfvw, iwjq PLUS 1)
+            END IF
+        END FUNCTION
+
+        FUNCTION loopI(mofubi parameter mofubi IS integer)
+            IF mofubi GREATER OR EQUAL TO 26 THEN
+                RETURN
+            ELSE
+                CALL loopJ(nums element at position mofubi, mofubi)
+                CALL loopI(mofubi PLUS 1)
+            END IF
+        END FUNCTION
+
+        CALL loopI(0)
+
+        FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+            SET rrrmt TO buildZeroMatrix(26, 26)
+            FUNCTION loopK(ii parameter ii IS integer jj parameter jj IS integer kk parameter kk IS integer accumulated parameter accumulated IS integer)
+                IF kk EQUALS 26 THEN
+                    RETURN accumulated
+                ELSE
+                    SET newAccum TO (accumulated PLUS (A element at position ii AND position kk TIMES B element at position kk AND position jj)) MOD MOD
+                    RETURN loopK(ii, jj, kk PLUS 1, newAccum)
+                END IF
+            END FUNCTION
+
+            FUNCTION loopJ(ii parameter ii IS integer jj parameter jj IS integer)
+                IF jj EQUALS 26 THEN
+                    RETURN
+                ELSE
+                    SET sumValue TO loopK(ii, jj, 0, 0)
+                    SET rrrmt element at position ii AND position jj TO sumValue
+                    CALL loopJ(ii, jj PLUS 1)
+                END IF
+            END FUNCTION
+
+            FUNCTION loopI(ii parameter ii IS integer)
+                IF ii EQUALS 26 THEN
+                    RETURN
+                ELSE
+                    CALL loopJ(ii, 0)
+                    CALL loopI(ii PLUS 1)
+                END IF
+            END FUNCTION
+
+            CALL loopI(0)
+            RETURN rrrmt
+        END FUNCTION
+
+        FUNCTION identity_matrix(size parameter size IS integer) RETURNS list of lists of integers
+            FUNCTION buildRow(i parameter i IS integer j parameter j IS integer)
+                IF j EQUALS size THEN
+                    RETURN empty list
+                ELSE
+                    IF i EQUALS j THEN
+                        RETURN 1 CONCATENATED WITH buildRow(i, j PLUS 1)
+                    ELSE
+                        RETURN 0 CONCATENATED WITH buildRow(i, j PLUS 1)
+                    END IF
+                END IF
+            END FUNCTION
+
+            FUNCTION buildMatrix(i parameter i IS integer)
+                IF i EQUALS size THEN
+                    RETURN empty list
+                ELSE
+                    RETURN buildRow(i, 0) CONCATENATED WITH buildMatrix(i PLUS 1)
+                END IF
+            END FUNCTION
+
+            RETURN buildMatrix(0)
+        END FUNCTION
+
+        FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+            SET resMatrix TO identity_matrix(26)
+            SET baseMatrix TO matrix
+
+            FUNCTION loopPower(p parameter p IS integer res parameter res IS list of lists of integers base parameter base IS list of lists of integers)
+                IF p EQUALS 0 THEN
+                    RETURN res
+                ELSE
+                    IF (p MOD 2) NOT EQUAL TO 1 THEN
+                        SET newBase TO matrix_multiply(base, base)
+                        RETURN loopPower(p DIV 2, res, newBase)
+                    ELSE
+                        SET newRes TO matrix_multiply(res, base)
+                        SET newBase TO matrix_multiply(base, base)
+                        RETURN loopPower(p DIV 2, newRes, newBase)
+                    END IF
+                END IF
+            END FUNCTION
+
+            RETURN loopPower(power, resMatrix, baseMatrix)
+        END FUNCTION
+
+        SET gkosjf TO matrix_power(cxcqw, t)
+
+        SET countList TO list of 26 zeros
+        FUNCTION count_characters(idx parameter idx IS integer)
+            IF idx EQUALS LENGTH OF s THEN
+                RETURN
+            ELSE
+                SET charValue TO ASCII OF s element at position idx MINUS ASCII OF 'a'
+                SET countList element at position charValue TO countList element at position charValue PLUS 1
+                CALL count_characters(idx PLUS 1)
+            END IF
+        END FUNCTION
+
+        CALL count_characters(0)
+
+        SET finalCount TO list of 26 zeros
+        FUNCTION fillFinalCount(ii parameter ii IS integer jj parameter jj IS integer)
+            IF ii EQUALS 26 THEN
+                RETURN
+            ELSE
+                IF jj EQUALS 26 THEN
+                    CALL fillFinalCount(ii PLUS 1, 0)
+                ELSE
+                    SET prod TO (countList element at position ii TIMES gkosjf element at position ii AND position jj) MOD MOD
+                    SET finalCount element at position jj TO (finalCount element at position jj PLUS prod) MOD MOD
+                    CALL fillFinalCount(ii, jj PLUS 1)
+                END IF
+            END IF
+        END FUNCTION
+
+        CALL fillFinalCount(0, 0)
+
+        FUNCTION sumFinal(idx parameter idx IS integer acc parameter acc IS integer)
+            IF idx EQUALS 26 THEN
+                RETURN acc MOD MOD
+            ELSE
+                RETURN sumFinal(idx PLUS 1, (acc PLUS finalCount element at position idx) MOD MOD)
+            END IF
+        END FUNCTION
+
+        RETURN sumFinal(0, 0)
+    END FUNCTION
+END CLASS
+```

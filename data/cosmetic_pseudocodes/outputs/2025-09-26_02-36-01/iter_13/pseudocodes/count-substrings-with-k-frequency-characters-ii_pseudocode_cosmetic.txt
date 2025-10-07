@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION numberOfSubstrings(s parameter, k parameter)
+        DEFINE FUNCTION contains_char_meeting_threshold(dictParam, thresholdParam)
+            SET iteratorVar TO 0
+            REPEAT
+                IF iteratorVar >= dict_length(dictParam) THEN
+                    RETURN false
+                END IF
+                SET keyVar TO dict_key_at(dictParam, iteratorVar)
+                IF dict_value_at(dictParam, keyVar) >= thresholdParam THEN
+                    RETURN true
+                END IF
+                SET iteratorVar TO iteratorVar + 1
+            UNTIL false
+        END FUNCTION
+
+        SET accumulatorVar TO 0
+        SET mapVar TO empty_mapping()
+        SET lowerBound TO 0
+        SET upperBound TO 0
+
+        DEFINE FUNCTION increment_dict_entry(mappingParam, keyParam)
+            IF keyParam IN mappingParam THEN
+                SET mappingParam[keyParam] TO mappingParam[keyParam] + 1
+            ELSE
+                SET mappingParam[keyParam] TO 1
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION decrement_dict_entry(mappingParam, keyParam)
+            IF keyParam IN mappingParam THEN
+                SET mappingParam[keyParam] TO mappingParam[keyParam] - 1
+                IF mappingParam[keyParam] == 0 THEN
+                    REMOVE keyParam FROM mappingParam
+                END IF
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION recursive_loop(highIndexParam)
+            IF highIndexParam == length_of(s) THEN
+                RETURN
+            END IF
+
+            SET currentChar TO s[highIndexParam]
+            CALL increment_dict_entry(mapVar, currentChar)
+
+            WHILE contains_char_meeting_threshold(mapVar, k) DO
+                SET leftChar TO s[lowerBound]
+                CALL decrement_dict_entry(mapVar, leftChar)
+                SET lowerBound TO lowerBound + 1
+            END WHILE
+
+            SET accumulatorVar TO accumulatorVar + lowerBound
+
+            CALL recursive_loop(highIndexParam + 1)
+        END FUNCTION
+
+        CALL recursive_loop(0)
+        RETURN accumulatorVar
+    END FUNCTION
+END CLASS

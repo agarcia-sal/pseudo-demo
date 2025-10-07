@@ -1,0 +1,76 @@
+CLASS Solution  
+    FUNCTION minimumCost(target, words, costs)  
+        SET mapping TO empty dictionary  
+        SET idx TO 0  
+        WHILE idx LESS THAN length of words  
+            SET current_word TO words at idx  
+            SET current_cost TO costs at idx  
+            IF NOT (current_word IN mapping) THEN  
+                mapping[current_word] = current_cost  
+            ELSE  
+                IF current_cost LESS THAN mapping[current_word] THEN  
+                    mapping[current_word] = current_cost  
+                END IF  
+            END IF  
+            SET idx TO idx + 1  
+        END WHILE  
+
+        SET letters TO a new list  
+        SET pos TO 0  
+        WHILE pos LESS THAN length of target  
+            APPEND character at position pos in target TO letters  
+            SET pos TO pos + 1  
+        END WHILE  
+
+        FUNCTION min_cost_to_form_target(position)  
+            IF position EQUALS length of letters THEN  
+                RETURN 0  
+            ELSE  
+                SET best_cost TO positive infinity  
+                SET pairs TO list of entries from mapping  
+                SET i TO 0  
+
+                WHILE i LESS THAN length of pairs  
+                    SET candidate_word TO first element of pairs at i  
+                    SET candidate_cost TO second element of pairs at i  
+                    SET word_len TO length of candidate_word  
+
+                    IF position + word_len LESS THAN OR EQUAL TO length of letters THEN  
+                        SET matched TO TRUE  
+                        SET j TO 0  
+                        WHILE j LESS THAN word_len AND matched  
+                            IF letters at position + j NOT EQUAL candidate_word character at j THEN  
+                                SET matched TO FALSE  
+                            END IF  
+                            SET j TO j + 1  
+                        END WHILE  
+
+                        IF matched THEN  
+                            SET sub_cost TO min_cost_to_form_target(position + word_len)  
+                            IF sub_cost NOT EQUAL positive infinity THEN  
+                                SET combined_cost TO candidate_cost + sub_cost  
+                                IF combined_cost LESS THAN best_cost THEN  
+                                    SET best_cost TO combined_cost  
+                                END IF  
+                            END IF  
+                        END IF  
+                    END IF  
+                    SET i TO i + 1  
+                END WHILE  
+
+                IF best_cost NOT EQUAL positive infinity THEN  
+                    RETURN best_cost  
+                ELSE  
+                    RETURN positive infinity  
+                END IF  
+            END IF  
+        END FUNCTION  
+
+        SET answer TO min_cost_to_form_target(0)  
+        IF answer NOT EQUAL positive infinity THEN  
+            RETURN answer  
+        ELSE  
+            RETURN -1  
+        END IF  
+    END FUNCTION  
+END CLASS

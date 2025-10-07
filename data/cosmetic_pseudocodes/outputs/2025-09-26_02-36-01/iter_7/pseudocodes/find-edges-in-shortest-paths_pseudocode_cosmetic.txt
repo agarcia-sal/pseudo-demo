@@ -1,0 +1,67 @@
+CLASS Solution
+	Function findAnswer(n, edges)
+		Declare adjacency := empty map with default empty list
+		Define INF := (1 << 30) * 32
+		
+		Procedure insert_edge(x, y, z)
+			Set adjacency[x] := adjacency[x] + [(y, z)]
+			Set adjacency[y] := adjacency[y] + [(x, z)]
+		EndProcedure
+
+		For idx from 0 to n(elements in edges) - 1 Step 1
+			Let p, q, r be edges[idx]
+			insert_edge(p, q, r)
+		EndFor
+		
+		Declare cost_list as list of length n with all elements := INF
+		Set cost_list[0] := 0
+		Declare priority_queue as list with single element (0, 0)
+		
+		Function pop_minimum(queue)
+			Sort queue by first element ascending
+			Let smallest := queue[0]
+			Remove element at index 0 from queue
+			Return smallest
+		EndFunction
+		
+		While (length(priority_queue) > 0)
+			Let current_distance, source_node := pop_minimum(priority_queue)
+			If (current_distance > cost_list[source_node]) Then
+				Continue While
+			EndIf
+			For each (neighbor, weight) in adjacency[source_node]
+				Let new_distance := current_distance + weight
+				If (new_distance < cost_list[neighbor]) Then
+					Set cost_list[neighbor] := new_distance
+					Set priority_queue := priority_queue + [(new_distance, neighbor)]
+				EndIf
+			EndFor
+		EndWhile
+		
+		Declare shortest_edges_set as empty set
+		Declare path_stack as list with one element (n - (1 + 0), cost_list[n - 1])
+		Declare seen_flags as list length n filled with False
+		
+		Repeat until (length(path_stack) = 0)
+			Let node, node_dist := Remove last element from path_stack
+			If seen_flags[node] = True Then
+				Continue Repeat
+			EndIf
+			Set seen_flags[node] := True
+			For each (adj_node, adj_weight) in adjacency[node]
+				If node_dist = cost_list[adj_node] + adj_weight Then
+					Add ((node < adj_node) ? node : adj_node, (node > adj_node) ? node : adj_node) to shortest_edges_set
+					Append (adj_node, cost_list[adj_node]) to path_stack
+				EndIf
+			EndFor
+		EndRepeat
+		
+		Declare result_list as empty list
+		For each triple (u_, v_, _) in edges
+			Let key := ((u_ < v_) ? u_ : v_, (u_ > v_) ? u_ : v_)
+			Append key in shortest_edges_set to result_list
+		EndFor
+		
+		Return result_list
+	EndFunction
+ENDCLASS

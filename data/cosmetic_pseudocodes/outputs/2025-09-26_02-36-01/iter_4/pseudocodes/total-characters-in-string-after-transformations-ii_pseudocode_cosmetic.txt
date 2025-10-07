@@ -1,0 +1,85 @@
+CLASS Solution  
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer  
+        DECLARE MODULUS AS (10 POWER 9) PLUS 1  
+
+        DECLARE transition_grid AS 26 BY 26 matrix filled with zero values  
+        INITIALIZE outer_index TO 0  
+        WHILE outer_index LESS THAN 26  
+            DECLARE inner_limit AS nums AT outer_index  
+            INITIALIZE inner_index TO 0  
+            WHILE inner_index LESS THAN inner_limit  
+                DECLARE target_pos AS (outer_index PLUS inner_index PLUS 1) MOD 26  
+                INCREMENT transition_grid AT [outer_index][target_pos] BY 1  
+                INCREMENT inner_index BY 1  
+            END WHILE  
+            INCREMENT outer_index BY 1  
+        END WHILE  
+
+        FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers  
+            DECLARE product_matrix AS 26 BY 26 matrix of zeroes  
+            SET row_index TO 0  
+            WHILE row_index LESS THAN 26  
+                DECLARE col_index TO 0  
+                WHILE col_index LESS THAN 26  
+                    DECLARE sum_accumulator TO 0  
+                    DECLARE k_index TO 0  
+                    WHILE k_index LESS THAN 26  
+                        DECLARE partial_mul AS A AT [row_index][k_index] TIMES B AT [k_index][col_index]  
+                        SET sum_accumulator TO sum_accumulator PLUS partial_mul  
+                        INCREMENT k_index BY 1  
+                    END WHILE  
+                    SET product_matrix AT [row_index][col_index] TO sum_accumulator MOD MODULUS  
+                    INCREMENT col_index BY 1  
+                END WHILE  
+                INCREMENT row_index BY 1  
+            END WHILE  
+            RETURN product_matrix  
+        END FUNCTION  
+
+        FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers  
+            DECLARE identity_matrix AS 26 BY 26 matrix WHERE element AT [x][y] IS 1 IF x EQUALS y OTHERWISE 0  
+            DECLARE exponent_base AS matrix  
+            DECLARE exponent_counter AS power  
+
+            WHILE exponent_counter GREATER THAN 0  
+                IF (exponent_counter MOD 2) NOT EQUAL TO 0  
+                    SET identity_matrix TO matrix_multiply(identity_matrix, exponent_base)  
+                END IF  
+                SET exponent_base TO matrix_multiply(exponent_base, exponent_base)  
+                SET exponent_counter TO exponent_counter DIVIDED BY 2 USING INTEGER DIVISION  
+            END WHILE  
+
+            RETURN identity_matrix  
+        END FUNCTION  
+
+        SET powered_matrix TO matrix_power(trans_matrix=transition_grid, power=t)  
+
+        DECLARE letter_freq AS list of 26 zeros  
+        DECLARE char_pos AS 0  
+        FOR EACH character IN s  
+            SET char_pos TO ASCII value OF character MINUS ASCII value OF 'a'  
+            INCREMENT letter_freq AT char_pos BY 1  
+        END FOR EACH  
+
+        DECLARE transformed_freq AS list of 26 zeros  
+        SET idx_outer TO 0  
+        WHILE idx_outer LESS THAN 26  
+            SET idx_inner TO 0  
+            WHILE idx_inner LESS THAN 26  
+                SET addition_val TO letter_freq AT idx_outer TIMES powered_matrix AT [idx_outer][idx_inner]  
+                SET transformed_freq AT idx_inner TO (transformed_freq AT idx_inner PLUS addition_val) MOD MODULUS  
+                INCREMENT idx_inner BY 1  
+            END WHILE  
+            INCREMENT idx_outer BY 1  
+        END WHILE  
+
+        DECLARE total_sum TO 0  
+        SET sum_index TO 0  
+        WHILE sum_index LESS THAN 26  
+            SET total_sum TO (total_sum PLUS transformed_freq AT sum_index) MOD MODULUS  
+            INCREMENT sum_index BY 1  
+        END WHILE  
+
+        RETURN total_sum  
+    END FUNCTION  
+END CLASS

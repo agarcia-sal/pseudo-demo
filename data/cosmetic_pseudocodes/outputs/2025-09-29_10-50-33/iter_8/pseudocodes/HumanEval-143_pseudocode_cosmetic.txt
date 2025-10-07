@@ -1,0 +1,24 @@
+FUNCTION words_in_sentence(sentence)
+  DEFINE collect_filtered(accumulator, tokens, index)
+    IF index >= LENGTH(tokens)
+      EXECUTE RETURN STRING_JOIN(accumulator, " ")
+    ELSE
+      LET candidate_word BE tokens[index]
+      LET marker BE false
+      EXECUTE WHEN (LENGTH(candidate_word) == 1)
+        marker <- true
+      DEFINE divisor_checker(divisor)
+        IF divisor >= LENGTH(candidate_word)
+          EXECUTE RETURN false
+        ELSEIF (LENGTH(candidate_word) MOD divisor) == 0
+          EXECUTE RETURN true
+        ELSE
+          EXECUTE RETURN divisor_checker(divisor + 1)
+      IF divisor_checker(2) THEN marker <- true
+      IF marker == false OR LENGTH(candidate_word) == 2
+        EXECUTE collect_filtered(accumulator + [candidate_word], tokens, index + 1)
+      ELSE
+        EXECUTE collect_filtered(accumulator, tokens, index + 1)
+  LET splitted_words <- sentence SPLIT BY " "
+  EXECUTE collect_filtered([], splitted_words, 0)
+END FUNCTION

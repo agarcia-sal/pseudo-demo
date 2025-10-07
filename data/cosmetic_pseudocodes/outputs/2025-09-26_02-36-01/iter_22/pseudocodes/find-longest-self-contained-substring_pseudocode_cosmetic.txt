@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION maxSubstringLength(s)
+        SET result TO -1
+        SET totalFreq TO a new empty map
+        FOR pos FROM 0 TO LENGTH(s) - 1
+            SET ch TO s[pos]
+            SET tempVal TO 0
+            IF ch IN totalFreq THEN
+                SET tempVal TO totalFreq[ch]
+            END IF
+            SET totalFreq[ch] TO tempVal + 1
+        END FOR
+
+        SET startPos TO 0
+        WHILE startPos <= LENGTH(s) - 1
+            SET freqMap TO {}
+            SET endPos TO startPos
+            REPEAT
+                SET currentChar TO s[endPos]
+                IF currentChar IN freqMap THEN
+                    SET freqMap[currentChar] TO freqMap[currentChar] + 1
+                ELSE
+                    SET freqMap[currentChar] TO 1
+                END IF
+
+                SET validSegment TO TRUE
+                FOR keyChar IN freqMap KEYS
+                    IF freqMap[keyChar] < totalFreq[keyChar] THEN
+                        SET validSegment TO FALSE
+                        BREAK
+                    END IF
+                END FOR
+
+                IF validSegment == TRUE THEN
+                    IF (COUNT_KEYS(freqMap) < COUNT_KEYS(totalFreq)) THEN
+                        SET candidateLen TO endPos - startPos + 1
+                        IF candidateLen > result THEN
+                            SET result TO candidateLen
+                        END IF
+                    END IF
+                END IF
+
+                SET endPos TO endPos + 1
+            UNTIL endPos > LENGTH(s) - 1
+            SET startPos TO startPos + 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

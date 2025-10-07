@@ -1,0 +1,55 @@
+FUNCTION check_dict_case(dict_obj)
+    DECLARE status = ""
+    DECLARE encountered_key
+    DECLARE keys_list = dict_obj KEYS
+    DECLARE is_empty = LENGTH(keys_list) = 0
+
+    IF is_empty THEN
+        RETURN False
+    END IF
+
+    status = "start"
+    DECLARE idx = 0
+
+    WHILE idx < LENGTH(keys_list)
+        encountered_key = keys_list.at(idx)
+        
+        IF NOT (encountered_key INSTANCEOF STRING) THEN
+            status = "mixed"
+            BREAK
+        END IF
+        
+        SWITCH status
+            CASE "start":
+                IF encountered_key = encountered_key TO_UPPERCASE THEN
+                    status = "upper"
+                ELSE
+                    IF encountered_key = encountered_key TO_LOWERCASE THEN
+                        status = "lower"
+                    ELSE
+                        BREAK
+                    END IF
+                END IF
+                BREAK
+            CASE "upper":
+                IF encountered_key != encountered_key TO_UPPERCASE THEN
+                    status = "mixed"
+                    BREAK
+                ELSE
+                    BREAK
+                END IF
+            CASE "lower":
+                IF encountered_key != encountered_key TO_LOWERCASE THEN
+                    status = "mixed"
+                    BREAK
+                ELSE
+                    BREAK
+                END IF
+        END SWITCH
+
+        idx = idx + 1
+    END WHILE
+
+    DECLARE result = (status = "upper") OR (status = "lower")
+    RETURN result
+END FUNCTION

@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION maxTotalReward(rewardValues)
+        FUNCTION explore(currentSum)
+            FUNCTION locateInsertion(target)
+                SET low TO 0
+                SET high TO LENGTH(rewardValues)
+                WHILE low < high
+                    SET mid TO (low + high) DIV 2
+                    IF rewardValues[mid] <= target
+                        SET low TO mid + 1
+                    ELSE
+                        SET high TO mid
+                    END IF
+                END WHILE
+                RETURN low
+            END FUNCTION
+
+            SET idx TO locateInsertion(currentSum)
+            SET maximumReward TO 0
+            SET pointer TO idx
+            WHILE pointer < LENGTH(rewardValues)
+                SET candidate TO rewardValues[pointer]
+                IF NOT ( (currentSum + candidate) <= currentSum )
+                    SET recursiveResult TO explore(currentSum + candidate)
+                    IF maximumReward < candidate + recursiveResult
+                        SET maximumReward TO candidate + recursiveResult
+                    END IF
+                END IF
+                SET pointer TO pointer + 1
+            END WHILE
+            RETURN maximumReward
+        END FUNCTION
+
+        SET n TO LENGTH(rewardValues)
+        IF n > 1
+            SET left TO 0
+            SET right TO n - 1
+            WHILE left < right
+                SET temp TO rewardValues[left]
+                SET rewardValues[left] TO rewardValues[right]
+                SET rewardValues[right] TO temp
+                SET left TO left + 1
+                SET right TO right - 1
+            END WHILE
+            SET start TO 0
+            WHILE start < n -1
+                SET minIndex TO start
+                SET j TO start + 1
+                WHILE j < n
+                    IF rewardValues[j] < rewardValues[minIndex]
+                        SET minIndex TO j
+                    END IF
+                    SET j TO j +1
+                END WHILE
+                IF minIndex != start
+                    SET temp2 TO rewardValues[start]
+                    SET rewardValues[start] TO rewardValues[minIndex]
+                    SET rewardValues[minIndex] TO temp2
+                END IF
+                SET start TO start + 1
+            END WHILE
+        END IF
+        RETURN explore(0)
+    END FUNCTION
+END CLASS

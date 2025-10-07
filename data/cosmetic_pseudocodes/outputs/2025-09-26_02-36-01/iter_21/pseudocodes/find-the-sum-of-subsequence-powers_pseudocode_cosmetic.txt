@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER
+        SET a TO 1_000_000_000 PLUS 7
+        SET b TO 0
+        FUNCTION helper_abs(x parameter INTEGER) RETURNS INTEGER
+            IF x LESS THAN 0 THEN
+                RETURN 0 MINUS x
+            ELSE
+                RETURN x
+            END IF
+        END FUNCTION
+        FUNCTION rec_combine(idx parameter INTEGER, start parameter INTEGER, curr parameter LIST OF INTEGERS) RETURNS VOID
+            IF idx GREATER THAN EQUAL TO k THEN
+                SET c TO 1_000_000_000_000
+                FUNCTION inner_loop(m parameter INTEGER, n parameter INTEGER, val parameter INTEGER) RETURNS VOID
+                    IF m GREATER THAN EQUAL TO n THEN
+                        SET b TO b PLUS val
+                        SET b TO b MOD a
+                        RETURN
+                    ELSE
+                        inner_loop(m PLUS 1, n, val)
+                    END IF
+                END FUNCTION
+                FUNCTION min_diff(i parameter INTEGER, j parameter INTEGER, min_val parameter INTEGER) RETURNS INTEGER
+                    IF i GREATER THAN EQUAL TO k MINUS 1 THEN
+                        RETURN min_val
+                    ELSE IF j GREATER THAN EQUAL TO k THEN
+                        RETURN min_diff(i PLUS 1, i PLUS 2, min_val)
+                    ELSE
+                        SET diff TO helper_abs(curr AT i MINUS curr AT j)
+                        IF diff LESS THAN min_val THEN
+                            RETURN min_diff(i, j PLUS 1, diff)
+                        ELSE
+                            RETURN min_diff(i, j PLUS 1, min_val)
+                        END IF
+                    END IF
+                END FUNCTION
+                SET c TO min_diff(0, 1, c)
+                inner_loop(0, 1, c)
+                RETURN
+            ELSE
+                IF start GREATER THAN EQUAL TO LENGTH OF nums THEN
+                    RETURN
+                ELSE
+                    CALL rec_combine(idx, start PLUS 1, curr)
+                    SET curr2 TO LIST COPY OF curr
+                    APPEND nums AT start TO curr2
+                    CALL rec_combine(idx PLUS 1, start PLUS 1, curr2)
+                END IF
+            END IF
+        END FUNCTION
+        CALL rec_combine(0, 0, EMPTY LIST)
+        RETURN b
+    END FUNCTION
+END CLASS

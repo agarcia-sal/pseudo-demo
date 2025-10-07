@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION numberOfSubmatrices(grid)
+      DECLARE rowLimit AS INTEGER = 0
+      DECLARE colLimit AS INTEGER = 0
+      DECLARE prefixMatrix AS ARRAY
+      DECLARE totalCount AS INTEGER = 0
+      DECLARE indexA AS INTEGER = 0
+      DECLARE indexB AS INTEGER = 0
+      DECLARE accX AS INTEGER
+      DECLARE accY AS INTEGER
+      DECLARE tempX AS INTEGER
+      DECLARE tempY AS INTEGER
+      DECLARE posX AS INTEGER
+      DECLARE posY AS INTEGER
+      REPEAT
+          IF (grid EQUALS [] OR grid[0] EQUALS [])
+              RETURN 0
+          END IF
+          EXIT
+      UNTIL FALSE
+
+      rowLimit = LENGTH(grid)
+      colLimit = LENGTH(grid[0])
+      DECLARE helperInit AS FUNCTION() RETURNS INTEGER[]
+        RETURN [0,0]
+      END FUNCTION
+
+      DECLARE zeroRow AS ARRAY = []
+      FOR posX FROM 0 TO (rowLimit + (1 - 0)) - 1 DO
+          DECLARE rowTemp AS ARRAY = []
+          FOR posY FROM 0 TO (colLimit + (1 - 0)) - 1 DO
+              rowTemp[posY] = helperInit()
+          END FOR
+          zeroRow[posX] = rowTemp
+      END FOR
+      prefixMatrix = zeroRow
+
+      indexA = 1
+      WHILE indexA <= rowLimit
+          indexB = 1
+          WHILE indexB <= colLimit
+              tempX = prefixMatrix[indexA][indexB - 1][0] + prefixMatrix[indexA - 1][indexB][0] - prefixMatrix[indexA - 1][indexB - 1][0]
+              tempY = prefixMatrix[indexA][indexB - 1][1] + prefixMatrix[indexA - 1][indexB][1] - prefixMatrix[indexA - 1][indexB - 1][1]
+
+              IF grid[indexA - 1][indexB - 1] EQUALS 'X'
+                  posX = tempX + 1
+                  prefixMatrix[indexA][indexB][0] = posX
+                  prefixMatrix[indexA][indexB][1] = tempY
+              ELSE
+                  IF grid[indexA - 1][indexB - 1] EQUALS 'Y'
+                      posY = tempY + 1
+                      prefixMatrix[indexA][indexB][1] = posY
+                      prefixMatrix[indexA][indexB][0] = tempX
+                  ELSE
+                      prefixMatrix[indexA][indexB][0] = tempX
+                      prefixMatrix[indexA][indexB][1] = tempY
+                  END IF
+              END IF
+
+              indexB = indexB + 1
+          END WHILE
+          indexA = indexA + 1
+      END WHILE
+
+      accX = 1
+      DECLARE partialCounter AS INTEGER = 0
+      WHILE accX <= rowLimit
+          accY = 1
+          WHILE accY <= colLimit
+              tempX = prefixMatrix[accX][accY][0]
+              tempY = prefixMatrix[accX][accY][1]
+              IF (tempX > 0)
+                  IF (tempX = tempY)
+                      totalCount = totalCount + 1
+                  END IF
+              END IF
+              accY = accY + 1
+          END WHILE
+          accX = accX + 1
+      END WHILE
+
+      RETURN totalCount
+    END FUNCTION
+END CLASS

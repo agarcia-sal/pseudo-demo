@@ -1,0 +1,183 @@
+cLass Solution  
+	funcTION smallestNumber(num, t)  
+		DeF gEtDivisibilityAndPrimes(val)  
+			local primeFactors = Counter()  
+			local dividend = val  
+			local primesList = [2,3,5,7]  
+			local idx = 0  
+			WHiLE idx < len(primesList):  
+				p = primesList[idx]  
+				WHiLE dividend % p == 0:  
+					dividend = dividend // p  
+					primeFactors[p] = primeFactors.get(p,0) + 1  
+				idx = idx + 1  
+			return (primeFactors, dividend == 1)  
+		END  
+		DeF mapFactors(cnt)  
+			local twoCntQuo = cnt.get(2,0) // 3  
+			local twoCntRem = cnt.get(2,0) % 3  
+			local thrCntQuo = cnt.get(3,0) // 2  
+			local thrCntRem = cnt.get(3,0) % 2  
+			local fourCnt = twoCntRem // 2  
+			local twoCntadj = twoCntRem % 2  
+			local sixCount  
+			if twoCntadj == 1 and thrCntRem == 1 then  
+				twoCntadj = 0  
+				thrCntRem = 0  
+				sixCount = 1  
+			else  
+				sixCount = 0  
+			end  
+			if thrCntRem == 1 and fourCnt == 1 then  
+				twoCntadj = 1  
+				sixCount = 1  
+				thrCntRem = 0  
+				fourCnt = 0  
+			end  
+			return Counter({  
+				"2":twoCntadj,  
+				"3":thrCntRem,  
+				"4":fourCnt,  
+				"5":cnt.get(5,0),  
+				"6":sixCount,  
+				"7":cnt.get(7,0),  
+				"8":twoCntQuo,  
+				"9":thrCntQuo  
+			})  
+		END  
+		DeF expandCounterToString(counterMap)  
+			local resultStr = ""  
+			for key in sorted(counterMap.keys()):  
+				local freq = counterMap.get(key,0)  
+				local i = 0  
+				while i < freq:  
+					resultStr = resultStr + key  
+					i = i + 1  
+				end  
+			end  
+			return resultStr  
+		END  
+	local varsInit = getPrimeCountAndDivisible := gEtDivisibilityAndPrimes(t)  
+	local primeCounter = varsInit[0]  
+	local isDivisibleFlag = varsInit[1]  
+	if not isDivisibleFlag then  
+		return "-1"  
+	end  
+	local factorialCounter = mapFactors(primeCounter)  
+	local totalFactorsCount = sum(factorialCounter.values())  
+	if totalFactorsCount > len(num) then  
+		return expandCounterToString(factorialCounter)  
+	end  
+	local accPrimeCounter = Counter()  
+	local function sumFactorCounts(v)  
+		return sum(mapFactors(v).values())  
+	end  
+	for idx = 0; idx < len(num); idx = idx + 1 do  
+		local charIntVal = int(num[idx])  
+		accPrimeCounter = accPrimeCounter + mapFactors(Counter({charIntVal:1}))  
+	end  
+	local firstZeroPos = len(num)  
+	local pos = 0  
+	while pos < len(num) and firstZeroPos == len(num):  
+		if num[pos] == "0" then  
+			firstZeroPos = pos  
+		end  
+		pos = pos + 1  
+	end  
+	if firstZeroPos == len(num) and sumFactorCounts(primeCounter) <= sum(accPrimeCounter.values()) then  
+		return num  
+	end  
+	local function subtractCounters(c1, c2)  
+		local res = Counter(c1)  
+		for k in c2.keys():  
+			res[k] = res.get(k,0) - c2[k]  
+		end  
+		return res  
+	end  
+	local sumAccPrimes = sum(accPrimeCounter.values())  
+	for revIdx = 0; revIdx < len(num); revIdx = revIdx + 1 do  
+		local actualIndex = len(num) - 1 - revIdx  
+		local currentDigit = int(num[actualIndex])  
+		accPrimeCounter = subtractCounters(accPrimeCounter, mapFactors(Counter({currentDigit:1})))  
+		local spaceAfterDigit = len(num) - 1 - actualIndex  
+		if actualIndex <= firstZeroPos then  
+			local candidateDigit = currentDigit + 1  
+			while candidateDigit <= 9 do  
+				local diffPrimeCount = subtractCounters(subtractCounters(primeCounter, accPrimeCounter), mapFactors(Counter({candidateDigit:1})))  
+				local sumAfterReplacement = sum(diffPrimeCount.values())  
+				if sumAfterReplacement <= spaceAfterDigit then  
+					local fillOnesCount = spaceAfterDigit - sumAfterReplacement  
+					local beforeStr = num[0:actualIndex]  
+					local onesStr = ""  
+					local c = 0  
+					while c < fillOnesCount do  
+						onesStr = onesStr + "1"  
+						c = c + 1  
+					end  
+					local tailStr = expandCounterToString(diffPrimeCount)  
+					return beforeStr + str(candidateDigit) + onesStr + tailStr  
+				end  
+				candidateDigit = candidateDigit + 1  
+			end  
+		end  
+	end  
+	factorialCounter = mapFactors(primeCounter)  
+	local lengthOnes = len(num) + 1 - sum(factorialCounter.values())  
+	local onesFinal = ""  
+	local idxc = 0  
+	while idxc < lengthOnes do  
+		onesFinal = onesFinal + "1"  
+		idxc = idxc + 1  
+	end  
+	return onesFinal + expandCounterToString(factorialCounter)  
+	end  
+	
+	funcTION _getPrimeCount(t)  
+		local countPrime = Counter()  
+		local primeSet = [2,3,5,7]  
+		local iterIndex = 0  
+		while iterIndex < len(primeSet):  
+			local p = primeSet[iterIndex]  
+			while t % p == 0:  
+				t = t // p  
+				countPrime[p] = countPrime.get(p,0) + 1  
+			end  
+			iterIndex = iterIndex + 1  
+		end  
+		return countPrime, (t == 1)  
+	end  
+	
+	funcTION _getFactorCount(count)  
+		local divMod2_3 = divmod(count.get(2,0), 3)  
+		local divMod3_2 = divmod(count.get(3,0), 2)  
+		local count8 = divMod2_3[0]  
+		local rem2 = divMod2_3[1]  
+		local count9 = divMod3_2[0]  
+		local count3 = divMod3_2[1]  
+		local divModRem2_2 = divmod(rem2, 2)  
+		local count4 = divModRem2_2[0]  
+		local count2 = divModRem2_2[1]  
+		local count6 = 0  
+		if count2 == 1 and count3 == 1:  
+			count2 = 0  
+			count3 = 0  
+			count6 = 1  
+		end  
+		if count3 == 1 and count4 == 1:  
+			count2 = 1  
+			count6 = 1  
+			count3 = 0  
+			count4 = 0  
+		end  
+		return Counter({  
+			"2": count2,  
+			"3": count3,  
+			"4": count4,  
+			"5": count.get(5, 0),  
+			"6": count6,  
+			"7": count.get(7, 0),  
+			"8": count8,  
+			"9": count9  
+		})  
+	end  
+End cLass

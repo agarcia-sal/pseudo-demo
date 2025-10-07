@@ -1,0 +1,74 @@
+CLASS Solution
+	FUNCTION maximumScore(grid)
+		SET delta TO 0
+		SET lengthVar TO LENGTH OF grid
+		SET accumulated TO A 2D ARRAY OF DIMENSIONS lengthVar BY (lengthVar + 1) EACH FILLED WITH zero
+		SET isPriorSelect TO AN ARRAY OF lengthVar + 1 FILLED WITH zero
+		SET isPriorReject TO AN ARRAY OF lengthVar + 1 FILLED WITH zero
+
+		SET colIndex1 TO 0
+		WHILE colIndex1 < lengthVar
+			SET rowIndex1 TO 0
+			WHILE rowIndex1 < lengthVar
+				SET accumulated[colIndex1][rowIndex1 + 1] TO accumulated[colIndex1][rowIndex1] + grid[rowIndex1][colIndex1]
+				SET rowIndex1 TO rowIndex1 + 1
+			END WHILE
+			SET colIndex1 TO colIndex1 + 1
+		END WHILE
+
+		SET k TO 1
+		REPEAT UNTIL k == lengthVar
+			SET isCurrentSelect TO AN ARRAY lengthVar + 1 FILLED WITH zero
+			SET isCurrentReject TO AN ARRAY lengthVar + 1 FILLED WITH zero
+
+			SET xVal TO 0
+			REPEAT WHILE xVal <= lengthVar
+				SET yVal TO 0
+				REPEAT WHILE yVal <= lengthVar
+					IF xVal > yVal THEN
+						SET segmentSum TO accumulated[k - 1][xVal] - accumulated[k - 1][yVal]
+						SET elem1 TO isCurrentSelect[xVal]
+						SET elem2 TO isPriorReject[yVal] + segmentSum
+						IF elem1 < elem2 THEN
+							SET isCurrentSelect[xVal] TO elem2
+						END IF
+						SET elem3 TO isCurrentReject[xVal]
+						SET elem4 TO isPriorReject[yVal] + segmentSum
+						IF elem3 < elem4 THEN
+							SET isCurrentReject[xVal] TO elem4
+						END IF
+					ELSE
+						SET segmentSum TO accumulated[k][yVal] - accumulated[k][xVal]
+						SET tmp1 TO isCurrentSelect[xVal]
+						SET tmp2 TO isPriorSelect[yVal] + segmentSum
+						IF tmp1 < tmp2 THEN
+							SET isCurrentSelect[xVal] TO tmp2
+						END IF
+						SET tmp3 TO isCurrentReject[xVal]
+						SET tmp4 TO isPriorSelect[yVal]
+						IF tmp3 < tmp4 THEN
+							SET isCurrentReject[xVal] TO tmp4
+						END IF
+					END IF
+					SET yVal TO yVal + 1
+				END REPEAT
+				SET xVal TO xVal + 1
+			END REPEAT
+
+			SET isPriorSelect TO isCurrentSelect
+			SET isPriorReject TO isCurrentReject
+			SET k TO k + 1
+		END REPEAT
+
+		SET maxScore TO isPriorSelect[0]
+		SET idx TO 1
+		WHILE idx <= lengthVar
+			IF maxScore < isPriorSelect[idx] THEN
+				SET maxScore TO isPriorSelect[idx]
+			END IF
+			SET idx TO idx + 1
+		END WHILE
+
+		RETURN maxScore
+	END FUNCTION
+END CLASS

@@ -1,0 +1,41 @@
+FUNCTION sort_array(array_of_integers)
+    SET temp_sorted_list TO EMPTY LIST
+    SET index_counter TO 0
+    WHILE index_counter LESS THAN LENGTH OF array_of_integers
+        APPEND element AT index_counter IN array_of_integers TO temp_sorted_list
+        SET index_counter TO index_counter PLUS 1
+    END WHILE
+    CALL temp_sorted_list.SORT()
+    SET sort_key_dict TO EMPTY MAP
+    SET element_cursor TO 0
+    WHILE element_cursor LESS THAN LENGTH OF temp_sorted_list
+        SET current_elem TO temp_sorted_list AT element_cursor
+        SET bin_representation TO CONVERT current_elem TO BINARY STRING
+        SET bin_without_prefix TO SLICE bin_representation FROM 2 TO LENGTH OF bin_representation
+        SET count_ones TO 0
+        SET char_index TO 0
+        WHILE char_index LESS THAN LENGTH OF bin_without_prefix
+            IF bin_without_prefix AT char_index EQUALS '1' THEN
+                SET count_ones TO count_ones PLUS 1
+            END IF
+            SET char_index TO char_index PLUS 1
+        END WHILE
+        MAP current_elem TO count_ones IN sort_key_dict
+        SET element_cursor TO element_cursor PLUS 1
+    END WHILE
+    SET final_result TO COPY OF temp_sorted_list
+    SET outer_idx TO 0
+    WHILE outer_idx LESS THAN LENGTH OF final_result MINUS 1
+        SET inner_idx TO outer_idx PLUS 1
+        WHILE inner_idx LESS THAN LENGTH OF final_result
+            IF sort_key_dict AT final_result AT outer_idx GREATER THAN sort_key_dict AT final_result AT inner_idx THEN
+                SET temporary_holder TO final_result AT outer_idx
+                SET final_result AT outer_idx TO final_result AT inner_idx
+                SET final_result AT inner_idx TO temporary_holder
+            END IF
+            SET inner_idx TO inner_idx PLUS 1
+        END WHILE
+        SET outer_idx TO outer_idx PLUS 1
+    END WHILE
+    RETURN final_result
+END FUNCTION

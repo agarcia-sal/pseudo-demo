@@ -1,0 +1,42 @@
+```
+FUNCTION valid_date(input_string)
+    DEFINE CHECK_RANGE(value, minimum, maximum) AS
+        value >= minimum AND value <= maximum
+    END DEFINE
+
+    DEFINE VALID_DAY(m, d) AS
+        SELECT m
+            CASE 1, 3, 5, 7, 8, 10, 12:
+                RETURN CHECK_RANGE(d, 1, 31)
+            CASE 4, 6, 9, 11:
+                RETURN CHECK_RANGE(d, 1, 30)
+            CASE 2:
+                RETURN CHECK_RANGE(d, 1, 29)
+            DEFAULT:
+                RETURN False
+        END SELECT
+    END DEFINE
+
+    TRY
+        LET trimmed = input_string.strip()
+        LET parts = trimmed.split('-')
+        IF parts.length NOT EQUAL 3 THEN RETURN False
+
+        LET m_str = parts[0]
+        LET d_str = parts[1]
+        LET y_str = parts[2]
+
+        LET m = INTEGER(m_str)
+        LET d = INTEGER(d_str)
+        LET y = INTEGER(y_str)
+
+        IF NOT CHECK_RANGE(m, 1, 12) THEN RETURN False
+        IF NOT VALID_DAY(m, d) THEN RETURN False
+
+    EXCEPT
+        RETURN False
+    END TRY
+
+    RETURN True
+END FUNCTION
+```

@@ -1,0 +1,222 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+       FUNCTION DequePopLeft(q)
+          SET idx TO 0
+          SET val TO q[idx]
+          REMOVE element at idx FROM q
+          RETURN val
+       END FUNCTION
+
+       FUNCTION DequeAppend(q, x)
+          INSERT x AT END OF q
+       END FUNCTION
+
+       SET count_nodes TO LENGTH(graph)
+       SET marks TO EMPTY LIST
+       SET temp_index TO 0
+       WHILE temp_index < count_nodes
+          APPEND false TO marks
+          SET temp_index TO temp_index + 1
+       END WHILE
+
+       SET queue_container TO EMPTY LIST
+       CALL DequeAppend(queue_container, (start, 0))
+       SET marks[start] TO true
+       
+       SET last_node TO start
+       SET max_dist TO 0
+
+       LABEL top_loop_begin
+          IF LENGTH(queue_container) = 0 THEN GOTO end_loop
+
+          SET pair_val TO DequePopLeft(queue_container)
+          SET cur_node TO pair_val[0]
+          SET cur_dist TO pair_val[1]
+
+          IF cur_dist > max_dist THEN
+             SET max_dist TO cur_dist
+             SET last_node TO cur_node
+          END IF
+
+          SET idx2 TO 0
+          LABEL neighbors_loop
+             IF idx2 >= LENGTH(graph[cur_node]) THEN GOTO end_neighbors_loop
+
+             SET adj_node TO graph[cur_node][idx2]
+             IF NOT marks[adj_node] THEN
+                SET marks[adj_node] TO true
+                CALL DequeAppend(queue_container, (adj_node, cur_dist + 1))
+             END IF
+
+             SET idx2 TO idx2 + 1
+             GOTO neighbors_loop
+          LABEL end_neighbors_loop
+
+          GOTO top_loop_begin
+       LABEL end_loop
+
+       RETURN last_node, max_dist
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+       SET st_node TO 0
+       SET temp_unused1, farthest TO CALL bfs(graph, st_node)
+       SET temp_unused2, diam_value TO CALL bfs(graph, farthest)
+       RETURN diam_value
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+       FUNCTION DequePopLeft(q)
+          SET ix TO 0
+          SET val2 TO q[ix]
+          REMOVE element at ix FROM q
+          RETURN val2
+       END FUNCTION
+
+       FUNCTION DequeAppend(q, y)
+          INSERT y AT END OF q
+       END FUNCTION
+
+       SET total_nodes TO LENGTH(graph)
+       SET flag_marks TO EMPTY LIST
+       SET idx_count TO 0
+       WHILE idx_count < total_nodes
+          APPEND false TO flag_marks
+          SET idx_count TO idx_count + 1
+       END WHILE
+
+       SET queue_list TO EMPTY LIST
+       CALL DequeAppend(queue_list, (node, 0))
+       SET flag_marks[node] TO true
+
+       SET max_len TO 0
+
+       LABEL outer_loop
+         IF LENGTH(queue_list) = 0 THEN GOTO outer_end
+
+         SET data_pair TO DequePopLeft(queue_list)
+         SET cur_n TO data_pair[0]
+         SET cur_d TO data_pair[1]
+
+         IF cur_d > max_len THEN SET max_len TO cur_d END IF
+
+         SET ix3 TO 0
+         LABEL inner_loop
+            IF ix3 >= LENGTH(graph[cur_n]) THEN GOTO inner_end
+
+            SET adj TO graph[cur_n][ix3]
+            IF NOT flag_marks[adj] THEN
+               SET flag_marks[adj] TO true
+               CALL DequeAppend(queue_list, (adj, cur_d + 1))
+            END IF
+
+            SET ix3 TO ix3 + 1
+            GOTO inner_loop
+         LABEL inner_end
+
+         GOTO outer_loop
+       LABEL outer_end
+
+       RETURN max_len
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+       FUNCTION AppendEdge(g_list, u_val, v_val)
+          APPEND v_val TO g_list[u_val]
+          APPEND u_val TO g_list[v_val]
+       END FUNCTION
+
+       SET length1 TO LENGTH(edges1) + 1
+       SET length2 TO LENGTH(edges2) + 1
+
+       SET graphA TO EMPTY LIST
+       SET counterA TO 0
+       WHILE counterA < length1
+          APPEND EMPTY LIST TO graphA
+          SET counterA TO counterA + 1
+       END WHILE
+
+       SET graphB TO EMPTY LIST
+       SET counterB TO 0
+       WHILE counterB < length2
+          APPEND EMPTY LIST TO graphB
+          SET counterB TO counterB + 1
+       END WHILE
+
+       SET idx_e1 TO 0
+       WHILE idx_e1 < LENGTH(edges1)
+          SET edge_pair TO edges1[idx_e1]
+          CALL AppendEdge(graphA, edge_pair[0], edge_pair[1])
+          SET idx_e1 TO idx_e1 + 1
+       END WHILE
+
+       SET idx_e2 TO 0
+       WHILE idx_e2 < LENGTH(edges2)
+          SET edge_pair2 TO edges2[idx_e2]
+          CALL AppendEdge(graphB, edge_pair2[0], edge_pair2[1])
+          SET idx_e2 TO idx_e2 + 1
+       END WHILE
+
+       SET dia1 TO CALL tree_diameter(graphA)
+       SET dia2 TO CALL tree_diameter(graphB)
+
+       SET longest_paths_A TO EMPTY LIST
+       SET idxA TO 0
+       WHILE idxA < length1
+          APPEND CALL maximum_path_length_from_node(graphA, idxA) TO longest_paths_A
+          SET idxA TO idxA + 1
+       END WHILE
+
+       SET longest_paths_B TO EMPTY LIST
+       SET idxB TO 0
+       WHILE idxB < length2
+          APPEND CALL maximum_path_length_from_node(graphB, idxB) TO longest_paths_B
+          SET idxB TO idxB + 1
+       END WHILE
+
+       SET min_diam_candidate TO 1 / 0.0
+
+       SET outer_counter TO 0
+       LABEL outer_i_loop
+          IF outer_counter >= length1 THEN GOTO outer_i_end
+
+          SET inner_counter TO 0
+          LABEL inner_j_loop
+             IF inner_counter >= length2 THEN GOTO inner_j_end
+
+             SET valA TO longest_paths_A[outer_counter]
+             SET valB TO longest_paths_B[inner_counter]
+
+             SET comp1 TO dia1
+             SET comp2 TO dia2
+             SET comp3 TO valA + valB + 1
+
+             IF comp1 >= comp2 THEN 
+                IF comp1 >= comp3 THEN
+                   SET max_val TO comp1
+                ELSE
+                   SET max_val TO comp3
+                END IF
+             ELSE
+                IF comp2 >= comp3 THEN
+                   SET max_val TO comp2
+                ELSE
+                   SET max_val TO comp3
+                END IF
+             END IF
+
+             IF max_val < min_diam_candidate THEN
+                SET min_diam_candidate TO max_val
+             END IF
+
+             SET inner_counter TO inner_counter + 1
+             GOTO inner_j_loop
+          LABEL inner_j_end
+
+          SET outer_counter TO outer_counter + 1
+          GOTO outer_i_loop
+       LABEL outer_i_end
+
+       RETURN min_diam_candidate
+    END FUNCTION
+END CLASS

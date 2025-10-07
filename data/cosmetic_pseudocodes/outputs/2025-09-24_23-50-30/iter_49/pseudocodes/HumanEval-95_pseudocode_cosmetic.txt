@@ -1,0 +1,40 @@
+```
+FUNCTION check_dict_case(dictionary)
+    FUNCTION traverse_keys(keylist, index, flag)
+        IF index = LENGTH OF keylist THEN
+            RETURN (flag = "upper") OR (flag = "lower")
+        ELSE
+            LET current_item BE keylist[index]
+            IF TYPE_OF(current_item) ≠ STRING THEN
+                RETURN FALSE
+            ELSE
+                SELECT
+                    CASE flag = "start"
+                        IF current_item = TO_UPPERCASE(current_item) THEN
+                            RETURN traverse_keys(keylist, index + 1, "upper")
+                        ELSE
+                            IF current_item = TO_LOWERCASE(current_item) THEN
+                                RETURN traverse_keys(keylist, index + 1, "lower")
+                            ELSE
+                                RETURN FALSE
+                            END IF
+                        END IF
+                    CASE (flag = "upper") AND (current_item ≠ TO_UPPERCASE(current_item))
+                        RETURN FALSE
+                    CASE (flag = "lower") AND (current_item ≠ TO_LOWERCASE(current_item))
+                        RETURN FALSE
+                    DEFAULT
+                        RETURN traverse_keys(keylist, index + 1, flag)
+                END SELECT
+            END IF
+        END IF
+    END FUNCTION
+
+    LET keys_array BE ARRAY_FROM(dictionary KEYS)
+    IF LENGTH OF keys_array ≠ 0 THEN
+        RETURN traverse_keys(keys_array, 0, "start")
+    ELSE
+        RETURN FALSE
+    END IF
+END FUNCTION
+```

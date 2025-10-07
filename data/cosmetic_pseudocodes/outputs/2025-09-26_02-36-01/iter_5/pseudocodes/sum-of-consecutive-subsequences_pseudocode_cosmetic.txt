@@ -1,0 +1,81 @@
+CLASS Solution
+    FUNCTION getSum(nums)
+        FUNCTION calc(sequence)
+            FUNCTION buildLeft(idx, length, countsMap, leftArray)
+                IF idx EQUALS length THEN
+                    RETURN
+                END IF
+                SET prevIndex TO idx MINUS 1
+                SET prevVal TO sequence[prevIndex]
+                SET prevCount TO 0
+                IF prevVal IN countsMap THEN
+                    SET prevCount TO countsMap[prevVal]
+                END IF
+                SET countsMap[prevVal] TO prevCount PLUS 1
+                SET leftArray[idx] TO countsMap[prevVal]
+                CALL buildLeft(idx PLUS 1, length, countsMap, leftArray)
+            END FUNCTION
+
+            FUNCTION buildRight(idx, countsMap, rightArray)
+                IF idx LESS THAN 0 THEN
+                    RETURN
+                END IF
+                SET nextIndex TO idx PLUS 1
+                SET nextVal TO sequence[nextIndex]
+                SET nextCount TO 0
+                IF nextVal IN countsMap THEN
+                    SET nextCount TO countsMap[nextVal]
+                END IF
+                SET countsMap[nextVal] TO nextCount PLUS 1
+                SET rightArray[idx] TO countsMap[nextVal]
+                CALL buildRight(idx MINUS 1, countsMap, rightArray)
+            END FUNCTION
+
+            SET lengthSeq TO 0 PLUS LENGTH OF sequence
+            SET leftList TO A NEW ARRAY OF lengthSeq FILLED WITH zero
+            SET rightList TO A NEW ARRAY OF lengthSeq FILLED WITH zero
+            SET counterMap1 TO AN EMPTY MAP
+            CALL buildLeft(1, lengthSeq, counterMap1, leftList)
+            SET counterMap2 TO AN EMPTY MAP
+            CALL buildRight(lengthSeq MINUS 2, counterMap2, rightList)
+            SET accumulator TO zero
+            SET indexIter TO 0
+            WHILE indexIter LESS THAN lengthSeq DO
+                SET leftVal TO leftList[indexIter]
+                SET rightVal TO rightList[indexIter]
+                SET baseVal TO sequence[indexIter]
+                SET intermediateSum TO ((leftVal PLUS rightVal) PLUS (leftVal MULTIPLIED BY rightVal)) MULTIPLIED BY baseVal
+                SET accumulator TO accumulator PLUS intermediateSum
+                SET indexIter TO indexIter PLUS 1
+            END WHILE
+            SET modulusValue TO (ten EXPONENTIATED TO nine) PLUS seven
+            SET resultVal TO accumulator MODULUS modulusValue
+            RETURN resultVal
+        END FUNCTION
+
+        SET modulusValue TO ten TO THE POWER OF nine PLUS seven
+        SET firstCalc TO calc(nums)
+        FUNCTION reverseList(originalList)
+            FUNCTION recurseReverse(startIdx, endIdx, lst)
+                IF startIdx GREATER OR EQUAL TO endIdx THEN
+                    RETURN
+                END IF
+                SET tempElem TO lst[startIdx]
+                SET lst[startIdx] TO lst[endIdx]
+                SET lst[endIdx] TO tempElem
+                CALL recurseReverse(startIdx PLUS 1, endIdx MINUS 1, lst)
+            END FUNCTION
+            CALL recurseReverse(zero, LENGTH OF originalList MINUS one, originalList)
+        END FUNCTION
+        CALL reverseList(nums)
+        SET secondCalc TO calc(nums)
+        SET sumOfNums TO zero
+        SET posCounter TO 0
+        WHILE posCounter LESS THAN LENGTH OF nums DO
+            SET sumOfNums TO sumOfNums PLUS nums[posCounter]
+            SET posCounter TO posCounter PLUS 1
+        END WHILE
+        SET finalResult TO (firstCalc PLUS secondCalc PLUS sumOfNums) MODULUS modulusValue
+        RETURN finalResult
+    END FUNCTION
+END CLASS

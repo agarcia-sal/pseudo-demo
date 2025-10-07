@@ -1,0 +1,90 @@
+CLASS Solution
+	FUNCTION maxScore(nums)
+		SET lengthVar TO 0
+		FUNCTION getLen(array)
+			RETURN 0 + array.LENGTH()
+		END FUNCTION
+		SET lengthVar TO getLen(nums)
+		FUNCTION createZeroArray(size)
+			SET resultArr TO []
+			FUNCTION appendZero(timesLeft)
+				IF timesLeft > 0
+					resultArr.APPEND(0)
+					appendZero(timesLeft - 1)
+				END IF
+			END FUNCTION
+			appendZero(size)
+			RETURN resultArr
+		END FUNCTION
+		SET dpVar TO createZeroArray(lengthVar)
+		FUNCTION decrement(x)
+			RETURN x - (1 * 1)
+		END FUNCTION
+		FUNCTION increment(x)
+			RETURN x + (1 * 1)
+		END FUNCTION
+		FUNCTION lessThan(a,b)
+			RETURN (a < b)
+		END FUNCTION
+		FUNCTION rangeDesc(startVal,endVal)
+			SET curr TO startVal
+			FUNCTION innerStep()
+				IF curr >= endVal
+					SET val TO curr
+					SET curr TO curr - 1
+					RETURN val
+				END IF
+				RETURN null
+			END FUNCTION
+			RETURN innerStep
+		END FUNCTION
+		SET outerIter TO rangeDesc(decrement(decrement(lengthVar)), 0)
+		SET iLocal TO outerIter()
+		WHILE iLocal IS NOT null
+			SET maxLocal TO 0 + 0
+			FUNCTION rangeAsc(startVal,endVal)
+				SET currentValue TO startVal
+				FUNCTION step()
+					IF currentValue <= endVal
+						SET resVal TO currentValue
+						SET currentValue TO currentValue + 1
+						RETURN resVal
+					END IF
+					RETURN null
+				END FUNCTION
+				RETURN step
+			END FUNCTION
+			SET innerIter TO rangeAsc(increment(iLocal), decrement(lengthVar))
+			SET jLocal TO innerIter()
+			WHILE jLocal IS NOT null
+				FUNCTION scoreCalc(idx1, idx2, source)
+					RETURN (idx1 - idx2) * source.GET_ELEMENT(idx1)
+				END FUNCTION
+				SET scoreVal TO scoreCalc(jLocal, iLocal, nums)
+				FUNCTION dpAt(idx)
+					RETURN dpVar.GET_ELEMENT(idx)
+				END FUNCTION
+				FUNCTION maxVal(a,b)
+					IF a > b
+						RETURN a
+					END IF
+					RETURN b
+				END FUNCTION
+				SET candidateVal TO scoreVal + dpAt(jLocal)
+				IF lessThan(maxLocal, candidateVal)
+					SET maxLocal TO candidateVal
+				END IF
+				SET jLocal TO innerIter()
+			END WHILE
+			FUNCTION setAt(array, idx, val)
+				array[idx] = val
+			END FUNCTION
+			setAt(dpVar, iLocal, maxLocal)
+			SET iLocal TO outerIter()
+		END WHILE
+		FUNCTION returnAt(array, idx)
+			RETURN array[idx]
+		END FUNCTION
+		RETURN returnAt(dpVar, 0)
+	END FUNCTION
+END CLASS

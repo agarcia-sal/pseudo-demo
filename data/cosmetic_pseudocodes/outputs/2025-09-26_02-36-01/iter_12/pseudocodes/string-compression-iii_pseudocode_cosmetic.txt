@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION compressedString(word)
+        FUNCTION stringLength(s)
+            SET x TO 0
+            REPEAT
+                EXIT WHEN s[x] IS UNDEFINED
+                SET x TO x + 1
+            UNTIL FALSE
+            RETURN x
+        END FUNCTION
+
+        FUNCTION stringConcat(a, b)
+            SET builder TO empty list
+            SET idxA TO 0
+            WHILE idxA < stringLength(a)
+                APPEND a[idxA] TO builder
+                SET idxA TO idxA + 1
+            END WHILE
+            SET idxB TO 0
+            WHILE idxB < stringLength(b)
+                APPEND b[idxB] TO builder
+                SET idxB TO idxB + 1
+            END WHILE
+            SET res TO empty string
+            SET p TO 0
+            WHILE p < stringLength(builder)
+                SET res TO res + builder[p]
+                SET p TO p + 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        DEFINE MAX_COUNT AS (3 * 3)  # 9
+
+        SET accumulation TO empty list
+        SET position TO 0
+
+        FUNCTION gatherSequence()
+            IF position >= stringLength(word)
+                RETURN (0, '')  # no count, no char
+            END IF
+
+            SET currentChar TO word[position]
+            SET tally TO 0
+
+            WHILE (position < stringLength(word)) AND (word[position] = currentChar)
+                SET tally TO tally + 1
+                SET position TO position + 1
+                IF tally = MAX_COUNT
+                    BREAK
+                END IF
+            END WHILE
+
+            RETURN (tally, currentChar)
+        END FUNCTION
+
+        FUNCTION intToString(num)
+            IF num = 0
+                RETURN '0'
+            END IF
+            SET digits TO empty list
+            SET n TO num
+            WHILE n > 0
+                SET rem TO n % 10
+                SET n TO (n - rem) / 10
+                # Convert digit rem to char by adding to ASCII code of '0'
+                SET digitChar TO CHR(48 + rem)
+                INSERT digitChar AT START OF digits
+            END WHILE
+
+            SET strNum TO empty string
+            SET q TO 0
+            WHILE q < stringLength(digits)
+                SET strNum TO strNum + digits[q]
+                SET q TO q + 1
+            END WHILE
+            RETURN strNum
+        END FUNCTION
+
+        FUNCTION buildCompressed()
+            SET builderInner TO empty string
+            WHILE position < stringLength(word)
+                SET (countNum, ch) TO gatherSequence()
+                SET countStr TO intToString(countNum)
+                SET builderInner TO stringConcat(builderInner, stringConcat(countStr, ch))
+            END WHILE
+            RETURN builderInner
+        END FUNCTION
+
+        RETURN buildCompressed()
+    END FUNCTION
+END CLASS

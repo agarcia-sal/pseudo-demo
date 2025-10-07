@@ -1,0 +1,128 @@
+CLASS UnionFind
+    FUNCTION __init__(self, size)
+      BEGIN
+        LET p TO array_of_integers(size)
+        LET r TO array_of_zeros(size)
+        VAR m := 0
+        WHILE m <= size - 1 DO
+          p[m] := m
+          m := m + 1
+        END WHILE
+        r := r
+        self.parent := p
+        self.rank := r
+      END
+    END FUNCTION
+
+    FUNCTION find(self, u)
+      BEGIN
+        FUNCTION recFind(x)
+          BEGIN
+            IF (self.parent[x] != x) THEN
+              LET y := recFind(self.parent[x])
+              self.parent[x] := y
+              RETURN y
+            ELSE
+              RETURN x
+            END IF
+          END
+        RETURN recFind(u)
+      END
+    END FUNCTION
+
+    FUNCTION union(self, u, v)
+      BEGIN
+        LET a := self.find(u)
+        LET b := self.find(v)
+        IF NOT(a = b) THEN
+          IF (self.rank[a] > self.rank[b]) THEN
+            self.parent[b] := a
+          ELSE
+            IF (self.rank[a] < self.rank[b]) THEN
+              self.parent[a] := b
+            ELSE
+              self.parent[b] := a
+              self.rank[a] := self.rank[a] + 1
+            END IF
+          END IF
+        END IF
+      END
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maximizeSumOfWeights(self, edges, k)
+      BEGIN
+        LET x := LENGTH(edges)
+        LET n := (x + 1)
+        LET deg := NEW_ARRAY(n, 0)
+        LET uf := NEW UnionFind(n)
+
+        FUNCTION cmp(a, b)
+          BEGIN
+            RETURN (a[2] >= b[2])
+          END
+
+        FUNCTION partition(arr, low, high)
+          BEGIN
+            LET pivot := arr[high]
+            LET i := low - 1
+            LET j := low
+            WHILE j <= high - 1 DO
+              IF (arr[j][2] >= pivot[2]) THEN
+                i := i + 1
+                LET tmp := arr[i]
+                arr[i] := arr[j]
+                arr[j] := tmp
+              END IF
+              j := j + 1
+            END WHILE
+            LET tmp2 := arr[i+1]
+            arr[i+1] := arr[high]
+            arr[high] := tmp2
+            RETURN i + 1
+          END
+
+        FUNCTION quicksort(arr, l, h)
+          BEGIN
+            IF l >= h THEN
+              RETURN
+            END IF
+            LET pidx := partition(arr, l, h)
+            CALL quicksort(arr, l, pidx - 1)
+            CALL quicksort(arr, pidx + 1, h)
+          END
+
+        CALL quicksort(edges, 0, x - 1)
+
+        LET total := 0
+        LET idx := 0
+
+        FUNCTION processEdges(i)
+          BEGIN
+            IF i >= x THEN
+              RETURN
+            END IF
+            LET currEdge := edges[i]
+            LET a := currEdge[0]
+            LET b := currEdge[1]
+            LET w := currEdge[2]
+            IF ((deg[a] < k) AND (deg[b] < k)) THEN
+              LET fa := uf.find(a)
+              LET fb := uf.find(b)
+              IF NOT fa = fb THEN
+                uf.union(a, b)
+                deg[a] := deg[a] + 1
+                deg[b] := deg[b] + 1
+                total := total + w
+              END IF
+            END IF
+            CALL processEdges(i + 1)
+          END
+
+        CALL processEdges(0)
+
+        RETURN total
+      END
+    END FUNCTION
+END CLASS

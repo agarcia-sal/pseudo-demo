@@ -1,0 +1,54 @@
+```pseudocode
+CLASS Solution
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+        SET Y2N3X9CV TO LENGTH OF s
+        SET KWMPH1E8 TO LIST OF (0) REPEATED (Y2N3X9CV + 1) TIMES
+        SET VUEI4ZD6 TO LIST OF (0) REPEATED (Y2N3X9CV + 1) TIMES
+
+        SET JX1P2QM9 TO 0
+        WHILE JX1P2QM9 <= Y2N3X9CV - 1
+            SET KWMPH1E8[JX1P2QM9 + 1] TO KWMPH1E8[JX1P2QM9] + ((s[JX1P2QM9] = '0') * 1)
+            SET VUEI4ZD6[JX1P2QM9 + 1] TO VUEI4ZD6[JX1P2QM9] + ((s[JX1P2QM9] = '1') * 1)
+            SET JX1P2QM9 TO JX1P2QM9 + 1
+        END WHILE
+
+        FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER
+            FUNCTION recurse_count(a parameter, b parameter) RETURNS INTEGER
+                IF a > b
+                    RETURN 0
+                END IF
+                SET current_start TO a
+                SET total_valid TO 0
+                WHILE current_start <= b
+                    SET low_bound TO current_start
+                    SET high_bound TO b + 1
+                    WHILE low_bound < high_bound
+                        SET midpoint TO DIVIDE (low_bound + high_bound) BY 2
+                        SET zero_subcount TO KWMPH1E8[midpoint + 1] - KWMPH1E8[current_start]
+                        SET one_subcount TO VUEI4ZD6[midpoint + 1] - VUEI4ZD6[current_start]
+                        IF zero_subcount <= k OR one_subcount <= k
+                            SET low_bound TO midpoint + 1
+                        ELSE
+                            SET high_bound TO midpoint
+                        END IF
+                    END WHILE
+                    SET valid_endpoint TO low_bound - 1
+                    IF valid_endpoint >= current_start
+                        SET total_valid TO total_valid + (valid_endpoint - current_start + 1)
+                    END IF
+                    SET current_start TO current_start + 1
+                END WHILE
+                RETURN total_valid
+            END FUNCTION
+            RETURN recurse_count(l, r)
+        END FUNCTION
+
+        SET result_list TO EMPTY LIST
+        FOR EACH pair (alpha, beta) IN queries
+            APPEND count_valid_substrings(alpha, beta) TO result_list
+        END FOR
+
+        RETURN result_list
+    END FUNCTION
+END CLASS
+```

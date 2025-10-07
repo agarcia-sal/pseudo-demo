@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION isArraySpecial(nums, queries)
+        FUNCTION moduloTwo(value)
+            RETURN value - ((value / 2) * 2)
+        END FUNCTION
+
+        SET binaryParity TO []
+        SET idxOuter TO 0
+        WHILE idxOuter < LENGTH(nums) DO
+            APPEND moduloTwo(nums[idxOuter]) TO binaryParity
+            SET idxOuter TO idxOuter + 1
+        END WHILE
+
+        SET prefixSpecialCount TO []
+        SET initLen TO LENGTH(nums)
+        SET fillIdx TO 0
+        WHILE fillIdx < initLen DO
+            APPEND 0 TO prefixSpecialCount
+            SET fillIdx TO fillIdx + 1
+        END WHILE
+
+        SET index := 1
+        REPEAT
+            IF binaryParity[index] = binaryParity[index-1] THEN
+                SET prefixSpecialCount[index] = prefixSpecialCount[index-1] + 1
+            ELSE
+                SET prefixSpecialCount[index] = prefixSpecialCount[index-1]
+            END IF
+            SET index = index + 1
+            IF index >= initLen THEN
+                EXIT REPEAT
+            END IF
+        UNTIL FALSE
+
+        SET outputList TO []
+        SET queryIdx TO 0
+        WHILE queryIdx < LENGTH(queries) DO
+            SET startPoint TO queries[queryIdx][0]
+            SET endPoint   TO queries[queryIdx][1]
+            IF startPoint = endPoint THEN
+                APPEND TRUE TO outputList
+            ELSE
+                IF startPoint > 0 THEN
+                    SET differenceValue TO prefixSpecialCount[endPoint] - prefixSpecialCount[startPoint]
+                ELSE
+                    SET differenceValue TO prefixSpecialCount[endPoint] - 0
+                END IF
+                APPEND (differenceValue = 0) TO outputList
+            END IF
+            SET queryIdx = queryIdx + 1
+        END WHILE
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

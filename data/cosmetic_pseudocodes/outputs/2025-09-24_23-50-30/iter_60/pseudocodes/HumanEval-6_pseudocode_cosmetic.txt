@@ -1,0 +1,39 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        FUNCTION depth_tail_recursion(idx, cur_d, max_d)
+            IF idx >= LENGTH(group_string) THEN
+                RETURN max_d
+            END IF
+            CASE group_string[idx] OF
+                '(':
+                    LET new_cur = cur_d + 1
+                    LET new_max = (new_cur > max_d) ? new_cur : max_d
+                    RETURN depth_tail_recursion(idx + 1, new_cur, new_max)
+                OTHERWISE:
+                    RETURN depth_tail_recursion(idx + 1, cur_d - 1, max_d)
+            END CASE
+        END FUNCTION
+        
+        RETURN depth_tail_recursion(0, 0, 0)
+    END FUNCTION
+
+    FUNCTION filter_and_map(arr, fn)
+        FUNCTION inner_fm(i, acc)
+            IF i >= LENGTH(arr) THEN
+                RETURN acc
+            END IF
+            LET elt = arr[i]
+            IF elt != "" THEN
+                RETURN inner_fm(i + 1, acc + [fn(elt)])
+            ELSE
+                RETURN inner_fm(i + 1, acc)
+            END IF
+        END FUNCTION
+        RETURN inner_fm(0, [])
+    END FUNCTION
+
+    LET split_groups = SPLIT parentheses_string BY ' '
+    RETURN filter_and_map(split_groups, parse_paren_group)
+END FUNCTION
+```

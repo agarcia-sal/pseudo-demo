@@ -1,0 +1,32 @@
+```
+FUNCTION words_string(input_string)
+    RETURN (CASE
+        WHEN input_string = "" THEN []
+        ELSE BEGIN
+            FUNCTION replace_commas(str, idx, acc)
+                IF idx >= LENGTH(str) THEN RETURN acc
+                LET ch = str[idx]
+                LET next_acc = acc + (IF ch = "," THEN " " ELSE ch)
+                RETURN replace_commas(str, idx + 1, next_acc)
+            END FUNCTION
+
+            LET transformed = replace_commas(input_string, 0, "")
+            LET split_words = []
+            LET word_start = 0
+            LET i = 0
+
+            WHILE i <= LENGTH(transformed)
+                IF i = LENGTH(transformed) OR transformed[i] = " " THEN
+                    IF word_start < i THEN
+                        split_words = split_words + [SUBSTRING(transformed, word_start, i)]
+                    END IF
+                    word_start = i + 1
+                END IF
+                i = i + 1
+            END WHILE
+
+            RETURN split_words
+        END
+    END CASE)
+END FUNCTION
+```

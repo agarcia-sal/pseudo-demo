@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+        DECLARE adjacency AS list filled with empty lists, length equal to COUNT(nums)
+        
+        LET idx TO 0
+        LET totalEdges TO COUNT(edges)
+        WHILE idx LESS THAN totalEdges
+            LET edgeItem TO edges AT idx
+            LET nodeA TO edgeItem FIRST ELEMENT
+            LET nodeB TO edgeItem SECOND ELEMENT
+            LET edgeWeight TO edgeItem THIRD ELEMENT
+            
+            ADD (nodeB, edgeWeight) TO adjacency AT nodeA
+            ADD (nodeA, edgeWeight) TO adjacency AT nodeB
+            
+            INCREMENT idx BY 1
+        END WHILE
+        
+        FUNCTION dfs(currentNode, lastNode, boundaryIndex, depthCount)
+            ACCESS maxLength FROM OUTER SCOPE
+            ACCESS minNodes FROM OUTER SCOPE
+            
+            LET previousDepth TO lastSeenDepth GET nums AT currentNode DEFAULT 0
+            ASSIGN lastSeenDepth AT nums AT currentNode TO depthCount
+            
+            IF NOT (boundaryIndex GREATER OR EQUAL previousDepth) THEN
+                ASSIGN boundaryIndex TO previousDepth
+            END IF
+            
+            LET segmentLength TO (LAST ELEMENT OF prefix) MINUS (prefix AT boundaryIndex)
+            LET segmentNodes TO depthCount MINUS boundaryIndex
+            
+            IF segmentLength GREATER THAN maxLength THEN
+                ASSIGN maxLength TO segmentLength
+                ASSIGN minNodes TO segmentNodes
+            ELSE IF segmentLength EQUALS maxLength AND segmentNodes LESS THAN minNodes THEN
+                ASSIGN minNodes TO segmentNodes
+            END IF
+            
+            LET neighborIndex TO 0
+            LET neighborsCount TO COUNT(adjacency AT currentNode)
+            WHILE neighborIndex LESS THAN neighborsCount
+                LET neighborTuple TO adjacency AT currentNode AT neighborIndex
+                LET neighbor TO neighborTuple FIRST ELEMENT
+                LET edgeValue TO neighborTuple SECOND ELEMENT
+                
+                IF neighbor NOT EQUAL lastNode THEN
+                    LET currentSum TO (LAST ELEMENT OF prefix) PLUS edgeValue
+                    APPEND currentSum TO prefix
+                    CALL dfs(neighbor, currentNode, boundaryIndex, depthCount PLUS 1)
+                    REMOVE LAST ELEMENT FROM prefix
+                END IF
+                
+                INCREMENT neighborIndex BY 1
+            END WHILE
+            
+            ASSIGN lastSeenDepth AT nums AT currentNode TO previousDepth
+        END FUNCTION
+        
+        LET maxLength TO 0
+        LET minNodes TO 1
+        LET prefix TO [0]
+        LET lastSeenDepth TO EMPTY MAP
+        
+        CALL dfs(0, -1, 0, 1)
+        RETURN [maxLength, minNodes]
+    END FUNCTION
+END CLASS

@@ -1,0 +1,45 @@
+FUNCTION parse_nested_parens(input_string)
+    FUNCTION parse_paren_group(substring)
+        SET depth_counter TO 0
+        SET max_depth_value TO 0
+        FOR idx FROM 0 TO LENGTH(substring) - 1
+            SET symbol TO substring.at(idx)
+            IF symbol = '(' THEN
+                LET depth_counter = depth_counter + 1
+                IF max_depth_value < depth_counter THEN
+                    LET max_depth_value = depth_counter
+                END IF
+            ELSE
+                LET depth_counter = depth_counter - 1
+            END IF
+        END FOR
+        RETURN max_depth_value
+    END FUNCTION
+
+    SET token_list TO []
+    SET buffer TO ""
+    FOR ch IN input_string
+        IF ch = ' ' THEN
+            APPEND buffer TO token_list
+            SET buffer TO ""
+        ELSE
+            APPEND ch TO buffer
+        END IF
+    END FOR
+    IF buffer ≠ "" THEN
+        APPEND buffer TO token_list
+    END IF
+
+    SET results TO []
+    SET i TO 0
+    WHILE i < LENGTH(token_list)
+        SET element TO token_list.at(i)
+        IF element ≠ "" THEN
+            LET depth_result = parse_paren_group(element)
+            APPEND depth_result TO results
+        END IF
+        SET i = i + 1
+    END WHILE
+
+    RETURN results
+END FUNCTION

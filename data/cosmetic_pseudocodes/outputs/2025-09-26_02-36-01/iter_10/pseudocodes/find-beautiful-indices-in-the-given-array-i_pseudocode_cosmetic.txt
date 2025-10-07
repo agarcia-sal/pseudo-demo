@@ -1,0 +1,72 @@
+CLASS Solution
+	 FUNCTION beautifulIndices(s, a, b, k)
+		DEFINE FUNCTION length_of_string(x)
+			DEFINE count AS 0
+			WHILE TRUE
+				IF x[count] IS UNDEFINED THEN BREAK END IF
+				count = count + 1
+			END WHILE
+			RETURN count
+		END FUNCTION
+
+		DEFINE FUNCTION substring_equal(str_main, start_pos, comparison_str)
+			DEFINE l AS length_of_string(comparison_str)
+			DEFINE pos AS 0
+			WHILE pos < l
+				IF str_main[start_pos + pos] != comparison_str[pos] THEN
+					RETURN FALSE
+				END IF
+				pos = pos + 1
+			END WHILE
+			RETURN TRUE
+		END FUNCTION
+
+		DEFINE FUNCTION gather_indices(source_str, pattern)
+			DEFINE collected_indices AS empty list
+			DEFINE source_len AS length_of_string(source_str)
+			DEFINE pattern_len AS length_of_string(pattern)
+
+			DEFINE recursive_index_search(current_idx)
+				IF current_idx > source_len - pattern_len THEN RETURN END IF
+				IF substring_equal(source_str, current_idx, pattern) THEN
+					APPEND current_idx TO collected_indices
+				END IF
+				recursive_index_search(current_idx + 1)
+			END FUNCTION
+			recursive_index_search(0)
+			RETURN collected_indices
+		END FUNCTION
+
+		DEFINE indices_a_list AS gather_indices(s, a)
+		DEFINE indices_b_list AS gather_indices(s, b)
+
+		DEFINE result_indices AS empty list
+
+		DEFINE find_and_append(i_idx)
+			DEFINE inner_search AS FUNCTION(j_idx)
+				IF j_idx >= length_of_string(indices_b_list) THEN RETURN FALSE END IF
+				DEFINE diff_abs
+				IF indices_a_list[i_idx] >= indices_b_list[j_idx] THEN
+					diff_abs = indices_a_list[i_idx] - indices_b_list[j_idx]
+				ELSE
+					diff_abs = indices_b_list[j_idx] - indices_a_list[i_idx]
+				END IF
+				IF diff_abs <= k THEN
+					APPEND indices_a_list[i_idx] TO result_indices
+					RETURN TRUE
+				END IF
+				RETURN inner_search(j_idx + 1)
+			END FUNCTION
+			inner_search(0)
+		END FUNCTION
+
+		DEFINE i_loop AS FUNCTION(pos)
+			IF pos >= length_of_string(indices_a_list) THEN RETURN END IF
+			find_and_append(pos)
+			i_loop(pos + 1)
+		END FUNCTION
+
+		i_loop(0)
+		RETURN result_indices
+	 END FUNCTION
+END CLASS

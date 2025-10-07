@@ -1,0 +1,62 @@
+CLASS Solution
+	FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+		DEFINE mapTree AS new mapping from keys to empty lists
+
+		FUNCTION insertEdge WITH PARAMETERS a b
+			APPEND b TO mapTree[a]
+			APPEND a TO mapTree[b]
+		END FUNCTION
+
+		PROCEDURE buildGraph
+			DEFINE indexA AS 0
+			WHILE indexA < LENGTH(edges)
+				LET x ← edges[indexA][0]
+				LET y ← edges[indexA][1]
+				CALL insertEdge WITH x y
+				SET indexA ← indexA + 1
+			END WHILE
+		END PROCEDURE
+
+		CALL buildGraph
+
+		DEFINE global_max AS 1
+
+		FUNCTION recursiveSearch WITH PARAMETERS current_node parent_node
+			SET aggregate_same_color_count TO 1
+			SET flag_all_children_same_color TO true
+
+			DEFINE idx AS 0
+			WHILE idx < LENGTH(mapTree[current_node])
+				LET adjacent_node ← mapTree[current_node][idx]
+
+				IF NOT (adjacent_node = parent_node) THEN
+					LET subtree_sz ← recursiveSearch(adjacent_node current_node)
+					IF subtree_sz = 0 THEN
+						SET flag_all_children_same_color ← false
+					ELSE
+						IF colors[adjacent_node] = colors[current_node] THEN
+							SET aggregate_same_color_count ← aggregate_same_color_count + subtree_sz
+						ELSE
+							SET flag_all_children_same_color ← false
+						END IF
+					END IF
+				END IF
+				SET idx ← idx + 1
+			END WHILE
+
+			IF flag_all_children_same_color = true THEN
+				IF global_max < aggregate_same_color_count THEN
+					SET global_max ← aggregate_same_color_count
+				END IF
+				RETURN aggregate_same_color_count
+			END IF
+
+			RETURN 0
+		END FUNCTION
+
+		LET start_node ← 0
+		LET invalid_parent ← -1
+
+		RETURN recursiveSearch(start_node invalid_parent) OR global_max
+	END FUNCTION
+END CLASS

@@ -1,0 +1,184 @@
+CLASS Solution  
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer  
+        FUNCTION computeFactorialArray(m integer) RETURNS list  
+            SET result TO empty list  
+            SET idx TO 0  
+            WHILE idx LESS THAN m PLUS 1  
+                CALL appendFactorial(idx, result)  
+                SET idx TO idx PLUS 1  
+            END WHILE  
+            RETURN result  
+        END FUNCTION  
+
+        FUNCTION appendFactorial(value integer, arr list)  
+            IF value EQUALS 0 THEN  
+                ADD 1 TO arr  
+                RETURN  
+            END IF  
+            SET acc TO 1  
+            SET counter TO value  
+            REPEAT  
+                SET acc TO acc MULTIPLIED BY counter  
+                SET counter TO counter MINUS 1  
+            UNTIL counter EQUALS 0  
+            ADD acc TO arr  
+        END FUNCTION  
+
+        FUNCTION reverseString(inputString string) RETURNS string  
+            SET outputString TO empty string  
+            SET pos TO LENGTH(inputString) MINUS 1  
+            WHILE pos GREATER THAN OR EQUAL TO 0  
+                SET outputString TO outputString CONCATENATED WITH CHARACTER_AT(inputString, pos)  
+                SET pos TO pos MINUS 1  
+            END WHILE  
+            RETURN outputString  
+        END FUNCTION  
+
+        FUNCTION substring(orig string, startPos integer) RETURNS string  
+            SET resultString TO empty string  
+            SET iter TO startPos  
+            WHILE iter LESS THAN LENGTH(orig)  
+                SET resultString TO resultString CONCATENATED WITH CHARACTER_AT(orig, iter)  
+                SET iter TO iter PLUS 1  
+            END WHILE  
+            RETURN resultString  
+        END FUNCTION  
+
+        FUNCTION stringToInteger(str string) RETURNS integer  
+            SET resInt TO 0  
+            SET power TO 1  
+            SET indexPos TO LENGTH(str) MINUS 1  
+            WHILE indexPos GREATER THAN OR EQUAL TO 0  
+                SET charCode TO ORD(CHARACTER_AT(str, indexPos)) MINUS ORD('0')  
+                SET resInt TO resInt PLUS charCode MULTIPLIED BY power  
+                SET power TO power MULTIPLIED BY 10  
+                SET indexPos TO indexPos MINUS 1  
+            END WHILE  
+            RETURN resInt  
+        END FUNCTION  
+
+        FUNCTION modIsZero(val integer, modBy integer) RETURNS boolean  
+            SET moduloRes TO val  
+            WHILE moduloRes GREATER THAN OR EQUAL TO modBy  
+                SET moduloRes TO moduloRes MINUS modBy  
+            END WHILE  
+            RETURN moduloRes EQUALS 0  
+        END FUNCTION  
+
+        FUNCTION sortCharactersAsc(strInput string) RETURNS string  
+            SET charList TO empty list  
+            SET ptr TO 0  
+            WHILE ptr LESS THAN LENGTH(strInput)  
+                ADD CHARACTER_AT(strInput, ptr) TO charList  
+                SET ptr TO ptr PLUS 1  
+            END WHILE  
+            CALL simpleSort(charList)  
+            SET sortedStr TO empty string  
+            SET idx2 TO 0  
+            WHILE idx2 LESS THAN LENGTH(charList)  
+                SET sortedStr TO sortedStr CONCATENATED WITH charList AT idx2  
+                SET idx2 TO idx2 PLUS 1  
+            END WHILE  
+            RETURN sortedStr  
+        END FUNCTION  
+
+        FUNCTION simpleSort(listToSort list)  
+            SET iVar TO 0  
+            WHILE iVar LESS THAN LENGTH(listToSort) MINUS 1  
+                SET jVar TO iVar PLUS 1  
+                WHILE jVar LESS THAN LENGTH(listToSort)  
+                    IF listToSort AT iVar GREATER THAN listToSort AT jVar THEN  
+                        SET tempVar TO listToSort AT iVar  
+                        SET listToSort AT iVar TO listToSort AT jVar  
+                        SET listToSort AT jVar TO tempVar  
+                    END IF  
+                    SET jVar TO jVar PLUS 1  
+                END WHILE  
+                SET iVar TO iVar PLUS 1  
+            END WHILE  
+        END FUNCTION  
+
+        FUNCTION countCharacters(freqStr string) RETURNS map  
+            SET frequencyMap TO empty map  
+            SET ctr1 TO 0  
+            WHILE ctr1 LESS THAN LENGTH(freqStr)  
+                SET currentChar TO CHARACTER_AT(freqStr, ctr1)  
+                IF currentChar NOT IN frequencyMap THEN  
+                    SET frequencyMap AT currentChar TO 0  
+                END IF  
+                SET frequencyMap AT currentChar TO frequencyMap AT currentChar PLUS 1  
+                SET ctr1 TO ctr1 PLUS 1  
+            END WHILE  
+            RETURN frequencyMap  
+        END FUNCTION  
+
+        SET factorials TO CALL computeFactorialArray(n)  
+
+        SET finalAns TO 0  
+        SET visitedMap TO empty map  
+        SET baseNum TO 1  
+        SET expCounter TO (n MINUS 1) DIVIDE_BY 2  
+        SET expChecker TO 0  
+        WHILE expChecker LESS THAN expCounter  
+            SET baseNum TO baseNum MULTIPLIED BY 10  
+            SET expChecker TO expChecker PLUS 1  
+        END WHILE  
+
+        SET endLimit TO baseNum MULTIPLIED BY 10 MINUS 1  
+        SET curVal TO baseNum  
+
+        WHILE curVal LESS THAN OR EQUAL_TO endLimit  
+            SET strRepr TO STRING_OF(curVal)  
+            SET strRev TO CALL reverseString(strRepr)  
+            SET tailStart TO n MOD 2  
+            SET strSuf TO CALL substring(strRev, tailStart)  
+            SET fullStr TO strRepr CONCATENATED WITH strSuf  
+            IF NOT CALL modIsZero(CALL stringToInteger(fullStr), k) THEN  
+                SET curVal TO curVal PLUS 1  
+                CONTINUE  
+            END IF  
+
+            SET sortedStr TO CALL sortCharactersAsc(fullStr)  
+            IF sortedStr IN visitedMap THEN  
+                SET curVal TO curVal PLUS 1  
+                CONTINUE  
+            END IF  
+
+            SET visitedMap AT sortedStr TO true  
+            SET freqCount TO CALL countCharacters(sortedStr)  
+
+            SET hasZeroChar TO false  
+            SET zeroCountVal TO 0  
+            IF '0' IN freqCount THEN  
+                IF freqCount AT '0' GREATER THAN 0 THEN  
+                    SET hasZeroChar TO true  
+                    SET zeroCountVal TO freqCount AT '0'  
+                END IF  
+            END IF  
+
+            IF hasZeroChar THEN  
+                SET partialRes TO (n MINUS zeroCountVal) MULTIPLIED BY factorials AT (n MINUS 1)  
+            ELSE  
+                SET partialRes TO factorials AT n  
+            END IF  
+
+            SET freqVals TO empty list  
+            SET freqIter TO 0  
+            FOR EACH keyVal IN freqCount KEYS  
+                ADD freqCount AT keyVal TO freqVals  
+                SET freqIter TO freqIter PLUS 1  
+            END FOR  
+
+            SET divideIter TO 0  
+            WHILE divideIter LESS THAN LENGTH(freqVals)  
+                SET partialRes TO partialRes DIVIDE_BY factorials AT freqVals AT divideIter  
+                SET divideIter TO divideIter PLUS 1  
+            END WHILE  
+
+            SET finalAns TO finalAns PLUS partialRes  
+            SET curVal TO curVal PLUS 1  
+        END WHILE  
+
+        RETURN finalAns  
+    END FUNCTION  
+END CLASS

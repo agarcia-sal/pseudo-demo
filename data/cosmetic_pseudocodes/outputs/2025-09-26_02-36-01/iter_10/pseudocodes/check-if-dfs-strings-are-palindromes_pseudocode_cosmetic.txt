@@ -1,0 +1,110 @@
+CLASS Hashing  
+	fUnCtIoN __init__(self, s, base, mod)  
+		self.mod ← mod  
+		self.h ← [0] * (LENGTH(s) + 1)  
+		self.p ← [1] * (LENGTH(s) + 1)  
+
+		DEFINE helperFill(x, y, z)  
+			IF x > LENGTH(s) THEN  
+				RETURN  
+			END IF  
+			self.h[x] ← ((self.h[x - 1] * base) + UNICODE(s[x - 1])) MOD mod  
+			self.p[x] ← (self.p[x - 1] * base) MOD mod  
+			helperFill(x + 1, y, z)  
+		END DEFINE  
+		
+		helperFill(1, NULL, NULL)  
+	END FUNCTION  
+
+	FUNCTION query(self, l, r)  
+		DEFINE subCalc(a, b)  
+			RETURN (self.h[b] - ((self.h[a - 1] * self.p[b - a + 1]) MOD self.mod) + self.mod) MOD self.mod  
+		END DEFINE  
+		RETURN subCalc(l, r)  
+	END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+	Function findAnswer(self, parent, s)  
+		
+		LET dfsStr ← []  
+		LET pos ← {}  
+		LET g ← makeEmptyLists(LENGTH(s))  
+		
+		DEFINE makeEmptyLists(count)  
+			IF count = 0 THEN RETURN [] END IF  
+			RETURN [[]] + makeEmptyLists(count - 1)  
+		END DEFINE  
+		
+		DEFINE buildGraph(index)  
+			IF index = LENGTH(s) THEN RETURN END IF  
+			CALL buildGraph(index + 1)  
+		END DEFINE	
+		
+		FUNCTION dfs(i)  
+			LET leftBound ← LENGTH(dfsStr) + 1  
+			DEFINE iterate(index)  
+				IF index >= LENGTH(g[i]) THEN RETURN END IF  
+				dfs(g[i][index])  
+				iterate(index + 1)  
+			END DEFINE  
+			iterate(0)  
+			APPEND s[i] TO dfsStr  
+			LET rightBound ← LENGTH(dfsStr)  
+			pos[i] ← (leftBound, rightBound)  
+		END FUNCTION  
+		
+		LET n ← LENGTH(s)  
+		FOR index Var i ← 1 TO n - 1 DO   
+			APPEND i TO g[parent[i]]  
+		END FOR  
+		
+		CALL dfs(0)  
+		
+		LET base ← 33331  
+		LET mod ← 998244353  
+		
+		LET h1 ← new Hashing(dfsStr, base, mod)  
+		LET reversedStr ← reverseSequence(dfsStr)  
+		
+		DEFINE reverseSequence(seq)  
+			LET rseq ← []  
+			FUNCTION recurReverse(idx)  
+				IF idx < 0 THEN RETURN END IF  
+				APPEND seq[idx] TO rseq  
+				recurReverse(idx - 1)  
+			END FUNCTION  
+			recurReverse(LENGTH(seq) - 1)  
+			RETURN rseq  
+		END DEFINE  
+		
+		LET h2 ← new Hashing(reversedStr, base, mod)  
+		
+		LET answerList ← []  
+		
+		DEFINE isEven(num)  
+			RETURN (num MOD 2) = 0  
+		END DEFINE  
+		
+		FUNCTION processIndex(var idx, acc)  
+			IF idx = n THEN RETURN acc END IF  
+			LET lBound, rBound ← pos[idx]  
+			LET lengthSub ← (rBound - lBound + 1)  
+			LET halfLen ← lengthSub / 2  
+			LET val1, val2  
+			
+			IF isEven(lengthSub) THEN  
+				val1 ← h1.query(lBound, lBound + halfLen - 1)  
+				val2 ← h2.query(n - rBound + 1, n - rBound + halfLen)  
+			ELSE  
+				val1 ← h1.query(lBound, lBound + halfLen - 1)  
+				val2 ← h2.query(n - rBound + 1, n - rBound + halfLen)  
+			END IF  
+			
+			APPEND (val1 = val2) TO acc  
+			RETURN processIndex(idx + 1, acc)  
+		END FUNCTION  
+		
+		RETURN processIndex(0, answerList)  
+	END Function  
+END CLASS

@@ -1,0 +1,63 @@
+class Solution
+	func medianOfUniquenessArray(nums)
+		func countLessOrEqual(target)
+			proc decrementCount(col, idx)
+				col[idx] = col[idx] - 1
+			endproc
+
+			proc incrementCount(col, idx)
+				col[idx] = col[idx] + 1
+			endproc
+
+			var tally = dictNew()
+			var leftIdx = 0
+			var uniqueCount = 0
+			var accCount = 0
+
+			func loopRight(i)
+				if i >= len(nums)
+					return
+				end
+				var numVal = nums[i]
+				if (tally[numVal] == 0) then
+					uniqueCount = uniqueCount + 1
+				end
+				incrementCount(tally, numVal)
+				while uniqueCount > target do
+					var leftVal = nums[leftIdx]
+					decrementCount(tally, leftVal)
+					if (tally[leftVal] == 0) then
+						uniqueCount = uniqueCount - 1
+					end
+					leftIdx = leftIdx + 1
+				end
+				accCount = accCount + (i - leftIdx + 1)
+				loopRight(i+1)
+			endfunc
+
+			loopRight(0)
+			return accCount
+		endfunc
+
+		var n = len(nums)
+		var totalSubs = n * (n + 1) / 2
+		var medianPos = (totalSubs + 1) / 2
+		var lowBound = 1
+		var highBound = n
+
+		func binarySearch()
+			while lowBound < highBound
+				var midVal = (lowBound + highBound) / 2
+				var cmpVal = countLessOrEqual(midVal)
+				if cmpVal < medianPos then
+					lowBound = midVal + 1
+				else
+					highBound = midVal
+				end
+			end
+		endfunc
+
+		binarySearch()
+		return lowBound
+	endfunc
+endclass

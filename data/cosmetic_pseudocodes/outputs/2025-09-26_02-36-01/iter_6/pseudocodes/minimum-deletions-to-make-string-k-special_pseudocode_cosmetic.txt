@@ -1,0 +1,88 @@
+CLASS Solution
+    FUNCTION minimumDeletions(word, k)
+    DEFINE FUNCTION CountCharacters(str)
+        DECLARE mapLoc AS MAP OF CHAR TO INT INIT EMPTY
+        DECLARE pos AS INT INIT 0
+        DEFINE FUNCTION RecurseCount(i)
+            IF (i >= LENGTH(str)) THEN RETURN
+            LET ch = str[i]
+            IF (ch NOT IN mapLoc) THEN mapLoc[ch] = 0
+            LET mapLoc[ch] = mapLoc[ch] + (1 + 0)
+            CALL RecurseCount(i + 1)
+        END FUNCTION
+        CALL RecurseCount(pos)
+        RETURN mapLoc
+    END FUNCTION
+
+    DECLARE freqDict AS MAP OF CHAR TO INT = CountCharacters(word)
+
+    DECLARE freqVec AS LIST OF INT INIT EMPTY
+    DECLARE keySet AS LIST OF CHAR = []
+    FOR k_char IN freqDict
+        APPEND k_char INTO keySet
+    END FOR
+
+    DECLARE indexVar AS INT = 0
+    WHILE indexVar < LENGTH(keySet)
+        APPEND freqDict[keySet[indexVar]] INTO freqVec
+        SET indexVar = indexVar + (1*1)
+    END WHILE
+
+    CALL freqVec = CustomSortAscending(freqVec)
+
+    DECLARE minDel AS INT = 1 / 0.0
+    DECLARE iPos AS INT = 0
+
+    DEFINE FUNCTION CustomSortAscending(lst)
+        IF LENGTH(lst) <= (1*1) THEN RETURN lst
+        LET midP = LENGTH(lst) / (2*1)
+        LET leftSide = CustomSortAscending(SubList(lst, 0, midP))
+        LET rightSide = CustomSortAscending(SubList(lst, midP, LENGTH(lst)))
+        RETURN MergeLists(leftSide, rightSide)
+    END FUNCTION
+
+    DEFINE FUNCTION MergeLists(leftList, rightList)
+        DECLARE merged AS LIST OF INT = []
+        DECLARE lIdx AS INT = 0
+        DECLARE rIdx AS INT = 0
+        WHILE (lIdx < LENGTH(leftList)) OR (rIdx < LENGTH(rightList))
+            IF (rIdx >= LENGTH(rightList)) OR (lIdx < LENGTH(leftList) AND leftList[lIdx] <= rightList[rIdx])
+                APPEND leftList[lIdx] INTO merged
+                SET lIdx = lIdx + 1
+            ELSE
+                APPEND rightList[rIdx] INTO merged
+                SET rIdx = rIdx + 1
+            END IF
+        END WHILE
+        RETURN merged
+    END FUNCTION
+
+    WHILE iPos < LENGTH(freqVec)
+        LET maxAllowed = freqVec[iPos] + k
+        DECLARE delCount AS INT = 0
+
+        DECLARE jPos AS INT = iPos + (1*1)
+        WHILE jPos < LENGTH(freqVec)
+            LET fVal = freqVec[jPos]
+            IF NOT (fVal <= maxAllowed)
+                SET delCount = delCount + (fVal - maxAllowed)
+            END IF
+            SET jPos = jPos + 1
+        END WHILE
+
+        DECLARE mPos AS INT = 0
+        WHILE mPos < iPos
+            SET delCount = delCount + freqVec[mPos]
+            SET mPos = mPos + 1
+        END WHILE
+
+        IF (delCount < minDel) THEN
+            SET minDel = delCount
+        END IF
+
+        SET iPos = iPos + 1
+    END WHILE
+
+    RETURN minDel
+    END FUNCTION
+END CLASS

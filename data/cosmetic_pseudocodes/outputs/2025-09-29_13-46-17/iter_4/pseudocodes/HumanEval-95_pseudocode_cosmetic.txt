@@ -1,0 +1,47 @@
+```
+FUNCTION check_dict_case(dictionary)
+    FUNCTION analyze_keys(keys_list, idx, current_state)
+        IF idx >= LENGTH OF keys_list THEN
+            RETURN (current_state = "upper") OR (current_state = "lower")
+        END IF
+
+        LET element = keys_list[idx]
+
+        IF TYPE_OF(element) IS NOT STRING THEN
+            RETURN False
+        END IF
+
+        IF current_state = "start" THEN
+            IF element = TO_UPPERCASE(element) THEN
+                RETURN analyze_keys(keys_list, idx + 1, "upper")
+            ELSE IF element = TO_LOWERCASE(element) THEN
+                RETURN analyze_keys(keys_list, idx + 1, "lower")
+            ELSE
+                RETURN False
+            END IF
+        ELSE IF current_state = "upper" THEN
+            IF element <> TO_UPPERCASE(element) THEN
+                RETURN False
+            ELSE
+                RETURN analyze_keys(keys_list, idx + 1, current_state)
+            END IF
+        ELSE IF current_state = "lower" THEN
+            IF element <> TO_LOWERCASE(element) THEN
+                RETURN False
+            ELSE
+                RETURN analyze_keys(keys_list, idx + 1, current_state)
+            END IF
+        ELSE
+            RETURN False
+        END IF
+    END FUNCTION
+
+    LET keys_collection = GET_KEYS(dictionary)
+
+    IF NOT (LENGTH OF keys_collection > 0) THEN
+        RETURN False
+    END IF
+
+    RETURN analyze_keys(keys_collection, 0, "start")
+END FUNCTION
+```

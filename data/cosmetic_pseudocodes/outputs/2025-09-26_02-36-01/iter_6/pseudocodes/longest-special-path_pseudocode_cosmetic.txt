@@ -1,0 +1,108 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+  DECLARE FUNCTION buildEmptyGraph(lengthVal)
+    DECLARE resultGraph
+    SET resultGraph TO empty list
+    DECLARE counter
+    SET counter TO 0
+    WHILE counter NOT EQUAL TO lengthVal
+      APPEND empty list TO resultGraph
+      SET counter TO counter PLUS 1
+    END WHILE
+    RETURN resultGraph
+  END FUNCTION
+
+  DECLARE FUNCTION pairAppend(container, value)
+    APPEND value TO container
+  END FUNCTION
+
+  DECLARE FUNCTION pairPop(container)
+    REMOVE last element FROM container
+  END FUNCTION
+
+  DECLARE FUNCTION getLast(container)
+    RETURN element at (length of container MINUS 1) of container
+  END FUNCTION
+
+  DECLARE FUNCTION myDictGet(dict, key, defaultVal)
+    IF key IN dict THEN
+      RETURN dict[key]
+    ELSE
+      RETURN defaultVal
+    END IF
+  END FUNCTION
+
+        SET graph TO buildEmptyGraph(LENGTH(nums))
+
+        DECLARE indexX
+        SET indexX TO LENGTH(edges) MINUS 1
+
+        WHILE indexX GREATER THAN OR EQUAL TO 0
+          DECLARE edgeTriple
+          SET edgeTriple TO element at indexX of edges
+
+          DECLARE posA posB weightVal
+          SET posA TO element at 0 of edgeTriple
+          SET posB TO element at 1 of edgeTriple
+          SET weightVal TO element at 2 of edgeTriple
+
+          pairAppend(element at posA of graph, [posB, weightVal])
+          pairAppend(element at posB of graph, [posA, weightVal])
+
+          SET indexX TO indexX MINUS 1
+        END WHILE
+
+        DECLARE maxLength minNodes prefix lastSeenDepth
+        SET maxLength TO 0 TIMES 0          # zero
+        SET minNodes TO 1 TIMES 1           # one
+        SET prefix TO [0 PLUS 0]
+        SET lastSeenDepth TO empty dictionary
+
+        DECLARE FUNCTION dfs(uArg, prevArg, leftBoundArg, currDepthArg)
+            DECLARE storedMax storedMin prevDepth currLength currNodes vNext wNext
+            SET storedMax TO maxLength
+            SET storedMin TO minNodes
+
+            SET prevDepth TO myDictGet(lastSeenDepth, element at uArg of nums, 0 TIMES 0)
+
+            SET lastSeenDepth[element at uArg of nums] TO currDepthArg
+
+            IF NOT (leftBoundArg GREATER THAN OR EQUAL TO prevDepth) THEN
+              SET leftBoundArg TO prevDepth
+            END IF
+
+            SET currLength TO getLast(prefix) MINUS element at leftBoundArg of prefix
+            SET currNodes TO currDepthArg MINUS leftBoundArg
+
+            IF (currLength GREATER THAN storedMax) OR ((currLength EQUALS storedMax) AND (currNodes LESS THAN storedMin)) THEN
+              SET maxLength TO currLength
+              SET minNodes TO currNodes
+            END IF
+
+            DECLARE iteratorIndex
+            SET iteratorIndex TO LENGTH(element at uArg of graph) MINUS 1
+
+            WHILE iteratorIndex GREATER THAN OR EQUAL TO 0
+              SET vNext TO element at 0 of element at iteratorIndex of element at uArg of graph
+              SET wNext TO element at 1 of element at iteratorIndex of element at uArg of graph
+
+              IF vNext EQUALS prevArg THEN
+                SET iteratorIndex TO iteratorIndex MINUS 1
+                CONTINUE
+              END IF
+
+              pairAppend(prefix, getLast(prefix) PLUS wNext)
+              CALL dfs(vNext, prevArg PLUS 1 MINUS 1, leftBoundArg, currDepthArg PLUS 1)
+              pairPop(prefix)
+
+              SET iteratorIndex TO iteratorIndex MINUS 1
+            END WHILE
+
+            SET lastSeenDepth[element at uArg of nums] TO prevDepth
+        END FUNCTION
+
+        CALL dfs(0, (-1) TIMES 1, 0 PLUS 0, 1 TIMES 1)
+
+        RETURN [maxLength, minNodes]
+    END FUNCTION
+END CLASS

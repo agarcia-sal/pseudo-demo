@@ -1,0 +1,65 @@
+CLASS Solution{
+ FUNCTION maxMoves(killingX, killingY, posList){
+  knightSteps ← [[-2,1],[ -1,2],[1,2],[ 2,1],[ 2,-1],[ 1,-2],[ -1,-2],[ -2,-1]]
+  pawnSet ⟵ {}
+  FOR pos IN posList DO
+   pawnSet.ADD( (pos[0],pos[1]) )
+  END FOR
+  totalPawns ← 0
+  FOR _ IN pawnSet DO
+   totalPawns ← totalPawns + 1
+  END FOR
+
+  FUNCTION dp(xr, yr, bitMask, aliceTurn){
+   IF bitMask = 0 THEN RETURN 0 END IF
+
+   bestScore ← IF aliceTurn THEN 0 ELSE +∞ END
+   idxIter ← 0
+   REPEAT
+    IF (bitMask & (1 << idxIter)) != 0 THEN
+     targetX ← posList[idxIter][0]
+     targetY ← posList[idxIter][1]
+
+     bfsQueue ← [ (xr, yr, 0) ]
+     seen ← {}
+     seen.ADD((xr,yr))
+     reached ← FALSE
+     
+     WHILE LENGTH(bfsQueue) > 0 DO
+      (currX, currY, dist) ← bfsQueue.REMOVE_FIRST()
+      IF (currX = targetX) AND (currY = targetY) THEN
+       reached ← TRUE
+       BREAK
+      END IF
+
+      FOR mv IN knightSteps DO
+       nx ← currX + mv[0]
+       ny ← currY + mv[1]
+       IF 0 ≤ nx < 50 AND 0 ≤ ny < 50 AND NOT (nx, ny) IN seen THEN
+        seen.ADD((nx, ny))
+        bfsQueue.APPEND((nx, ny, dist + 1))
+       END IF
+      END FOR
+     END WHILE
+
+     IF reached THEN
+      nextMask ← bitMask ^ (1 << idxIter)
+      nextScore ← dist + dp(targetX, targetY, nextMask, NOT aliceTurn)
+      IF aliceTurn THEN
+       IF bestScore < nextScore THEN bestScore ← nextScore END IF
+      ELSE
+       IF bestScore > nextScore THEN bestScore ← nextScore END IF
+      END IF
+     END IF
+    END IF
+    idxIter ← idxIter + 1
+    EXIT WHEN idxIter ≥ totalPawns
+   UNTIL FALSE
+
+   RETURN bestScore
+  END FUNCTION
+
+  fullMask ← (1 << totalPawns) - 1
+  RETURN dp(killingX, killingY, fullMask, TRUE)
+ }
+}

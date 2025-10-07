@@ -1,0 +1,48 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(sequence_string)
+        VARIABLE depth_counter := 0
+        VARIABLE peak_depth := 0
+
+        VARIABLE index := 0
+        WHILE index < LENGTH(sequence_string) DO
+            VARIABLE symbol := sequence_string[index]
+
+            SWITCH symbol
+                CASE '(':
+                    depth_counter := depth_counter + 1
+                    peak_depth := (peak_depth > depth_counter) ? peak_depth : depth_counter
+                OTHERWISE:
+                    depth_counter := depth_counter - 1
+            END SWITCH
+
+            index := index + 1
+        END WHILE
+
+        RETURN peak_depth
+    END FUNCTION
+
+    VARIABLE segments := []
+    VARIABLE start_pos := 0
+    VARIABLE length_string := LENGTH(parentheses_string)
+    VARIABLE position := 0
+
+    WHILE position <= length_string DO
+        IF position = length_string OR parentheses_string[position] = ' ' THEN
+            VARIABLE part := SUBSTRING(parentheses_string, start_pos, position - start_pos)
+            IF LENGTH(part) > 0 THEN
+                segments := segments + [part]
+            END IF
+            start_pos := position + 1
+        END IF
+        position := position + 1
+    END WHILE
+
+    VARIABLE results := []
+    FOR EACH element IN segments DO
+        results := results + [parse_paren_group(element)]
+    END FOR
+
+    RETURN results
+END FUNCTION
+```

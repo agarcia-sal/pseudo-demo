@@ -1,0 +1,39 @@
+```
+FUNCTION check_dict_case(container)
+    SWITCH LENGTH(container KEYS)
+        CASE 0:
+            RETURN False
+    END SWITCH
+
+    SET mode TO "start"
+    SET index TO 0
+    SET keys_list TO container KEYS
+
+    WHILE index < LENGTH(keys_list)
+        SET current_key TO keys_list[index]
+
+        SELECT
+            CASE NOT (current_key INSTANCEOF STRING):
+                mode = "mixed"
+                BREAK
+            CASE mode == "start"
+                IF current_key == TOUPPER(current_key) THEN
+                    mode = "upper"
+                ELSE IF current_key == TOLOWER(current_key) THEN
+                    mode = "lower"
+                ELSE
+                    BREAK
+                END IF
+            CASE (mode == "upper" AND current_key != TOUPPER(current_key)) OR (mode == "lower" AND current_key != TOLOWER(current_key)):
+                mode = "mixed"
+                BREAK
+            OTHERWISE:
+                BREAK
+        END SELECT
+
+        index = index + 1
+    END WHILE
+
+    RETURN (mode == "upper") OR (mode == "lower")
+END FUNCTION
+```

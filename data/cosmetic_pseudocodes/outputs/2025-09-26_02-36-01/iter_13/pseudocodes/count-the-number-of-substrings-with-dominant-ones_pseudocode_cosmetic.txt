@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION numberOfSubstrings(s)
+        DECLARE totalLength AS INTEGER
+        SET totalLength = 0
+        FOR EACH _ IN s
+            totalLength = totalLength + 1
+        END FOR
+
+        DECLARE aggregateCount AS INTEGER
+        SET aggregateCount = 0
+
+        DECLARE procedure ProcessEndPosition(pos, startPos, oneCount, zeroCount, incrementCountRef)
+            IF pos >= totalLength THEN
+                RETURN
+            END IF
+            DECLARE currentChar AS CHARACTER
+            SET currentChar = s[pos]
+            DECLARE updatedOneCount AS INTEGER
+            DECLARE updatedZeroCount AS INTEGER
+
+            IF currentChar = '1' THEN
+                SET updatedOneCount = oneCount + 1
+                SET updatedZeroCount = zeroCount
+            ELSE
+                SET updatedOneCount = oneCount
+                SET updatedZeroCount = zeroCount + 1
+            END IF
+
+            IF updatedOneCount >= updatedZeroCount * updatedZeroCount THEN
+                SET incrementCountRef.value = incrementCountRef.value + 1
+            END IF
+
+            CALL ProcessEndPosition(pos + 1, startPos, updatedOneCount, updatedZeroCount, incrementCountRef)
+        END PROCEDURE
+
+        DECLARE pointer AS INTEGER
+        SET pointer = 0
+
+        DECLARE RefCount AS RECORD
+            value : INTEGER
+        END RECORD
+
+        WHILE pointer <= totalLength - 1
+            DECLARE oneCounter AS INTEGER
+            DECLARE zeroCounter AS INTEGER
+            SET oneCounter = 0
+            SET zeroCounter = 0
+
+            DECLARE counterRef AS RefCount
+            SET counterRef.value = 0
+
+            CALL ProcessEndPosition(pointer, pointer, oneCounter, zeroCounter, counterRef)
+
+            SET aggregateCount = aggregateCount + counterRef.value
+            SET pointer = pointer + 1
+        END WHILE
+
+        RETURN aggregateCount
+    END FUNCTION
+END CLASS

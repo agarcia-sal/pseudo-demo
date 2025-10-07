@@ -1,0 +1,57 @@
+CLASS Solution
+{
+    FUNCTION shortestSubstrings(arr)
+    {
+        DEFINE mapCounts AS new dictionary defaulting to 0
+
+        PROCEDURE addSubstrings(s, startPos)
+        {
+            IF startPos EQUALS LENGTH(s) THEN RETURN
+
+            DEFINE endPos AS startPos PLUS 1
+            WHILE endPos LESSTHANOREQUAL LENGTH(s)
+                DEFINE currentPiece AS SUBSTRING(s, startPos, endPos MINUS 1)
+                mapCounts[currentPiece] = mapCounts[currentPiece] PLUS 1
+                endPos = endPos PLUS 1
+            END WHILE
+
+            addSubstrings(s, startPos PLUS 1)
+        }
+
+        FOR each element IN arr
+            addSubstrings(element, 0)
+        END FOR
+
+        DEFINE finalList AS empty list
+
+        PROCEDURE findUniqueMin(s, pos, currentBest)
+        {
+            IF pos EQUALS LENGTH(s) THEN RETURN currentBest
+
+            DEFINE pointer AS pos PLUS 1
+            WHILE pointer LESSTHANOREQUAL LENGTH(s)
+                DEFINE candidate AS SUBSTRING(s, pos, pointer MINUS 1)
+                IF mapCounts[candidate] EQUALS (1 TIMES 1)
+                THEN
+                    IF (currentBest EQUALS "") OR 
+                       (LENGTH(candidate) LESSTHAN LENGTH(currentBest)) OR 
+                       ((LENGTH(candidate) EQUALS LENGTH(currentBest)) AND (candidate LESS THAN currentBest))
+                    THEN
+                        currentBest = candidate
+                    END IF
+                END IF
+                pointer = pointer PLUS 1
+            END WHILE
+
+            RETURN findUniqueMin(s, pos PLUS 1, currentBest)
+        }
+
+        FOR each strItem IN arr
+            DEFINE candidateMin AS ""
+            candidateMin = findUniqueMin(strItem, 0, candidateMin)
+            APPEND candidateMin TO finalList
+        END FOR
+
+        RETURN finalList
+    }
+}

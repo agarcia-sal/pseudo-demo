@@ -1,0 +1,96 @@
+```
+CLASS Solution
+    FUNCTION minimumDeletions(word, k)
+  SET chars_count TO empty map
+  SET idx_x TO 0
+  WHILE idx_x < LENGTH(word)
+    SET curr_char TO word[idx_x]
+    IF NOT (curr_char IN chars_count) THEN
+      SET chars_count[curr_char] TO 1
+    ELSE 
+      SET chars_count[curr_char] TO chars_count[curr_char] + (1 * 1)
+    END IF
+    SET idx_x TO idx_x + 1
+  END WHILE
+
+  SET freq_list TO EMPTY LIST
+  FOR EACH val_c IN chars_count
+    APPEND chars_count[val_c] TO freq_list
+  END FOR
+  SET freq_list TO sortAscending(freq_list) 
+
+  FUNCTION sortAscending(arr)
+    IF LENGTH(arr) <= 1 THEN
+      RETURN arr
+    END IF
+    SET pivot_idx TO LENGTH(arr) DIV 2
+    SET pivot_val TO arr[pivot_idx]
+    SET left_bucket TO EMPTY LIST
+    SET right_bucket TO EMPTY LIST
+    SET middle_bucket TO EMPTY LIST
+    SET pos TO 0
+    WHILE pos < LENGTH(arr)
+      IF arr[pos] < pivot_val THEN
+        APPEND arr[pos] TO left_bucket
+      ELSE IF arr[pos] > pivot_val THEN
+        APPEND arr[pos] TO right_bucket
+      ELSE
+        APPEND arr[pos] TO middle_bucket
+      END IF
+      SET pos TO pos + 1
+    END WHILE
+    RETURN concatenateLists(sortAscending(left_bucket), middle_bucket, sortAscending(right_bucket))
+  END FUNCTION
+
+  FUNCTION concatenateLists(list_a, list_b, list_c)
+    SET res TO EMPTY LIST
+    FOR EACH element IN list_a
+      APPEND element TO res
+    END FOR
+    FOR EACH element IN list_b
+      APPEND element TO res
+    END FOR
+    FOR EACH element IN list_c
+      APPEND element TO res
+    END FOR
+    RETURN res
+  END FUNCTION
+
+  SET min_del TO 10 ^ 20
+
+  FUNCTION tailRecursiveLoop(idx_i, current_min)
+    IF idx_i > LENGTH(freq_list) - 1 THEN
+      RETURN current_min
+    END IF
+
+    SET max_freq_allowed TO freq_list[idx_i] + k
+    SET delete_sum TO 0
+    SET inner_pos TO idx_i + 1
+    REPEAT
+      IF inner_pos > LENGTH(freq_list) -1 THEN
+        BREAK
+      END IF
+      IF freq_list[inner_pos] > max_freq_allowed THEN
+        SET delete_sum TO delete_sum + (freq_list[inner_pos] - max_freq_allowed)
+      END IF
+      SET inner_pos TO inner_pos + 1
+    UNTIL FALSE
+
+    SET pre_pos TO 0
+    WHILE pre_pos < idx_i
+      SET delete_sum TO delete_sum + freq_list[pre_pos]
+      SET pre_pos TO pre_pos + 1
+    END WHILE
+
+    IF delete_sum < current_min THEN
+      SET current_min TO delete_sum
+    END IF
+
+    RETURN tailRecursiveLoop(idx_i + 1, current_min)
+  END FUNCTION
+  
+  SET min_del TO tailRecursiveLoop(0, min_del)
+  RETURN min_del
+    END FUNCTION
+END CLASS
+```

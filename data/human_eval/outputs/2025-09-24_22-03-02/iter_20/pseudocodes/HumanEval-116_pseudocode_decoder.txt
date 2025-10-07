@@ -1,0 +1,33 @@
+FUNCTION sort_array(arr)
+    SET sorted_arr TO CALL sorted WITH ARGUMENTS arr
+    DEFINE length_of_sorted_arr AS LENGTH OF sorted_arr
+    SET result TO LIST WITH ELEMENTS EMPTY
+    FOR index FROM 0 TO length_of_sorted_arr MINUS 1
+        SET current_element TO sorted_arr AT index
+        CALL CONVERT current_element TO BINARY STRING WITHOUT PREFIX TO binary_string
+        SET count_ones TO 0
+        DEFINE length_of_binary_string AS LENGTH OF binary_string
+        FOR binary_index FROM 0 TO length_of_binary_string MINUS 1
+            IF binary_string AT binary_index EQUALS CHARACTER '1'
+                INCREMENT count_ones BY 1
+            END IF
+        END FOR
+        APPEND TUPLE WITH ELEMENTS count_ones AND current_element TO result
+    END FOR
+    DEFINE length_of_result AS LENGTH OF result
+    FOR i FROM 0 TO length_of_result MINUS 2
+        FOR j FROM 0 TO length_of_result MINUS 2 MINUS i
+            IF result AT j FIRST ELEMENT GREATER THAN result AT j PLUS 1 FIRST ELEMENT OR
+               (result AT j FIRST ELEMENT EQUALS result AT j PLUS 1 FIRST ELEMENT AND result AT j SECOND ELEMENT GREATER THAN result AT j PLUS 1 SECOND ELEMENT)
+                SET temp TO result AT j
+                SET result AT j TO result AT j PLUS 1
+                SET result AT j PLUS 1 TO temp
+            END IF
+        END FOR
+    END FOR
+    SET final_arr TO LIST WITH ELEMENTS EMPTY
+    FOR k FROM 0 TO length_of_result MINUS 1
+        APPEND result AT k SECOND ELEMENT TO final_arr
+    END FOR
+    RETURN final_arr
+END FUNCTION

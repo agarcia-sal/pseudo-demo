@@ -1,0 +1,46 @@
+CLASS Solution
+	FUNCTION numberOfStableArrays(zero, one, limit)
+		LET modulus := (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+
+		FUNCTION dp(curr_zero_count, curr_one_count, prev_char, run_len)
+			WHILE TRUE
+				IF curr_zero_count = 0 AND curr_one_count = 0 THEN 
+					RETURN 1
+				END IF
+				IF curr_zero_count < 0 OR curr_one_count < 0 THEN
+					RETURN 0
+				END IF
+				LET sum_result := 0
+
+				LET can_append_zero := NOT (prev_char = 0 AND run_len >= limit)
+				LET can_append_one := NOT (prev_char = 1 AND run_len >= limit)
+
+				IF can_append_zero THEN
+					LET next_run_length := run_len
+					IF prev_char = 0 THEN
+						next_run_length := run_len + 1
+					ELSE
+						next_run_length := 1
+					END IF
+					LET recurse_result := dp(curr_zero_count - 1, curr_one_count, 0, next_run_length)
+					sum_result := (sum_result + recurse_result) % modulus
+				END IF
+
+				IF can_append_one THEN
+					LET next_run_length := run_len
+					IF prev_char = 1 THEN
+						next_run_length := run_len + 1
+					ELSE
+						next_run_length := 1
+					END IF
+					LET recurse_result := dp(curr_zero_count, curr_one_count - 1, 1, next_run_length)
+					sum_result := (sum_result + recurse_result) % modulus
+				END IF
+
+				RETURN sum_result
+			END WHILE
+		END FUNCTION
+
+		RETURN dp(zero, one, -1, 0)
+	END FUNCTION
+END CLASS

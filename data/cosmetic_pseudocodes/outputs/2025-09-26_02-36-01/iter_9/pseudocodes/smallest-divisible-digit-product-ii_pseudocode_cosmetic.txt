@@ -1,0 +1,220 @@
+CLASS Solution
+
+    FUNCTION smallestNumber(xqyt, vdnh)
+    BEGIN
+        SET kgpr, ymji, tdax TO self._getPrimeCount(vdnh)
+        IF ymji = false THEN
+            RETURN "-1"
+        END IF
+
+        SET dmtq TO self._getFactorCount(kgpr)
+
+        SET gvnr TO 0
+        FOR EACH val IN dmtq VALUES DO
+            SET gvnr TO gvnr + val
+        END FOR
+
+        IF gvnr > LENGTH(xqyt) THEN
+            SET rfel TO ""
+            FOR EACH key, val IN dmtq DO
+                FOR uu = 1 TO val DO
+                    SET rfel TO rfel + key
+                END FOR
+            END FOR
+            RETURN rfel
+        END IF
+
+        FUNCTION sumFactorCounts(s)
+        BEGIN
+            SET counter TO NEW Counter()
+            FOR EACH ch IN s DO
+                SET digitVal TO INTEGER(ch)
+                SET factors TO FACTOR_COUNTS[digitVal]
+                FOR EACH fk, fv IN factors DO
+                    IF fk IN counter THEN
+                        SET counter[fk] TO counter[fk] + fv
+                    ELSE
+                        SET counter[fk] TO fv
+                    END IF
+                END FOR
+            END FOR
+            RETURN counter
+        END
+
+        SET primeCountPrefix TO sumFactorCounts(xqyt)
+
+        FUNCTION findFirstZeroIndex(strg)
+        BEGIN
+            SET idx TO 0
+            WHILE idx < LENGTH(strg) DO
+                IF strg[idx] = '0' THEN
+                    RETURN idx
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN LENGTH(strg)
+        END
+
+        SET firstZeroIndex TO findFirstZeroIndex(xqyt)
+
+        IF firstZeroIndex = LENGTH(xqyt) AND self._compareCountersLE(kgpr, primeCountPrefix) THEN
+            RETURN xqyt
+        END IF
+
+        FUNCTION sumCounterVals(cnt)
+        BEGIN
+            SET sumVal TO 0
+            FOR EACH v IN cnt VALUES DO
+                SET sumVal TO sumVal + v
+            END FOR
+            RETURN sumVal
+        END
+
+        FUNCTION counterSubtract(a, b)
+        BEGIN
+            SET result TO NEW Counter()
+            FOR EACH k IN a KEYS DO
+                SET result[k] TO a[k]
+            END FOR
+            FOR EACH k IN b KEYS DO
+                IF k IN result THEN
+                    SET result[k] TO result[k] - b[k]
+                ELSE
+                    SET result[k] TO -b[k]
+                END IF
+            END FOR
+            RETURN result
+        END
+
+        FUNCTION concatRepeatedChars(cnt)
+        BEGIN
+            SET s OUT TO ""
+            FOR EACH k, v IN cnt DO
+                FOR zz = 1 TO v DO
+                    SET s OUT TO s OUT + k
+                END FOR
+            END FOR
+            RETURN s OUT
+        END
+
+        SET nlen TO LENGTH(xqyt)
+        SET idx TO nlen - 1
+        WHILE idx >= 0 DO
+            SET cchar TO xqyt[idx]
+            SET digitZ TO INTEGER(cchar)
+
+            FUNCTION subtractFactorCounts(a, b)
+                RETURN counterSubtract(a,b)
+            END
+
+            SET primeCountPrefix TO subtractFactorCounts(primeCountPrefix, FACTOR_COUNTS[digitZ])
+
+            SET remPositions TO nlen - 1 - idx
+
+            IF idx <= firstZeroIndex THEN
+                SET candidate TO digitZ + 1
+                WHILE candidate <= 9 DO
+                    SET tmpPrimeCount TO counterSubtract(kgpr, primeCountPrefix)
+                    SET tmpPrimeCount TO counterSubtract(tmpPrimeCount, FACTOR_COUNTS[candidate])
+                    IF sumCounterVals(tmpPrimeCount) <= remPositions THEN
+                        SET leftoverOnes TO remPositions - sumCounterVals(tmpPrimeCount)
+
+                        FUNCTION buildResult()
+                        BEGIN
+                            IF idx = 0 THEN
+                                SET leftSub TO ""
+                            ELSE
+                                SET leftSub TO SUBSTRING(xqyt, 0, idx)
+                            END IF
+                            RETURN leftSub + STRING(candidate) + STRING('1' REPEATED leftoverOnes) + concatRepeatedChars(tmpPrimeCount)
+                        END
+
+                        RETURN buildResult()
+                    END IF
+                    SET candidate TO candidate + 1
+                END WHILE
+            END IF
+
+            SET idx TO idx - 1
+        END WHILE
+
+        SET dmtq TO self._getFactorCount(kgpr)
+
+        SET totalFactors TO 0
+        FOR EACH val IN dmtq VALUES DO
+            SET totalFactors TO totalFactors + val
+        END FOR
+
+        SET onesCount TO LENGTH(xqyt) + 1 - totalFactors
+        SET ansStr TO STRING('1' REPEATED onesCount) + concatRepeatedChars(dmtq)
+
+        RETURN ansStr
+    END
+
+    FUNCTION _getPrimeCount(rwws)
+    BEGIN
+        SET counter TO NEW Counter()
+        SET ps TO [2, 3, 5, 7]
+        FOR EACH p IN ps DO
+            WHILE rwws MOD p = 0 DO
+                SET rwws TO rwws / p
+                IF p IN counter THEN
+                    SET counter[p] TO counter[p] + 1
+                ELSE
+                    SET counter[p] TO 1
+                END IF
+            END WHILE
+        END FOR
+        RETURN counter, (rwws = 1)
+    END
+
+    FUNCTION _getFactorCount(enoq)
+    BEGIN
+        SET v2 TO enoq[2]
+        SET qc TO v2 / 3
+        SET rem2 TO v2 MOD 3
+
+        SET v3 TO enoq[3]
+        SET ct9 TO v3 / 2
+        SET ct3 TO v3 MOD 2
+
+        SET ct4 TO rem2 / 2
+        SET ct2 TO rem2 MOD 2
+
+        SET ct6 TO 0
+        IF ct2 = 1 AND ct3 = 1 THEN
+            SET ct2 TO 0
+            SET ct3 TO 0
+            SET ct6 TO 1
+        END IF
+
+        IF ct3 = 1 AND ct4 = 1 THEN
+            SET ct2 TO 1
+            SET ct6 TO 1
+            SET ct3 TO 0
+            SET ct4 TO 0
+        END IF
+
+        RETURN NEW Counter {
+            '2': ct2,
+            '3': ct3,
+            '4': ct4,
+            '5': enoq[5],
+            '6': ct6,
+            '7': enoq[7],
+            '8': qc,
+            '9': ct9
+        }
+    END
+
+    FUNCTION _compareCountersLE(a, b)
+    BEGIN
+        FOR EACH k IN a KEYS DO
+            IF NOT (k IN b) OR a[k] > b[k] THEN
+                RETURN false
+            END IF
+        END FOR
+        RETURN true
+    END
+
+END CLASS

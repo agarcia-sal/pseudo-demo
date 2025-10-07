@@ -1,0 +1,53 @@
+FUNCTION valid_date(input_string)
+    DECLARE stripped_string, parts, mon_str, dy_str, yr_str, mon_val, dy_val, yr_val
+    DECLARE is_month_valid, is_day_valid, is_error_occurred
+    SET is_error_occurred TO False
+
+    TRY
+        SET stripped_string TO input_string TRIMMED OF LEADING AND TRAILING SPACES
+        SET parts TO SPLIT stripped_string BY '-'
+        SET mon_str TO parts.at(0)
+        SET dy_str TO parts.at(1)
+        SET yr_str TO parts.at(2)
+
+        SET mon_val TO CONVERT mon_str TO INTEGER
+        SET dy_val TO CONVERT dy_str TO INTEGER
+        SET yr_val TO CONVERT yr_str TO INTEGER
+    EXCEPT ANY ERROR
+        SET is_error_occurred TO True
+    END TRY
+
+    IF is_error_occurred
+        RETURN False
+    END IF
+
+    SET is_month_valid TO (mon_val >= 1) AND (mon_val <= 0xc)  # 12 in hex
+    IF NOT is_month_valid
+        RETURN False
+    END IF
+
+    SWITCH mon_val
+        CASE 1, 3, 5, 7, 8, 10, 12:
+            SET is_day_valid TO (dy_val >= 1) AND (dy_val <= 31)
+            IF NOT is_day_valid
+                RETURN False
+            END IF
+            BREAK
+
+        CASE 4, 6, 9, 11:
+            SET is_day_valid TO (dy_val >= 1) AND (dy_val <= 30)
+            IF NOT is_day_valid
+                RETURN False
+            END IF
+            BREAK
+
+        CASE 2:
+            SET is_day_valid TO (dy_val >= 1) AND (dy_val <= 0x1d)  # 29 decimal
+            IF NOT is_day_valid
+                RETURN False
+            END IF
+            BREAK
+    END SWITCH
+
+    RETURN True
+END FUNCTION

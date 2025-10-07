@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION sumOfGoodSubsequences(nums)
+        CONSTANT MOD_VALUE ASSIGN 10^9 + 7
+        DECLARE map_f SET DEFAULT 0
+        DECLARE map_g SET DEFAULT 0
+
+        FUNCTION safe_get(d, key)
+            IF key IN d THEN
+                RETURN d[key]
+            ELSE
+                RETURN 0
+            ENDIF
+        END FUNCTION
+
+        PROCEDURE mod_add(target_map, key, val)
+            DECLARE old_val ASSIGN safe_get(target_map, key)
+            target_map[key] = (old_val + val) % MOD_VALUE
+        END PROCEDURE
+
+        DECLARE index ASSIGN 0
+        DECLARE length_nums ASSIGN LENGTH(nums)
+        WHILE index < length_nums
+            DECLARE current_val ASSIGN nums[index]
+
+            mod_add(map_g, current_val, 1)
+            mod_add(map_f, current_val, current_val)
+
+            DECLARE left_key ASSIGN current_val - 1
+            DECLARE left_f ASSIGN safe_get(map_f, left_key)
+            DECLARE left_g ASSIGN safe_get(map_g, left_key)
+            DECLARE increment_f1 ASSIGN (left_f + left_g * current_val) % MOD_VALUE
+
+            DECLARE val_f_current ASSIGN safe_get(map_f, current_val)
+            val_f_current = (val_f_current + increment_f1) % MOD_VALUE
+            map_f[current_val] = val_f_current
+
+            DECLARE val_g_current ASSIGN safe_get(map_g, current_val)
+            val_g_current = (val_g_current + left_g) % MOD_VALUE
+            map_g[current_val] = val_g_current
+
+            DECLARE right_key ASSIGN current_val + 1
+            DECLARE right_f ASSIGN safe_get(map_f, right_key)
+            DECLARE right_g ASSIGN safe_get(map_g, right_key)
+            DECLARE increment_f2 ASSIGN (right_f + right_g * current_val) % MOD_VALUE
+
+            map_f[current_val] = (map_f[current_val] + increment_f2) % MOD_VALUE
+            map_g[current_val] = (map_g[current_val] + right_g) % MOD_VALUE
+
+            index = index + 1
+        END WHILE
+
+        DECLARE accumulator ASSIGN 0
+        DECLARE keys_list ASSIGN LIST_KEYS(map_f)
+        DECLARE position ASSIGN 0
+        DECLARE total_keys ASSIGN LENGTH(keys_list)
+        REPEAT
+            IF position >= total_keys THEN
+                BREAK
+            ENDIF
+            DECLARE current_key ASSIGN keys_list[position]
+            accumulator = accumulator + map_f[current_key]
+            position = position + 1
+        UNTIL FALSE
+
+        DECLARE output_result ASSIGN accumulator MOD MOD_VALUE
+        RETURN output_result
+    END FUNCTION
+END CLASS

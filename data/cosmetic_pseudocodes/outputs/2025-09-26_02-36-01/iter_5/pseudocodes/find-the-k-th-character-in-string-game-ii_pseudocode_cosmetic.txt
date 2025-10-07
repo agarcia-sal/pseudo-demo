@@ -1,0 +1,45 @@
+CLASS Solution
+    FUNCTION kthCharacter(k param_k INTEGER, operations param_operations LIST OF INTEGER) RETURNS STRING
+        DEFINE FUNCTION helper_decrement(index_current INTEGER, length_current INTEGER, position_current INTEGER, current_char CHAR, ops_collection LIST OF INTEGER) RETURNS CHAR
+            IF index_current LESS THAN zero THEN
+                RETURN current_char
+            END IF
+
+            DEFINE half_length INTEGER = length_current DIVIDED BY 2
+
+            IF position_current LESS THAN OR EQUAL TO half_length THEN
+                RETURN helper_decrement(index_current - 1, half_length, position_current, current_char, ops_collection)
+            ELSE
+                DEFINE updated_position INTEGER = position_current - half_length
+                DEFINE updated_char CHAR = current_char
+                IF ops_collection[index_current] EQUALS 1 THEN
+                    DEFINE char_code INTEGER = ASCII(updated_char)
+                    IF char_code EQUALS ASCII('z') THEN
+                        SET updated_char TO 'a'
+                    ELSE
+                        SET updated_char TO CHARACTER(char_code + 1)
+                    END IF
+                END IF
+                RETURN helper_decrement(index_current - 1, half_length, updated_position, updated_char, ops_collection)
+            END IF
+        END FUNCTION
+
+        DEFINE length_calc INTEGER = 1
+        DEFINE ops_list LIST OF INTEGER = []
+
+        DEFINE index INTEGER = 0
+        WHILE index LESS THAN param_operations.LENGTH DO
+            DEFINE op_curr INTEGER = param_operations[index]
+            CALL ops_list.APPEND(op_curr)
+            DEFINE multiplier INTEGER = 2 * 1
+            SET length_calc = length_calc * multiplier DIVIDED BY 2
+            SET index = index + 1
+        END WHILE
+
+        DEFINE initial_character CHAR = 'a'
+        DEFINE ops_last_index INTEGER = ops_list.LENGTH - 1
+        DEFINE result_char CHAR = helper_decrement(ops_last_index, length_calc, param_k, initial_character, ops_list)
+
+        RETURN result_char
+    END FUNCTION
+END CLASS

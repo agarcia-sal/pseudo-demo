@@ -1,0 +1,56 @@
+CLASS Solution  
+	 FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer  
+		  FUNCTION update_count(count LIST OF integers num integer add integer)  
+			   SET bit_flag TO integer 1  
+			   SET index_counter TO integer 0  
+			   WHILE index_counter LESS THAN OR EQUAL TO 31  
+					IF (num BITWISE-AND bit_flag) NOT EQUAL TO 0  
+						 SET count at position index_counter TO count at position index_counter PLUS add  
+					END IF  
+					SET bit_flag TO bit_flag MULTIPLY 2  
+					SET index_counter TO index_counter PLUS 1  
+			   END WHILE  
+		  END FUNCTION  
+
+		  FUNCTION compute_current_or(count LIST OF integers) RETURNS integer  
+			   SET assembled_or TO integer 0  
+			   SET position TO integer 0  
+			   REPEAT  
+					IF count at position GREATER THAN 0  
+						 SET assembled_or TO (assembled_or BITWISE-OR (1 LEFT SHIFT position))  
+					END IF  
+					SET position TO position PLUS 1  
+			   UNTIL position GREATER THAN 31  
+			   RETURN assembled_or  
+		  END FUNCTION  
+
+		  SET length_nums TO LENGTH OF nums  
+		  SET bit_counts TO LIST OF integer 0 REPEATED 32 TIMES  
+		  SET aggregated_or TO 0  
+		  SET left_pointer TO 0  
+		  SET minimal_length TO +∞  
+
+		  SET right_pointer TO 0  
+		  WHILE right_pointer LESS THAN length_nums  
+			   CALL update_count WITH bit_counts nums at position right_pointer 1  
+			   SET aggregated_or TO aggregated_or BITWISE-OR nums at position right_pointer  
+
+			   WHILE (NOT (aggregated_or LESS THAN k)) AND (left_pointer LESS THAN OR EQUAL TO right_pointer)  
+					IF minimal_length GREATER THAN (right_pointer MINUS left_pointer PLUS (1 TIMES 1))  
+						 SET minimal_length TO right_pointer MINUS left_pointer PLUS 1  
+					END IF  
+					CALL update_count WITH bit_counts nums at position left_pointer -1  
+					SET aggregated_or TO compute_current_or(bit_counts)  
+					SET left_pointer TO left_pointer PLUS 1  
+			   END WHILE  
+
+			   SET right_pointer TO right_pointer PLUS 1  
+		  END WHILE  
+
+		  IF minimal_length EQUALS +∞  
+			   RETURN -1  
+		  ELSE  
+			   RETURN minimal_length  
+		  END IF  
+	 END FUNCTION  
+END CLASS

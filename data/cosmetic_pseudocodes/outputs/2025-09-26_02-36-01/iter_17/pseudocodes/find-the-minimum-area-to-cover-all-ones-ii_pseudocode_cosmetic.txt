@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION minimumSum(grid)
+        DECLARE L AS empty list
+        DECLARE a AS 0
+        WHILE a LESS THAN length(grid)
+            DECLARE b AS 0
+            REPEAT
+                IF (grid[a] EQUALS 1) AND (grid[a][b] EQUALS 1) THEN
+                    APPEND (a, b) TO L
+                END IF
+                SET b TO b + 1
+                IF b GREATER OR EQUAL TO length(grid[a]) THEN BREAK END IF
+            UNTIL FALSE
+            SET a TO a + 1
+        END WHILE
+
+        FUNCTION rect_area(points)
+            IF (length(points) EQUALS 0) THEN RETURN 0 END IF
+
+            DECLARE Xs AS empty list
+            DECLARE Ys AS empty list
+            DECLARE idx AS 0
+            WHILE idx LESS THAN length(points)
+                APPEND points[idx][0] TO Xs
+                APPEND points[idx][1] TO Ys
+                SET idx TO idx + 1
+            END WHILE
+
+            DECLARE minX AS Xs[0]
+            DECLARE maxX AS Xs[0]
+            DECLARE minY AS Ys[0]
+            DECLARE maxY AS Ys[0]
+            DECLARE c AS 1
+            WHILE c LESS THAN length(Xs)
+                IF Xs[c] LESS THAN minX THEN minX = Xs[c] END IF
+                IF Xs[c] GREATER THAN maxX THEN maxX = Xs[c] END IF
+                IF Ys[c] LESS THAN minY THEN minY = Ys[c] END IF
+                IF Ys[c] GREATER THAN maxY THEN maxY = Ys[c] END IF
+                SET c TO c + 1
+            END WHILE
+
+            DECLARE w AS (maxX - minX) + 1
+            DECLARE h AS (maxY - minY) + 1
+
+            RETURN w * h
+        END FUNCTION
+
+        DECLARE minimumValue AS +∞
+        DECLARE M AS length(L)
+
+        DECLARE p AS 1
+        WHILE p LESS THAN M
+            DECLARE q AS p + 1
+            REPEAT
+                DECLARE r AS q + 1
+                REPEAT
+                    DECLARE combinations_i AS all combinations of L TAKEN p at a time
+                    FOR EACH C1 IN combinations_i
+                        DECLARE setL AS set(L)
+                        DECLARE setC1 AS set(C1)
+                        DECLARE remAfterC1 AS setL MINUS setC1
+
+                        DECLARE comb2count AS q - p
+                        DECLARE combinations_j AS all combinations of remAfterC1 TAKEN comb2count at a time
+                        FOR EACH C2 IN combinations_j
+                            DECLARE setC2 AS set(C2)
+                            DECLARE C3 AS remAfterC1 MINUS setC2
+
+                            DECLARE areaOne AS rect_area(C1)
+                            DECLARE areaTwo AS rect_area(C2)
+                            DECLARE areaThree AS rect_area(C3)
+
+                            IF (areaOne GREATER THAN 0) AND (areaTwo GREATER THAN 0) AND (areaThree GREATER THAN 0) THEN
+                                DECLARE sumAreas AS areaOne + areaTwo + areaThree
+                                IF sumAreas LESS THAN minimumValue THEN
+                                    SET minimumValue TO sumAreas
+                                END IF
+                            END IF
+                        END FOR
+                    END FOR
+                    SET r TO r + 1
+                    IF r GREATER OR EQUAL TO M THEN BREAK END IF
+                UNTIL FALSE
+                SET q TO q + 1
+                IF q GREATER OR EQUAL TO M THEN BREAK END IF
+            UNTIL FALSE
+            SET p TO p + 1
+        END WHILE
+
+        RETURN minimumValue
+    END FUNCTION
+END CLASS

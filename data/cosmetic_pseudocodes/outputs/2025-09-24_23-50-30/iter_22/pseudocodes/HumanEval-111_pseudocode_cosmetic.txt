@@ -1,0 +1,33 @@
+```
+FUNCTION histogram(input_text)
+    DECLARE freq_map AS empty map
+    DECLARE tokens AS list FROM splitting input_text ON ' '
+    DECLARE top_freq AS 0
+
+    DEFINE find_maximum(index, current_max)
+        IF index EQUALS LENGTH(tokens)
+            RETURN current_max
+        ELSE
+            DECLARE item AS tokens[index]
+            DECLARE count AS LENGTH(FILTER tokens WHERE element EQUALS item)
+            DECLARE next_max AS (count > current_max AND item NOT EQUAL TO "") ? count : current_max
+            RETURN find_maximum(index + 1, next_max)
+    END DEFINE
+
+    SET top_freq TO find_maximum(0, 0)
+
+    DEFINE add_entries(index)
+        IF index < LENGTH(tokens)
+            DECLARE entry AS tokens[index]
+            DECLARE freq AS LENGTH(FILTER tokens WHERE element EQUALS entry)
+            IF freq EQUALS top_freq
+                SET freq_map[entry] TO top_freq
+            CALL add_entries(index + 1)
+    END DEFINE
+
+    IF top_freq > 0 THEN
+        CALL add_entries(0)
+
+    RETURN freq_map
+END FUNCTION
+```

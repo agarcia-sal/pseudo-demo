@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION largestPalindrome(n, k)
+        DEFINE FUNCTION toString(num)
+            RETURN "" + num
+        END FUNCTION
+
+        DEFINE FUNCTION stringReverse(str)
+            DEFINE FUNCTION helper(idx, acc)
+                IF idx < 0 THEN RETURN acc END IF
+                RETURN helper(idx - 1, acc + str[idx])
+            END FUNCTION
+            RETURN helper(LENGTH(str) - 1, "")
+        END FUNCTION
+
+        DEFINE FUNCTION substring(str, startIdx, endIdx)
+            DEFINE FUNCTION subHelper(i, acc)
+                IF i == endIdx THEN RETURN acc END IF
+                RETURN subHelper(i + 1, acc + str[i])
+            END FUNCTION
+            RETURN subHelper(startIdx, "")
+        END FUNCTION
+
+        DEFINE FUNCTION digitNineRepeated(times)
+            DEFINE FUNCTION repeatHelper(count, acc)
+                IF count == 0 THEN RETURN acc END IF
+                RETURN repeatHelper(count - 1, acc + "9")
+            END FUNCTION
+            RETURN repeatHelper(times, "")
+        END FUNCTION
+
+        DEFINE FUNCTION toInt(str)
+            DEFINE FUNCTION toIntHelper(i, length, result)
+                IF i == length THEN RETURN result END IF
+                DEFINE digitVal = ASCII_VALUE(str[i]) - ASCII_VALUE('0')
+                RETURN toIntHelper(i + 1, length, result * 10 + digitVal)
+            END FUNCTION
+            RETURN toIntHelper(0, LENGTH(str), 0)
+        END FUNCTION
+
+        DEFINE FUNCTION isDivisibleBy(value, divisor)
+            RETURN (value - ((value / divisor) * divisor)) == 0
+        END FUNCTION
+
+        IF (n - 1) == 0 THEN
+            DEFINE FUNCTION descendLoop(x)
+                IF x < 1 THEN RETURN "0" END IF
+                IF isDivisibleBy(x, k) THEN
+                    RETURN toString(x)
+                ELSE
+                    RETURN descendLoop(x - 1)
+                END IF
+            END FUNCTION
+
+            RETURN descendLoop(9)
+        END IF
+
+        DEFINE halfCount = ((n + 1) / 2)
+        DEFINE nineString = digitNineRepeated(halfCount)
+        DEFINE half = toInt(nineString)
+
+        DEFINE FUNCTION palindromeCheck(currHalf)
+            IF currHalf <= 0 THEN RETURN "0" END IF
+
+            DEFINE halfStr = toString(currHalf)
+            DEFINE leftPart = halfStr
+
+            DEFINE rightPart = 
+                IF isDivisibleBy(n, 2) THEN
+                    stringReverse(halfStr)
+                ELSE
+                    stringReverse(substring(halfStr, 0, LENGTH(halfStr) - 1))
+                END IF
+
+            DEFINE fullStr = leftPart + rightPart
+            DEFINE fullNum = toInt(fullStr)
+
+            IF isDivisibleBy(fullNum, k) THEN
+                RETURN fullStr
+            ELSE
+                RETURN palindromeCheck(currHalf - 1)
+            END IF
+        END FUNCTION
+
+        RETURN palindromeCheck(half)
+    END FUNCTION
+END CLASS

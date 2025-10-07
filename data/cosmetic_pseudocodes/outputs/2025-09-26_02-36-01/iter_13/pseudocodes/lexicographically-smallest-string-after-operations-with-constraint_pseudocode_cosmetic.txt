@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION getSmallestString(s parameter of type string k parameter of type integer) RETURNS string
+        FUNCTION cyclic_distance(c1 parameter of type character c2 parameter of type character) RETURNS integer
+            SET diff TO ABSOLUTE_VALUE(ORDINAL_VALUE(c1) - ORDINAL_VALUE(c2))
+            SET alt TO 26 - diff
+            IF diff < alt THEN
+                RETURN diff
+            ELSE
+                RETURN alt
+            END IF
+        END FUNCTION
+
+        SET idx TO 0
+        SET length TO LENGTH(s)
+        SET chars TO EMPTY LIST
+        FOR pos FROM 1 TO length
+            APPEND CHARACTER_AT(s, pos) TO chars
+        END FOR
+
+        FUNCTION process_position(position parameter of type integer) RETURNS VOID
+            IF position >= length OR k <= 0 THEN
+                RETURN
+            END IF
+
+            SET current_char TO chars[position + 1]
+            IF current_char = 'a' THEN
+                CALL process_position(position + 1)
+                RETURN
+            END IF
+
+            SET distance TO cyclic_distance(current_char, 'a')
+            IF distance <= k THEN
+                SET chars[position + 1] TO 'a'
+                SET k TO k - distance
+            ELSE
+                SET new_char_code TO ORDINAL_VALUE(current_char) - k
+                SET chars[position + 1] TO CHARACTER_FROM_CODE(new_char_code)
+                SET k TO 0
+            END IF
+
+            CALL process_position(position + 1)
+        END FUNCTION
+
+        CALL process_position(0)
+
+        SET output_string TO EMPTY_STRING
+        SET pos TO 1
+        REPEAT
+            IF pos > length THEN
+                EXIT
+            END IF
+            SET output_string TO output_string + chars[pos]
+            SET pos TO pos + 1
+        UNTIL FALSE
+
+        RETURN output_string
+    END FUNCTION
+END CLASS

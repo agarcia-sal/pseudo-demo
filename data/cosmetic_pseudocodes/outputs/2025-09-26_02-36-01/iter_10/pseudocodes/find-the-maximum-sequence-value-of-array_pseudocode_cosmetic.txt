@@ -1,0 +1,132 @@
+CLASS Solution  
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER  
+        
+        FUNCTION Pow2(exp INTEGER) RETURNS INTEGER  
+            IF exp = 0 THEN RETURN 1  
+            RETURN 2 * Pow2(exp - 1)  
+        END FUNCTION  
+        
+        FUNCTION Len(lst LIST OF INTEGER) RETURNS INTEGER  
+            SET c TO 0  
+            WHILE TRUE  
+                TRY  
+                    SET x TO lst[c]  
+                    SET c TO c + 1  
+                CATCH  
+                    BREAK  
+                END TRY  
+            END WHILE  
+            RETURN c  
+        END FUNCTION  
+        
+        FUNCTION Create3DBoolArray(d1 INTEGER, d2 INTEGER, d3 INTEGER) RETURNS ARRAY OF ARRAY OF ARRAY OF BOOLEAN  
+            FUNCTION Create1D(size INTEGER) RETURNS ARRAY OF BOOLEAN  
+                SET resultArr TO []  
+                SET idx1 TO 0  
+                WHILE idx1 < size  
+                    APPEND FALSE TO resultArr  
+                    SET idx1 TO idx1 + 1  
+                END WHILE  
+                RETURN resultArr  
+            END FUNCTION  
+            
+            FUNCTION Create2D(size1 INTEGER, size2 INTEGER) RETURNS ARRAY OF ARRAY OF BOOLEAN  
+                SET resultArr TO []  
+                SET idx2 TO 0  
+                WHILE idx2 < size1  
+                    APPEND Create1D(size2) TO resultArr  
+                    SET idx2 TO idx2 + 1  
+                END WHILE  
+                RETURN resultArr  
+            END FUNCTION  
+            
+            SET outerArr TO []  
+            SET idx3 TO 0  
+            WHILE idx3 < d1  
+                APPEND Create2D(d2, d3) TO outerArr  
+                SET idx3 TO idx3 + 1  
+            END WHILE  
+            RETURN outerArr  
+        END FUNCTION  
+        
+        SET expValue TO 7  
+        SET powTwo TO Pow2(expValue)  
+        SET lenNums TO Len(nums)  
+        SET dpF TO Create3DBoolArray(lenNums + 1, k + 2, powTwo)  
+        SET dpF[0][0][0] TO TRUE  
+        
+        FUNCTION LoopIndicesForward(a INTEGER, b INTEGER, c INTEGER)  
+            IF a = lenNums THEN RETURN END FUNCTION  
+            FUNCTION LoopJ(j INTEGER)  
+                IF j > k THEN RETURN END FUNCTION  
+                FUNCTION LoopX(x INTEGER)  
+                    IF x >= powTwo THEN RETURN END FUNCTION  
+                    SET dpF[a+1][j][x] TO dpF[a+1][j][x] OR dpF[a][j][x]  
+                    SET dpF[a+1][j+1][x OR nums[a]] TO TRUE OR dpF[a][j][x]  
+                    LoopX(x + 1)  
+                END FUNCTION  
+                LoopX(0)  
+                LoopJ(j + 1)  
+            END FUNCTION  
+            LoopJ(0)  
+            LoopIndicesForward(a + 1, b, c)  
+        END FUNCTION  
+        
+        LoopIndicesForward(0, 0, 0)  
+        
+        SET dpG TO Create3DBoolArray(lenNums + 1, k + 2, powTwo)  
+        SET dpG[lenNums][0][0] TO TRUE  
+        
+        FUNCTION LoopIndicesBackward(a INTEGER)  
+            IF a <= 0 THEN RETURN END FUNCTION  
+            FUNCTION LoopJb(jb INTEGER)  
+                IF jb > k THEN RETURN END FUNCTION  
+                FUNCTION LoopYb(yb INTEGER)  
+                    IF yb >= powTwo THEN RETURN END FUNCTION  
+                    SET dpG[a-1][jb][yb] TO dpG[a-1][jb][yb] OR dpG[a][jb][yb]  
+                    SET dpG[a-1][jb+1][yb OR nums[a-1]] TO TRUE OR dpG[a][jb][yb]  
+                    LoopYb(yb + 1)  
+                END FUNCTION  
+                LoopYb(0)  
+                LoopJb(jb + 1)  
+            END FUNCTION  
+            LoopJb(0)  
+            LoopIndicesBackward(a - 1)  
+        END FUNCTION  
+        
+        LoopIndicesBackward(lenNums)  
+        
+        SET answer TO 0  
+        
+        FUNCTION CheckI(i INTEGER)  
+            IF i >= k AND i <= (lenNums - k) THEN  
+                FUNCTION CheckX(xa INTEGER)  
+                    IF xa >= powTwo THEN RETURN END FUNCTION  
+                    IF dpF[i][k][xa] = TRUE THEN  
+                        FUNCTION CheckY(ya INTEGER)  
+                            IF ya >= powTwo THEN RETURN END FUNCTION  
+                            IF dpG[i][k][ya] = TRUE THEN  
+                                SET tmpMax TO xa XOR ya  
+                                IF tmpMax > answer THEN  
+                                    SET answer TO tmpMax  
+                                END IF  
+                            END IF  
+                            CheckY(ya + 1)  
+                        END FUNCTION  
+                        CheckY(0)  
+                    END IF  
+                    CheckX(xa + 1)  
+                END FUNCTION  
+                CheckX(0)  
+            END IF  
+            SET nextI TO i + 1  
+            IF nextI <= (lenNums - k) THEN  
+                CheckI(nextI)  
+            END IF  
+        END FUNCTION  
+        
+        CheckI(k)  
+        
+        RETURN answer  
+    END FUNCTION  
+END CLASS

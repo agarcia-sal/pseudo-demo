@@ -1,0 +1,85 @@
+``` 
+CLASS Solution
+    FUNCTION subsequencePairCount(nums)
+        LET modVal BE 10 * 1000 * 1000 * 1000 + 7
+        LET maxVal BE 0
+        LET idxCounter BE 0
+
+        WHILE idxCounter < LENGTH(nums)
+            IF nums[idxCounter] > maxVal THEN
+                SET maxVal TO nums[idxCounter]
+            END IF
+            SET idxCounter TO idxCounter + 1
+        END WHILE
+
+        LET dpTable BE CREATE_2D_ARRAY(maxVal + 1, maxVal + 1, 0)
+        dpTable[0][0] = 1
+
+        DEFINE FUNCTION gcdFunction(a, b)
+            IF b = 0 THEN
+                RETURN a
+            ELSE
+                RETURN gcdFunction(b, a MOD b)
+            END IF
+        END FUNCTION
+
+        LET idxA BE 0
+        WHILE idxA < LENGTH(nums)
+            LET currentNum BE nums[idxA]
+            LET nextDp BE CREATE_2D_ARRAY(maxVal + 1, maxVal + 1, 0)
+
+            LET xVal BE 0
+            WHILE xVal <= maxVal
+                LET yVal BE 0
+                WHILE yVal <= maxVal
+                    LET currentDPVal BE dpTable[xVal][yVal]
+
+                    LET cumulVal1 BE nextDp[xVal][yVal] + currentDPVal
+                    LET reducedVal1 BE cumulVal1 - (modVal * (cumulVal1 DIV modVal))
+                    nextDp[xVal][yVal] = reducedVal1
+
+                    LET gX BE gcdFunction(xVal, currentNum)
+                    LET cumulVal2 BE nextDp[gX][yVal] + currentDPVal
+                    LET reducedVal2 BE cumulVal2 - (modVal * (cumulVal2 DIV modVal))
+                    nextDp[gX][yVal] = reducedVal2
+
+                    LET gY BE gcdFunction(yVal, currentNum)
+                    LET cumulVal3 BE nextDp[xVal][gY] + currentDPVal
+                    LET reducedVal3 BE cumulVal3 - (modVal * (cumulVal3 DIV modVal))
+                    nextDp[xVal][gY] = reducedVal3
+
+                    SET yVal TO yVal + 1
+                END WHILE
+                SET xVal TO xVal + 1
+            END WHILE
+            dpTable = nextDp
+            SET idxA TO idxA + 1
+        END WHILE
+
+        LET answerTotal BE 0
+        LET gIndex BE 1
+        REPEAT
+            IF gIndex > maxVal THEN
+                BREAK
+            END IF
+            SET answerTotal TO answerTotal + dpTable[gIndex][gIndex]
+            SET gIndex TO gIndex + 1
+        UNTIL FALSE
+
+        LET finalAnswer BE answerTotal - (modVal * (answerTotal DIV modVal))
+        RETURN finalAnswer
+    END FUNCTION
+
+    FUNCTION CREATE_2D_ARRAY(rows, cols, initialValue)
+        LET arr BE EMPTY_LIST
+        FOR rowIndex FROM 0 TO rows - 1
+            LET innerArr BE EMPTY_LIST
+            FOR colIndex FROM 0 TO cols -1
+                APPEND initialValue TO innerArr
+            END FOR
+            APPEND innerArr TO arr
+        END FOR
+        RETURN arr
+    END FUNCTION
+END CLASS
+```

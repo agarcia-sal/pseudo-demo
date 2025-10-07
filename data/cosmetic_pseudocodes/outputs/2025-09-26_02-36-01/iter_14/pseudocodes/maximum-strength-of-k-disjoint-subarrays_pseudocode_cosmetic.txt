@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION maximumStrength(nums k)
+        SET totalCount TO LENGTH OF nums
+        SET table TO A 2D ARRAY OF SIZE (totalCount + 1) BY (k + 1) FILLED WITH NEGATIVE_INFINITY
+        SET table[0][0] TO 0
+
+        FUNCTION computeSign(value)
+            IF (value MOD 2) ≠ 0 THEN
+                RETURN ((k - value - 1) + 1)
+            ELSE
+                RETURN ( -1 ) * ((k - value - 1) + 1)
+            END IF
+        END FUNCTION
+
+        PROCEDURE iterDescending(limit, callback)
+            SET idx TO limit
+            WHILE idx ≥ 1
+                callback(idx)
+                DECREMENT idx BY 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE iterRange(start, finish, callback)
+            SET pos TO start
+            WHILE pos ≤ finish
+                callback(pos)
+                INCREMENT pos BY 1
+            END WHILE
+        END PROCEDURE
+
+        FUNCTION max(a, b)
+            IF a > b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        FOR outerIndex FROM 1 TO totalCount
+            FOR innerIndex FROM 1 TO k
+                SET accSum TO 0
+                CALL iterDescending(outerIndex, (subIndex) =>
+                    accSum ← accSum + nums[subIndex - 1]
+                    SET impact TO computeSign(innerIndex)
+                    SET updatedVal TO table[outerIndex][innerIndex]
+                    SET candidateVal TO table[subIndex - 1][innerIndex - 1] + (impact * accSum)
+                    SET table[outerIndex][innerIndex] TO max(updatedVal, candidateVal)
+                )
+                SET table[outerIndex][innerIndex] TO max(table[outerIndex][innerIndex], table[outerIndex - 1][innerIndex])
+            END FOR
+        END FOR
+
+        RETURN table[totalCount][k]
+    END FUNCTION
+END CLASS

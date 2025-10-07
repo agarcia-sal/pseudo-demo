@@ -1,0 +1,64 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, n)  
+        INITIALIZE self.tree AS an array of zeros with size n + 1  
+    END FUNCTION  
+
+    FUNCTION add(self, i)  
+        SET index TO i  
+        WHILE index < LENGTH of self.tree  
+            self.tree[index] = self.tree[index] + 1  
+            index = index + (index & (-index))  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION pre(self, i)  
+        SET accumulator TO 0  
+        SET pos TO i  
+        WHILE pos > 0  
+            accumulator = accumulator + self.tree[pos]  
+            pos = pos & (pos - 1)  
+        END WHILE  
+        RETURN accumulator  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        RETURN self.pre(r) - self.pre(l - 1)  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+        CREATE pairsList AS sorted list of pairs zipped from xCoord and yCoord  
+        CREATE uniqueYs AS sorted list of distinct elements from yCoord  
+        SET maxArea TO -1  
+        INITIALIZE fenwicksTree AS Fenwick(length of uniqueYs)  
+        
+        SET firstYIndex TO bisect_left(uniqueYs, pairsList[0][1]) + 1  
+        fenwicksTree.add(firstYIndex)  
+        
+        INITIALIZE previousRecords AS empty dictionary  
+        
+        FOR each consecutive pairs (xPrev, yPrev), (xCurr, yCurr) IN pairsList  
+            SET currYIndex TO bisect_left(uniqueYs, yCurr) + 1  
+            fenwicksTree.add(currYIndex)  
+            
+            IF xPrev != xCurr THEN  
+                CONTINUE  
+            END IF  
+            
+            SET currentCount TO fenwicksTree.query(bisect_left(uniqueYs, yPrev) + 1, currYIndex)  
+            
+            IF yCurr IN previousRecords AND previousRecords[yCurr][1] == yPrev AND previousRecords[yCurr][2] + 2 == currentCount THEN  
+                SET (prevX, prevY, prevCount) TO previousRecords[yCurr]  
+                SET width TO xCurr - prevX  
+                SET height TO yCurr - yPrev  
+                SET candidateArea TO width * height  
+                maxArea = MAX(maxArea, candidateArea)  
+            END IF  
+            
+            previousRecords[yCurr] = (xPrev, yPrev, currentCount)  
+        END FOR  
+        
+        RETURN maxArea  
+    END FUNCTION  
+END CLASS

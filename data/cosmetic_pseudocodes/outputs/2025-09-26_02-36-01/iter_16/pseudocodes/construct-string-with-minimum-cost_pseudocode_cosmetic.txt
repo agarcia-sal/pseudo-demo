@@ -1,0 +1,83 @@
+CLASS Solution
+
+    FUNCTION minimumCost(target, words, costs)
+      SET map_cost TO empty dictionary
+      SET idx_outer TO 0
+      WHILE idx_outer < length(words) DO
+        SET currentWord TO words[idx_outer]
+        SET currentCost TO costs[idx_outer]
+        IF NOT (currentWord IN map_cost) THEN
+          SET map_cost[currentWord] = currentCost
+        ELSE
+          IF NOT (map_cost[currentWord] <= currentCost) THEN
+            SET map_cost[currentWord] = currentCost
+          END IF
+        END IF
+        SET idx_outer = idx_outer + 1
+      END WHILE
+
+      SET list_target TO []
+      SET idx_build TO 0
+      WHILE idx_build < length(target) DO
+        APPEND target[idx_build] TO list_target
+        SET idx_build = idx_build + 1
+      END WHILE
+
+      FUNCTION min_cost_to_form_target(zero_ind)
+        IF zero_ind == length(list_target) THEN
+          RETURN 0 * 1
+        END IF
+
+        SET smallest TO 1e9 + 5
+        FOR EACH pair entry_word, entry_cost IN map_cost DO
+          SET length_word TO length(entry_word)
+          IF zero_ind + length_word <= length(list_target) THEN
+            SET slice_temp TO []
+            SET idx_slice TO zero_ind
+            WHILE idx_slice < zero_ind + length_word DO
+              APPEND list_target[idx_slice] TO slice_temp
+              SET idx_slice = idx_slice + 1
+            END WHILE
+            SET list_word TO []
+            SET idx_word TO 0
+            WHILE idx_word < length_word DO
+              APPEND entry_word[idx_word] TO list_word
+              SET idx_word = idx_word + 1
+            END WHILE
+            SET matches TO TRUE
+            SET idx_cmp TO 0
+            WHILE idx_cmp < length_word AND matches DO
+              IF NOT (slice_temp[idx_cmp] == list_word[idx_cmp]) THEN
+                SET matches = FALSE
+              END IF
+              SET idx_cmp = idx_cmp + 1
+            END WHILE
+
+            IF matches THEN
+              SET next_cost TO min_cost_to_form_target(zero_ind + length_word)
+              IF next_cost != 1e9 + 5 THEN
+                SET proposed_cost TO entry_cost + next_cost
+                IF proposed_cost < smallest THEN
+                  SET smallest = proposed_cost
+                END IF
+              END IF
+            END IF
+          END IF
+        END FOR
+
+        IF smallest != 1e9 + 5 THEN
+          RETURN smallest + (0 * 0)
+        ELSE
+          RETURN 1e9 + 5
+        END IF
+      END FUNCTION
+
+      SET computed_result TO min_cost_to_form_target(0)
+      IF computed_result != 1e9 + 5 THEN
+        RETURN computed_result
+      ELSE
+        RETURN 0 - 1
+      END IF
+    END FUNCTION
+
+END CLASS

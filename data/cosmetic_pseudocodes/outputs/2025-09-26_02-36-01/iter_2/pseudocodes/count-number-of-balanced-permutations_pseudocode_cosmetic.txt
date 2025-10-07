@@ -1,0 +1,42 @@
+CLASS Solution  
+    FUNCTION countBalancedPermutations(num)  
+        LET val = num  
+
+        FUNCTION dfs(index, target, leftCount, rightCount)  
+            IF index > 9 THEN  
+                RETURN ((target OR leftCount OR rightCount) == 0)  
+            END IF  
+            IF leftCount == 0 AND target != 0 THEN  
+                RETURN 0  
+            END IF  
+            LET result = 0  
+            LET maxUse = MIN(cnt[index], leftCount)  
+            LET step = 0  
+            WHILE step <= maxUse  
+                LET notUsed = cnt[index] - step  
+                IF notUsed >= 0 AND notUsed <= rightCount AND step * index <= target THEN  
+                    LET part1 = combination(leftCount, step)  
+                    LET part2 = combination(rightCount, notUsed)  
+                    LET part3 = dfs(index + 1, target - step * index, leftCount - step, rightCount - notUsed)  
+                    LET temp = part1 * part2 * part3  
+                    LET result = result + temp  
+                END IF  
+                step = step + 1  
+            END WHILE  
+            RETURN result MOD mod  
+        END FUNCTION  
+
+        LET digitList = [INT(ch) FOR ch IN num]  
+        LET totalSum = 0  
+        FOR eachNum IN digitList DO  
+            totalSum = totalSum + eachNum  
+        END FOR  
+        IF totalSum % 2 != 0 THEN  
+            RETURN 0  
+        END IF  
+        LET lengthNums = LENGTH(digitList)  
+        LET mod = 10 ^ 9 + 7  
+        LET cnt = Counter(digitList)  
+        RETURN dfs(0, totalSum / 2, lengthNums / 2, (lengthNums + 1) / 2)  
+    END FUNCTION  
+END CLASS

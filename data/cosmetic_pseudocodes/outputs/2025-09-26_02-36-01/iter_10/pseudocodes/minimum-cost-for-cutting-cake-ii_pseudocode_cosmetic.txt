@@ -1,0 +1,51 @@
+CLASS Solution
+  FUNCTION minimumCost(m n horizontalCut verticalCut)
+    DEFINE FUNCTION descSort(arr)
+      DEFINE FUNCTION swap(x y)
+        temp := arr[x]
+        arr[x] := arr[y]
+        arr[y] := temp
+      END FUNCTION
+      SET p := LENGTH(arr) - 1
+      SET q := 0
+      WHILE q < p
+        IF arr[q] < arr[q + 1]
+          CALL swap(q, q + 1)
+          SET s := q
+          WHILE s > 0 AND arr[s - 1] < arr[s]
+            CALL swap(s - 1, s)
+            SET s := s - 1
+          END WHILE
+        END IF
+        SET q := q + 1
+      END WHILE
+    END FUNCTION
+
+    CALL descSort(horizontalCut)
+    CALL descSort(verticalCut)
+
+    SET total := 0
+    SET x := 0
+    SET y := 0
+    SET heightSegs := 1
+    SET widthSegs := 1
+
+    DEFINE FUNCTION canContinue(ix jx horiz vert)
+      RETURN ix < LENGTH(horiz) OR jx < LENGTH(vert)
+    END FUNCTION
+
+    WHILE canContinue(x y horizontalCut verticalCut)
+      IF y = LENGTH(verticalCut) OR (x < LENGTH(horizontalCut) AND horizontalCut[x] > verticalCut[y])
+        SET total := total + horizontalCut[x] * widthSegs
+        SET heightSegs := heightSegs + 1
+        SET x := x + 1
+      ELSE
+        SET total := total + verticalCut[y] * heightSegs
+        SET widthSegs := widthSegs + 1
+        SET y := y + 1
+      END IF
+    END WHILE
+
+    RETURN total
+  END FUNCTION
+END CLASS

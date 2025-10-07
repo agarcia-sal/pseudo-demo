@@ -1,0 +1,58 @@
+CLASS Solution  
+    FUNCTION shortestSubstrings(arr)  
+        DECLARE substringsFrequency DICTIONARY WITH DEFAULT 0  
+        DECLARE idx1 AS INTEGER = 0  
+        WHILE idx1 < LENGTH(arr) DO  
+            DECLARE currentString AS STRING = arr[idx1]  
+            DECLARE strLen AS INTEGER = LENGTH(currentString)  
+            DECLARE startPos AS INTEGER = 0  
+            WHILE startPos < strLen DO  
+                DECLARE endPos AS INTEGER = startPos + 1  
+                WHILE endPos <= strLen DO  
+                    DECLARE fragment AS STRING = SUBSTRING(currentString, startPos, endPos - 1)  
+                    SET substringsFrequency[fragment] = substringsFrequency[fragment] + 1  
+                    endPos = endPos + 1  
+                END WHILE  
+                startPos = startPos + 1  
+            END WHILE  
+            idx1 = idx1 + 1  
+        END WHILE  
+
+        DECLARE results AS LIST = LIST()  
+        DECLARE idx2 AS INTEGER = 0  
+        WHILE idx2 < LENGTH(arr) DO  
+            DECLARE sequence AS STRING = arr[idx2]  
+            DECLARE seqLen AS INTEGER = LENGTH(sequence)  
+            DECLARE minimalUnique AS STRING = ""  
+            DECLARE posStart AS INTEGER = 0  
+            WHILE posStart < seqLen DO  
+                DECLARE posEnd AS INTEGER = posStart + 1  
+                WHILE posEnd <= seqLen DO  
+                    DECLARE candidate AS STRING = SUBSTRING(sequence, posStart, posEnd - 1)  
+                    IF substringsFrequency[candidate] = 1 THEN  
+                        DECLARE isMinimal AS BOOLEAN = FALSE  
+                        IF LENGTH(minimalUnique) = 0 THEN  
+                            SET isMinimal = TRUE  
+                        ELSE IF LENGTH(candidate) < LENGTH(minimalUnique) THEN  
+                            SET isMinimal = TRUE  
+                        ELSE IF LENGTH(candidate) = LENGTH(minimalUnique) THEN  
+                            IF candidate < minimalUnique THEN  
+                                SET isMinimal = TRUE  
+                            END IF  
+                        END IF  
+                        END IF  
+                        IF isMinimal THEN  
+                            SET minimalUnique = candidate  
+                        END IF  
+                    END IF  
+                    posEnd = posEnd + 1  
+                END WHILE  
+                posStart = posStart + 1  
+            END WHILE  
+            APPEND minimalUnique TO results  
+            idx2 = idx2 + 1  
+        END WHILE  
+
+        RETURN results  
+    END FUNCTION  
+END CLASS

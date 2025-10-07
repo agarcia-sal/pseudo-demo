@@ -1,0 +1,30 @@
+```
+FUNCTION rescale_to_unit(input_sequence)
+  FUNCTION helper(index, min_val, max_val, accum)
+    IF index EQUALS LENGTH(input_sequence) THEN
+      RETURN accum
+    ELSE
+      SET current_val TO input_sequence[index]
+      SET normalized TO (current_val - min_val) * 1 / (max_val - min_val)
+      RETURN helper(index + 1, min_val, max_val, accum + [normalized])
+    ENDIF
+  END FUNCTION
+
+  SET min_el TO +∞
+  SET max_el TO -∞
+
+  FUNCTION find_bounds(idx, cur_min, cur_max)
+    IF idx EQUALS LENGTH(input_sequence) THEN
+      RETURN (cur_min, cur_max)
+    ELSE
+      SET elem TO input_sequence[idx]
+      SET new_min TO (elem < cur_min) * elem + (elem >= cur_min) * cur_min
+      SET new_max TO (elem > cur_max) * elem + (elem <= cur_max) * cur_max
+      RETURN find_bounds(idx + 1, new_min, new_max)
+    ENDIF
+  END FUNCTION
+
+  SET (min_el, max_el) TO find_bounds(0, min_el, max_el)
+  RETURN helper(0, min_el, max_el, [])
+END FUNCTION
+```

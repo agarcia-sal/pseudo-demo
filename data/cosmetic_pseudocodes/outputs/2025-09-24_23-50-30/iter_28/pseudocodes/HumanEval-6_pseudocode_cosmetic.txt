@@ -1,0 +1,73 @@
+```
+FUNCTION parse_nested_parens(input_sequence)
+    FUNCTION traverse_group(sequence)
+        SET depth_counter TO 0
+        SET peak_depth TO 0
+
+        FUNCTION process_index(idx)
+            IF idx > LENGTH(sequence) THEN
+                RETURN peak_depth
+            END IF
+
+            SET symbol TO sequence[idx]
+
+            SWITCH true
+                CASE (symbol = '('):
+                    SET depth_counter TO depth_counter + 1
+                    SET peak_depth TO (IF depth_counter > peak_depth THEN depth_counter ELSE peak_depth)
+                CASE (symbol <> '('):
+                    SET depth_counter TO depth_counter - 1
+            END SWITCH
+
+            RETURN process_index(idx + 1)
+        END FUNCTION
+
+        RETURN process_index(1)
+    END FUNCTION
+
+    FUNCTION filter_non_empty(list_of_groups)
+        FUNCTION recurse_filter(i, acc)
+            IF i > LENGTH(list_of_groups) THEN
+                RETURN acc
+            END IF
+
+            SET part TO list_of_groups[i]
+
+            IF LENGTH(part) > 0 THEN
+                RETURN recurse_filter(i + 1, acc + [part])
+            ELSE
+                RETURN recurse_filter(i + 1, acc)
+            END IF
+        END FUNCTION
+
+        RETURN recurse_filter(1, [])
+    END FUNCTION
+
+    FUNCTION map_parse(groups_list)
+        FUNCTION recurse_map(j, accum)
+            IF j > LENGTH(groups_list) THEN
+                RETURN accum
+            END IF
+
+            SET element TO groups_list[j]
+            RETURN recurse_map(j + 1, accum + [traverse_group(element)])
+        END FUNCTION
+
+        RETURN recurse_map(1, [])
+    END FUNCTION
+
+    SET split_parts TO []
+    FOR idx FROM 1 TO LENGTH(input_sequence) + 1
+        IF idx = LENGTH(input_sequence) + 1 OR input_sequence[idx] = ' ' THEN
+            APPEND SUBSTRING(input_sequence, 1, idx - 1) TO split_parts
+            IF idx < LENGTH(input_sequence) THEN
+                SET input_sequence TO SUBSTRING(input_sequence, idx + 1)
+                SET idx TO 0
+            END IF
+        END IF
+    END FOR
+
+    SET filtered_groups TO filter_non_empty(split_parts)
+    RETURN map_parse(filtered_groups)
+END FUNCTION
+```

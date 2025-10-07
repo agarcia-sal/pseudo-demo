@@ -1,0 +1,79 @@
+CLASS Solution  
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)  
+        DECLARE adjacencyMap AS mapping WITH default empty lists  
+        INITIALIZE index TO zero  
+        WHILE index LESS THAN THE number OF elements in edges  
+            LET currentEdge EQUAL edges[index]  
+            LET source EQUAL currentEdge[0]  
+            LET target EQUAL currentEdge[1]  
+            LET delay EQUAL currentEdge[2]  
+            PUSH [target, delay] INTO adjacencyMap[source]  
+            PUSH [source, delay] INTO adjacencyMap[target]  
+            ADD one TO index  
+        END WHILE  
+
+        LET nodeCount EQUAL the count OF keys in adjacencyMap  
+        DECLARE answers AS list OF nodeCount zeros  
+
+        FUNCTION dfs(currentNode, prevNode, accumulatedDistance, accumulatorPath)  
+            LET modCheck EQUAL accumulatedDistance MOD signalSpeed  
+            IF modCheck EQUALS zero  
+                PUSH currentNode INTO accumulatorPath  
+            END IF  
+
+            LET subtreeSum EQUAL zero  
+            LET edgeIndex TO zero  
+            WHILE edgeIndex LESS THAN the length OF adjacencyMap[currentNode]  
+                LET adjacentPair EQUAL adjacencyMap[currentNode][edgeIndex]  
+                LET neighborNode EQUAL adjacentPair[0]  
+                LET edgeWeight EQUAL adjacentPair[1]  
+                IF neighborNode NOT EQUAL prevNode  
+                    LET recursiveCount EQUAL dfs(neighborNode, currentNode, accumulatedDistance + edgeWeight, accumulatorPath)  
+                    ADD recursiveCount TO subtreeSum  
+                END IF  
+                INCREMENT edgeIndex BY one  
+            END WHILE  
+
+            IF accumulatedDistance MOD signalSpeed EQUALS zero  
+                RETURN subtreeSum + 1  
+            ELSE  
+                RETURN subtreeSum  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION count_pairs_through_c(c)  
+            LET collectedPaths BE an empty list  
+            LET neighborIndex TO zero  
+            WHILE neighborIndex LESS THAN the size OF adjacencyMap[c]  
+                LET neighborInfo EQUAL adjacencyMap[c][neighborIndex]  
+                LET pathList AS empty list  
+                CALL dfs(neighborInfo[0], c, neighborInfo[1], pathList)  
+                APPEND pathList TO collectedPaths  
+                INCREMENT neighborIndex BY one  
+            END WHILE  
+
+            LET pairSum EQUAL zero  
+            LET outerIndex TO zero  
+            WHILE outerIndex LESS THAN length OF collectedPaths - 1  
+                LET innerIndex TO outerIndex + 1  
+                WHILE innerIndex LESS THAN length OF collectedPaths  
+                    LET countA EQUAL length OF collectedPaths[outerIndex]  
+                    LET countB EQUAL length OF collectedPaths[innerIndex]  
+                    ADD countA * countB TO pairSum  
+                    INCREMENT innerIndex BY one  
+                END WHILE  
+                INCREMENT outerIndex BY one  
+            END WHILE  
+
+            RETURN pairSum  
+        END FUNCTION  
+
+        LET currentNode TO zero  
+        WHILE currentNode LESS THAN nodeCount  
+            SET answers[currentNode] TO count_pairs_through_c(currentNode)  
+            INCREMENT currentNode BY one  
+        END WHILE  
+
+        RETURN answers  
+    END FUNCTION  
+END CLASS

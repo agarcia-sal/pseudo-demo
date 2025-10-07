@@ -1,0 +1,45 @@
+```
+FUNCTION find_closest_elements(input_sequence)
+    SET result_pair TO None
+    SET current_min TO None
+
+    SET def_inner_loop := FUNCTION(a_index, a_value, remaining_index, remaining_value_list, cur_min, cur_pair)
+        IF remaining_index > LENGTH(input_sequence) THEN
+            RETURN cur_pair, cur_min
+        ELSE
+            SET b_value TO remaining_value_list[0]
+            SET b_index TO remaining_index
+
+            SET updated_pair, updated_min TO cur_pair, cur_min
+            IF a_index != b_index THEN
+                SET dist_calc TO (b_value - a_value)
+                SET dist_abs TO dist_calc IF dist_calc >= 0 ELSE -dist_calc
+
+                IF updated_min IS None OR dist_abs < updated_min THEN
+                    SET updated_min TO dist_abs
+                    SET updated_pair TO [a_value, b_value]
+                    IF updated_pair[0] > updated_pair[1] THEN
+                        SET temp_var TO updated_pair[0]
+                        SET updated_pair[0] TO updated_pair[1]
+                        SET updated_pair[1] TO temp_var
+                    END IF
+                END IF
+            END IF
+
+            RETURN def_inner_loop(a_index, a_value, b_index + 1, SLICE(input_sequence, 1), updated_min, updated_pair)
+        END IF
+    END FUNCTION
+
+    SET def_outer_loop := FUNCTION(outer_index, remaining_list, cur_min, cur_pair)
+        IF outer_index >= LENGTH(input_sequence) THEN
+            RETURN cur_pair
+        ELSE
+            SET curr_val TO remaining_list[0]
+            SET pair_after_inner, min_after_inner TO def_inner_loop(outer_index, curr_val, 0, input_sequence, cur_min, cur_pair)
+            RETURN def_outer_loop(outer_index + 1, SLICE(remaining_list, 1), min_after_inner, pair_after_inner)
+        END IF
+    END FUNCTION
+
+    RETURN def_outer_loop(0, input_sequence, current_min, result_pair)
+END FUNCTION
+```

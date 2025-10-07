@@ -1,0 +1,89 @@
+CLASS Solution
+
+    FUNCTION maxPathLength(coordinates, k)
+        SET alpha TO (coordinates[k])[0]
+        SET beta TO (coordinates[k])[1]
+        SET delta TO []
+        SET omega TO 0
+        WHILE omega < LENGTH(coordinates)
+            SET phi TO coordinates[omega][0]
+            SET psi TO coordinates[omega][1]
+            IF phi < alpha
+                IF psi < beta
+                    SET INDEX TO LENGTH(delta)
+                    delta = delta + [(phi, psi)]
+                END IF
+            END IF
+            SET omega TO omega + 1
+        END WHILE
+
+        SET gamma TO []
+        SET sigma TO 0
+        WHILE sigma < LENGTH(coordinates)
+            SET mu TO coordinates[sigma][0]
+            SET nu TO coordinates[sigma][1]
+            IF NOT (mu <= alpha)
+                IF NOT (nu <= beta)
+                    gamma = gamma + [(mu, nu)]
+                END IF
+            END IF
+            SET sigma TO sigma + 1
+        END WHILE
+
+        RETURN 1 + self._lengthOfLIS(delta) + self._lengthOfLIS(gamma)
+    END FUNCTION
+
+    FUNCTION _lengthOfLIS(coordinates)
+        PROCEDURE CustomSort(listCoords)
+            SET n TO LENGTH(listCoords)
+            REPEAT
+                SET changed TO FALSE
+                FOR i FROM 1 TO n - 1
+                    SET a TO listCoords[i - 1]
+                    SET b TO listCoords[i]
+                    IF (a[0] > b[0]) OR ((a[0] = b[0]) AND (a[1] < b[1]))
+                        SET temp TO a
+                        listCoords[i - 1] = b
+                        listCoords[i] = temp
+                        SET changed TO TRUE
+                    END IF
+                END FOR
+                SET n TO n - 1
+            UNTIL NOT changed
+        END PROCEDURE
+
+        CALL CustomSort(coordinates)
+
+        SET tail TO []
+        SET idx TO 0
+        WHILE idx < LENGTH(coordinates)
+            SET __a TO coordinates[idx][1]
+            IF LENGTH(tail) = 0
+                tail = tail + [__a]
+            ELSE
+                SET lastVal TO tail[LENGTH(tail)-1]
+                IF __a > lastVal
+                    tail = tail + [__a]
+                ELSE
+                    PROCEDURE BinaryLocate(tailList, val, start, end)
+                        IF start >= end
+                            RETURN start
+                        END IF
+                        SET mid TO start + (end - start) / 2
+                        IF tailList[mid] < val
+                            RETURN BinaryLocate(tailList, val, mid + 1, end)
+                        ELSE
+                            RETURN BinaryLocate(tailList, val, start, mid)
+                        END IF
+                    END PROCEDURE
+                    SET pos TO BinaryLocate(tail, __a, 0, LENGTH(tail))
+                    tail[pos] = __a
+                END IF
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+
+        RETURN LENGTH(tail)
+    END FUNCTION
+
+END CLASS

@@ -1,0 +1,73 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minCostGoodCaption(caption)
+        SET totalChars TO LENGTH OF caption
+        IF NOT (totalChars >= 3)
+            RETURN ""
+        END IF
+
+        SET charList TO ARRAY OF CHARACTERS FROM caption
+
+        DEFINE FUNCTION incrementChar(ch)
+            IF ch = 'a' THEN RETURN 'b'
+            ELSE
+                IF ch = 'z' THEN RETURN 'y'
+                ELSE
+                    RETURN CHARACTER WITH ASCII CODE (ASCII OF ch + 1)
+                END IF
+            END IF
+        END FUNCTION
+
+        SET pos TO 0
+        LOOP
+            EXIT WHEN NOT(pos < totalChars)
+
+            SET groupStart TO pos
+            REPEAT
+                EXIT WHEN NOT(pos < totalChars AND charList[pos] = charList[groupStart])
+                SET pos TO pos + 1
+            UNTIL FALSE
+
+            SET segmentLength TO pos - groupStart
+
+            IF segmentLength < 3 THEN
+                IF groupStart > 0 AND charList[groupStart - 1] = charList[groupStart] THEN
+                    SET charList[groupStart - 1] TO charList[groupStart]
+                    SET groupStart TO groupStart - 1
+                    SET segmentLength TO segmentLength + 1
+                END IF
+
+                IF pos < totalChars AND charList[pos - 1] = charList[pos] THEN
+                    SET charList[pos] TO charList[pos - 1]
+                    SET pos TO pos + 1
+                    SET segmentLength TO segmentLength + 1
+                END IF
+
+                IF segmentLength < 3 THEN
+                    IF groupStart > 0 THEN
+                        SET substituteChar TO charList[groupStart - 1]
+                    ELSE
+                        SET substituteChar TO charList[pos]
+                    END IF
+
+                    IF substituteChar = 'a' THEN
+                        SET substituteChar TO 'b'
+                    ELSE IF substituteChar = 'z' THEN
+                        SET substituteChar TO 'y'
+                    ELSE
+                        SET substituteChar TO incrementChar(substituteChar)
+                    END IF
+
+                    FOR index FROM groupStart TO (groupStart + segmentLength - 1)
+                        SET charList[index] TO substituteChar
+                    END FOR
+
+                    SET pos TO groupStart + segmentLength
+                END IF
+            END IF
+        END LOOP
+
+        RETURN CONCATENATE charList
+    END FUNCTION
+END CLASS
+```

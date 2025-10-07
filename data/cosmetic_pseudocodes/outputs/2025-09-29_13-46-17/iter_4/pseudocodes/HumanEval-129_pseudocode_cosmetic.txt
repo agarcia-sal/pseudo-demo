@@ -1,0 +1,51 @@
+```
+FUNCTION minPath(grid, k)
+    SET dimSize TO LENGTH OF grid
+    SET minVal TO (dimSize * dimSize) + 1
+
+    FUNCTION gatherNeighbors(x_coord, y_coord, limit)
+        SET neighbors TO EMPTY LIST
+        IF x_coord > 0 THEN
+            neighbors.ADD(grid[x_coord - 1][y_coord])
+        END IF
+        IF y_coord > 0 THEN
+            neighbors.ADD(grid[x_coord][y_coord - 1])
+        END IF
+        IF x_coord < (limit - 1) THEN
+            neighbors.ADD(grid[x_coord + 1][y_coord])
+        END IF
+        IF y_coord < (limit - 1) THEN
+            neighbors.ADD(grid[x_coord][y_coord + 1])
+        END IF
+        RETURN neighbors
+    END FUNCTION
+
+    FUNCTION loopI(pi_idx)
+        IF pi_idx = dimSize THEN RETURN
+        FUNCTION loopJ(pj_idx)
+            IF pj_idx = dimSize THEN RETURN
+            IF grid[pi_idx][pj_idx] = 1 THEN
+                SET neighbor_vals TO gatherNeighbors(pi_idx, pj_idx, dimSize)
+                SET minVal TO MINIMUM OF neighbor_vals APPENDED WITH minVal
+            END IF
+            CALL loopJ(pj_idx + 1)
+        END FUNCTION
+        CALL loopJ(0)
+        CALL loopI(pi_idx + 1)
+    END FUNCTION
+
+    CALL loopI(0)
+
+    FUNCTION buildAnswerList(accumulator, current_index)
+        IF current_index = k THEN RETURN accumulator
+        IF (current_index MOD 2) = 0 THEN
+            accumulator.ADD(1)
+        ELSE
+            accumulator.ADD(minVal)
+        END IF
+        RETURN buildAnswerList(accumulator, current_index + 1)
+    END FUNCTION
+
+    RETURN buildAnswerList([], 0)
+END FUNCTION
+```

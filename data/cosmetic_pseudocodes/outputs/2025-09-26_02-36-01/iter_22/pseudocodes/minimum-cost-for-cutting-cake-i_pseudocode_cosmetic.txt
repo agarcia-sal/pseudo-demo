@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION minimumCost(m n horizontalCut verticalCut)
+      DEFINE FUNCTION CompareDesc(x y)
+        RETURN (x > y)
+      END FUNCTION
+
+      PROCEDURE SortDescending(arr)
+        DECLARE changed BOOLEAN
+        REPEAT
+          SET changed TO FALSE
+          SET k TO 0
+          WHILE k < LENGTH(arr) - 1
+            IF CompareDesc(arr[k], arr[k+1]) IS FALSE THEN
+              SET temp TO arr[k]
+              SET arr[k] TO arr[k+1]
+              SET arr[k+1] TO temp
+              SET changed TO TRUE
+            END IF
+            SET k TO k + 1
+          END WHILE
+        UNTIL changed IS FALSE
+      END PROCEDURE
+
+      CALL SortDescending(horizontalCut)
+      CALL SortDescending(verticalCut)
+
+      SET totalCost TO 0
+      SET idxH TO 0
+      SET idxV TO 0
+      SET countH TO 1
+      SET countV TO 1
+
+      DEFINE FUNCTION ConditionA()
+        RETURN (idxV = n - 1) OR ((idxH < m - 1) AND (horizontalCut[idxH] > verticalCut[idxV]))
+      END FUNCTION
+
+      WHILE NOT ((idxH >= m - 1) AND (idxV >= n - 1)) DO
+        IF ConditionA() THEN
+          SET increment TO horizontalCut[idxH] * countV
+          SET totalCost TO totalCost + increment
+          SET countH TO countH + 1
+          SET idxH TO idxH + 1
+        ELSE
+          SET increment TO verticalCut[idxV] * countH
+          SET totalCost TO totalCost + increment
+          SET countV TO countV + 1
+          SET idxV TO idxV + 1
+        END IF
+      END WHILE
+
+      RETURN totalCost
+    END FUNCTION
+END CLASS

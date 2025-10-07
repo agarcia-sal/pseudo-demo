@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION maxPointsInsideSquare(points s)
+    BEGIN
+        LET totalPoints BE 0
+        LET maxFound BE 0
+        PROCEDURE countDistinctTags(collection)
+        BEGIN
+            LET tagsMap BE EMPTY MAP
+            LET isValid BE TRUE
+            FOR idx FROM 0 TO (LENGTH(collection) - 1) DO
+                LET px BE ELEMENT AT 0 OF ELEMENT AT idx OF collection
+                LET py BE ELEMENT AT 1 OF ELEMENT AT idx OF collection
+                LET distBound BE MAX(ABS(HEAD(collection)), ABS(SECOND(collection)))
+                IF (ABS(px) <= distBound) AND (ABS(py) <= distBound) THEN
+                    LET currentTag BE ELEMENT AT idx OF s
+                    IF tagsMap CONTAINS currentTag THEN
+                        SET isValid TO FALSE
+                        EXIT LOOP
+                    ELSE
+                        MAP INSERT tagsMap currentTag TRUE
+                    END IF
+                END IF
+            END FOR
+            RETURN (isValid, SIZE OF tagsMap)
+        END PROCEDURE
+
+        LET iterator1 BE 0
+        WHILE iterator1 < LENGTH(s) DO
+            LET currentX BE ELEMENT AT 0 OF ELEMENT AT iterator1 OF s
+            LET currentY BE ELEMENT AT 1 OF ELEMENT AT iterator1 OF s
+            LET boundary BE IF ABS(currentX) > ABS(currentY) THEN ABS(currentX) ELSE ABS(currentY)
+            LET filteredPoints BE EMPTY LIST
+            LET idx2 BE 0
+            WHILE idx2 < LENGTH(s) DO
+                LET checkX BE ELEMENT AT 0 OF ELEMENT AT idx2 OF s
+                LET checkY BE ELEMENT AT 1 OF ELEMENT AT idx2 OF s
+                IF (ABS(checkX) <= boundary) AND (ABS(checkY) <= boundary) THEN
+                    APPEND ELEMENT AT idx2 OF s TO filteredPoints
+                END IF
+                SET idx2 TO idx2 + 1
+            END WHILE
+
+            LET (valid, count) BE countDistinctTags(filteredPoints)
+            IF valid THEN
+                IF count > maxFound THEN
+                    SET maxFound TO count
+                END IF
+            END IF
+
+            SET iterator1 TO iterator1 + 1
+        END WHILE
+
+        RETURN maxFound
+    END FUNCTION
+END CLASS

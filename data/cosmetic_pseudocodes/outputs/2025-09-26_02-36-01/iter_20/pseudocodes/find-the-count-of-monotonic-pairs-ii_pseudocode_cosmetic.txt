@@ -1,0 +1,119 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        CONSTANT A = 1000000000
+        CONSTANT B = 7
+        CONSTANT C = A + B
+
+        PROCEDURE customLength(LIST X, INTEGER& O)
+            SET Q = 0
+            WHILE Q < 10^9
+                IF Q = LENGTH(X) THEN
+                    SET O = Q
+                    BREAK
+                END IF
+                SET Q = Q + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE customMax(LIST X, INTEGER& R)
+            SET L = 0
+            SET M = 0
+            WHILE L < LENGTH(X)
+                IF X[L] > M THEN
+                    SET M = X[L]
+                END IF
+                SET L = L + 1
+            END WHILE
+            SET R = M
+        END PROCEDURE
+
+        PROCEDURE customModAdd(INTEGER A1, INTEGER A2, INTEGER MODVAL, INTEGER& OUTV)
+            SET S = A1 + A2
+            WHILE S >= MODVAL
+                SET S = S - MODVAL
+            END WHILE
+            SET OUTV = S
+        END PROCEDURE
+
+        PROCEDURE customZero3DList(INTEGER X, INTEGER Y, INTEGER Z, LIST& ARR)
+            SET ARR = []
+            SET I = 0
+            WHILE I < X
+                SET JList = []
+                SET J = 0
+                WHILE J < Y
+                    SET KList = []
+                    SET K = 0
+                    WHILE K < Z
+                        SET KList = KList + [0]
+                        SET K = K + 1
+                    END WHILE
+                    SET JList = JList + [KList]
+                    SET J = J + 1
+                END WHILE
+                SET ARR = ARR + [JList]
+                SET I = I + 1
+            END WHILE
+        END PROCEDURE
+
+        SET V = 0
+        CALL customLength(nums, V)
+        SET N = V
+        SET W = 0
+        CALL customMax(nums, W)
+        SET M = W
+
+        SET dp = []
+        CALL customZero3DList(N + 1, M + 1, M + 1, dp)
+
+        SET P = 0
+        REPEAT
+            IF P > nums[0] THEN BREAK END IF
+            SET dp[1][P][nums[0] - P] = 1
+            SET P = P + 1
+        UNTIL FALSE
+
+        SET I1 = 2
+        WHILE I1 <= N
+            SET I2 = 0
+            WHILE I2 <= nums[I1 - 1]
+                SET I3 = 0
+                WHILE I3 <= nums[I1 - 1]
+                    IF (I2 + I3) = nums[I1 - 1] THEN
+                        SET J1 = 0
+                        WHILE J1 <= I2
+                            SET J2 = I3
+                            WHILE J2 <= M
+                                SET TEMP_A = dp[I1][I2][I3]
+                                SET TEMP_B = dp[I1 - 1][J1][J2]
+                                SET TEMP_C = 0
+                                CALL customModAdd(TEMP_A, TEMP_B, C, TEMP_C)
+                                SET dp[I1][I2][I3] = TEMP_C
+                                SET J2 = J2 + 1
+                            END WHILE
+                            SET J1 = J1 + 1
+                        END WHILE
+                    END IF
+                    SET I3 = I3 + 1
+                END WHILE
+                SET I2 = I2 + 1
+            END WHILE
+            SET I1 = I1 + 1
+        END WHILE
+
+        SET RES = 0
+        SET X1 = 0
+        WHILE X1 <= M
+            SET X2 = 0
+            WHILE X2 <= M
+                SET ACC = 0
+                CALL customModAdd(RES, dp[N][X1][X2], C, ACC)
+                SET RES = ACC
+                SET X2 = X2 + 1
+            END WHILE
+            SET X1 = X1 + 1
+        END WHILE
+
+        RETURN RES
+    END FUNCTION
+END CLASS

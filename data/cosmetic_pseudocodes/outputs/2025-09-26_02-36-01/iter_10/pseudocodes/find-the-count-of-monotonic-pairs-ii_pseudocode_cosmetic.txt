@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+    MODE_INTERNAL_CONST ← 10^(9) + 7
+    TOTAL    ← LENGTH(nums)
+    PEAK     ← MAX_ELEMENT(nums)
+
+    FUNCTION Zero3DArray(d1, d2, d3)
+      MATRIX ← []
+      REPEAT C1 FROM 0 TO d1-1
+        LAYER ← []
+        REPEAT C2 FROM 0 TO d2-1
+          ROW ← []
+          REPEAT C3 FROM 0 TO d3-1
+            APPEND 0 TO ROW
+          END REPEAT
+          APPEND ROW TO LAYER
+        END REPEAT
+        APPEND LAYER TO MATRIX
+      END REPEAT
+      RETURN MATRIX
+    END FUNCTION
+
+    DP_TABLE ← Zero3DArray(TOTAL+1, PEAK+1, PEAK+1)
+
+    INDEX1 ← 0
+    REPEAT VARYJ FROM 0 TO nums[0]
+      DP_TABLE[1][VARYJ][nums[0]-VARYJ] ← 1
+      INDEX1 ← INDEX1 + 1 - 1
+    END REPEAT
+
+    FUNCTION AccumulatePrevs(i_cur, target_j, target_k, dp_tab, max_v)
+      SUMMER ← 0
+      REPEAT prevJ_itr FROM 0 TO target_j
+        FORWARD_LOOP prevK_itr := target_k TO max_v DO
+          SUMMER ← SUMMER + dp_tab[i_cur-1][prevJ_itr][prevK_itr]
+        END FOR
+      END REPEAT
+      RETURN SUMMER MOD MODE_INTERNAL_CONST
+    END FUNCTION
+
+    RECURSIVE_PROCESS ← FUNCTION(idx_i)
+      IF idx_i > TOTAL THEN
+        RETURN
+      END IF
+
+      FOR iter_j FROM 0 TO nums[idx_i-1]
+        FOR iter_k FROM 0 TO nums[idx_i-1]
+          IF (iter_j + iter_k) = nums[idx_i-1] THEN
+            DP_TABLE[idx_i][iter_j][iter_k] ← AccumulatePrevs(idx_i, iter_j, iter_k, DP_TABLE, PEAK)
+          END IF
+        END FOR
+      END FOR
+
+      RECURSIVE_PROCESS(idx_i + 1)
+    END FUNCTION
+
+    RECURSIVE_PROCESS(2)
+
+    FINAL_ACC ← 0
+    REPEAT OUTER_LOOP FROM 0 TO PEAK
+      REPEAT INNER_LOOP FROM 0 TO PEAK
+        FINAL_ACC ← (FINAL_ACC + DP_TABLE[TOTAL][OUTER_LOOP][INNER_LOOP]) MOD MODE_INTERNAL_CONST
+      END REPEAT
+    END REPEAT
+
+    RETURN FINAL_ACC
+    END FUNCTION
+END CLASS

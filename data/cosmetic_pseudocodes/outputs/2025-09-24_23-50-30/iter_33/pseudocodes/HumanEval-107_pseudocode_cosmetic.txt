@@ -1,0 +1,36 @@
+```
+FUNCTION even_odd_palindrome(n_param)
+    FUNCTION is_palindrome(test_val)
+        DEFINE str_val = TO_STRING(test_val)
+        DEFINE rev_str_val = ""
+        FOR idx FROM LENGTH(str_val) DOWNTO 1 STEP -1
+            rev_str_val = CONCAT(rev_str_val, str_val[idx])
+        END FOR
+        RETURN (str_val = rev_str_val)
+    END FUNCTION
+
+    DEFINE accumulator = { even_count: 0, odd_count: 0 }
+
+    FUNCTION process_next(curr, limit, acc)
+        IF curr > limit THEN
+            RETURN acc
+        ELSE
+            DEFINE remainder = curr MOD 2
+            DEFINE palindrome_check = is_palindrome(curr)
+            IF palindrome_check THEN
+                SWITCH remainder
+                    CASE 0:
+                        acc.even_count = acc.even_count + 1
+                    CASE 1:
+                        acc.odd_count = acc.odd_count + 1
+                END SWITCH
+            END IF
+            RETURN process_next(curr + 1, limit, acc)
+        END IF
+    END FUNCTION
+
+    DEFINE final_counts = process_next(1, n_param, accumulator)
+
+    RETURN TUPLE(final_counts.even_count, final_counts.odd_count)
+END FUNCTION
+```

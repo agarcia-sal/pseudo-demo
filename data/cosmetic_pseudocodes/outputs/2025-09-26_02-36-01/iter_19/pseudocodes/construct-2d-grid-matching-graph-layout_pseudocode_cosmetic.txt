@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION constructGridLayout(n, edges)
+      SET adjacencyMatrix TO new list with n elements as empty lists
+      FOR each pair sourceNode, targetNode IN edges
+          APPEND targetNode TO adjacencyMatrix[sourceNode]
+          APPEND sourceNode TO adjacencyMatrix[targetNode]
+      END FOR
+
+      SET degrees TO list of length 5, all initialized with (-1)
+      FOR index nodeIndex, neighbors IN adjacencyMatrix
+          SET degrees[length of neighbors] TO nodeIndex
+      END FOR
+
+      IF degrees[1] NOT EQUALS (-1) THEN
+          SET currentRow TO list containing degrees[1]
+      ELSE IF degrees[4] EQUALS (-1) THEN
+          SET candidateNode TO degrees[2]
+          FOR each candidateNeighbor IN adjacencyMatrix[candidateNode]
+              IF length of adjacencyMatrix[candidateNeighbor] EQUALS 2 THEN
+                  SET currentRow TO list with elements candidateNode, candidateNeighbor
+                  BREAK
+              END IF
+          END FOR
+      ELSE
+          SET candidateNode TO degrees[2]
+          SET currentRow TO list containing candidateNode
+          SET previousNode TO candidateNode
+          SET candidateNode TO adjacencyMatrix[candidateNode][0]
+
+          WHILE length of adjacencyMatrix[candidateNode] GREATER THAN 2
+              APPEND candidateNode TO currentRow
+              FOR each neighborNode IN adjacencyMatrix[candidateNode]
+                  IF neighborNode NOT EQUALS previousNode AND length of adjacencyMatrix[neighborNode] LESS THAN 4 THEN
+                      SET previousNode TO candidateNode
+                      SET candidateNode TO neighborNode
+                      BREAK
+                  END IF
+              END FOR
+          END WHILE
+
+          APPEND candidateNode TO currentRow
+      END IF
+
+      SET answer TO list containing currentRow
+      SET visitedFlags TO list of size n, all set to false
+
+      FOR iterationIndex FROM 1 TO (n / length of currentRow) - 1
+          FOR each nodeIndex IN currentRow
+              SET visitedFlags[nodeIndex] TO true
+          END FOR
+
+          SET nextRow TO empty list
+
+          FOR each nodeIndex IN currentRow
+              FOR each neighborNode IN adjacencyMatrix[nodeIndex]
+                  IF visitedFlags[neighborNode] EQUALS false THEN
+                      APPEND neighborNode TO nextRow
+                      BREAK
+                  END IF
+              END FOR
+          END FOR
+
+          APPEND nextRow TO answer
+          SET currentRow TO nextRow
+      END FOR
+      RETURN answer
+    END FUNCTION
+END CLASS

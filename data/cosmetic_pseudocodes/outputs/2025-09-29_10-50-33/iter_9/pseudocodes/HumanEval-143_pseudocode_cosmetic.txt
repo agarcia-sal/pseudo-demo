@@ -1,0 +1,39 @@
+FUNCTION words_in_sentence(sentence)
+{
+    DEFINE assembledWords AS collection()
+    
+    DEFINE traverseWords(index = 1)
+    {
+        IF index GREATER_THAN length(sentence SPLIT_BY " ")
+            EXECUTE
+                COMPOSE resultString AS ""
+                EXECUTE assembledWords ON EACH append TO resultString WITH " "
+                INVOKE TRIM on resultString
+                RETURN resultString
+        END
+
+        SET currentToken TO sentence SPLIT_BY " "[index]
+
+        DEFINE divisorFound AS FALSE
+
+        DEFINE evaluateDivisors(divisor = 2)
+        {
+            IF divisor GREATER_OR_EQUAL_TO LENGTH(currentToken)
+                INVOKE evaluateDivisors RETURN FALSE
+
+            IF (LENGTH(currentToken) MOD divisor) EQUALS 0
+                INVOKE evaluateDivisors RETURN TRUE
+            ELSE
+                INVOKE evaluateDivisors(divisor + 1)
+        }
+
+        SET divisorFound TO evaluateDivisors()
+
+        IF NOT divisorFound OR LENGTH(currentToken) EQUALS 2
+            assembledWords APPEND currentToken
+
+        INVOKE traverseWords(index + 1)
+    }
+
+    INVOKE traverseWords()
+}

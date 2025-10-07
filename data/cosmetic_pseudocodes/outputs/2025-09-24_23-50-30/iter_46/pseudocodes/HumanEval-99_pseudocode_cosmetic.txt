@@ -1,0 +1,47 @@
+```
+FUNCTION closest_integer(inputString)
+    IMPORT floor, ceil FROM math
+
+    FUNCTION removeTrailingZeros(recStr)
+        IF recStr[-1] = '0'
+            RETURN removeTrailingZeros(SUBSTRING(recStr, 0, LENGTH(recStr) - 1))
+        ELSE
+            RETURN recStr
+        END IF
+    END FUNCTION
+
+    FUNCTION endsWithDotFive(str)
+        RETURN (LENGTH(str) >= 2) AND (SUBSTRING(str, LENGTH(str) - 2, 2) = '.5')
+    END FUNCTION
+
+    FUNCTION hasSingleDot(str)
+        FUNCTION countDots(idx, count)
+            IF idx = LENGTH(str)
+                RETURN count
+            ELSE
+                RETURN countDots(idx + 1, count + IF str[idx] = '.' THEN 1 ELSE 0 END IF)
+            END IF
+        END FUNCTION
+        RETURN (countDots(0, 0) = 1)
+    END FUNCTION
+
+    IF hasSingleDot(inputString)
+        SET inputString TO removeTrailingZeros(inputString)
+    END IF
+
+    SET numericValue TO FLOAT(inputString)
+
+    SWITCH TRUE
+        CASE endsWithDotFive(inputString) AND (numericValue > 0)
+            SET outputValue TO ceil(numericValue)
+        CASE endsWithDotFive(inputString) AND NOT (numericValue > 0)
+            SET outputValue TO floor(numericValue)
+        CASE LENGTH(inputString) > 0
+            SET outputValue TO ROUND(numericValue)
+        DEFAULT
+            SET outputValue TO 0
+    END SWITCH
+
+    RETURN outputValue
+END FUNCTION
+```

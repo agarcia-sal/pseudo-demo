@@ -1,0 +1,42 @@
+```
+FUNCTION encode_cyclic(input_string)
+  INITIALIZE partitioned_strings AS empty list
+  SET cursor TO 0
+
+  WHILE cursor LESS THAN LENGTH OF input_string
+    LET end_pos = cursor + 3
+    IF end_pos GREATER THAN LENGTH OF input_string
+      SET end_pos TO LENGTH OF input_string
+    END IF
+    APPEND SUBSTRING OF input_string FROM cursor UP TO (BUT NOT INCLUDING) end_pos TO partitioned_strings
+    SET cursor TO cursor + 3
+  END WHILE
+
+  INITIALIZE transformed_groups AS empty list
+  SET iterator TO 0
+
+  WHILE iterator LESS THAN LENGTH OF partitioned_strings
+    LET segment = partitioned_strings[iterator]
+    IF NOT (LENGTH OF segment NOT EQUAL TO 3)
+      APPEND CONCATENATION OF SUBSTRING OF segment FROM INDEX 1 TO END AND FIRST CHARACTER OF segment TO transformed_groups
+    ELSE
+      APPEND segment TO transformed_groups
+    END IF
+    INCREMENT iterator BY 1
+  END WHILE
+
+  INITIALIZE result_string AS empty string
+  SET indexer TO 0
+
+  WHILE indexer LESS THAN LENGTH OF transformed_groups
+    SET result_string TO result_string + transformed_groups[indexer]
+    INCREMENT indexer BY 1
+  END WHILE
+
+  RETURN result_string
+END FUNCTION
+
+FUNCTION decode_cyclic(input_string)
+  RETURN encode_cyclic(encode_cyclic(input_string))
+END FUNCTION
+```

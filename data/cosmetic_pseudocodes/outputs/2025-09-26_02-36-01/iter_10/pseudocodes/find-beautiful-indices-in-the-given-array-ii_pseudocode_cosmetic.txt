@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION beautifulIndices(s parameter a parameter b parameter k)
+      DEFINE FUNCTION subEquals(strX, startX, patternX)
+        DEFINE FUNCTION subStr(strM, st, ed)
+          DEFINE FUNCTION loopRec(lim, cur)
+            IF cur > lim THEN RETURN false END IF
+            IF strM[cur] != patternX[cur - st] THEN RETURN false END IF
+            RETURN loopRec(lim, cur + 1)
+          END FUNCTION
+          RETURN loopRec(ed, st)
+        END FUNCTION
+        IF LENGTH(patternX) = 0 THEN RETURN true END IF
+        IF startX < 0 THEN RETURN false END IF
+        IF startX + LENGTH(patternX) - 1 >= LENGTH(strX) THEN RETURN false END IF
+        RETURN loopRec(startX + LENGTH(patternX) - 1, startX)
+      END FUNCTION
+
+      DEFINE FUNCTION assembleIndices(stringP, patternP)
+        VAR accumulatorList ← []
+        VAR pos ← 0
+        WHILE pos <= LENGTH(stringP) - LENGTH(patternP)
+          IF subEquals(stringP, pos, patternP) THEN
+            APPEND pos TO accumulatorList
+          END IF
+          pos ← pos + 1
+        END WHILE
+        RETURN accumulatorList
+      END FUNCTION
+
+      VAR listAlpha ← assembleIndices(s, a)
+      VAR listBeta ← assembleIndices(s, b)
+      VAR resultRound ← []
+      
+      VAR leftIdx ← 0
+      VAR rightIdx ← 0
+
+      DEFINE FUNCTION absVal(x)
+        RETURN IF x >= 0 THEN x ELSE -x END IF
+      END FUNCTION
+
+      WHILE (leftIdx < LENGTH(listAlpha)) AND (rightIdx < LENGTH(listBeta))
+        VAR diff ← absVal(listAlpha[leftIdx] - listBeta[rightIdx])
+        IF diff <= k THEN
+          APPEND listAlpha[leftIdx] TO resultRound
+          leftIdx ← leftIdx + 1
+        ELSE
+          IF listAlpha[leftIdx] < listBeta[rightIdx] THEN
+            leftIdx ← leftIdx + 1
+          ELSE
+            rightIdx ← rightIdx + 1
+          END IF
+        END IF
+      END WHILE
+      
+      RETURN resultRound
+    END FUNCTION
+END CLASS

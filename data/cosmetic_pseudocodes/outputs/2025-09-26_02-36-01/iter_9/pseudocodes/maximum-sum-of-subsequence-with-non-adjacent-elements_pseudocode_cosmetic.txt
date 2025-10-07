@@ -1,0 +1,48 @@
+CLASS Solution
+    FUNCTION maximumSumSubsequence(weights, changes)
+        CONSTANT limit = (10 ^ 9) + (1 * 1)
+        VARIABLE lengthValue ← SIZE OF weights
+        VARIABLE chosenSets ← ARRAY FILLED WITH SET(), LENGTH lengthValue
+        VARIABLE skippedSets ← ARRAY FILLED WITH SET(), LENGTH lengthValue
+        chosenSets[0] ← MAX(0, weights[0])
+        skippedSets[0] ← 0
+
+        PROCEDURE updateAtPosition(pos)
+            IF pos = 0 THEN
+                chosenSets[0] ← MAX(0, weights[0])
+                skippedSets[0] ← 0
+            ELSE
+                chosenSets[pos] ← MAX(0, skippedSets[pos - 1]) + weights[pos]
+                skippedSets[pos] ← MAX(skippedSets[pos - 1], chosenSets[pos - 1])
+            END IF
+        END PROCEDURE
+        
+        VARIABLE posIndex ← 1
+        WHILE posIndex < lengthValue DO
+            chosenSets[posIndex] ← MAX(0, skippedSets[posIndex - 1]) + weights[posIndex]
+            skippedSets[posIndex] ← MAX(skippedSets[posIndex - 1], chosenSets[posIndex - 1])
+            posIndex ← posIndex + 1
+        END WHILE
+
+        VARIABLE finalSum ← 0
+
+        PROCEDURE recalc(startPos)
+            VARIABLE idx ← startPos + 1
+            WHILE idx < lengthValue DO
+                chosenSets[idx] ← MAX(0, skippedSets[idx - 1]) + weights[idx]
+                skippedSets[idx] ← MAX(skippedSets[idx - 1], chosenSets[idx - 1])
+                idx ← idx + 1
+            END WHILE
+        END PROCEDURE
+
+        VARIABLE changePos ← 0
+        FOR EACH indexVal, newVal IN changes DO
+            weights[indexVal] ← newVal
+            updateAtPosition(indexVal)
+            recalc(indexVal)
+            finalSum ← (finalSum + MAX(chosenSets[lengthValue - 1], skippedSets[lengthValue - 1])) % limit
+        END FOR
+
+        RETURN finalSum
+    END FUNCTION
+END CLASS

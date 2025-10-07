@@ -1,0 +1,90 @@
+class Solution
+	func subsequencePairCount(nums)
+		const MODULO = (5 * (10 ^ 8)) + (2 * (10 ^ 8)) + 7
+
+		function computeGCD(a, b)
+			while b != 0 do
+				temp = b
+				b = a % b
+				a = temp
+			endwhile
+			return a
+		endfunction
+
+		function zeroMatrix(rows, cols)
+			matrix = []
+			r = 0
+			while r <= (rows - 1)
+				rowList = []
+				c = 0
+				while c <= (cols - 1)
+					rowList = rowList + [0]
+					c = c + 1
+				endwhile
+				matrix = matrix + [rowList]
+				r = r + 1
+			endwhile
+			return matrix
+		endfunction
+
+		maxValue = 0
+		idx = 0
+		while idx < length(nums)
+			if nums[idx] > maxValue
+				maxValue = nums[idx]
+			endif
+			idx = idx + 1
+		endwhile
+
+		dynamic = zeroMatrix(maxValue + 1, maxValue + 1)
+		dynamic[0][0] = 1
+
+		index = 0
+		while index < length(nums)
+			intermediate = zeroMatrix(maxValue + 1, maxValue + 1)
+
+			function innerLoopX(x, y)
+				intermediate[x][y] = (intermediate[x][y] + dynamic[x][y]) % MODULO
+				
+				vX = computeGCD(x, nums[index])
+				intermediate[vX][y] = (intermediate[vX][y] + dynamic[x][y]) % MODULO
+
+				vY = computeGCD(y, nums[index])
+				intermediate[x][vY] = (intermediate[x][vY] + dynamic[x][y]) % MODULO
+			endfunction
+
+			function loopY(x, y)
+				if y > maxValue
+					return
+				endif
+				innerLoopX(x, y)
+				loopY(x, y + 1)
+			endfunction
+
+			function loopX(x)
+				if x > maxValue
+					return
+				endif
+				loopY(x, 0)
+				loopX(x + 1)
+			endfunction
+
+			loopX(0)
+			dynamic = intermediate
+			index = index + 1
+		endwhile
+
+		total = 0
+
+		function addG(g)
+			if g > maxValue
+				return
+			endif
+			total = (total + dynamic[g][g]) % MODULO
+			addG(g + 1)
+		endfunction
+
+		addG(1)
+		return total
+	endfunc
+endclass

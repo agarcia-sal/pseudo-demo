@@ -1,0 +1,57 @@
+CLASS Solution  
+    FUNCTION mostFrequentIDs(nums PARAMETER, freq PARAMETER)  
+        FUNCTION customNegate(x)  
+            RETURN 0 - x  
+        END FUNCTION  
+
+        FUNCTION customPush(heap, val)  
+            INSERT val AT THE END OF heap  
+        END FUNCTION  
+
+        FUNCTION customPop(heap)  
+            REMOVE THE LAST ELEMENT FROM heap  
+        END FUNCTION  
+
+        FUNCTION customTop(heap)  
+            RETURN heap[SIZE(heap) - 1]  
+        END FUNCTION  
+
+        FUNCTION customIsEmpty(collection)  
+            RETURN SIZE(collection) = 0  
+        END FUNCTION  
+
+        SET tempMap TO NEW DICTIONARY WHERE DEFAULT VALUE IS 0  
+        SET tempHeap TO EMPTY LIST  
+        SET ansList TO EMPTY LIST  
+        
+        FUNCTION iterateIndices(i, limit)  
+            IF i >= limit THEN  
+                RETURN  
+            ELSE  
+                SET a TO nums[i]  
+                SET b TO freq[i]  
+                SET prevCount TO 0  
+                IF a IN tempMap THEN  
+                    SET prevCount TO tempMap[a]  
+                END IF  
+                SET tempMap[a] TO prevCount + b  
+                CALL customPush(tempHeap, (customNegate(tempMap[a]), a))  
+
+                WHILE (NOT customIsEmpty(tempHeap)) AND (customNegate(customTop(tempHeap)[0]) <> tempMap[customTop(tempHeap)[1]])  
+                    CALL customPop(tempHeap)  
+                END WHILE  
+
+                IF NOT customIsEmpty(tempHeap) THEN  
+                    APPEND customNegate(customTop(tempHeap)[0]) TO ansList  
+                ELSE  
+                    APPEND 0 TO ansList  
+                END IF  
+
+                CALL iterateIndices(i + 1, limit)  
+            END IF  
+        END FUNCTION  
+
+        CALL iterateIndices(0, SIZE(nums))  
+        RETURN ansList  
+    END FUNCTION  
+END CLASS

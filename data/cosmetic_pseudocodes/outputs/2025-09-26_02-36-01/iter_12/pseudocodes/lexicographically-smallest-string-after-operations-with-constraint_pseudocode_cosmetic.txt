@@ -1,0 +1,79 @@
+CLASS Solution  
+    FUNCTION getSmallestString(s parameter of type string k parameter of type integer) RETURNS string  
+        FUNCTION cyclic_distance(c1 parameter of type character c2 parameter of type character) RETURNS integer  
+            FUNCTION abs_val(x parameter of type integer) RETURNS integer  
+                IF x LESS THAN zero THEN  
+                    RETURN 0 - x  
+                END IF  
+                RETURN x  
+            END FUNCTION  
+
+            SET diff TO abs_val(ASCII_CODE(c1) - ASCII_CODE(c2))  
+            SET alt_diff TO 26 - diff  
+            IF diff LESS THAN alt_diff THEN  
+                RETURN diff  
+            ELSE  
+                RETURN alt_diff  
+            END IF  
+        END FUNCTION  
+
+        SET t TO EMPTY LIST OF CHARACTERS  
+        FOR idx FROM 0 TO LENGTH(s) - 1 DO  
+            APPEND CHARACTER_AT(s, idx) TO t  
+        END FOR  
+
+        SET idx_var TO 0  
+        SET n_var TO LENGTH(s)  
+        SET remaining_ops TO k  
+
+        FUNCTION lesser_or_equal(x parameter of type integer y parameter of type integer) RETURNS boolean  
+            IF x GREATER THAN y THEN  
+                RETURN false  
+            ELSE  
+                RETURN true  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION equal_chars(c1 parameter of type character c2 parameter of type character) RETURNS boolean  
+            IF ASCII_CODE(c1) EQUALS ASCII_CODE(c2) THEN  
+                RETURN true  
+            ELSE  
+                RETURN false  
+            END IF  
+        END FUNCTION  
+
+        WHILE (remaining_ops GREATER THAN 0) AND (idx_var LESS THAN n_var) DO  
+            IF equal_chars(t[idx_var], 'a') THEN  
+                SET idx_var TO idx_var + 1  
+                CONTINUE  
+            END IF  
+
+            SET diff_a TO cyclic_distance(t[idx_var], 'a')  
+
+            IF lesser_or_equal(diff_a, remaining_ops) THEN  
+                SET t[idx_var] TO 'a'  
+                SET remaining_ops TO remaining_ops - diff_a  
+            ELSE  
+                SET original_ord TO ASCII_CODE(t[idx_var])  
+                SET new_ord TO original_ord - remaining_ops  
+                SET t[idx_var] TO CHARACTER_FROM_CODE(new_ord)  
+                SET remaining_ops TO 0  
+            END IF  
+
+            SET idx_var TO idx_var + 1  
+        END WHILE  
+
+        FUNCTION join_chars(char_list parameter of type list of character) RETURNS string  
+            SET result_str TO EMPTY STRING  
+            SET pos TO 0  
+            SET length_var TO LENGTH(char_list)  
+            WHILE pos LESS THAN length_var DO  
+                SET result_str TO result_str + char_list[pos]  
+                SET pos TO pos + 1  
+            END WHILE  
+            RETURN result_str  
+        END FUNCTION  
+
+        RETURN join_chars(t)  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,83 @@
+```pseudocode
+FUNCTION is_prime(z)  
+  IF NOT (z > 1) THEN  
+     RETURN false  
+  END IF  
+  IF z <= 3 THEN  
+     RETURN true  
+  END IF  
+  IF (z % 2 = 0) OR (z % 3 = 0) THEN  
+    RETURN false  
+  END IF  
+  PROCEDURE check_divisor(w)  
+     IF w * w > z THEN  
+        RETURN true  
+     ELSE  
+        IF (z % w = 0) OR (z % (w + 2) = 0) THEN  
+           RETURN false  
+        ELSE  
+           RETURN check_divisor(w + 6)  
+        END IF  
+     END IF  
+  END PROCEDURE  
+  RETURN check_divisor(5)  
+END FUNCTION  
+
+CLASS Solution  
+  FUNCTION mostFrequentPrime(matrix)  
+    SET length_m = 0  
+    SET length_n = 0  
+    length_m := SIZE(matrix)  
+    length_n := SIZE(matrix[0])  
+
+    SET vecs = [( -1, 0 ), ( -1, 1 ), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]  
+
+    DECLARE dict_count as mapping from integer to integer  
+    SET dict_count = empty mapping  
+
+    FUNCTION explore(a, b, da, db, val)  
+      LET xa = a + da  
+      LET yb = b + db  
+
+      IF (xa < 0) OR (xa >= length_m) OR (yb < 0) OR (yb >= length_n) THEN  
+         RETURN  
+      END IF  
+
+      LET w = val * 10 + matrix[xa][yb]  
+
+      IF (w > 10) AND (is_prime(w)) THEN  
+         IF w in dict_count THEN  
+           dict_count[w] = dict_count[w] + 1  
+         ELSE  
+           dict_count[w] = 1  
+         END IF  
+      END IF  
+
+      CALL explore(xa, yb, da, db, w)  
+    END FUNCTION  
+
+    FOR u FROM 0 TO length_m - 1  
+      FOR v FROM 0 TO length_n - 1  
+        FOR each (dx, dy) IN vecs  
+          CALL explore(u, v, dx, dy, matrix[u][v])  
+        END FOR  
+      END FOR  
+    END FOR  
+
+    IF SIZE(dict_count) = 0 THEN  
+      RETURN -1  
+    END IF  
+
+    SET max_item = null  
+    SET max_value = -2147483648  
+    FOR (key, val) IN dict_count  
+      IF (val > max_value) OR ((val = max_value) AND (key > max_item)) THEN  
+         max_value = val  
+         max_item = key  
+      END IF  
+    END FOR  
+
+    RETURN max_item  
+  END FUNCTION  
+END CLASS
+```

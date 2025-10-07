@@ -1,0 +1,81 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        FUNCTION lengthOf(str STRING) RETURNS INTEGER
+            SET count TO 0
+            WHILE count LESS THAN LENGTH(str) DO
+                SET count TO count + 1
+            END WHILE
+            RETURN count
+        END FUNCTION
+
+        FUNCTION splitOnDot(text STRING) RETURNS ARRAY OF STRING
+            SET pieces TO []
+            SET current TO ""
+            SET idx TO 0
+            SET maxIdx TO lengthOf(text)
+            WHILE idx LESS THAN maxIdx DO
+                IF text[idx] EQUALS '.' THEN
+                    APPEND current TO pieces
+                    SET current TO ""
+                ELSE
+                    SET current TO current + text[idx]
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            APPEND current TO pieces
+            RETURN pieces
+        END FUNCTION
+
+        FUNCTION sortByLengthAsc(arr ARRAY OF STRING) RETURNS ARRAY OF STRING
+            SET sortedArr TO arr
+            SET changed TO TRUE
+            WHILE changed DO
+                SET changed TO FALSE
+                SET i TO 0
+                SET limit TO lengthOf(sortedArr) - 1
+                WHILE i LESS THAN limit DO
+                    IF lengthOf(sortedArr[i]) GREATER THAN lengthOf(sortedArr[i + 1]) THEN
+                        SET temp TO sortedArr[i]
+                        SET sortedArr[i] TO sortedArr[i + 1]
+                        SET sortedArr[i + 1] TO temp
+                        SET changed TO TRUE
+                    END IF
+                    SET i TO i + 1
+                END WHILE
+            END WHILE
+            RETURN sortedArr
+        END FUNCTION
+
+        SET segments TO splitOnDot(road)
+        SET sortedSegments TO sortByLengthAsc(segments)
+        SET totalFixed TO 0
+        SET segIndex TO 0
+        SET segCount TO lengthOf(sortedSegments)
+        WHILE segIndex LESS THAN segCount DO
+            SET currentSegment TO sortedSegments[segIndex]
+            SET lengthSeg TO lengthOf(currentSegment)
+            IF lengthSeg EQUALS 0 THEN
+                SET segIndex TO segIndex + 1
+                CONTINUE
+            END IF
+            SET neededCost TO lengthSeg + 1
+            IF neededCost LESS THAN OR EQUAL TO budget THEN
+                SET totalFixed TO totalFixed + lengthSeg
+                SET budget TO budget - neededCost
+            ELSE
+                SET decN TO lengthSeg
+                WHILE decN GREATER THAN 0 AND budget GREATER THAN 0 DO
+                    SET testCost TO decN + 1
+                    IF budget GREATER THAN OR EQUAL TO testCost THEN
+                        SET totalFixed TO totalFixed + decN
+                        SET budget TO budget - testCost
+                        BREAK
+                    END IF
+                    SET decN TO decN - 1
+                END WHILE
+            END IF
+            SET segIndex TO segIndex + 1
+        END WHILE
+        RETURN totalFixed
+    END FUNCTION
+END CLASS

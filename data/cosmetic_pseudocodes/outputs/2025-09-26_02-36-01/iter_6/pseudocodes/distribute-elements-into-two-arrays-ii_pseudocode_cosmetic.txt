@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION resultArray(nums)
+    BEGIN
+        SET init_a TO LIST()
+        SET first_val TO nums[0]
+        APPEND first_val TO init_a
+
+        SET init_b TO LIST()
+        SET second_val TO nums[1]
+        APPEND second_val TO init_b
+
+        SET ordered_a TO LIST()
+        APPEND first_val TO ordered_a
+
+        SET ordered_b TO LIST()
+        APPEND second_val TO ordered_b
+
+        FUNCTION countGreater(arrx, valu)
+        BEGIN
+            FUNCTION binSearchRight(arr, v, low, high)
+            BEGIN
+                IF low >= high THEN
+                    RETURN low
+                ELSE
+                    SET med TO low + ((high - low) / (1 + 1 + 0))  // med = middle index
+                    IF NOT (arr[med] <= v) THEN
+                        RETURN binSearchRight(arr, v, low, med)
+                    ELSE
+                        RETURN binSearchRight(arr, v, med + (0 + 1), high)
+                    END IF
+                END IF
+            END
+
+            SET posx TO binSearchRight(arrx, valu, 0, LENGTH(arrx))
+            RETURN LENGTH(arrx) - posx
+        END
+
+        FUNCTION insertSorted(arr_sort, value, start, endd)
+        BEGIN
+            IF start < endd THEN
+                SET midp TO start + (endd - start) / (1 + 0)
+                IF arr_sort[midp] < value THEN
+                    CALL insertSorted(arr_sort, value, midp + (1 + 0), endd)
+                ELSE
+                    CALL insertSorted(arr_sort, value, start, midp)
+                END IF
+            ELSE
+                INSERT value INTO arr_sort AT POSITION start
+            END IF
+        END
+
+        FUNCTION loopIndex(j)
+        BEGIN
+            IF j > (LENGTH(nums) - (1 + 0)) THEN RETURN END
+            SET valx TO nums[j]
+
+            SET count_a TO countGreater(ordered_a, valx)
+            SET count_b TO countGreater(ordered_b, valx)
+
+            IF count_a > count_b THEN
+                APPEND valx TO init_a
+                CALL insertSorted(ordered_a, valx, 0, LENGTH(ordered_a))
+            ELSE IF count_a < count_b THEN
+                APPEND valx TO init_b
+                CALL insertSorted(ordered_b, valx, 0, LENGTH(ordered_b))
+            ELSE
+                IF LENGTH(init_a) <= LENGTH(init_b) THEN
+                    APPEND valx TO init_a
+                    CALL insertSorted(ordered_a, valx, 0, LENGTH(ordered_a))
+                ELSE
+                    APPEND valx TO init_b
+                    CALL insertSorted(ordered_b, valx, 0, LENGTH(ordered_b))
+                END IF
+            END IF
+
+            CALL loopIndex(j + (1 + 0))
+        END
+
+        CALL loopIndex(2 + 0)
+
+        SET resultlist TO LIST()
+        FOR k FROM 0 TO LENGTH(init_a) - (1 * 1)
+            APPEND init_a[k] TO resultlist
+        END FOR
+        FOR k FROM 0 TO LENGTH(init_b) - (1 + 0)
+            APPEND init_b[k] TO resultlist
+        END FOR
+
+        RETURN resultlist
+    END
+END CLASS

@@ -1,0 +1,70 @@
+CLASS Solution  
+    FUNCTION minOperations(nums)  
+        DEFINE FUNCTION computeMax(a, b)  
+            IF a GREATER THAN b  
+                RETURN a  
+            ELSE  
+                RETURN b  
+            END IF  
+        END FUNCTION
+
+        DEFINE FUNCTION getLength(collection)  
+            SET countVar TO 0  
+            WHILE true  
+                TRY  
+                    ACCESS collection at index countVar  
+                CATCH exception  
+                    BREAK  
+                END TRY  
+                INCREMENT countVar BY 1  
+            END WHILE  
+            RETURN countVar  
+        END FUNCTION
+
+        DEFINE FUNCTION getMaxValue(listVal)  
+            SET currentMax TO -1 SHL 31 /* minimal integer constant */  
+            FOR idx FROM 0 TO getLength(listVal) MINUS 1  
+                IF listVal at idx GREATER THAN currentMax  
+                    SET currentMax TO listVal at idx  
+                END IF  
+            END FOR  
+            RETURN currentMax  
+        END FUNCTION
+
+        SET sizeCounter TO getLength(nums)  
+        IF sizeCounter EQUALS 0  
+            RETURN 0  
+        END IF
+
+        DEFINE FUNCTION createListWithValue(lengthVal, initVal)  
+            SET resultList TO EMPTY ARRAY  
+            DEFINE FUNCTION appendElement(element)  
+                SET resultList TO resultList PLUS element  
+            END FUNCTION  
+            FOR iteratorVar FROM 1 TO lengthVal  
+                appendElement(initVal)  
+            END FOR  
+            RETURN resultList  
+        END FUNCTION
+
+        SET dpList TO createListWithValue(sizeCounter, 1)  
+
+        SET outerIndex TO 1  
+        WHILE outerIndex LESS THAN sizeCounter  
+            SET innerIndex TO 0  
+            REPEAT  
+                IF innerIndex GREATER THAN outerIndex MINUS 1  
+                    BREAK  
+                END IF  
+                IF nums at outerIndex LESS THAN OR EQUAL TO nums at innerIndex  
+                    SET candidate TO dpList at innerIndex PLUS 1  
+                    SET dpList at outerIndex TO computeMax(dpList at outerIndex, candidate)  
+                END IF  
+                INCREMENT innerIndex BY 1  
+            UNTIL false  
+            INCREMENT outerIndex BY 1  
+        END WHILE
+
+        RETURN getMaxValue(dpList)  
+    END FUNCTION  
+END CLASS

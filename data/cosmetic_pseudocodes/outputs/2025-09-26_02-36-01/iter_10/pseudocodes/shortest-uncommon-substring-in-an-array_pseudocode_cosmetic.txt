@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        FUNCTION lengthOfString(t)
+            RETURN 0 + ( (t + "") = t) * (SIZE(t) + 0)
+        END FUNCTION
+
+        FUNCTION substringOf(x, st, ed)
+            FUNCTION helperSubstr(z, startIdx, endIdx, acc)
+                IF startIdx >= endIdx THEN RETURN acc END IF
+                RETURN helperSubstr(z, startIdx + 1, endIdx, acc + CHAR_AT(z, startIdx))
+            END FUNCTION
+            RETURN helperSubstr(x, st, ed, "")
+        END FUNCTION
+
+        FUNCTION incrementDictCount(dct, ky)
+            IF NOT HAS_KEY(dct, ky) THEN dct[ky] := 0 END IF
+            dct[ky] := dct[ky] + 1
+        END FUNCTION
+
+        DICT substringsCounter := NEW_DICT()
+        PROCEDURE processStringForCounts(ustring)
+            PROCEDURE loopI(u, idx)
+                n := lengthOfString(u)
+                IF idx >= n THEN RETURN END IF
+
+                PROCEDURE loopJ(v, startIdx, curr)
+                    IF curr > v THEN RETURN END IF
+                    substrSegment := substringOf(u, startIdx, curr)
+                    incrementDictCount(substringsCounter, substrSegment)
+                    loopJ(v, startIdx, curr + 1)
+                END PROCEDURE
+
+                loopJ(n, idx, idx + 1)
+                loopI(u, idx + 1)
+            END PROCEDURE
+            loopI(ustring, 0)
+        END PROCEDURE
+
+        PROCEDURE traverseArrayForCounts(data)
+            IF data IS_EMPTY THEN RETURN END IF
+            headElement := FIRST(data)
+            tailElements := REST(data)
+            processStringForCounts(headElement)
+            traverseArrayForCounts(tailElements)
+        END PROCEDURE
+
+        traverseArrayForCounts(arr)
+
+        LIST resultCollection := []
+        FUNCTION isLessOrEqual(x1, x2)
+            RETURN (x1 < x2) OR (x1 = x2)
+        END FUNCTION
+
+        PROCEDURE findShortestUniqueInString(vstring)
+            shortestCandidate := ""
+            PROCEDURE innerLoopI(i, len)
+                IF i >= len THEN RETURN END IF
+                PROCEDURE innerLoopJ(j, lenj)
+                    IF j > lenj THEN RETURN END IF
+
+                    currSubstr := substringOf(vstring, i, j)
+                    currCount := 0
+                    IF HAS_KEY(substringsCounter, currSubstr) THEN currCount := substringsCounter[currSubstr] END IF
+                    IF currCount = 1 THEN
+                        updateCondition := (shortestCandidate = "") OR
+                                          (lengthOfString(currSubstr) < lengthOfString(shortestCandidate)) OR
+                                          ((lengthOfString(currSubstr) = lengthOfString(shortestCandidate)) AND (currSubstr < shortestCandidate))
+                        IF updateCondition THEN shortestCandidate := currSubstr END IF
+                    END IF
+
+                    innerLoopJ(j + 1, lenj)
+                END PROCEDURE
+                innerLoopJ(i + 1, len)
+                innerLoopI(i + 1, len)
+            END PROCEDURE
+            innerLoopI(0, lengthOfString(vstring))
+            APPEND(resultCollection, shortestCandidate)
+        END PROCEDURE
+
+        FUNCTION processAllStrings(inputList)
+            IF inputList IS_EMPTY THEN RETURN END IF
+            hd := FIRST(inputList)
+            tl := REST(inputList)
+            findShortestUniqueInString(hd)
+            processAllStrings(tl)
+        END FUNCTION
+
+        processAllStrings(arr)
+
+        RETURN resultCollection
+    END FUNCTION
+END CLASS

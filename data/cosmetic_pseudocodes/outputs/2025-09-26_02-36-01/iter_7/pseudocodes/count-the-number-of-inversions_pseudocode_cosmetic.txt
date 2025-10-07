@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION numberOfPermutations(n, requirements)
+        LET MOD_CONST ← 10 ^ 9 + 7
+        LET constraintsMap ← empty dictionary
+
+        LET idx ← 0
+        WHILE idx < LENGTH(requirements)
+            LET currentPair ← requirements[idx]
+            LET endIdx ← currentPair[0]
+            LET cntVal ← currentPair[1]
+            constraintsMap[endIdx] ← cntVal
+            idx ← idx + 1
+        END WHILE
+
+        FUNCTION count_permutations(currLen, invCount, bitMask)
+            IF currLen <> n THEN
+                IF currLen > 0 THEN
+                    LET threshold ← IF currLen - 1 IN constraintsMap THEN constraintsMap[currLen - 1] ELSE invCount
+                    IF invCount <> threshold THEN
+                        RETURN 0
+                    END IF
+                END IF
+            ELSE
+                LET finishThreshold ← IF n - 1 IN constraintsMap THEN constraintsMap[n - 1] ELSE 0
+                IF invCount = finishThreshold THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            LET total ← 0
+            LET numIterator ← n - 1
+            REPEAT
+                IF (bitMask & (1 << numIterator)) = 0 THEN
+                    LET updatedInv ← invCount
+                    LET j ← numIterator + 1
+                    WHILE j < n
+                        IF (bitMask & (1 << j)) <> 0 THEN
+                            updatedInv ← updatedInv + 1
+                        END IF
+                        j ← j + 1
+                    END WHILE
+                    total ← (total + count_permutations(currLen + 1, updatedInv, bitMask | (1 << numIterator))) % MOD_CONST
+                END IF
+                numIterator ← numIterator - 1
+            UNTIL numIterator < 0
+
+            RETURN total
+        END FUNCTION
+
+        RETURN count_permutations(0, 0, 0)
+    END FUNCTION
+END CLASS

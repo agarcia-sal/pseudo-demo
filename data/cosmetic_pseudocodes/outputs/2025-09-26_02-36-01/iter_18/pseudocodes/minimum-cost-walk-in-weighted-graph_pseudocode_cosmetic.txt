@@ -1,0 +1,137 @@
+```pseudocode
+CLASS UnionFind
+    FUNCTION __init__(self, n)
+        SET self.parent TO empty list
+        SET self.rank TO empty list
+        SET idx TO 0
+        WHILE idx LESS THAN n DO
+            APPEND idx TO self.parent
+            APPEND 1 TO self.rank
+            SET idx TO idx + 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION find(self, x)
+        DECLARE retVal
+        IF self.parent[x] EQUALS x THEN
+            SET retVal TO x
+        ELSE
+            SET tmpVar TO self.parent[x]
+            SET retVal TO self.find(tmpVar)
+            SET self.parent[x] TO retVal
+        END IF
+        RETURN retVal
+    END FUNCTION
+
+    FUNCTION union(self, a, b)
+        DECLARE p
+        DECLARE q
+        SET p TO self.find(a)
+        SET q TO self.find(b)
+        DECLARE mergedFlag
+        SET mergedFlag TO false
+
+        WHILE NOT mergedFlag DO
+            IF p NOT EQUAL TO q THEN
+                IF self.rank[p] GREATER THAN self.rank[q] THEN
+                    SET self.parent[q] TO p
+                    SET mergedFlag TO true
+                ELSE
+                    IF self.rank[p] LESS THAN self.rank[q] THEN
+                        SET self.parent[p] TO q
+                        SET mergedFlag TO true
+                    ELSE
+                        SET self.parent[q] TO p
+                        SET self.rank[p] TO self.rank[p] + 1
+                        SET mergedFlag TO true
+                    END IF
+                END IF
+            ELSE
+                SET mergedFlag TO true
+            END IF
+        END WHILE
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION minimumCost(self, n, edges, query)
+        SET uf TO UnionFind(n)
+        SET allOnes TO 1
+        SET bitSize TO 32
+        DECLARE maskVal
+        SET maskVal TO allOnes
+        SET shiftCount TO bitSize
+        WHILE shiftCount GREATER THAN zero DO
+            SET maskVal TO maskVal * 2
+            SET shiftCount TO shiftCount - 1
+        END WHILE
+        SET maskVal TO maskVal - 1
+
+        SET compAnd TO empty list
+        DECLARE pos
+        SET pos TO 0
+        WHILE pos LESS THAN n DO
+            APPEND maskVal TO compAnd
+            SET pos TO pos + 1
+        END WHILE
+
+        DECLARE edgeElement
+        SET edgePtr TO 0
+        WHILE edgePtr LESS THAN LENGTH(edges) DO
+            SET edgeElement TO edges[edgePtr]
+            DECLARE uVal
+            DECLARE vVal
+            DECLARE wVal
+            SET uVal TO edgeElement[0]
+            SET vVal TO edgeElement[1]
+            SET wVal TO edgeElement[2]
+
+            CALL uf.union(uVal, vVal)
+            DECLARE findU
+            SET findU TO uf.find(uVal)
+            SET compAnd[findU] TO compAnd[findU] BITWISE AND wVal
+
+            SET edgePtr TO edgePtr + 1
+        END WHILE
+
+        SET compCost TO empty dictionary
+        SET idxIter TO 0
+        WHILE idxIter LESS THAN n DO
+            DECLARE r
+            SET r TO uf.find(idxIter)
+            IF NOT (r IN compCost) THEN
+                SET compCost[r] TO compAnd[r]
+            END IF
+            SET idxIter TO idxIter + 1
+        END WHILE
+
+        SET retList TO empty list
+        DECLARE qElem
+        SET qIdx TO 0
+        WHILE qIdx LESS THAN LENGTH(query) DO
+            SET qElem TO query[qIdx]
+            DECLARE sVal
+            DECLARE tVal
+            SET sVal TO qElem[0]
+            SET tVal TO qElem[1]
+
+            IF sVal EQUALS tVal THEN
+                APPEND 0 TO retList
+            ELSE
+                DECLARE findS
+                DECLARE findT
+                SET findS TO uf.find(sVal)
+                SET findT TO uf.find(tVal)
+                IF NOT (findS NOT EQUAL findT) THEN
+                    APPEND compCost[findS] TO retList
+                ELSE
+                    APPEND -1 TO retList
+                END IF
+            END IF
+            SET qIdx TO qIdx + 1
+        END WHILE
+
+        RETURN retList
+    END FUNCTION
+END CLASS
+```

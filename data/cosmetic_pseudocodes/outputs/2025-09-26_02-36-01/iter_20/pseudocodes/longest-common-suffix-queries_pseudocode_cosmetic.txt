@@ -1,0 +1,98 @@
+CLASS Solution  
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER  
+        
+        FUNCTION identicalDictCreator() RETURNS DICTIONARY STRING TO INTEGER
+            SET dictX TO empty dictionary
+            RETURN dictX
+        END FUNCTION
+        
+        FUNCTION substringExtractor(str str TO STRING, startIdx startIdx TO INTEGER) RETURNS STRING
+            SET lenStr TO LENGTH OF str
+            SET acc TO empty STRING
+            SET idxY TO startIdx
+            WHILE idxY LESS THAN lenStr DO
+                SET acc TO acc CONCATENATED WITH CHAR_AT str idxY
+                SET idxY TO idxY PLUS 1
+            END WHILE
+            RETURN acc
+        END FUNCTION
+        
+        FUNCTION stringLengthEqualOrSmaller(lenA lenA TO INTEGER, lenB lenB TO INTEGER, idxA idxA TO INTEGER, idxB idxB TO INTEGER) RETURNS BOOLEAN
+            IF lenA LESS THAN lenB THEN
+                RETURN true
+            ELSE IF lenA EQUALS lenB THEN
+                RETURN idxA LESS THAN idxB
+            ELSE
+                RETURN false
+            END IF
+        END FUNCTION
+        
+        FUNCTION selectMinimumIndex(words words TO LIST OF STRING) RETURNS INTEGER
+            SET accIdx TO 0
+            SET accLen TO LENGTH OF element at position 0 of words
+            SET current TO 1
+            WHILE current LESS THAN LENGTH OF words DO
+                SET currLen TO LENGTH OF element at position current of words
+                IF currLen LESS THAN accLen THEN
+                    SET accLen TO currLen
+                    SET accIdx TO current
+                ELSE IF currLen EQUALS accLen THEN
+                    IF current LESS THAN accIdx THEN
+                        SET accIdx TO current
+                    END IF
+                END IF
+                SET current TO current PLUS 1
+            END WHILE
+            RETURN accIdx
+        END FUNCTION
+        
+        FUNCTION getBestMatchFunction(q query TO STRING, mapZ DICTIONARY STRING TO INTEGER) RETURNS INTEGER
+            SET lenQ TO LENGTH OF q
+            SET ptrA TO 0
+            WHILE ptrA LESS THAN lenQ DO
+                SET suff TO substringExtractor(q, ptrA)
+                IF suff IN mapZ THEN
+                    RETURN mapZ element at key suff
+                END IF
+                SET ptrA TO ptrA PLUS 1
+            END WHILE
+            RETURN selectMinimumIndex(wordsContainer)
+        END FUNCTION
+        
+        SET mapAlpha TO identicalDictCreator()
+        
+        SET idxOuter TO 0
+        WHILE idxOuter LESS THAN LENGTH OF wordsContainer DO
+            SET wordCurr TO element at position idxOuter of wordsContainer
+            SET lenCurr TO LENGTH OF wordCurr
+            SET idxInner TO 0
+            LOOP
+                IF idxInner GREATER THAN lenCurr MINUS 1 THEN BREAK
+                END IF
+                SET substrCurr TO substringExtractor(wordCurr, idxInner)
+                IF substrCurr NOT IN mapAlpha THEN
+                    SET mapAlpha element at key substrCurr TO idxOuter
+                ELSE
+                    SET existIdx TO mapAlpha element at key substrCurr
+                    SET existWord TO element at position existIdx of wordsContainer
+                    IF stringLengthEqualOrSmaller(lenCurr, LENGTH OF existWord, idxOuter, existIdx) THEN
+                        SET mapAlpha element at key substrCurr TO idxOuter
+                    END IF
+                END IF
+                SET idxInner TO idxInner PLUS 1
+            END LOOP
+            SET idxOuter TO idxOuter PLUS 1
+        END WHILE
+        
+        SET outList TO empty LIST OF INTEGER
+        SET idxQ TO 0
+        WHILE idxQ LESS THAN LENGTH OF wordsQuery DO
+            SET queryWord TO element at position idxQ of wordsQuery
+            SET answerIdx TO getBestMatchFunction(queryWord, mapAlpha)
+            APPEND answerIdx TO outList
+            SET idxQ TO idxQ PLUS 1
+        END WHILE
+        
+        RETURN outList
+    END FUNCTION  
+END CLASS

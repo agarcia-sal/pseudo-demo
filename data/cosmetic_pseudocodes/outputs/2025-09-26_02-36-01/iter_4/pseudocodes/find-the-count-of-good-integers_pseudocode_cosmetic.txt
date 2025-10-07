@@ -1,0 +1,110 @@
+CLASS Solution
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer
+        DECLARE factorials AS empty array
+        DECLARE index AS integer
+        SET index TO 0
+        WHILE index IS LESS THAN n PLUS 1
+            LET factVal TO 1
+            LET mulCounter TO 1
+            WHILE mulCounter IS LESS THAN OR EQUAL TO index
+                SET factVal TO factVal MULTIPLIED BY mulCounter
+                INCREMENT mulCounter BY 1
+            END WHILE
+            APPEND factVal TO factorials
+            INCREMENT index BY 1
+        END WHILE
+
+        DECLARE resultSum AS zero
+        DECLARE seenStrings AS empty set
+
+        DECLARE halfBase AS integer
+        SET halfBase TO 10 TO THE POWER OF ((n MINUS 1) INTEGER_DIVIDED_BY 2)
+
+        DECLARE currentVal AS integer
+        SET currentVal TO halfBase
+        DECLARE upperBound AS integer
+        SET upperBound TO (halfBase MULTIPLIED_BY 10) MINUS 1
+
+        WHILE currentVal IS LESS THAN OR EQUAL TO upperBound
+            LET strVal TO string conversion of currentVal
+
+            DECLARE revStr AS string
+            SET revStr TO empty string
+            DECLARE revIndex AS integer
+            SET revIndex TO LENGTH(strVal) MINUS 1
+            WHILE revIndex IS GREATER THAN OR EQUAL TO 0
+                SET revStr TO revStr CONCATENATED WITH strVal AT revIndex
+                DECREMENT revIndex BY 1
+            END WHILE
+
+            LET remainderIndex TO n MOD 2
+            LET suffixStr TO substring of revStr FROM remainderIndex TO LENGTH(revStr) MINUS 1
+
+            SET strVal TO strVal CONCATENATED WITH suffixStr
+
+            LET intVal AS integer parsed from strVal
+            LET modCheck AS remainder of intVal DIVIDED_BY k
+
+            IF modCheck IS NOT EQUAL TO zero THEN
+                SET currentVal TO currentVal PLUS 1
+                CONTINUE TO NEXT iteration
+            END IF
+
+            DECLARE sortedChars AS list
+            SET sortedChars TO empty list
+            DECLARE charIndex AS integer
+            SET charIndex TO 0
+            WHILE charIndex IS LESS THAN LENGTH(strVal)
+                APPEND strVal AT charIndex TO sortedChars
+                INCREMENT charIndex BY 1
+            END WHILE
+            SORT sortedChars IN ascending order
+            LET tStr TO concatenation of elements in sortedChars
+
+            IF tStr IS IN seenStrings THEN
+                SET currentVal TO currentVal PLUS 1
+                CONTINUE TO NEXT iteration
+            END IF
+
+            ADD tStr TO seenStrings
+
+            DECLARE frequencyMap AS empty dictionary
+            DECLARE charIter AS integer
+            SET charIter TO 0
+            WHILE charIter IS LESS THAN LENGTH(tStr)
+                LET ch TO tStr AT charIter
+                IF ch IS NOT A KEY IN frequencyMap THEN
+                    SET frequencyMap[ch] TO 1
+                ELSE
+                    INCREMENT frequencyMap[ch] BY 1
+                END IF
+                INCREMENT charIter BY 1
+            END WHILE
+
+            DECLARE zeroCount AS integer
+            IF '0' IS A KEY IN frequencyMap THEN
+                SET zeroCount TO frequencyMap['0']
+            ELSE
+                SET zeroCount TO 0
+            END IF
+
+            DECLARE resVal AS integer
+            IF zeroCount GREATER THAN 0 THEN
+                LET multiplier TO factorials[n MINUS 1]
+                SET resVal TO (n MINUS zeroCount) MULTIPLIED BY multiplier
+            ELSE
+                SET resVal TO factorials[n]
+            END IF
+
+            FOR EACH value IN frequencyMap.values()
+                SET resVal TO resVal INTEGER_DIVIDED_BY factorials[value]
+            END FOR
+
+            SET resultSum TO resultSum PLUS resVal
+
+            SET currentVal TO currentVal PLUS 1
+        END WHILE
+
+        RETURN resultSum
+    END FUNCTION
+END CLASS

@@ -1,0 +1,69 @@
+CLASS Solution  
+    FUNCTION countSubmatrices(grid, k)  
+        LET total_rows := SIZE OF grid  
+        LET total_cols := SIZE OF grid[0]  
+        LET total_count := 0  
+        
+        FUNCTION is_valid_submatrix(submat)  
+            LET r := 0  
+            WHILE r < SIZE OF submat  
+                LET c := 0  
+                WHILE c < SIZE OF submat[r]  
+                    IF NOT (submat[r][c] <= k) THEN  
+                        RETURN False  
+                    END IF  
+                    c += 1  
+                END WHILE  
+                r += 1  
+            END WHILE  
+            RETURN True  
+        END FUNCTION  
+        
+        FUNCTION is_sorted_submatrix(submat)  
+            FOR EACH line IN submat DO  
+                LET index := 1  
+                WHILE index < SIZE OF line DO  
+                    IF line[index] > line[index - 1] THEN  
+                        RETURN False  
+                    END IF  
+                    index = index + 1  
+                END WHILE  
+            END FOR  
+            RETURN True  
+        END FUNCTION  
+        
+        LET start_row := 0  
+        WHILE start_row < total_rows DO  
+            LET start_col := 0  
+            WHILE start_col < total_cols DO  
+                LET end_row := start_row  
+                WHILE end_row < total_rows DO  
+                    LET end_col := start_col  
+                    WHILE end_col < total_cols DO  
+                        LET temp_submatrix := []  
+                        LET row_index := start_row  
+                        WHILE row_index <= end_row DO  
+                            LET segment := []  
+                            LET col_idx := start_col  
+                            WHILE col_idx <= end_col DO  
+                                APPEND grid[row_index][col_idx] TO segment  
+                                col_idx = col_idx + 1  
+                            END WHILE  
+                            APPEND segment TO temp_submatrix  
+                            row_index = row_index + 1  
+                        END WHILE  
+                        IF is_valid_submatrix(temp_submatrix) AND is_sorted_submatrix(temp_submatrix) THEN  
+                            total_count = total_count + 1  
+                        END IF  
+                        end_col += 1  
+                    END WHILE  
+                    end_row = end_row + 1  
+                END WHILE  
+                start_col = start_col + 1  
+            END WHILE  
+            start_row = start_row + 1  
+        END WHILE  
+        
+        RETURN total_count  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,85 @@
+CLASS Solution
+	 FUNCTION minimumAddedInteger(walden1 RETURNS List OF integer, walden2 RETURNS List OF integer) RETURNS integer
+		 
+		 PROCEDURE customSort(arts LIST OF integer)
+			 IF arts IS EMPTY THEN RETURN END IF
+			 DECLARE swapped BOOLEAN
+			 REPEAT
+				 SET swapped = FALSE
+				 DECLARE pvt INTEGER = 0
+				 WHILE pvt < LENGTH(arts) - 1
+					 IF arts[pvt] > arts[pvt + 1] THEN
+						 DECLARE t INTEGER = arts[pvt]
+						 SET arts[pvt] = arts[pvt + 1]
+						 SET arts[pvt + 1] = t
+						 SET swapped = TRUE
+					 END IF
+					 SET pvt = pvt + 1
+				 END WHILE
+			 UNTIL NOT swapped
+		 END PROCEDURE
+		 
+		 CALL customSort(walden1)
+		 CALL customSort(walden2)
+		 
+		 DECLARE subIndex1 INTEGER = 0
+		 WHILE subIndex1 <= LENGTH(walden1) - 2
+			 
+			 DECLARE subIndex2 INTEGER = subIndex1 + 1
+			 WHILE subIndex2 <= LENGTH(walden1) - 1
+				 
+				 DECLARE filteredList LIST OF integer
+				 SET filteredList = []
+				 
+				 DECLARE idx INTEGER = 0
+				 REPEAT
+					 IF idx < subIndex1 THEN
+						 CALL filteredList.APPEND(walden1[idx])
+					 END IF
+					 SET idx = idx + 1
+				 UNTIL idx > subIndex1 - 1
+				 
+				 SET idx = subIndex1 + 1
+				 REPEAT
+					 IF idx < subIndex2 THEN
+						 CALL filteredList.APPEND(walden1[idx])
+					 END IF
+					 SET idx = idx + 1
+				 UNTIL idx > subIndex2 - 1
+				 
+				 SET idx = subIndex2 + 1
+				 REPEAT
+					 IF idx < LENGTH(walden1) THEN
+						 CALL filteredList.APPEND(walden1[idx])
+					 END IF
+					 SET idx = idx + 1
+				 UNTIL idx > LENGTH(walden1) - 1
+				 
+				 DECLARE candidate INTEGER = walden2[0] + (- filteredList[0])
+				 
+				 DECLARE allMatch BOOLEAN = TRUE
+				 DECLARE counter INTEGER = 0
+				 
+				 PROCEDURE checkMatch()
+					 IF counter > LENGTH(walden2) - 1 THEN RETURN END IF
+					 IF filteredList[counter] + candidate != walden2[counter] THEN
+						 SET allMatch = FALSE
+						 RETURN
+					 END IF
+					 SET counter = counter + 1
+					 CALL checkMatch()
+				 END PROCEDURE
+				 
+				 CALL checkMatch()
+				 
+				 IF allMatch == TRUE THEN RETURN candidate END IF
+				 
+				 SET subIndex2 = subIndex2 + 1
+			 END WHILE
+			 
+			 SET subIndex1 = subIndex1 + 1
+		 END WHILE
+		 
+		 RETURN None
+	 END FUNCTION
+END CLASS

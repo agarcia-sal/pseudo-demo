@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION makeAntiPalindrome(s)
+        SET a TO 0
+        SET b TO 0
+        SET c TO LIST()
+        SET d TO LENGTH(s)
+        WHILE a LESS THAN d
+            APPEND s[a] TO c
+            SET a TO a + 1
+        END WHILE
+        
+        CALL sortListAscRecursive(c, 0, d)
+        
+        SET e TO d DIV 2
+        SET f TO 0
+        IF (NOT c[e] NOT_EQUALS c[e - 1]) THEN
+            SET f TO e
+            CALL scanAndSwap(c, f, d, e)
+        END IF
+
+        SET g TO 0
+        WHILE g < e
+            IF NOT (NOT c[g] NOT_EQUALS c[d - g - 1]) THEN
+                SET h TO e
+                SET swapped TO false
+                REPEAT
+                    IF (NOT (c[h] NOT_EQUALS c[g]) AND NOT (c[h] NOT_EQUALS c[d - g - 1])) THEN
+                        CALL exchangeElements(c, h, g)
+                        SET swapped TO true
+                        EXIT
+                    END IF
+                    SET h TO h + 1
+                UNTIL h >= d
+                IF NOT swapped THEN
+                    RETURN "-1"
+                END IF
+            END IF
+            SET g TO g + 1
+        END WHILE
+
+        RETURN joinListElements(c)
+    END FUNCTION
+    
+    FUNCTION sortListAscRecursive(arr, start, length)
+        IF start >= length - 1 THEN
+            RETURN
+        END IF
+        SET minIndex TO start
+        SET j TO start + 1
+        WHILE j < length
+            IF arr[j] < arr[minIndex] THEN
+                SET minIndex TO j
+            END IF
+            SET j TO j + 1
+        END WHILE
+        CALL exchangeElements(arr, start, minIndex)
+        CALL sortListAscRecursive(arr, start + 1, length)
+    END FUNCTION
+
+    FUNCTION scanAndSwap(arr, index, length, mid)
+        WHILE index < length AND (NOT arr[index] NOT_EQUALS arr[index - 1]) DO
+            SET index TO index + 1
+        END WHILE
+        
+        SET y TO mid
+        WHILE y < length AND (NOT arr[y] NOT_EQUALS arr[length - y - 1])
+            IF index >= length THEN
+                RETURN "-1"
+            END IF
+            CALL exchangeElements(arr, index, y)
+            SET index TO index + 1
+            SET y TO y + 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION exchangeElements(arr, x, y)
+        SET temp TO arr[x]
+        SET arr[x] TO arr[y]
+        SET arr[y] TO temp
+    END FUNCTION
+
+    FUNCTION joinListElements(lst)
+        SET result TO ""
+        SET i TO 0
+        WHILE i < LENGTH(lst)
+            SET result TO result + lst[i]
+            SET i TO i + 1
+        END WHILE
+        RETURN result
+    END FUNCTION
+END CLASS

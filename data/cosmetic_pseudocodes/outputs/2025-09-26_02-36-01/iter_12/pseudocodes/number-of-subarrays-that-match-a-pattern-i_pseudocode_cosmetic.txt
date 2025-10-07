@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION countMatchingSubarrays(nums parameter, pattern parameter)
+        FUNCTION isLessThan(A, B)
+            RETURN A < B
+        END FUNCTION
+
+        FUNCTION isEqual(A, B)
+            RETURN A == B
+        END FUNCTION
+
+        FUNCTION isGreaterThanOrEqual(A, B)
+            RETURN NOT isLessThan(A, B)
+        END FUNCTION
+
+        SET lengthNums TO 0
+        WHILE TRUE
+            IF lengthNums >= LENGTH nums parameter THEN
+                BREAK
+            END IF
+            SET lengthNums TO lengthNums + 1
+        END WHILE
+
+        SET lengthPattern TO 0
+        WHILE TRUE
+            IF lengthPattern >= LENGTH pattern parameter THEN
+                BREAK
+            END IF
+            SET lengthPattern TO lengthPattern + 1
+        END WHILE
+
+        SET totalMatches TO 0
+        SET outerIndex TO 0
+
+        WHILE outerIndex <= lengthNums - lengthPattern - 1
+            SET currentMatch TO TRUE
+            SET innerIndex TO 0
+
+            FUNCTION checkCondition(index)
+                IF isEqual(pattern parameter[index], 1) THEN
+                    RETURN isLessThan(nums parameter[outerIndex + index + 1], nums parameter[outerIndex + index])
+                ELSE IF isEqual(pattern parameter[index], 0) THEN
+                    RETURN NOT isEqual(nums parameter[outerIndex + index + 1], nums parameter[outerIndex + index])
+                ELSE IF isEqual(pattern parameter[index], -1) THEN
+                    RETURN isGreaterThanOrEqual(nums parameter[outerIndex + index + 1], nums parameter[outerIndex + index])
+                ELSE
+                    RETURN FALSE
+                END IF
+            END FUNCTION
+
+            FUNCTION recursiveCheck(pos)
+                IF pos >= lengthPattern - 1 THEN
+                    RETURN TRUE
+                END IF
+                IF checkCondition(pos) THEN
+                    RETURN FALSE
+                ELSE
+                    RETURN recursiveCheck(pos + 1)
+                END IF
+            END FUNCTION
+
+            SET currentMatch TO recursiveCheck(0)
+
+            IF currentMatch THEN
+                SET totalMatches TO totalMatches + 1
+            END IF
+
+            SET outerIndex TO outerIndex + 1
+        END WHILE
+
+        RETURN totalMatches
+    END FUNCTION
+END CLASS

@@ -1,0 +1,48 @@
+FUNCTION find_closest_elements(numbers_collection)
+    DECLARE best_match = None
+    DECLARE smallest_gap = None
+    FOR posA FROM 0 TO LENGTH(numbers_collection) - 1
+        LET valA = numbers_collection.at(posA)
+        LET posB = 0
+        WHILE posB < LENGTH(numbers_collection) DO
+            LET valB = numbers_collection.at(posB)
+            SWITCH (posA == posB)
+                CASE true:
+                    ; // do nothing when indices are equal
+                CASE false:
+                    IF smallest_gap == None THEN
+                        LET difference = valA - valB
+                        LET absolute_difference = difference
+                        IF difference < 0 THEN
+                            absolute_difference = -difference
+                        END IF
+                        smallest_gap = absolute_difference
+                        LET pair_list = [valA, valB]
+                        IF pair_list[0] > pair_list[1] THEN
+                            LET temp_val = pair_list[0]
+                            pair_list[0] = pair_list[1]
+                            pair_list[1] = temp_val
+                        END IF
+                        best_match = (pair_list[0], pair_list[1])
+                    ELSE
+                        LET candidate_distance = valA - valB
+                        IF candidate_distance < 0 THEN
+                            candidate_distance = 0 - candidate_distance
+                        END IF
+                        IF candidate_distance < smallest_gap THEN
+                            smallest_gap = candidate_distance
+                            LET sorted_pair = [valA, valB]
+                            IF sorted_pair[0] > sorted_pair[1] THEN
+                                LET temp_swap = sorted_pair[0]
+                                sorted_pair[0] = sorted_pair[1]
+                                sorted_pair[1] = temp_swap
+                            END IF
+                            best_match = (sorted_pair[0], sorted_pair[1])
+                        END IF
+                    END IF
+            END SWITCH
+            posB = posB + 1
+        END WHILE
+    END FOR
+    RETURN best_match
+END FUNCTION

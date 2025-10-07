@@ -1,0 +1,175 @@
+CLASS Solution  
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer  
+        SET P TO 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 + 1  
+
+        SET M TO []  
+        SET a TO 0  
+        WHILE a <= 25  
+            BEGIN  
+                SET row TO []  
+                SET b TO 0  
+                WHILE b <= 25  
+                    BEGIN  
+                        APPEND 0 TO row  
+                        SET b TO b + 1  
+                    END  
+                END WHILE  
+                APPEND row TO M  
+                SET a TO a + 1  
+            END  
+        END WHILE  
+
+        SET x TO 0  
+        WHILE x <= 25  
+            BEGIN  
+                SET y TO 0  
+                WHILE y < nums[x]  
+                    BEGIN  
+                        SET z TO (x + y + 1)  
+                        SET w TO z % 26  
+                        SET M[x][w] TO M[x][w] + 1  
+                        SET y TO y + 1  
+                    END  
+                END WHILE  
+                SET x TO x + 1  
+            END  
+        END WHILE  
+
+        FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers  
+            DECLARE R AS list of lists of integers  
+            SET i1 TO 0  
+            WHILE i1 <= 25  
+                BEGIN  
+                    DECLARE rowR AS list of integers  
+                    SET j1 TO 0  
+                    WHILE j1 <= 25  
+                        BEGIN  
+                            APPEND 0 TO rowR  
+                            SET j1 TO j1 + 1  
+                        END  
+                    END WHILE  
+                    APPEND rowR TO R  
+                    SET i1 TO i1 + 1  
+                END  
+            END WHILE  
+
+            SET p1 TO 0  
+            WHILE p1 <= 25  
+                BEGIN  
+                    SET q1 TO 0  
+                    WHILE q1 <= 25  
+                        BEGIN  
+                            SET r1 TO 0  
+                            WHILE r1 <= 25  
+                                BEGIN  
+                                    SET temp_val TO (A[p1][r1] * B[r1][q1]) % P  
+                                    SET temp_sum TO R[p1][q1] + temp_val  
+                                    SET R[p1][q1] TO temp_sum % P  
+                                    SET r1 TO r1 + 1  
+                                END  
+                            END WHILE  
+                            SET q1 TO q1 + 1  
+                        END  
+                    END WHILE  
+                    SET p1 TO p1 + 1  
+                END  
+            END WHILE  
+
+            RETURN R  
+        END FUNCTION  
+
+        FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers  
+            DECLARE id AS list of lists of integers  
+            SET i2 TO 0  
+            WHILE i2 <= 25  
+                BEGIN  
+                    DECLARE row_id AS list of integers  
+                    SET j2 TO 0  
+                    WHILE j2 <= 25  
+                        BEGIN  
+                            IF i2 = j2 THEN  
+                                APPEND 1 TO row_id  
+                            ELSE  
+                                APPEND 0 TO row_id  
+                            END IF  
+                            SET j2 TO j2 + 1  
+                        END  
+                    END WHILE  
+                    APPEND row_id TO id  
+                    SET i2 TO i2 + 1  
+                END  
+            END WHILE  
+
+            SET base_matrix TO matrix  
+            SET expo TO power  
+            WHILE expo > 0  
+                BEGIN  
+                    IF expo % 2 = 1 THEN  
+                        SET id TO matrix_multiply(id, base_matrix)  
+                    END IF  
+                    SET base_matrix TO matrix_multiply(base_matrix, base_matrix)  
+                    SET expo TO expo DIV 2  
+                END  
+            END WHILE  
+
+            RETURN id  
+        END FUNCTION  
+
+        SET FM TO matrix_power(M, t)  
+
+        DECLARE cArr AS list of integers  
+        SET idx_c TO 0  
+        WHILE idx_c <= 25  
+            BEGIN  
+                APPEND 0 TO cArr  
+                SET idx_c TO idx_c + 1  
+            END  
+        END WHILE  
+
+        SET pos_c TO 0  
+        WHILE pos_c < LENGTH(s)  
+            BEGIN  
+                SET ch_index TO ORD(s[pos_c]) - ORD('a')  
+                SET cArr[ch_index] TO cArr[ch_index] + 1  
+                SET pos_c TO pos_c + 1  
+            END  
+        END WHILE  
+
+        DECLARE fArr AS list of integers  
+        SET idx_f TO 0  
+        WHILE idx_f <= 25  
+            BEGIN  
+                APPEND 0 TO fArr  
+                SET idx_f TO idx_f + 1  
+            END  
+        END WHILE  
+
+        SET aa TO 0  
+        WHILE aa <= 25  
+            BEGIN  
+                SET bb TO 0  
+                WHILE bb <= 25  
+                    BEGIN  
+                        SET val_calc TO (cArr[aa] * FM[aa][bb]) % P  
+                        SET sum_val TO fArr[bb] + val_calc  
+                        SET fArr[bb] TO sum_val % P  
+                        SET bb TO bb + 1  
+                    END  
+                END WHILE  
+                SET aa TO aa + 1  
+            END  
+        END WHILE  
+
+        SET res_sum TO 0  
+        SET cc TO 0  
+        WHILE cc <= 25  
+            BEGIN  
+                SET tempR TO res_sum + fArr[cc]  
+                SET res_sum TO tempR % P  
+                SET cc TO cc + 1  
+            END  
+        END WHILE  
+
+        RETURN res_sum  
+    END FUNCTION  
+END CLASS

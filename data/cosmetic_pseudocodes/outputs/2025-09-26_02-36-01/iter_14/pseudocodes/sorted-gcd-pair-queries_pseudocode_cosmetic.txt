@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION gcdValues(nums, queries)
+        SET highest TO 0
+        FOR x IN nums DO
+            IF (x > highest) THEN
+                SET highest TO x
+            END IF
+        END FOR
+
+        DEFINE countMap AS empty map with default 0
+        FOR element IN nums DO
+            SET countMap[element] TO countMap[element] + 1
+        END FOR
+
+        SET freqList TO array of zeros with size (highest + 1)
+
+        SET currentIndex TO highest
+        WHILE (currentIndex >= 1) DO
+            SET tempSum TO 0
+            SET innerIndex TO currentIndex
+            WHILE (innerIndex <= highest) DO
+                SET tempSum TO tempSum + countMap[innerIndex]
+                SET freqList[currentIndex] TO freqList[currentIndex] - freqList[innerIndex]
+                SET innerIndex TO innerIndex + currentIndex
+            END WHILE
+            SET freqList[currentIndex] TO freqList[currentIndex] + ((tempSum * (tempSum - 1)) / 2)
+            SET currentIndex TO currentIndex - 1
+        END WHILE
+
+        DEFINE accList AS array with length freqList length
+        DEFINE accTotal AS 0
+        FOR pos FROM 0 TO LENGTH(freqList) - 1 DO
+            SET accTotal TO accTotal + freqList[pos]
+            SET accList[pos] TO accTotal
+        END FOR
+
+        DEFINE outputList AS empty list
+        FOR queryVal IN queries DO
+            SET leftBound TO 0
+            SET rightBound TO LENGTH(accList)
+            WHILE (leftBound < rightBound) DO
+                SET midIndex TO (leftBound + rightBound) / 2
+                IF NOT (queryVal < accList[midIndex]) THEN
+                    SET leftBound TO midIndex + 1
+                ELSE
+                    SET rightBound TO midIndex
+                END IF
+            END WHILE
+            APPEND leftBound TO outputList
+        END FOR
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

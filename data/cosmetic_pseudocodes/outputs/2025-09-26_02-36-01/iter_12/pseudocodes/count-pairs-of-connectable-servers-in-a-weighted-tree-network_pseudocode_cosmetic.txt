@@ -1,0 +1,94 @@
+CLAss Solution  
+    FUNCTion countPairsOfConnectableServers(edges, signalSpeed)  
+      deCLARE graph AS mapping OF key TO list initialized empty  
+      
+      CALL populateGraph(edges, graph)  
+      
+      deCLARE n AS integer  
+      n := mapKeyCount(graph)  
+      
+      DECLARE result AS list OF integer WITH size n FILLED WITH (0)  
+      
+      FUNCTION irregularDFS(alphaNode, betaParent, gammaDistance, deltaPath)  
+        IF modArithmetic(gammaDistance, signalSpeed) == 0 THEN  
+          appendElem(deltaPath, alphaNode)  
+        END IF  
+        
+        DECLARE countAccum AS integer = 0  
+        
+        FOR paIr OF tuple IN graph[alphaNode] DO  
+          DECLARE neigh, wei  
+          neigh, wei := paIr[0], paIr[1]  
+          IF neigh != betaParent THEN  
+            countAccum += irregularDFS(neigh, betaParent, gammaDistance + wei, deltaPath)  
+          END IF  
+        END FOR  
+        
+        IF modArithmetic(gammaDistance, signalSpeed) == 0 THEN  
+          RETURN countAccum + 1  
+        ELSE  
+          RETURN countAccum  
+        END IF  
+      END FUNCTION  
+      
+      FUNCTION tallyPairsAround(centerNode)  
+        DECLARE collectionOfPaths AS list of lists INITIALIZED empty  
+        
+        FOR pairEntry IN graph[centerNode] DO  
+          DECLARE neighborAndWeight = pairEntry  
+          DECLARE tempPath AS new empty list  
+          irregularDFS(neighborAndWeight[0], centerNode, neighborAndWeight[1], tempPath)  
+          appendElem(collectionOfPaths, tempPath)  
+        END FOR  
+        
+        DECLARE combinedPairs AS integer = 0  
+        DECLARE xIndex AS integer = 0  
+        WHILE xIndex < listLength(collectionOfPaths) - 1 DO  
+          DECLARE yIndex AS integer = xIndex + 1  
+          WHILE yIndex < listLength(collectionOfPaths) DO  
+            combinedPairs += listLength(collectionOfPaths[xIndex]) * listLength(collectionOfPaths[yIndex])  
+            yIndex += 1  
+          END WHILE  
+          xIndex += 1  
+        END WHILE  
+        
+        RETURN combinedPairs  
+      END FUNCTION  
+      
+      DECLARE loopVar AS integer = 0  
+      WHILE loopVar < n DO  
+        result[loopVar] := tallyPairsAround(loopVar)  
+        loopVar += 1  
+      END WHILE  
+      
+      RETURN result  
+    END FUNCTion  
+    
+    
+    FUNCTION populateGraph(edgeEntries, graphMap)  
+      DECLARE edgeIndexer AS integer = 0  
+      WHILE edgeIndexer < listLength(edgeEntries) DO  
+        DECLARE uvwTriplet = edgeEntries[edgeIndexer]  
+        DECLARE rootNode AS integer = uvwTriplet[0]  
+        DECLARE childNode AS integer = uvwTriplet[1]  
+        DECLARE edgeWeight AS integer = uvwTriplet[2]  
+        
+        IF graphMap[rootNode] == undefined THEN  
+          graphMap[rootNode] := new empty list  
+        END IF  
+        IF graphMap[childNode] == undefined THEN  
+          graphMap[childNode] := new empty list  
+        END IF  
+        
+        appendElem(graphMap[rootNode], [childNode, edgeWeight])  
+        appendElem(graphMap[childNode], [rootNode, edgeWeight])  
+        
+        edgeIndexer += 1  
+      END WHILE  
+    END FUNCTION  
+    
+    
+    FUNCTION modArithmetic(xValue, yValue)  
+      RETURN xValue - yValue * ((xValue) // yValue)  
+    END FUNCTION  
+END CLAss

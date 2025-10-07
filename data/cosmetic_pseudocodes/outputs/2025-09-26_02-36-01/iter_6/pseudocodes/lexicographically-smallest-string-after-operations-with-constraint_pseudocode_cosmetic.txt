@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION getSmallestString(s parameter of type string k parameter of type integer) RETURNS string
+        FUNCTION cyclic_distance(c1 parameter of type character c2 parameter of type character) RETURNS integer
+            DEFINE distance_forward BE (code_of(c1) - code_of(c2))
+            IF distance_forward < 0 THEN
+                SET distance_forward TO (-distance_forward)
+            ENDIF
+            
+            DEFINE distance_backward BE (26 - distance_forward)
+            
+            IF distance_forward <= distance_backward THEN
+                RETURN distance_forward
+            ELSE
+                RETURN distance_backward
+            ENDIF
+        END FUNCTION
+
+        DEFINE char_list BE empty list
+        FOR idx FROM 1 TO LENGTH(s) DO
+            APPEND s[idx] TO char_list
+        ENDFOR
+
+        DEFINE current_index BE 0
+        DEFINE length_s BE LENGTH(s)
+        DEFINE k_remaining BE k
+
+        PROCEDURE process_characters(current_pos parameter of type integer)
+            IF (k_remaining <= 0) OR (current_pos >= length_s) THEN
+                RETURN
+            ENDIF
+
+            IF char_list[current_pos + 1] = 'a' THEN
+                process_characters(current_pos + 1)
+                RETURN
+            ENDIF
+
+            DEFINE dist_to_a BE cyclic_distance(char_list[current_pos + 1], 'a')
+
+            IF dist_to_a <= k_remaining THEN
+                SET char_list[current_pos + 1] TO 'a'
+                SET k_remaining TO k_remaining - dist_to_a
+            ELSE
+                DEFINE original_code BE code_of(char_list[current_pos + 1])
+                SET char_list[current_pos + 1] TO character_of_code(original_code - k_remaining)
+                SET k_remaining TO 0
+            ENDIF
+
+            process_characters(current_pos + 1)
+        END PROCEDURE
+
+        process_characters(current_index)
+
+        DEFINE result_string BE empty string
+        FOR rev_idx FROM length_s DOWNTO 1 DO
+            SET result_string TO char_list[rev_idx] + result_string
+        ENDFOR
+
+        RETURN result_string
+    END FUNCTION
+END CLASS

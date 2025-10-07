@@ -1,0 +1,86 @@
+CLASS TreeNode  
+    FUNCTION __init__(self COMMA val EQUALS 0 COMMA left EQUALS None COMMA right EQUALS None)  
+        ASSIGN self.val AS val  
+        ASSIGN self.left AS left  
+        ASSIGN self.right AS right  
+    END FUNCTION  
+END CLASS  
+
+FUNCTION tree_node(values)  
+    DECLARE lengthValues AS LENGTH(values)  
+    DECLARE index AS 1  
+    IF NOT (lengthValues GREATER THAN 0) THEN  
+        RETURN None  
+    END IF  
+    SET rootNode TO NEW TreeNode WITH val = values[0]  
+    DECLARE processingQueue AS NEW deque  
+    INSERT rootNode INTO processingQueue FROM RIGHT  
+    WHILE TRUE  
+        IF processingQueue IS EMPTY THEN  
+            EXIT WHILE  
+        END IF  
+        ASSIGN currentNode AS REMOVE LEFT processingQueue  
+        IF (index LESS THAN lengthValues) AND (NOT (values[index] IS None)) THEN  
+            CREATE childLeft AS NEW TreeNode WITH val = values[index]  
+            ASSIGN currentNode.left AS childLeft  
+            INSERT childLeft INTO processingQueue FROM RIGHT  
+        END IF  
+        SET index TO index PLUS 1  
+        IF (index LESS THAN lengthValues) AND (NOT (values[index] IS None)) THEN  
+            CREATE childRight AS NEW TreeNode WITH val = values[index]  
+            ASSIGN currentNode.right AS childRight  
+            INSERT childRight INTO processingQueue FROM RIGHT  
+        END IF  
+        SET index TO index PLUS 1  
+    END WHILE  
+    RETURN rootNode  
+END FUNCTION  
+
+FUNCTION is_same_tree(p COMMA q)  
+    IF (p IS None) AND (q IS None) THEN  
+        RETURN True  
+    ELSE IF (p IS None) OR (q IS None) THEN  
+        RETURN False  
+    ELSE  
+        DECLARE valuesEqual AS NOT (p.val NOT EQUAL q.val)  
+        IF NOT valuesEqual THEN  
+            RETURN False  
+        ELSE  
+            RETURN is_same_tree(p.left COMMA q.left) AND is_same_tree(p.right COMMA q.right)  
+        END IF  
+    END IF  
+END FUNCTION  
+
+CLASS Solution  
+    FUNCTION minimumLevel(self COMMA root)  
+        IF root IS None THEN  
+            RETURN 0  
+        END IF  
+        DECLARE nodesQueue AS NEW deque WITH root  
+        DECLARE currentLvl AS 1  
+        DECLARE minSumValue AS INFINITY  
+        DECLARE minimalLevel AS 1  
+        WHILE nodesQueue IS NOT EMPTY  
+            DECLARE nodeCount AS LENGTH(nodesQueue)  
+            DECLARE accumulatedSum AS 0  
+            DECLARE loopIndex AS 0  
+            WHILE loopIndex LESS THAN nodeCount  
+                DECLARE currentNode AS REMOVE LEFT nodesQueue  
+                SET accumulatedSum TO accumulatedSum PLUS currentNode.val  
+                IF currentNode.left IS NOT None THEN  
+                    INSERT currentNode.left INTO nodesQueue FROM RIGHT  
+                END IF  
+                IF currentNode.right IS NOT None THEN  
+                    INSERT currentNode.right INTO nodesQueue FROM RIGHT  
+                END IF  
+                SET loopIndex TO loopIndex PLUS 1  
+            END WHILE  
+            IF accumulatedSum LESS THAN minSumValue THEN  
+                ASSIGN minSumValue AS accumulatedSum  
+                ASSIGN minimalLevel AS currentLvl  
+            END IF  
+            SET currentLvl TO currentLvl PLUS 1  
+        END WHILE  
+        RETURN minimalLevel  
+    END FUNCTION  
+END CLASS

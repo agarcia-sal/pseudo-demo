@@ -1,0 +1,120 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        SET INTEGER_CONST TO 1000000000 PLUS 7
+        SET length_var TO LENGTH OF nums
+        SET max_element TO NEGATIVE_INFINITY
+        SET idx_counter TO 0
+        REPEAT UNTIL idx_counter GREATER THAN OR EQUAL TO length_var
+            IF nums[idx_counter] GREATER THAN max_element THEN
+                SET max_element TO nums[idx_counter]
+            END IF
+            SET idx_counter TO idx_counter PLUS 1
+        END REPEAT
+
+        FUNCTION zeros3D(dim1, dim2, dim3)
+            IF dim1 EQUALS 0 THEN
+                RETURN []
+            ELSE
+                SET outer_list TO []
+                SET dim1_iter TO 0
+                WHILE dim1_iter LESS THAN dim1
+                    APPEND zeros3D(dim2, dim3, 0) TO outer_list
+                    SET dim1_iter TO dim1_iter PLUS 1
+                END WHILE
+                RETURN outer_list
+            END IF
+        END FUNCTION
+
+        FUNCTION zeros3D(d2, d3, val)
+            IF d2 EQUALS 0 THEN
+                RETURN []
+            ELSE
+                SET middle_list TO []
+                SET d2_iter TO 0
+                WHILE d2_iter LESS THAN d2
+                    APPEND zeros2D(d3, val) TO middle_list
+                    SET d2_iter TO d2_iter PLUS 1
+                END WHILE
+                RETURN middle_list
+            END IF
+        END FUNCTION
+
+        FUNCTION zeros2D(size, val)
+            IF size EQUALS 0 THEN
+                RETURN []
+            ELSE
+                SET inner_list TO []
+                SET inner_counter TO 0
+                WHILE inner_counter LESS THAN size
+                    APPEND val TO inner_list
+                    SET inner_counter TO inner_counter PLUS 1
+                END WHILE
+                RETURN inner_list
+            END IF
+        END FUNCTION
+
+        SET dp TO zeros3D(length_var PLUS 1, max_element PLUS 1, max_element PLUS 1)
+
+        FUNCTION assignDp(i_val, j_val, k_val, new_val)
+            SET dp[i_val][j_val][k_val] TO new_val
+        END FUNCTION
+
+        FUNCTION getDp(i_val, j_val, k_val)
+            RETURN dp[i_val][j_val][k_val]
+        END FUNCTION
+
+        SET first_num TO nums[0]
+        SET outer_counter TO 0
+        WHILE outer_counter LESS THAN OR EQUAL TO first_num
+            CALL assignDp(1, outer_counter, first_num MINUS outer_counter, 1)
+            SET outer_counter TO outer_counter PLUS 1
+        END WHILE
+
+        SET index_i TO 2
+        WHILE index_i LESS THAN OR EQUAL TO length_var
+            SET current_num TO nums[index_i MINUS 1]
+            SET outer_j TO 0
+            WHILE outer_j LESS THAN OR EQUAL TO current_num
+                SET outer_k TO 0
+                WHILE outer_k LESS THAN OR EQUAL TO current_num
+                    IF NOT (outer_j PLUS outer_k DIFFERENT FROM current_num) THEN
+                        SET prev_j_iter TO 0
+                        WHILE prev_j_iter LESS THAN OR EQUAL TO outer_j
+                            SET prev_k_iter TO outer_k
+                            WHILE prev_k_iter LESS THAN OR EQUAL TO max_element
+                                SET prev_val TO getDp(index_i MINUS 1, prev_j_iter, prev_k_iter)
+                                SET curr_val TO getDp(index_i, outer_j, outer_k)
+                                SET sum_val TO curr_val PLUS prev_val
+                                SET modded_val TO sum_val MINUS ((sum_val DIV INTEGER_CONST) TIMES INTEGER_CONST)
+                                CALL assignDp(index_i, outer_j, outer_k, modded_val)
+                                SET prev_k_iter TO prev_k_iter PLUS 1
+                            END WHILE
+                            SET prev_j_iter TO prev_j_iter PLUS 1
+                        END WHILE
+                    END IF
+                    SET outer_k TO outer_k PLUS 1
+                END WHILE
+                SET outer_j TO outer_j PLUS 1
+            END WHILE
+            SET index_i TO index_i PLUS 1
+        END WHILE
+
+        FUNCTION modularAdd(a_val, b_val, mod_val)
+            SET temp_sum TO a_val PLUS b_val
+            RETURN temp_sum MINUS ((temp_sum DIV mod_val) TIMES mod_val)
+        END FUNCTION
+
+        SET accumulator TO 0
+        SET loop_j TO 0
+        WHILE loop_j LESS THAN OR EQUAL TO max_element
+            SET loop_k TO 0
+            WHILE loop_k LESS THAN OR EQUAL TO max_element
+                SET accumulator TO modularAdd(accumulator, getDp(length_var, loop_j, loop_k), INTEGER_CONST)
+                SET loop_k TO loop_k PLUS 1
+            END WHILE
+            SET loop_j TO loop_j PLUS 1
+        END WHILE
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

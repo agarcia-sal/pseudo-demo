@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION minLength(s parameter, numOps parameter)
+        FUNCTION longest_uniform_substring(s parameter)
+            SET longestSeq TO 0
+            SET seqCount TO 1
+            SET idx TO 1
+            WHILE idx < ( (LENGTH OF s) + (0 - 1) )
+                IF ( (s AT idx) EQUALS (s AT (idx - 1)) )
+                    seqCount ← seqCount + 1
+                ELSE
+                    IF longestSeq < seqCount
+                        longestSeq ← seqCount
+                    ELSE
+                        # no operation
+                    END IF
+                    seqCount ← 1
+                END IF
+                idx ← idx + 1
+            END WHILE
+            IF longestSeq > seqCount
+                RETURN longestSeq
+            RETURN seqCount
+        END FUNCTION
+        
+        SET finalMin TO LENGTH OF s
+        SET upperBound TO (1 LEFT SHIFT (LENGTH OF s))
+        SET iterIndex TO 0
+        repeat_until iterIndex >= upperBound
+            IF ( (COUNT ONES IN (CONVERT iterIndex TO BINARY)) > numOps )
+                iterIndex ← iterIndex + 1
+                continue
+            END IF
+            SET tempList TO []
+            SET posCounter TO 0
+            repeat_until posCounter >= LENGTH OF s
+                ADD (s AT posCounter) TO tempList
+                posCounter ← posCounter + 1
+            END repeat_until
+            SET posCounter TO 0
+            repeat_until posCounter >= LENGTH OF s
+                SET flagBit TO (1 LEFT SHIFT posCounter)
+                IF ( (iterIndex BITWISE_AND flagBit) NOT_EQUALS 0 )
+                    IF (tempList AT posCounter EQUALS '0')
+                        SET tempList AT posCounter TO '1'
+                    ELSE
+                        SET tempList AT posCounter TO '0'
+                    END IF
+                END IF
+                posCounter ← posCounter + 1
+            END repeat_until
+
+            SET currentCandidate TO longest_uniform_substring(tempList)
+            IF finalMin > currentCandidate
+                finalMin ← currentCandidate
+            ELSE
+                # do nothing
+            END IF
+            iterIndex ← iterIndex + 1
+        END repeat_until
+        RETURN finalMin
+    END FUNCTION
+END CLASS

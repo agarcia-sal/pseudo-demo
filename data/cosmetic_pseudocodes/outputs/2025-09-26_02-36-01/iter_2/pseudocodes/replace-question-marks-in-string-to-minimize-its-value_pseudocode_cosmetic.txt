@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        IMPORT the count aggregator as CounterFunction
+
+        LET char_frequencies BE CounterFunction invoked on s
+        IF char_frequencies INCLUDES key '?'
+            DELETE key '?' FROM char_frequencies
+        END IF
+
+        INITIALIZE positions TO empty list
+        LET pos_index BE 0
+        WHILE pos_index < LENGTH of s
+            LET current_char BE s at position pos_index
+            IF current_char IS '?'
+                ADD pos_index TO positions
+            END IF
+            pos_index INCREMENT BY 1
+        END WHILE
+
+        DEFINE substitutes AS empty list
+
+        FOR EACH position_element IN positions DO
+            LET least_frequency BE a very large number
+            LET character_to_use BE null
+            LET ascii_code BE 97  // corresponding to 'a'
+            WHILE ascii_code <= 122  // corresponding to 'z'
+                LET alphabet_char BE CHARACTER represented by ascii_code
+                LET frequency_count BE char_frequencies VALUE for alphabet_char OR zero IF absent
+                IF frequency_count < least_frequency
+                    least_frequency = frequency_count
+                    character_to_use = alphabet_char
+                END IF
+                ascii_code = ascii_code + 1
+            END WHILE
+            APPEND character_to_use TO substitutes
+            INCREMENT char_frequencies value at character_to_use BY 1
+        END FOR
+
+        substitutes SORTED lex order ascendingly
+
+        CONVERT s TO array_of_chars
+
+        LET idx = 0
+        WHILE idx < LENGTH of positions
+            LET replacement_pos BE positions[idx]
+            LET replacement_char BE substitutes[idx]
+            array_of_chars at index replacement_pos ASSIGN replacement_char
+            idx = idx + 1
+        END WHILE
+
+        RETURN CONCATENATION of all chars in array_of_chars
+    END FUNCTION
+END CLASS

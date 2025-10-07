@@ -1,0 +1,89 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        LET divisor BE 1_000_000_000 PLUS 7
+        LET length BE 0
+        WHILE TRUE
+            IF length EQUALS LENGTH OF nums THEN
+                BREAK
+            END IF
+            LET length BE length PLUS 1
+        END WHILE
+
+        IF NOT (length GREATER THAN OR EQUAL TO 5) THEN
+            RETURN 0
+        END IF
+
+        LET groups BE EMPTY LIST
+        LET indices BE [0,1,2,3,4]
+        WHILE TRUE
+            LET combo TO EMPTY LIST
+            LET idxCounter BE 0
+            WHILE idxCounter LESS THAN 5
+                APPEND nums[indices[idxCounter]] TO combo
+                LET idxCounter BE idxCounter PLUS 1
+            END WHILE
+            APPEND combo TO groups
+
+            LET incremented BE FALSE
+            LET pos BE 4
+            WHILE pos GREATER THAN OR EQUAL TO 0 AND NOT incremented
+                LET indices[pos] BE indices[pos] PLUS 1
+                IF indices[pos] LESS THAN (length MINUS (4 MINUS pos)) THEN
+                    LET incremented BE TRUE
+                    LET nextPos BE pos PLUS 1
+                    WHILE nextPos LESS THAN 5
+                        LET indices[nextPos] BE indices[nextPos - 1] PLUS 1
+                        LET nextPos BE nextPos PLUS 1
+                    END WHILE
+                ELSE
+                    LET pos BE pos MINUS 1
+                END IF
+            END WHILE
+
+            IF NOT incremented THEN
+                BREAK
+            END IF
+        END WHILE
+
+        LET resultCount BE 0
+
+        LET i BE 0
+        WHILE i LESS THAN LENGTH OF groups
+            LET comboGroup BE groups[i]
+
+            LET frequencyMap BE EMPTY MAP
+            LET j BE 0
+            WHILE j LESS THAN 5
+                LET elem BE comboGroup[j]
+                IF elem IN frequencyMap THEN
+                    LET frequencyMap[elem] BE frequencyMap[elem] PLUS 1
+                ELSE
+                    SET frequencyMap[elem] TO 1
+                END IF
+                LET j BE j PLUS 1
+            END WHILE
+
+            LET centerVal BE comboGroup[2]
+            LET centerCount BE frequencyMap[centerVal]
+
+            LET uniqueModeFlag BE TRUE
+            FOR EACH key IN frequencyMap KEYS
+                IF NOT (key EQUALS centerVal) THEN
+                    IF frequencyMap[key] GREATER THAN OR EQUAL TO centerCount THEN
+                        LET uniqueModeFlag BE FALSE
+                        BREAK
+                    END IF
+                END IF
+            END FOR
+
+            IF uniqueModeFlag THEN
+                LET resultCount BE resultCount PLUS 1
+            END IF
+
+            LET i BE i PLUS 1
+        END WHILE
+
+        LET finalResult BE resultCount MOD divisor
+        RETURN finalResult
+    END FUNCTION
+END CLASS

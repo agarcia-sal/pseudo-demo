@@ -1,0 +1,65 @@
+```pseudocode
+CLASS Solution
+    FUNCTION numberOfSubmatrices(grid)
+        DECLARE avail_flag BOOLEAN
+        SET avail_flag TO NOT (grid EQUALS empty OR grid[0] EQUALS empty)
+        IF NOT avail_flag THEN
+            RETURN 0
+        END IF
+
+        SET hamper1 TO LENGTH(grid)
+        SET hamper2 TO LENGTH(grid[0])
+
+        DECLARE cache ARRAY OF LENGTH hamper1+1
+        FOR s FROM 0 TO hamper1 DO
+            cache[s] = ARRAY OF LENGTH hamper2+1
+            FOR r FROM 0 TO hamper2 DO
+                cache[s][r] = [0, 0]
+            END FOR
+        END FOR
+
+        SET k1 TO 1
+        WHILE k1 <= hamper1 DO
+            DECLARE l2 INT
+            SET l2 TO 1
+            REPEAT
+                cache[k1][l2][0] = cache[k1-1][l2][0] + cache[k1][l2-1][0] - cache[k1-1][l2-1][0]
+                cache[k1][l2][1] = cache[k1-1][l2][1] + cache[k1][l2-1][1] - cache[k1-1][l2-1][1]
+
+                IF grid[k1-1][l2-1] EQUALS 'X' THEN
+                    SET cache[k1][l2][0] TO cache[k1][l2][0] + 1
+                ELSE
+                    IF grid[k1-1][l2-1] EQUALS 'Y' THEN
+                        SET cache[k1][l2][1] TO cache[k1][l2][1] + 1
+                    END IF
+                END IF
+
+                SET l2 TO l2 + 1
+            UNTIL l2 > hamper2
+            SET k1 TO k1 + 1
+        END WHILE
+
+        SET tally TO 0
+        SET p_q TO 1
+        WHILE p_q <= hamper1 DO
+            DECLARE r_s INT
+            SET r_s TO 1
+            REPEAT
+                DECLARE localA INT
+                DECLARE localB INT
+                SET localA TO cache[p_q][r_s][0]
+                SET localB TO cache[p_q][r_s][1]
+
+                IF (localA > 0) AND NOT (localA NOT EQUALS localB) THEN
+                    SET tally TO tally + 1
+                END IF
+
+                SET r_s TO r_s + 1
+            UNTIL r_s > hamper2
+            SET p_q TO p_q + 1
+        END WHILE
+
+        RETURN tally
+    END FUNCTION
+END CLASS
+```

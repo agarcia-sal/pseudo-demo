@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        FUNCTION splitByDot(input STRING) RETURNS LIST OF STRING
+            DECLARE result LIST OF STRING ← empty list
+            DECLARE current STRING ← empty string
+            DECLARE idx INTEGER ← 0
+            WHILE idx LESS THAN LENGTH(input) DO
+                IF input[idx] EQUALS '.' THEN
+                    APPEND current TO result
+                    SET current TO empty string
+                ELSE
+                    SET current TO current CONCAT input[idx]
+                END IF
+                SET idx TO idx PLUS 1
+            END WHILE
+            APPEND current TO result
+            RETURN result
+        END FUNCTION
+
+        FUNCTION sortByLengthAscending(segs LIST OF STRING) RETURNS LIST OF STRING
+            DECLARE sorted LIST OF STRING ← COPY(segs)
+            DECLARE changeMade BOOLEAN ← TRUE
+            DECLARE pass INTEGER ← 0
+            WHILE changeMade DO
+                SET changeMade TO FALSE
+                SET pass TO pass PLUS 1
+                DECLARE i INTEGER ← 0
+                WHILE i LESS THAN LENGTH(sorted) MINUS 1 DO
+                    IF LENGTH(sorted[i]) GREATER THAN LENGTH(sorted[i+1]) THEN
+                        DECLARE temp STRING ← sorted[i]
+                        SET sorted[i] TO sorted[i+1]
+                        SET sorted[i+1] TO temp
+                        SET changeMade TO TRUE
+                    END IF
+                    SET i TO i PLUS 1
+                END WHILE
+            END WHILE
+            RETURN sorted
+        END FUNCTION
+
+        DECLARE segments LIST OF STRING ← splitByDot(road)
+        DECLARE ordered_segments LIST OF STRING ← sortByLengthAscending(segments)
+        DECLARE accum_fixed INTEGER ← 0
+        DECLARE seg_idx INTEGER ← 0
+
+        LABEL outer_loop_start:
+        IF seg_idx GREATER THAN OR EQUAL TO LENGTH(ordered_segments) THEN
+            GOTO outer_loop_end
+        END IF
+
+        DECLARE curr_seg STRING ← ordered_segments[seg_idx]
+        DECLARE length_seg INTEGER ← LENGTH(curr_seg)
+
+        IF NOT (length_seg EQUALS 0) THEN
+            DECLARE expense INTEGER ← length_seg PLUS 1
+
+            IF budget GREATER THAN OR EQUAL TO expense THEN
+                SET accum_fixed TO accum_fixed PLUS length_seg
+                SET budget TO budget MINUS expense
+            ELSE
+
+                DECLARE temp_len INTEGER ← length_seg
+                LABEL inner_while_start:
+                IF temp_len GREATER THAN 0 AND budget GREATER THAN 0 THEN
+                    DECLARE current_cost INTEGER ← temp_len PLUS 1
+                    IF budget GREATER THAN OR EQUAL TO current_cost THEN
+                        SET accum_fixed TO accum_fixed PLUS temp_len
+                        SET budget TO budget MINUS current_cost
+                        GOTO inner_while_end
+                    ELSE
+                        SET temp_len TO temp_len MINUS 1
+                        GOTO inner_while_start
+                    END IF
+                END IF
+                LABEL inner_while_end:
+            END IF
+        END IF
+
+        SET seg_idx TO seg_idx PLUS 1
+        GOTO outer_loop_start
+
+        LABEL outer_loop_end:
+
+        RETURN accum_fixed
+    END FUNCTION
+END CLASS

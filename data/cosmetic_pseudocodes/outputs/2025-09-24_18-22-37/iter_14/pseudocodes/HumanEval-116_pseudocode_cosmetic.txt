@@ -1,0 +1,53 @@
+FUNCTION sort_array(input_list)
+    SET temp_ordered_list TO EMPTY LIST
+    SET index_counter TO 0
+    WHILE index_counter LESS THAN LENGTH OF input_list DO
+        APPEND input_list.at(index_counter) TO temp_ordered_list
+        SET index_counter TO index_counter PLUS 1
+    END WHILE
+
+    CALL temp_ordered_list.SORT() 
+
+    SET result_list TO EMPTY LIST
+    SET ptr TO 0
+    WHILE ptr LESS THAN LENGTH OF temp_ordered_list DO
+        SET current_element TO temp_ordered_list.at(ptr)
+        SET binary_str TO TO_BINARY_STRING(current_element) 
+        SET count_ones TO 0
+        SET char_index TO 3
+        WHILE char_index LESS THAN LENGTH OF binary_str DO
+            IF binary_str.char_at(char_index) EQUALS '1' THEN
+                SET count_ones TO count_ones PLUS 1
+            END IF
+            SET char_index TO char_index PLUS 1
+        END WHILE
+        APPEND (current_element, count_ones) TO result_list
+        SET ptr TO ptr PLUS 1
+    END WHILE
+
+    SET sorted_results TO EMPTY LIST
+    SET n TO LENGTH OF result_list
+    SET p TO 0
+    WHILE p LESS THAN n DO
+        SET q TO p PLUS 1
+        WHILE q LESS THAN n DO
+            SET first_elem TO result_list.at(p)
+            SET second_elem TO result_list.at(q)
+            IF (first_elem.1 GREATER THAN second_elem.1) OR
+               ((first_elem.1 EQUALS second_elem.1) AND (first_elem.0 GREATER THAN second_elem.0)) THEN
+                SET temp_tuple TO first_elem
+                SET result_list.at(p) TO second_elem
+                SET result_list.at(q) TO temp_tuple
+            END IF
+            SET q TO q PLUS 1
+        END WHILE
+        SET p TO p PLUS 1
+    END WHILE
+
+    SET output_array TO EMPTY LIST
+    FOR EACH pair IN result_list DO
+        APPEND pair.0 TO output_array
+    END FOR
+
+    RETURN output_array
+END FUNCTION

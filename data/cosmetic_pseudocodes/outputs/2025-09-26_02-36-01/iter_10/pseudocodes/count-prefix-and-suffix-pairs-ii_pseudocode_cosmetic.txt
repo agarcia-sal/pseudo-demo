@@ -1,0 +1,40 @@
+CLASS Solution
+	fUNCTION countPrefixSuffixPairs(words)
+		VAR totalMatches := 0
+		VAR frequencyMap := new mapping defaults to 0
+		DEF checkEdges(baseStr, cmpStr) RETURNS BOOLEAN
+			// baseStr length = lengthA, cmpStr length = lengthB
+			VAR lengthA := LENGTH(cmpStr)
+			VAR lengthB := LENGTH(baseStr)
+			RETURN (cmpStr = SUBSTRING(baseStr, 0, lengthA)) AND (cmpStr = SUBSTRING(baseStr, lengthB - lengthA, lengthB))
+		END DEF
+
+		DEF iterateKeys(keysList, currentWord, accumulator)
+			IF keysList IS EMPTY THEN
+				RETURN accumulator
+			ELSE
+				VAR currentKey := HEAD(keysList)
+				VAR tailKeys := TAIL(keysList)
+				IF checkEdges(currentKey, currentWord) THEN
+					RETURN iterateKeys(tailKeys, currentWord, accumulator + frequencyMap[currentKey])
+				ELSE
+					RETURN iterateKeys(tailKeys, currentWord, accumulator)
+				END IF
+			END IF
+		END DEF
+
+		DEF processWords(index)
+			IF index < 0 THEN
+				RETURN
+			END IF
+			VAR wordAtIndex := words[index]
+			VAR keysSnapshot := KEYS(frequencyMap)
+			totalMatches := totalMatches + iterateKeys(keysSnapshot, wordAtIndex, 0)
+			frequencyMap[wordAtIndex] := frequencyMap[wordAtIndex] + 1
+			processWords(index - 1)
+		END DEF
+
+		processWords(LENGTH(words) - 1)
+		RETURN totalMatches
+	END FUNCTION
+END CLASS

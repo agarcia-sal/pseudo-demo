@@ -1,0 +1,57 @@
+CLASS Solution  
+    FUNCTION tripletCount(a AS List OF integer, b AS List OF integer, c AS List OF integer) RETURNS integer  
+        FUNCTION count_even_odd_bits(arr AS List OF integer) RETURNS tuple OF integer and integer  
+            FUNCTION count_one_bits_recursive(index AS integer, acc AS integer) RETURNS integer  
+                IF index < 0 THEN  
+                    RETURN acc  
+                ELSE  
+                    SET shifted_value TO (arr[index] DIVIDED_BY 2)  
+                    SET bit_value TO arr[index] MINUS (shifted_value MULTIPLIED_BY 2)  
+                    RETURN count_one_bits_recursive(index - 1, acc + bit_value)  
+                END IF  
+            END FUNCTION  
+            
+            FUNCTION count_bits_in_number(num AS integer) RETURNS integer  
+                IF num = 0 THEN RETURN 0 END IF  
+                RETURN (num MODULO 2) + count_bits_in_number(num DIVIDED_BY 2)  
+            END FUNCTION  
+            
+            FUNCTION helper_loop(pos AS integer, evens_acc AS integer) RETURNS integer  
+                IF pos >= LENGTH OF arr THEN  
+                    RETURN evens_acc  
+                ELSE  
+                    SET ones_count TO 0  
+                    
+                    FUNCTION count_bits_iter(n AS integer, cnt AS integer) RETURNS integer  
+                        IF n = 0 THEN RETURN cnt END IF  
+                        RETURN count_bits_iter(n DIVIDED_BY 2, cnt + (n MODULO 2))  
+                    END FUNCTION  
+                    
+                    SET ones_count TO count_bits_iter(arr[pos], 0)  
+                    
+                    IF (ones_count MODULO 2) = 0 THEN  
+                        SET new_evens TO evens_acc + 1  
+                    ELSE  
+                        SET new_evens TO evens_acc  
+                    END IF  
+                    RETURN helper_loop(pos + 1, new_evens)  
+                END IF  
+            END FUNCTION  
+            
+            SET total_even TO helper_loop(0, 0)  
+            SET total_odd TO LENGTH OF arr MINUS total_even  
+            
+            RETURN total_even, total_odd  
+        END FUNCTION  
+        
+        SET e_a, o_a TO count_even_odd_bits(a)  
+        SET e_b, o_b TO count_even_odd_bits(b)  
+        SET e_c, o_c TO count_even_odd_bits(c)  
+        
+        SET part1 TO e_a * e_b * e_c  
+        SET part2 TO (e_a * o_b * o_c) + (o_a * e_b * o_c) + (o_a * o_b * e_c)  
+        
+        SET final_answer TO part1 + part2  
+        RETURN final_answer  
+    END FUNCTION  
+END CLASS

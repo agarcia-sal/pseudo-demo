@@ -1,0 +1,43 @@
+```
+FUNCTION encode(message)
+    CONSTANT vowels_set = "AEIOUaeiou"
+    FUNCTION shift_chars(chars, offset)
+        SET shifted_map TO EMPTY DICTIONARY
+        FOR idx FROM 0 TO LENGTH(chars) - 1
+            SET ch TO chars[idx]
+            SET shifted_map[ch] = CHARACTER(ASCII(ch) + offset)
+        END FOR
+        RETURN shifted_map
+    END FUNCTION
+
+    SET vowel_shift_map TO shift_chars(vowels_set, 2)
+
+    FUNCTION swap_case_recursive(text, pos, acc)
+        IF pos == LENGTH(text)
+            RETURN acc
+        ELSE
+            SET current_char TO text[pos]
+            SET swapped_char TO IF current_char IS UPPERCASE THEN TO_LOWERCASE(current_char) ELSE TO_UPPERCASE(current_char)
+            RETURN swap_case_recursive(text, pos + 1, acc + swapped_char)
+        END IF
+    END FUNCTION
+
+    SET swapped_message TO swap_case_recursive(message, 0, "")
+
+    FUNCTION replace_chars$text(index, data, map, vowels, acc)
+        IF index == LENGTH(data)
+            RETURN acc
+        ELSE
+            SET char_to_check TO data[index]
+            IF char_to_check IN vowels
+                SET acc TO acc + map[char_to_check]
+            ELSE
+                SET acc TO acc + char_to_check
+            END IF
+            RETURN replace_chars$text(index + 1, data, map, vowels, acc)
+        END IF
+    END FUNCTION
+
+    RETURN replace_chars$text(0, swapped_message, vowel_shift_map, vowels_set, "")
+END FUNCTION
+```

@@ -1,0 +1,82 @@
+CLASS Solution  
+    FUNCTION makeStringGood(s)  
+      SET freqList TO a new list filled with (0 times (0+25+1))  
+      SET idx TO 0  
+      WHILE idx LESS THAN LENGTH OF s  
+        SET ch TO s[idx]  
+        SET posIndex TO ORD(ch) - ORD("a")  
+        SET freqList[posIndex] TO freqList[posIndex] + (1 * 1)  
+        SET idx TO idx + 1  
+      END WHILE  
+      
+      SET maxF TO 0  
+      SET posCheck TO 0  
+      WHILE posCheck LESS THAN LENGTH OF freqList  
+        IF freqList[posCheck] GREATER THAN maxF THEN  
+          SET maxF TO freqList[posCheck]  
+        END IF  
+        SET posCheck TO posCheck + 1  
+      END WHILE  
+      
+      SET result TO 1000000  
+      SET currentTarget TO 1  
+      REPEAT  
+        IF currentTarget GREATER THAN maxF THEN  
+          BREAK  
+        END IF  
+        SET val TO _getMinOperations(freqList, currentTarget)  
+        IF val LESS THAN result THEN  
+          SET result TO val  
+        END IF  
+        SET currentTarget TO currentTarget + 1  
+      UNTIL FALSE  
+      
+      RETURN result  
+    END FUNCTION  
+  
+    FUNCTION _getMinOperations(count, target)  
+      SET dpList TO new list filled with (0 times (26+1))  
+      SET i TO 25  
+      WHILE i GREATER THAN OR EQUAL TO 0  
+        SET allDel TO count[i]  
+        IF NOT (target <= count[i]) THEN  
+          SET diff TO target - count[i]  
+        ELSE  
+          SET diff TO count[i] - target  
+        END IF  
+        
+        SET val1 TO allDel  
+        SET val2 TO diff + dpList[i+1]  
+        SET currentVal TO val1  
+        IF val2 LESS THAN currentVal THEN  
+          SET currentVal TO val2  
+        END IF  
+        
+        IF (i + 1) < 26 THEN  
+          IF NOT (count[i+1] >= target) THEN  
+            SET deficitNext TO target - count[i+1]  
+            IF count[i] <= target THEN  
+              SET changeNeed TO count[i]  
+            ELSE  
+              SET changeNeed TO count[i] - target  
+            END IF  
+            
+            IF deficitNext > changeNeed THEN  
+              SET altChange TO changeNeed + (deficitNext - changeNeed)  
+            ELSE  
+              SET altChange TO deficitNext + (changeNeed - deficitNext)  
+            END IF  
+            
+            SET altVal TO altChange + dpList[i+2]  
+            IF altVal LESS THAN currentVal THEN  
+              SET currentVal TO altVal  
+            END IF  
+          END IF  
+        END IF  
+        
+        SET dpList[i] TO currentVal  
+        SET i TO i - 1  
+      END WHILE  
+      RETURN dpList[0]  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION numberOfSubstrings(s parameter, k parameter)
+        FUNCTION containsCharReachingK(freqMap parameter, limit parameter) RETURNS BOOLEAN
+            SET keysList TO keys of freqMap
+            SET index TO 0
+            WHILE index LESS THAN length of keysList
+                SET character TO keysList[index]
+                IF freqMap[character] GREATER THAN OR EQUAL TO limit THEN
+                    RETURN TRUE
+                END IF
+                SET index TO index + 1
+            END WHILE
+            RETURN FALSE
+        END FUNCTION
+
+        SET frequencyTable TO empty mapping
+        SET totalCount TO 0
+        SET startIndex TO 0
+
+        PROCEDURE incrementFreq(map parameter, key parameter)
+            IF key IN map THEN
+                SET map[key] TO map[key] + 1
+            ELSE
+                SET map[key] TO 1
+            END IF
+        END PROCEDURE
+
+        PROCEDURE decrementFreq(map parameter, key parameter)
+            IF key IN map THEN
+                SET map[key] TO map[key] - 1
+                IF map[key] EQUALS 0 THEN
+                    REMOVE key FROM map
+                END IF
+            END IF
+        END PROCEDURE
+
+        FUNCTION processIndex(current parameter, finish parameter) RETURNS VOID
+            IF current GREATER THAN OR EQUAL TO finish THEN
+                RETURN
+            END IF
+
+            SET currentChar TO s[current]
+            CALL incrementFreq(frequencyTable, currentChar)
+
+            WHILE containsCharReachingK(frequencyTable, k) IS TRUE
+                SET leftChar TO s[startIndex]
+                CALL decrementFreq(frequencyTable, leftChar)
+                SET startIndex TO startIndex + 1
+            END WHILE
+
+            SET totalCount TO totalCount + startIndex
+            CALL processIndex(current + 1, finish)
+        END FUNCTION
+
+        CALL processIndex(0, length of s)
+        RETURN totalCount
+    END FUNCTION
+END CLASS

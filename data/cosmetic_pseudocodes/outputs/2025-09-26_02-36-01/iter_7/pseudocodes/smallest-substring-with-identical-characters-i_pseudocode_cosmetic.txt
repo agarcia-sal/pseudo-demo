@@ -1,0 +1,65 @@
+CLASS Solution  
+    FUNCTION minLength(s parameter, numOps parameter)  
+        FUNCTION longest_uniform_substring(s parameter)  
+            SET best_run TO 0  
+            SET current_run TO 1  
+            SET idx TO 1  
+            WHILE idx < LENGTH(s) DO  
+                IF s[idx] = s[idx - 1] THEN  
+                    SET current_run TO current_run + 1  
+                ELSE  
+                    IF current_run > best_run THEN  
+                        SET best_run TO current_run  
+                    END IF  
+                    SET current_run TO 1  
+                END IF  
+                SET idx TO idx + 1  
+            END WHILE  
+            IF best_run >= current_run THEN  
+                RETURN best_run  
+            ELSE  
+                RETURN current_run  
+            END IF  
+        END FUNCTION  
+  
+        SET length_s TO LENGTH(s)  
+        SET minimal_length TO length_s  
+        SET limit_val TO (1 << length_s)  
+        SET counter TO 0  
+        REPEAT  
+            IF counter >= limit_val THEN  
+                BREAK  
+            END IF  
+            LET bit_count TO 0  
+            LET temp TO counter  
+            WHILE temp > 0 DO  
+                SET bit_count TO bit_count + (temp AND 1)  
+                SET temp TO temp >> 1  
+            END WHILE  
+            IF bit_count > numOps THEN  
+                SET counter TO counter + 1  
+                CONTINUE  
+            END IF  
+            LET modified_list TO LIST(s)  
+            SET pos TO 0  
+            WHILE pos < length_s DO  
+                LET mask TO 1 << pos  
+                IF (counter AND mask) <> 0 THEN  
+                    IF modified_list[pos] = '0' THEN  
+                        SET modified_list[pos] TO '1'  
+                    ELSE  
+                        SET modified_list[pos] TO '0'  
+                    END IF  
+                END IF  
+                SET pos TO pos + 1  
+            END WHILE  
+            LET candidate TO longest_uniform_substring(modified_list)  
+            IF minimal_length > candidate THEN  
+                SET minimal_length TO candidate  
+            END IF  
+            SET counter TO counter + 1  
+        UNTIL FALSE  
+  
+        RETURN minimal_length  
+    END FUNCTION  
+END CLASS

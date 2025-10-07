@@ -1,0 +1,122 @@
+CLASS Solution
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)
+        DECLARE graph AS empty map integer → list of integer
+        DECLARE reverse_graph AS empty map integer → list of integer
+
+        SET pos TO 0
+        WHILE pos < LENGTH(flowFrom)
+            SET startNode TO flowFrom[pos]
+            SET endNode TO flowTo[pos]
+            IF startNode NOT IN graph
+                SET graph[startNode] TO empty list
+            END IF
+            APPEND endNode TO graph[startNode]
+            IF endNode NOT IN reverse_graph
+                SET reverse_graph[endNode] TO empty list
+            END IF
+            APPEND startNode TO reverse_graph[endNode]
+            SET pos TO pos + 1
+        END WHILE
+
+        DECLARE indices AS list of size n filled with -1
+        DECLARE lowLinks AS list of size n filled with 0
+        DECLARE onStack AS list of size n filled with False
+        DECLARE stack AS empty list
+        SET currIndex TO 0
+        DECLARE sccs AS empty list
+
+        FUNCTION tarjan(node)
+            SET indices[node] TO currIndex
+            SET lowLinks[node] TO currIndex
+            SET currIndex TO currIndex + 1
+            APPEND node TO stack
+            SET onStack[node] TO True
+
+            SET neighborPos TO 0
+            DECLARE neighbors AS graph[node] IF node IN graph ELSE empty list
+            WHILE neighborPos < LENGTH(neighbors)
+                SET nbr TO neighbors[neighborPos]
+                IF indices[nbr] = -1
+                    CALL tarjan(nbr)
+                    SET lowLinks[node] TO MIN(lowLinks[node], lowLinks[nbr])
+                ELSE
+                    IF onStack[nbr]
+                        SET lowLinks[node] TO MIN(lowLinks[node], indices[nbr])
+                    END IF
+                END IF
+                SET neighborPos TO neighborPos + 1
+            END WHILE
+
+            IF lowLinks[node] = indices[node]
+                DECLARE component AS empty list
+                REPEAT
+                    SET w TO stack[-1]
+                    REMOVE last element FROM stack
+                    SET onStack[w] TO False
+                    APPEND w TO component
+                UNTIL w = node
+                APPEND component TO sccs
+            END IF
+        END FUNCTION
+
+        SET i TO 0
+        WHILE i < n
+            IF indices[i] = -1
+                CALL tarjan(i)
+            END IF
+            SET i TO i + 1
+        END WHILE
+
+        DECLARE sccGraph AS empty map integer → list of integer
+        DECLARE sccIndex AS list size n filled with -1
+        DECLARE sccHasCrystal AS list size LENGTH(sccs) filled with False
+        SET sccCount TO 0
+
+        FOR idx FROM 0 TO LENGTH(sccs) - 1
+            SET componentNodes TO sccs[idx]
+            FOR eachNode IN componentNodes
+                SET sccIndex[eachNode] TO sccCount
+                IF eachNode IN crystals
+                    SET sccHasCrystal[idx] TO True
+                END IF
+            END FOR
+            SET sccCount TO sccCount + 1
+        END FOR
+
+        SET p TO 0
+        WHILE p < LENGTH(flowFrom)
+            SET srcScc TO sccIndex[flowFrom[p]]
+            SET dstScc TO sccIndex[flowTo[p]]
+            IF srcScc ≠ dstScc
+                IF srcScc NOT IN sccGraph
+                    SET sccGraph[srcScc] TO empty list
+                END IF
+                APPEND dstScc TO sccGraph[srcScc]
+            END IF
+            SET p TO p + 1
+        END WHILE
+
+        DECLARE inDegree AS list size LENGTH(sccs) filled with 0
+
+        SET idxScc TO 0
+        WHILE idxScc < LENGTH(sccs)
+            IF idxScc IN sccGraph
+                FOR nxt IN sccGraph[idxScc]
+                    SET inDegree[nxt] TO inDegree[nxt] + 1
+                END FOR
+            END IF
+            SET idxScc TO idxScc + 1
+        END WHILE
+
+        SET additionalRunes TO 0
+        SET checkIdx TO 0
+        WHILE checkIdx < LENGTH(sccs)
+            IF (inDegree[checkIdx] = 0) AND (NOT sccHasCrystal[checkIdx])
+                SET additionalRunes TO additionalRunes + 1
+            END IF
+            SET checkIdx TO checkIdx + 1
+        END WHILE
+
+        RETURN additionalRunes
+    END FUNCTION
+END CLASS

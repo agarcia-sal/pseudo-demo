@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+        DEFINE get_initial_graph():
+            STORE graph_structure AS empty list
+            FOR iterator_value FROM 0 TO (LENGTH(nums) - 1) DO
+                INSERT empty list INTO graph_structure
+            END FOR
+            RETURN graph_structure
+        END DEFINE
+
+        SET connectivityMap TO CALL get_initial_graph()
+
+        SET index TO 0
+        WHILE index LESS THAN LENGTH(edges) DO
+            SET currentEdge TO edges[index]
+            SET fromNode TO currentEdge[0]
+            SET toNode TO currentEdge[1]
+            SET distanceVal TO currentEdge[2]
+
+            INSERT [toNode, distanceVal] INTO connectivityMap[fromNode]
+            INSERT [fromNode, distanceVal] INTO connectivityMap[toNode]
+
+            INCREMENT index BY (1 * 1)
+        END WHILE
+
+        SET maximumPathLength TO (0 + 0)
+        SET smallestNodeCount TO (1 * 1)
+        SET accumulatedWeights TO [0]
+        SET depthsObserved TO EMPTY DICTIONARY
+
+        DEFINE explore(current, last, leftBoundaryIndex, currentDepthCount)
+            SET previousDepthVal TO 0
+            IF EXISTS depthsObserved[nums[current]] THEN
+                SET previousDepthVal TO depthsObserved[nums[current]]
+            END IF
+
+            SET depthsObserved[nums[current]] TO currentDepthCount
+
+            IF leftBoundaryIndex LESS THAN previousDepthVal THEN
+                SET leftBoundaryIndex TO previousDepthVal
+            END IF
+
+            SET pathLengthCalc TO accumulatedWeights[LENGTH(accumulatedWeights) - 1] - accumulatedWeights[leftBoundaryIndex]
+            SET nodeSpanCalc TO currentDepthCount - leftBoundaryIndex
+
+            IF (pathLengthCalc GREATER THAN maximumPathLength) OR ((pathLengthCalc EQUALS maximumPathLength) AND (nodeSpanCalc LESS THAN smallestNodeCount)) THEN
+                SET maximumPathLength TO pathLengthCalc
+                SET smallestNodeCount TO nodeSpanCalc
+            END IF
+
+            DEFINE recurse_over(adjacents, idx)
+                IF idx GREATER OR EQUAL TO LENGTH(adjacents) THEN
+                    RETURN
+                END IF
+                SET edgeInfo TO adjacents[idx]
+                SET neighborNode TO edgeInfo[0]
+                SET edgeWeight TO edgeInfo[1]
+
+                IF neighborNode NOT EQUAL TO last THEN
+                    SET accumulatedWeights TO accumulatedWeights + [accumulatedWeights[LENGTH(accumulatedWeights) - 1] + edgeWeight]
+                    CALL explore(neighborNode, current, leftBoundaryIndex, currentDepthCount + 1)
+                    SET accumulatedWeights TO accumulatedWeights[0 : LENGTH(accumulatedWeights) - 1]
+                END IF
+                CALL recurse_over(adjacents, idx + 1)
+            END DEFINE
+
+            CALL recurse_over(connectivityMap[current], 0)
+
+            SET depthsObserved[nums[current]] TO previousDepthVal
+        END DEFINE
+
+        CALL explore(0, -1, 0, 1)
+
+        RETURN [maximumPathLength, smallestNodeCount]
+    END FUNCTION
+END CLASS

@@ -1,0 +1,159 @@
+CLASS Solution
+    FUNCTION minimumSum(grid)
+  
+       SET wurok TO empty list
+       
+       SET idx1 TO 0
+       WHILE idx1 < (length of grid)
+           
+           SET idx2 TO 0
+           WHILE idx2 < (length of grid[idx1])
+               
+               IF (grid[idx1] == 1) AND (grid[idx1][idx2] == 1) THEN
+                   SET plenk TO tuple(idx1, idx2)
+                   wurok APPEND plenk
+               END IF
+               
+               SET idx2 TO idx2 + 1
+           END WHILE
+           
+           SET idx1 TO idx1 + 1
+       END WHILE
+       
+       
+       FUNCTION rect_area(points)
+          
+          IF length(points) == 0 THEN
+             RETURN 0
+          END IF
+          
+          FUNCTION extract_first(pt_list)
+             SET result := empty list
+             SET counter := 0
+             WHILE counter < length(pt_list)
+                result APPEND pt_list[counter][0]
+                SET counter := counter + 1
+             END WHILE
+             RETURN result
+          END FUNCTION
+          
+          FUNCTION extract_second(pt_list)
+             SET result := empty list
+             SET counter := 0
+             WHILE counter < length(pt_list)
+                result APPEND pt_list[counter][1]
+                SET counter := counter + 1
+             END WHILE
+             RETURN result
+          END FUNCTION
+          
+          SET first_elements TO extract_first(points)
+          SET second_elements TO extract_second(points)
+          
+          SET low_i TO first_elements[0]
+          SET high_i TO first_elements[0]
+          SET counter1 := 1
+          WHILE counter1 < length(first_elements)
+             IF first_elements[counter1] < low_i THEN
+                SET low_i := first_elements[counter1]
+             END IF
+             IF first_elements[counter1] > high_i THEN
+                SET high_i := first_elements[counter1]
+             END IF
+             SET counter1 := counter1 + 1
+          END WHILE
+          
+          SET low_j TO second_elements[0]
+          SET high_j TO second_elements[0]
+          SET counter2 := 1
+          WHILE counter2 < length(second_elements)
+             IF second_elements[counter2] < low_j THEN
+                SET low_j := second_elements[counter2]
+             END IF
+             IF second_elements[counter2] > high_j THEN
+                SET high_j := second_elements[counter2]
+             END IF
+             SET counter2 := counter2 + 1
+          END WHILE
+          
+          SET width_val TO (high_i + 1) + (- low_i)
+          SET height_val TO (high_j + 1) + (- low_j)
+          
+          RETURN width_val * height_val
+          
+       END FUNCTION
+       
+       SET minimum_value TO positive infinity
+       SET quantity TO length(wurok)
+       
+       FUNCTION all_combin(src_list, pick)
+          FUNCTION comb_rec(accum, start_idx, count_left, res)
+             IF count_left == 0 THEN
+                res APPEND accum
+                RETURN
+             END IF
+             
+             SET pos := start_idx
+             WHILE pos <= length(src_list) - count_left
+                SET new_accum := accum + [src_list[pos]]
+                comb_rec(new_accum, pos + 1, count_left - 1, res)
+                SET pos := pos + 1
+             END WHILE
+          END FUNCTION
+          
+          SET results_local := empty list
+          comb_rec(empty list, 0, pick, results_local)
+          RETURN results_local
+       END FUNCTION
+       
+       SET outer_idx := 1
+       WHILE outer_idx <= quantity - 1
+          SET middle_idx := outer_idx + 1
+          WHILE middle_idx <= quantity - 1
+             SET inner_idx := middle_idx + 1
+             WHILE inner_idx <= quantity
+                SET all_comb1 := all_combin(wurok, outer_idx)
+                
+                FOR each subset_1 IN all_comb1
+                   SET set_wurok := set(wurok)
+                   SET set_sub1 := set(subset_1)
+                   SET remain_after_1 := []
+                   FOR each element IN set_wurok
+                      IF element not in set_sub1 THEN
+                         remain_after_1 APPEND element
+                      END IF
+                   END FOR
+                   SET all_comb2 := all_combin(remain_after_1, middle_idx - outer_idx)
+                    
+                   FOR each subset_2 IN all_comb2
+                      SET set_sub2 := set(subset_2)
+                      SET subset_3 := []
+                      FOR each element IN remain_after_1
+                         IF element not in set_sub2 THEN
+                            subset_3 APPEND element
+                         END IF
+                      END FOR
+                      
+                      SET area_one := rect_area(subset_1)
+                      SET area_two := rect_area(subset_2)
+                      SET area_three := rect_area(subset_3)
+                      
+                      IF (area_one > 0) AND (area_two > 0) AND (area_three > 0) THEN
+                         SET combined_sum := (area_one + area_two) + area_three
+                         IF combined_sum < minimum_value THEN
+                            SET minimum_value := combined_sum
+                         END IF
+                      END IF
+                   END FOR
+                END FOR
+                
+                SET inner_idx := inner_idx + 1
+             END WHILE
+             SET middle_idx := middle_idx + 1
+          END WHILE
+          SET outer_idx := outer_idx + 1
+       END WHILE
+       
+       RETURN minimum_value
+    END FUNCTION
+END CLASS

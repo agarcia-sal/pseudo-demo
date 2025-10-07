@@ -1,0 +1,53 @@
+CLASS Solution
+  FUNCTION maxOperations(nums)
+    CONSTANT ZERO ← 0
+    CONSTANT ONE ← 1
+    CONSTANT TWO ← ONE + ONE
+    CONSTANT THREE ← TWO + ONE
+    CONSTANT EMPTY_MAP ← {}
+
+    FUNCTION dfs(x, y, threshold, cache)
+      IF x ≥ y THEN
+        RETURN ZERO
+      ELSE IF (x, y, threshold) IN cache THEN
+        RETURN cache[(x, y, threshold)]
+      END IF
+
+      VARIABLE highestCount ← ZERO
+      VARIABLE sumLeftPair ← nums[x] + nums[x + ONE]
+      VARIABLE sumRightPair ← nums[y] + nums[y - ONE]
+      VARIABLE sumOuterPair ← nums[x] + nums[y]
+
+      IF sumLeftPair = threshold THEN
+        VARIABLE countAfterLeft ← dfs(x + TWO, y, threshold, cache)
+        IF highestCount < ONE + countAfterLeft THEN
+          highestCount ← ONE + countAfterLeft
+        END IF
+      END IF
+
+      IF sumRightPair = threshold THEN
+        VARIABLE countAfterRight ← dfs(x, y - TWO, threshold, cache)
+        IF highestCount < ONE + countAfterRight THEN
+          highestCount ← ONE + countAfterRight
+        END IF
+      END IF
+
+      IF sumOuterPair = threshold THEN
+        VARIABLE countAfterOuter ← dfs(x + ONE, y - ONE, threshold, cache)
+        IF highestCount < ONE + countAfterOuter THEN
+          highestCount ← ONE + countAfterOuter
+        END IF
+      END IF
+
+      cache[(x, y, threshold)] ← highestCount
+      RETURN highestCount
+    END FUNCTION
+
+    VARIABLE lenNums ← LENGTH(nums)
+    VARIABLE candidateOne ← ONE + dfs(TWO, lenNums - ONE, nums[ZERO] + nums[ONE], {})
+    VARIABLE candidateTwo ← ONE + dfs(ZERO, lenNums - THREE, nums[lenNums - TWO] + nums[lenNums - ONE], {})
+    VARIABLE candidateThree ← ONE + dfs(ONE, lenNums - TWO, nums[ZERO] + nums[lenNums - ONE], {})
+
+    RETURN MAXIMUM(candidateOne, candidateTwo, candidateThree)
+  END FUNCTION
+END CLASS

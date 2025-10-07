@@ -1,0 +1,148 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+        DECLARE total_nodes AS LENGTH OF graph
+        DECLARE visited_nodes AS LIST WITH total_nodes TIMES false
+        DECLARE traversal_queue AS deque CONTAINING (start, NUMBER zero)
+        SET visited_nodes[start] TO true
+        DECLARE far_node AS start
+        DECLARE greatest_distance AS zero
+
+        PROCEDURE process_queue()
+            IF LENGTH OF traversal_queue IS zero
+                EXIT PROCEDURE
+            END IF
+
+            EXTRACT AND REMOVE LEFTMOST ELEMENT FROM traversal_queue INTO current_node, current_distance
+
+            IF NOT (current_distance <= greatest_distance)
+                SET greatest_distance TO current_distance
+                SET far_node TO current_node
+            END IF
+
+            DECLARE neighbor_iterator AS 0
+            WHILE neighbor_iterator < LENGTH OF graph[current_node]
+                DECLARE adjacent AS graph[current_node][neighbor_iterator]
+                IF NOT visited_nodes[adjacent]
+                    SET visited_nodes[adjacent] TO true
+                    APPEND (adjacent, current_distance + 1) TO traversal_queue
+                END IF
+                INCREMENT neighbor_iterator BY 1
+            END WHILE
+
+            CALL process_queue()
+        END PROCEDURE
+
+        CALL process_queue()
+        RETURN far_node, greatest_distance
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        DECLARE initial_node AS 0
+
+        DECLARE temp_farthest, unused_val1 AS CALL bfs(graph, initial_node)
+        DECLARE unused_val2, diameter_value AS CALL bfs(graph, temp_farthest)
+
+        RETURN diameter_value
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+        DECLARE graph_size AS LENGTH OF graph
+        DECLARE visited_flags AS LIST OF graph_size TIMES false
+        DECLARE bfs_queue AS deque CONTAINING (node, NUMBER zero)
+        SET visited_flags[node] TO true
+        DECLARE max_dist AS zero
+
+        PROCEDURE iterate_bfs()
+            IF LENGTH OF bfs_queue IS zero
+                EXIT PROCEDURE
+            END IF
+
+            REMOVE LEFTMOST ELEMENT FROM bfs_queue INTO current_vertex, current_dist
+
+            IF NOT (current_dist <= max_dist)
+                SET max_dist TO current_dist
+            END IF
+
+            DECLARE n_index AS 0
+            WHILE n_index < LENGTH OF graph[current_vertex]
+                DECLARE child_node AS graph[current_vertex][n_index]
+                IF NOT visited_flags[child_node]
+                    SET visited_flags[child_node] TO true
+                    APPEND (child_node, current_dist + 1) TO bfs_queue
+                END IF
+                INCREMENT n_index BY 1
+            END WHILE
+
+            CALL iterate_bfs()
+        END PROCEDURE
+
+        CALL iterate_bfs()
+        RETURN max_dist
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        DECLARE length_n AS LENGTH OF edges1 + 1
+        DECLARE length_m AS LENGTH OF edges2 + 1
+
+        DECLARE adj_list1 AS LIST OF length_n ELEMENTS INITIALIZED TO EMPTY LIST
+        DECLARE adj_list2 AS LIST OF length_m ELEMENTS INITIALIZED TO EMPTY LIST
+
+        DECLARE idx1 AS 0
+        WHILE idx1 < LENGTH OF edges1
+            DECLARE u1, v1 AS edges1[idx1]
+            APPEND v1 TO adj_list1[u1]
+            APPEND u1 TO adj_list1[v1]
+            INCREMENT idx1 BY 1
+        END WHILE
+
+        DECLARE idx2 AS 0
+        WHILE idx2 < LENGTH OF edges2
+            DECLARE u2, v2 AS edges2[idx2]
+            APPEND v2 TO adj_list2[u2]
+            APPEND u2 TO adj_list2[v2]
+            INCREMENT idx2 BY 1
+        END WHILE
+
+        DECLARE dia1 AS CALL tree_diameter(adj_list1)
+        DECLARE dia2 AS CALL tree_diameter(adj_list2)
+
+        DECLARE longest_paths1 AS EMPTY LIST
+        DECLARE counter1 AS 0
+        WHILE counter1 < length_n
+            APPEND CALL maximum_path_length_from_node(adj_list1, counter1) TO longest_paths1
+            INCREMENT counter1 BY 1
+        END WHILE
+
+        DECLARE longest_paths2 AS EMPTY LIST
+        DECLARE counter2 AS 0
+        WHILE counter2 < length_m
+            APPEND CALL maximum_path_length_from_node(adj_list2, counter2) TO longest_paths2
+            INCREMENT counter2 BY 1
+        END WHILE
+
+        DECLARE minimal_diameter AS positive infinity
+        DECLARE loop_u AS 0
+        WHILE loop_u < length_n
+            DECLARE loop_v AS 0
+            WHILE loop_v < length_m
+                DECLARE combined_distance AS longest_paths1[loop_u] + longest_paths2[loop_v] + 1
+                DECLARE potential_diameter AS dia1
+                IF dia2 > potential_diameter
+                    SET potential_diameter TO dia2
+                END IF
+                IF combined_distance > potential_diameter
+                    SET potential_diameter TO combined_distance
+                END IF
+
+                IF potential_diameter < minimal_diameter
+                    SET minimal_diameter TO potential_diameter
+                END IF
+
+                INCREMENT loop_v BY 1
+            END WHILE
+            INCREMENT loop_u BY 1
+        END WHILE
+
+        RETURN minimal_diameter
+    END FUNCTION
+END CLASS

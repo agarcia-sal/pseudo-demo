@@ -1,0 +1,70 @@
+CLASS Solution
+	FUNCTION resultArray(nums)
+		SET _x TO 0
+		SET _y TO 1
+		SET _a TO LIST(nums[_x])
+		SET _b TO LIST(nums[_y])
+		SET _c TO LIST(nums[_x])
+		SET _d TO LIST(nums[_y])
+
+		FUNCTION greaterCount(arr, val)
+			RETURN LENGTH(arr) - binarySearchRight(arr, val)
+		END FUNCTION
+
+		FUNCTION binarySearchRight(arr, val)
+			SET left TO 0
+			SET right TO LENGTH(arr)
+			WHILE left < right
+				SET mid TO (left + right) DIV 2
+				IF NOT (val < arr[mid])
+					SET left TO mid + 1
+				ELSE
+					SET right TO mid
+				END IF
+			END WHILE
+			RETURN left
+		END FUNCTION
+
+		FUNCTION insertIntoSorted(arr, val)
+			SET pos TO binarySearchRight(arr, val)
+			SET idx TO LENGTH(arr)
+			WHILE idx > pos
+				SET arr[idx] TO arr[idx - 1]
+				SET idx TO idx - 1
+			END WHILE
+			SET arr[pos] TO val
+		END FUNCTION
+
+		FUNCTION processValue(i)
+			SET val TO nums[i]
+			SET count1 TO greaterCount(_c, val)
+			SET count2 TO greaterCount(_d, val)
+
+			IF count1 > count2 THEN
+				APPEND val TO _a
+				insertIntoSorted(_c, val)
+			ELSE
+				IF count1 < count2 THEN
+					APPEND val TO _b
+					insertIntoSorted(_d, val)
+				ELSE
+					IF LENGTH(_a) <= LENGTH(_b) THEN
+						APPEND val TO _a
+						insertIntoSorted(_c, val)
+					ELSE
+						APPEND val TO _b
+						insertIntoSorted(_d, val)
+					END IF
+				END IF
+			END IF
+		END FUNCTION
+
+		SET i TO 2
+		REPEAT
+			processValue(i)
+			SET i TO i + 1
+		UNTIL i > LENGTH(nums) - 1
+
+		RETURN _a + _b
+	END FUNCTION
+END CLASS

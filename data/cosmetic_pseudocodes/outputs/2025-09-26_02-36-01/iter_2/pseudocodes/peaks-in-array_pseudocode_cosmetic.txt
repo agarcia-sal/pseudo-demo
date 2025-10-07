@@ -1,0 +1,102 @@
+CLASS Solution  
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER  
+        FUNCTION is_peak(pos INTEGER) RETURNS BOOLEAN  
+            LET prev_val BE nums[pos - 1]  
+            LET curr_val BE nums[pos]  
+            LET next_val BE nums[pos + 1]  
+            RETURN (prev_val < curr_val) AND (curr_val > next_val)  
+        END FUNCTION  
+  
+        LET peak_positions BE LIST EMPTY  
+        LET idx BE 1  
+        WHILE idx <= (LENGTH(nums) - 2)  
+            IF is_peak(idx) THEN  
+                APPEND peak_positions WITH idx  
+            END IF  
+            idx = idx + 1  
+        END WHILE  
+  
+        LET output_list BE LIST EMPTY  
+        FOR EACH qry IN queries DO  
+            LET op_type BE qry[0]  
+            IF op_type = 1 THEN  
+                LET start_bound BE qry[1]  
+                LET end_bound BE qry[2]  
+  
+                LET left_pos BE 0  
+                WHILE left_pos < LENGTH(peak_positions) AND peak_positions[left_pos] < (start_bound + 1) DO  
+                    left_pos = left_pos + 1  
+                END WHILE  
+  
+                LET right_pos BE LENGTH(peak_positions) - 1  
+                WHILE right_pos >= 0 AND peak_positions[right_pos] > (end_bound - 1) DO  
+                    right_pos = right_pos - 1  
+                END WHILE  
+  
+                LET count_peaks BETWEEN left_pos AND right_pos BE 0  
+                IF right_pos >= left_pos THEN  
+                    count_peaks = right_pos - left_pos + 1  
+                END IF  
+  
+                APPEND output_list WITH count_peaks  
+            ELSE  
+                LET change_idx BE qry[1]  
+                LET new_value BE qry[2]  
+  
+                IF nums[change_idx] = new_value THEN  
+                    CONTINUE  
+                END IF  
+  
+                nums[change_idx] = new_value  
+  
+                LET start_update BE change_idx - 1  
+                IF start_update < 1 THEN  
+                    start_update = 1  
+                END IF  
+  
+                LET end_update BE change_idx + 1  
+                IF end_update > (LENGTH(nums) - 2) THEN  
+                    end_update = LENGTH(nums) - 2  
+                END IF  
+  
+                LET pos_update BE start_update  
+                WHILE pos_update <= end_update DO  
+                    LET currently_peak BE is_peak(pos_update)  
+  
+                    LET found_index BE -1  
+                    LET low BE 0  
+                    LET high BE LENGTH(peak_positions) - 1  
+                    WHILE low <= high DO  
+                        LET mid BE (low + high) DIV 2  
+                        IF peak_positions[mid] = pos_update THEN  
+                            found_index = mid  
+                            BREAK  
+                        ELSE IF peak_positions[mid] < pos_update THEN  
+                            low = mid + 1  
+                        ELSE  
+                            high = mid - 1  
+                        END IF  
+                    END WHILE  
+  
+                    IF currently_peak THEN  
+                        IF found_index = -1 THEN  
+                            LET insert_pos BE 0  
+                            WHILE insert_pos < LENGTH(peak_positions) AND peak_positions[insert_pos] < pos_update DO  
+                                insert_pos = insert_pos + 1  
+                            END WHILE  
+                            INSERT peak_positions AT insert_pos VALUE pos_update  
+                        END IF  
+                    ELSE  
+                        IF found_index <> -1 THEN  
+                            REMOVE peak_positions AT found_index  
+                        END IF  
+                    END IF  
+  
+                    pos_update = pos_update + 1  
+                END WHILE  
+            END IF  
+        END FOR  
+  
+        RETURN output_list  
+    END FUNCTION  
+END CLASS

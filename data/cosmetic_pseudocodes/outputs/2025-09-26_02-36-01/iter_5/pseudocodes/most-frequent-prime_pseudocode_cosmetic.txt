@@ -1,0 +1,91 @@
+FUNCTION is_prime(n)
+    SET result TO false
+    IF n GREATER THAN one
+        IF n LESS THAN OR EQUAL TO (two PLUS one)
+            SET result TO true
+        ELSE
+            IF (n MOD two) NOT EQUAL TO zero AND (n MOD three) NOT EQUAL TO zero
+                SET divisor TO five
+                FUNCTION loop_check(d)
+                    IF (d TIMES d) GREATER THAN n
+                        RETURN true
+                    ELSE
+                        IF (n MOD d) EQUALS zero OR (n MOD (d PLUS two)) EQUALS zero
+                            RETURN false
+                        ELSE
+                            RETURN loop_check(d PLUS six)
+                        END IF
+                    END IF
+                END FUNCTION
+                SET result TO loop_check(divisor)
+            END IF
+        END IF
+    END IF
+    RETURN result
+END FUNCTION
+
+CLASS Solution
+    FUNCTION mostFrequentPrime(mat)
+        SET rowCount TO LENGTH OF mat
+        SET colCount TO LENGTH OF mat[zero]
+        SET dirOffsets TO LIST OF (-one, zero), (-one, one), (zero, one), (one, one), (one, zero), (one, -one), (zero, -one), (-one, -one)
+        SET primeFreq TO EMPTY MAPPING FROM ELEMENT TO INTEGER
+
+        FUNCTION traverse(posX, posY, deltaX, deltaY, currNum)
+            SET nextX TO posX PLUS deltaX
+            SET nextY TO posY PLUS deltaY
+            IF (nextX GREATER THAN OR EQUAL TO zero) AND (nextX LESS THAN rowCount) AND (nextY GREATER THAN OR EQUAL TO zero) AND (nextY LESS THAN colCount)
+                SET updatedNum TO (currNum TIMES ten) PLUS mat[nextX][nextY]
+                IF updatedNum GREATER THAN ten AND is_prime(updatedNum)
+                    SET tempCount TO 0
+                    IF updatedNum IN primeFreq
+                        SET tempCount TO primeFreq[updatedNum]
+                    END IF
+                    SET primeFreq[updatedNum] TO tempCount PLUS one
+                END IF
+                CALL traverse(nextX, nextY, deltaX, deltaY, updatedNum)
+            END IF
+        END FUNCTION
+
+        SET rowIndex TO zero
+        WHILE rowIndex LESS THAN rowCount
+            SET colIndex TO zero
+            WHILE colIndex LESS THAN colCount
+                SET dirIndex TO zero
+                WHILE dirIndex LESS THAN LENGTH OF dirOffsets
+                    SET deltaX TO dirOffsets[dirIndex].first
+                    SET deltaY TO dirOffsets[dirIndex].second
+                    CALL traverse(rowIndex, colIndex, deltaX, deltaY, mat[rowIndex][colIndex])
+                    SET dirIndex TO dirIndex PLUS one
+                END WHILE
+                SET colIndex TO colIndex PLUS one
+            END WHILE
+            SET rowIndex TO rowIndex PLUS one
+        END WHILE
+
+        SET maxPrime TO -one
+        IF LENGTH OF primeFreq GREATER THAN zero
+            SET maxCount TO -1
+            DEFINE FUNCTION compare_keys(keyList)
+                IF keyList IS EMPTY
+                    RETURN null
+                ELSE IF LENGTH OF keyList EQUALS one
+                    RETURN keyList[zero]
+                ELSE
+                    SET head TO keyList[zero]
+                    SET tailMax TO compare_keys(keyList FROM one TO END)
+                    SET headCount TO primeFreq[head]
+                    SET tailCount TO primeFreq[tailMax]
+                    IF headCount GREATER THAN tailCount OR (headCount EQUALS tailCount AND head GREATER THAN tailMax)
+                        RETURN head
+                    ELSE
+                        RETURN tailMax
+                    END IF
+                END IF
+            END FUNCTION
+            SET maxPrime TO compare_keys(keys OF primeFreq)
+        END IF
+
+        RETURN maxPrime
+    END FUNCTION
+END CLASS

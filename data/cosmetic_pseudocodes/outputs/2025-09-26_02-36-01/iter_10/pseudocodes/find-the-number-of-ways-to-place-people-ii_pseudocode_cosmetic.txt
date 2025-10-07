@@ -1,0 +1,79 @@
+CLASS Solution
+	Function numberOfPairs(points)
+		Define procedure comparePoints(a, b)
+			If a.x > b.x or (a.x = b.x and a.y < b.y) Then
+				Return 1
+			Else If a.x = b.x and a.y = b.y Then
+				Return 0
+			Else
+				Return -1
+			End If
+		End Define
+
+		Define procedure reorder(arr, startIndex, endIndex)
+			If startIndex >= endIndex Then
+				Return
+			End If
+			Set pivotIndex to startIndex
+			Set pivotVal to arr[endIndex]
+			Set leftPtr to startIndex
+			For tmpPtr From startIndex To endIndex - 1
+				If comparePoints(arr[tmpPtr], pivotVal) ≤ 0 Then
+					Swap arr[leftPtr], arr[tmpPtr]
+					Set leftPtr to leftPtr + 1
+				End If
+			End For
+			Swap arr[leftPtr], arr[endIndex]
+			Call reorder(arr, startIndex, leftPtr - 1)
+			Call reorder(arr, leftPtr + 1, endIndex)
+		End Define
+
+		Call reorder(points, 0, Length(points) - 1)
+		
+		Set totalElements to Length(points)
+		Set totalCount to 0
+
+		Define recursive function checkInnerRange(startIndex, endIndex, xStart, yStart, xEnd, yEnd)
+			If startIndex >= endIndex Then
+				Return True
+			End If
+			Set scanIndex to startIndex
+
+			Repeat
+				If points[scanIndex].x ≥ xStart and points[scanIndex].x ≤ xEnd and points[scanIndex].y ≥ yEnd and points[scanIndex].y ≤ yStart Then
+					Return False
+				End If
+				Set scanIndex to scanIndex + 1
+			Until scanIndex ≥ endIndex
+
+			Return True
+		End function
+
+		Define procedure iterateInnerBlocks(idx)
+			If idx ≥ totalElements - 1 Then
+				Return
+			End If
+
+			Set inner to idx + 1
+			While inner < totalElements
+				Set firstX to points[idx].x
+				Set firstY to points[idx].y
+				Set secondX to points[inner].x
+				Set secondY to points[inner].y
+
+				If firstX ≤ secondX and firstY ≥ secondY Then
+					If checkInnerRange(idx + 1, inner, firstX, firstY, secondX, secondY) Then
+						Set totalCount to totalCount + 1
+					End If
+				End If
+
+				Set inner to inner + 1
+			End While
+
+			Call iterateInnerBlocks(idx + 1)
+		End procedure
+
+		Call iterateInnerBlocks(0)
+		Return totalCount
+	End Function
+END CLASS

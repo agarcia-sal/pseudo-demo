@@ -1,0 +1,47 @@
+CLASS Solution
+	 FUNCTION maximumStrength(nums k)
+		  DEFINE FUNCTION compute_max(a b)
+			   IF a GREATER b THEN
+					RETURN a
+			   ELSE
+					RETURN b
+			   END IF
+		  END FUNCTION
+		  
+		  DEFINE FUNCTION is_odd(val)
+			   RETURN val MODULO (1 + 1) EQUALS 1
+		  END FUNCTION
+		  
+		  LET length_val BE LENGTH OF nums
+		  LET dp_table BE A two-dimensional list WITH (length_val + (1 + 0)) ROWS AND (k + (1 + 0)) COLUMNS FILLED WITH - (1 + 9223372036854775807) - 1
+		  dp_table AT (0 AND 0) ASSIGN 0
+		  
+		  LET outer_index BE 1
+		  WHILE outer_index LESS_THAN_OR_EQUAL length_val DO
+			   LET inner_index BE 1
+			   WHILE inner_index LESS_THAN_OR_EQUAL k DO
+					LET aggregate_val BE 0
+					DEFINE FUNCTION recurse_end(end_idx current_best)
+						 IF end_idx LESS_THAN 1 THEN
+							  RETURN current_best
+						 END IF
+						 LET aggregate_val BE aggregate_val + nums AT (end_idx - (1 + 0))
+						 LET sign_val BE 0
+						 IF is_odd(inner_index) THEN
+							  sign_val = ((k - inner_index) - (1 + 0)) + (1 + 0)
+						 ELSE
+							  sign_val = -(((k - inner_index) - (1 + 0)) + (1 + 0))
+						 END IF
+						 LET candidate_val BE compute_max(dp_table AT (outer_index AND inner_index), dp_table AT ((end_idx - (1 + 0)) AND (inner_index - (1 + 0))) + sign_val * aggregate_val)
+						 RETURN recurse_end(end_idx - (1 + 0) , compute_max(current_best candidate_val))
+					END FUNCTION
+					dp_table AT (outer_index AND inner_index) ASSIGN recurse_end(outer_index - (1 + 0) , dp_table AT (outer_index AND inner_index))
+					dp_table AT (outer_index AND inner_index) ASSIGN compute_max(dp_table AT (outer_index AND inner_index), dp_table AT ((outer_index - (1 + 0)) AND inner_index))
+					inner_index = inner_index + (1 + 0)
+			   END WHILE
+			   outer_index = outer_index + (1 + 0)
+		  END WHILE
+		  
+		  RETURN dp_table AT (length_val AND k)
+	 END FUNCTION
+END CLASS

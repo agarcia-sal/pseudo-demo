@@ -1,0 +1,98 @@
+CLASS Solution
+	 FUNCTION maxTargetNodes(edges1, edges2)
+			DEFINE FUNCTION buildAdjacency(edgeList)
+				SET dictMap TO new default dict returning empty list on miss
+				DEFINE FUNCTION addEdge(a, b)
+					dictMap[a] APPEND b
+					dictMap[b] APPEND a
+				END FUNCTION
+				FOR EACH x, y IN edgeList
+					addEdge(x, y)
+				END FOR
+				RETURN dictMap
+			END FUNCTION
+
+			LET firstGraphAdjacency BE buildAdjacency(edges1)
+			LET secondGraphAdjacency BE buildAdjacency(edges2)
+
+			LET countNodesFirst BE SIZE OF KEYS(firstGraphAdjacency)
+			LET countNodesSecond BE SIZE OF KEYS(secondGraphAdjacency)
+
+			DEFINE FUNCTION breadthFirstSearch(graphStructure, rootNode)
+				LET nodeDepthEven, nodeDepthOdd BE 0, 0
+				LET processingQueue BE A NEW deque CONTAINING (rootNode, 0)
+				LET recordedVisited BE A NEW set CONTAINING rootNode
+
+				DEFINE FUNCTION nextStep()
+					IF processingQueue IS EMPTY THEN RETURN (FALSE, NULL, NULL)
+					LET currNode, currDistance BE processingQueue POP FRONT
+					RETURN (TRUE, currNode, currDistance)
+				END FUNCTION
+
+				LOOP FOREVER
+					LET continueFlag, currentNode, currentDist BE nextStep()
+					IF NOT continueFlag THEN BREAK
+
+					IF (currentDist % 2) == 0 THEN 
+						nodeDepthEven <- nodeDepthEven + 1
+					ELSE 
+						nodeDepthOdd <- nodeDepthOdd + 1
+					END IF
+
+					FOR neighborNode IN graphStructure[currentNode]
+						IF neighborNode NOT IN recordedVisited THEN
+							recordedVisited ADD neighborNode
+							processingQueue APPEND (neighborNode, currentDist + 1)
+						END IF
+					END FOR
+				END LOOP
+
+				RETURN (nodeDepthEven, nodeDepthOdd)
+			END FUNCTION
+
+			LET firstCounts BE EMPTY LIST
+			DEFINE FUNCTION recurFillFirst(idx)
+				IF idx >= countNodesFirst THEN RETURN
+				firstCounts APPEND breadthFirstSearch(firstGraphAdjacency, idx)
+				recurFillFirst(idx + 1)
+			END FUNCTION
+			recurFillFirst(0)
+
+			LET secondCounts BE EMPTY LIST
+			DEFINE FUNCTION recurFillSecond(idx2)
+				IF idx2 >= countNodesSecond THEN RETURN
+				secondCounts APPEND breadthFirstSearch(secondGraphAdjacency, idx2)
+				recurFillSecond(idx2 + 1)
+			END FUNCTION
+			recurFillSecond(0)
+
+			LET combinedResult BE EMPTY LIST
+			DEFINE FUNCTION calculateResults(pos1)
+				IF pos1 >= countNodesFirst THEN RETURN
+				LET evn1, odd1 BE firstCounts[pos1]
+				LET greatestTargets BE 0
+
+				DEFINE FUNCTION checkPos(pos2)
+					IF pos2 >= countNodesSecond THEN RETURN
+					LET evn2, odd2 BE secondCounts[pos2]
+					LET currentMaxTargets
+					IF (pos1 == pos2) OR ((pos1 % 2) == (pos2 % 2)) THEN
+						currentMaxTargets = evn2
+					ELSE
+						currentMaxTargets = odd2
+					END IF
+					IF currentMaxTargets > greatestTargets THEN
+						greatestTargets <- currentMaxTargets
+					END IF
+					checkPos(pos2 + 1)
+				END FUNCTION
+
+				checkPos(0)
+				combinedResult APPEND (evn1 + greatestTargets)
+				calculateResults(pos1 + 1)
+			END FUNCTION
+			calculateResults(0)
+
+			RETURN combinedResult
+	 END FUNCTION
+END CLASS

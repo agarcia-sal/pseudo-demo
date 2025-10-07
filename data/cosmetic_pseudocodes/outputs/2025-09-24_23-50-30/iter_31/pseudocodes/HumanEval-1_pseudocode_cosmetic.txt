@@ -1,0 +1,34 @@
+```
+FUNCTION separate_paren_groups(string_of_parentheses)
+    SET output_collection TO []
+    SET temporary_buffer TO []
+    SET nesting_counter TO 0
+
+    PROCEDURE process_index(current_index)
+        IF current_index = LENGTH(string_of_parentheses) THEN
+            RETURN
+        ELSE
+            SET symbol TO string_of_parentheses[current_index]
+            SELECT
+                CASE symbol = '(':
+                    SET nesting_counter TO nesting_counter + 1
+                    APPEND symbol TO temporary_buffer
+                CASE symbol = ')':
+                    SET nesting_counter TO nesting_counter - 1
+                    APPEND symbol TO temporary_buffer
+
+                    IF nesting_counter = 0 THEN
+                        APPEND JOIN(temporary_buffer) TO output_collection
+                        SET temporary_buffer TO []
+                    END IF
+                DEFAULT:
+                    NOOP
+            END SELECT
+            CALL process_index(current_index + 1)
+        END IF
+    END PROCEDURE
+
+    CALL process_index(0)
+    RETURN output_collection
+END FUNCTION
+```

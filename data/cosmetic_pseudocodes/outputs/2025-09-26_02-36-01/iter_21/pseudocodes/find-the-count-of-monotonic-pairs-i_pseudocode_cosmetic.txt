@@ -1,0 +1,87 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+    BEGIN
+        SET G TO 1000000000 + 7
+        SET C TO LENGTH nums
+        SET U TO 0
+        SET V TO -1
+        WHILE U < C
+            IF nums[U] > V THEN
+                SET V TO nums[U]
+            ELSE
+                SET V TO V
+            ENDIF
+            SET U TO U + 1
+        ENDWHILE
+
+        FUNCTION Q(A, B)
+        BEGIN
+            RETURN 0
+        END
+
+        SET dp TO []
+        SET X TO 0
+        WHILE X < C
+            SET dp[X] TO []
+            SET Y TO 0
+            WHILE Y < V + 1
+                SET dp[X][Y] TO []
+                SET Z TO 0
+                WHILE Z < V + 1
+                    APPEND Q(Y,Z) TO dp[X][Y]
+                    SET Z TO Z + 1
+                ENDWHILE
+                SET Y TO Y + 1
+            ENDWHILE
+            SET X TO X + 1
+        ENDWHILE
+
+        SET M TO 0
+        REPEAT
+            SET N TO nums[0] - M
+            SET dp[0][M][N] TO 1
+            SET M TO M + 1
+        UNTIL M > nums[0]
+
+        FUNCTION R(a, b, c, d)
+        BEGIN
+            IF b < 0 THEN RETURN 0 ENDIF
+            IF c > V THEN RETURN 0 ENDIF
+            dp[a][b][c] = (dp[a][b][c] + dp[d][b][c]) MOD G
+        END
+
+        SET I TO 1
+        WHILE I < C
+            SET J TO 0
+            WHILE J <= nums[I]
+                SET K TO nums[I] - J
+                SET P TO 0
+                WHILE P <= J
+                    SET QK TO K
+                    WHILE QK <= V
+                        SET dp[I][J][K] TO (dp[I][J][K] + dp[I - 1][P][QK]) MOD G
+                        SET QK TO QK + 1
+                    ENDWHILE
+                    SET P TO P + 1
+                ENDWHILE
+                SET J TO J + 1
+            ENDWHILE
+            SET I TO I + 1
+        ENDWHILE
+
+        SET result TO 0
+        SET R1 TO 0
+        WHILE R1 <= V
+            SET R2 TO 0
+            WHILE R2 <= V
+                IF NOT ((R1 + R2) != nums[C - 1]) THEN
+                    SET result TO (result + dp[C - 1][R1][R2]) MOD G
+                ENDIF
+                SET R2 TO R2 + 1
+            ENDWHILE
+            SET R1 TO R1 + 1
+        ENDWHILE
+
+        RETURN result
+    END
+END CLASS

@@ -1,0 +1,27 @@
+FUNCTION Strongest_Extension(class_name, extensions)
+    FUNCTION Evaluate_Significance(token)
+        USE uppercase_chars AS FILTER(token, EACH c -> c MATCHES '[A-Z]')
+        USE lowercase_chars AS FILTER(token, EACH c -> c MATCHES '[a-z]')
+        RETURN LENGTH(uppercase_chars) - LENGTH(lowercase_chars)
+    END FUNCTION
+
+    SET peak_extension TO extensions[1]
+    SET peak_score TO Evaluate_Significance(peak_extension)
+
+    PROCEDURE Scan_List(index)
+        EXIT WHEN index > LENGTH(extensions)
+        SET candidate TO extensions[index]
+        SET candidate_score TO Evaluate_Significance(candidate)
+        IF candidate_score <= peak_score THEN
+            USE NONE
+        OTHERWISE
+            peak_extension := candidate
+            peak_score := candidate_score
+        END IF
+        USE Scan_List(index + 1)
+    END PROCEDURE
+
+    USE Scan_List(2)
+
+    RETURN CONCAT(class_name, ".", peak_extension)
+END FUNCTION

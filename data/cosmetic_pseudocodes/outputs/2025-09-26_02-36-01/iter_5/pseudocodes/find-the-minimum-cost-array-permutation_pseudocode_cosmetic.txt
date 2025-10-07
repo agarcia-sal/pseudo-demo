@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION findPermutation(nums)
+        FUNCTION dfs(current_mask, last_element)
+            FUNCTION is_full(mask_val)
+                RETURN mask_val = (ONE << (LEN_NUMS - ONE))
+            END FUNCTION
+
+            FUNCTION abs_diff(a, b)
+                RETURN IF a > b THEN a - b ELSE b - a
+            END FUNCTION
+
+            LET LEN_NUMS = LENGTH(nums)
+            IF is_full(current_mask) THEN
+                LET result_val = abs_diff(last_element, nums[0])
+                RETURN result_val
+            END IF
+
+            LET minimal_result = INFINITY
+
+            FUNCTION try_index(index)
+                IF (current_mask >> index) & ONE = ZERO THEN
+                    LET temp_val = abs_diff(last_element, nums[index]) + dfs(current_mask | (ONE << index), index)
+                    IF temp_val < minimal_result THEN
+                        minimal_result = temp_val
+                    END IF
+                END IF
+            END FUNCTION
+
+            LET idx = ZERO
+            WHILE idx < LEN_NUMS
+                CALL try_index(idx)
+                SET idx = idx + ONE
+            END WHILE
+
+            RETURN minimal_result
+        END FUNCTION
+
+        FUNCTION g(current_mask, last_element)
+            APPEND last_element TO ans
+            LET LEN_NUMS = LENGTH(nums)
+            IF current_mask = (ONE << (LEN_NUMS - ONE)) THEN
+                RETURN
+            END IF
+
+            LET desired_result = dfs(current_mask, last_element)
+
+            FUNCTION search_index(index)
+                IF (current_mask >> index) & ONE = ZERO THEN
+                    LET candidate_val = (IF last_element > nums[index] THEN last_element - nums[index] ELSE nums[index] - last_element) + dfs(current_mask | (ONE << index), index)
+                    IF candidate_val = desired_result THEN
+                        CALL g(current_mask | (ONE << index), index)
+                        RETURN TRUE
+                    END IF
+                END IF
+                RETURN FALSE
+            END FUNCTION
+
+            LET pointer = ZERO
+            LET break_flag = FALSE
+            WHILE pointer < LEN_NUMS AND NO break_flag
+                IF search_index(pointer) THEN
+                    break_flag = TRUE
+                ELSE
+                    pointer = pointer + ONE
+                END IF
+            END WHILE
+        END FUNCTION
+
+        LET LEN_NUMS = LENGTH(nums)
+        LET ans = []
+        CALL g(ONE << ZERO, ZERO)
+        RETURN ans
+    END FUNCTION
+END CLASS

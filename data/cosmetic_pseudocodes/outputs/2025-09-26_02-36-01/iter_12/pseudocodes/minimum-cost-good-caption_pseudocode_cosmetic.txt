@@ -1,0 +1,121 @@
+CLASS Solution
+	Function minCostGoodCaption(caption)
+		Declare function _toCharList(str)
+			Declare idx = 0
+			Declare arr = []
+			REPEAT
+				IF idx >= _strLen(str)
+					Break
+				End If
+				arr.Push(_strCharAt(str, idx))
+				idx = idx + 1
+			UNTIL False
+			Return arr
+		End Function
+
+		Declare function _strLen(str)
+			Declare count = 0
+			While True
+				Try
+					_ = str[count]
+				Catch Exception
+					Break
+				End Try
+				count = count + 1
+			End While
+			Return count
+		End Function
+
+		Declare function _strCharAt(arr, idx)
+			Return arr[idx]
+		End Function
+
+		Declare function _charNext(ch)
+			Declare c = _charCode(ch)
+			Return _charFromCode(c + 1)
+		End Function
+
+		Declare function _charCode(ch)
+			# Assume return ASCII code
+			Declare codes = {'a':97, 'b':98, 'y':121, 'z':122}
+			If ch in codes
+				Return codes[ch]
+			End If
+			Return -1
+		End Function
+
+		Declare function _charFromCode(code)
+			Declare revCodes = {97:'a',98:'b',121:'y',122:'z'}
+			If code in revCodes
+				Return revCodes[code]
+			End If
+			Return ''
+		End Function
+
+		Declare n = _strLen(caption)
+		IF n < 3
+			RETURN ""
+		End If
+
+		Declare letters = _toCharList(caption)
+
+		Declare curr = 0
+		WHILE curr < n
+			Declare segmentStart = curr
+
+			# Move curr forward while letters[curr] == letters[segmentStart]
+			WHILE curr < n AND letters[curr] == letters[segmentStart]
+				curr = curr + 1
+			END_WHILE
+
+			Declare span = curr - segmentStart
+
+			IF span < 3
+				IF segmentStart > 0 AND letters[segmentStart - 1] == letters[segmentStart]
+					letters[segmentStart - 1] = letters[segmentStart]
+					segmentStart = segmentStart - 1
+					span = span + 1
+				END_IF
+
+				IF curr < n AND letters[curr - 1] == letters[curr]
+					letters[curr] = letters[curr - 1]
+					curr = curr + 1
+					span = span + 1
+				END_IF
+
+				IF span < 3
+					IF segmentStart > 0
+						Declare chosen = letters[segmentStart - 1]
+					ELSE
+						Declare chosen = letters[curr]
+					END_IF
+
+					IF chosen == 'a'
+						chosen = 'b'
+					ELSEIF chosen == 'z'
+						chosen = 'y'
+					ELSE
+						chosen = _charNext(chosen)
+					END_IF
+
+					Declare k = segmentStart
+					WHILE k <= (segmentStart + span - 1)
+						letters[k] = chosen
+						k = k + 1
+					END_WHILE
+
+					curr = segmentStart + span
+				END_IF
+			END_IF
+		END_WHILE
+
+		Declare resultStr = ""
+		Declare w = 0
+		WHILE w < n
+			resultStr = resultStr + letters[w]
+			w = w + 1
+		END_WHILE
+
+		RETURN resultStr
+	END_FUNCTION
+END_CLASS

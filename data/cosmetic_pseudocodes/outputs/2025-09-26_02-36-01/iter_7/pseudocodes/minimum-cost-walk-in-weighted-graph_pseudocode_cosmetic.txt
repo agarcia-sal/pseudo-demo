@@ -1,0 +1,109 @@
+CLASS UnionFind  
+DO  
+    FUNCTION __init__(self, n)  
+        LET idx TO 0  
+        LET pnts TO empty list  
+        WHILE idx LESS THAN n DO  
+            APPEND idx TO pnts  
+            SET idx TO idx PLUS 1  
+        END WHILE  
+        SET self.parent TO pnts  
+
+        LET rnk TO empty list  
+        LET counter TO 0  
+        REPEAT  
+            APPEND 1 TO rnk  
+            SET counter TO counter PLUS 1  
+        UNTIL counter GREATER THAN (n SUBTRACT 1)  
+
+        SET self.rank TO rnk  
+    END FUNCTION  
+
+    FUNCTION find(self, u)  
+        IF self.parent[u] NOT_EQUALS u THEN  
+            LET rec_result TO self.find(self.parent[u])  
+            SET self.parent[u] TO rec_result  
+        END IF  
+        RETURN self.parent[u]  
+    END FUNCTION  
+
+    FUNCTION union(self, u, v)  
+        LET x_root TO self.find(u)  
+        LET y_root TO self.find(v)  
+
+        IF x_root NOT_EQUALS y_root THEN  
+            IF self.rank[x_root] GREATER THAN self.rank[y_root] THEN  
+                SET self.parent[y_root] TO x_root  
+            ELSE  
+                IF self.rank[x_root] LESS THAN self.rank[y_root] THEN  
+                    SET self.parent[x_root] TO y_root  
+                ELSE  
+                    SET self.parent[y_root] TO x_root  
+                    SET self.rank[x_root] TO self.rank[x_root] PLUS (1 * 1)  
+                END IF  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+
+CLASS Solution  
+DO  
+    FUNCTION minimumCost(self, n, edges, query)  
+        LET uf_instance TO UnionFind(n)  
+        
+        LET mask_limit TO (2 POWER 32) MINUS 1  
+        LET comp_mask TO empty list  
+        LET idx_c TO 0  
+        WHILE idx_c LESS_THAN n DO  
+            APPEND mask_limit TO comp_mask  
+            SET idx_c TO idx_c PLUS 1  
+        END WHILE  
+        
+        FOR EACH triple_element IN edges DO  
+            LET a TO triple_element[0]  
+            LET b TO triple_element[1]  
+            LET c TO triple_element[2]  
+
+            CALL uf_instance.union(a, b)  
+            LET root_idx TO uf_instance.find(a)  
+            SET comp_mask[root_idx] TO comp_mask[root_idx] BITWISE_AND c  
+        END FOR  
+
+        LET costs_map TO EMPTY_DICTIONARY  
+        LET i TO 0  
+        WHILE i LESS_THAN n DO  
+            LET root_val TO uf_instance.find(i)  
+
+            IF NOT (root_val IN costs_map) THEN  
+                SET costs_map[root_val] TO comp_mask[root_val]  
+            END IF  
+            SET i TO i PLUS 1  
+        END WHILE  
+
+        LET res_list TO empty list  
+        LET q_idx TO 0  
+        LET q_len TO LENGTH(query)  
+        WHILE q_idx LESS_THAN q_len DO  
+            LET pair_vals TO query[q_idx]  
+            LET first_val TO pair_vals[0]  
+            LET second_val TO pair_vals[1]  
+
+            IF first_val EQUALS second_val THEN  
+                APPEND 0 TO res_list  
+            ELSE  
+                LET root_first TO uf_instance.find(first_val)  
+                LET root_second TO uf_instance.find(second_val)  
+                IF root_first EQUALS root_second THEN  
+                    APPEND costs_map[root_first] TO res_list  
+                ELSE  
+                    APPEND (0 SUBTRACT 1) TO res_list  
+                END IF  
+            END IF  
+
+            SET q_idx TO q_idx PLUS 1  
+        END WHILE  
+
+        RETURN res_list  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION occurrencesOfElement(nums, queries, x)
+        DEFINE function replicateEquals(a, b) RETURNS BOOLEAN
+            RETURN NOT (a NOT EQUAL TO b)
+        END FUNCTION
+
+        DEFINE function lengthOf(collection) RETURNS INTEGER
+            SET countVar TO 0
+            WHILE TRUE
+                TRY
+                    ACCESS element AT countVar IN collection
+                CATCH OutOfBounds
+                    BREAK
+                END TRY
+                SET countVar TO countVar + 1
+            END WHILE
+            RETURN countVar
+        END FUNCTION
+
+        SET idxList TO []
+        SET idxCounter TO 0
+
+        WHILE idxCounter LESS THAN lengthOf(nums)
+            SET currentVal TO nums[idxCounter]
+            IF replicateEquals(currentVal, x)
+                SET tempList TO []
+                SET tempIndex TO 0
+                WHILE tempIndex LESS THAN lengthOf(idxList)
+                    SET tempList TO tempList + [idxList[tempIndex]]
+                    SET tempIndex TO tempIndex + 1
+                END WHILE
+                SET idxList TO tempList + [idxCounter]
+            END IF
+            SET idxCounter TO idxCounter + 1
+        END WHILE
+
+        SET outputList TO []
+        SET qIdx TO 0
+
+        FUNCTION retrieveAtPosition(pos, collection)
+            SET innerIdx TO 0
+            SET resultVar TO null
+            WHILE innerIdx LESS THAN lengthOf(collection)
+                IF (innerIdx + 1) EQUALS pos
+                    SET resultVar TO collection[innerIdx]
+                    BREAK
+                END IF
+                SET innerIdx TO innerIdx + 1
+            END WHILE
+            RETURN resultVar
+        END FUNCTION
+
+        WHILE qIdx LESS THAN lengthOf(queries)
+            SET currentQuery TO queries[qIdx]
+            IF NOT (currentQuery GREATER THAN lengthOf(idxList))
+                SET valToAppend TO retrieveAtPosition(currentQuery, idxList)
+                SET outputList TO outputList + [valToAppend]
+            ELSE
+                SET outputList TO outputList + [-1]
+            END IF
+            SET qIdx TO qIdx + 1
+        END WHILE
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

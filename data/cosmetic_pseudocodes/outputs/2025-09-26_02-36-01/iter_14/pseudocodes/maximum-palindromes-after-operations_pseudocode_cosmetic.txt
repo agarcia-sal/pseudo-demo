@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION maxPalindromesAfterOperations(words)
+        DEFINE FUNCTION buildCounter(seq)
+            SET outputMap TO empty map
+            FOR each element IN seq
+                IF element IN outputMap
+                    SET outputMap[element] TO outputMap[element] + 1
+                ELSE
+                    SET outputMap[element] TO 1
+                END IF
+            END FOR
+            RETURN outputMap
+        END FUNCTION
+
+        SET combinedString TO empty string
+        FOR idx FROM 0 TO LENGTH(words) - 1
+            SET combinedString TO combinedString + words[idx]
+        END FOR
+
+        SET letterCountMap TO buildCounter(combinedString)
+
+        SET totalPairs TO 0
+        SET totalSingles TO 0
+
+        SET iteratorList TO list of all values in letterCountMap
+
+        SET indexVar TO 0
+        WHILE indexVar < LENGTH(iteratorList)
+            SET currentCount TO iteratorList[indexVar]
+            SET dividend TO currentCount DIV 2
+            SET remainder TO currentCount - dividend * 2
+            SET totalPairs TO totalPairs + dividend
+            SET totalSingles TO totalSingles + remainder
+            SET indexVar TO indexVar + 1
+        END WHILE
+
+        DEFINE FUNCTION lengthAccessor(s)
+            RETURN LENGTH(s)
+        END FUNCTION
+
+        SORT words USING lengthAccessor IN ascending order
+
+        SET palindromeCount TO 0
+
+        DEFINE FUNCTION checkAndConsumePairs(requestedPairs, availablePairs)
+            IF NOT (availablePairs < requestedPairs)
+                RETURN TRUE
+            ELSE
+                RETURN FALSE
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION decrementPairs(availablePairsVar, decrementAmount)
+            SET availablePairsVar TO availablePairsVar - decrementAmount
+            RETURN availablePairsVar
+        END FUNCTION
+
+        FOR variableX FROM 0 TO LENGTH(words) - 1
+            SET currentWord TO words[variableX]
+            SET halfLen TO (LENGTH(currentWord) - (LENGTH(currentWord) MOD 2)) / 2
+
+            IF checkAndConsumePairs(halfLen, totalPairs)
+                SET totalPairs TO decrementPairs(totalPairs, halfLen)
+                SET palindromeCount TO palindromeCount + 1
+            END IF
+        END FOR
+
+        RETURN palindromeCount
+    END FUNCTION
+END CLASS

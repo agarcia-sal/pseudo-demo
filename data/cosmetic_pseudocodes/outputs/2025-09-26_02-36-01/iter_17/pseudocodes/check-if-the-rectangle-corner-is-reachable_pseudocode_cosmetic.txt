@@ -1,0 +1,108 @@
+CLASS Solution  
+    FUNCTION canReachCorner(xCorner yCorner circles)  
+        FUNCTION in_circle(x y cx cy r)  
+            SET dx TO x - cx  
+            SET dy TO y - cy  
+            SET dist_sq TO (dx * dx) + (dy * dy)  
+            SET r_sq TO r * r  
+            RETURN dist_sq <= r_sq  
+        END FUNCTION  
+
+        FUNCTION cross_left_top(cx cy r)  
+            SET cond1 TO (ABS(cx) <= r) AND (0 <= cy AND cy <= yCorner)  
+            SET cond2 TO (ABS(cy - yCorner) <= r) AND (0 <= cx AND cx <= xCorner)  
+            RETURN cond1 OR cond2  
+        END FUNCTION  
+
+        FUNCTION cross_right_bottom(cx cy r)  
+            SET cond1 TO (ABS(cx - xCorner) <= r) AND (0 <= cy AND cy <= yCorner)  
+            SET cond2 TO (ABS(cy) <= r) AND (0 <= cx AND cx <= xCorner)  
+            RETURN cond1 OR cond2  
+        END FUNCTION  
+
+        FUNCTION dfs(current_index)  
+            SET cx TO circles[current_index][0]  
+            SET cy TO circles[current_index][1]  
+            SET cr TO circles[current_index][2]  
+
+            IF cross_right_bottom(cx cy cr)  
+                RETURN True  
+            END IF  
+
+            SET vis[current_index] TO True  
+
+            SET k TO 0  
+            REPEAT  
+                IF k >= LENGTH(circles) THEN  
+                    BREAK  
+                END IF  
+
+                SET nx TO circles[k][0]  
+                SET ny TO circles[k][1]  
+                SET nr TO circles[k][2]  
+
+                IF vis[k] = True THEN  
+                    SET k TO k + 1  
+                    CONTINUE  
+                END IF  
+
+                SET ddx TO cx - nx  
+                SET ddy TO cy - ny  
+                SET dist_check TO (ddx * ddx) + (ddy * ddy)  
+                SET rad_sum TO cr + nr  
+                SET rad_sum_sq TO rad_sum * rad_sum  
+
+                IF dist_check > rad_sum_sq THEN  
+                    SET k TO k + 1  
+                    CONTINUE  
+                END IF  
+
+                SET left_expr TO (cx * nr) + (nx * cr)  
+                SET right_expr TO rad_sum * xCorner  
+                SET top_expr TO (cy * nr) + (ny * cr)  
+                SET bottom_expr TO rad_sum * yCorner  
+
+                IF (left_expr < right_expr) AND (top_expr < bottom_expr) AND dfs(k) THEN  
+                    RETURN True  
+                END IF  
+
+                SET k TO k + 1  
+            UNTIL False  
+
+            RETURN False  
+        END FUNCTION  
+
+        SET vis TO []  
+        SET iter_i TO 0  
+        REPEAT  
+            IF iter_i >= LENGTH(circles) THEN  
+                BREAK  
+            END IF  
+            APPEND False TO vis  
+            SET iter_i TO iter_i + 1  
+        UNTIL False  
+
+        SET iter_m TO 0  
+        WHILE iter_m < LENGTH(circles) DO  
+            SET cur_x TO circles[iter_m][0]  
+            SET cur_y TO circles[iter_m][1]  
+            SET cur_r TO circles[iter_m][2]  
+
+            IF in_circle(0 0 cur_x cur_y cur_r) OR in_circle(xCorner yCorner cur_x cur_y cur_r) THEN  
+                RETURN False  
+            END IF  
+
+            IF vis[iter_m] = False THEN  
+                IF cross_left_top(cur_x cur_y cur_r) THEN  
+                    IF dfs(iter_m) THEN  
+                        RETURN False  
+                    END IF  
+                END IF  
+            END IF  
+
+            SET iter_m TO iter_m + 1  
+        END WHILE  
+
+        RETURN True  
+    END FUNCTION  
+END CLASS

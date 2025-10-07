@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER count INTEGER) RETURNS LIST OF INTEGER
+        LET bin_collection BE an empty sequence
+        LET idx BE 0
+        WHILE idx < LENGTH(nums)
+            LET val BE nums[idx]
+            LET bin_rep BE CONVERT val TO BINARY STRING
+            LET bin_len BE LENGTH(bin_rep)
+            LET padding_needed BE count - bin_len
+            LET padded_bin BE REPEAT('0', padding_needed) + bin_rep
+            APPEND padded_bin TO bin_collection
+            idx = idx + 1
+        END WHILE
+
+        LET results BE []
+        
+        FUNCTION hamming_distance(binA STRING, binB STRING) RETURNS INTEGER
+            LET pos BE 0
+            LET diff_count BE 0
+            WHILE pos < LENGTH(binA)
+                LET charA BE binA[pos]
+                LET charB BE binB[pos]
+                IF NOT (charA = charB)
+                    diff_count = diff_count + 1
+                END IF
+                pos = pos + 1
+            END WHILE
+            RETURN diff_count
+        END FUNCTION
+        
+        LET outer_idx BE 0
+        WHILE outer_idx < LENGTH(nums)
+            LET highest_dist BE 0
+            LET inner_idx BE 0
+            WHILE inner_idx < LENGTH(nums)
+                IF outer_idx != inner_idx THEN
+                    LET current_dist BE hamming_distance(bin_collection[outer_idx], bin_collection[inner_idx])
+                    IF highest_dist < current_dist THEN
+                        highest_dist = current_dist
+                    END IF
+                END IF
+                inner_idx = inner_idx + 1
+            END WHILE
+            APPEND highest_dist TO results
+            outer_idx = outer_idx + 1
+        END WHILE
+        
+        RETURN results
+    END FUNCTION
+END CLASS

@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION distanceSum WITH PARAMETERS m n k
+        DEFINE CONST MODULUS <- 1000000007
+        FUNCTION computeCombinations WITH PARAMETERS x y
+            IF ( y > x ) THEN RETURN 0 END IF
+            IF ( y = 0 ) THEN RETURN 1 END IF
+            DEFINE array pascal[0..x][0..y]
+            SET i <- 0
+            WHILE i <= x DO
+                SET j <- 0
+                WHILE j <= MIN(i,y) DO
+                    IF j = 0 OR j = i THEN
+                        SET pascal[i][j] <- 1
+                    ELSE
+                        SET pascal[i][j] <- (pascal[i-1][j-1] + pascal[i-1][j]) MOD MODULUS
+                    END IF
+                    SET j <- j + 1
+                END WHILE
+                SET i <- i + 1
+            END WHILE
+            RETURN pascal[x][y]
+        END FUNCTION        
+        FUNCTION integerPower WITH PARAMETERS base exponent
+            SET result <- 1
+            SET tempBase <- base MOD MODULUS
+            SET tempExp <- exponent
+            WHILE tempExp > 0 DO
+                IF (tempExp MOD 2) = 1 THEN
+                    SET result <- (result * tempBase) MOD MODULUS
+                END IF
+                SET tempBase <- (tempBase * tempBase) MOD MODULUS
+                SET tempExp <- tempExp DIV 2
+            END WHILE
+            RETURN result
+        END FUNCTION
+        FUNCTION calcPart WITH PARAMETERS largeVal smallVal
+            RETURN (((smallVal * smallVal) MOD MODULUS) * ((largeVal * ((largeVal * largeVal) - 1)) DIV 6)) MOD MODULUS
+        END FUNCTION
+        SET a <- m
+        SET b <- n
+        SET part1 <- calcPart b a
+        SET part2 <- calcPart a b
+        SET totalElements <- a * b
+        SET combinationsCount <- computeCombinations(totalElements - 2, k - 2)
+        SET tempSum <- ((part1 + part2) MOD MODULUS) * combinationsCount
+        SET answer <- tempSum MOD MODULUS
+        RETURN answer
+    END FUNCTION
+END CLASS

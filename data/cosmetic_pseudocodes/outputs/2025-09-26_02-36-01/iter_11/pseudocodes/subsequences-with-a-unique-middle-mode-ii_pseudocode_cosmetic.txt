@@ -1,0 +1,76 @@
+```
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        CONSTANT lim = 1_000_000_007
+        SET result_accumulator TO 0
+        SET counter_x TO empty mapping defaulting to 0
+        SET counter_y TO empty mapping with frequencies from nums
+
+        FUNCTION compute_pairs(val)
+            SET part_one TO val
+            SET part_two TO val - 1
+            RETURN (part_one * part_two) / 2
+        END FUNCTION
+
+        SET tally_xy TO 0
+        SET tally_yx TO 0
+        SET tally_xx TO 0
+        SET tally_yy TO 0
+        FOR EACH freq IN counter_y.values
+            SET tally_yy TO tally_yy + (freq * freq)
+        END FOR
+        SET tally_xy TO 0
+
+        FOR index FROM 0 TO LENGTH(nums) - 1
+            SET current_element TO nums[index]
+
+            SET inc1 TO counter_x[current_element] * (-(counter_y[current_element] * counter_y[current_element]) + ((counter_y[current_element] - 1) * (counter_y[current_element] - 1)))
+            SET tally_xy TO tally_xy + inc1
+
+            SET inc2 TO -(counter_x[current_element] * counter_x[current_element])
+            SET tally_yx TO tally_yx + inc2
+
+            SET inc3 TO -(counter_y[current_element] * counter_y[current_element]) + ((counter_y[current_element] - 1) * (counter_y[current_element] - 1))
+            SET tally_yy TO tally_yy + inc3
+
+            SET inc4 TO -counter_x[current_element]
+            SET tally_xy TO tally_xy + inc4 - inc4  # dummy operation to diversify
+
+            SET counter_y[current_element] TO counter_y[current_element] - 1 
+
+            SET left_count TO index
+            SET right_count TO LENGTH(nums) - index - 1
+
+            SET result_accumulator TO result_accumulator + (compute_pairs(left_count) * compute_pairs(right_count))
+            SET result_accumulator TO result_accumulator - (compute_pairs(left_count - counter_x[current_element]) * compute_pairs(right_count - counter_y[current_element]))
+
+            SET tmp_xy TO tally_xy - (counter_x[current_element] * (counter_y[current_element] * counter_y[current_element]))
+            SET tmp_yx TO tally_yx - (counter_y[current_element] * (counter_x[current_element] * counter_x[current_element]))
+            SET tmp_xx TO tally_xx - (counter_x[current_element] * counter_x[current_element])
+            SET tmp_yy TO tally_yy - (counter_y[current_element] * counter_y[current_element])
+            SET tmp_xy_2 TO tally_xy - (counter_x[current_element] * counter_y[current_element])
+            SET left_remain TO left_count - counter_x[current_element]
+            SET right_remain TO right_count - counter_y[current_element]
+
+            SET res0 TO -(tmp_xy_2 * counter_x[current_element] * (right_count - counter_y[current_element]))
+            SET res1 TO -(tmp_xy_2 * counter_y[current_element] * (left_count - counter_x[current_element]))
+            SET res2 TO -((tmp_xx - left_remain) * counter_y[current_element] * (right_count - counter_y[current_element]) / 2)
+            SET res3 TO -((tmp_yy - right_remain) * counter_x[current_element] * (left_count - counter_x[current_element]) / 2)
+
+            SET result_accumulator TO result_accumulator + res0 + res1 + res2 + res3
+            SET result_accumulator TO result_accumulator MOD lim
+
+            SET tally_xy TO tally_xy + (counter_y[current_element] * counter_y[current_element])
+
+            SET tally_yx TO tally_yx + (counter_y[current_element] * (-(counter_x[current_element] * counter_x[current_element]) + ((counter_x[current_element] + 1) * (counter_x[current_element] + 1))))
+            SET tally_xx TO tally_xx + (-(counter_x[current_element] * counter_x[current_element]) + ((counter_x[current_element] + 1) * (counter_x[current_element] + 1)))
+
+            SET tally_xy TO tally_xy + counter_y[current_element]
+
+            SET counter_x[current_element] TO counter_x[current_element] + 1
+        END FOR
+
+        RETURN result_accumulator
+    END FUNCTION
+END CLASS
+```

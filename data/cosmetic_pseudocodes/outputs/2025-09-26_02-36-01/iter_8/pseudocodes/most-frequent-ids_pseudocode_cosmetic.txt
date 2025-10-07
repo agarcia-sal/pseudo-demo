@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION mostFrequentIDs(nums PARAMETER, freq PARAMETER)
+      LET tally = create_dictionary_with_default( ( ) -> 0 )
+      LET priority_queue = []
+      LET output_list = []
+      
+      DECLARE FUNCTION create_dictionary_with_default(default_provider)
+          LET dict_container = {}
+          RETURN dict_container
+      END FUNCTION
+
+      LET index_counter = (0)
+      REPEAT 
+          IF index_counter >= length(nums) THEN
+              BREAK
+          ENDIF
+          
+          LET value_current = nums[index_counter]
+          LET frequency_current = freq[index_counter]
+          
+          LET prior_count = tally[value_current]
+          LET updated_count = prior_count + frequency_current
+          tally[value_current] = updated_count
+          
+          LET entry_pair = ( -updated_count, value_current )
+          CALL function_push(priority_queue, entry_pair)
+          
+          WHILE NOT is_empty(priority_queue) AND (-priority_queue[0][0]) != tally[priority_queue[0][1]]
+              CALL function_pop(priority_queue)
+          ENDWHILE
+          
+          IF is_empty(priority_queue) == false THEN
+              LET top_frequency = -priority_queue[0][0]
+              output_list.append(top_frequency)
+          ELSE
+              output_list.append(0)
+          ENDIF
+
+          index_counter = index_counter + (1)
+      UNTIL false
+
+      RETURN output_list
+
+      DECLARE FUNCTION function_push(queue, element)
+          CALL queue.append(element)
+          DECLARE FUNCTION sift_up()
+              LET position = length(queue) - (1)
+              WHILE position > 0
+                  LET parent_pos = (position - 1) / 2
+                  IF queue[parent_pos][0] > queue[position][0]
+                      SWAP queue[parent_pos], queue[position]
+                      SET position TO parent_pos
+                  ELSE
+                      BREAK
+                  ENDIF
+              ENDWHILE
+          END FUNCTION
+          CALL sift_up()
+      END FUNCTION
+
+      DECLARE FUNCTION function_pop(queue)
+          IF length(queue) == 0 THEN RETURN
+          SET queue[0] TO queue[length(queue) - 1]
+          REMOVE last item of queue
+          DECLARE FUNCTION sift_down()
+              LET pos = 0
+              LET length_queue = length(queue)
+              WHILE TRUE
+                  LET left_child = pos*2 + (1)
+                  LET right_child = pos*2 + (2)
+                  LET smallest = pos
+                  
+                  IF left_child < length_queue AND queue[left_child][0] < queue[smallest][0] 
+                      SET smallest TO left_child
+                  ENDIF
+                  IF right_child < length_queue AND queue[right_child][0] < queue[smallest][0]
+                      SET smallest TO right_child
+                  ENDIF
+                  IF smallest == pos
+                      BREAK
+                  ENDIF
+                  SWAP queue[smallest], queue[pos]
+                  SET pos TO smallest
+              ENDWHILE
+          END FUNCTION
+          CALL sift_down()
+      END FUNCTION
+      
+      DECLARE FUNCTION is_empty(list_check)
+          RETURN length(list_check) == (0)
+      END FUNCTION
+      
+      DECLARE FUNCTION length(collection)
+          LET counter = (0)
+          FOR EACH item IN collection
+              SET counter TO counter + (1)
+          END FOR
+          RETURN counter
+      END FUNCTION
+    END FUNCTION
+END CLASS

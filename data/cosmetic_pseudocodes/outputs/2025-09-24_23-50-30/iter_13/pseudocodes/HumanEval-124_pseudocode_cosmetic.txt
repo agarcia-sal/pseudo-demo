@@ -1,0 +1,54 @@
+```
+FUNCTION valid_date(date_string)
+  DECLARE input_trimmed, components, m_str, d_str, y_str, m_val, d_val, y_val
+  DECLARE invalid_flag = False
+
+  ASSIGN input_trimmed TO REMOVE_WHITESPACES(date_string)
+  ASSIGN components TO SPLIT input_trimmed BY '-'
+
+  IF LENGTH(components) NOT EQUAL 3
+    RETURN False
+  END IF
+
+  ASSIGN m_str TO components[0]
+  ASSIGN d_str TO components[1]
+  ASSIGN y_str TO components[2]
+
+  FOR each elem IN [m_str, d_str, y_str]
+    IF NOT IS_NUMERIC(elem)
+      RETURN False
+    END IF
+  END FOR
+
+  ASSIGN m_val TO TO_INTEGER(m_str)
+  ASSIGN d_val TO TO_INTEGER(d_str)
+  ASSIGN y_val TO TO_INTEGER(y_str)
+
+  IF (m_val < 1) OR (m_val > 12)
+    RETURN False
+  END IF
+
+  SELECT m_val
+    CASE 1, 3, 5, 7, 8, 10, 12
+      IF (d_val < 1) OR (d_val > 31)
+        invalid_flag = True
+      END IF
+    CASE 4, 6, 9, 11
+      IF (d_val < 1) OR (d_val > 30)
+        invalid_flag = True
+      END IF
+    CASE 2
+      IF (d_val < 1) OR (d_val > 29)
+        invalid_flag = True
+      END IF
+    DEFAULT
+      invalid_flag = True
+  END SELECT
+
+  IF invalid_flag
+    RETURN False
+  END IF
+
+  RETURN True
+END FUNCTION
+```

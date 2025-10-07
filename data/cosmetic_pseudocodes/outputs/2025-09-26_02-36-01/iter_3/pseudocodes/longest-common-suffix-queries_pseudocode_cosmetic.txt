@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+        SET map_suffixes TO DICTIONARY OF STRING TO INTEGER INITIALLY EMPTY
+
+        SET position TO 0
+        WHILE position < LENGTH OF wordsContainer
+            SET current_word TO wordsContainer[position]
+            SET char_index TO 0
+            WHILE char_index <= LENGTH OF current_word - 1
+                SET segment TO SLICE current_word FROM char_index TO END
+
+                IF NOT (segment IN map_suffixes)
+                    map_suffixes[segment] <<= position
+                ELSE
+                    SET stored_pos TO map_suffixes[segment]
+                    SET stored_word TO wordsContainer[stored_pos]
+                    SET len_current TO LENGTH OF current_word
+                    SET len_stored TO LENGTH OF stored_word
+
+                    IF (len_current < len_stored) OR ((len_current = len_stored) AND (position < stored_pos))
+                        map_suffixes[segment] := position
+                    END IF
+                END IF
+
+                char_index := char_index + 1
+            END WHILE
+            position := position + 1
+        END WHILE
+
+        FUNCTION get_best_match(query query TO STRING) RETURNS INTEGER
+            SET pointer TO 0
+            WHILE pointer < LENGTH OF query
+                SET sub_str TO SUBSTRING query FROM pointer TO LENGTH OF query
+                IF sub_str IN map_suffixes THEN
+                    RETURN map_suffixes[sub_str]
+                END IF
+                pointer := pointer + 1
+            END WHILE
+
+            SET min_length TO LENGTH OF wordsContainer[0]
+            SET min_pos TO 0
+
+            SET index_iter TO 1
+            WHILE index_iter < LENGTH OF wordsContainer
+                SET candidate_word TO wordsContainer[index_iter]
+                SET candidate_len TO LENGTH OF candidate_word
+                IF (candidate_len < min_length) OR ((candidate_len = min_length) AND (index_iter < min_pos))
+                    min_length := candidate_len
+                    min_pos := index_iter
+                END IF
+                index_iter := index_iter + 1
+            END WHILE
+
+            RETURN min_pos
+        END FUNCTION
+
+        SET output_results TO NEW LIST OF INTEGER EMPTY
+        SET query_ptr TO 0
+        WHILE query_ptr < LENGTH OF wordsQuery
+            SET current_query TO wordsQuery[query_ptr]
+            output_results APPEND get_best_match(current_query)
+            query_ptr += 1
+        END WHILE
+        RETURN output_results
+    END FUNCTION
+END CLASS

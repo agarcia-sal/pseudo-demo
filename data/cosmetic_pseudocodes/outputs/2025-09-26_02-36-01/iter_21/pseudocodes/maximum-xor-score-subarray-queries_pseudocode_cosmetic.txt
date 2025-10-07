@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+      
+      SET alpha TO LENGTH(nums)
+      SET beta TO []
+      SET gamma TO []
+      
+      PROCEDURE initializeMatrix(rows PARAMETER, cols PARAMETER, result PARAMETER)
+        SET x TO 0
+        REPEAT
+          SET y TO 0
+          WHILE y < cols DO
+            SET result[x][y] TO 0
+            SET y TO y + 1
+          END WHILE
+          SET x TO x + 1
+        UNTIL x >= rows
+      END PROCEDURE
+      
+      SET beta TO LIST OF alpha LISTS EACH OF LENGTH alpha FILLED WITH 0
+      SET gamma TO LIST OF alpha LISTS EACH OF LENGTH alpha FILLED WITH 0
+      
+      SET m TO alpha MINUS 1
+      WHILE m GREATER OR EQUAL TO 0 DO
+        SET beta[m][m] TO nums[m]
+        SET gamma[m][m] TO nums[m]
+        SET n TO m PLUS 1
+        REPEAT
+          IF NOT (n GREATER THAN alpha MINUS 1) THEN
+            BREAK
+          END IF
+          SET beta[m][n] TO beta[m][n - 1] XOR beta[m + 1][n]
+          
+          SET candidate1 TO beta[m][n]
+          SET candidate2 TO gamma[m][n - 1]
+          SET candidate3 TO gamma[m + 1][n]
+          
+          SET maxVal TO candidate1
+          IF NOT (candidate2 LESS OR EQUAL maxVal) THEN
+            SET maxVal TO candidate2
+          END IF
+          IF NOT (candidate3 LESS OR EQUAL maxVal) THEN
+            SET maxVal TO candidate3
+          END IF
+          
+          SET gamma[m][n] TO maxVal
+          SET n TO n + 1
+        UNTIL FALSE
+        SET m TO m - 1
+      END WHILE
+      
+      PROCEDURE retrieveMaxVal(pair PARAMETER)
+        SET firstIndex TO pair[0]
+        SET secondIndex TO pair[1]
+        RETURN gamma[firstIndex][secondIndex]
+      END PROCEDURE
+      
+      SET resultList TO []
+      SET idx TO 0
+      REPEAT
+        IF NOT (idx LESS THAN LENGTH(queries)) THEN
+          BREAK
+        END IF
+        APPEND retrieveMaxVal(queries[idx]) TO resultList
+        SET idx TO idx + 1
+      UNTIL FALSE
+      
+      RETURN resultList
+    END FUNCTION
+END CLASS

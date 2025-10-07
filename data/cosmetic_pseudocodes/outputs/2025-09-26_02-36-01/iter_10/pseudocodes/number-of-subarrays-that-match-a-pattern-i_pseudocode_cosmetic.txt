@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION countMatchingSubarrays(nums parameter, pattern parameter)
+        FUNCTION isInvalidSegment(arr array, idx integer, pat array, pos integer) RETURNS boolean
+            SET res TO false
+            IF (pat[pos] = 1) AND (arr[idx + pos + 1] <= arr[idx + pos]) THEN
+                SET res TO true
+            ELSEIF (pat[pos] = 0) AND (arr[idx + pos + 1] <> arr[idx + pos]) THEN
+                SET res TO true
+            ELSEIF (pat[pos] = -1) AND (arr[idx + pos + 1] >= arr[idx + pos]) THEN
+                SET res TO true
+            END IF
+            RETURN res
+        END FUNCTION
+
+        SET sizeNums TO LENGTH(nums parameter)
+        SET sizePat TO LENGTH(pattern parameter)
+        SET totalMatches TO 0
+
+        FUNCTION checkAtIndex(pos integer) RETURNS boolean
+            IF pos >= sizeNums - sizePat THEN
+                RETURN false
+            END IF
+            RETURN verifyPattern(pos, 0)
+        END FUNCTION
+
+        FUNCTION verifyPattern(index integer, offset integer) RETURNS boolean
+            IF offset >= sizePat - 1 THEN
+                RETURN true
+            END IF
+
+            IF isInvalidSegment(nums parameter, index, pattern parameter, offset) THEN
+                RETURN false
+            END IF
+
+            RETURN verifyPattern(index, offset + 1)
+        END FUNCTION
+
+        PROCEDURE iterateOverPositions(current integer)
+            IF current > sizeNums - sizePat - 1 THEN RETURN END IF
+            IF checkAtIndex(current) THEN
+                SET totalMatches TO totalMatches + 1
+            END IF
+            iterateOverPositions(current + 1)
+        END PROCEDURE
+
+        iterateOverPositions(0)
+
+        RETURN totalMatches
+    END FUNCTION
+END CLASS

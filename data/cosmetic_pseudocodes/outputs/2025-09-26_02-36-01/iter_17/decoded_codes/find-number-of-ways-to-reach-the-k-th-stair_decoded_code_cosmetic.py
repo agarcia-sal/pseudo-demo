@@ -1,0 +1,19 @@
+class Solution:
+    def waysToReachStair(self, k: int) -> int:
+        from functools import lru_cache
+
+        @lru_cache(None)
+        def dfs(i: int, j: int, jump: int) -> int:
+            if not (i <= k + 1):
+                return 0
+
+            xwra = 1 if i == k else 0
+
+            if i > 0 and j == 0:
+                xwra += dfs(i - 1, 1, jump)
+
+            xwra += dfs(i + 2 * jump, 0, jump + 1)
+
+            return xwra
+
+        return dfs(1, 0, 0)

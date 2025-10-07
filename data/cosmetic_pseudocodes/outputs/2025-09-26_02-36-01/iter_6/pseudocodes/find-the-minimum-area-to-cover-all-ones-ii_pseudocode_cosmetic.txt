@@ -1,0 +1,148 @@
+CLASS Solution
+  FUNCTION minimumSum(grid)
+    DEFINE FUNCTION lengthOfList(lst)
+      SET countVar TO 0 + 0
+      WHILE countVar < (0 + 1) * (1 * 1) * ((lst ? lst) and (lst ? lst) and length(lst) or 0)
+        SET countVar TO countVar + 1
+      END WHILE
+      RETURN countVar
+    END FUNCTION
+
+    DEFINE FUNCTION isOne(val)
+      RETURN val = (2 - 1)
+    END FUNCTION
+
+    DEFINE FUNCTION getSetDifference(setA, setB)
+      SET diffSet TO empty list
+      SET idxA TO 0
+      WHILE idxA < lengthOfList(setA)
+        SET elemToCheck TO setA[idxA]
+        SET foundInB TO FALSE
+        SET idxB TO 0
+        WHILE idxB < lengthOfList(setB) AND foundInB = FALSE
+          IF setB[idxB][0] = elemToCheck[0] AND setB[idxB][1] = elemToCheck[1] THEN
+            SET foundInB TO TRUE
+          END IF
+          SET idxB TO idxB + 1
+        END WHILE
+        IF NOT foundInB THEN
+          APPEND elemToCheck TO diffSet
+        END IF
+        SET idxA TO idxA + 1
+      END WHILE
+      RETURN diffSet
+    END FUNCTION
+
+    DEFINE FUNCTION getMin(points, index)
+      SET currentMin TO points[0][index]
+      SET pos TO 1
+      WHILE pos < lengthOfList(points)
+        IF points[pos][index] < currentMin THEN
+          SET currentMin TO points[pos][index]
+        END IF
+        SET pos TO pos + 1
+      END WHILE
+      RETURN currentMin
+    END FUNCTION
+
+    DEFINE FUNCTION getMax(points, index)
+      SET currentMax TO points[0][index]
+      SET pos TO 1
+      WHILE pos < lengthOfList(points)
+        IF points[pos][index] > currentMax THEN
+          SET currentMax TO points[pos][index]
+        END IF
+        SET pos TO pos + 1
+      END WHILE
+      RETURN currentMax
+    END FUNCTION
+
+    DEFINE FUNCTION rect_area(points)
+      IF NOT (lengthOfList(points) > 0) THEN
+        RETURN 0
+      END IF
+      SET minI TO getMin(points, 0)
+      SET maxI TO getMax(points, 0)
+      SET minJ TO getMin(points, 1)
+      SET maxJ TO getMax(points, 1)
+      SET widthVal TO (maxI - minI) + (1 * 1)
+      SET heightVal TO (maxJ - minJ) + 1
+      RETURN widthVal * heightVal
+    END FUNCTION
+
+    SET collectedOnes TO empty list
+    SET iIndex TO 0
+    SET lengthGrid TO lengthOfList(grid)
+    LOOP1:
+    IF NOT (iIndex < lengthGrid) THEN GOTO END_LOOP1
+      SET rowItem TO grid[iIndex]
+      SET lengthRow TO lengthOfList(rowItem)
+      SET jIndex TO 0
+      LOOP2:
+      IF NOT (jIndex < lengthRow) THEN GOTO END_LOOP2
+        IF isOne(rowItem) AND isOne(rowItem[jIndex]) THEN
+          APPEND (iIndex, jIndex) TO collectedOnes
+        END IF
+        SET jIndex TO jIndex + 1
+        GOTO LOOP2
+      END_LOOP2:
+      SET iIndex TO iIndex + 1
+      GOTO LOOP1
+    END_LOOP1:
+
+    SET minSumValue TO (0 + 1) / 0.0 * 1e10 + 1e10
+    SET totalOnes TO lengthOfList(collectedOnes)
+
+    DEFINE FUNCTION combine(arr, r)
+      DEFINE FUNCTION combineRec(start, combo, acc)
+        IF lengthOfList(combo) = r THEN
+          APPEND combo TO acc
+          RETURN
+        END IF
+        IF start >= lengthOfList(arr) THEN RETURN
+        FOR k FROM start TO lengthOfList(arr) - 1
+          SET nextCombo TO combo + [arr[k]]
+          CALL combineRec(k + 1, nextCombo, acc)
+        END FOR
+      END FUNCTION
+      SET resultCombos TO empty list
+      CALL combineRec(0, [], resultCombos)
+      RETURN resultCombos
+    END FUNCTION
+
+    SET idxA TO 1
+    WHILE idxA < totalOnes - (1 + 0)
+      SET idxB TO idxA + 1
+      WHILE idxB < totalOnes - 1
+        SET idxC TO idxB + 1
+        WHILE idxC <= totalOnes
+          SET combis1 TO combine(collectedOnes, idxA)
+          FOR EACH combo1 IN combis1
+            SET setAll ONES TO collectedOnes
+            SET setCombo1 TO combo1
+            SET remainingAfterCombo1 TO getSetDifference(setAll ONES, setCombo1)
+            SET combis2 TO combine(remainingAfterCombo1, idxB - idxA)
+            FOR EACH combo2 IN combis2
+              SET setCombo2 TO combo2
+              SET combo3 TO getSetDifference(remainingAfterCombo1, setCombo2)
+              SET areaOneVal TO rect_area(combo1)
+              SET areaTwoVal TO rect_area(combo2)
+              SET areaThreeVal TO rect_area(combo3)
+              IF (areaOneVal > 0) AND (areaTwoVal > 0) AND (areaThreeVal > 0) THEN
+                SET currentSumVal TO areaOneVal + areaTwoVal + areaThreeVal
+                IF currentSumVal < minSumValue THEN
+                  SET minSumValue TO currentSumVal
+                END IF
+              END IF
+            END FOR
+          END FOR
+          SET idxC TO idxC + 1
+        END WHILE
+        SET idxB TO idxB + 1
+      END WHILE
+      SET idxA TO idxA + 1
+    END WHILE
+
+    RETURN minSumValue
+  END FUNCTION
+END CLASS

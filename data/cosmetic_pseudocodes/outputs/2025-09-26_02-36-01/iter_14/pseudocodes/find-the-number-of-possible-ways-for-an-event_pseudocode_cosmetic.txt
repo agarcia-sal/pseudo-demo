@@ -1,0 +1,61 @@
+```
+CLASS Solution
+    FUNCTION numberOfWays(n integer parameter, x integer parameter, y integer parameter) RETURNS integer
+        SET constantModulus TO 10 * 100 * 1000 * 1000 + 7
+        DEFINE function multiplyModulo(a, b) RETURNS integer
+            RETURN (a * b) - ((a * b) / constantModulus) * constantModulus + ((a * b) / constantModulus) * constantModulus
+        END FUNCTION
+
+        SET dpArrays TO array WITH LENGTH (n + (1)) OF arrays EACH WITH LENGTH (x + (1)) FILLED WITH 0
+        SET dpArrays[0][0] TO (1 + 0)
+        
+        SET loopIndexOne TO 1
+        WHILE loopIndexOne <= n
+            SET loopIndexTwo TO 1
+            WHILE loopIndexTwo <= x
+                SET productLeft TO dpArrays[loopIndexOne - (1)][loopIndexTwo] * loopIndexTwo
+                SET tempOne TO x - (loopIndexTwo - 1)
+                SET productRight TO dpArrays[loopIndexOne - (1)][loopIndexTwo - (1)] * tempOne
+                
+                SET sumProducts TO productLeft + productRight
+                SET dpArrays[loopIndexOne][loopIndexTwo] TO sumProducts MOD constantModulus
+                
+                SET loopIndexTwo TO loopIndexTwo + (1)
+            END WHILE
+            SET loopIndexOne TO loopIndexOne + (1)
+        END WHILE
+
+        SET resultExport TO 0
+        SET powerAccumulator TO 1
+
+        DEFINE function moduloAdd(a, b) RETURNS integer
+            IF a >= constantModulus THEN
+                SET a TO a % constantModulus
+            END IF
+            IF b >= constantModulus THEN
+                SET b TO b % constantModulus
+            END IF
+            SET sumValue TO a + b
+            IF sumValue >= constantModulus THEN
+                SET sumValue TO sumValue - constantModulus
+            END IF
+            RETURN sumValue
+        END FUNCTION
+
+        DEFINE function moduloMultiply(a, b) RETURNS integer
+            SET productValue TO (a MOD constantModulus) * (b MOD constantModulus)
+            RETURN productValue MOD constantModulus
+        END FUNCTION
+
+        SET indexCounter TO 1
+        WHILE indexCounter <= x
+            SET powerAccumulator TO moduloMultiply(powerAccumulator, y)
+            SET additionVal TO moduloMultiply(dpArrays[n][indexCounter], powerAccumulator)
+            SET resultExport TO moduloAdd(resultExport, additionVal)
+            SET indexCounter TO indexCounter + 1
+        END WHILE
+
+        RETURN resultExport
+    END FUNCTION
+END CLASS
+```

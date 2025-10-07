@@ -1,0 +1,134 @@
+CLASS Solution  
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)  
+        DECLARE connections AS empty dictionary mapping int TO list of int  
+        DECLARE inverse_connections AS empty dictionary mapping int TO list of int  
+
+        DECLARE idx AS zero  
+        DECLARE stack_list AS empty list  
+        DECLARE on_stack_flag AS list of n elements ALL False  
+        DECLARE discovery_indices AS list of n elements ALL -1  
+        DECLARE low_link_vals AS list of n elements ALL zero  
+        DECLARE strongly_connected_components AS empty list  
+
+        FOR position FROM zero TO LENGTH(flowFrom) MINUS one  
+            LET start_node TO flowFrom[position]  
+            LET end_node TO flowTo[position]  
+            IF start_node NOT IN connections THEN  
+                SET connections[start_node] TO empty list  
+            END IF  
+            IF end_node NOT IN inverse_connections THEN  
+                SET inverse_connections[end_node] TO empty list  
+            END IF  
+            APPEND end_node TO connections[start_node]  
+            APPEND start_node TO inverse_connections[end_node]  
+        END FOR  
+
+        FUNCTION tarjan(node)  
+            SET discovery_indices[node] TO idx  
+            SET low_link_vals[node] TO idx  
+            INCREMENT idx BY one  
+            APPEND node TO stack_list  
+            SET on_stack_flag[node] TO True  
+
+            DECLARE neighbors_list AS empty list  
+            IF node IN connections THEN  
+                SET neighbors_list TO connections[node]  
+            END IF  
+
+            LET current_idx TO 0  
+            WHILE current_idx LESS THAN LENGTH(neighbors_list)  
+                LET neighbor TO neighbors_list[current_idx]  
+                IF discovery_indices[neighbor] EQUALS -1 THEN  
+                    CALL tarjan(neighbor)  
+                    IF low_link_vals[neighbor] LESS THAN low_link_vals[node] THEN  
+                        SET low_link_vals[node] TO low_link_vals[neighbor]  
+                    END IF  
+                ELSE  
+                    IF on_stack_flag[neighbor] IS True AND discovery_indices[neighbor] LESS THAN low_link_vals[node] THEN  
+                        SET low_link_vals[node] TO discovery_indices[neighbor]  
+                    END IF  
+                END IF  
+                INCREMENT current_idx BY one  
+            END WHILE  
+
+            IF low_link_vals[node] EQUALS discovery_indices[node] THEN  
+                DECLARE component AS empty list  
+                WHILE True  
+                    REMOVE last element FROM stack_list AND STORE INTO w  
+                    SET on_stack_flag[w] TO False  
+                    APPEND w TO component  
+                    IF w EQUALS node THEN  
+                        EXIT WHILE  
+                    END IF  
+                END WHILE  
+                APPEND component TO strongly_connected_components  
+            END IF  
+        END FUNCTION  
+
+        LET iteration_index TO zero  
+        WHILE iteration_index LESS THAN n  
+            IF discovery_indices[iteration_index] EQUALS -1 THEN  
+                CALL tarjan(iteration_index)  
+            END IF  
+            INCREMENT iteration_index BY one  
+        END WHILE  
+
+        DECLARE component_graph AS empty dictionary mapping int TO list of int  
+        DECLARE node_to_component AS list of size n FILLED WITH -1  
+        DECLARE component_contains_crystal AS list of size LENGTH(strongly_connected_components) FILLED WITH False  
+        DECLARE component_id AS zero  
+
+        LET scc_index TO zero  
+        WHILE scc_index LESS THAN LENGTH(strongly_connected_components)  
+            LET comp_nodes TO strongly_connected_components[scc_index]  
+            FOR EACH vertex IN comp_nodes DO  
+                node_to_component[vertex] = component_id  
+                IF crystals CONTAINS vertex THEN  
+                    component_contains_crystal[scc_index] = True  
+                END IF  
+            END FOR  
+            INCREMENT component_id BY one  
+            INCREMENT scc_index BY one  
+        END WHILE  
+
+        LET pos TO zero  
+        WHILE pos LESS THAN LENGTH(flowFrom)  
+            LET from_node TO flowFrom[pos]  
+            LET to_node TO flowTo[pos]  
+            LET from_component TO node_to_component[from_node]  
+            LET to_component TO node_to_component[to_node]  
+            IF from_component NOT EQUALS to_component THEN  
+                IF from_component NOT IN component_graph THEN  
+                    SET component_graph[from_component] TO empty list  
+                END IF  
+                APPEND to_component TO component_graph[from_component]  
+            END IF  
+            INCREMENT pos BY one  
+        END WHILE  
+
+        DECLARE incoming_edge_count AS list of size LENGTH(strongly_connected_components) FILLED WITH zero  
+
+        LET comp_idx TO zero  
+        WHILE comp_idx LESS THAN LENGTH(strongly_connected_components)  
+            DECLARE adj_list AS empty list  
+            IF comp_idx IN component_graph THEN  
+                SET adj_list TO component_graph[comp_idx]  
+            END IF  
+            FOR EACH neighbor_component IN adj_list DO  
+                incoming_edge_count[neighbor_component] = incoming_edge_count[neighbor_component] + 1  
+            END FOR  
+            INCREMENT comp_idx BY one  
+        END WHILE  
+
+        DECLARE rune_additions_needed AS zero  
+        LET component_iter TO zero  
+        WHILE component_iter LESS THAN LENGTH(strongly_connected_components)  
+            IF (incoming_edge_count[component_iter] EQUALS zero) AND (component_contains_crystal[component_iter] IS False) THEN  
+                rune_additions_needed = rune_additions_needed + 1  
+            END IF  
+            INCREMENT component_iter BY one  
+        END WHILE  
+
+        RETURN rune_additions_needed  
+    END FUNCTION  
+END CLASS

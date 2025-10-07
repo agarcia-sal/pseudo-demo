@@ -1,0 +1,43 @@
+CLASS Solution
+    FUNCTION numberOfStableArrays(zero, one, limit)
+        DECLARE CONSTANT MODULO_VALUE AS 1_000_000_001
+
+        FUNCTION dp(remaining_zeros, remaining_ones, previous_char, run_length)
+            DECLARE tally AS 0
+
+            IF NOT (remaining_zeros = 0 AND remaining_ones = 0) THEN
+                IF remaining_zeros < 0 OR remaining_ones < 0 THEN
+                    RETURN 0
+                END IF
+
+                IF previous_char <> 0 OR run_length < limit THEN
+                    DECLARE new_run_length_0
+                    IF previous_char = 0 THEN
+                        LET new_run_length_0 = run_length + 1
+                    ELSE
+                        LET new_run_length_0 = 1
+                    END IF
+                    LET tally = tally + dp(remaining_zeros - 1, remaining_ones, 0, new_run_length_0)
+                    LET tally = tally MOD MODULO_VALUE
+                END IF
+
+                IF previous_char <> 1 OR run_length < limit THEN
+                    DECLARE new_run_length_1
+                    IF previous_char = 1 THEN
+                        LET new_run_length_1 = run_length + 1
+                    ELSE
+                        LET new_run_length_1 = 1
+                    END IF
+                    LET tally = tally + dp(remaining_zeros, remaining_ones - 1, 1, new_run_length_1)
+                    LET tally = tally MOD MODULO_VALUE
+                END IF
+
+                RETURN tally
+            ELSE
+                RETURN 1
+            END IF
+        END FUNCTION
+
+        RETURN dp(zero, one, -1, 0)
+    END FUNCTION
+END CLASS

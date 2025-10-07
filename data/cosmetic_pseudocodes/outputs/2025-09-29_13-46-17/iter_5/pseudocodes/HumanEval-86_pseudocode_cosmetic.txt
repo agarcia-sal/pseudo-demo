@@ -1,0 +1,53 @@
+```
+FUNCTION anti_shuffle(input_string)
+   SET iIndex TO 0
+   SET words_array TO input_string SPLIT_BY " "
+   SET sorted_version_list TO []
+   WHILE iIndex < LENGTH words_array
+       SET current_item TO words_array[iIndex]
+       SET sorted_chars_array TO []
+       FOR letter IN current_item
+           ADD letter TO sorted_chars_array
+       END FOR
+       CALL quicksort_recursive(sorted_chars_array, 0, LENGTH sorted_chars_array - 1)
+       SET jPos TO 0
+       SET temp_word_builder TO ""
+       WHILE jPos < LENGTH sorted_chars_array
+           SET temp_word_builder TO temp_word_builder + sorted_chars_array[jPos]
+           SET jPos TO jPos + 1
+       END WHILE
+       ADD temp_word_builder TO sorted_version_list
+       SET iIndex TO iIndex + 1
+   END WHILE
+   RETURN sorted_version_list[0] + (IF LENGTH sorted_version_list > 1 THEN
+       FOLD(sorted_version_list[1:], "", (accumulator, elem) -> accumulator + " " + elem)
+   ELSE "")
+END FUNCTION
+
+FUNCTION quicksort_recursive(arr, left, right)
+   IF left < right THEN
+       SET pivot_index TO partition(arr, left, right)
+       CALL quicksort_recursive(arr, left, pivot_index - 1)
+       CALL quicksort_recursive(arr, pivot_index + 1, right)
+   END IF
+END FUNCTION
+
+FUNCTION partition(arr, low, high)
+   SET pivot_val TO arr[high]
+   SET marker TO low - 1
+   FOR current_index FROM low TO high - 1
+       IF NOT (arr[current_index] > pivot_val) THEN
+           SET marker TO marker + 1
+           CALL swap(arr, marker, current_index)
+       END IF
+   END FOR
+   CALL swap(arr, marker + 1, high)
+   RETURN marker + 1
+END FUNCTION
+
+FUNCTION swap(list_vals, a_idx, b_idx)
+   SET temp_val TO list_vals[a_idx]
+   SET list_vals[a_idx] TO list_vals[b_idx]
+   SET list_vals[b_idx] TO temp_val
+END FUNCTION
+```

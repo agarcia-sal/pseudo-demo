@@ -1,0 +1,41 @@
+```
+FUNCTION check_dict_case(dictionary)
+    IF NOT dictionary KEYS EXISTS OR LENGTH OF dictionary KEYS IS 0
+        RETURN False
+    END IF
+
+    SET mode TO "init"
+
+    FUNCTION process_keys(keys_list, index)
+        IF index EQUALS LENGTH OF keys_list
+            RETURN True
+        END IF
+
+        SET current_key TO keys_list[index]
+        IF current_key TYPE IS NOT STRING
+            SET mode TO "mixed"
+            RETURN False
+        END IF
+
+        IF mode EQUALS "init"
+            IF current_key IS UPPERCASE
+                SET mode TO "upper"
+            ELSE IF current_key IS LOWERCASE
+                SET mode TO "lower"
+            ELSE
+                RETURN False
+            END IF
+        ELSE 
+            IF (mode EQUALS "upper" AND current_key IS NOT UPPERCASE) OR (mode EQUALS "lower" AND current_key IS NOT LOWERCASE)
+                SET mode TO "mixed"
+                RETURN False
+            ELSE IF NOT ((mode EQUALS "upper" AND current_key IS UPPERCASE) OR (mode EQUALS "lower" AND current_key IS LOWERCASE))
+                RETURN False
+            END IF
+        END IF
+        RETURN process_keys(keys_list, index + 1)
+    END FUNCTION
+
+    RETURN process_keys(dictionary KEYS, 0)
+END FUNCTION
+```

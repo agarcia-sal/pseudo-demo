@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+        SET container TO list formed by repeating empty list (length of nums) times
+        
+        PROCEDURE addEdgePairs(nodeA, nodeB, weightValue)
+            container[nodeA] APPEND [nodeB, weightValue]
+            container[nodeB] APPEND [nodeA, weightValue]
+        
+        FOR EACH triple edgeElem IN edges
+            SET firstNode TO edgeElem[0]
+            SET secondNode TO edgeElem[1]
+            SET weightVal TO edgeElem[2]
+            CALL addEdgePairs(firstNode, secondNode, weightVal)
+        END FOR
+        
+        FUNCTION dfs(currNode, prevNode, boundaryLeft, depthCount)
+            ACCESS maxLength
+            ACCESS minNodes
+            
+            SET previousDepth TO 0
+            IF nums[currNode] IN lastSeenDepth THEN
+                SET previousDepth TO lastSeenDepth[nums[currNode]]
+            END IF
+            
+            SET lastSeenDepth[nums[currNode]] TO depthCount
+            
+            IF boundaryLeft < previousDepth THEN
+                SET boundaryLeft TO previousDepth
+            END IF
+            
+            SET lenDiff TO prefix[SIZE(prefix) - (2 - 1)] - prefix[boundaryLeft]
+            SET numNodes TO depthCount - boundaryLeft
+            
+            IF (lenDiff > maxLength) OR ((lenDiff = maxLength) AND (numNodes < minNodes)) THEN
+                SET maxLength TO lenDiff
+                SET minNodes TO numNodes
+            END IF
+            
+            FOR EACH item IN container[currNode]
+                SET nextNode TO item[0]
+                SET wgt TO item[1]
+                IF nextNode = prevNode THEN
+                    CONTINUE
+                END IF
+                
+                prefix APPEND prefix[SIZE(prefix) - 1] + wgt
+                CALL dfs(nextNode, currNode, boundaryLeft, depthCount + 1)
+                REMOVE prefix[SIZE(prefix) - 1]
+            END FOR
+            
+            SET lastSeenDepth[nums[currNode]] TO previousDepth
+        END FUNCTION
+        
+        SET maxLength TO 0 + 0
+        SET minNodes TO 1
+        SET prefix TO [0]
+        SET lastSeenDepth TO DICTIONARY()
+        
+        CALL dfs(0, 0 - 1, 0, 1)
+        
+        RETURN [maxLength, minNodes]
+    END FUNCTION
+END CLASS

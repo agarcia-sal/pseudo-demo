@@ -1,0 +1,49 @@
+```  
+CLASS Solution  
+    FUNCTION numberOfPermutations(n, requirements)  
+        DEFINE CONSTANT M AS (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7  
+        DECLARE mapping AS empty dictionary  
+        FOR EACH (index, quantity) IN requirements DO  
+            mapping[index] <- quantity  
+        END FOR  
+
+        FUNCTION count_permutations(depth, inversionCount, usedMask)  
+            IF depth = n THEN  
+                IF inversionCount = (mapping.get(n - 1, 0)) THEN  
+                    RETURN 1  
+                ELSE  
+                    RETURN 0  
+                END IF  
+            END IF  
+
+            IF depth > 0 THEN  
+                LET requiredInv = mapping.get(depth - 1, inversionCount)  
+                IF inversionCount != requiredInv THEN  
+                    RETURN 0  
+                END IF  
+            END IF  
+
+            LET totalCount = 0  
+            LET currentNum = 0  
+            WHILE currentNum < n DO  
+                IF (usedMask & (1 << currentNum)) = 0 THEN  
+                    LET newInversions = inversionCount  
+                    LET nextIndex = currentNum + 1  
+                    WHILE nextIndex < n DO  
+                        IF (usedMask & (1 << nextIndex)) != 0 THEN  
+                            newInversions = newInversions + 1  
+                        END IF  
+                        nextIndex = nextIndex + 1  
+                    END WHILE  
+                    LET recursiveResult = count_permutations(depth + 1, newInversions, (usedMask | (1 << currentNum)))  
+                    totalCount = (totalCount + recursiveResult) % M  
+                END IF  
+                currentNum = currentNum + 1  
+            END WHILE  
+            RETURN totalCount  
+        END FUNCTION  
+
+        RETURN count_permutations(0, 0, 0)  
+    END FUNCTION  
+END CLASS  
+```

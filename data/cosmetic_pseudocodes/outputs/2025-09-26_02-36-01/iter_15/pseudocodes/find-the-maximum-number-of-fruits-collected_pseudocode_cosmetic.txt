@@ -1,0 +1,57 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+        SET alpha TO LENGTH OF fruits
+        SET beta TO LIST OF PAIRS [ (1, 1), (1, 0) ]
+        SET gamma TO LIST OF PAIRS [ (1, -1), (1, 0), (1, 1) ]
+        SET delta TO LIST OF PAIRS [ (-1, 1), (0, 1), (1, 1) ]
+
+        SET cache TO EMPTY DICTIONARY
+
+        FUNCTION dp(a1, b1, a2, b2, a3, b3)
+            IF (a1 < 0 OR a1 >= alpha) OR (b1 < 0 OR b1 >= alpha) OR (a2 < 0 OR a2 >= alpha) OR (b2 < 0 OR b2 >= alpha) OR (a3 < 0 OR a3 >= alpha) OR (b3 < 0 OR b3 >= alpha) THEN
+                RETURN -1 * (2 ^ 30)
+            END IF
+
+            IF (a1 = b1) AND (b1 = a2) AND (a2 = b2) AND (b2 = a3) AND (a3 = b3) AND (b3 = alpha - 1) THEN
+                RETURN fruits[alpha - 1][alpha - 1]
+            END IF
+
+            SET eta TO (a1, b1, a2, b2, a3, b3)
+            IF eta IN cache THEN
+                RETURN cache[eta]
+            END IF
+
+            SET phi TO fruits[a1][b1]
+
+            IF (a1 = a2 AND b1 = b2) OR (a1 = a3 AND b1 = b3) THEN
+                SET phi TO 0
+            END IF
+
+            IF (a2 = a3) AND (b2 = b3) THEN
+                SET phi TO phi + fruits[a2][b2]
+            ELSE
+                SET temp_sum TO fruits[a2][b2] + fruits[a3][b3]
+                SET phi TO phi + temp_sum
+            END IF
+
+            SET omega TO - (2 ^ 30)
+            FOR EACH (p, q) IN beta
+                FOR EACH (r, s) IN gamma
+                    FOR EACH (u, v) IN delta
+                        SET zeta TO dp(a1 + p, b1 + q, a2 + r, b2 + s, a3 + u, b3 + v)
+                        IF zeta > omega THEN
+                            SET omega TO zeta
+                        END IF
+                    END FOR
+                END FOR
+            END FOR
+
+            SET cache[eta] TO phi + omega
+            RETURN phi + omega
+        END FUNCTION
+
+        RETURN dp(0, 0, 0, alpha - 1, alpha - 1, 0)
+    END FUNCTION
+END CLASS
+```

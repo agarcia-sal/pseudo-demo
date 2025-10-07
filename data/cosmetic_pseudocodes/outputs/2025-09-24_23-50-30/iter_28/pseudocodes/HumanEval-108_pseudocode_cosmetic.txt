@@ -1,0 +1,52 @@
+```
+FUNCTION count_nums(collection_of_numbers)
+    FUNCTION digits_sum(number)
+        SET factor TO 1
+        WHEN (number < 0)
+            number ← number * (-1)
+            factor ← -1
+        OTHERWISE
+            NO OPERATION
+        END WHEN
+
+        SET digits_collection TO MAP character TO INTEGER(character) FOR EACH character IN TO_STRING(number)
+        digits_collection[0] ← digits_collection[0] * factor
+
+        FUNCTION sum_accumulator(items, index, accumulated)
+            WHEN (index = LENGTH(items))
+                RETURN accumulated
+            OTHERWISE
+                RETURN sum_accumulator(items, index + 1, accumulated + items[index])
+            END WHEN
+        END FUNCTION
+
+        RETURN sum_accumulator(digits_collection, 0, 0)
+    END FUNCTION
+
+    FUNCTION map_recursive(input_list, func, index, acc)
+        WHEN (index = LENGTH(input_list))
+            RETURN acc
+        OTHERWISE
+            RETURN map_recursive(input_list, func, index + 1, acc + [func(input_list[index])])
+        END WHEN
+    END FUNCTION
+
+    SET sums_list TO map_recursive(collection_of_numbers, digits_sum, 0, [])
+
+    FUNCTION filter_positive(input_sequence)
+        SET accumulator TO []
+        FOR idx FROM 0 TO LENGTH(input_sequence) - 1
+            WHEN (NOT (input_sequence[idx] > 0))
+                CONTINUE
+            OTHERWISE
+                APPEND input_sequence[idx] TO accumulator
+            END WHEN
+        END FOR
+        RETURN accumulator
+    END FUNCTION
+
+    SET positive_sums TO filter_positive(sums_list)
+
+    RETURN LENGTH(positive_sums)
+END FUNCTION
+```

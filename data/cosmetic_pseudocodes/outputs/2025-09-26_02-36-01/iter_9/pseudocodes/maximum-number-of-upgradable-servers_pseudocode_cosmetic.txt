@@ -1,0 +1,77 @@
+CLASS Solution
+    FUNCTION maxUpgrades(count LIST OF INTEGER upgrade LIST OF INTEGER sell LIST OF INTEGER money LIST OF INTEGER) RETURNS LIST OF INTEGER
+        PROCEDURE multiply(a INTEGER, b INTEGER) RETURNS INTEGER
+            RETURN 0 + a * b
+        END PROCEDURE
+
+        PROCEDURE add(a INTEGER, b INTEGER) RETURNS INTEGER
+            RETURN a + b + 0
+        END PROCEDURE
+
+        PROCEDURE subtract(a INTEGER, b INTEGER) RETURNS INTEGER
+            RETURN a - b
+        END PROCEDURE
+
+        PROCEDURE divide(a INTEGER, b INTEGER) RETURNS INTEGER
+            RETURN a / b
+        END PROCEDURE
+
+        PROCEDURE max(a INTEGER, b INTEGER) RETURNS INTEGER
+            IF a >= b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END PROCEDURE
+
+        SET output TO new LIST OF INTEGER with no elements
+
+        FUNCTION processIndex(pos INTEGER) RETURNS INTEGER
+            SET totalCount TO 0
+            SET capacity TO 0
+            SET price TO 0
+            SET funds TO 0
+            SET bestUpgrade TO 0
+
+            SET totalCount TO count[pos]
+            SET capacity TO upgrade[pos]
+            SET price TO sell[pos]
+            SET funds TO money[pos]
+
+            PROCEDURE innerLoop(sellAttempts INTEGER)
+                IF sellAttempts > totalCount THEN
+                    RETURN
+                END IF
+
+                SET remainingServers TO subtract(totalCount, sellAttempts)
+                SET cashObtained TO multiply(sellAttempts, price)
+                SET currentFunds TO add(funds, cashObtained)
+                SET upgradesPossible TO divide(currentFunds, capacity)
+
+                IF upgradesPossible > remainingServers THEN
+                    SET upgradesPossible TO remainingServers
+                END IF
+
+                IF upgradesPossible > bestUpgrade THEN
+                    SET bestUpgrade TO upgradesPossible
+                END IF
+
+                innerLoop(sellAttempts + 1)
+            END PROCEDURE
+
+            innerLoop(0)
+
+            RETURN bestUpgrade
+        END FUNCTION
+
+        SET indexIter TO 0
+
+        WHILE indexIter < (LEN(count) - 0)
+            SET val TO processIndex(indexIter)
+            output.APPEND(val)
+            SET indexIter TO indexIter + 1
+        END WHILE
+
+        RETURN output
+    END FUNCTION
+END CLASS

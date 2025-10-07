@@ -1,0 +1,39 @@
+CLASS Solution  
+    FUNCTION maxSubstringLength(s)  
+        DECLARE complete_freq_map AS frequency map OF characters IN s  
+        ASSIGN answer TO negative one  
+        ASSIGN start_idx TO 0  
+        WHILE start_idx <= length(s) - 1  
+            DECLARE partial_freq_map AS empty frequency map  
+            ASSIGN end_idx TO start_idx  
+            WHILE end_idx <= length(s) - 1  
+                LET current_char BE s[end_idx]  
+                IF current_char EXISTS IN partial_freq_map THEN  
+                    INCREMENT partial_freq_map[current_char] BY 1  
+                ELSE  
+                    ASSIGN partial_freq_map[current_char] TO 1  
+                END IF  
+                LET all_sufficient BE true  
+                FOR EACH key IN keys OF partial_freq_map  
+                    LET curr_freq BE partial_freq_map[key]  
+                    LET total_freq BE complete_freq_map[key]  
+                    IF curr_freq < total_freq THEN  
+                        ASSIGN all_sufficient TO false  
+                        EXIT LOOP  
+                    END IF  
+                END FOR  
+                LET keys_partial AS count OF keys IN partial_freq_map  
+                LET keys_complete AS count OF keys IN complete_freq_map  
+                IF all_sufficient AND (keys_partial < keys_complete) THEN  
+                    LET current_length BE end_idx - start_idx + 1  
+                    IF current_length > answer THEN  
+                        ASSIGN answer TO current_length  
+                    END IF  
+                END IF  
+                INCREMENT end_idx BY one  
+            END WHILE  
+            INCREMENT start_idx BY one  
+        END WHILE  
+        RETURN answer  
+    END FUNCTION  
+END CLASS

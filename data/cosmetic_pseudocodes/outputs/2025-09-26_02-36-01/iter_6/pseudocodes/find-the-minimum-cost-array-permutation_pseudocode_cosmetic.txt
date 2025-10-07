@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION findPermutation(nums)
+        FUNCTION computeDepth(bitmask, lastVal)
+            IF (bitmask XOR ((1 << LENGTH(nums)) - 1)) EQUALS 0 THEN
+                RETURN ABS(lastVal - nums[0])
+            END IF
+
+            SET minimumDifference TO +∞
+            SET indexTracker TO 0
+
+            FUNCTION recurseIndex(index)
+                IF index GREATER THAN (LENGTH(nums) - 1) THEN 
+                    RETURN
+                ELSE
+                    SET isVisited TO ((bitmask >> index) & 1)
+                    IF isVisited EQUALS 0 THEN
+                        SET localCandidate TO ABS(lastVal - nums[index]) + computeDepth(bitmask | (1 << index), index)
+                        IF localCandidate < minimumDifference THEN
+                            SET minimumDifference TO localCandidate
+                        END IF
+                    END IF
+                    CALL recurseIndex(index + 1)
+                END IF
+            END FUNCTION
+
+            CALL recurseIndex(indexTracker)
+            RETURN minimumDifference
+        END FUNCTION
+
+        FUNCTION generatePath(bitmask, lastSelected)
+            SET ans APPEND lastSelected
+            IF NOT (bitmask XOR ((1 << LENGTH(nums)) - 1)) THEN
+                RETURN
+            END IF
+            SET targetValue TO computeDepth(bitmask, lastSelected)
+
+            SET currentIndex TO (LENGTH(nums) - 1)
+            WHILE currentIndex >= 0 DO
+                SET visitedFlag TO (bitmask >> currentIndex) & 1
+                IF (visitedFlag EQUALS 0) THEN
+                    SET evaluationValue TO ABS(lastSelected - nums[currentIndex]) + computeDepth(bitmask | (1 << currentIndex), currentIndex)
+                    IF evaluationValue EQUALS targetValue THEN
+                        CALL generatePath(bitmask | (1 << currentIndex), currentIndex)
+                        BREAK
+                    END IF
+                END IF
+                SET currentIndex TO currentIndex - 1
+            END WHILE
+        END FUNCTION
+
+        SET countNums TO LENGTH(nums)
+        SET ans TO []
+        CALL generatePath(1 << 0, 0)
+        RETURN ans
+    END FUNCTION
+END CLASS

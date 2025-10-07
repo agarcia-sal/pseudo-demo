@@ -1,0 +1,45 @@
+```
+FUNCTION sort_numbers(string_of_number_words)
+	LET dictionary_pairings ← MAP { 'one' => 1, 'two' => 2, 'three' => 3, 'four' => 4, 'five' => 5, 'six' => 6, 'seven' => 7, 'eight' => 8, 'nine' => 9, 'zero' => 0 }
+	LET auxiliary_nonempty_words(accumulator,fragments,index)
+		IF index = LENGTH(fragments) THEN
+			RETURN accumulator
+		ELSE
+			LET current_fragment ← fragments[index]
+			LET adjusted_accumulator ← (current_fragment ≠ '') ? accumulator + [current_fragment] : accumulator
+			RETURN auxiliary_nonempty_words(adjusted_accumulator, fragments, index + 1)
+	ENDLET
+	LET fragmented_tokens ← SPLIT string_of_number_words BY ' '
+	LET words_collected ← auxiliary_nonempty_words([], fragmented_tokens, 0)
+	LET reordered_list ← 
+		FUNCTION recurse_sort(unsorted, acc)
+			IF LENGTH(unsorted) = 0 THEN RETURN acc ENDIF
+			LET minimum ← unsorted[0]
+			LET rest ← unsorted[1 to END]
+			LET (candidate, residual) ←
+				FUNCTION find_minimum(c_list, c_min, c_rest, i)
+					IF i = LENGTH(c_list) THEN RETURN (c_min, c_rest) ELSE
+						LET element ← c_list[i]
+						LET updated_min ← 
+							IF dictionary_pairings[element] < dictionary_pairings[c_min] THEN element ELSE c_min
+						LET updated_rest ←
+							IF dictionary_pairings[element] < dictionary_pairings[c_min] THEN c_rest + [c_min] ELSE c_rest + [element]
+						RETURN find_minimum(c_list, updated_min, updated_rest, i + 1)
+					ENDIF
+				END FUNCTION
+				find_minimum(rest, minimum, [], 0)
+			RETURN recurse_sort(residual, acc + [candidate])
+		END FUNCTION
+		recurse_sort(words_collected, [])
+	LET final_string ← ''
+	LET join_with_space ← 
+		FUNCTION joiner(arr, idx)
+			IF idx = LENGTH(arr) THEN RETURN '' ELSE
+				LET sep ← (idx = LENGTH(arr)-1) ? '' : ' '
+				RETURN arr[idx] + sep + joiner(arr, idx + 1)
+			ENDIF
+		END FUNCTION
+	final_string ← join_with_space(reordered_list, 0)
+	RETURN final_string
+END FUNCTION
+```

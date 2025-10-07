@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION beautifulIndices(s parameter, a parameter, b parameter, k parameter)
+      SET result_indices TO an empty list
+      SET total_len TO LENGTH OF s
+      SET len_a TO LENGTH OF a
+      SET len_b TO LENGTH OF b
+      
+      FUNCTION equal_substring(main_str, start_pos, sub_str)
+        SET pos TO 0
+        LOOP
+          IF NOT (pos < LENGTH OF sub_str) THEN
+            RETURN true
+          END IF
+          IF NOT (main_str[start_pos + pos] = sub_str[pos]) THEN
+            RETURN false
+          END IF
+          SET pos TO pos + 1
+        END LOOP
+      END FUNCTION
+      
+      FUNCTION gather_positions(target_list, search_str, search_len, curr_idx)
+        IF curr_idx > total_len - search_len THEN
+          RETURN
+        END IF
+        IF equal_substring(s, curr_idx, search_str) THEN
+          APPEND curr_idx TO target_list
+        END IF
+        CALL gather_positions(target_list, search_str, search_len, curr_idx + 1)
+      END FUNCTION
+      
+      SET pos_a TO an empty list
+      CALL gather_positions(pos_a, a, len_a, 0)
+      
+      SET pos_b TO an empty list
+      CALL gather_positions(pos_b, b, len_b, 0)
+      
+      FUNCTION is_beautiful(i_idx, j_idx)
+        RETURN NOT (((i_idx - j_idx) > k) OR ((j_idx - i_idx) > k))
+      END FUNCTION
+      
+      FUNCTION check_pairs(list_a, idx_a, list_b, idx_b, acc_list)
+        IF idx_a >= LENGTH OF list_a THEN
+          RETURN
+        END IF
+        
+        FUNCTION iterate_bs(curr_b)
+          IF curr_b >= LENGTH OF list_b THEN
+            CALL check_pairs(list_a, idx_a + 1, list_b, 0, acc_list)
+            RETURN
+          END IF
+          IF is_beautiful(list_a[idx_a], list_b[curr_b]) THEN
+            APPEND list_a[idx_a] TO acc_list
+            CALL check_pairs(list_a, idx_a + 1, list_b, 0, acc_list)
+            RETURN
+          ELSE
+            CALL iterate_bs(curr_b + 1)
+          END IF
+        END FUNCTION
+        
+        CALL iterate_bs(idx_b)
+      END FUNCTION
+      
+      CALL check_pairs(pos_a, 0, pos_b, 0, result_indices)
+      RETURN result_indices
+    END FUNCTION
+END CLASS

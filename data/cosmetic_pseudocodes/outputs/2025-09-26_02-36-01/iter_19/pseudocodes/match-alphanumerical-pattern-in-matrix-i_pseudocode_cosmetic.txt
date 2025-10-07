@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION findPattern(board, pattern)
+      SET M TO LENGTH OF board
+      SET N TO LENGTH OF element at index 0 of board
+      SET R TO LENGTH OF pattern
+      SET S TO LENGTH OF element at index 0 of pattern
+
+      FUNCTION matches(x, y)
+        SET mapC TO empty mapping
+        SET mapD TO empty mapping
+
+        FUNCTION eqDigit(ch)
+          RETURN (ch >= '0') AND (ch <= '9')
+        END FUNCTION
+
+        SET idx1 TO 0
+        WHILE idx1 < R
+          SET idx2 TO 0
+          LOOP
+            IF NOT (idx2 < S) THEN BREAK END IF
+
+            SET patCh TO element at idx1 of pattern THEN element at idx2
+            SET bdVal TO element at (x + idx1) of board THEN element at (y + idx2)
+
+            IF eqDigit(patCh) = true
+              IF (bdVal <> INTEGER VALUE OF patCh) = true THEN RETURN false END IF
+            ELSE
+              IF (patCh IN mapC) = true
+                IF mapC[patCh] <> bdVal THEN RETURN false END IF
+              ELSE
+                IF bdVal IN mapD THEN RETURN false END IF
+                ASSIGN mapC[patCh] TO bdVal
+                ASSIGN mapD[bdVal] TO patCh
+              END IF
+            END IF
+
+            SET idx2 TO idx2 + 1
+          END LOOP
+          SET idx1 TO idx1 + 1
+        END WHILE
+        RETURN true
+      END FUNCTION
+
+      SET r1 TO 0
+      LOOP
+        IF NOT (r1 <= M - R) THEN BREAK END IF
+        SET c1 TO 0
+        WHILE c1 <= N - S
+          IF matches(r1, c1) = true THEN RETURN [r1, c1] END IF
+          SET c1 TO c1 + 1
+        END WHILE
+        SET r1 TO r1 + 1
+      END LOOP
+
+      RETURN [-1, -1]
+    END FUNCTION
+END CLASS

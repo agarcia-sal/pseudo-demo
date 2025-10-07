@@ -1,0 +1,57 @@
+```pseudocode
+CLASS Solution
+    FUNCTION gcdValues(nums, queries)
+        SET zed TO -∞
+        FOR val IN nums DO
+            IF val > zed THEN
+                SET zed TO val
+            END IF
+        END FOR
+
+        SET tally TO new counter object initialized with nums
+        SET accArr TO array of zeros with length zed + 1
+
+        SET k TO zed
+        WHILE k >= 1 DO
+            SET wump TO 0
+            SET m TO k
+            WHILE m <= zed DO
+                SET wump TO wump + tally[m]
+                SET accArr[k] TO accArr[k] - accArr[m]
+                SET m TO m + k
+            END WHILE
+            SET accArr[k] TO accArr[k] + (wump * (wump - 1)) / 2
+            SET k TO k - 1
+        END WHILE
+
+        SET prefixSum TO array of zeros with length zed + 1
+        SET indexer TO 1
+        WHILE indexer <= zed DO
+            SET prefixSum[indexer] TO prefixSum[indexer - 1] + accArr[indexer]
+            SET indexer TO indexer + 1
+        END WHILE
+
+        FUNCTION locateInsertPosition(array, target)
+            SET low TO 0
+            SET high TO length(array)
+            WHILE low < high DO
+                SET mid TO (low + high) DIV 2
+                IF target < array[mid] THEN
+                    SET high TO mid
+                ELSE
+                    SET low TO mid + 1
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        SET outList TO empty list
+        FOR each curry IN queries DO
+            SET loc TO locateInsertPosition(prefixSum, curry)
+            APPEND loc TO outList
+        END FOR
+
+        RETURN outList
+    END FUNCTION
+END CLASS
+```

@@ -1,0 +1,152 @@
+class Solution
+  function countOfPairs(nums)
+    Let modulus ← 10^9 + 7
+    Let length_nums ← 0
+    repeat
+      length_nums ← length_nums + 1
+    until length_nums = length(nums)
+
+    function findMax(arr, idx, currentMax)
+      if idx = length(arr) then
+        return currentMax
+      else
+        if arr[idx] > currentMax then
+          return findMax(arr, idx + 1, arr[idx])
+        else
+          return findMax(arr, idx + 1, currentMax)
+        end if
+      end if
+    end function
+
+    Let highest ← findMax(nums, 0, 0)
+
+    function create3DArray(x, y, z)
+      if x = 0 then
+        return []
+      else
+        let layer ← create2DArray(y, z)
+        let rest ← create3DArray(x - 1, y, z)
+        return [layer] + rest
+      end if
+    end function
+
+    function create2DArray(a, b)
+      if a = 0 then
+        return []
+      else
+        let row ← create1DArray(b)
+        let remaining ← create2DArray(a - 1, b)
+        return [row] + remaining
+      end if
+    end function
+
+    function create1DArray(size)
+      if size = 0 then
+        return []
+      else
+        return [0] + create1DArray(size - 1)
+      end if
+    end function
+
+    Let matrix_dp ← create3DArray(length_nums, highest + 1, highest + 1)
+
+    function setValue3D(arr, i, j, k, val)
+      let copy_arr ← arr
+      let sub_arr_j ← copy_arr[i][j]
+      let new_sub_arr_j ← sub_arr_j
+      new_sub_arr_j[k] ← val
+      copy_arr[i][j] ← new_sub_arr_j
+      return copy_arr
+    end function
+
+    function getValue3D(arr, i, j, k)
+      return arr[i][j][k]
+    end function
+
+    let firstNum ← nums[0]
+
+    function assignInitialDP(index, val)
+      if index > val then
+        return matrix_dp
+      else
+        let part_k ← val - index
+        let updated_dp ← setValue3D(matrix_dp, 0, index, part_k, 1)
+        return assignInitialDP(index + 1, val)
+      end if
+    end function
+
+    let dp_after_init ← assignInitialDP(0, firstNum)
+
+    function innerMostLoop(i, j, j_prev_loop, k, max_val_loop, dp_current)
+      if k > max_val_loop then
+        return dp_current
+      else
+        let current ← getValue3D(dp_current, i, j, k)
+        let prev_val ← getValue3D(dp_current, i - 1, j_prev_loop, k)
+        let sum_val ← (current + prev_val) mod modulus
+        let updated_dp ← setValue3D(dp_current, i, j, k, sum_val)
+        return innerMostLoop(i, j, j_prev_loop, k + 1, max_val_loop, updated_dp)
+      end if
+    end function
+
+    function innerLoopJPrev(i, j, j_prev_val, k, max_value, dp_current)
+      if j_prev_val > j then
+        return dp_current
+      else
+        let dp_after_innermost ← innerMostLoop(i, j, j_prev_val, k, max_value, dp_current)
+        return innerLoopJPrev(i, j, j_prev_val + 1, k, max_value, dp_after_innermost)
+      end if
+    end function
+
+    function innerLoopJK(i, j, k_val, max_value, dp_current)
+      if k_val > max_value then
+        return dp_current
+      else
+        let dp_after_jprev ← innerLoopJPrev(i, j, 0, k_val, max_value, dp_current)
+        return innerLoopJK(i, j, k_val + 1, max_value, dp_after_jprev)
+      end if
+    end function
+
+    function loopOverJ(i, j_val, num_i, max_value, dp_current)
+      if j_val > num_i then
+        return dp_current
+      else
+        let dp_after_inner ← innerLoopJK(i, j_val, 0, max_value, dp_current)
+        return loopOverJ(i, j_val + 1, num_i, max_value, dp_after_inner)
+      end if
+    end function
+
+    function loopI(i_val, limit_n, nums_arr, max_value, dp_current)
+      if i_val > limit_n then
+        return dp_current
+      else
+        let num_at_i ← nums_arr[i_val]
+        let dp_after_jloop ← loopOverJ(i_val, 0, num_at_i, max_value, dp_current)
+        return loopI(i_val + 1, limit_n, nums_arr, max_value, dp_after_jloop)
+      end if
+    end function
+
+    let dp_full ← loopI(1, length_nums - 1, nums, highest, dp_after_init)
+
+    function computeResult(j_val, k_val, max_val, last_num, dp_arr, accum)
+      if j_val > max_val then
+        return accum
+      else
+        if k_val > max_val then
+          return computeResult(j_val + 1, 0, max_val, last_num, dp_arr, accum)
+        else
+          if j_val + k_val = last_num then
+            let val ← dp_arr[length_nums - 1][j_val][k_val]
+            let new_accum ← (accum + val) mod modulus
+            return computeResult(j_val, k_val + 1, max_val, last_num, dp_arr, new_accum)
+          else
+            return computeResult(j_val, k_val + 1, max_val, last_num, dp_arr, accum)
+          end if
+        end if
+      end if
+    end function
+
+    let res ← computeResult(0, 0, highest, nums[length_nums - 1], dp_full, 0)
+    return res
+  end function
+end class

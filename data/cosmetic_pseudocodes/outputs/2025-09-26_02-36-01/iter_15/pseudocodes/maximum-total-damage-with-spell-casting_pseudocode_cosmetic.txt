@@ -1,0 +1,105 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maximumTotalDamage(power)
+        DECLARE freqMap AS MAPPING OF INTEGER TO INTEGER
+        DECLARE uniqueList AS LIST OF INTEGER
+        DECLARE resultMap AS MAPPING OF INTEGER TO INTEGER
+
+        PROCEDURE tally(elements)
+            FOR each val IN elements
+                IF val NOT IN freqMap
+                    SET freqMap[val] TO 1
+                ELSE
+                    SET freqMap[val] TO freqMap[val] PLUS 1
+                END IF
+            END FOR
+        END PROCEDURE
+
+        tally(power)
+
+        SET uniqueList TO EMPTY LIST
+        FOR each key IN freqMap
+            APPEND key TO uniqueList
+        END FOR
+
+        PROCEDURE quickSort(arr, left, right)
+            IF left GREATER THAN OR EQUAL TO right
+                RETURN
+            END IF
+            SET pivotIndex TO left
+            SET i TO left PLUS 1
+            SET j TO right
+            REPEAT
+                WHILE i LESS THAN OR EQUAL TO right AND arr[i] LESS THAN arr[pivotIndex]
+                    SET i TO i PLUS 1
+                END WHILE
+                WHILE j GREATER THAN left AND arr[j] GREATER THAN arr[pivotIndex]
+                    SET j TO j MINUS 1
+                END WHILE
+                IF i GREATER THAN j
+                    BREAK
+                END IF
+                SWAP arr[i] WITH arr[j]
+                SET i TO i PLUS 1
+                SET j TO j MINUS 1
+            UNTIL i GREATER THAN j
+            SWAP arr[pivotIndex] WITH arr[j]
+            CALL quickSort(arr, left, j MINUS 1)
+            CALL quickSort(arr, j PLUS 1, right)
+        END PROCEDURE
+
+        CALL quickSort(uniqueList, 0, SIZE_OF(uniqueList) MINUS 1)
+
+        FUNCTION getVal(mapping, key)
+            IF key IN mapping
+                RETURN mapping[key]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        DECLARE idx AS INTEGER
+        SET idx TO 0
+        WHILE idx LESS THAN SIZE_OF(uniqueList)
+            SET currentKey TO uniqueList[idx]
+
+            IF idx GREATER THAN 0
+                SET valExcl TO getVal(resultMap, uniqueList[idx MINUS 1])
+            ELSE
+                SET valExcl TO 0
+            END IF
+
+            SET valIncl TO currentKey MULTIPLIED BY freqMap[currentKey]
+
+            DECLARE backIdx AS INTEGER
+            SET backIdx TO idx MINUS 1
+
+            WHILE backIdx GREATER THAN OR EQUAL TO 0 AND uniqueList[backIdx] GREATER THAN OR EQUAL TO (currentKey MINUS 2)
+                SET backIdx TO backIdx MINUS 1
+            END WHILE
+
+            IF backIdx GREATER THAN OR EQUAL TO 0
+                SET valIncl TO valIncl PLUS getVal(resultMap, uniqueList[backIdx])
+            END IF
+
+            IF valIncl GREATER THAN valExcl
+                SET resultMap[currentKey] TO valIncl
+            ELSE
+                SET resultMap[currentKey] TO valExcl
+            END IF
+
+            SET idx TO idx PLUS 1
+        END WHILE
+
+        DECLARE maxVal AS INTEGER
+        SET maxVal TO 0
+
+        FOR each v IN resultMap
+            IF v GREATER THAN maxVal
+                SET maxVal TO v
+            END IF
+        END FOR
+        RETURN maxVal
+    END FUNCTION
+END CLASS
+```

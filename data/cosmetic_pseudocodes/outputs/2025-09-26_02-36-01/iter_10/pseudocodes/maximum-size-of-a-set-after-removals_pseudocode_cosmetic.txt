@@ -1,0 +1,151 @@
+CLASS Solution
+	FUNCTION maximumSetSize(nums1 PARAMETER List OF integers nums2 PARAMETER List OF integers) RETURNS integer
+		DEFINE FUNCTION lengthOfList(xs PARAMETER List OF integers) RETURNS integer
+			DEFINE FUNCTION helper(i PARAMETER integer) RETURNS integer
+				IF i EQUALS length(xs) THEN
+					RETURN 0
+				ELSE
+					RETURN 1 + helper(i + 1)
+				ENDIF
+			END FUNCTION
+			RETURN helper(0)
+		END FUNCTION
+
+		DEFINE FUNCTION length(xs PARAMETER List OF integers) RETURNS integer
+			RETURN lengthOfList(xs)
+		END FUNCTION
+
+		DEFINE FUNCTION uniqueElements(xs PARAMETER List OF integers) RETURNS List OF integers
+			DEFINE FUNCTION contains(lst PARAMETER List OF integers val PARAMETER integer) RETURNS boolean
+				DEFINE FUNCTION process(i PARAMETER integer) RETURNS boolean
+					IF i EQUALS length(lst) THEN
+						RETURN false
+					ELSE
+						IF lst[i] EQUALS val THEN 
+							RETURN true
+						ELSE
+							RETURN process(i + 1)
+						ENDIF
+					ENDIF
+				END FUNCTION
+				RETURN process(0)
+			END FUNCTION
+
+			DEFINE FUNCTION collect(i PARAMETER integer acc PARAMETER List OF integers) RETURNS List OF integers
+				IF i EQUALS length(xs) THEN
+					RETURN acc
+				ELSE
+					IF contains(acc, xs[i]) THEN
+						RETURN collect(i + 1, acc)
+					ELSE
+						RETURN collect(i + 1, acc + [xs[i]])
+					ENDIF
+				ENDIF
+			END FUNCTION
+
+			RETURN collect(0, [])
+		END FUNCTION
+
+		DEFINE FUNCTION intersection(xs PARAMETER List OF integers ys PARAMETER List OF integers) RETURNS List OF integers
+			DEFINE FUNCTION contains(lst PARAMETER List OF integers val PARAMETER integer) RETURNS boolean
+				DEFINE FUNCTION loop(j PARAMETER integer) RETURNS boolean
+					IF j EQUALS length(lst) THEN
+						RETURN false
+					ELSE
+						IF lst[j] EQUALS val THEN
+							RETURN true
+						ELSE 
+							RETURN loop(j + 1)
+						ENDIF
+					ENDIF
+				END FUNCTION
+				RETURN loop(0)
+			END FUNCTION
+
+			DEFINE FUNCTION build(i PARAMETER integer acc PARAMETER List OF integers) RETURNS List OF integers
+				IF i EQUALS length(xs) THEN
+					RETURN acc
+				ELSE
+					IF contains(ys, xs[i]) THEN
+						RETURN build(i + 1, acc + [xs[i]])
+					ELSE 
+						RETURN build(i + 1, acc)
+					ENDIF
+				ENDIF
+			END FUNCTION
+
+			RETURN build(0, [])
+		END FUNCTION
+
+		DEFINE FUNCTION difference(xs PARAMETER List OF integers ys PARAMETER List OF integers) RETURNS List OF integers
+			DEFINE FUNCTION contains(lst PARAMETER List OF integers val PARAMETER integer) RETURNS boolean
+				DEFINE FUNCTION rec(k PARAMETER integer) RETURNS boolean
+					IF k EQUALS length(lst) THEN
+						RETURN false
+					ELSE
+						IF lst[k] EQUALS val THEN
+							RETURN true
+						ELSE
+							RETURN rec(k + 1)
+						ENDIF
+					ENDIF
+				END FUNCTION
+				RETURN rec(0)
+			END FUNCTION
+
+			DEFINE FUNCTION gather(i PARAMETER integer acc PARAMETER List OF integers) RETURNS List OF integers
+				IF i EQUALS length(xs) THEN
+					RETURN acc
+				ELSE
+					IF contains(ys, xs[i]) THEN
+						RETURN gather(i + 1, acc)
+					ELSE
+						RETURN gather(i + 1, acc + [xs[i]])
+					ENDIF
+				ENDIF
+			END FUNCTION
+
+			RETURN gather(0, [])
+		END FUNCTION
+
+		DEFINE FUNCTION minVal(a PARAMETER integer b PARAMETER integer) RETURNS integer
+			IF a LESS THAN b THEN
+				RETURN a
+			ELSE
+				RETURN b
+			ENDIF
+		END FUNCTION
+
+		DEFINE FUNCTION maxVal(a PARAMETER integer b PARAMETER integer) RETURNS integer
+			IF a GREATER THAN b THEN
+				RETURN a
+			ELSE
+				RETURN b
+			ENDIF
+		END FUNCTION
+
+		DEFINE FUNCTION halfDivide(x PARAMETER integer) RETURNS integer
+			RETURN x DIV 2
+		END FUNCTION
+
+		LET c LENGTH nums1
+		LET d halfDivide(c)
+
+		LET e uniqueElements(nums1)
+		LET f uniqueElements(nums2)
+
+		LET g intersection(e, f)
+
+		LET h difference(e, g)
+		LET i difference(f, g)
+
+		LET j minVal(d, length(h))
+		LET k minVal(d, length(i))
+
+		LET l maxVal(0, d - j) + maxVal(0, d - k)
+
+		LET m j + k + minVal(l, length(g))
+
+		RETURN m
+	END FUNCTION
+END CLASS

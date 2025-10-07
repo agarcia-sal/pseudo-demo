@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION canSortArray(nums)
+        FUNCTION bitCount(value)
+            SET counter TO 0
+            SET tmp TO value
+            WHILE tmp NOT EQUAL TO 0
+                SET counter TO counter PLUS (tmp BITWISE AND 1)
+                SET tmp TO tmp RIGHT SHIFTED BY 1
+            END WHILE
+            RETURN counter
+        END FUNCTION
+
+        SET length TO LENGTH OF nums
+        SET ascending_sorted TO []
+        FOR idx FROM 0 TO length MINUS 1
+            APPEND nums[idx] TO ascending_sorted
+        END FOR
+        CALL quickSortAscending(ascending_sorted, 0, length MINUS 1)
+
+        PROCEDURE quickSortAscending(arr, low, high)
+            IF low GREATER THAN OR EQUAL TO high
+                RETURN
+            END IF
+            SET pivotIndex TO partition(arr, low, high)
+            CALL quickSortAscending(arr, low, pivotIndex MINUS 1)
+            CALL quickSortAscending(arr, pivotIndex PLUS 1, high)
+        END PROCEDURE
+        
+        FUNCTION partition(arr, startIndex, endIndex)
+            SET pivotVal TO arr[endIndex]
+            SET i TO startIndex MINUS 1
+            SET j TO startIndex
+            WHILE j LESS THAN endIndex
+                IF arr[j] LESS THAN OR EQUAL TO pivotVal
+                    SET i TO i PLUS 1
+                    CALL swapElements(arr, i, j)
+                END IF
+                SET j TO j PLUS 1
+            END WHILE
+            CALL swapElements(arr, i PLUS 1, endIndex)
+            RETURN i PLUS 1
+        END FUNCTION
+
+        PROCEDURE swapElements(arrRef, pos1, pos2)
+            SET tempVar TO arrRef[pos1]
+            SET arrRef[pos1] TO arrRef[pos2]
+            SET arrRef[pos2] TO tempVar
+        END PROCEDURE
+
+        SET outerIndex TO 0
+        REPEAT
+            SET innerIndex TO 0
+            WHILE innerIndex LESS THAN length MINUS 1
+                IF (bitCount(nums[innerIndex]) EQUALS bitCount(nums[innerIndex PLUS 1])) AND (nums[innerIndex] GREATER THAN nums[innerIndex PLUS 1])
+                    CALL swapElements(nums, innerIndex, innerIndex PLUS 1)
+                END IF
+                SET innerIndex TO innerIndex PLUS 1
+            END WHILE
+            SET outerIndex TO outerIndex PLUS 1
+        UNTIL outerIndex GREATER THAN OR EQUAL TO length
+
+        SET isEqual TO TRUE
+        SET compareIdx TO 0
+        WHILE isEqual AND compareIdx LESS THAN length
+            IF nums[compareIdx] NOT EQUALS ascending_sorted[compareIdx]
+                SET isEqual TO FALSE
+            END IF
+            SET compareIdx TO compareIdx PLUS 1
+        END WHILE
+
+        RETURN isEqual
+    END FUNCTION
+END CLASS

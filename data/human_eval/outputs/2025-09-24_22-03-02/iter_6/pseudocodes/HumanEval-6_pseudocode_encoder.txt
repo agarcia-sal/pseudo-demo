@@ -1,0 +1,26 @@
+FUNCTION parse_nested_parens(paren_string AS STRING) RETURNS LIST OF INTEGER
+    FUNCTION parse_paren_group(group_string AS STRING) RETURNS INTEGER
+        SET depth TO 0
+        SET max_depth TO 0
+        FOR each character IN group_string DO
+            IF character EQUALS '(' THEN
+                SET depth TO depth PLUS 1
+                IF depth GREATER THAN max_depth THEN
+                    SET max_depth TO depth
+                END IF
+            ELSE
+                SET depth TO depth MINUS 1
+            END IF
+        END FOR
+        RETURN max_depth
+    END FUNCTION
+
+    SET groups TO SPLIT paren_string BY SPACE
+    SET result TO EMPTY LIST
+    FOR each group IN groups DO
+        IF group IS NOT EMPTY THEN
+            APPEND parse_paren_group(group) TO result
+        END IF
+    END FOR
+    RETURN result
+END FUNCTION

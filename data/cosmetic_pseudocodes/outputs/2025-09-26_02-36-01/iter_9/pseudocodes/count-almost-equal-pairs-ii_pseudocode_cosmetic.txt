@@ -1,0 +1,217 @@
+CLASS Solution
+    FUNCTION countPairs(nums)
+        CALL self.ReorderNumbersInPlace(nums)
+        SET totalPairs TO 0
+        SET frequencyMap TO NewDefaultDict(0)
+        FOR each number IN nums DO
+            SET encounteredSet TO NewSetWithSingleElement(number)
+            SET digitCharacters TO self.ConvertNumberToCharList(number)
+            SET lengthDigits TO self.GetListLength(digitCharacters)
+            CALL self.EnumerateSwaps(digitCharacters, lengthDigits, encounteredSet)
+            SET totalPairs TO totalPairs + self.SumFrequencyMatches(frequencyMap, encounteredSet)
+            CALL self.IncrementFrequency(frequencyMap, number)
+        END FOR
+        RETURN totalPairs
+    END FUNCTION
+
+    FUNCTION ReorderNumbersInPlace(listRef)
+        SET n TO self.GetListLength(listRef)
+        SET index TO 1
+        WHILE index < n DO
+            SET current TO listRef[index]
+            SET position TO index - 1
+            WHILE position >= 0 AND listRef[position] > current DO
+                SET listRef[position + 1] TO listRef[position]
+                SET position TO position - 1
+            END WHILE
+            SET listRef[position + 1] TO current
+            SET index TO index + 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION NewDefaultDict(defaultVal)
+        DEFINE internalMap AS empty map
+        FUNCTION getValue(key)
+            IF key IN internalMap THEN
+                RETURN internalMap[key]
+            ELSE
+                RETURN defaultVal
+            END IF
+        END FUNCTION
+        FUNCTION setValue(key, val)
+            internalMap[key] = val
+        END FUNCTION
+        FUNCTION containsKey(key)
+            RETURN key IN internalMap
+        END FUNCTION
+        RETURN object WITH getValue, setValue, containsKey, internalMap
+    END FUNCTION
+
+    FUNCTION NewSetWithSingleElement(element)
+        DEFINE newSet AS empty set
+        CALL newSet.Insert(element)
+        RETURN newSet
+    END FUNCTION
+
+    FUNCTION ConvertNumberToCharList(num)
+        SET chars TO empty list
+        SET numString TO self.IntToStr(num)
+        FOR idx FROM 0 TO self.GetStringLength(numString) - 1 DO
+            APPEND numString[idx] TO chars
+        END FOR
+        RETURN chars
+    END FUNCTION
+
+    FUNCTION GetListLength(lst)
+        SET count TO 0
+        FOR EACH _ IN lst DO
+            SET count TO count + 1
+        END FOR
+        RETURN count
+    END FUNCTION
+
+    FUNCTION GetStringLength(str)
+        SET count TO 0
+        WHILE True DO
+            TRY TO ACCESS str[count]
+            IF access fails THEN
+                BREAK
+            END IF
+            SET count TO count + 1
+        END WHILE
+        RETURN count
+    END FUNCTION
+
+    FUNCTION IntToStr(number)
+        IF number = 0 THEN
+            RETURN "0"
+        END IF
+        SET negativeFlag TO FALSE
+        IF number < 0 THEN
+            SET negativeFlag TO TRUE
+            SET number TO -number
+        END IF
+        SET digitsList TO empty list
+        WHILE number > 0 DO
+            SET r TO number MOD 10
+            SET number TO number DIV 10
+            APPEND self.CharFromDigit(r) TO digitsList
+        END WHILE
+        CALL self.ReverseListInPlace(digitsList)
+        SET resultStr TO self.JoinChars(digitsList)
+        IF negativeFlag THEN
+            RETURN "-" + resultStr
+        ELSE
+            RETURN resultStr
+        END IF
+    END FUNCTION
+
+    FUNCTION CharFromDigit(d)
+        SET digitToCharMap TO {0:"0",1:"1",2:"2",3:"3",4:"4",5:"5",6:"6",7:"7",8:"8",9:"9"}
+        RETURN digitToCharMap[d]
+    END FUNCTION
+
+    FUNCTION ReverseListInPlace(lst)
+        SET start TO 0
+        SET end TO self.GetListLength(lst) - 1
+        WHILE start < end DO
+            SET temp TO lst[start]
+            SET lst[start] TO lst[end]
+            SET lst[end] TO temp
+            SET start TO start + 1
+            SET end TO end - 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION JoinChars(chars)
+        SET output TO empty string
+        FOR EACH c IN chars DO
+            SET output TO output + c
+        END FOR
+        RETURN output
+    END FUNCTION
+
+    FUNCTION EnumerateSwaps(charList, lengthList, containerSet)
+        SET outerIndex TO 0
+        WHILE outerIndex <= lengthList - 1 DO
+            SET middleIndex TO 0
+            WHILE middleIndex <= outerIndex - 1 DO
+                CALL self.SwapElements(charList, middleIndex, outerIndex)
+                CALL self.AddPermutationToSet(charList, containerSet)
+                CALL self.EnumerateFurtherSwaps(charList, middleIndex, lengthList, containerSet)
+                CALL self.SwapElements(charList, middleIndex, outerIndex)
+                SET middleIndex TO middleIndex + 1
+            END WHILE
+            SET outerIndex TO outerIndex + 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION SwapElements(arr, idx1, idx2)
+        SET tempValue TO arr[idx1]
+        SET arr[idx1] TO arr[idx2]
+        SET arr[idx2] TO tempValue
+    END FUNCTION
+
+    FUNCTION AddPermutationToSet(charArray, targetSet)
+        SET convertedNumber TO self.StrToInt(self.JoinChars(charArray))
+        CALL targetSet.Insert(convertedNumber)
+    END FUNCTION
+
+    FUNCTION EnumerateFurtherSwaps(charArray, startIndex, lengthList, targetSet)
+        SET endIndex TO startIndex + 1
+        WHILE endIndex <= lengthList - 1 DO
+            SET midIndex TO startIndex + 1
+            WHILE midIndex <= endIndex - 1 DO
+                CALL self.SwapElements(charArray, midIndex, endIndex)
+                CALL self.AddPermutationToSet(charArray, targetSet)
+                CALL self.SwapElements(charArray, midIndex, endIndex)
+                SET midIndex TO midIndex + 1
+            END WHILE
+            SET endIndex TO endIndex + 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION StrToInt(strVal)
+        SET negativeFlag TO FALSE
+        SET idx TO 0
+        SET lengthStr TO self.GetStringLength(strVal)
+        IF lengthStr > 0 AND strVal[0] = '-' THEN
+            SET negativeFlag TO TRUE
+            SET idx TO 1
+        END IF
+        SET resultNum TO 0
+        WHILE idx < lengthStr DO
+            SET digitValue TO self.DigitFromChar(strVal[idx])
+            SET resultNum TO resultNum * 10 + digitValue
+            SET idx TO idx + 1
+        END WHILE
+        IF negativeFlag THEN
+            RETURN -resultNum
+        ELSE
+            RETURN resultNum
+        END IF
+    END FUNCTION
+
+    FUNCTION DigitFromChar(character)
+        SET charToDigitMap TO {"0":0,"1":1,"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9}
+        RETURN charToDigitMap[character]
+    END FUNCTION
+
+    FUNCTION SumFrequencyMatches(freqMap, elementsSet)
+        SET totalSum TO 0
+        FOR EACH element IN elementsSet DO
+            IF freqMap.containsKey(element) THEN
+                SET totalSum TO totalSum + freqMap.getValue(element)
+            END IF
+        END FOR
+        RETURN totalSum
+    END FUNCTION
+
+    FUNCTION IncrementFrequency(freqMap, keyVal)
+        IF freqMap.containsKey(keyVal) THEN
+            SET freqMap.internalMap[keyVal] = freqMap.getValue(keyVal) + 1
+        ELSE
+            SET freqMap.internalMap[keyVal] = 1
+        END IF
+    END FUNCTION
+END CLASS

@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION minimumPushes(word)
+        FUNCTION countLetters(inputStr)
+            DEFINE resultMap
+            FOR idx FROM 0 TO LENGTH(inputStr) - 1
+                LET ch = inputStr[idx]
+                IF ch NOT IN resultMap
+                    SET resultMap[ch] TO 1
+                ELSE
+                    SET resultMap[ch] TO resultMap[ch] + 1
+                END IF
+            END FOR
+            RETURN resultMap
+        END FUNCTION
+
+        LET frequencyMap = countLetters(word)
+        LET freqValues = []
+        LET keyCount = 0
+        FOR EACH key IN frequencyMap
+            APPEND frequencyMap[key] TO freqValues
+        END FOR
+
+        FUNCTION descendingSort(arr)
+            LET n = LENGTH(arr)
+            FOR i FROM 0 TO n - 2
+                FOR j FROM 0 TO n - 2 - i
+                    IF arr[j] < arr[j + 1]
+                        LET temp = arr[j]
+                        SET arr[j] TO arr[j + 1]
+                        SET arr[j + 1] TO temp
+                    END IF
+                END FOR
+            END FOR
+        END FUNCTION
+
+        CALL descendingSort(freqValues)
+
+        LET accumulatedPushes = 0
+        LET multiplier = 1
+        LET keysUsed = 0
+
+        FUNCTION processFrequencies(arr, index)
+            IF index >= LENGTH(arr)
+                RETURN
+            END IF
+            SET accumulatedPushes TO accumulatedPushes + arr[index] * multiplier
+            SET keysUsed TO keysUsed + 1
+            IF keysUsed = 8
+                SET keysUsed TO 0
+                SET multiplier TO multiplier + 1
+            END IF
+            CALL processFrequencies(arr, index + 1)
+        END FUNCTION
+
+        CALL processFrequencies(freqValues, 0)
+        RETURN accumulatedPushes
+    END FUNCTION
+END CLASS

@@ -1,0 +1,56 @@
+```
+FUNCTION sort_even(list_of_elements)
+	TYPE queue_even <- linked_list()
+	TYPE queue_odd <- linked_list()
+	
+	ITERATOR idx <- 0
+	LOOP
+		IF idx >= LENGTH(list_of_elements) THEN BREAK
+		APPEND list_of_elements[idx] TO queue_even
+		IF idx + 1 >= LENGTH(list_of_elements) THEN BREAK
+		APPEND list_of_elements[idx + 1] TO queue_odd
+		SET idx <- idx + 2
+	END LOOP
+	
+	// Sort queue_even ascending order using iterative insertion sort
+	TYPE sorted_even <- EMPTY linked_list()
+	FOREACH item IN queue_even DO
+		TYPE inserted <- FALSE
+		TYPE temp_list <- EMPTY linked_list()
+		WHILE LENGTH(sorted_even) > 0 AND inserted == FALSE
+			REMOVE_HEAD(sorted_even, TYPE head_item)
+			IF head_item <= item THEN
+				APPEND head_item TO temp_list
+			ELSE
+				APPEND item TO temp_list
+				APPEND head_item TO temp_list
+				SET inserted <- TRUE
+			ENDIF
+		ENDWHILE
+		IF inserted == FALSE THEN
+			APPEND item TO temp_list
+		ENDIF
+		EXTEND temp_list BY REMAINDER OF sorted_even
+		SET sorted_even <- temp_list
+	END FOREACH
+	
+	TYPE iter_even <- ITERATOR(sorted_even)
+	TYPE iter_odd <- ITERATOR(queue_odd)
+	TYPE result_list <- EMPTY list
+	
+	LOOP
+		IF NOT HAS_NEXT(iter_even) THEN BREAK
+		TYPE elem_even <- NEXT(iter_even)
+		IF HAS_NEXT(iter_odd) THEN
+			TYPE elem_odd <- NEXT(iter_odd)
+			APPEND elem_even TO result_list
+			APPEND elem_odd TO result_list
+		ELSE
+			APPEND elem_even TO result_list
+			BREAK
+		ENDIF
+	END LOOP
+	
+	RETURN result_list
+END FUNCTION
+```

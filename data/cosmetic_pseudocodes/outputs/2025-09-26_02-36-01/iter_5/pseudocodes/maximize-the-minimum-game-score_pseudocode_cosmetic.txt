@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION maxScore(points, m)  
+        FUNCTION isPossible(threshold, limit)  
+            SET totalMoves TO 0  
+            SET previousCount TO 0  
+
+            FUNCTION recurse(idx)  
+                IF idx EQUALS LENGTH(points) THEN  
+                    RETURN True  
+                END IF  
+
+                SET currentPoint TO points[idx]  
+                SET neededRaw TO ((threshold + currentPoint - 1) DIV currentPoint)  
+                SET neededAdjusted TO 0  
+                IF (neededRaw - previousCount) < 0 THEN  
+                    SET neededAdjusted TO 0  
+                ELSE  
+                    SET neededAdjusted TO (neededRaw - previousCount)  
+                END IF  
+
+                IF neededAdjusted > 0 THEN  
+                    SET totalMoves TO totalMoves + (2 * neededAdjusted - 1)  
+                    SET previousCount TO neededAdjusted - 1  
+                ELSE IF idx + 1 < LENGTH(points) THEN  
+                    SET totalMoves TO totalMoves + 1  
+                    SET previousCount TO 0  
+                END IF  
+
+                IF totalMoves > limit THEN  
+                    RETURN False  
+                END IF  
+
+                SET nextResult TO recurse(idx + 1)  
+                RETURN nextResult  
+            END FUNCTION  
+
+            RETURN recurse(0)  
+        END FUNCTION  
+
+        SET leftBound TO 0  
+        SET rightBound TO (((m + 1) DIV 2) * points[0]) + 1  
+
+        WHILE leftBound < rightBound  
+            SET midPoint TO ((leftBound + rightBound + 1) DIV 2)  
+            IF isPossible(midPoint, m) THEN  
+                SET leftBound TO midPoint  
+            ELSE  
+                SET rightBound TO midPoint - 1  
+            END IF  
+        END WHILE  
+
+        SET resultValue TO leftBound  
+        RETURN resultValue  
+    END FUNCTION  
+END CLASS

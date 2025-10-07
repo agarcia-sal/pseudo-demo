@@ -1,0 +1,33 @@
+CLASS Solution
+    FUNCTION maximumTotalDamage(power)
+        DEFINE FUNCTION computeMaximum(i, keysList, freqMap, memory)
+            IF i < 0 THEN
+                RETURN 0
+            END IF
+
+            IF memory CONTAINS keysList[i] THEN
+                RETURN memory[keysList[i]]
+            END IF
+
+            VARIABLE currentVal ASSIGN keysList[i] * freqMap[keysList[i]]
+
+            VARIABLE k ASSIGN i - 1
+            WHILE k >= 0 AND keysList[k] >= keysList[i] - 2
+                k = k - 1
+            END WHILE
+
+            VARIABLE including ASSIGN currentVal + computeMaximum(k, keysList, freqMap, memory)
+            VARIABLE excluding ASSIGN computeMaximum(i - 1, keysList, freqMap, memory)
+
+            VARIABLE answer ASSIGN max(including, excluding)
+            memory[keysList[i]] = answer
+
+            RETURN answer
+        END FUNCTION
+
+        VARIABLE frequency COUNT_ELEMENTS_IN(power)
+        VARIABLE sortedKeys SORT_ASCENDING(GET_KEYS(frequency))
+        VARIABLE memo EMPTY_MAP
+        RETURN computeMaximum(LENGTH(sortedKeys) - 1, sortedKeys, frequency, memo)
+    END FUNCTION
+END CLASS

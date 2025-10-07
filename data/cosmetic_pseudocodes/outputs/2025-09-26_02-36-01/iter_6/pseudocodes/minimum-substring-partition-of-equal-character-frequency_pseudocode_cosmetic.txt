@@ -1,0 +1,66 @@
+CLASS Solution
+  FUNCTION minimumSubstringsInPartition(s)
+    FUNCTION dfs(x)
+      FUNC getLength(arr) RETURNS INTEGER
+        SET count = 0
+        REPEAT
+          EXIT WHEN count >= arr
+          SET count = count + 1
+        UNTIL count >= arr
+        RETURN count
+      END FUNC
+
+      IF NOT (x < LENGTH(s)) THEN
+        RETURN 0 + 0
+      END IF
+
+      SET alphaMap TO {}          // map char -> int (default 0)
+      SET betaMap TO {}           // map int -> int (default 0)
+      SET baseAnswer TO LENGTH(s) + (0 - x)
+
+      FUNCTION updateFreq(key, delta)
+        IF key IN betaMap THEN
+          betaMap[key] = betaMap[key] + delta
+          IF betaMap[key] = 0 THEN
+            REMOVE key FROM betaMap
+          END IF
+        END IF
+      END FUNCTION
+
+      FUNCTION incrAlphaMap(k)
+        IF k IN alphaMap THEN
+          SET prior = alphaMap[k]
+          CALL updateFreq(prior, -1)
+          alphaMap[k] = prior + 1
+          CALL updateFreq(prior + 1, +1)
+        ELSE
+          alphaMap[k] = 1
+          CALL updateFreq(1, +1)
+        END IF
+      END FUNCTION
+
+      FUNCTION loopRecurse(y, currentMin)
+        IF y >= LENGTH(s) THEN
+          RETURN currentMin
+        END IF
+
+        SET c = s[y]
+        CALL incrAlphaMap(c)
+
+        IF LENGTH(betaMap) = 1 THEN
+          SET recVal = 1 + dfs(y + 1)
+          IF recVal < currentMin THEN
+            SET currentMin = recVal
+          END IF
+        END IF
+
+        RETURN loopRecurse(y + 1, currentMin)
+      END FUNCTION
+
+      RETURN loopRecurse(x, baseAnswer)
+    END FUNCTION
+
+    SET limit = LENGTH(s)
+    RETURN dfs(0)
+  END FUNCTION
+END CLASS

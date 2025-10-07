@@ -1,0 +1,47 @@
+CLASS Solution  
+    FUNCTION maximumTotalDamage(power)  
+        DECLARE frequencyMap AS empty dictionary  
+        DECLARE distinctValues AS empty list  
+        FOR each element IN power DO  
+            IF element NOT IN frequencyMap THEN  
+                SET frequencyMap[element] AS zero  
+            END IF  
+            INCREASE frequencyMap[element] BY one  
+        END FOR  
+        SET distinctValues TO all keys from frequencyMap converted to list  
+        SORT distinctValues in ascending order  
+        DECLARE dpMap AS empty dictionary  
+        DECLARE currentIndex AS zero  
+        WHILE currentIndex LESS THAN LENGTH of distinctValues DO  
+            SET currentValue TO distinctValues[currentIndex]  
+            IF currentIndex EQUALS zero THEN  
+                SET prevExcluded TO zero  
+            ELSE  
+                IF distinctValues[currentIndex - 1] IN dpMap THEN  
+                    SET prevExcluded TO dpMap[distinctValues[currentIndex - 1]]  
+                ELSE  
+                    SET prevExcluded TO zero  
+                END IF  
+            END IF  
+            SET includedSum TO currentValue MULTIPLIED BY frequencyMap[currentValue]  
+            SET iterator AS currentIndex - 1  
+            WHILE iterator GREATER THAN OR EQUAL TO zero AND distinctValues[iterator] GREATER THAN OR EQUAL TO currentValue MINUS 2 DO  
+                DECREASE iterator BY one  
+            END WHILE  
+            IF iterator GREATER THAN OR EQUAL TO zero THEN  
+                IF distinctValues[iterator] IN dpMap THEN  
+                    ADD dpMap[distinctValues[iterator]] TO includedSum  
+                END IF  
+            END IF  
+            SET dpMap[currentValue] TO includedSum IF includedSum GREATER THAN prevExcluded ELSE prevExcluded  
+            INCREASE currentIndex BY one  
+        END WHILE  
+        DECLARE maxResult AS zero  
+        FOR val IN dpMap DO  
+            IF dpMap[val] GREATER THAN maxResult THEN  
+                SET maxResult TO dpMap[val]  
+            END IF  
+        END FOR  
+        RETURN maxResult  
+    END FUNCTION  
+END CLASS

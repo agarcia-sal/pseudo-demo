@@ -1,0 +1,87 @@
+CLASS Solution  
+    FUNCTION maxCollectedFruits(fruits)  
+        LET size = LENGTH(fruits)  
+        
+        LET directionsOne = [(1, 1), (1, 0)]  
+        LET directionsTwo = [(1, -1), (1, 0), (1, 1)]  
+        LET directionsThree = [(-1, 1), (0, 1), (1, 1)]  
+        
+        LET cache = EMPTY_MAP  
+        
+        FUNCTION dp(p1x, p1y, p2x, p2y, p3x, p3y)  
+            FUNCTION outOfBounds(a, b)  
+                RETURN (a < 0) OR (a >= size) OR (b < 0) OR (b >= size)  
+            END FUNCTION  
+            
+            IF outOfBounds(p1x, p1y) OR outOfBounds(p2x, p2y) OR outOfBounds(p3x, p3y) THEN  
+                LET negInfVal = - (1 * (1 << 28))  
+                RETURN negInfVal  
+            END IF  
+            
+            IF (p1x = p1y) AND (p1y = p2x) AND (p2x = p2y) AND (p2y = p3x) AND (p3x = p3y) AND (p3y = size - 1) THEN  
+                LET lastVal = fruits[size - 1][size - 1]  
+                RETURN lastVal  
+            END IF  
+            
+            LET keyTuple = (p1x, p1y, p2x, p2y, p3x, p3y)  
+            IF keyTuple EXISTS IN cache THEN  
+                RETURN cache[keyTuple]  
+            END IF  
+            
+            LET sumCollected = fruits[p1y][p1x]  
+            
+            IF ((p1x = p2x) AND (p1y = p2y)) OR ((p1x = p3x) AND (p1y = p3y)) THEN  
+                sumCollected = 0  
+            END IF  
+            
+            IF (p2x = p3x) AND (p2y = p3y) THEN  
+                sumCollected = sumCollected + fruits[p2y][p2x]  
+            ELSE  
+                sumCollected = sumCollected + fruits[p2y][p2x] + fruits[p3y][p3x]  
+            END IF  
+            
+            LET maxNext = - (1 << 28)  
+            
+            LET i1 = 0  
+            FUNCTION loopDir1()  
+                IF i1 >= LENGTH(directionsOne) THEN RETURN END FUNCTION  
+                LET (d1x, d1y) = directionsOne[i1]  
+                LET i2 = 0  
+                FUNCTION loopDir2()  
+                    IF i2 >= LENGTH(directionsTwo) THEN RETURN END FUNCTION  
+                    LET (d2x, d2y) = directionsTwo[i2]  
+                    LET j = 0  
+                    FUNCTION loopDir3()  
+                        IF j >= LENGTH(directionsThree) THEN RETURN END FUNCTION  
+                        LET (d3x, d3y) = directionsThree[j]  
+                        LET candidateVal = dp(p1x + d1x, p1y + d1y, p2x + d2x, p2y + d2y, p3x + d3x, p3y + d3y)  
+                        IF candidateVal > maxNext THEN maxNext = candidateVal END IF  
+                        j = j + 1  
+                        loopDir3()  
+                    END FUNCTION  
+                    loopDir3()  
+                    i2 = i2 + 1  
+                    loopDir2()  
+                END FUNCTION  
+                loopDir2()  
+                i1 = i1 + 1  
+                loopDir1()  
+            END FUNCTION  
+            loopDir1()  
+            
+            LET resultVal = sumCollected + maxNext  
+            cache[keyTuple] = resultVal  
+            RETURN resultVal  
+        END FUNCTION  
+        
+        LET startX1 = 0  
+        LET startY1 = 0  
+        LET startX2 = 0  
+        LET startY2 = size - 1  
+        LET startX3 = size - 1  
+        LET startY3 = 0  
+        
+        LET outputVal = dp(startX1, startY1, startX2, startY2, startX3, startY3)  
+        RETURN outputVal  
+    END FUNCTION  
+END CLASS

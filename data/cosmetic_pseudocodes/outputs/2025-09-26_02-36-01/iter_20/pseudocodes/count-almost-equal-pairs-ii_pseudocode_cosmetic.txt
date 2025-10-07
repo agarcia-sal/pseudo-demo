@@ -1,0 +1,108 @@
+CLASS Solution
+    FUNCTION countPairs(nums)
+        
+        FUNCTION customSort(arr)
+            FUNCTION partition(lo, hi)
+                SET pivotValue TO arr[hi]
+                SET splitIndex TO (lo - 1)
+                SET scanIndex TO lo
+                WHILE scanIndex <= hi - 1
+                    IF arr[scanIndex] <= pivotValue THEN
+                        INCREMENT splitIndex BY 1
+                        CALL swap(splitIndex, scanIndex)
+                    END IF
+                    INCREMENT scanIndex BY 1
+                END WHILE
+                CALL swap(splitIndex + 1, hi)
+                RETURN splitIndex + 1
+            END FUNCTION
+
+            PROCEDURE swap(i1, i2)
+                SET tempVal TO arr[i1]
+                SET arr[i1] TO arr[i2]
+                SET arr[i2] TO tempVal
+            END PROCEDURE
+
+            FUNCTION quickSortHelper(leftBound, rightBound)
+                IF leftBound < rightBound THEN
+                    SET pi TO partition(leftBound, rightBound)
+                    CALL quickSortHelper(leftBound, pi - 1)
+                    CALL quickSortHelper(pi + 1, rightBound)
+                END IF
+            END FUNCTION
+
+            CALL quickSortHelper(0, LENGTH(arr) - 1)
+        END FUNCTION
+        
+        CALL customSort(nums)
+        
+        SET resultCount TO 0
+        SET frequencyMap TO empty map defaulting to 0
+        
+        PROCEDURE addPermutations(num)
+            SET seenSet TO new empty set
+            ADD num TO seenSet
+            SET strList TO empty list
+            FUNCTION intToStringList(n, lst)
+                IF n == 0 THEN RETURN END IF
+                CALL intToStringList(n DIV 10, lst)
+                APPEND CHARACTER((n MOD 10) + 48) TO lst
+            END FUNCTION
+            CALL intToStringList(num, strList)
+            IF strList IS empty THEN
+                APPEND '0' TO strList
+            END IF
+            SET lenStrList TO LENGTH(strList)
+            
+
+            FUNCTION addNumberFromList(lst)
+                SET totalNum TO 0
+                FOR idx FROM 0 TO LENGTH(lst) - 1
+                    SET totalNum TO (totalNum * 10) + (INTEGER(lst[idx]) - 48)
+                END FOR
+                RETURN totalNum
+            END FUNCTION
+
+            PROCEDURE recurseSwap(startPos, endPos)
+                IF startPos >= endPos THEN RETURN END IF
+                FOR currentJ FROM endPos DOWNTO startPos + 1
+                    FOR currentI FROM startPos TO currentJ - 1
+                        CALL swapPositions(currentI, currentJ)
+                        ADD addNumberFromList(strList) TO seenSet
+                        FOR qIndex FROM currentI + 1 TO LENGTH(strList) - 1
+                            FOR pIndex FROM currentI + 1 TO qIndex - 1
+                                CALL swapPositions(pIndex, qIndex)
+                                ADD addNumberFromList(strList) TO seenSet
+                                CALL swapPositions(pIndex, qIndex)
+                            END FOR
+                        END FOR
+                        CALL swapPositions(currentI, currentJ)
+                    END FOR
+                END FOR
+            END PROCEDURE
+
+            PROCEDURE swapPositions(a, b)
+                SET tempChar TO strList[a]
+                SET strList[a] TO strList[b]
+                SET strList[b] TO tempChar
+            END PROCEDURE
+
+            CALL recurseSwap(0, lenStrList - 1)
+            RETURN seenSet
+        END PROCEDURE
+
+        FOR element IN nums
+            SET permutationsSet TO addPermutations(element)
+            SET sumForCurrent TO 0
+            FOR key IN permutationsSet
+                IF frequencyMap CONTAINS key THEN
+                    SET sumForCurrent TO sumForCurrent + frequencyMap[key]
+                END IF
+            END FOR
+            SET resultCount TO resultCount + sumForCurrent
+            SET frequencyMap[element] TO frequencyMap[element] + 1
+        END FOR
+        
+        RETURN resultCount
+    END FUNCTION
+END CLASS

@@ -1,0 +1,49 @@
+CLASS Solution
+	Function findMaximumNumber(k, x)
+		Function count_set_bits(n, pos)
+			Var tally ← 0
+			Var segment_len ← 1 << pos
+			Var full_segments ← n // segment_len
+			tally ← tally + ((full_segments // 2) * segment_len)
+			
+			If (full_segments & 1) = 1
+				tally ← tally + ((n % segment_len) + 1)
+			EndIf
+			
+			Return tally
+		EndFunction
+
+		Function accumulated_price(n)
+			Var cost_sum ← 0
+			Var idx ← 1
+			
+			Repeat
+				Var power_val ← (idx * x) - 1
+				Var limit ← 1 << power_val
+				
+				If limit > n Then 
+					Break
+				EndIf
+				
+				cost_sum ← cost_sum + count_set_bits(n, power_val)
+				idx ← idx + 1
+			Until False
+			
+			Return cost_sum
+		EndFunction
+
+		Var start_val ← 1
+		Var end_val ← 1 << 60
+		While start_val ≤ end_val
+			Var midpoint ← start_val + ((end_val - start_val) // 2)
+			
+			If accumulated_price(midpoint) ≤ k Then
+				start_val ← midpoint + 1
+			Else
+				end_val ← midpoint - 1
+			EndIf
+		EndWhile
+		
+		Return end_val
+	EndFunction
+END CLASS

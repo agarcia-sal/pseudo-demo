@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+        LET count BE THE LENGTH OF nums
+        DEFINE FUNCTION bitwiseXor(a, b)
+            RETURN a XOR b
+        END FUNCTION
+
+        LET matrixF BE a LIST OF count ELEMENTS EACH CONTAINING A LIST OF count ZEROS
+        LET matrixG BE a LIST OF count ELEMENTS EACH CONTAINING A LIST OF count ZEROS
+
+        LET procFill BE FUNCTION(posIdx)
+            IF posIdx GREATER THAN OR EQUAL TO count THEN
+                RETURN
+            ENDIF
+            matrixF[posIdx][posIdx] = nums[posIdx]
+            matrixG[posIdx][posIdx] = nums[posIdx]
+            LET posWalker BE posIdx + (1 * 1)
+            LET fillLoop BE FUNCTION(currentPos)
+                IF currentPos GREATER THAN OR EQUAL TO count THEN
+                    RETURN
+                ENDIF
+
+                LET leftXorValue BE matrixF[posIdx][currentPos - 1]
+                LET rightXorValue BE matrixF[posIdx + 1][currentPos]
+                LET xorCalc BE bitwiseXor(leftXorValue, rightXorValue)
+                matrixF[posIdx][currentPos] = xorCalc
+
+                LET leftMax BE matrixG[posIdx][currentPos]
+                LET maxLeft BE matrixG[posIdx][currentPos - 1]
+                LET maxRight BE matrixG[posIdx + 1][currentPos]
+
+                LET computeMax1 BE leftMax
+                IF maxLeft GREATER THAN computeMax1 THEN
+                    computeMax1 = maxLeft
+                ENDIF
+                IF maxRight GREATER THAN computeMax1 THEN
+                    computeMax1 = maxRight
+                ENDIF
+                matrixG[posIdx][currentPos] = computeMax1
+
+                fillLoop(currentPos + 1)
+            END FUNCTION
+            fillLoop(posWalker)
+            procFill(posIdx + 1)
+        END FUNCTION
+        procFill(0)
+
+        LET resultAccumulator BE EMPTY LIST
+        FOR EACH boundaryPair IN queries
+            LET lowerBound BE boundaryPair[0]
+            LET upperBound BE boundaryPair[1]
+            APPEND matrixG[lowerBound][upperBound] TO resultAccumulator
+        END FOR
+
+        RETURN resultAccumulator
+    END FUNCTION
+END CLASS

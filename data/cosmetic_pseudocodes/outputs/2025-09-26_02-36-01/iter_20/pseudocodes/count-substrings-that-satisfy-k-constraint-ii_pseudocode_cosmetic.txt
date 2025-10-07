@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+        SET w TO (LENGTH OF s) PLUS 1
+        SET X TO LIST OF 0 REPEATED w TIMES
+        SET Y TO LIST OF 0 REPEATED w TIMES
+
+        FUNCTION accumulate_counts()
+            SET a TO 0
+            WHILE a LESS THAN w MINUS 1
+                SET b TO a PLUS 1
+                SET p TO X[a] PLUS (IF s[a] EQUALS '0' THEN 1 ELSE 0)
+                SET X[b] TO p
+                SET q TO Y[a] PLUS (IF s[a] EQUALS '1' THEN 1 ELSE 0)
+                SET Y[b] TO q
+                SET a TO b
+            END WHILE
+        END FUNCTION
+        CALL accumulate_counts()
+
+        FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER
+            SET total TO 0
+            SET start_index TO l
+            LABEL outer_loop:
+            IF start_index GREATER THAN r THEN
+                RETURN total
+            END IF
+
+            FUNCTION binary_search(left parameter right parameter) RETURNS INTEGER
+                IF left GREATER OR EQUAL TO right THEN
+                    RETURN left
+                END IF
+                SET middle TO (left PLUS right) DIVIDED BY 2
+                SET zero_subcount TO X[middle PLUS 1] MINUS X[start_index]
+                SET one_subcount TO Y[middle PLUS 1] MINUS Y[start_index]
+                IF zero_subcount LESS THAN OR EQUAL TO k OR one_subcount LESS THAN OR EQUAL TO k THEN
+                    RETURN binary_search(middle PLUS 1, right)
+                ELSE
+                    RETURN binary_search(left, middle)
+                END IF
+            END FUNCTION
+
+            SET upper_bound TO r PLUS 1
+            SET pos TO binary_search(start_index, upper_bound) MINUS 1
+            IF pos GREATER OR EQUAL TO start_index THEN
+                SET total TO total PLUS (pos MINUS start_index PLUS 1)
+            END IF
+            SET start_index TO start_index PLUS 1
+            GOTO outer_loop
+        END FUNCTION
+
+        SET output TO EMPTY LIST
+        SET qidx TO 0
+        REPEAT
+            IF qidx GREATER OR EQUAL TO LENGTH OF queries THEN
+                BREAK
+            END IF
+            SET pair TO queries[qidx]
+            SET left_bound TO pair[0]
+            SET right_bound TO pair[1]
+            APPEND count_valid_substrings(left_bound, right_bound) TO output
+            SET qidx TO qidx PLUS 1
+        UNTIL FALSE
+
+        RETURN output
+    END FUNCTION
+END CLASS

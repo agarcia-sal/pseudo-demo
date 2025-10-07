@@ -1,0 +1,96 @@
+CLASS Solution
+    FUNCTION subsequencePairCount(nums)
+        DEFINE CONSTANT MODULUS = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+        LET highestValue BE 0
+        LET indexProbe BE 0
+        LET scanningResult BE 0
+        LET tempXtotal BE 0
+        LET tempYtotal BE 0
+        LET secondaryResult BE 0
+        LET tempGCDx BE 0
+        LET tempGCDy BE 0
+        LET currentDPArray BE []
+        LET incomingDPArray BE []
+
+        PROCEDURE findMaxValue(vals, outputRef)
+            LET posCounter BE 0
+            LET currentMax BE 0
+            WHILE posCounter < LENGTH(vals)
+                IF vals[posCounter] > currentMax THEN
+                    currentMax = vals[posCounter]
+                ENDIF
+                posCounter = posCounter + 1
+            ENDWHILE
+            outputRef = currentMax
+        END PROCEDURE
+
+        PROCEDURE gcd(p, q, resultRef)
+            IF q = 0 THEN
+                resultRef = p
+            ELSE
+                gcd(q, p % q, resultRef)
+            ENDIF
+        END PROCEDURE
+
+        PROCEDURE initialize2DArray(rows, cols, targetArray)
+            LET outerIndex BE 0
+            LET innerIndex BE 0
+            targetArray = []
+            WHILE outerIndex < rows
+                LET innerList BE []
+                innerIndex = 0
+                WHILE innerIndex < cols
+                    APPEND 0 TO innerList
+                    innerIndex = innerIndex + 1
+                ENDWHILE
+                APPEND innerList TO targetArray
+                outerIndex = outerIndex + 1
+            ENDWHILE
+        END PROCEDURE
+
+        CALL findMaxValue(nums, highestValue)
+        CALL initialize2DArray(highestValue + (1 * 1), highestValue + (1 * 1), currentDPArray)
+        currentDPArray[0][0] = 1
+
+        LET iteratorIndex BE 0
+
+        PROCEDURE processIteration(ilist, workingDP)
+            IF iteratorIndex >= LENGTH(ilist) THEN RETURN
+            initialize2DArray(highestValue + 1, highestValue + 1, incomingDPArray)
+            LET scanX BE 0
+            WHILE scanX <= highestValue
+                LET scanY BE 0
+                WHILE scanY <= highestValue
+                    incomingDPArray[scanX][scanY] = incomingDPArray[scanX][scanY] + workingDP[scanX][scanY]
+                    incomingDPArray[scanX][scanY] = incomingDPArray[scanX][scanY] % MODULUS
+
+                    CALL gcd(scanX, ilist[iteratorIndex], tempGCDx)
+                    incomingDPArray[tempGCDx][scanY] = incomingDPArray[tempGCDx][scanY] + workingDP[scanX][scanY]
+                    incomingDPArray[tempGCDx][scanY] = incomingDPArray[tempGCDx][scanY] % MODULUS
+
+                    CALL gcd(scanY, ilist[iteratorIndex], tempGCDy)
+                    incomingDPArray[scanX][tempGCDy] = incomingDPArray[scanX][tempGCDy] + workingDP[scanX][scanY]
+                    incomingDPArray[scanX][tempGCDy] = incomingDPArray[scanX][tempGCDy] % MODULUS
+
+                    scanY = scanY + 1
+                ENDWHILE
+                scanX = scanX + 1
+            ENDWHILE
+            workingDP = incomingDPArray
+            iteratorIndex = iteratorIndex + 1
+            CALL processIteration(ilist, workingDP)
+        END PROCEDURE
+
+        CALL processIteration(nums, currentDPArray)
+
+        LET accumulatorSum BE 0
+        LET gatherIndex BE 1
+        WHILE gatherIndex <= highestValue
+            accumulatorSum = accumulatorSum + currentDPArray[gatherIndex][gatherIndex]
+            gatherIndex = gatherIndex + 1
+        ENDWHILE
+
+        secondaryResult = accumulatorSum % MODULUS
+        RETURN secondaryResult
+    END FUNCTION
+END CLASS

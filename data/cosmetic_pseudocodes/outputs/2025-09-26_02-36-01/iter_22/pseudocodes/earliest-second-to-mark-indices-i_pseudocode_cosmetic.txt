@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+        SET length_nums TO 0
+        SET length_change TO 0
+        SET idx_counter TO 0
+        SET temp_accum TO 0
+        SET temp_flag TO 0
+        
+        SET length_nums TO LENGTH OF nums
+        SET length_change TO LENGTH OF changeIndices
+        
+        FUNCTION can_mark_by_second(limit)
+            SET last_seen TO ARRAY FILLED WITH -1 OF SIZE length_nums
+            SET pos_counter TO 0
+            
+            WHILE pos_counter < limit
+                SET idx_tmp TO changeIndices[pos_counter] - 1
+                SET last_seen[idx_tmp] TO pos_counter
+                SET pos_counter TO pos_counter + 1
+            END WHILE
+            
+            SET sum_needed TO 0
+            SET decrements_avail TO 0
+            SET marked_set TO EMPTY SET
+            
+            SET idx_loop TO 0
+            WHILE idx_loop < limit
+                SET current_idx TO changeIndices[idx_loop] - 1
+                IF NOT (current_idx IN marked_set)
+                    IF last_seen[current_idx] = idx_loop
+                        IF nums[current_idx] <= decrements_avail
+                            SET decrements_avail TO decrements_avail - nums[current_idx]
+                            ADD current_idx TO marked_set
+                        ELSE
+                            RETURN False
+                        END IF
+                    ELSE
+                        SET decrements_avail TO decrements_avail + 1
+                    END IF
+                ELSE
+                    SET decrements_avail TO decrements_avail + 1
+                END IF
+                SET idx_loop TO idx_loop + 1
+            END WHILE
+            
+            IF LENGTH OF marked_set = length_nums
+                RETURN True
+            ELSE
+                RETURN False
+            END IF
+        END FUNCTION
+        
+        SET low TO 0
+        SET high TO length_change + 1
+        
+        WHILE low < high
+            SET mid_val TO (low + high) DIV 2
+            IF can_mark_by_second(mid_val)
+                SET high TO mid_val
+            ELSE
+                SET low TO low + 1
+            END IF
+        END WHILE
+        
+        IF low <= length_change
+            RETURN low
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

@@ -1,0 +1,78 @@
+CLASS Solution
+{
+  FUNCTION maximumProcessableQueries(nums AS LIST OF INTEGER, queries AS LIST OF INTEGER) RETURNS INTEGER
+  {
+    FUNCTION process_queries(subseq AS LIST OF INTEGER, queries AS LIST OF INTEGER) RETURNS INTEGER
+    {
+      SET count TO 0
+      SET idx TO 0
+      WHILE idx LESS THAN LENGTH(subseq)
+      {
+        IF NOT (subseq[idx] < queries[count])
+        {
+          SET idx TO idx + 1
+        }
+        SET count TO count + (IF count < LENGTH(queries) THEN 0 ELSE 1)
+        IF count EQUALS LENGTH(queries)
+        {
+          BREAK
+        }
+      }
+      RETURN idx
+    }
+
+    SET total_nums TO LENGTH(nums)
+    SET total_queries TO LENGTH(queries)
+    SET highest_processed TO process_queries(nums, queries)
+
+    SET pos TO 0
+    REPEAT
+      IF pos >= total_nums
+      {
+        BREAK
+      }
+      SET left_segment TO EMPTY LIST
+      SET right_segment TO EMPTY LIST
+
+      SET j TO 0
+      WHILE j < pos
+      {
+        APPEND nums[j] TO left_segment
+        SET j TO j + 1
+      }
+
+      SET k TO total_nums - 1
+      WHILE k >= pos
+      {
+        APPEND nums[k] TO right_segment
+        SET k TO k - 1
+      }
+
+      SET combined_seq TO EMPTY LIST
+      SET m TO 0
+      WHILE m < LENGTH(left_segment)
+      {
+        APPEND left_segment[m] TO combined_seq
+        SET m TO m + 1
+      }
+
+      SET n_idx TO 0
+      WHILE n_idx < LENGTH(right_segment)
+      {
+        APPEND right_segment[n_idx] TO combined_seq
+        SET n_idx TO n_idx + 1
+      }
+
+      CALL combined_seq.SORT(ASCENDING)
+
+      SET current_processed TO process_queries(combined_seq, queries)
+      IF current_processed > highest_processed
+      {
+        SET highest_processed TO current_processed
+      }
+      SET pos TO pos + 1
+    UNTIL FALSE
+
+    RETURN highest_processed
+  }
+}

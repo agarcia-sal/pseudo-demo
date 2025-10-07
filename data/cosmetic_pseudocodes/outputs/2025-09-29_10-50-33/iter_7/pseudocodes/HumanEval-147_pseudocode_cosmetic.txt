@@ -1,0 +1,35 @@
+FUNCTION get_max_triples(input_limit)
+    DECLARE sequence_collection ← NEW ARRAY
+    DECLARE current_index ← 1
+    WHILE current_index ≤ input_limit DO
+        LET computed_value ← (current_index × current_index) − current_index + 1
+        sequence_collection.APPEND(computed_value)
+        current_index ← current_index + 1
+    END WHILE
+
+    DECLARE result_combinations ← EMPTY ARRAY
+
+    PROCEDURE explore_combinations(first_cursor, second_cursor, third_cursor)
+        IF first_cursor = input_limit − 2 THEN
+            RETURN
+        END IF
+        IF second_cursor = input_limit − 1 THEN
+            CALL explore_combinations(first_cursor + 1, first_cursor + 2, first_cursor + 3)
+            RETURN
+        END IF
+        IF third_cursor = input_limit THEN
+            CALL explore_combinations(first_cursor, second_cursor + 1, second_cursor + 2)
+            RETURN
+        END IF
+
+        LET sum_triplet ← sequence_collection[first_cursor] + sequence_collection[second_cursor] + sequence_collection[third_cursor]
+        IF (sum_triplet MODULO 3) = 0 THEN
+            result_combinations.APPEND((sequence_collection[first_cursor], sequence_collection[second_cursor], sequence_collection[third_cursor]))
+        END IF
+        CALL explore_combinations(first_cursor, second_cursor, third_cursor + 1)
+    END PROCEDURE
+
+    CALL explore_combinations(0, 1, 2)
+
+    RETURN COUNT(result_combinations)
+END FUNCTION

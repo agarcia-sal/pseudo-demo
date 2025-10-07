@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        DEFINE substr_freq AS an empty map defaulting to zero
+        SET idx_outer TO 0
+        WHILE idx_outer < LENGTH(arr)
+            SET current_str TO arr[idx_outer]
+            SET str_len TO LENGTH(current_str)
+            SET start_pos TO 0
+            WHILE start_pos < str_len
+                SET end_pos TO start_pos + 1
+                WHILE end_pos <= str_len
+                    SET piece TO SLICE current_str FROM start_pos TO end_pos - 1
+                    SET current_count TO substr_freq[piece]
+                    SET substr_freq[piece] TO current_count + 1
+                    SET end_pos TO end_pos + 1
+                END WHILE
+                SET start_pos TO start_pos + 1
+            END WHILE
+            SET idx_outer TO idx_outer + 1
+        END WHILE
+
+        SET results TO LIST()
+        SET idx_array TO 0
+        WHILE idx_array < LENGTH(arr)
+            SET string_to_check TO arr[idx_array]
+            SET length_str TO LENGTH(string_to_check)
+            SET min_unique_substr TO ""
+
+            SET outer_idx TO 0
+            WHILE outer_idx < length_str
+                SET inner_idx TO outer_idx + 1
+                WHILE inner_idx <= length_str
+                    SET candidate_substring TO string_to_check[outer_idx: inner_idx]
+                    IF substr_freq[candidate_substring] = 1 THEN
+                        IF min_unique_substr = "" OR LENGTH(candidate_substring) < LENGTH(min_unique_substr) OR
+                           (LENGTH(candidate_substring) = LENGTH(min_unique_substr) AND candidate_substring < min_unique_substr) THEN
+                            SET min_unique_substr TO candidate_substring
+                        END IF
+                    END IF
+                    SET inner_idx TO inner_idx + 1
+                END WHILE
+                SET outer_idx TO outer_idx + 1
+            END WHILE
+
+            APPEND min_unique_substr TO results
+            SET idx_array TO idx_array + 1
+        END WHILE
+
+        RETURN results
+    END FUNCTION
+END CLASS

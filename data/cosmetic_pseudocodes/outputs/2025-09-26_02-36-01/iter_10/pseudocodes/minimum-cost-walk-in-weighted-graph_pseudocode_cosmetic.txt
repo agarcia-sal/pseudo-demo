@@ -1,0 +1,110 @@
+CLASS UnionFind  
+	FUNCTION __init__(self, n)  
+		PROCEDURE buildList(a, b)  
+			RETURN a >= b ? [] : [a] + buildList(a + 1, b)  
+		END PROCEDURE  
+		
+		SET self.parent TO buildList(0, n)  
+		PROCEDURE createRepeatedArray(val, cnt)  
+			IF cnt <= 0 THEN RETURN [] END IF  
+			RETURN [val] + createRepeatedArray(val, cnt - 1)  
+		END PROCEDURE  
+		SET self.rank TO createRepeatedArray(1, n)  
+	END FUNCTION  
+  
+	FUNCTION find(self, u)  
+		PROCEDURE recurFind(x) RETURNS INTEGER  
+			IF self.parent[x] != x THEN  
+				SET self.parent[x] TO recurFind(self.parent[x])  
+			END IF  
+			RETURN self.parent[x]  
+		END PROCEDURE  
+		RETURN recurFind(u)  
+	END FUNCTION  
+  
+	FUNCTION union(self, u, v)  
+		PROCEDURE join(x, y)  
+			SET rootX TO self.find(x)  
+			SET rootY TO self.find(y)  
+			IF rootX != rootY THEN  
+				IF self.rank[rootX] > self.rank[rootY] THEN  
+					SET self.parent[rootY] TO rootX  
+				ELSE  
+					IF self.rank[rootX] < self.rank[rootY] THEN  
+						SET self.parent[rootX] TO rootY  
+					ELSE  
+						SET self.parent[rootY] TO rootX  
+						SET self.rank[rootX] TO self.rank[rootX] + 1  
+					END IF  
+				END IF  
+			END IF  
+		END PROCEDURE  
+		CALL join(u, v)  
+	END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+	FUNCTION minimumCost(self, n, edges, query)  
+		SET uf TO UnionFind(n)  
+		
+		PROCEDURE pow2Minus1(exp)  
+			RETURN (1 << exp) - 1  
+		END PROCEDURE  
+		
+		SET maskArray TO []  
+		PROCEDURE fillMaskArray(length, val)  
+			IF length <= 0 THEN RETURN [] END IF  
+			RETURN [val] + fillMaskArray(length - 1, val)  
+		END PROCEDURE  
+		SET maskArray TO fillMaskArray(n, pow2Minus1(32))  
+		
+		PROCEDURE processEdges(edgelist)  
+			IF edgelist == [] THEN RETURN END IF  
+			SET headTuple TO edgelist[0]  
+			SET tailList TO edgelist[1:]  
+			SET uu TO headTuple[0]  
+			SET vv TO headTuple[1]  
+			SET ww TO headTuple[2]  
+			uf.union(uu, vv)  
+			SET rootIdx TO uf.find(uu)  
+			SET maskArray[rootIdx] TO maskArray[rootIdx] BITWISE_AND ww  
+			CALL processEdges(tailList)  
+		END PROCEDURE  
+		CALL processEdges(edges)  
+		
+		SET compCosts TO {}  
+		PROCEDURE fillCompCosts(index)  
+			IF index >= n THEN RETURN END IF  
+			SET r TO uf.find(index)  
+			IF r NOT_IN compCosts THEN  
+				SET compCosts[r] TO maskArray[r]  
+			END IF  
+			CALL fillCompCosts(index + 1)  
+		END PROCEDURE  
+		CALL fillCompCosts(0)  
+		
+		SET ans TO []  
+		PROCEDURE processQueries(qr)  
+			IF qr == [] THEN RETURN END IF  
+			SET firstPair TO qr[0]  
+			SET restPairs TO qr[1:]  
+			SET ss TO firstPair[0]  
+			SET tt TO firstPair[1]  
+			IF ss == tt THEN  
+				SET ans TO ans + [0]  
+			ELSE  
+				SET groupS TO uf.find(ss)  
+				SET groupT TO uf.find(tt)  
+				IF groupS == groupT THEN  
+					SET ans TO ans + [compCosts[groupS]]  
+				ELSE  
+					SET ans TO ans + [-1]  
+				END IF  
+			END IF  
+			CALL processQueries(restPairs)  
+		END PROCEDURE  
+		CALL processQueries(query)  
+		
+		RETURN ans  
+	END FUNCTION  
+END CLASS

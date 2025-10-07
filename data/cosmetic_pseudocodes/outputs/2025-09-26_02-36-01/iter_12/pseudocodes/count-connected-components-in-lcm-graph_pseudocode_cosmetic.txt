@@ -1,0 +1,89 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+        DECLARE tempMap1 AS empty map  
+        DECLARE tempMap2 AS empty map  
+        DECLARE idx AS integer = 0  
+        WHILE idx LESS THAN n DO  
+            SET tempMap1[idx] = idx  
+            SET tempMap2[idx] = 0  
+            INCREMENT idx BY 1  
+        END WHILE  
+        SET self.parent = tempMap1  
+        SET self.rank = tempMap2  
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+        FUNCTION recursiveFind(y)  
+            IF self.parent[y] NOT EQUALS y THEN  
+                SET intermediateVal = recursiveFind(self.parent[y])  
+                SET self.parent[y] = intermediateVal  
+            END IF  
+            RETURN self.parent[y]  
+        END FUNCTION  
+        RETURN recursiveFind(x)  
+    END FUNCTION  
+
+    FUNCTION union_set(self, u, v)  
+        FUNCTION swapIfNeeded(a, b)  
+            IF self.rank[a] LESS THAN self.rank[b] THEN  
+                RETURN (b, a)  
+            ELSE  
+                RETURN (a, b)  
+            END IF  
+        END FUNCTION  
+
+        SET u = self.find(u)  
+        SET v = self.find(v)  
+        IF u NOT EQUALS v THEN  
+            SET (u, v) = swapIfNeeded(u, v)  
+            SET self.parent[v] = u  
+            IF self.rank[u] EQUALS self.rank[v] THEN  
+                SET self.rank[u] = self.rank[u] PLUS 1  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+        FUNCTION generateMultiples(base, limit)  
+            DECLARE multiplesList AS empty list  
+            DECLARE currVal AS integer = base + base  
+            WHILE currVal LESS THAN OR EQUAL TO limit DO  
+                APPEND currVal TO multiplesList  
+                SET currVal = currVal + base  
+            END WHILE  
+            RETURN multiplesList  
+        END FUNCTION  
+
+        SET dsu = DSU(threshold + 1)  
+
+        DECLARE outerIndex AS integer = 0  
+        DECLARE nCount AS integer = LENGTH(nums)  
+        WHILE outerIndex LESS THAN nCount DO  
+            SET currentNum = nums[outerIndex]  
+            DECLARE multiples = generateMultiples(currentNum, threshold)  
+            DECLARE innerIndex AS integer = 0  
+            DECLARE multCount AS integer = LENGTH(multiples)  
+            WHILE innerIndex LESS THAN multCount DO  
+                CALL dsu.union_set(currentNum, multiples[innerIndex])  
+                INCREMENT innerIndex BY 1  
+            END WHILE  
+            INCREMENT outerIndex BY 1  
+        END WHILE  
+
+        DECLARE resultSet AS empty set  
+        DECLARE i AS integer = 0  
+        WHILE i LESS THAN nCount DO  
+            SET val = nums[i]  
+            IF val LESS THAN OR EQUAL TO threshold THEN  
+                ADD dsu.find(val) TO resultSet  
+            ELSE  
+                ADD val TO resultSet  
+            END IF  
+            INCREMENT i BY 1  
+        END WHILE  
+
+        RETURN SIZE(resultSet)  
+    END FUNCTION  
+END CLASS

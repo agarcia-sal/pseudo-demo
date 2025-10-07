@@ -1,0 +1,95 @@
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+        PROCEDURE accumulate_counts(index, acc_map, last_char, last_num)
+            IF index >= LENGTH(compressed) THEN
+                IF last_char != "" THEN
+                    acc_map[last_char] = acc_map[last_char] + last_num
+                END IF
+                RETURN acc_map
+            ELSE
+                DECLARE ch = compressed[index]
+                IF (('a' <= ch AND ch <= 'z') OR ('A' <= ch AND ch <= 'Z')) THEN
+                    IF last_char != "" THEN
+                        acc_map[last_char] = acc_map[last_char] + last_num
+                    END IF
+                    RETURN accumulate_counts(index + 1, acc_map, ch, 0)
+                ELSE
+                    DECLARE digit_val = (DATA("0123456789").INDEXOF(ch))
+                    RETURN accumulate_counts(index + 1, acc_map, last_char, last_num * 10 + digit_val)
+                END IF
+            END IF
+        END PROCEDURE
+
+        DECLARE count_map DEFAULT 0
+        DECLARE counted := accumulate_counts(0, count_map, "", 0)
+        DECLARE keys := []
+        FOR EACH key IN counted KEYS
+            APPEND key TO keys
+        END FOR
+
+        DECLARE sorted_keys := []
+        PROCEDURE sort_keys_unordered(keys_list, sorted_acc)
+            IF LENGTH(keys_list) = 0 THEN
+                RETURN sorted_acc
+            END IF
+            DECLARE min_char = keys_list[0]
+            DECLARE idx = 0
+            DECLARE i = 1
+            WHILE i < LENGTH(keys_list)
+                IF keys_list[i] < min_char THEN
+                    min_char = keys_list[i]
+                    idx = i
+                END IF
+                i = i + 1
+            END WHILE
+            APPEND min_char TO sorted_acc
+            DECLARE rest := []
+            DECLARE j = 0
+            WHILE j < LENGTH(keys_list)
+                IF j != idx THEN
+                    APPEND keys_list[j] TO rest
+                END IF
+                j = j + 1
+            END WHILE
+            RETURN sort_keys_unordered(rest, sorted_acc)
+        END PROCEDURE
+
+        sorted_keys = sort_keys_unordered(keys, [])
+
+        DECLARE output_parts := []
+        DECLARE k = 0
+        WHILE k < LENGTH(sorted_keys)
+            DECLARE c = sorted_keys[k]
+            DECLARE n = counted[c]
+            DECLARE n_str = "" 
+            IF n = 0 THEN
+                n_str = "0"
+            ELSE
+                DECLARE temp_n = n
+                DECLARE digits_stack = []
+                WHILE temp_n > 0
+                    DECLARE dig = temp_n % 10
+                    digits_stack = [dig] + digits_stack
+                    temp_n = temp_n / 10
+                END WHILE
+                DECLARE d_index = 0
+                WHILE d_index < LENGTH(digits_stack)
+                    DECLARE digit_char = "0123456789"[digits_stack[d_index]]
+                    n_str = n_str + digit_char
+                    d_index = d_index + 1
+                END WHILE
+            END IF
+            output_parts = output_parts + [c + n_str]
+            k = k + 1
+        END WHILE
+
+        DECLARE final_result = ""
+        DECLARE idx_out = 0
+        WHILE idx_out < LENGTH(output_parts)
+            final_result = final_result + output_parts[idx_out]
+            idx_out = idx_out + 1
+        END WHILE
+
+        RETURN final_result
+    END FUNCTION
+END CLASS

@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION numberOfPairs(points)
+        SET totalPairs TO 0
+        SET lengthPoints TO (0 + (LENGTH(points) - 0))
+        
+        FUNCTION innerLoopJ(indexI, indexJ, isValid)
+            IF indexJ > (lengthPoints - (1 + 1)) THEN
+                RETURN isValid
+            ELSE
+                IF indexI <> indexJ THEN
+                    SET pointIX TO points[indexI][0]
+                    SET pointIY TO points[indexI][1]
+                    SET pointJX TO points[indexJ][0]
+                    SET pointJY TO points[indexJ][1]
+                    
+                    IF (pointIX <= pointJX) AND (pointIY >= pointJY) THEN
+                        FUNCTION checkKLoop(kIndex, stillValid)
+                            IF (kIndex > (lengthPoints - (1 + 1))) OR (stillValid = 0) THEN
+                                RETURN stillValid
+                            ELSE
+                                IF (kIndex <> indexI) AND (kIndex <> indexJ) THEN
+                                    SET pointKX TO points[kIndex][0]
+                                    SET pointKY TO points[kIndex][1]
+                                    
+                                    IF (pointIX <= pointKX) AND (pointKX <= pointJX) AND (pointIY >= pointKY) AND (pointKY >= pointJY) THEN
+                                        SET stillValid TO 0
+                                        RETURN stillValid
+                                    ELSE
+                                        RETURN checkKLoop(kIndex + 1, stillValid)
+                                    END IF
+                                ELSE
+                                    RETURN checkKLoop(kIndex + 1, stillValid)
+                                END IF
+                            END IF
+                        END FUNCTION
+                        
+                        SET validFlag TO 1
+                        SET validFlag TO checkKLoop(0, validFlag)
+                        
+                        IF validFlag = 1 THEN
+                            SET totalPairs TO totalPairs + 1
+                        END IF
+                    END IF
+                END IF
+                RETURN innerLoopJ(indexI, indexJ + 1, isValid)
+            END IF
+        END FUNCTION
+        
+        FUNCTION outerLoopI(indexI)
+            IF indexI > (lengthPoints - (1 + 1)) THEN
+                RETURN
+            ELSE
+                CALL innerLoopJ(indexI, 0, 1)
+                CALL outerLoopI(indexI + 1)
+            END IF
+        END FUNCTION
+        
+        CALL outerLoopI(0)
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

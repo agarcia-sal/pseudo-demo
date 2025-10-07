@@ -1,0 +1,58 @@
+CLASS Solution
+	TYPE MODULO IS INTEGER
+	TYPE MAPPING IS MAP<CHAR, INTEGER>
+
+	FUNCTION countWinningSequences(s)
+		
+		FUNCTION calc(p, q)
+			RETURN (
+				(p = q) * 0
+				+
+				((p < q) * (((p = 0) * (q = 2)) * 1 + (1 - ((p = 0) * (q = 2))) * (-1)))
+				+
+				((p > q) * (((p = 2) * (q = 0)) * (-1) + (1 - ((p = 2) * (q = 0))) * 1)))
+			)
+		END FUNCTION
+		
+		FUNCTION dfs(a, b, c)
+			RETURN dfs_helper(a, b, c, LENGTH(s))
+		END FUNCTION
+		
+		FUNCTION dfs_helper(x, y, z, length)
+			IF ((length - x) <= y) THEN
+				RETURN 0
+			ELSE
+				IF (x >= length) THEN
+					IF y < 0 THEN
+						RETURN 1
+					ELSE
+						RETURN 0
+					END IF
+				ELSE
+					VARIABLE accumulation IS 0
+					VARIABLE iteration IS 0
+					WHILE iteration <= 2 DO
+						IF iteration != z THEN
+							VARIABLE tmpCalc IS calc(MAPPING[s[x]], iteration)
+							VARIABLE tmpRecursive IS dfs_helper(x + 1, y + tmpCalc, iteration, length)
+							accumulation = (accumulation + tmpRecursive) MOD MODULO
+						END IF
+						iteration = iteration + 1
+					END WHILE
+					RETURN accumulation
+				END IF
+			END IF
+		END FUNCTION
+
+		MODULO = 1000000000 + 7
+
+		MAPPING = EMPTY MAP
+		MAPPING['F'] = 0
+		MAPPING['W'] = 1
+		MAPPING['E'] = 2
+
+		ANS = dfs(0, 0, -1)
+		/* dfs cache clear method called in original pseudocode; ignored here as no explicit cache defined */
+		RETURN ANS
+	END FUNCTION
+END CLASS

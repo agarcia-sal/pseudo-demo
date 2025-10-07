@@ -1,0 +1,174 @@
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION is_peak(pos INTEGER) RETURNS BOOLEAN
+            DECLARE left_val INTEGER, curr_val INTEGER, right_val INTEGER
+            SET curr_val = nums[pos]
+            SET left_val = nums[pos - 1]
+            SET right_val = nums[pos + 1]
+            DECLARE left_check BOOLEAN, right_check BOOLEAN
+            SET left_check = (left_val < curr_val)
+            SET right_check = (curr_val > right_val)
+            RETURN (left_check AND right_check)
+        END FUNCTION
+
+        DECLARE peak_positions LIST OF INTEGER
+        DECLARE idx INTEGER
+        SET idx = 1
+        WHILE idx ≤ LENGTH(nums) - 2
+            IF is_peak(idx) = TRUE THEN
+                APPEND idx TO peak_positions
+            END IF
+            SET idx = idx + 1
+        END WHILE
+
+        DECLARE output LIST OF INTEGER
+        DECLARE q LIST OF INTEGER
+        DECLARE curr_q_idx INTEGER
+        DECLARE left_bound INTEGER
+        DECLARE right_bound INTEGER
+        DECLARE pos INTEGER
+        DECLARE val INTEGER
+        DECLARE start_pos INTEGER
+        DECLARE end_pos INTEGER
+
+        DECLARE p_index_left INTEGER
+        DECLARE p_index_right INTEGER
+
+        DECLARE i_min INTEGER
+        DECLARE i_max INTEGER
+
+        DECLARE p_exists BOOLEAN
+
+        DECLARE loop_i INTEGER
+
+        DECLARE temp_idx INTEGER
+
+        DECLARE total_queries INTEGER
+        SET curr_q_idx = 0
+        SET total_queries = LENGTH(queries)
+
+        WHILE curr_q_idx < total_queries
+            SET q = queries[curr_q_idx]
+            IF q[0] = 1 THEN
+                SET left_bound = q[1]
+                SET right_bound = q[2]
+
+                DECLARE l_insert_pos INTEGER
+                DECLARE r_insert_pos INTEGER
+
+                FUNCTION lower_bound(arr LIST OF INTEGER, val INTEGER) RETURNS INTEGER
+                    DECLARE l INTEGER, r INTEGER, m INTEGER
+                    SET l = 0
+                    SET r = LENGTH(arr)
+                    WHILE l < r
+                        SET m = (l + r) / 2
+                        IF arr[m] < val THEN
+                            SET l = m + 1
+                        ELSE
+                            SET r = m
+                        END IF
+                    END WHILE
+                    RETURN l
+                END FUNCTION
+
+                FUNCTION upper_bound(arr LIST OF INTEGER, val INTEGER) RETURNS INTEGER
+                    DECLARE l INTEGER, r INTEGER, m INTEGER
+                    SET l = 0
+                    SET r = LENGTH(arr)
+                    WHILE l < r
+                        SET m = (l + r) / 2
+                        IF arr[m] ≤ val THEN
+                            SET l = m + 1
+                        ELSE
+                            SET r = m
+                        END IF
+                    END WHILE
+                    RETURN l
+                END FUNCTION
+
+                SET l_insert_pos = upper_bound(peak_positions, left_bound + 1)
+                SET r_insert_pos = lower_bound(peak_positions, right_bound)
+                SET p_index_left = l_insert_pos
+                SET p_index_right = r_insert_pos - 1
+                SET pos = p_index_right - p_index_left
+                APPEND pos TO output
+
+            ELSE
+                SET pos = q[1]
+                SET val = q[2]
+                IF nums[pos] = val THEN
+                    SET curr_q_idx = curr_q_idx + 1
+                    CONTINUE
+                END IF
+                SET nums[pos] = val
+
+                SET i_min = (1 > (pos - 1)) ? 1 : (pos - 1)
+                SET i_max = ((LENGTH(nums) - 2) < (pos + 1)) ? (LENGTH(nums) - 2) : (pos + 1)
+
+                SET loop_i = i_min
+                WHILE loop_i ≤ i_max
+                    SET p_exists = FALSE
+
+                    FUNCTION binary_search(arr LIST OF INTEGER, target INTEGER) RETURNS BOOLEAN
+                        DECLARE l INTEGER, r INTEGER, m INTEGER
+                        SET l = 0
+                        SET r = LENGTH(arr) - 1
+                        WHILE l ≤ r
+                            SET m = (l + r) / 2
+                            IF arr[m] = target THEN
+                                RETURN TRUE
+                            ELSE IF arr[m] < target THEN
+                                SET l = m + 1
+                            ELSE
+                                SET r = m - 1
+                            END IF
+                        END WHILE
+                        RETURN FALSE
+                    END FUNCTION
+                    
+                    FUNCTION insert_sorted(arr LIST OF INTEGER, val INTEGER)
+                        DECLARE pos INTEGER
+                        SET pos = lower_bound(arr, val)
+                        INSERT val INTO arr AT pos
+                    END FUNCTION
+
+                    FUNCTION remove_sorted(arr LIST OF INTEGER, val INTEGER)
+                        DECLARE l INTEGER, r INTEGER, m INTEGER, pos INTEGER
+                        SET l = 0
+                        SET r = LENGTH(arr) -1
+                        SET pos = -1
+                        WHILE l ≤ r
+                            SET m = (l + r) / 2
+                            IF arr[m] = val THEN
+                                SET pos = m
+                                BREAK
+                            ELSE IF arr[m] < val THEN
+                                SET l = m + 1
+                            ELSE
+                                SET r = m - 1
+                            END IF
+                        END WHILE
+                        IF pos ≠ -1 THEN
+                            REMOVE element at pos FROM arr
+                        END IF
+                    END FUNCTION
+
+                    SET p_exists = binary_search(peak_positions, loop_i)
+                    IF is_peak(loop_i) = TRUE THEN
+                        IF p_exists = FALSE THEN
+                            CALL insert_sorted(peak_positions, loop_i)
+                        END IF
+                    ELSE
+                        IF p_exists = TRUE THEN
+                            CALL remove_sorted(peak_positions, loop_i)
+                        END IF
+                    END IF
+                    SET loop_i = loop_i + 1
+                END WHILE
+            END IF
+            SET curr_q_idx = curr_q_idx + 1
+        END WHILE
+
+        RETURN output
+    END FUNCTION
+END CLASS

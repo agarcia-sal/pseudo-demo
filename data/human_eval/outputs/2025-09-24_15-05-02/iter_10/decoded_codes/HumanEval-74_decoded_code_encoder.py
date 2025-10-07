@@ -1,0 +1,9 @@
+from typing import List
+
+def total_match(list1: List[str], list2: List[str]) -> List[str]:
+    l1 = sum(len(string) for string in list1)
+    l2 = sum(len(string) for string in list2)
+    if l1 <= l2:
+        return list1
+    else:
+        return list2

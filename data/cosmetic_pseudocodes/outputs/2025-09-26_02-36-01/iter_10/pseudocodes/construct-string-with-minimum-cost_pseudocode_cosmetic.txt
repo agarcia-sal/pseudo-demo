@@ -1,0 +1,74 @@
+CLASS Solution
+	FUNCTION minimumCost(target, words, costs)
+		DEFINE FUNCTION replicate_dictionary(keys_list, values_list)
+			DEFINE FUNCTION aux(idx, accum_dict)
+				IF idx EQUALS LENGTH(keys_list) THEN
+					RETURN accum_dict
+				END IF
+				LET curr_key = keys_list[idx]
+				LET curr_val = values_list[idx]
+				IF curr_key NOT_IN accum_dict THEN
+					SET accum_dict[curr_key] = curr_val
+				ELSE
+					IF curr_val < accum_dict[curr_key] THEN
+						SET accum_dict[curr_key] = curr_val
+					END IF
+				END IF
+				RETURN aux(idx + 1, accum_dict)
+			END FUNCTION
+			RETURN aux(0, {})
+		END FUNCTION
+
+		LET dictionary_word_to_cost = replicate_dictionary(words, costs)
+		LET target_chars = []
+		REPEAT
+			EXIT WHEN LENGTH(target) = LENGTH(target_chars)
+			LET target_chars = target_chars + [target[ LENGTH(target_chars) ]]
+		UNTIL FALSE
+
+		DEFINE FUNCTION minimum_cost_from_position(position)
+			IF position EQUALS LENGTH(target_chars) THEN
+				RETURN 0
+			END IF
+			LET temporary_minimum = 1 / 0
+			DEFINE FUNCTION iterate_dict(pairs, idx)
+				IF idx EQUALS LENGTH(pairs) THEN
+					RETURN
+				END IF
+				LET word_str = pairs[idx][0]
+				LET associated_cost = pairs[idx][1]
+				LET word_len = LENGTH(word_str)
+				IF (position + word_len) <= LENGTH(target_chars) THEN
+					LET slice_of_target = []
+					FOR i IN 0 TO (word_len - 1)
+						SET slice_of_target = slice_of_target + [target_chars[position + i]]
+					END FOR
+					LET word_as_list = []
+					FOR j IN 0 TO (word_len - 1)
+						SET word_as_list = word_as_list + [word_str[j]]
+					END FOR
+					IF slice_of_target EQUALS word_as_list THEN
+						LET next_cost = minimum_cost_from_position(position + word_len)
+						IF next_cost != 1 / 0 THEN
+							IF (associated_cost + next_cost) < temporary_minimum THEN
+								SET temporary_minimum = associated_cost + next_cost
+							END IF
+						END IF
+					END IF
+				END IF
+				iterate_dict(pairs, idx + 1)
+			END FUNCTION
+			iterate_dict(TO_LIST(dictionary_word_to_cost.ITEMS()), 0)
+			IF temporary_minimum != 1 / 0 THEN
+				RETURN temporary_minimum
+			END IF
+			RETURN 1 / 0
+		END FUNCTION
+
+		LET final_answer = minimum_cost_from_position(0)
+		IF final_answer != 1 / 0 THEN
+			RETURN final_answer
+		END IF
+		RETURN -1
+	END FUNCTION
+END CLASS

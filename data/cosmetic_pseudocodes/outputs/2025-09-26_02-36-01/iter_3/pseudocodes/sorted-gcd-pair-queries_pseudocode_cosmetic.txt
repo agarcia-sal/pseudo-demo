@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION gcdValues(nums, queries)
+        LET topValue ← -∞
+        FOR each elementVal IN nums
+            IF elementVal > topValue THEN
+                topValue ← elementVal
+            END IF
+        END FOR
+
+        LET counts ← a new counting map
+        FOR each numItem IN nums
+            counts[numItem] ← (counts[numItem] OR 0) + 1
+        END FOR
+
+        LET gcdCounts ← array of zeroes sized (topValue + 1)
+        LET divisor ← topValue
+        WHILE divisor ≥ 1 DO
+            LET sumCount ← 0
+            LET multiple ← divisor
+            WHILE multiple ≤ topValue DO
+                LET frequency ← counts[multiple] OR 0
+                sumCount ← sumCount + frequency
+
+                gcdCounts[divisor] ← gcdCounts[divisor] - gcdCounts[multiple]
+                multiple ← multiple + divisor
+            END WHILE
+
+            LET pairsCount ← (sumCount * (sumCount - 1)) / 2
+            gcdCounts[divisor] ← gcdCounts[divisor] + pairsCount
+
+            divisor ← divisor - 1
+        END WHILE
+
+        LET prefixSums ← empty list
+        LET runningSum ← 0
+        FOR index FROM 0 TO topValue DO
+            runningSum ← runningSum + gcdCounts[index]
+            prefixSums APPEND runningSum
+        END FOR
+
+        LET answers ← empty list
+        FOR each queryVal IN queries DO
+            LET left ← 0
+            LET right ← length of prefixSums
+            WHILE left < right DO
+                LET middle ← (left + right) / 2
+                IF prefixSums[middle] ≤ queryVal THEN
+                    left ← middle + 1
+                ELSE
+                    right ← middle
+                END IF
+            END WHILE
+            answers APPEND left
+        END FOR
+
+        RETURN answers
+    END FUNCTION
+END CLASS

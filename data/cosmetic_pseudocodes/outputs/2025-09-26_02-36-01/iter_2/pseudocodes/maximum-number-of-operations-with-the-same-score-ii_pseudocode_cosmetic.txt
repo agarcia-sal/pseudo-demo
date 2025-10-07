@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION maxOperations(numbers)
+        FUNCTION dfs(leftIdx, rightIdx, targetSum, cache)
+            IF leftIdx >= rightIdx THEN
+                RETURN 0
+            END IF
+            
+            keyTriple := (leftIdx, rightIdx, targetSum)
+            IF keyTriple IN cache THEN
+                RETURN cache[keyTriple]
+            END IF
+
+            currentMax := 0
+
+            a1 := numbers[leftIdx]
+            a2 := numbers[leftIdx + 1]
+            sumLeftPair := a1 + a2
+            IF sumLeftPair = targetSum THEN
+                candidate1 := 1 + dfs(leftIdx + 2, rightIdx, targetSum, cache)
+                currentMax := (candidate1 > currentMax) ? candidate1 : currentMax
+            END IF
+            
+            b1 := numbers[rightIdx]
+            b2 := numbers[rightIdx - 1]
+            sumRightPair := b2 + b1
+            IF sumRightPair = targetSum THEN
+                candidate2 := 1 + dfs(leftIdx, rightIdx - 2, targetSum, cache)
+                currentMax := (candidate2 > currentMax) ? candidate2 : currentMax
+            END IF
+            
+            c1 := numbers[leftIdx]
+            c2 := numbers[rightIdx]
+            sumOuterPair := c1 + c2
+            IF sumOuterPair = targetSum THEN
+                candidate3 := 1 + dfs(leftIdx + 1, rightIdx - 1, targetSum, cache)
+                currentMax := (candidate3 > currentMax) ? candidate3 : currentMax
+            END IF
+
+            cache[keyTriple] := currentMax
+            RETURN currentMax
+        END FUNCTION
+
+        lengthNums := LENGTH(numbers)
+
+        opt1 := 1 + dfs(2, lengthNums - 1, numbers[0] + numbers[1], {})
+        opt2 := 1 + dfs(0, lengthNums - 3, numbers[lengthNums - 2] + numbers[lengthNums - 1], {})
+        opt3 := 1 + dfs(1, lengthNums - 2, numbers[0] + numbers[lengthNums - 1], {})
+
+        RETURN (opt1 > opt2) ? (opt1 > opt3 ? opt1 : opt3) : (opt2 > opt3 ? opt2 : opt3)
+    END FUNCTION
+END CLASS

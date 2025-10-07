@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER m INTEGER) RETURNS LIST OF INTEGER
+        SET binaries TO []
+        FUNCTION to_binary_with_padding(value INTEGER, length INTEGER) RETURNS STRING
+            SET result TO ""
+            FUNCTION helper(v INTEGER, count INTEGER) RETURNS STRING
+                IF count EQUALS zero
+                    RETURN ""
+                ELSE
+                    SET bit_value TO v MODULO 2
+                    SET rest TO helper(v DIV 2, count - 1)
+                    RETURN rest CONCATENATED WITH (IF bit_value EQUALS 1 THEN "1" ELSE "0")
+                END IF
+            END FUNCTION
+            SET result TO helper(value, length)
+            RETURN result
+        END FUNCTION
+
+        SET index_nums TO 0
+        WHILE index_nums LESS THAN LENGTH OF nums
+            SET current_num TO nums[index_nums]
+            SET binary_form TO to_binary_with_padding(current_num, m)
+            CALL binaries.APPEND(binary_form)
+            SET index_nums TO index_nums + 1
+        END WHILE
+
+        SET results TO []
+
+        FUNCTION hamming_distance(binA STRING, binB STRING) RETURNS INTEGER
+            FUNCTION hamming_recursive(pos INTEGER, acc INTEGER) RETURNS INTEGER
+                IF pos GREATER OR EQUAL TO LENGTH OF binA
+                    RETURN acc
+                ELSE
+                    SET charA TO binA[pos]
+                    SET charB TO binB[pos]
+                    SET increased_acc TO acc
+                    IF NOT (charA EQUALS charB)
+                        SET increased_acc TO acc + 1
+                    END IF
+                    RETURN hamming_recursive(pos + 1, increased_acc)
+                END IF
+            END FUNCTION
+            RETURN hamming_recursive(0, 0)
+        END FUNCTION
+
+        SET outer_index TO 0
+        WHILE outer_index LESS THAN LENGTH OF nums
+            SET max_tally TO 0
+            SET inner_index TO 0
+            WHILE inner_index LESS THAN LENGTH OF nums
+                IF NOT (outer_index EQUALS inner_index)
+                    SET dist_calc TO hamming_distance(binaries[outer_index], binaries[inner_index])
+                    IF dist_calc GREATER THAN max_tally
+                        SET max_tally TO dist_calc
+                    END IF
+                END IF
+                SET inner_index TO inner_index + 1
+            END WHILE
+            CALL results.APPEND(max_tally)
+            SET outer_index TO outer_index + 1
+        END WHILE
+
+        SET final_output TO results
+        RETURN final_output
+    END FUNCTION
+END CLASS

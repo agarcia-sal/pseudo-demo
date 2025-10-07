@@ -1,0 +1,65 @@
+```pseudocode
+CLASS Solution
+    FUNCTION numberOfPermutations(n, requirements)
+        CONSTANT K_MODULUS = (10 ^ 9) + 7
+        DECLARE req_map AS empty dictionary
+        SET idx_α TO 0
+        WHILE idx_α < LENGTH(requirements)
+            DECLARE pos_χ, val_β
+            SET pos_χ, val_β TO requirements[idx_α][0], requirements[idx_α][1]
+            SET req_map[pos_χ] = val_β
+            SET idx_α = idx_α + 1
+        END WHILE
+
+        FUNCTION count_permutations(len_prefix, inv_count, used_mask)
+            IF len_prefix >= n THEN
+                DECLARE limit_inv
+                IF HAS_KEY(req_map, n - 1) THEN
+                    SET limit_inv = req_map[n - 1]
+                ELSE
+                    SET limit_inv = 0
+                END IF
+                IF inv_count = limit_inv THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            IF len_prefix > 0 THEN
+                DECLARE req_inv
+                IF HAS_KEY(req_map, len_prefix - 1) THEN
+                    SET req_inv = req_map[len_prefix - 1]
+                ELSE
+                    SET req_inv = inv_count
+                END IF
+                IF inv_count != req_inv THEN
+                    RETURN 0
+                END IF
+            END IF
+
+            DECLARE acc_counter = 0
+            DECLARE i_num = 0
+            WHILE i_num < n
+                DECLARE bit_flag = used_mask BITWISE_AND (1 LEFT_SHIFT i_num)
+                IF bit_flag = 0 THEN
+                    DECLARE inv_new = inv_count
+                    DECLARE j_idx = i_num + 1
+                    WHILE j_idx < n
+                        IF (used_mask BITWISE_AND (1 LEFT_SHIFT j_idx)) != 0 THEN
+                            SET inv_new = inv_new + 1
+                        END IF
+                        SET j_idx = j_idx + 1
+                    END WHILE
+                    SET acc_counter = (acc_counter + count_permutations(len_prefix + 1, inv_new, used_mask BITWISE_OR (1 LEFT_SHIFT i_num))) MODULO K_MODULUS
+                END IF
+                SET i_num = i_num + 1
+            END WHILE
+
+            RETURN acc_counter
+        END FUNCTION
+
+        RETURN count_permutations(0, 0, 0)
+    END FUNCTION
+END CLASS
+```

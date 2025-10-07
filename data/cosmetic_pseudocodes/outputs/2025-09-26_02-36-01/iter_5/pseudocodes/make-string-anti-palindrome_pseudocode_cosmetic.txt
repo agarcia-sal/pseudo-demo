@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION makeAntiPalindrome(s)
+        FUNCTION reorder(charsList, leftIndex, rightIndex)
+            IF leftIndex >= rightIndex THEN
+                RETURN charsList
+            END IF
+            IF charsList[leftIndex] = charsList[rightIndex] THEN
+                LOCAL swapOccurred BOOLEAN := false
+                LOCAL pos INTEGER := leftIndex + 1
+                WHILE pos < LENGTH(charsList) AND charsList[pos] = charsList[leftIndex]
+                    pos := pos + 1
+                END WHILE
+                IF pos >= LENGTH(charsList) THEN
+                    RETURN "−" + STRING(1)
+                END IF
+                LOCAL temp CHAR := charsList[pos]
+                charsList[pos] := charsList[leftIndex]
+                charsList[leftIndex] := temp
+                RETURN reorder(charsList, leftIndex, rightIndex)  // re-check after swap
+            ELSE
+                RETURN reorder(charsList, leftIndex + 1, rightIndex - 1)
+            END IF
+        END FUNCTION
+
+        LOCAL chars ARRAY := SORT(TO_LIST(s))
+        LOCAL length INTEGER := LENGTH(chars)
+        LOCAL middle INTEGER := length DIV 2
+        LOCAL result STRING
+
+        IF chars[middle] = chars[middle - 1]
+            LOCAL idx1 INTEGER := middle
+            WHILE idx1 < length AND chars[idx1] = chars[idx1 - 1]
+                idx1 := idx1 + 1
+            END WHILE
+
+            LOCAL idx2 INTEGER := middle
+            WHILE idx2 < length AND chars[idx2] = chars[length - idx2 - 1]
+                IF idx1 >= length THEN
+                    result := "−" + STRING(1)
+                    RETURN result
+                END IF
+                LOCAL aux CHAR := chars[idx1]
+                chars[idx1] := chars[idx2]
+                chars[idx2] := aux
+                idx1 := idx1 + 1
+                idx2 := idx2 + 1
+            END WHILE
+        END IF
+
+        LOCAL pointer INTEGER := 0
+        WHILE pointer < middle
+            IF chars[pointer] = chars[length - pointer - 1]
+                LOCAL found BOOLEAN := false
+                LOCAL seeker INTEGER := middle
+                WHILE seeker < length AND NOT found
+                    IF chars[seeker] <> chars[pointer] AND chars[seeker] <> chars[length - pointer - 1]
+                        LOCAL temp CHAR := chars[seeker]
+                        chars[seeker] := chars[pointer]
+                        chars[pointer] := temp
+                        found := true
+                    ELSE
+                        seeker := seeker + 1
+                    END IF
+                END WHILE
+                IF NOT found
+                    result := "−" + STRING(1)
+                    RETURN result
+                END IF
+            END IF
+            pointer := pointer + 1
+        END WHILE
+
+        LOCAL output STRING := ""
+        LOCAL idx INTEGER := 0
+        WHILE idx < length
+            output := output + chars[idx]
+            idx := idx + 1
+        END WHILE
+
+        RETURN output
+    END FUNCTION
+END CLASS

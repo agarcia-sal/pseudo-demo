@@ -1,0 +1,109 @@
+CLASS TreeNode  
+    FUNCTION __init__(self COMMA val EQUALS 0 COMMA left EQUALS None COMMA right EQUALS None)  
+        SET self.val TO val  
+        SET self.left TO left  
+        SET self.right TO right  
+    END FUNCTION  
+END CLASS  
+
+FUNCTION tree_node(valList)  
+    IF valList EQUALS empty THEN  
+        RETURN None  
+    END IF  
+
+    FUNCTION extract_node(queueRef)  
+        SET n TO queueRef[0]  
+        REMOVE element at position 0 from queueRef  
+        RETURN n  
+    END FUNCTION  
+
+    SET root TO new TreeNode with value equal to valList[0]  
+    SET cursor TO 0  
+    SET container TO empty list  
+    APPEND root TO container  
+
+    REPEAT  
+        IF cursor GREATER THAN OR EQUAL TO length of valList THEN  
+            BREAK  
+        END IF  
+
+        SET current TO extract_node(container)  
+
+        IF cursor + 1 LESS THAN length of valList AND valList[cursor + 1] NOT EQUALS None THEN  
+            SET childLeft TO new TreeNode with value equal to valList[cursor + 1]  
+            SET current.left TO childLeft  
+            APPEND childLeft TO container  
+        END IF  
+        SET cursor TO cursor + 2  
+
+        IF cursor - 1 LESS THAN length of valList AND valList[cursor - 1] NOT EQUALS None THEN  
+            SET childRight TO new TreeNode with value equal to valList[cursor - 1]  
+            SET current.right TO childRight  
+            APPEND childRight TO container  
+        END IF  
+    UNTIL container IS empty OR cursor GREATER THAN OR EQUAL TO length of valList  
+
+    RETURN root  
+END FUNCTION  
+
+FUNCTION is_same_tree(p COMMA q)  
+    FUNCTION compare_nodes(a COMMA b)  
+        IF a EQUALS None AND b EQUALS None THEN  
+            RETURN True  
+        END IF  
+        IF a EQUALS None OR b EQUALS None THEN  
+            RETURN False  
+        END IF  
+        IF NOT (a.val EQUALS b.val) THEN  
+            RETURN False  
+        END IF  
+        RETURN compare_nodes(a.left COMMA b.left) AND compare_nodes(a.right COMMA b.right)  
+    END FUNCTION  
+    RETURN compare_nodes(p COMMA q)  
+END FUNCTION  
+
+CLASS Solution  
+    FUNCTION minimumLevel(self COMMA root)  
+        IF root EQUALS None THEN  
+            RETURN 0  
+        END IF  
+
+        FUNCTION append_children_if_not_none(nodeRef COMMA queRef)  
+            IF nodeRef.left NOT EQUALS None THEN  
+                APPEND nodeRef.left TO queRef  
+            END IF  
+            IF nodeRef.right NOT EQUALS None THEN  
+                APPEND nodeRef.right TO queRef  
+            END IF  
+        END FUNCTION  
+
+        SET q TO list containing root  
+        SET ret_level TO 1  
+        SET best_sum TO 1 / 0  # represents positive infinity  
+        SET current_level TO 1  
+
+        WHILE length of q GREATER THAN 0  
+            SET temp_sum TO 0  
+            SET count TO length of q  
+
+            FUNCTION process_nodes(idx)  
+                IF idx GREATER THAN count THEN  
+                    RETURN  
+                END IF  
+                SET nd TO q[0]  
+                REMOVE element at position 0 from q  
+                SET temp_sum TO temp_sum + nd.val  
+                CALL append_children_if_not_none(nd COMMA q)  
+                CALL process_nodes(idx + 1)  
+            END FUNCTION  
+            CALL process_nodes(1)  
+
+            IF temp_sum LESS THAN best_sum THEN  
+                SET best_sum TO temp_sum  
+                SET ret_level TO current_level  
+            END IF  
+            SET current_level TO current_level + 1  
+        END WHILE  
+        RETURN ret_level  
+    END FUNCTION  
+END CLASS

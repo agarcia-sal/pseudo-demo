@@ -1,0 +1,67 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+        DECLARE index AS INTEGER  
+        INITIALIZE self.parent AS empty mapping  
+        INITIALIZE self.rank AS empty mapping  
+        SET index TO 0  
+        WHILE index IS LESS THAN n  
+            ASSIGN self.parent[index] = index  
+            ASSIGN self.rank[index] = 0  
+            INCREMENT index BY 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+        WHILE self.parent[x] IS NOT x  
+            SET self.parent[x] TO self.parent[self.parent[x]]  
+            SET x TO self.parent[x]  
+        END WHILE  
+        RETURN x  
+    END FUNCTION  
+
+    FUNCTION union_set(self, u, v)  
+        u = self.find(u)  
+        v = self.find(v)  
+        IF u ≠ v THEN  
+            IF self.rank[u] < self.rank[v] THEN  
+                LOCALLY DECLARE temp_u = u  
+                u = v  
+                v = temp_u  
+            END IF  
+            self.parent[v] = u  
+            IF self.rank[u] = self.rank[v] THEN  
+                self.rank[u] = self.rank[u] + 1  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+        DECLARE dsu = DSU(threshold + 1)  
+        DECLARE idx_outer  
+        DECLARE idx_inner  
+        SET idx_outer = 0  
+        WHILE idx_outer < LENGTH(nums)  
+            DECLARE val = nums[idx_outer]  
+            SET idx_inner = val * 2  
+            WHILE idx_inner <= threshold  
+                dsu.union_set(val, idx_inner)  
+                idx_inner = idx_inner + val  
+            END WHILE  
+            INCREMENT idx_outer BY 1  
+        END WHILE  
+
+        DECLARE unique_parents AS empty set  
+        FOR EACH el IN nums  
+            IF el <= threshold THEN  
+                ADD dsu.find(el) TO unique_parents  
+            ELSE  
+                ADD el TO unique_parents  
+            END IF  
+        END FOR  
+
+        RETURN LENGTH(unique_parents)  
+    END FUNCTION  
+END CLASS

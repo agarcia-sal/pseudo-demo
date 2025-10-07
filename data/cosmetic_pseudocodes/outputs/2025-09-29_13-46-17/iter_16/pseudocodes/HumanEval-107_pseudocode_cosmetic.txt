@@ -1,0 +1,57 @@
+```
+FUNCTION even_odd_palindrome(n)
+	TYPE Result { even: INTEGER, odd: INTEGER }
+
+	FUNCTION is_palindrome(number)
+		FUNCTION to_chars(x)
+			IF x < 10 THEN RETURN [x] ELSE RETURN to_chars(x DIV 10) + [x MOD 10] ENDIF
+		END FUNCTION
+
+		FUNCTION reverse_list(lst)
+			IF lst = [] THEN RETURN [] ELSE
+				RETURN reverse_list(lst[1..]) + [lst[0]]
+			ENDIF
+		END FUNCTION
+
+		FUNCTION eq_lists(a,b)
+			IF a = [] AND b = [] THEN RETURN TRUE ELSE
+				IF a = [] OR b = [] THEN RETURN FALSE ELSE
+					IF a[0] ≠ b[0] THEN RETURN FALSE ELSE
+						RETURN eq_lists(a[1..], b[1..])
+					ENDIF
+				ENDIF
+			ENDIF
+		END FUNCTION
+
+		RETURN eq_lists(to_chars(number), reverse_list(to_chars(number)))
+	END FUNCTION
+
+	FUNCTION count_palindromes(index, even_acc, odd_acc, cont)
+		IF index > n THEN RETURN cont(Result{even_acc, odd_acc})
+		ELSE
+			FUNCTION mod_is_one(x)
+				RETURN NOT( (x MOD 2) = 0)
+			END FUNCTION
+			FUNCTION mod_is_zero(x)
+				RETURN (x MOD 2) = 0
+			END FUNCTION
+
+			FUNCTION update_counts(i,e,o)
+				IF mod_is_one(i) THEN
+					IF is_palindrome(i) THEN RETURN Result{e, o + 1} ELSE RETURN Result{e, o} ENDIF
+				ELSE
+					IF is_palindrome(i) THEN RETURN Result{e + 1, o} ELSE RETURN Result{e, o} ENDIF
+				ENDIF
+			END FUNCTION
+
+			FUNCTION continue_with_new_counts(new_res)
+				RETURN count_palindromes(index + 1, new_res.even, new_res.odd, cont)
+			END FUNCTION
+
+			RETURN continue_with_new_counts(update_counts(index, even_acc, odd_acc))
+		ENDIF
+	END FUNCTION
+
+	RETURN count_palindromes(1, 0, 0, FUNCTION(r) RETURN (r.even, r.odd) END)
+END FUNCTION
+```

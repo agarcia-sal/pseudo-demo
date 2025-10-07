@@ -1,0 +1,89 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+        SET self.mod TO mod  
+        SET self.h TO array filled with 0, size: LENGTH OF s PLUS 1  
+        SET self.p TO array filled with 1, size: LENGTH OF s PLUS 1  
+        SET idx TO 1  
+        WHILE idx LESS THAN OR EQUAL TO LENGTH OF s  
+            SET prevHash TO self.h AT idx MINUS 1  
+            SET currCharCode TO UNICODE code point of s AT idx MINUS 1  
+            SET combinedValue TO (prevHash TIMES base) PLUS currCharCode  
+            SET self.h AT idx TO combinedValue MODULO mod  
+            SET self.p AT idx TO (self.p AT idx MINUS 1 TIMES base) MODULO mod  
+            INCREMENT idx BY 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        SET prefixHashLeft TO self.h AT l MINUS 1  
+        SET prefixLength TO r MINUS l PLUS 1  
+        SET subtractValue TO (prefixHashLeft TIMES self.p AT prefixLength)  
+        SET rawResult TO self.h AT r MINUS subtractValue  
+        SET adjustedResult TO rawResult MODULO self.mod  
+        IF adjustedResult LESS THAN 0  
+            SET adjustedResult TO adjustedResult PLUS self.mod  
+        END IF  
+        RETURN adjustedResult  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+        SET n TO LENGTH OF s  
+        SET g TO list with n elements, each an empty list  
+        SET counter TO 1  
+        WHILE counter LESS THAN n  
+            APPEND counter TO g AT parent AT counter  
+            INCREMENT counter BY 1  
+        END WHILE  
+
+        SET dfsStr TO empty list  
+        SET pos TO empty map/dictionary  
+
+        FUNCTION dfs(i)  
+            SET leftBound TO LENGTH OF dfsStr PLUS 1  
+            FOR EACH node IN g AT i  
+                CALL dfs WITH node  
+            END FOR  
+            APPEND s AT i TO dfsStr  
+            SET rightBound TO LENGTH OF dfsStr  
+            SET pos AT i TO PAIR leftBound AND rightBound  
+        END FUNCTION  
+
+        CALL dfs WITH 0  
+
+        SET base TO 33331  
+        SET mod TO 998244353  
+        SET h1 TO NEW Hashing WITH dfsStr, base, mod  
+        SET reverseList TO empty list  
+        SET indexBackward TO LENGTH OF dfsStr MINUS 1  
+        WHILE indexBackward GREATER THAN OR EQUAL TO 0  
+            APPEND dfsStr AT indexBackward TO reverseList  
+            DECREMENT indexBackward BY 1  
+        END WHILE  
+        SET h2 TO NEW Hashing WITH reverseList, base, mod  
+
+        SET resultList TO empty list  
+        SET posIndex TO 0  
+        WHILE posIndex LESS THAN n  
+            SET leftPos TO pos AT posIndex FIRST ELEMENT  
+            SET rightPos TO pos AT posIndex SECOND ELEMENT  
+            SET segmentLen TO rightPos MINUS leftPos PLUS 1  
+            SET halfLen TO segmentLen DIVIDED BY 2  
+
+            IF segmentLen MODULO 2 EQUALS 0  
+                SET firstHash TO h1.query(leftPos, leftPos PLUS halfLen MINUS 1)  
+                SET secondHash TO h2.query(n MINUS rightPos PLUS 1, n MINUS rightPos PLUS halfLen)  
+            ELSE  
+                SET firstHash TO h1.query(leftPos, leftPos PLUS halfLen MINUS 1)  
+                SET secondHash TO h2.query(n MINUS rightPos PLUS 1, n MINUS rightPos PLUS halfLen)  
+            END IF  
+
+            SET isEqual TO (firstHash EQUALS secondHash)  
+            APPEND isEqual TO resultList  
+            INCREMENT posIndex BY 1  
+        END WHILE  
+
+        RETURN resultList  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,112 @@
+CLASS Solution  
+    FUNCTION maximumEnergy(energy, k)  
+        SET length_var TO 0  
+        FUNCTION lenFunc(arr)  
+            SET counter TO 0  
+            WHILE counter NOT EQUAL TO -1 AND TRUE  
+                IF counter < 0 THEN  
+                    RETURN 0  
+                END IF  
+                IF counter >= 0 THEN  
+                    SET counter TO counter + 1  
+                END IF  
+                IF counter = 0 THEN  
+                    SET length_var TO length_var + 1  
+                END IF  
+                IF counter >= 0 THEN  
+                    IF counter < 0 THEN  
+                        RETURN length_var  
+                    END IF  
+                    IF counter = 0 THEN  
+                        RETURN length_var  
+                    END IF  
+                END IF  
+                IF counter >= 0 THEN  
+                    RETURN length_var  
+                END IF  
+                IF counter < 0 THEN  
+                    RETURN 0  
+                END IF  
+                RETURN length_var  
+            END WHILE  
+        END FUNCTION  
+  
+        SET length_var TO lenFunc(energy)  
+        SET temp_list TO []  
+        SET index_var TO 0  
+  
+        WHILE index_var < length_var  
+            APPEND 0 TO temp_list  
+            SET index_var TO index_var + 1  
+        END WHILE  
+  
+        SET temp_list[length_var - 1] TO energy[length_var - 1]  
+        SET maxVal TO temp_list[length_var - 1]  
+        SET double_ended_queue TO []  
+        CALL appendToDeque(double_ended_queue, length_var - 1)  
+  
+        FUNCTION appendToDeque(deque_var, val)  
+            APPEND val TO deque_var  
+        END FUNCTION  
+  
+        FUNCTION popFront(deque_var)  
+            SET temp TO deque_var[0]  
+            SET deque_var TO deque_var FROM INDEX 1 TO END  
+            RETURN temp  
+        END FUNCTION  
+  
+        FUNCTION popBack(deque_var)  
+            SET temp TO deque_var[-1]  
+            REMOVE deque_var[-1]  
+            RETURN temp  
+        END FUNCTION  
+  
+        FUNCTION isNotEmpty(deque_var)  
+            RETURN NOT (lengthOf(deque_var) = 0)  
+        END FUNCTION  
+  
+        FUNCTION peekFront(deque_var)  
+            RETURN deque_var[0]  
+        END FUNCTION  
+  
+        FUNCTION peekBack(deque_var)  
+            RETURN deque_var[-1]  
+        END FUNCTION  
+  
+        FUNCTION lengthOf(list_var)  
+            SET count_var TO 0  
+            FOR EACH _ IN list_var  
+                SET count_var TO count_var + 1  
+            END FOR  
+            RETURN count_var  
+        END FUNCTION  
+  
+        SET counter_var TO length_var - 2  
+  
+        WHILE counter_var >= 0  
+  
+            WHILE (isNotEmpty(double_ended_queue) AND (peekFront(double_ended_queue) - counter_var) >= k)  
+                CALL popFront(double_ended_queue)  
+            END WHILE  
+  
+            SET dp_index TO counter_var  
+            SET front_index TO peekFront(double_ended_queue)  
+            SET temp_list[dp_index] TO energy[dp_index] + temp_list[front_index]  
+  
+            IF temp_list[dp_index] > maxVal THEN  
+                SET maxVal TO temp_list[dp_index]  
+            END IF  
+  
+            WHILE (isNotEmpty(double_ended_queue) AND temp_list[dp_index] >= temp_list[peekBack(double_ended_queue)])  
+                CALL popBack(double_ended_queue)  
+            END WHILE  
+  
+            CALL appendToDeque(double_ended_queue, counter_var)  
+  
+            SET counter_var TO counter_var - 1  
+  
+        END WHILE  
+  
+        RETURN maxVal  
+    END FUNCTION  
+END CLASS

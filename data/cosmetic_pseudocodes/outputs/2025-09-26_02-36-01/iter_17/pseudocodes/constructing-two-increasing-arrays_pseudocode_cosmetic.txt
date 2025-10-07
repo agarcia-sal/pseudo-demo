@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer
+        FUNCTION nxt(x x AS integer y y AS integer) RETURNS integer
+            BEGIN
+                DECLARE tmp1 AS integer ← (x BITWISE_AND (1 XOR y))
+                IF tmp1 = 1 THEN
+                    RETURN x + 1
+                ELSE
+                    RETURN x + 2
+                END IF
+            END
+        END FUNCTION
+
+        DECLARE m AS integer ← LENGTH(nums1)
+        DECLARE n AS integer ← LENGTH(nums2)
+        DECLARE f AS list OF list OF integers ← []
+        DECLARE p1 AS integer ← 0
+
+        WHILE p1 ≤ m DO
+            DECLARE p2 AS integer ← 0
+            DECLARE row AS list OF integers ← []
+            REPEAT
+                row APPEND 0
+                p2 ← p2 + 1
+            UNTIL p2 > n
+            f APPEND row
+            p1 ← p1 + 1
+        END WHILE
+
+        DECLARE r AS integer ← 1
+        REPEAT
+            IF r > m THEN
+                BREAK
+            END IF
+            DECLARE a AS integer ← nums1[r]
+            DECLARE s AS integer ← nxt(f[r - 1][0], a)
+            f[r][0] ← s
+            r ← r + 1
+        UNTIL FALSE
+
+        DECLARE t AS integer ← 1
+        REPEAT
+            IF t > n THEN
+                BREAK
+            END IF
+            DECLARE b AS integer ← nums2[t]
+            DECLARE u AS integer ← nxt(f[0][t - 1], b)
+            f[0][t] ← u
+            t ← t + 1
+        UNTIL FALSE
+
+        DECLARE i AS integer ← 1
+        REPEAT
+            IF i > m THEN
+                BREAK
+            END IF
+            DECLARE v AS integer ← nums1[i]
+            DECLARE j AS integer ← 1
+            WHILE j ≤ n DO
+                DECLARE w AS integer ← nums2[j]
+                DECLARE val1 AS integer ← nxt(f[i - 1][j], v)
+                DECLARE val2 AS integer ← nxt(f[i][j - 1], w)
+                IF val1 < val2 THEN
+                    f[i][j] ← val1
+                ELSE
+                    f[i][j] ← val2
+                END IF
+                j ← j + 1
+            END WHILE
+            i ← i + 1
+        UNTIL FALSE
+
+        RETURN f[m][n]
+    END FUNCTION
+END CLASS

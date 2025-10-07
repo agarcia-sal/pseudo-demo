@@ -1,0 +1,64 @@
+FUNCTION prod_signs(list_of_values)
+    SWITCH (list_of_values IS EMPTY)
+        CASE true:
+            RETURN None
+    END SWITCH
+
+    DECLARE zero_found AS BOOLEAN
+    SET zero_found := false
+    DECLARE idx AS INTEGER
+    SET idx := 0
+
+    WHILE idx < LENGTH OF list_of_values
+        IF list_of_values[idx] == 0 THEN
+            SET zero_found := true
+            BREAK
+        END IF
+        SET idx := idx + 1
+    END WHILE
+
+    DECLARE sign_result AS INTEGER
+
+    SWITCH (zero_found)
+        CASE true:
+            SET sign_result := 0
+        CASE false:
+            DECLARE neg_count AS INTEGER
+            SET neg_count := 0
+            SET idx := 0
+            WHILE idx < LENGTH OF list_of_values
+                IF list_of_values[idx] < 0 THEN
+                    SET neg_count := neg_count + 1
+                END IF
+                SET idx := idx + 1
+            END WHILE
+            DECLARE sign_base AS INTEGER
+            SET sign_base := -1
+            DECLARE power_result AS INTEGER
+            SET power_result := 1
+            DECLARE exp_counter AS INTEGER
+            SET exp_counter := 0
+            WHILE exp_counter < neg_count
+                SET power_result := power_result * sign_base
+                SET exp_counter := exp_counter + 1
+            END WHILE
+            SET sign_result := power_result
+    END SWITCH
+
+    DECLARE total_magnitude AS INTEGER
+    SET total_magnitude := 0
+    SET idx := 0
+    WHILE idx < LENGTH OF list_of_values
+        DECLARE current_val AS INTEGER
+        SET current_val := list_of_values[idx]
+        IF current_val < 0 THEN
+            SET current_val := 0 - current_val
+        END IF
+        SET total_magnitude := total_magnitude + current_val
+        SET idx := idx + 1
+    END WHILE
+
+    DECLARE final_result AS INTEGER
+    SET final_result := sign_result * total_magnitude
+    RETURN final_result
+END FUNCTION

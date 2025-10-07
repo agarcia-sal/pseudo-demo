@@ -1,0 +1,146 @@
+CLASS Solution
+	FUNCTION minimumDeletions(word, k)
+		FUNCTION countCharacters(s)
+			FUNCTION incCount(dict, key)
+				IF NOT existsKey(dict, key) THEN
+					setKey(dict, key, 1)
+				ELSE
+					setKey(dict, key, getKey(dict, key) + 1)
+				END IF
+			END FUNCTION
+			SET freqDict TO emptyMap()
+			SET pos TO 0
+			REPEAT
+				IF pos GREATER OR EQUAL length(s) THEN BREAK END IF
+				incCount(freqDict, s[pos])
+				pos <- pos + 1
+			UNTIL FALSE
+			RETURN freqDict
+		END FUNCTION
+
+		FUNCTION toList(dict)
+			SET lst TO emptyList()
+			SET keys TO getKeys(dict)
+			SET i TO 0
+			WHILE i LESS THAN length(keys)
+				ADD getKey(dict, keys[i]) TO lst
+				i <- i + 1
+			END WHILE
+			RETURN lst
+		END FUNCTION
+
+		FUNCTION sortAscending(arr)
+			IF length(arr) LESS OR EQUAL 1 THEN RETURN arr END IF
+			SET pivot TO arr[0]
+			SET less TO emptyList()
+			SET greaterOrEqual TO emptyList()
+			SET idx TO 1
+			WHILE idx LESS THAN length(arr)
+				IF arr[idx] LESS THAN pivot THEN
+					ADD arr[idx] TO less
+				ELSE
+					ADD arr[idx] TO greaterOrEqual
+				END IF
+				idx <- idx + 1
+			END WHILE
+			RETURN concat(sortAscending(less), [pivot], sortAscending(greaterOrEqual))
+		END FUNCTION
+
+		FUNCTION existsKey(dict, key) RETURNS BOOLEAN
+			// simple helper: returns true if key exists in dict
+			// assume built-in or pre-existing
+		END FUNCTION
+
+		FUNCTION getKey(dict, key)
+			// helper that returns dict[key]
+		END FUNCTION
+
+		FUNCTION setKey(dict, key, val)
+			// helper that assigns dict[key] = val
+		END FUNCTION
+
+		FUNCTION getKeys(dict)
+			// returns list of keys of dict
+		END FUNCTION
+
+		FUNCTION emptyMap()
+			RETURN new map container
+		END FUNCTION
+
+		FUNCTION emptyList()
+			RETURN new list container
+		END FUNCTION
+
+		FUNCTION concat(list1, list2, list3)
+			FUNCTION concatTwo(a,b)
+				SET result TO emptyList()
+				SET p TO 0
+				WHILE p LESS THAN length(a)
+					ADD a[p] TO result
+					p <- p + 1
+				END WHILE
+				SET q TO 0
+				WHILE q LESS THAN length(b)
+					ADD b[q] TO result
+					q <- q + 1
+				END WHILE
+				RETURN result
+			END FUNCTION
+			RETURN concatTwo(concatTwo(list1, list2), list3)
+		END FUNCTION
+
+		SET freqMap TO countCharacters(word)
+		SET freqValues TO toList(freqMap)
+		SET freqValues TO sortAscending(freqValues)
+		SET inf TO 1 / 0
+		SET minDel TO inf
+
+		FUNCTION recurLoop(idx, arr, n, kVal, currentMin)
+			IF idx GREATER OR EQUAL n THEN
+				RETURN currentMin
+			END IF
+
+			SET maxAllowed TO arr[idx] + kVal
+			SET delAcc TO 0
+
+			FUNCTION calcDeletionsFrom(arrInner, startPos, endPos, maxA)
+				SET totalDel TO 0
+				SET pos2 TO startPos
+				WHILE pos2 LESS OR EQUAL endPos
+					IF arrInner[pos2] GREATER THAN maxA THEN
+						totalDel <- totalDel + (arrInner[pos2] - maxA)
+					END IF
+					pos2 <- pos2 + 1
+				END WHILE
+				RETURN totalDel
+			END FUNCTION
+
+			SET iterPos TO idx + 1
+			delAcc <- delAcc + calcDeletionsFrom(arr, iterPos, n - 1, maxAllowed)
+
+			FUNCTION sumListSegment(arrSegment, beginI, endI)
+				SET sumVal TO 0
+				SET jj TO beginI
+				WHILE jj LESS OR EQUAL endI
+					sumVal <- sumVal + arrSegment[jj]
+					jj <- jj + 1
+				END WHILE
+				RETURN sumVal
+			END FUNCTION
+
+			IF idx GREATER THAN 0 THEN
+				delAcc <- delAcc + sumListSegment(arr, 0, idx - 1)
+			END IF
+
+			SET condLess TO (delAcc LESS THAN currentMin)
+			IF condLess THEN
+				currentMin <- delAcc
+			END IF
+
+			RETURN recurLoop(idx + 1, arr, n, kVal, currentMin)
+		END FUNCTION
+
+		SET lengthVals TO length(freqValues)
+		RETURN recurLoop(0, freqValues, lengthVals, k, minDel)
+	END FUNCTION
+END CLASS

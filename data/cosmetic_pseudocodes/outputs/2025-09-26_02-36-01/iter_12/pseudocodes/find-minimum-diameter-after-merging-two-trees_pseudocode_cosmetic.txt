@@ -1,0 +1,228 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+        FUNCTION pop_left(queue)
+            SET tempVar1 TO queue[0]
+            REMOVE element at index 0 from queue
+            RETURN tempVar1
+        END FUNCTION
+
+        FUNCTION is_empty(container)
+            RETURN LENGTH OF container EQUALS 0
+        END FUNCTION
+
+        SET totalNodes TO 0
+        WHILE totalNodes < LENGTH OF graph
+            SET totalNodes TO totalNodes + 1
+        END WHILE
+
+        SET visited_flags TO []
+        SET idx1 TO 0
+        WHILE idx1 < totalNodes
+            APPEND false TO visited_flags
+            SET idx1 TO idx1 + 1
+        END WHILE
+
+        SET q_container TO []
+        APPEND (start, 0) TO q_container
+
+        SET visited_flags[start] TO true
+
+        SET currentFarthest TO start
+        SET currentMaxDist TO 0
+
+        WHILE (NOT is_empty(q_container))
+            SET currentPair TO pop_left(q_container)
+            SET currentNode TO currentPair[0]
+            SET currentDist TO currentPair[1]
+
+            IF (currentDist > currentMaxDist) THEN
+                SET currentMaxDist TO currentDist
+                SET currentFarthest TO currentNode
+            END IF
+
+            SET neighbors_iter TO graph[currentNode]
+            SET idx2 TO 0
+            WHILE idx2 < LENGTH OF neighbors_iter
+                SET neighbor_candidate TO neighbors_iter[idx2]
+                IF (visited_flags[neighbor_candidate] EQUALS false) THEN
+                    SET visited_flags[neighbor_candidate] TO true
+                    SET newDistPair TO (neighbor_candidate, currentDist + 1)
+                    APPEND newDistPair TO q_container
+                END IF
+                SET idx2 TO idx2 + 1
+            END WHILE
+        END WHILE
+
+        RETURN currentFarthest, currentMaxDist
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        SET initNode TO 0
+
+        FUNCTION call_bfs1()
+            RETURN bfs(graph, initNode)
+        END FUNCTION
+
+        SET far_node, _unused1 TO call_bfs1()
+
+        FUNCTION call_bfs2()
+            RETURN bfs(graph, far_node)
+        END FUNCTION
+
+        SET _unused2, diam_value TO call_bfs2()
+
+        RETURN diam_value
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+        FUNCTION pop_left(queue)
+            SET tmpLeft TO queue[0]
+            REMOVE element at index 0 from queue
+            RETURN tmpLeft
+        END FUNCTION
+
+        FUNCTION is_empty(container)
+            RETURN LENGTH OF container == 0
+        END FUNCTION
+
+        SET totalAmount TO 0
+        SET counter TO 0
+        WHILE counter < LENGTH OF graph
+            SET counter TO counter + 1
+            SET totalAmount TO counter
+        END WHILE
+
+        SET visitFlags TO []
+        SET idx3 TO 0
+        WHILE idx3 < totalAmount
+            APPEND false TO visitFlags
+            SET idx3 TO idx3 + 1
+        END WHILE
+
+        SET q_list TO []
+        APPEND (node, 0) TO q_list
+
+        SET visitFlags[node] TO true
+
+        SET maxDistanceVal TO 0
+
+        WHILE (NOT is_empty(q_list))
+            SET currPair TO pop_left(q_list)
+            SET currNode TO currPair[0]
+            SET currDist TO currPair[1]
+
+            IF (currDist > maxDistanceVal) THEN
+                SET maxDistanceVal TO currDist
+            END IF
+
+            SET adj_nodes TO graph[currNode]
+            SET idx4 TO 0
+            WHILE idx4 < LENGTH OF adj_nodes
+                SET currNeighbor TO adj_nodes[idx4]
+                IF visitFlags[currNeighbor] == false THEN
+                    SET visitFlags[currNeighbor] TO true
+                    SET newPair TO (currNeighbor, currDist + 1)
+                    APPEND newPair TO q_list
+                END IF
+                SET idx4 TO idx4 + 1
+            END WHILE
+        END WHILE
+
+        RETURN maxDistanceVal
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        FUNCTION append_edge(graph, u, v)
+            APPEND v TO graph[u]
+            APPEND u TO graph[v]
+        END FUNCTION
+
+        SET len1 TO 0
+        SET len2 TO 0
+        FOR _ IN edges1
+            SET len1 TO len1 + 1
+        END FOR
+        FOR __ IN edges2
+            SET len2 TO len2 + 1
+        END FOR
+
+        SET n_nodes TO len1 + 1
+        SET m_nodes TO len2 + 1
+
+        SET graph_1 TO []
+        SET graph_2 TO []
+        SET fillIdx1 TO 0
+        WHILE fillIdx1 < n_nodes
+            APPEND [] TO graph_1
+            SET fillIdx1 TO fillIdx1 + 1
+        END WHILE
+        SET fillIdx2 TO 0
+        WHILE fillIdx2 < m_nodes
+            APPEND [] TO graph_2
+            SET fillIdx2 TO fillIdx2 + 1
+        END WHILE
+
+        SET edgeIdx1 TO 0
+        WHILE edgeIdx1 < len1
+            SET edgeVal TO edges1[edgeIdx1]
+            SET u_val TO edgeVal[0]
+            SET v_val TO edgeVal[1]
+            append_edge(graph_1, u_val, v_val)
+            SET edgeIdx1 TO edgeIdx1 + 1
+        END WHILE
+
+        SET edgeIdx2 TO 0
+        WHILE edgeIdx2 < len2
+            SET edgeVal2 TO edges2[edgeIdx2]
+            SET u_val2 TO edgeVal2[0]
+            SET v_val2 TO edgeVal2[1]
+            append_edge(graph_2, u_val2, v_val2)
+            SET edgeIdx2 TO edgeIdx2 + 1
+        END WHILE
+
+        SET diam_1 TO tree_diameter(graph_1)
+        SET diam_2 TO tree_diameter(graph_2)
+
+        SET longest_paths_1 TO []
+        SET i1 TO 0
+        WHILE i1 < n_nodes
+            SET path_len TO maximum_path_length_from_node(graph_1, i1)
+            APPEND path_len TO longest_paths_1
+            SET i1 TO i1 + 1
+        END WHILE
+
+        SET longest_paths_2 TO []
+        SET i2 TO 0
+        WHILE i2 < m_nodes
+            SET path_len2 TO maximum_path_length_from_node(graph_2, i2)
+            APPEND path_len2 TO longest_paths_2
+            SET i2 TO i2 + 1
+        END WHILE
+
+        SET min_diam TO 1.0 / 0.0  // positive infinity equivalent
+
+        SET u_idx TO 0
+        WHILE u_idx < n_nodes
+            SET v_idx TO 0
+            WHILE v_idx < m_nodes
+                SET candidate_diam1 TO diam_1
+                IF diam_2 > candidate_diam1 THEN
+                    SET candidate_diam1 TO diam_2
+                END IF
+
+                SET temp_sum TO longest_paths_1[u_idx] + longest_paths_2[v_idx] + 1
+                IF temp_sum > candidate_diam1 THEN
+                    SET candidate_diam1 TO temp_sum
+                END IF
+
+                IF candidate_diam1 < min_diam THEN
+                    SET min_diam TO candidate_diam1
+                END IF
+                SET v_idx TO v_idx + 1
+            END WHILE
+            SET u_idx TO u_idx + 1
+        END WHILE
+
+        RETURN min_diam
+    END FUNCTION
+END CLASS

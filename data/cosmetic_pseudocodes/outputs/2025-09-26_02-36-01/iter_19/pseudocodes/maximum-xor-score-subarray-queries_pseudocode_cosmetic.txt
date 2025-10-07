@@ -1,0 +1,46 @@
+CLASS Solution
+	FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+		SET a TO LENGTH OF nums
+		SET tableA TO a TWO-DIMENSIONAL ARRAY OF SIZE a BY a INITIALIZED WITH 0
+		SET tableB TO a TWO-DIMENSIONAL ARRAY OF SIZE a BY a INITIALIZED WITH 0
+
+		SET x TO a MINUS 1
+		WHILE x GREATER OR EQUAL TO 0
+			SET tableA[x][x] TO nums[x]
+			SET tableB[x][x] TO nums[x]
+			SET y TO x PLUS 1
+			WHILE y LESS THAN a
+				SET firstPart TO tableA[x][y - 1]
+				SET secondPart TO tableA[x + 1][y]
+				SET tableA[x][y] TO firstPart XOR secondPart
+
+				SET candidate1 TO tableA[x][y]
+				SET candidate2 TO tableB[x][y - 1]
+				SET candidate3 TO tableB[x + 1][y]
+
+				IF candidate1 GREATER OR EQUAL TO candidate2
+					IF candidate1 GREATER OR EQUAL TO candidate3
+						SET tableB[x][y] TO candidate1
+					ELSE
+						SET tableB[x][y] TO candidate3
+					END IF
+				ELSE
+					IF candidate2 GREATER OR EQUAL TO candidate3
+						SET tableB[x][y] TO candidate2
+					ELSE
+						SET tableB[x][y] TO candidate3
+					END IF
+				END IF
+				SET y TO y PLUS 1
+			END WHILE
+			SET x TO x MINUS 1
+		END WHILE
+
+		SET result TO EMPTY LIST
+		FOR EACH start, end IN queries
+			APPEND tableB[start][end] TO result
+		END FOR
+
+		RETURN result
+	END FUNCTION
+END CLASS

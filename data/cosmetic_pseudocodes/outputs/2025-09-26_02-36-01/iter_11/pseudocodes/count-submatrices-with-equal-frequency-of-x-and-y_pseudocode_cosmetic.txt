@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION numberOfSubmatrices(grid)
+        IF (NOT grid OR NOT (grid[0])) THEN
+            RETURN 0
+        ENDIF
+
+        SET alpha TO LENGTH(grid)
+        SET beta TO LENGTH(grid[0])
+        DEFINE prefix_data AS ARRAY OF SIZE (alpha + 1) WITH EACH ELEMENT AN ARRAY OF SIZE (beta + 1) CONTAINING [0, 0]
+
+        PROCEDURE compute_prefix(a, b)
+            LET first_val BE prefix_data[a - 1][b][0] + prefix_data[a][b - 1][0] - prefix_data[a - 1][b - 1][0]
+            LET second_val BE prefix_data[a - 1][b][1] + prefix_data[a][b - 1][1] - prefix_data[a - 1][b - 1][1]
+
+            IF grid[a - 1][b - 1] == 'X' THEN
+                SET first_val TO first_val + 1
+            ELSE IF grid[a - 1][b - 1] == 'Y' THEN
+                SET second_val TO second_val + 1
+            ENDIF
+
+            prefix_data[a][b][0] = first_val
+            prefix_data[a][b][1] = second_val
+        END PROCEDURE
+
+        FUNCTION iterate_rows_col(current_row)
+            IF current_row > alpha THEN
+                RETURN
+            ENDIF
+
+            FUNCTION iterate_cols(current_col)
+                IF current_col > beta THEN
+                    RETURN
+                ENDIF
+
+                compute_prefix(current_row, current_col)
+                iterate_cols(current_col + 1)
+            END FUNCTION
+
+            iterate_cols(1)
+            iterate_rows_col(current_row + 1)
+        END FUNCTION
+
+        iterate_rows_col(1)
+
+        LET tally TO 0
+
+        FUNCTION count_loop(ridx)
+            IF ridx > alpha THEN
+                RETURN
+            ENDIF
+
+            FUNCTION count_inner(cidx)
+                IF cidx > beta THEN
+                    RETURN
+                ENDIF
+
+                LET count_x BE prefix_data[ridx][cidx][0]
+                LET count_y BE prefix_data[ridx][cidx][1]
+
+                IF (count_x > 0) AND (count_x == count_y) THEN
+                    SET tally TO tally + 1
+                ENDIF
+
+                count_inner(cidx + 1)
+            END FUNCTION
+
+            count_inner(1)
+            count_loop(ridx + 1)
+        END FUNCTION
+
+        count_loop(1)
+
+        RETURN tally
+    END FUNCTION
+END CLASS

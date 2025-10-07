@@ -1,0 +1,95 @@
+CLASS Solution  
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer  
+        DECLARE rows AS LENGTH OF image  
+        DECLARE columns AS LENGTH OF image AT INDEX zero  
+        DECLARE accumulation AS LIST OF rows ELEMENTS EACH BEING LIST OF columns ELEMENTS INITIALIZED TO zero  
+        DECLARE occurrences AS LIST OF rows ELEMENTS EACH CONTAINING LIST OF columns ELEMENTS SET TO zero  
+        
+        FUNCTION is_valid_region(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE boolean  
+            LET dxdy_pairs BE THE LIST OF PAIRS: (-1,0), (1,0), (0,-1), (0,1)  
+            LET limit_x BE x PLUS 3  
+            LET limit_y BE y PLUS 3  
+            LET row_index BE x  
+            WHILE row_index LESS THAN limit_x DO  
+                LET column_index BE y  
+                WHILE column_index LESS THAN limit_y DO  
+                    FOR EACH (offset_x, offset_y) IN dxdy_pairs DO  
+                        LET neighbor_x BE row_index PLUS offset_x  
+                        LET neighbor_y BE column_index PLUS offset_y  
+                        IF neighbor_x GREATER THAN OR EQUAL TO 0 AND neighbor_x LESS THAN limit_x AND neighbor_y GREATER THAN OR EQUAL TO 0 AND neighbor_y LESS THAN limit_y THEN  
+                            LET difference BE image AT row_index AT column_index MINUS image AT neighbor_x AT neighbor_y  
+                            IF ABS(difference) GREATER THAN threshold THEN  
+                                RETURN False  
+                            END IF  
+                        END IF  
+                    END FOR  
+                    INCREMENT column_index BY 1  
+                END WHILE  
+                INCREMENT row_index BY 1  
+            END WHILE  
+            RETURN True  
+        END FUNCTION  
+        
+        FUNCTION calculate_average(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE integer  
+            LET sum_accumulator BE zero  
+            LET end_x BE x PLUS 3  
+            LET end_y BE y PLUS 3  
+            LET outer_index BE x  
+            WHILE outer_index LESS THAN end_x DO  
+                LET inner_index BE y  
+                WHILE inner_index LESS THAN end_y DO  
+                    SET sum_accumulator TO sum_accumulator PLUS image AT outer_index AT inner_index  
+                    INCREMENT inner_index BY 1  
+                END WHILE  
+                INCREMENT outer_index BY 1  
+            END WHILE  
+            LET divider BE 9  
+            LET computed_average BE sum_accumulator DIVIDED BY divider  
+            RETURN computed_average  
+        END FUNCTION  
+        
+        LET main_i BE 0  
+        LET limit_i BE rows MINUS 2  
+        WHILE main_i LESS THAN limit_i DO  
+            LET main_j BE 0  
+            LET limit_j BE columns MINUS 2  
+            WHILE main_j LESS THAN limit_j DO  
+                IF is_valid_region(main_i, main_j) NOT EQUAL TO False THEN  
+                    LET avg_val BE calculate_average(main_i, main_j)  
+                    LET inner_x BE main_i  
+                    LET inner_limit_x BE main_i PLUS 3  
+                    WHILE inner_x LESS THAN inner_limit_x DO  
+                        LET inner_y BE main_j  
+                        LET inner_limit_y BE main_j PLUS 3  
+                        WHILE inner_y LESS THAN inner_limit_y DO  
+                            SET accumulation AT inner_x AT inner_y TO accumulation AT inner_x AT inner_y PLUS avg_val  
+                            SET occurrences AT inner_x AT inner_y TO occurrences AT inner_x AT inner_y PLUS 1  
+                            INCREMENT inner_y BY 1  
+                        END WHILE  
+                        INCREMENT inner_x BY 1  
+                    END WHILE  
+                END IF  
+                INCREMENT main_j BY 1  
+            END WHILE  
+            INCREMENT main_i BY 1  
+        END WHILE  
+        
+        LET idx_i BE 0  
+        WHILE idx_i LESS THAN rows DO  
+            LET idx_j BE 0  
+            WHILE idx_j LESS THAN columns DO  
+                IF occurrences AT idx_i AT idx_j GREATER THAN 0 THEN  
+                    LET numerator BE accumulation AT idx_i AT idx_j  
+                    LET denominator BE occurrences AT idx_i AT idx_j  
+                    SET accumulation AT idx_i AT idx_j TO numerator DIVIDED BY denominator  
+                ELSE  
+                    SET accumulation AT idx_i AT idx_j TO image AT idx_i AT idx_j  
+                END IF  
+                INCREMENT idx_j BY 1  
+            END WHILE  
+            INCREMENT idx_i BY 1  
+        END WHILE  
+        
+        RETURN accumulation  
+    END FUNCTION  
+END CLASS

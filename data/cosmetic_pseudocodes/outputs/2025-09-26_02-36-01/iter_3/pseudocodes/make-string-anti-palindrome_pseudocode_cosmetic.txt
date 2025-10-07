@@ -1,0 +1,77 @@
+CLASS Solution
+    FUNCTION makeAntiPalindrome(s)
+        LET letters = []
+        FOR idx = 0 TO LENGTH(s) - 1
+            letters = letters + [s[idx]]
+        END FOR
+        LET sortedLetters = []
+        WHILE LENGTH(letters) > 0
+            LET minChar = letters[0]
+            LET minPos = 0
+            LET pos = 1
+            WHILE pos < LENGTH(letters)
+                IF letters[pos] < minChar THEN
+                    minChar = letters[pos]
+                    minPos = pos
+                END IF
+                pos = pos + 1
+            END WHILE
+            sortedLetters = sortedLetters + [minChar]
+            letters = SLICE(letters, 0, minPos) + SLICE(letters, minPos+1, LENGTH(letters))
+        END WHILE
+
+        LET lengthVal = LENGTH(sortedLetters)
+        LET half = lengthVal DIV 2
+        
+        LET midLeftChar = sortedLetters[half - 1]
+        LET midChar = sortedLetters[half]
+
+        IF NOT (midChar - midLeftChar) THEN
+            LET idxI = half
+            WHILE (idxI < lengthVal) AND (sortedLetters[idxI] = sortedLetters[idxI - 1])
+                idxI = idxI + 1
+            END WHILE
+            LET idxJ = half
+            WHILE (idxJ < lengthVal) AND (sortedLetters[idxJ] = sortedLetters[lengthVal - idxJ - 1])
+                IF idxI >= lengthVal THEN
+                    RETURN "-1"
+                END IF
+                LET tempChar = sortedLetters[idxI]
+                sortedLetters[idxI] = sortedLetters[idxJ]
+                sortedLetters[idxJ] = tempChar
+                idxI = idxI + 1
+                idxJ = idxJ + 1
+            END WHILE
+        END IF
+
+        LET pointer = 0
+        WHILE pointer < half
+            IF sortedLetters[pointer] = sortedLetters[lengthVal - pointer - 1] THEN
+                LET foundSwap = 0
+                LET searchIndex = half
+                WHILE searchIndex < lengthVal AND foundSwap = 0
+                    IF NOT (sortedLetters[searchIndex] = sortedLetters[pointer]) AND NOT (sortedLetters[searchIndex] = sortedLetters[lengthVal - pointer - 1]) THEN
+                        LET temporary = sortedLetters[searchIndex]
+                        sortedLetters[searchIndex] = sortedLetters[pointer]
+                        sortedLetters[pointer] = temporary
+                        foundSwap = 1
+                    END IF
+                    searchIndex = searchIndex + 1
+                END WHILE
+                IF foundSwap = 0 THEN
+                    RETURN "-1"
+                END IF
+            END IF
+            pointer = pointer + 1
+        END WHILE
+
+        LET outputString = ""
+        LET gather = 0
+        WHILE gather < LENGTH(sortedLetters)
+            outputString = outputString + sortedLetters[gather]
+            gather = gather + 1
+        END WHILE
+
+        RETURN outputString
+    END FUNCTION
+END CLASS

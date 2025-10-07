@@ -1,0 +1,43 @@
+```
+FUNCTION parse_nested_parens(input_sequence)
+    FUNCTION parse_paren_group_a(input_fragment)
+        SET depth_counter = 0
+        SET depth_max = 0
+        FOR idx FROM 0 TO LENGTH(input_fragment) - 1 DO
+            SWITCH input_fragment[idx]
+                CASE '(':
+                    SET depth_counter = depth_counter + 1
+                    SET depth_max = depth_max >= depth_counter ? depth_max : depth_counter
+                    BREAK
+                DEFAULT:
+                    SET depth_counter = depth_counter - 1
+            END SWITCH
+        END FOR
+        RETURN depth_max
+    END FUNCTION
+
+    SET segment_list = []
+    SET start_index = 1
+    FOR i FROM 1 TO LENGTH(input_sequence) + 1 DO
+        IF i > LENGTH(input_sequence) OR input_sequence[i] = ' ' THEN
+            SET segment = SUBSTRING(input_sequence, start_index, i - start_index)
+            IF LENGTH(segment) > 0 THEN
+                APPEND segment TO segment_list
+            END IF
+            SET start_index = i + 1
+        END IF
+    END FOR
+
+    FUNCTION map_function(lst, f)
+        SET result = []
+        SET pos = 1
+        WHILE pos <= LENGTH(lst) DO
+            APPEND f(lst[pos]) TO result
+            SET pos = pos + 1
+        END WHILE
+        RETURN result
+    END FUNCTION
+
+    RETURN map_function(segment_list, parse_paren_group_a)
+END FUNCTION
+```

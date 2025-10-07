@@ -1,0 +1,90 @@
+CLASS TreeNode  
+    FUNCTION __init__(self COMMA val EQUALS zero COMMA left EQUALS None COMMA right EQUALS None)  
+        SET self.val TO val  
+        SET self.left TO left  
+        SET self.right TO right  
+    END FUNCTION  
+END CLASS  
+
+FUNCTION tree_node(values)  
+    FUNCTION construct_nodes(position COMMA lineup)  
+        IF position GREATER_THAN_OR_EQUAL length(values) THEN  
+            RETURN  
+        END IF  
+        SET current TO lineup[zero]  
+        DEFINE add_child(child_index)  
+            IF child_index LESS_THAN length(values) AND values[child_index] IS_NOT None THEN  
+                SET offspring TO new TreeNode(values[child_index])  
+                IF child_index MOD two EQUALS one THEN  
+                    SET current.left TO offspring  
+                ELSE  
+                    SET current.right TO offspring  
+                END IF  
+                lineup APPEND offspring  
+            END IF  
+        END FUNCTION  
+        CALL add_child(position)  
+        CALL add_child(position + one)  
+        REMOVE lineup[zero]  
+        CALL construct_nodes(position + two, lineup)  
+    END FUNCTION  
+    IF values IS_EMPTY THEN  
+        RETURN None  
+    END IF  
+    SET root_node TO new TreeNode(values[zero])  
+    SET node_queue TO list containing root_node  
+    CALL construct_nodes(one, node_queue)  
+    RETURN root_node  
+END FUNCTION  
+
+FUNCTION is_same_tree(p COMMA q)  
+    SET verdict TO False  
+    IF p IS None AND q IS None THEN  
+        SET verdict TO one EQUALS one  
+    ELSE IF p IS None OR q IS None THEN  
+        SET verdict TO one NOT_EQUAL one  
+    ELSE  
+        IF p.val EQUALS q.val THEN  
+            SET verdict TO is_same_tree(p.left COMMA q.left) AND is_same_tree(p.right COMMA q.right)  
+        ELSE  
+            SET verdict TO one NOT_EQUAL one  
+        END IF  
+    END IF  
+    RETURN verdict  
+END FUNCTION  
+
+CLASS Solution  
+    FUNCTION minimumLevel(self COMMA root)  
+        FUNCTION explore_level(nodes COMMA current_depth COMMA best_sum COMMA best_level)  
+            IF nodes IS_EMPTY THEN  
+                RETURN best_level  
+            END IF  
+            SET cumulative TO zero  
+            SET next_list TO empty list  
+            FUNCTION process_node(index)  
+                IF index GREATER_THAN_OR_EQUAL length(nodes) THEN  
+                    RETURN  
+                END IF  
+                SET target_node TO nodes[index]  
+                SET cumulative TO cumulative + target_node.val  
+                IF target_node.left IS_NOT None THEN  
+                    next_list APPEND target_node.left  
+                END IF  
+                IF target_node.right IS_NOT None THEN  
+                    next_list APPEND target_node.right  
+                END IF  
+                CALL process_node(index + one)  
+            END FUNCTION  
+            CALL process_node(zero)  
+            IF cumulative LESS_THAN best_sum THEN  
+                SET best_sum TO cumulative  
+                SET best_level TO current_depth  
+            END IF  
+            RETURN explore_level(next_list COMMA current_depth + one COMMA best_sum COMMA best_level)  
+        END FUNCTION  
+        IF root IS None THEN  
+            RETURN zero  
+        END IF  
+        RETURN explore_level([root] COMMA one COMMA positive_infinity COMMA one)  
+    END FUNCTION  
+END CLASS

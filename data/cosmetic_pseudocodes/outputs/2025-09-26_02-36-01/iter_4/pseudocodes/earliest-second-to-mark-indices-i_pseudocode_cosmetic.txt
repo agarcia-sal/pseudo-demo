@@ -1,0 +1,64 @@
+CLASS Solution
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+        SET totalElements TO LENGTH OF nums
+        SET totalChanges TO LENGTH OF changeIndices
+
+        FUNCTION can_mark_by_second(k)
+            DECLARE recent_positions AS new LIST OF size totalElements FILLED WITH -1
+            DECLARE index_counter TO 0
+            WHILE index_counter < k
+                LET currentIndex TO changeIndices[index_counter] MINUS 1
+                SET recent_positions[currentIndex] TO index_counter
+                INCREMENT index_counter BY 1
+            END WHILE
+
+            DECLARE sumNeeded TO 0
+            FOR idx FROM 0 TO totalElements MINUS 1
+                SET sumNeeded TO sumNeeded PLUS nums[idx]
+            END FOR
+
+            SET decrements_available TO 0
+            DECLARE marked_set AS empty SET
+
+            DECLARE step TO 0
+            WHILE step < k
+                LET pos TO changeIndices[step] MINUS 1
+                IF pos NOT IN marked_set
+                    IF recent_positions[pos] EQUALS step
+                        IF nums[pos] <= decrements_available
+                            SET decrements_available TO decrements_available MINUS nums[pos]
+                            ADD pos TO marked_set
+                        ELSE
+                            RETURN False
+                        END IF
+                    ELSE
+                        SET decrements_available TO decrements_available PLUS 1
+                    END IF
+                ELSE
+                    SET decrements_available TO decrements_available PLUS 1
+                END IF
+                INCREMENT step BY 1
+            END WHILE
+
+            RETURN LENGTH OF marked_set EQUALS totalElements
+        END FUNCTION
+
+        DECLARE low TO 0
+        DECLARE high TO totalChanges PLUS 1
+
+        WHILE low < high
+            LET middle TO (low + high) DIVIDED BY 2 USING INTEGER DIVISION
+            IF can_mark_by_second(middle)
+                SET high TO middle
+            ELSE
+                SET low TO low PLUS 1
+            END IF
+        END WHILE
+
+        IF low <= totalChanges
+            RETURN low
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

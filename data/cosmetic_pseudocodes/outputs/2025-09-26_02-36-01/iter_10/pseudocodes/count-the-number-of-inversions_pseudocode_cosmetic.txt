@@ -1,0 +1,89 @@
+CLASS Solution
+
+    FUNCTION numberOfPermutations(n, requirements)
+        
+        CONST MODULO := (10 ^ 9) + 7
+        
+        DECLARE requirementsMap AS DICTIONARY
+        SET requirementsMap TO EMPTY DICTIONARY
+        
+        DECLARE iteratorA, iteratorB, iteratorIndex
+        SET iteratorIndex TO 0
+        WHILE iteratorIndex < LENGTH(requirements)
+            SET iteratorA TO requirements[iteratorIndex][0]
+            SET iteratorB TO requirements[iteratorIndex][1]
+            SET requirementsMap[iteratorA] TO iteratorB
+            SET iteratorIndex TO iteratorIndex + 1
+        END WHILE
+
+        FUNCTION count_permutations(prefixLen, inversionCount, usedMask)
+
+            FUNCTION getRequirement(key)
+                IF key IN requirementsMap THEN
+                    RETURN requirementsMap[key]
+                ELSE
+                    RETURN inversionCount
+                END IF
+            END FUNCTION
+
+            IF prefixLen = n THEN
+                IF inversionCount = ( (requirementsMap[n] IF n IN requirementsMap ELSE 0) - 1 ) THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            IF prefixLen > 0 THEN
+                DECLARE targetValue
+                IF n OT IN requirementsMap THEN
+                  targetValue = inversionCount
+                ELSE
+                  targetValue = requirementsMap[prefixLen] - 1 IF prefixLen IN requirementsMap ELSE inversionCount
+                END IF
+                
+                IF inversionCount != (requirementsMap[prefixLen] - 1 IF prefixLen IN requirementsMap ELSE inversionCount) THEN
+                    RETURN 0
+                END IF
+            END IF
+
+            DECLARE totalCount
+            SET totalCount TO 0
+            
+            PROCEDURE loopFromZeroTo(nValue, action)
+                DECLARE counter
+                SET counter TO 0
+                WHILE counter <= nValue - 1
+                    CALL action(counter)
+                    SET counter TO counter + 1
+                END WHILE
+            END PROCEDURE
+
+            DECLARE singleIterFunc
+            SET singleIterFunc TO FUNCTION(currentNumber)
+                IF (usedMask & (1 << currentNumber)) = 0 THEN
+                    DECLARE inversionAcc
+                    SET inversionAcc TO inversionCount
+
+                    DECLARE innerCounter
+                    SET innerCounter TO currentNumber + 1
+                    WHILE innerCounter <= n - 1
+                        IF (usedMask & (1 << innerCounter)) != 0 THEN
+                            SET inversionAcc TO inversionAcc + 1
+                        END IF
+                        SET innerCounter TO innerCounter + 1
+                    END WHILE
+
+                    SET totalCount TO (totalCount + count_permutations(prefixLen + 1, inversionAcc, (usedMask | (1 << currentNumber)))) % MODULO
+                END IF
+            END FUNCTION
+
+            CALL loopFromZeroTo(n, singleIterFunc)
+            
+            RETURN totalCount
+        END FUNCTION
+        
+        RETURN count_permutations(0, 0, 0)
+    END FUNCTION
+
+END CLASS

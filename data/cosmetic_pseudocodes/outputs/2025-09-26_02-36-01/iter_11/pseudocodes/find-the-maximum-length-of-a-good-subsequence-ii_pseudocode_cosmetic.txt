@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+        SET uqv TO LENGTH(nums)
+        SET dmv TO LIST OF LENGTH uqv, EACH ELEMENT IS A LIST OF ZEROS OF LENGTH k + 1
+        SET bwe TO LIST OF LENGTH k + 1, EACH ELEMENT IS A DEFAULT DICTIONARY WITH DEFAULT VALUE ZERO
+        SET mte TO LIST OF LENGTH k + 1, EACH ELEMENT IS A LIST [0, 0, 0]
+        SET lfs TO 0
+
+        SET pgs TO 0
+        WHILE pgs < uqv
+            SET wmz TO nums[pgs]
+            SET rht TO 0
+            REPEAT
+                EXIT WHEN rht > k
+
+                SET dmv[pgs][rht] TO bwe[rht].GET(wmz, 0)
+
+                IF rht > 0 THEN
+                    IF mte[rht - 1][0] != nums[pgs] THEN
+                        SET dmv[pgs][rht] TO MAX(dmv[pgs][rht], mte[rht - 1][1])
+                    ELSE
+                        SET dmv[pgs][rht] TO MAX(dmv[pgs][rht], mte[rht - 1][2])
+                    ENDIF
+                ENDIF
+
+                SET dmv[pgs][rht] TO dmv[pgs][rht] + 1
+
+                SET bwe[rht][nums[pgs]] TO MAX(bwe[rht].GET(nums[pgs], 0), dmv[pgs][rht])
+
+                IF mte[rht][0] != wmz THEN
+                    IF dmv[pgs][rht] >= mte[rht][1] THEN
+                        SET mte[rht][2] TO mte[rht][1]
+                        SET mte[rht][1] TO dmv[pgs][rht]
+                        SET mte[rht][0] TO wmz
+                    ELSE
+                        SET mte[rht][2] TO MAX(mte[rht][2], dmv[pgs][rht])
+                    ENDIF
+                ELSE
+                    SET mte[rht][1] TO MAX(mte[rht][1], dmv[pgs][rht])
+                ENDIF
+
+                SET lfs TO MAX(lfs, dmv[pgs][rht])
+
+                SET rht TO rht + 1
+            END REPEAT
+
+            SET pgs TO pgs + 1
+        END WHILE
+
+        RETURN lfs
+    END FUNCTION
+END CLASS

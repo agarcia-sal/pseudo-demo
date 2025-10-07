@@ -1,0 +1,40 @@
+CLASS Solution  
+    FUNCTION validSubstringCount(word1, word2)  
+        IMPORT Counter FROM collections  
+        
+        DECLARE target_freq AS Counter(word2)  
+        DECLARE current_freq AS new Counter()  
+        LET total_required BE SIZE(target_freq)  
+        DECLARE match_count AS 0  
+        LET start_ptr BE 0  
+        LET result TO 0  
+        
+        LET idx BE 0  
+        WHILE idx < LENGTH(word1)  
+            LET current_char BE word1[idx]  
+            current_freq[current_char] = current_freq[current_char] + 1  
+            
+            IF (current_char IN target_freq) AND (current_freq[current_char] = target_freq[current_char]) THEN  
+                match_count = match_count + 1  
+            END IF  
+            
+            WHILE (match_count = total_required) AND ((idx + 1) - start_ptr >= LENGTH(word2)) DO  
+                LET remaining AS LENGTH(word1) - idx  
+                result = result + remaining  
+                
+                LET left_char BE word1[start_ptr]  
+                current_freq[left_char] = current_freq[left_char] - 1  
+                
+                IF (left_char IN target_freq) AND (current_freq[left_char] < target_freq[left_char]) THEN  
+                    match_count = match_count - 1  
+                END IF  
+                
+                start_ptr = start_ptr + 1  
+            END WHILE  
+            
+            idx = idx + 1  
+        END WHILE  
+        
+        RETURN result  
+    END FUNCTION  
+END CLASS

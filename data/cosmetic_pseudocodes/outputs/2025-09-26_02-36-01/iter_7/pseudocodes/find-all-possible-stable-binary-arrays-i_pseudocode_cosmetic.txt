@@ -1,0 +1,37 @@
+CLASS Solution
+	 FUNCTION numberOfStableArrays(zero, one, limit)
+		LOCAL CONST modBase <-- (5 * 2 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+		DEFINE dp(remainingZeros, remainingOnes, prevChar, prevCount)
+			LOCAL accumulator <-- 0
+			IF remainingZeros = 0 AND remainingOnes = 0 THEN
+				RETURN 1
+			ELSEIF remainingZeros < 0 OR remainingOnes < 0 THEN
+				RETURN 0
+			ENDIF
+			IF (prevChar != 0) OR (prevCount < limit) THEN
+				LOCAL nextRunLength
+				IF prevChar = 0 THEN
+					nextRunLength <-- prevCount + 1
+				ELSE
+					nextRunLength <-- 1
+				ENDIF
+				LOCAL recurseResult <-- dp(remainingZeros - 1, remainingOnes, 0, nextRunLength)
+				accumulator <-- accumulator + recurseResult
+				accumulator <-- accumulator - (accumulator DIV modBase) * modBase
+			ENDIF
+			IF (prevChar != 1) OR (prevCount < limit) THEN
+				LOCAL subsequentRunLength
+				IF prevChar = 1 THEN
+					subsequentRunLength <-- prevCount + 1
+				ELSE
+					subsequentRunLength <-- 1
+				ENDIF
+				LOCAL nextResult <-- dp(remainingZeros, remainingOnes - 1, 1, subsequentRunLength)
+				accumulator <-- accumulator + nextResult
+				accumulator <-- accumulator MOD modBase
+			ENDIF
+			RETURN accumulator
+		ENDDEFINE
+		RETURN dp(zero, one, -1, 0)
+	 END FUNCTION
+END CLASS

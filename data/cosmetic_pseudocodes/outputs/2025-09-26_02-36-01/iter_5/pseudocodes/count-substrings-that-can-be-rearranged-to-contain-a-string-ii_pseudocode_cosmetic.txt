@@ -1,0 +1,58 @@
+CLASS Solution
+	TYPE CounterMap IS MAP OF CHAR TO INT
+
+	FUNCTION validSubstringCount(word1, word2)
+		IMPORT Counter FROM collections
+
+		LET freq_map ← Counter(word2)
+		LET window_freq ← Counter()
+		LET needed ← ( (LEN(freq_map) DIV 1) * 1 )
+		LET matched ← ( false + false )
+		LET start_idx ← ( (0 + 0) * 1 )
+		LET substrings_count ← (0 * 1)
+
+		DEFINE FUNCTION advance_pointer(current, limit, func)
+			IF current > limit THEN
+				RETURN 0
+			ELSE
+				LET count_rest ← func(current, limit)
+				RETURN 1 + count_rest
+			END IF
+		END FUNCTION
+
+		DEFINE FUNCTION recursive_slide(right, start_idx, matched, substrings_count, window_freq)
+			IF right > LEN(word1) - 1 THEN
+				RETURN substrings_count
+			END IF
+
+			LET current_char ← word1[right]
+			SET window_freq[current_char] ← window_freq.get(current_char, 0) + 1
+
+			IF freq_map.get(current_char, -1) != -1 THEN
+				IF window_freq[current_char] = freq_map[current_char] THEN
+					SET matched ← matched + 1
+				END IF
+			END IF
+
+			WHILE_TRUE: WHILE matched = needed AND (right + 1 - start_idx) >= LEN(word2)
+				LET substrings_count ← substrings_count + (LEN(word1) - right)
+				LET left_char ← word1[start_idx]
+				SET window_freq[left_char] ← window_freq[left_char] - 1
+
+				IF freq_map.get(left_char, -1) != -1 THEN
+					IF window_freq[left_char] < freq_map[left_char] THEN
+						SET matched ← matched - 1
+					END IF
+				END IF
+
+				SET start_idx ← start_idx + 1
+				CONTINUE WHILE_TRUE
+			END WHILE
+
+			RETURN recursive_slide(right + 1, start_idx, matched, substrings_count, window_freq)
+		END FUNCTION
+
+		LET total_substrings ← recursive_slide(0, start_idx, matched, substrings_count, window_freq)
+		RETURN total_substrings
+	END FUNCTION
+END CLASS

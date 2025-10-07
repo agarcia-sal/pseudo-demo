@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION maxPointsInsideSquare(points params)
+        FUNCTION withinBounds(val, limit)
+            RETURN (val >= -limit) AND (val <= limit)
+        END FUNCTION
+
+        FUNCTION enumerateIndices(current, endIndex, actionFunc)
+            IF current > endIndex THEN
+                RETURN
+            ELSE
+                CALL actionFunc(current)
+                CALL enumerateIndices(current + 1, endIndex, actionFunc)
+            END IF
+        END FUNCTION
+
+        SET totalCount TO 0
+        SET upperBound TO LENGTH OF params
+
+        FUNCTION processIndex(index)
+            SET coordX TO (params[index])[0]
+            SET coordY TO (params[index])[1]
+            SET maxSide TO IF (ABS(coordX) > ABS(coordY)) THEN ABS(coordX) ELSE ABS(coordY) END IF
+
+            SET seenTags TO an empty dictionary
+            SET isValidSquare TO 1 = 1
+
+            FUNCTION checkIndex(innerIdx)
+                SET candidateX TO (params[innerIdx])[0]
+                SET candidateY TO (params[innerIdx])[1]
+
+                IF withinBounds(candidateX, maxSide) AND withinBounds(candidateY, maxSide) THEN
+                    SET currentTag TO params[innerIdx]
+                    IF currentTag EXISTS IN seenTags THEN
+                        SET isValidSquare TO (0 = 1)
+                        RETURN
+                    ELSE
+                        SET seenTags[currentTag] TO 1
+                    END IF
+                END IF
+            END FUNCTION
+
+            CALL enumerateIndices(0, upperBound - 1, checkIndex)
+
+            IF isValidSquare = (1 = 1) THEN
+                SET totalCount TO IF totalCount >= LENGTH OF seenTags THEN totalCount ELSE LENGTH OF seenTags END IF
+            END IF
+        END FUNCTION
+
+        CALL enumerateIndices(0, upperBound - 1, processIndex)
+
+        RETURN totalCount
+    END FUNCTION
+END CLASS

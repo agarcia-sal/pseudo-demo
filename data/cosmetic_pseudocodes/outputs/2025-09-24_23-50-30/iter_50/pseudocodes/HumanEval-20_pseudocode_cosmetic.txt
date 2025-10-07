@@ -1,0 +1,48 @@
+```
+FUNCTION find_closest_elements(list_of_numbers)
+    SET accumulator TO None
+    SET threshold TO None
+
+    FUNCTION inner_loop(fixed_index, fixed_value, iterable, start_pos, current_best, current_minimum)
+        IF start_pos EQUALS LENGTH(iterable)
+            RETURN current_best, current_minimum
+        ELSE
+            SET run_index TO start_pos
+            SET run_value TO iterable[run_index]
+
+            IF run_index NOT_EQUALS fixed_index THEN
+                SET delta TO run_value - fixed_value
+                SET delta_abs TO delta
+                IF delta < 0 THEN SET delta_abs TO -delta END IF
+
+                IF current_minimum IS None OR delta_abs < current_minimum THEN
+                    SET current_best TO (run_value, fixed_value)
+                    IF current_best[0] > current_best[1] THEN 
+                        SET current_best TO (current_best[1], current_best[0])
+                    END IF
+                    SET current_minimum TO delta_abs
+                END IF
+            END IF
+
+            RETURN inner_loop(fixed_index, fixed_value, iterable, start_pos + 1, current_best, current_minimum)
+        END IF
+    END FUNCTION
+
+    FUNCTION outer_loop(position, collection, best_pair, best_dist)
+        IF position EQUALS LENGTH(collection)
+            RETURN best_pair
+        ELSE
+            SET chosen_value TO collection[position]
+            SET candidate_best, candidate_min TO inner_loop(position, chosen_value, collection, 0, best_pair, best_dist)
+
+            IF best_dist IS None OR (candidate_min IS NOT None AND candidate_min < best_dist) THEN
+                RETURN outer_loop(position + 1, collection, candidate_best, candidate_min)
+            ELSE
+                RETURN outer_loop(position + 1, collection, best_pair, best_dist)
+            END IF
+        END IF
+    END FUNCTION
+
+    RETURN outer_loop(0, list_of_numbers, accumulator, threshold)
+END FUNCTION
+```

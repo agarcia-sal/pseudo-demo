@@ -1,0 +1,47 @@
+CLASS Solution
+	FUNCTION validSubstringCount(word1, word2)
+		DEFINE FUNCTION createFrequencyMap(sequence)
+			SET freqMap TO an empty map with default zero
+			REPEAT index FROM 0 TO LENGTH(sequence) - 1
+				LET currentChar BE sequence[index]
+				INCREMENT freqMap[currentChar] BY 1
+			UNTIL index EQUALS LENGTH(sequence) - 1
+			RETURN freqMap
+		END FUNCTION
+
+		SET word2Frequency TO createFrequencyMap(word2)
+		SET windowFrequency TO an empty map with default zero
+		SET uniqueRequired TO LENGTH(word2Frequency)
+		SET formedCount TO 0
+		SET windowStart TO 0
+		SET totalValidSubstrings TO 0
+
+		SET posRight TO 0
+		WHILE posRight LESS THAN LENGTH(word1)
+			LET currentCharRight BE word1[posRight]
+			SET currentCountRight TO windowFrequency[currentCharRight]
+			SET windowFrequency[currentCharRight] TO currentCountRight + 1
+
+			IF (currentCharRight IN word2Frequency) AND (windowFrequency[currentCharRight] EQUALS word2Frequency[currentCharRight]) THEN
+				SET formedCount TO formedCount + 1
+			END IF
+
+			WHILE formedCount EQUALS uniqueRequired AND ((posRight + 1) - windowStart) GREATER_THAN_OR_EQUAL_TO LENGTH(word2)
+				SET totalValidSubstrings TO totalValidSubstrings + (LENGTH(word1) - posRight)
+				LET currentCharLeft BE word1[windowStart]
+				SET countLeft TO windowFrequency[currentCharLeft]
+				SET windowFrequency[currentCharLeft] TO countLeft - 1
+
+				IF (currentCharLeft IN word2Frequency) AND (windowFrequency[currentCharLeft] LESS_THAN word2Frequency[currentCharLeft]) THEN
+					SET formedCount TO formedCount - 1
+				END IF
+
+				SET windowStart TO windowStart + 1			
+			END WHILE
+
+			SET posRight TO posRight + 1
+		END WHILE
+
+		RETURN totalValidSubstrings
+	END FUNCTION
+END CLASS

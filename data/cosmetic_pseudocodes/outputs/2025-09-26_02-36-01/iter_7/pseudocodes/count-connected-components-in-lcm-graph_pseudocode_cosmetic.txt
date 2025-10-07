@@ -1,0 +1,70 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+        DEFINE limit AS n MINUS (1 MULTIPLIED BY 1)  
+        INITIALIZE self.parent WITH an empty mapping  
+        INITIALIZE self.rank WITH an empty mapping  
+        SET counter TO 0  
+        WHILE counter LESS THAN OR EQUAL TO limit DO  
+            ASSIGN self.parent[counter] TO counter  
+            ASSIGN self.rank[counter] TO (0 PLUS 0)  
+            INCREMENT counter BY 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+        IF self.parent[x] NOT EQUAL x THEN  
+            ASSIGN temporary_holder TO self.parent[x]  
+            ASSIGN self.parent[x] TO self.find(temporary_holder)  
+        END IF  
+        RETURN self.parent[x]  
+    END FUNCTION  
+
+    FUNCTION union_set(self, u, v)  
+        ASSIGN a_local TO self.find(u)  
+        ASSIGN b_local TO self.find(v)  
+        IF a_local NOT EQUAL b_local THEN  
+            IF self.rank[a_local] LESS THAN self.rank[b_local] THEN  
+                ASSIGN swapper TO a_local  
+                ASSIGN a_local TO b_local  
+                ASSIGN b_local TO swapper  
+            END IF  
+            ASSIGN self.parent[b_local] TO a_local  
+            IF self.rank[a_local] EQUAL self.rank[b_local] THEN  
+                ASSIGN current_rank TO self.rank[a_local]  
+                ASSIGN self.rank[a_local] TO current_rank PLUS (1 MULTIPLIED BY 1)  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+        ASSIGN dsu TO DSU(threshold PLUS (1 PLUS 0))  
+
+        ASSIGN idx_outer TO 0  
+        WHILE idx_outer LESS THAN LENGTH(nums) DO  
+            ASSIGN val_outer TO nums[idx_outer]  
+            ASSIGN start_inner TO val_outer PLUS val_outer  
+            ASSIGN idx_inner TO start_inner  
+            WHILE idx_inner LESS THAN OR EQUAL TO threshold DO  
+                CALL dsu.union_set(val_outer, idx_inner)  
+                ASSIGN idx_inner TO idx_inner PLUS val_outer  
+            END WHILE  
+            INCREMENT idx_outer BY 1  
+        END WHILE  
+
+        DEFINE unique_parents AS an empty set  
+        ASSIGN idx_check TO 0  
+        WHILE idx_check LESS THAN LENGTH(nums) DO  
+            ASSIGN elem TO nums[idx_check]  
+            IF elem LESS THAN OR EQUAL TO threshold THEN  
+                ADD dsu.find(elem) TO unique_parents  
+            ELSE  
+                ADD elem TO unique_parents  
+            END IF  
+            INCREMENT idx_check BY 1  
+        END WHILE  
+
+        RETURN LENGTH(unique_parents)  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION minimumOperations(grid)
+        SET alpha TO LENGTH(grid)
+        SET beta TO LENGTH(grid[0])
+        SET delta TO 0
+
+        DEFINE FUNCTION nextDiffValue(curr)
+            SET epsilon TO 0
+            REPEAT
+                IF epsilon NOT EQUALS curr THEN
+                    RETURN epsilon
+                END IF
+                SET epsilon TO epsilon + 1
+            UNTIL epsilon > 9
+            RETURN 0
+        END FUNCTION
+
+        DEFINE FUNCTION fixColumns(colIdx, rowIdx, acc)
+            IF rowIdx >= alpha - 1 THEN
+                RETURN acc
+            END IF
+            IF NOT (grid[rowIdx][colIdx] = grid[rowIdx+1][colIdx]) THEN
+                SET grid[rowIdx+1][colIdx] TO grid[rowIdx][colIdx]
+                RETURN fixColumns(colIdx, rowIdx+1, acc + 1)
+            END IF
+            RETURN fixColumns(colIdx, rowIdx+1, acc)
+        END FUNCTION
+
+        DEFINE FUNCTION modifyNextColumn(colIdx, rowIdx, acc)
+            IF rowIdx >= alpha THEN
+                RETURN acc
+            END IF
+            IF (colIdx < beta - 1) AND (grid[rowIdx][colIdx] = grid[rowIdx][colIdx+1]) THEN
+                SET grid[rowIdx][colIdx+1] TO nextDiffValue(grid[rowIdx][colIdx])
+                RETURN modifyNextColumn(colIdx, rowIdx + 1, acc + 1)
+            ELSE
+                RETURN modifyNextColumn(colIdx, rowIdx + 1, acc)
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION iterateColumns(colIdx, acc)
+            IF colIdx >= beta THEN
+                RETURN acc
+            END IF
+            SET updatedAcc TO fixColumns(colIdx, 0, acc)
+            SET newAcc TO modifyNextColumn(colIdx, 0, updatedAcc)
+            RETURN iterateColumns(colIdx + 1, newAcc)
+        END FUNCTION
+
+        RETURN iterateColumns(0, delta)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,90 @@
+CLASS Solution  
+    FUNCTION shortestDistanceAfterQueries(n, queries)  
+         SET kpxq TO empty mapping FROM zero TO n MINUS one TO empty lists  
+         SET guwz TO zero  
+         WHILE guwz LESS THAN n MINUS one  
+              SET qrvb TO guwz PLUS one  
+              SET zfdk TO 1  
+              SET qrcj TO (qrvb, zfdk)  
+              APPEND qrcj TO kpxq[guwz]  
+              SET guwz TO guwz PLUS 1  
+         END WHILE  
+         
+         FUNCTION dijkstra()  
+              SET jlht TO list OF length n FILLED WITH positive infinity  
+              SET jlht[zero] TO zero  
+              SET yscb TO list WITH single element (zero, zero)  
+              
+              FUNCTION pop_min_heap(heap)  
+                   SET min_idx TO zero  
+                   SET vngq TO heap[min_idx]  
+                   SET last_idx TO LENGTH(heap) MINUS 1  
+                   SET heap[min_idx] TO heap[last_idx]  
+                   REMOVE element AT last_idx FROM heap  
+                   SET cur_idx TO min_idx  
+                   WHILE true  
+                        SET left_child TO 2 * cur_idx PLUS 1  
+                        SET right_child TO 2 * cur_idx PLUS 2  
+                        SET smallest TO cur_idx  
+                        IF left_child < LENGTH(heap) AND heap[left_child][0] < heap[smallest][0] THEN  
+                             SET smallest TO left_child  
+                        END IF  
+                        IF right_child < LENGTH(heap) AND heap[right_child][0] < heap[smallest][0] THEN  
+                             SET smallest TO right_child  
+                        END IF  
+                        IF smallest = cur_idx THEN  
+                             BREAK  
+                        END IF  
+                        SET heap[cur_idx], heap[smallest] TO heap[smallest], heap[cur_idx]  
+                        SET cur_idx TO smallest  
+                   END WHILE  
+                   RETURN vngq  
+              END FUNCTION  
+              
+              FUNCTION push_min_heap(heap, tup)  
+                   APPEND tup TO heap  
+                   SET idx TO LENGTH(heap) MINUS 1  
+                   WHILE idx > zero  
+                        SET parent TO (idx MINUS 1) DIV 2  
+                        IF heap[parent][0] <= heap[idx][0] THEN  
+                             BREAK  
+                        END IF  
+                        SET heap[parent], heap[idx] TO heap[idx], heap[parent]  
+                        SET idx TO parent  
+                   END WHILE  
+              END FUNCTION  
+              
+              WHILE LENGTH(yscb) > zero  
+                   SET (ndlq, wcmd) TO pop_min_heap(yscb)  
+                   IF ndlq > jlht[wcmd] THEN  
+                        CONTINUE  
+                   END IF  
+                   SET pqhs TO 0  
+                   WHILE pqhs < LENGTH(kpxq[wcmd])  
+                        SET (nmlo, rzti) TO kpxq[wcmd][pqhs]  
+                        SET unkw TO ndlq PLUS rzti  
+                        IF unkw < jlht[nmlo] THEN  
+                             SET jlht[nmlo] TO unkw  
+                             CALL push_min_heap(yscb, (unkw, nmlo))  
+                        END IF  
+                        SET pqhs TO pqhs PLUS 1  
+                   END WHILE  
+              END WHILE  
+              RETURN jlht[n MINUS 1]  
+         END FUNCTION  
+         
+         SET xgft TO empty list  
+         SET tmwo TO 0  
+         SET hpdo TO LENGTH(queries)  
+         WHILE tmwo < hpdo  
+              SET (prws, hmvu) TO queries[tmwo]  
+              SET ewqn TO hmvu  
+              APPEND (ewqn, 1) TO kpxq[prws]  
+              SET pnkm TO dijkstra()  
+              APPEND pnkm TO xgft  
+              SET tmwo TO tmwo PLUS 1  
+         END WHILE  
+         
+         RETURN xgft  
+    END FUNCTION  
+END CLASS

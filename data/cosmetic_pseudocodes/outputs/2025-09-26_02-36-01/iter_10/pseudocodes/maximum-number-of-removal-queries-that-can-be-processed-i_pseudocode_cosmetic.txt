@@ -1,0 +1,89 @@
+CLASS Solution
+    FUNCTION maximumProcessableQueries(nums parameters AS LIST OF INTEGER, queries parameters AS LIST OF INTEGER) RETURNS INTEGER
+        FUNCTION process_queries(subseq IN PSEUDOLIST OF INTEGER, queries_1 IN PSEUDOLIST OF INTEGER) RETURNS INTEGER
+            DECLARE count_tally INTEGER ← 0
+
+            DECLARE recursion_index INTEGER ← 0
+            FUNCTION recur_match(position INTEGER) RETURNS INTEGER
+                IF position = LENGTH(subseq) OR position = LENGTH(queries_1)
+                    RETURN count_tally
+                ELSE
+                    IF subseq[position] >= queries_1[position]
+                        count_tally ← count_tally + 1
+                        RETURN recur_match(position + 1)
+                    ELSE
+                        RETURN recur_match(position + 1)
+                    END IF
+                END IF
+            END FUNCTION
+
+            count_tally ← 0
+            DECLARE iter_index INTEGER ← 0
+            WHILE iter_index < LENGTH(queries_1) AND iter_index < LENGTH(subseq)
+                IF subseq[iter_index] >= queries_1[iter_index]
+                    count_tally ← count_tally + 1
+                    iter_index ← iter_index + 1
+                ELSE
+                    iter_index ← iter_index + 1
+                END IF
+            END WHILE
+            
+            RETURN count_tally
+        END FUNCTION
+
+        DECLARE len_nums INTEGER ← LENGTH(nums)
+        DECLARE len_queries INTEGER ← LENGTH(queries)
+        DECLARE best_result INTEGER ← process_queries(nums, queries)
+
+        DECLARE outer_counter INTEGER ← 0
+        WHILE outer_counter < len_nums
+            DECLARE first_slice LIST OF INTEGER ← EMPTY_LIST
+            FOR idx INTEGER FROM 0 TO outer_counter - 1
+                APPEND nums[idx] TO first_slice
+            END FOR
+
+            DECLARE second_slice LIST OF INTEGER ← EMPTY_LIST
+            FOR idx INTEGER FROM outer_counter TO len_nums - 1
+                APPEND nums[idx] TO second_slice
+            END FOR
+
+            DECLARE reversed_second_slice LIST OF INTEGER ← EMPTY_LIST
+            DECLARE rev_idx INTEGER ← LENGTH(second_slice) - 1
+            WHILE rev_idx >= 0
+                APPEND second_slice[rev_idx] TO reversed_second_slice
+                rev_idx ← rev_idx - 1
+            END WHILE
+
+            DECLARE recombined_seq LIST OF INTEGER ← EMPTY_LIST
+            FOR e INTEGER IN first_slice
+                APPEND e TO recombined_seq
+            END FOR
+            FOR e INTEGER IN reversed_second_slice
+                APPEND e TO recombined_seq
+            END FOR
+
+            DECLARE j INTEGER ← 0
+            WHILE j < LENGTH(recombined_seq) - 1
+                DECLARE k INTEGER ← j + 1
+                WHILE k < LENGTH(recombined_seq)
+                    IF recombined_seq[j] > recombined_seq[k]
+                        DECLARE temp INTEGER ← recombined_seq[j]
+                        recombined_seq[j] ← recombined_seq[k]
+                        recombined_seq[k] ← temp
+                    END IF
+                    k ← k + 1
+                END WHILE
+                j ← j + 1
+            END WHILE
+
+            DECLARE current_best INTEGER ← process_queries(recombined_seq, queries)
+            IF current_best > best_result
+                best_result ← current_best
+            END IF
+
+            outer_counter ← outer_counter + 1
+        END WHILE
+
+        RETURN best_result
+    END FUNCTION
+END CLASS

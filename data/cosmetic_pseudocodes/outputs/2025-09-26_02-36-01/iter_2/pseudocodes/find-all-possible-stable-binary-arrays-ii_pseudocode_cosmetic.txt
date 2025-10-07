@@ -1,0 +1,33 @@
+CLASS Solution
+    FUNCTION numberOfStableArrays(countZero countZero, countOne countOne, maxConsecutive maxConsecutive) RETURNS integer
+        CONSTANT MODULUS := 1_000_000_001
+
+        FUNCTION dp(zerosLeft zerosLeft, onesLeft onesLeft, previous previous, streakLength streakLength) RETURNS integer
+            IF zerosLeft == 0 AND onesLeft == 0 THEN
+                RETURN 1
+            ELSE IF zerosLeft < 0 OR onesLeft < 0 THEN
+                RETURN 0
+            END IF
+
+            accumulator := 0
+            IF previous == 0 THEN
+                IF streakLength < maxConsecutive THEN
+                    temp := dp(zerosLeft - 1, onesLeft, 0, streakLength + 1)
+                    accumulator := accumulator + temp
+                END IF
+                accumulator := accumulator + dp(zerosLeft, onesLeft - 1, 1, 1)
+            ELSE
+                IF zerosLeft > 0 THEN
+                    accumulator := accumulator + dp(zerosLeft - 1, onesLeft, 0, 1)
+                END IF
+                IF streakLength < maxConsecutive THEN
+                    accumulator := accumulator + dp(zerosLeft, onesLeft - 1, 1, streakLength + 1)
+                END IF
+            END IF
+
+            RETURN accumulator MOD MODULUS
+        END FUNCTION
+
+        RETURN dp(countZero, countOne - 1, 0, 1)
+    END FUNCTION
+END CLASS

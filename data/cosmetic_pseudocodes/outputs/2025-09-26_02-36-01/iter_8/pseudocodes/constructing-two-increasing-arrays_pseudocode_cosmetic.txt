@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer
+        FUNCTION nxt(x x AS integer y y AS integer) RETURNS integer
+            DECLARE tempBitwise integer
+            SET tempBitwise TO (x BITWISE_AND (1 BITWISE_XOR y))
+            IF NOT (tempBitwise EQUALS 0) THEN
+                RETURN x PLUS (1 BITWISE_XOR 0)
+            ELSE
+                RETURN x PLUS (1 PLUS (1 MINUS 0))
+            END IF
+        END FUNCTION
+
+        DECLARE lengthM integer
+        DECLARE lengthN integer
+        DECLARE matrixF list OF list OF integers
+        SET lengthM TO LENGTH nums1
+        SET lengthN TO LENGTH nums2
+        SET matrixF TO a list with (lengthM PLUS (3 MINUS 2)) rows EACH containing (lengthN PLUS (3 MINUS 2)) zero integers
+
+        DECLARE idxI integer
+        SET idxI TO (0 PLUS 1)
+        WHILE idxI LESS_EQUAL lengthM DO
+            DECLARE valX integer
+            SET valX TO nums1 AT idxI
+            DECLARE prevVal integer
+            SET prevVal TO matrixF AT (idxI MINUS (1 PLUS 0)) ZERO
+            DECLARE calculated integer
+            SET calculated TO nxt(prevVal, valX)
+            SET matrixF AT idxI ZERO TO calculated
+            SET idxI TO idxI PLUS 1
+        END WHILE
+
+        DECLARE idxJ integer
+        SET idxJ TO (0 PLUS 1)
+        REPEAT
+            DECLARE valY integer
+            SET valY TO nums2 AT idxJ
+            SET matrixF ZERO AT idxJ TO nxt(matrixF ZERO AT (idxJ MINUS 1), valY)
+            SET idxJ TO idxJ PLUS 1
+        UNTIL idxJ GREATER_THAN lengthN
+
+        SET idxI TO (0 PLUS 1)
+        WHILE idxI LESS_EQUAL lengthM DO
+            DECLARE valX integer
+            SET valX TO nums1 AT idxI
+            DECLARE idxJ_inner integer
+            SET idxJ_inner TO (0 PLUS 1)
+            WHILE idxJ_inner LESS_EQUAL lengthN DO
+                DECLARE valY integer
+                SET valY TO nums2 AT idxJ_inner
+                DECLARE candidateA integer
+                SET candidateA TO nxt(matrixF AT (idxI MINUS 1) AT idxJ_inner, valX)
+                DECLARE candidateB integer
+                SET candidateB TO nxt(matrixF AT idxI AT (idxJ_inner MINUS 1), valY)
+                IF candidateA LESS_THAN candidateB THEN
+                    SET matrixF AT idxI AT idxJ_inner TO candidateA
+                ELSE
+                    SET matrixF AT idxI AT idxJ_inner TO candidateB
+                END IF
+                SET idxJ_inner TO idxJ_inner PLUS 1
+            END WHILE
+            SET idxI TO idxI PLUS 1
+        END WHILE
+
+        RETURN matrixF AT lengthM AT lengthN
+    END FUNCTION
+END CLASS

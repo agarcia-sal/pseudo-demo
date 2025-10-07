@@ -1,0 +1,75 @@
+CLASS Solution  
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER  
+        SET positionIndices TO an empty list  
+        SET lenNums TO LENGTH OF nums  
+        SET idx TO 0  
+        WHILE idx LESS THAN lenNums  
+            IF nums AT idx EQUALS 1 THEN  
+                APPEND idx TO positionIndices  
+            END IF  
+            SET idx TO idx PLUS 1  
+        END WHILE  
+
+        IF LENGTH OF positionIndices EQUALS 0 THEN  
+            RETURN k TIMES (1 PLUS 1)  
+        END IF  
+
+        SET totalOnes TO LENGTH OF positionIndices  
+        SET accumPrefix TO a list of zeros with size totalOnes PLUS 1  
+
+        SET posCounter TO 0  
+        WHILE posCounter LESS THAN totalOnes  
+            SET accumPrefix AT (posCounter PLUS 1) TO accumPrefix AT posCounter PLUS positionIndices AT posCounter  
+            SET posCounter TO posCounter PLUS 1  
+        END WHILE  
+
+        FUNCTION cost(startIndex INTEGER endIndex INTEGER) RETURNS INTEGER  
+            SET midpoint TO (startIndex PLUS endIndex) DIV 2  
+            SET centerVal TO positionIndices AT midpoint  
+            SET totalCost TO 0  
+            SET leftWalker TO startIndex  
+            WHILE leftWalker LESS THAN midpoint  
+                SET totalCost TO totalCost PLUS (centerVal MINUS positionIndices AT leftWalker) MINUS (midpoint MINUS leftWalker)  
+                SET leftWalker TO leftWalker PLUS 1  
+            END WHILE  
+            SET rightWalker TO midpoint PLUS 1  
+            WHILE rightWalker LESS THAN OR EQUAL TO endIndex  
+                SET totalCost TO totalCost PLUS (positionIndices AT rightWalker MINUS centerVal) MINUS (rightWalker MINUS midpoint)  
+                SET rightWalker TO rightWalker PLUS 1  
+            END WHILE  
+            RETURN totalCost  
+        END FUNCTION  
+
+        SET minimumMoves TO positive infinity  
+        SET startIdx TO 0  
+        SET maxStart TO totalOnes MINUS k  
+        WHILE startIdx LESS OR EQUAL maxStart  
+            SET finishIdx TO startIdx PLUS k MINUS 1  
+            SET calculatedCost TO cost(startIdx, finishIdx)  
+
+            IF k MOD 2 EQUALS 1 THEN  
+                SET midPos TO (startIdx PLUS finishIdx) DIV 2  
+                SET medVal TO positionIndices AT midPos  
+                SET neededChanges TO finishIdx MINUS midPos MINUS (medVal MINUS positionIndices AT midPos MINUS 1)  
+            ELSE  
+                SET leftMid TO (startIdx PLUS finishIdx) DIV 2  
+                SET rightMid TO leftMid PLUS 1  
+                SET leftMedian TO positionIndices AT leftMid  
+                SET rightMedian TO positionIndices AT rightMid  
+                SET neededChanges TO rightMid MINUS leftMid MINUS 1 MINUS (rightMedian MINUS leftMedian MINUS 1)  
+            END IF  
+
+            IF neededChanges GREATER THAN maxChanges THEN  
+                SET calculatedCost TO calculatedCost PLUS (neededChanges MINUS maxChanges)  
+            END IF  
+
+            IF calculatedCost LESS THAN minimumMoves THEN  
+                SET minimumMoves TO calculatedCost  
+            END IF  
+
+            SET startIdx TO startIdx PLUS 1  
+        END WHILE  
+
+        RETURN minimumMoves  
+    END FUNCTION  
+END CLASS

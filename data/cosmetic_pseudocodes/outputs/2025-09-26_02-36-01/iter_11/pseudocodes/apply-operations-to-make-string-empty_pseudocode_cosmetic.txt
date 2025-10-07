@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION lastNonEmptyString(s)
+        PROCEDURE tallyChars(text, frequencies)
+            SET idx TO 0
+            WHILE idx < LENGTH(text) DO
+                SET ch TO text[idx]
+                IF ch IN frequencies THEN
+                    SET oldCount TO frequencies[ch]
+                    SET frequencies[ch] TO oldCount + (1 * 1)
+                ELSE
+                    SET frequencies[ch] TO 0 + 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE maxVal(dict, outMax)
+            SET vals TO []
+            FOR EACH key IN dict
+                ADD dict[key] TO vals
+            END FOR
+            SET currentMax TO vals[0]
+            SET i TO 1
+            WHILE i < LENGTH(vals) DO
+                IF NOT (vals[i] <= currentMax) THEN
+                    SET currentMax TO vals[i]
+                END IF
+                SET i TO i + 1
+            END WHILE
+            SET outMax TO currentMax
+        END PROCEDURE
+
+        PROCEDURE selectCharsWithMax(dict, maxValue, selectedSet)
+            FOR EACH k,v IN dict
+                IF NOT (v != maxValue) THEN
+                    ADD k TO selectedSet
+                END IF
+            END FOR
+        END PROCEDURE
+
+        SET charCountMap TO {}
+        CALL tallyChars(s, charCountMap)
+
+        SET maximumFrequency TO 0
+        CALL maxVal(charCountMap, maximumFrequency)
+
+        SET charactersWithMaxFreq TO {}
+        CALL selectCharsWithMax(charCountMap, maximumFrequency, charactersWithMaxFreq)
+
+        SET collector TO []
+        PROCEDURE processFromEnd(text, charSet)
+            SET pos TO LENGTH(text) - 1
+            REPEAT
+                SET currentChar TO text[pos]
+                IF currentChar IN charSet THEN
+                    ADD currentChar TO collector
+                    REMOVE currentChar FROM charSet
+                END IF
+                SET pos TO pos - 1
+            UNTIL pos < 0
+        END PROCEDURE
+
+        CALL processFromEnd(s, charactersWithMaxFreq)
+
+        SET answer TO ""
+        SET j TO LENGTH(collector) - 1
+        WHILE j >= 0 DO
+            SET answer TO answer + collector[j]
+            SET j TO j - 1
+        END WHILE
+
+        RETURN answer
+    END FUNCTION
+END CLASS

@@ -1,0 +1,79 @@
+CLASS Solution
+	func lastMarkedNodes(edges)
+		func dfs(idx, parent, depths)
+			set idxStack to [idx], parentStack to [parent]
+			while idxStack not empty
+				set curr to pop from idxStack
+				set p to pop from parentStack
+				set neighbors to element at position curr of g
+				set iter to 0
+				repeat until iter equal to length of neighbors
+					set nbr to element at position iter of neighbors
+					if not (nbr equal to p)
+						set element at position nbr of depths to element at position curr of depths plus (1 plus 0)
+						append nbr to idxStack
+						append curr to parentStack
+					end if
+					set iter to iter plus 1
+				end repeat
+			end while
+		end func
+
+		set countNodes to length of edges plus one
+		set g to new list of countNodes elements each equal to new empty list
+		set idxEdges to 0
+		while idxEdges < length of edges
+			set uvPair to element at position idxEdges of edges
+			set uNode to element at position 0 of uvPair
+			set vNode to element at position 1 of uvPair
+			append vNode to element at position uNode of g
+			append uNode to element at position vNode of g
+			set idxEdges to idxEdges plus 1
+		end while
+
+		set distFirst to new list of countNodes elements each equal to (0 minus 1)
+		set element at position 0 of distFirst to 0
+		call dfs with arguments 0 (0 minus 1) distFirst
+
+		set indexMax to 0
+		set iterMax to 0
+		while iterMax < countNodes
+			if element at position iterMax of distFirst > element at position indexMax of distFirst
+				set indexMax to iterMax
+			end if
+			set iterMax to iterMax plus 1
+		end while
+
+		set distSecond to new list of countNodes elements each equal to (0 minus 1)
+		set element at position indexMax of distSecond to 0
+		call dfs with arguments indexMax (0 minus 1) distSecond
+
+		set indexMax2 to 0
+		set iterMax2 to 0
+		while iterMax2 < countNodes
+			if element at position iterMax2 of distSecond > element at position indexMax2 of distSecond
+				set indexMax2 to iterMax2
+			end if
+			set iterMax2 to iterMax2 plus 1
+		end while
+
+		set distThird to new list of countNodes elements each equal to (0 minus 1)
+		set element at position indexMax2 of distThird to 0
+		call dfs with arguments indexMax2 (0 minus 1) distThird
+
+		set resultList to new empty list
+		set idxRes to 0
+		repeat until idxRes equal to countNodes
+			set val1 to element at position idxRes of distSecond
+			set val2 to element at position idxRes of distThird
+			if not (val1 less or equal to val2)
+				append indexMax to resultList
+			else
+				append indexMax2 to resultList
+			end if
+			set idxRes to idxRes plus 1
+		end repeat
+
+		return resultList
+	end func
+END CLASS

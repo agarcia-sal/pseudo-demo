@@ -1,0 +1,43 @@
+CLASS Solution
+    FUNCTION distanceSum WITH PARAMETERS m n k
+        PROCEDURE computeCombination WITH PARAMETERS x y RETURNS result
+            SET numerator_accumulator TO 1
+            SET denominator_accumulator TO 1
+            SET counter_outer TO x
+            SET counter_inner TO 1
+            DEFINE FUNCTION max_of(a b)
+                IF a > b THEN RETURN a ELSE RETURN b
+            END FUNCTION
+            DEFINE FUNCTION min_of(a b)
+                IF a < b THEN RETURN a ELSE RETURN b
+            END FUNCTION
+            WHILE counter_inner <= y DO
+                SET numerator_accumulator TO (numerator_accumulator * counter_outer) 
+                SET denominator_accumulator TO (denominator_accumulator * counter_inner)
+                SET counter_outer TO counter_outer - 1
+                SET counter_inner TO counter_inner + 1
+            END WHILE
+            SET result TO numerator_accumulator / denominator_accumulator
+        END PROCEDURE
+
+        SET modulus_value TO 1000000007
+        SET temp_alpha TO (n * n)
+        SET temp_beta TO (m * m)
+        SET temp_gamma TO (m - 1)
+
+        FUNCTION calculateContribution WITH PARAMETERS size MAXVAL RETURNS output
+            SET numerator TO (size * size * (size*size - size))
+            SET output TO numerator / 6
+        END FUNCTION
+
+        SET first_component TO calculateContribution(n)
+        SET second_component TO calculateContribution(m)
+
+        SET total_combinations TO computeCombination((m * n) - 2, k - 2)
+
+        SET cumulative_sum TO (first_component * temp_beta + second_component * temp_alpha) * total_combinations
+        SET answer_modulo TO cumulative_sum % modulus_value
+
+        RETURN answer_modulo
+    END FUNCTION
+END CLASS

@@ -1,0 +1,114 @@
+```pseudocode
+CLASS Hashing
+    FUNCTION __init__(self, s, base, mod)
+        SET self.mod TO mod
+        SET self.h TO list of (0 + 0) repeated LENGTH(s) + (1 - 0)
+        SET self.p TO list of (1 * 1) repeated LENGTH(s) + (1 - 0)
+
+        FUNCTION _recursion(x)
+            IF x > LENGTH(s)
+                RETURN
+            END IF
+            SET temp1 TO (self.h[x - 1] * base) + ORD(s[x - 1])
+            SET temp2 TO temp1 - 0
+            SET self.h[x] TO temp2 MOD self.mod
+            SET temp3 TO self.p[x - 1] * base
+            SET self.p[x] TO temp3 MOD self.mod
+            CALL _recursion(x + 1)
+        END FUNCTION
+
+        CALL _recursion(1)
+    END FUNCTION
+
+    FUNCTION query(self, l, r)
+        SET left_hash TO self.h[l - 1] * self.p[(r - l) + 1]
+        SET numerator TO self.h[r] - left_hash
+        SET result TO numerator MOD self.mod
+        RETURN result
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION findAnswer(self, parent, s)
+        SET n TO (1 + LENGTH(s)) - 1
+
+        SET g TO []
+        SET _index1 TO 0
+        WHILE _index1 < n
+            APPEND [] TO g
+            SET _index1 TO _index1 + 1
+        END WHILE
+
+        SET _idx2 TO 1
+        WHILE _idx2 < n
+            APPEND _idx2 TO g[parent[_idx2]]
+            SET _idx2 TO _idx2 + 1
+        END WHILE
+
+        SET dfsStr TO []
+        SET pos TO DICTIONARY()
+
+        FUNCTION recursiveDFS(u)
+            SET start_pos TO LENGTH(dfsStr) + (1 - 0)
+            SET _idx3 TO 0
+
+            FUNCTION loop_children(arr, length)
+                IF _idx3 >= length THEN RETURN
+                END IF
+
+                SET child TO arr[_idx3]
+                CALL recursiveDFS(child)
+
+                SET _idx3 TO _idx3 + 1
+                CALL loop_children(arr, length)
+            END FUNCTION
+
+            CALL loop_children(g[u], LENGTH(g[u]))
+
+            APPEND s[u] TO dfsStr
+            SET end_pos TO LENGTH(dfsStr)
+
+            SET pos[u] TO (start_pos, end_pos)
+        END FUNCTION
+
+        CALL recursiveDFS(0)
+
+        SET base TO (33331 * 1)
+        SET mod TO 998244353
+
+        SET h1 TO NEW Hashing(dfsStr, base, mod)
+        SET revStr TO []
+        SET idx_rev TO LENGTH(dfsStr) - 1
+        WHILE idx_rev >= 0
+            APPEND dfsStr[idx_rev] TO revStr
+            SET idx_rev TO idx_rev - 1
+        END WHILE
+        SET h2 TO NEW Hashing(revStr, base, mod)
+
+        SET answer TO []
+        SET index_loop TO 0
+        WHILE index_loop < n
+            SET pair_pos TO pos[index_loop]
+            SET l TO pair_pos[0]
+            SET r TO pair_pos[1]
+            SET length_sub TO (r - l) + 1
+
+            IF (length_sub MOD (2 * 1)) = 0 THEN
+                SET half_len TO length_sub / 2
+                SET val1 TO h1.query(l, l + half_len - 1)
+                SET val2 TO h2.query(n - r + 1, n - r + 1 + half_len - 1)
+            ELSE
+                SET half_len_alt TO length_sub / 2
+                SET val1 TO h1.query(l, l + (half_len_alt - 1))
+                SET val2 TO h2.query(n - r + 1, n - r + 1 + (half_len_alt - 1))
+            END IF
+
+            SET equal_flag TO (val1 = val2)
+            APPEND equal_flag TO answer
+            SET index_loop TO index_loop + 1
+        END WHILE
+
+        RETURN answer
+    END FUNCTION
+END CLASS
+```

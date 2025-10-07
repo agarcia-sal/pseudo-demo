@@ -1,0 +1,35 @@
+CLASS Solution  
+    FUNCTION validSubstringCount(word1, word2)  
+        FROM collections IMPORT Counter  
+        
+        LET count_word2 = Counter(word2)  
+        LET window = Counter()  
+        LET needed = LENGTH(count_word2)  
+        LET formed = 0  
+        LET start = 0  
+        LET total_valid = 0  
+        
+        FOR end IN RANGE(LENGTH(word1)):  
+            LET current_char = word1[end]  
+            window[current_char] = window.get(current_char, 0) + 1  
+            
+            IF current_char IN count_word2 AND window[current_char] == count_word2[current_char]:  
+                formed = formed + 1  
+            END IF  
+            
+            WHILE formed == needed AND (end - start + 1) >= LENGTH(word2):  
+                total_valid = total_valid + (LENGTH(word1) - end)  
+                LET left_char = word1[start]  
+                window[left_char] = window[left_char] - 1  
+                
+                IF left_char IN count_word2 AND window[left_char] < count_word2[left_char]:  
+                    formed = formed - 1  
+                END IF  
+                
+                start = start + 1  
+            END WHILE  
+        END FOR  
+        
+        RETURN total_valid  
+    END FUNCTION  
+END CLASS

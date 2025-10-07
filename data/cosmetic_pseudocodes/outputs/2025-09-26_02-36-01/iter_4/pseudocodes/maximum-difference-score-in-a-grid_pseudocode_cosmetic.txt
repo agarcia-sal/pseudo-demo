@@ -1,0 +1,76 @@
+CLASS Solution  
+    FUNCTION maxScore(grid)  
+        DECLARE rowCount EQUAL TO LENGTH(grid)  
+        DECLARE colCount EQUAL TO LENGTH(grid[ZERO_INDEX])  
+        DECLARE dpMatrix AS ARRAY WITH rowCount ELEMENTS  
+        SET indexCounter TO ZERO_INDEX  
+        WHILE indexCounter < rowCount DO  
+            SET dpMatrix[indexCounter] AS ARRAY WITH colCount ELEMENTS EACH INITIALIZED TO POSITIVE_INFINITY  
+            INCREMENT indexCounter BY ONE_UNIT  
+        END WHILE  
+        
+        SET dpMatrix[ZERO_INDEX][ZERO_INDEX] TO grid[ZERO_INDEX][ZERO_INDEX]  
+        
+        DECLARE colCursor TO ONE_UNIT  
+        WHILE colCursor < colCount DO  
+            LET prevMin = dpMatrix[ZERO_INDEX][colCursor - 1]  
+            LET currentGridVal = grid[ZERO_INDEX][colCursor]  
+            IF prevMin < currentGridVal THEN  
+                SET dpMatrix[ZERO_INDEX][colCursor] TO prevMin  
+            ELSE  
+                SET dpMatrix[ZERO_INDEX][colCursor] TO currentGridVal  
+            ENDIF  
+            INCREMENT colCursor BY ONE_UNIT  
+        END WHILE  
+        
+        DECLARE rowCursor TO ONE_UNIT  
+        WHILE rowCursor < rowCount DO  
+            LET aboveMin = dpMatrix[rowCursor - 1][ZERO_INDEX]  
+            LET currentGridVal = grid[rowCursor][ZERO_INDEX]  
+            IF aboveMin < currentGridVal THEN  
+                SET dpMatrix[rowCursor][ZERO_INDEX] TO aboveMin  
+            ELSE  
+                SET dpMatrix[rowCursor][ZERO_INDEX] TO currentGridVal  
+            ENDIF  
+            INCREMENT rowCursor BY ONE_UNIT  
+        END WHILE  
+        
+        DECLARE i TO ONE_UNIT  
+        WHILE i < rowCount DO  
+            DECLARE j TO ONE_UNIT  
+            WHILE j < colCount DO  
+                LET fromAbove = dpMatrix[i - 1][j]  
+                LET fromLeft = dpMatrix[i][j - 1]  
+                IF fromAbove < fromLeft THEN  
+                    SET dpMatrix[i][j] TO fromAbove  
+                ELSE  
+                    SET dpMatrix[i][j] TO fromLeft  
+                ENDIF  
+                
+                LET valAtGrid = grid[i][j]  
+                LET minValAtDP = dpMatrix[i][j]  
+                LET currentScore = valAtGrid - minValAtDP  
+                
+                DECLARE maxScoreSoFar  
+                IF NOT DEFINED maxScoreSoFar THEN  
+                    SET maxScoreSoFar TO NEGATIVE_INFINITY  
+                ENDIF  
+                
+                IF currentScore > maxScoreSoFar THEN  
+                    SET maxScoreSoFar TO currentScore  
+                ENDIF  
+                
+                IF NOT DEFINED max_score THEN  
+                    SET max_score TO currentScore  
+                ELSE IF max_score < currentScore THEN  
+                    SET max_score TO currentScore  
+                ENDIF  
+                
+                j = j + ONE_UNIT  
+            END WHILE  
+            i = i + ONE_UNIT  
+        END WHILE  
+        
+        RETURN max_score  
+    END FUNCTION  
+END CLASS

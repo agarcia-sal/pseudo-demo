@@ -1,0 +1,67 @@
+FUNCTION valid_date(tauzefip)
+  BEGIN
+    DECLARE bylucmo, favimru, iepkras AS STRING
+    DECLARE uvactaj, tenepdor, vuwjok AS INTEGER
+
+    TRY
+      SET tauzefip TO tauzefip WITH ALL LEADING CHARACTERS THAT ARE WHITESPACE REMOVED
+      SET tauzefip TO tauzefip WITH ALL TRAILING CHARACTERS THAT ARE WHITESPACE REMOVED
+
+      SET (bylucmo, favimru, iepkras) TO SPLIT tauzefip USING '-' AS DELIMITER
+
+      SET uvactaj TO INTEGER VALUE OF bylucmo
+      SET tenepdor TO INTEGER VALUE OF favimru
+      SET vuwjok TO INTEGER VALUE OF iepkras
+
+      IF uvactaj >= 1 THEN
+        IF uvactaj <= 12 THEN
+          IF uvactaj = 2 THEN
+            IF tenepdor >= 1 THEN
+              IF tenepdor <= 29 THEN
+                // continue
+              ELSE
+                RETURN False
+              END IF
+            ELSE
+              RETURN False
+            END IF
+          ELSE
+            DECLARE okuzted AS BOOLEAN
+            SET okuzted TO (uvactaj = 1) OR (uvactaj = 3) OR (uvactaj = 5) OR (uvactaj = 7) OR (uvactaj = 8) OR (uvactaj = 10) OR (uvactaj = 12)
+            IF okuzted THEN
+              IF tenepdor >= 1 THEN
+                IF tenepdor <= 31 THEN
+                  // continue
+                ELSE
+                  RETURN False
+                END IF
+              ELSE
+                RETURN False
+              END IF
+            ELSE
+              // month is among 4,6,9,11
+              IF tenepdor >= 1 THEN
+                IF tenepdor <= 30 THEN
+                  // continue
+                ELSE
+                  RETURN False
+                END IF
+              ELSE
+                RETURN False
+              END IF
+            END IF
+          END IF
+        ELSE
+          RETURN False
+        END IF
+      ELSE
+        RETURN False
+      END IF
+
+    EXCEPT
+      RETURN False
+    END TRY
+
+    RETURN True
+  END
+END FUNCTION

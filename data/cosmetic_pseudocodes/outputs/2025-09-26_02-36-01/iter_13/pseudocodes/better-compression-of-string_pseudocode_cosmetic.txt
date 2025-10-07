@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+        FUNCTION isAlpha(ch)
+            RETURN (ch >= "A" AND ch <= "Z") OR (ch >= "a" AND ch <= "z")
+        END FUNCTION
+
+        FUNCTION strToInt(strVal)
+            SET acc TO 0
+            SET idx TO 1
+            WHILE idx <= LENGTH(strVal) DO
+                SET acc TO acc * 10 + (ORD(strVal[idx]) - ORD("0"))
+                SET idx TO idx + 1
+            END WHILE
+            RETURN acc
+        END FUNCTION
+
+        FUNCTION sortedKeys(dictObj)
+            SET keyList TO []
+            FOR key IN dictObj KEYS DO
+                APPEND key TO keyList
+            END FOR
+            SET n TO LENGTH(keyList)
+            REPEAT UNTIL n <= 1
+                SET newN TO 0
+                FOR i FROM 2 TO n DO
+                    IF keyList[i - 1] > keyList[i] THEN
+                        SET tempVal TO keyList[i - 1]
+                        SET keyList[i - 1] TO keyList[i]
+                        SET keyList[i] TO tempVal
+                        SET newN TO i
+                    END IF
+                END FOR
+                SET n TO newN
+            END REPEAT
+            RETURN keyList
+        END FUNCTION
+
+        FUNCTION dictGetOrZero(dictionary, key)
+            IF key IN dictionary THEN
+                RETURN dictionary[key]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        SET charAccum TO {}
+        SET curLetter TO ""
+        SET curNumStr TO ""
+
+        FUNCTION processNumber()
+            IF curLetter != "" THEN
+                SET currentTotal TO dictGetOrZero(charAccum, curLetter)
+                SET parsedCount TO strToInt(curNumStr)
+                SET charAccum[curLetter] TO currentTotal + parsedCount
+            END IF
+            SET curNumStr TO ""
+        END FUNCTION
+
+        FUNCTION betterCompressionHelper(idx)
+            IF idx > LENGTH(compressed) THEN
+                CALL processNumber()
+                RETURN
+            END IF
+
+            SET ch TO compressed[idx]
+            IF isAlpha(ch) THEN
+                CALL processNumber()
+                SET curLetter TO ch
+            ELSE
+                SET curNumStr TO curNumStr + ch
+            END IF
+
+            CALL betterCompressionHelper(idx + 1)
+        END FUNCTION
+
+        SET curLetter TO ""
+        SET curNumStr TO ""
+        CALL betterCompressionHelper(1)
+
+        SET resultParts TO []
+
+        FUNCTION appendParts(sortedList, pos)
+            IF pos > LENGTH(sortedList) THEN RETURN END IF
+            SET cKey TO sortedList[pos]
+            SET val TO charAccum[cKey]
+            SET PART TO cKey + "" + STRING(val)
+            APPEND PART TO resultParts
+            CALL appendParts(sortedList, pos + 1)
+        END FUNCTION
+
+        SET sortedChars TO sortedKeys(charAccum)
+        CALL appendParts(sortedChars, 1)
+
+        SET outputString TO ""
+        FOR part IN resultParts DO
+            SET outputString TO outputString + part
+        END FOR
+
+        RETURN outputString
+    END FUNCTION
+END CLASS

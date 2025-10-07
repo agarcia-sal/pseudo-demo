@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION findPermutation(nums)
+        FUNCTION dfs(mask, previous)
+            SET limit TO 1 << LENGTH(nums) - 1
+            IF mask == limit THEN
+                SET diff TO previous - nums[0]
+                SET abs_diff TO diff
+                IF abs_diff < 0 THEN
+                    SET abs_diff TO -abs_diff
+                END IF
+                RETURN abs_diff
+            END IF
+            SET result TO a very large number
+            SET index TO 0
+            WHILE index < LENGTH(nums)
+                SET shifted_mask TO mask >> index
+                IF (shifted_mask & 1) == 0 THEN
+                    SET candidate TO previous - nums[index]
+                    IF candidate < 0 THEN
+                        SET candidate TO -candidate
+                    END IF
+                    SET recursive_val TO dfs(mask | (1 << index), index)
+                    SET total_val TO candidate + recursive_val
+                    IF total_val < result THEN
+                        SET result TO total_val
+                    END IF
+                END IF
+                SET index TO index + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        FUNCTION g(mask, prev_index)
+            APPEND prev_index TO ans
+            SET limit TO 1 << LENGTH(nums) - 1
+            IF mask == limit THEN
+                RETURN
+            END IF
+            SET res TO dfs(mask, prev_index)
+            SET cur_index TO 0
+            WHILE cur_index < LENGTH(nums)
+                SET shifted_mask TO mask >> cur_index
+                IF (shifted_mask & 1) == 0 THEN
+                    SET diff_val TO prev_index - cur_index
+                    IF diff_val < 0 THEN
+                        SET diff_val TO -diff_val
+                    END IF
+                    SET candidate_val TO diff_val + dfs(mask | (1 << cur_index), cur_index)
+                    IF candidate_val == res THEN
+                        CALL g(mask | (1 << cur_index), cur_index)
+                        BREAK
+                    END IF
+                END IF
+                SET cur_index TO cur_index + 1
+            END WHILE
+        END FUNCTION
+
+        SET length_nums TO LENGTH(nums)
+        SET ans TO an empty list
+        CALL g(1 << 0, 0)
+        RETURN ans
+    END FUNCTION
+END CLASS

@@ -1,0 +1,69 @@
+CLASS Solution
+    FUNCTION maxTotalReward(rewardValues)
+        FUNCTION auxiliaryDepthSearch(currentSum)
+            FUNCTION insertPosition(sortedArray, target)
+                PROCEDURE loopSearch(low, high, pos)
+                    IF low >= high THEN
+                        SET pos TO low
+                        RETURN pos
+                    ELSE
+                        SET mid TO (low + high) DIV 2
+                        IF target < sortedArray[mid] OR target = sortedArray[mid] THEN
+                            RETURN loopSearch(low, mid, pos)
+                        ELSE
+                            RETURN loopSearch(mid + 1, high, pos)
+                        END IF
+                    END IF
+                END PROCEDURE
+                RETURN loopSearch(0, LENGTH(sortedArray), 0)
+            END FUNCTION
+
+            SET insertionIndex TO insertPosition(rewardValues, currentSum)
+            SET bestReward TO 0
+            SET indexCounter TO insertionIndex
+
+            WHILE indexCounter < LENGTH(rewardValues)
+                SET candidateValue TO rewardValues[indexCounter]
+                IF NOT (currentSum + candidateValue <= currentSum) THEN
+                    SET recursiveSum TO currentSum + candidateValue
+                    SET deeperReward TO auxiliaryDepthSearch(recursiveSum)
+                    IF bestReward < candidateValue + deeperReward THEN
+                        SET bestReward TO candidateValue + deeperReward
+                    END IF
+                END IF
+                SET indexCounter TO indexCounter + 1
+            END WHILE
+            RETURN bestReward
+        END FUNCTION
+
+        PROCEDURE quickSort(arr, left, right)
+            IF left < right THEN
+                SET pivotIndex TO partition(arr, left, right)
+                quickSort(arr, left, pivotIndex - 1)
+                quickSort(arr, pivotIndex + 1, right)
+            END IF
+        END PROCEDURE
+
+        FUNCTION partition(arr, left, right)
+            SET pivotVal TO arr[right]
+            SET i TO left - 1
+            SET j TO left
+            REPEAT 
+                IF arr[j] <= pivotVal THEN
+                    SET i TO i + 1
+                    SET temp TO arr[i]
+                    SET arr[i] TO arr[j]
+                    SET arr[j] TO temp
+                END IF
+                SET j TO j + 1
+            UNTIL j > right - 1
+            SET temp TO arr[i + 1]
+            SET arr[i + 1] TO arr[right]
+            SET arr[right] TO temp
+            RETURN i + 1
+        END FUNCTION
+
+        quickSort(rewardValues, 0, LENGTH(rewardValues) - 1)
+        RETURN auxiliaryDepthSearch(0)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION minimumOperationsToMakeKPeriodic(word parameter k)
+        DEFINE FUNCTION get_length(s)
+            SET counter = 0
+            WHILE TRUE
+                IF s[counter] IS UNDEFINED THEN BREAK
+                SET counter = counter + 1
+            END WHILE
+            RETURN counter
+        END FUNCTION
+
+        DEFINE FUNCTION substr(s, start, end)
+            SET res = EMPTY LIST
+            SET pos = start
+            WHILE pos <= end
+                APPEND s[pos] TO res
+                SET pos = pos + 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        DEFINE FUNCTION unique_count(lst)
+            SET freq_map = EMPTY MAP
+            SET i = 0
+            WHILE i < get_length(lst)
+                SET key = lst[i]
+                IF key IN freq_map THEN
+                    SET freq_map[key] = freq_map[key] + 1
+                ELSE
+                    SET freq_map[key] = 1
+                END IF
+                SET i = i + 1
+            END WHILE
+            RETURN freq_map
+        END FUNCTION
+
+        DEFINE FUNCTION max_value_in_map(m)
+            SET max_val = -INFINITY
+            FOR EACH key IN m
+                IF m[key] > max_val THEN
+                    SET max_val = m[key]
+                END IF
+            END FOR
+            RETURN max_val
+        END FUNCTION
+
+
+        SET total_length = get_length(word)
+        SET segments_collection = EMPTY LIST
+
+        SET idx_outer = 0
+        WHILE idx_outer <= total_length - 1
+            SET slice_start = idx_outer
+            SET slice_end = idx_outer + k - 1
+            SET segment_slice = substr(word, slice_start, slice_end)
+            APPEND segment_slice TO segments_collection
+            SET idx_outer = idx_outer + k
+        END WHILE
+
+        SET counts_map = unique_count(segments_collection)
+        SET maximum_rep = max_value_in_map(counts_map)
+        SET final_answer = get_length(segments_collection) - maximum_rep
+        RETURN final_answer
+    END FUNCTION
+END CLASS

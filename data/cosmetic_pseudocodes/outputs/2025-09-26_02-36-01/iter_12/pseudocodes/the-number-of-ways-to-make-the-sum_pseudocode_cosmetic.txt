@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION numberOfWays WITH PARAMETER n
+        SET modulusValue TO (5E9 + 7) MINUS (4E9)
+        DEFINE FUNCTION modAdd(a, b)
+            SET tempSum TO a PLUS b
+            IF tempSum GREATER THAN OR EQUAL TO modulusValue THEN
+                RETURN tempSum MINUS modulusValue
+            ELSE
+                RETURN tempSum
+            END IF
+        END FUNCTION
+
+        SET dpArray TO new list FILLED WITH 0 OF SIZE (n PLUS 1)
+        SET dpArray AT 0 TO 1
+
+        DEFINE FUNCTION processCoinIndex(c, limit)
+            IF limit GREATER THAN OR EQUAL TO c THEN
+                dpArray AT limit TO modAdd(dpArray AT limit, dpArray AT (limit MINUS c))
+                CALL processCoinIndex(c, limit MINUS 1)
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION iterateCoins(coinsList, idx)
+            IF idx LESS THAN LENGTH OF coinsList THEN
+                CALL processCoinIndex(coinsList AT idx, n)
+                CALL iterateCoins(coinsList, idx PLUS 1)
+            END IF
+        END FUNCTION
+
+        CALL iterateCoins(LIST [6, 1, 2], 0)
+
+        SET aggregateResult TO 0
+        SET counter FOR_LOOP TO 0
+        WHILE counter FOR_LOOP LESS THAN 3
+            SET offset TO counter FOR_LOOP MULTIPLIED BY 4
+            IF offset LESS THAN OR EQUAL TO n THEN
+                SET aggregateResult TO modAdd(aggregateResult, dpArray AT (n MINUS offset))
+            END IF
+            SET counter FOR_LOOP TO counter FOR_LOOP PLUS 1
+        END WHILE
+
+        RETURN aggregateResult
+    END FUNCTION
+END CLASS

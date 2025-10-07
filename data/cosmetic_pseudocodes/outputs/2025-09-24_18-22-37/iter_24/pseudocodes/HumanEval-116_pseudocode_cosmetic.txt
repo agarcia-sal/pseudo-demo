@@ -1,0 +1,69 @@
+```
+FUNCTION sort_array(array_of_integers)
+    SET counter_variable_nu TO LENGTH(array_of_integers)
+    SET temporary_sorted_result TO EMPTY LIST
+    SET position_marker_pm TO 0
+    WHILE position_marker_pm < counter_variable_nu DO
+        INSERT array_of_integers.at(position_marker_pm) INTO temporary_sorted_result
+        SET position_marker_pm TO position_marker_pm + 1
+    END WHILE
+
+    SET ascending_order_result TO EMPTY LIST
+    SET index_iterator_kq TO 0
+    WHILE index_iterator_kq < LENGTH(temporary_sorted_result) DO
+        SET value_holder_vh TO temporary_sorted_result.at(index_iterator_kq)
+        SET temp_list_tl TO EMPTY LIST
+        SET temp_pos_tp TO 0
+        WHILE temp_pos_tp < LENGTH(temporary_sorted_result) DO
+            IF temporary_sorted_result.at(temp_pos_tp) <= value_holder_vh THEN
+                INSERT temporary_sorted_result.at(temp_pos_tp) INTO temp_list_tl
+            END IF
+            SET temp_pos_tp TO temp_pos_tp + 1
+        END WHILE
+        SET ascending_order_result TO temp_list_tl
+        SET index_iterator_kq TO index_iterator_kq + 1
+    END WHILE
+
+    SET binary_ones_key_mapper TO EMPTY DICTIONARY
+    SET element_iterator_zr TO 0
+    WHILE element_iterator_zr < LENGTH(ascending_order_result) DO
+        SET current_element_ce TO ascending_order_result.at(element_iterator_zr)
+        SET binary_string_bs TO CONVERT_TO_BINARY(current_element_ce)
+        SET count_ones_co TO 0
+        SET char_index_ci TO 2
+        WHILE char_index_ci < LENGTH(binary_string_bs) DO
+            CASE binary_string_bs.at(char_index_ci) OF
+                '1': SET count_ones_co TO count_ones_co + 1
+                DEFAULT: SKIP
+            END CASE
+            SET char_index_ci TO char_index_ci + 1
+        END WHILE
+        SET binary_ones_key_mapper[current_element_ce] TO count_ones_co
+        SET element_iterator_zr TO element_iterator_zr + 1
+    END WHILE
+
+    SET sorted_final_by_ones TO EMPTY LIST
+    SET temp_list_for_sorting TO ascending_order_result
+    SET outer_loop_xp TO 0
+    WHILE outer_loop_xp < LENGTH(temp_list_for_sorting) DO
+        SET inner_loop_yp TO outer_loop_xp + 1
+        WHILE inner_loop_yp < LENGTH(temp_list_for_sorting) DO
+            IF binary_ones_key_mapper[temp_list_for_sorting.at(outer_loop_xp)] > binary_ones_key_mapper[temp_list_for_sorting.at(inner_loop_yp)] THEN
+                SET temp_holder_th TO temp_list_for_sorting.at(outer_loop_xp)
+                SET temp_list_for_sorting[outer_loop_xp] TO temp_list_for_sorting.at(inner_loop_yp)
+                SET temp_list_for_sorting[inner_loop_yp] TO temp_holder_th
+            ELSE
+                SET dummy_flag_df TO 0
+            END IF
+            SET inner_loop_yp TO inner_loop_yp + 1
+        END WHILE
+        SET outer_loop_xp TO outer_loop_xp + 1
+    END WHILE
+    
+    FOR EACH element_in_final ei IN temp_list_for_sorting DO
+        INSERT ei INTO sorted_final_by_ones
+    END FOR
+    
+    RETURN sorted_final_by_ones
+END FUNCTION
+```

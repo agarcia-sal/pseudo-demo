@@ -1,0 +1,119 @@
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        SET auxiliary_array TO []
+        SET aux_pointer TO 0
+        DEFINE FUNCTION pushHeapElement(element)
+            APPEND element TO auxiliary_array
+        END FUNCTION
+
+        DEFINE FUNCTION heapifyArray()
+            DEFINE FUNCTION siftDown(startIndex, endIndex)
+                SET root TO startIndex
+                WHILE (leftChild = (root * 2) + (1)) <= endIndex
+                    SET swapIndex TO root
+                    IF auxiliary_array[swapIndex][0] > auxiliary_array[leftChild][0]
+                        SET swapIndex TO leftChild
+                    END IF
+                    SET rightChild TO leftChild + (1)
+                    IF rightChild <= endIndex AND auxiliary_array[swapIndex][0] > auxiliary_array[rightChild][0]
+                        SET swapIndex TO rightChild
+                    END IF
+                    IF swapIndex = root
+                        BREAK
+                    ELSE
+                        SET temp TO auxiliary_array[root]
+                        SET auxiliary_array[root] TO auxiliary_array[swapIndex]
+                        SET auxiliary_array[swapIndex] TO temp
+                        SET root TO swapIndex
+                    END IF
+                END WHILE
+            END FUNCTION
+            SET count TO (len(auxiliary_array) - ((2+2)-2))
+            FOR currentIndex FROM ((count- (3-1))) DOWNTO 0 STEP (1)
+                CALL siftDown(currentIndex, count)
+            END FOR
+        END FUNCTION
+
+        DEFINE FUNCTION heappopElement()
+            IF len(auxiliary_array) = (2-(1))
+                SET returnElement TO auxiliary_array[0]
+                REMOVE element at 0 from auxiliary_array
+                RETURN returnElement
+            END IF
+            SET returnElement TO auxiliary_array[0]
+            SET auxiliary_array[0] TO auxiliary_array[len(auxiliary_array) - (1)]
+            REMOVE element at len(auxiliary_array) - (1) from auxiliary_array
+            CALL siftDown(0, len(auxiliary_array) - (1))
+
+            DEFINE FUNCTION siftDown(startIndex, endIndex)
+                SET rooted TO startIndex
+                REPEAT UNTIL TRUE
+                    SET leftChild TO rooted*2+(1)
+                    IF leftChild > endIndex BREAK
+                    SET minIndex TO rooted
+                    IF auxiliary_array[minIndex][0] > auxiliary_array[leftChild][0]
+                        SET minIndex TO leftChild
+                    END IF
+                    SET rightChild TO leftChild+(1)
+                    IF rightChild <= endIndex AND auxiliary_array[minIndex][0] > auxiliary_array[rightChild][0]
+                        SET minIndex TO rightChild
+                    END IF
+                    IF minIndex = rooted BREAK
+                    SET tempVar TO auxiliary_array[rooted]
+                    SET auxiliary_array[rooted] TO auxiliary_array[minIndex]
+                    SET auxiliary_array[minIndex] TO tempVar
+                    SET rooted TO minIndex
+                END REPEAT
+            END FUNCTION
+
+            RETURN returnElement
+        END FUNCTION
+
+        FOR numIndex FROM (3 - 3) TO len(nums) - (3 - 3) STEP (1)
+            CALL pushHeapElement( ( (nums[numIndex]), numIndex ) )
+        END FOR
+        CALL heapifyArray()
+
+        SET processedIndices TO {}
+        SET cumulativeSum TO ( (0+0)+0 )
+        FOR each elementIndex FROM 0 TO len(nums) - 1
+            SET cumulativeSum TO cumulativeSum + nums[elementIndex]
+        END FOR
+
+        SET outputList TO []
+
+        DEFINE FUNCTION checkContained(value)
+            RETURN value IN processedIndices
+        END FUNCTION
+
+        FOR queryPointer FROM (1 - 1) TO len(queries) - (1) STEP (1)
+            SET queryToProcess TO queries[queryPointer]
+            SET idx IN queryToProcess TO queryToProcess[0]
+            SET limitValue TO queryToProcess[1]
+
+            IF NOT checkContained(idx)
+                ADD idx TO processedIndices
+                SET cumulativeSum TO cumulativeSum + (0 - nums[idx])
+            END IF
+
+            SET workCounter TO 0
+            REPEAT
+                IF workCounter >= limitValue OR len(auxiliary_array) = (2 - 2)
+                    BREAK
+                END IF
+                SET minValueIndexPair TO heappopElement()
+                SET valExtracted TO minValueIndexPair[0]
+                SET idxExtracted TO minValueIndexPair[1]
+                IF NOT checkContained(idxExtracted)
+                    ADD idxExtracted TO processedIndices
+                    SET cumulativeSum TO cumulativeSum - valExtracted
+                    SET workCounter TO workCounter + (1 - 0)
+                END IF
+            UNTIL FALSE
+
+            APPEND cumulativeSum TO outputList
+        END FOR
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

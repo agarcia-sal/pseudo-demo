@@ -1,0 +1,58 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+        INITIALIZE self.parent AS empty dictionary  
+        INITIALIZE self.rank AS empty dictionary  
+        FOR i FROM 0 TO n MINUS 1 DO  
+            ASSIGN self.parent[i] = i  
+            ASSIGN self.rank[i] = 0  
+        END FOR  
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+        WHILE self.parent[x] IS NOT x DO  
+            ASSIGN self.parent[x] = self.parent[self.parent[x]]  
+            ASSIGN x = self.parent[x]  
+        END WHILE  
+        RETURN x  
+    END FUNCTION  
+
+    FUNCTION union_set(self, u, v)  
+        SET root_u TO self.find(u)  
+        SET root_v TO self.find(v)  
+        IF root_u IS root_v THEN  
+            RETURN  
+        END IF  
+        IF self.rank[root_u] < self.rank[root_v] THEN  
+            SWAP root_u WITH root_v  
+        END IF  
+        ASSIGN self.parent[root_v] = root_u  
+        IF self.rank[root_u] == self.rank[root_v] THEN  
+            INCREMENT self.rank[root_u] BY 1  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+        CREATE dsu AS DSU(threshold + 1)  
+
+        FOR EACH number IN nums DO  
+            SET multiple TO number * 2  
+            WHILE multiple <= threshold DO  
+                dsu.union_set(number, multiple)  
+                INCREMENT multiple BY number  
+            END WHILE  
+        END FOR  
+
+        DECLARE representatives AS empty set  
+        FOR EACH number IN nums DO  
+            IF number <= threshold THEN  
+                ADD dsu.find(number) TO representatives  
+            ELSE  
+                ADD number TO representatives  
+            END IF  
+        END FOR  
+
+        RETURN size OF representatives  
+    END FUNCTION  
+END CLASS

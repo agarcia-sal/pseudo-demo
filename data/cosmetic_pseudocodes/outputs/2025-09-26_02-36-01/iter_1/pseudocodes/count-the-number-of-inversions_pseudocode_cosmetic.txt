@@ -1,0 +1,39 @@
+CLASS Solution  
+    FUNCTION numberOfPermutations(n, requirements)  
+        CONST MODULO = 1_000_000_007  
+        DECLARE requirementMap AS dictionary = {}  
+        FOR EACH (endIndex, count) IN requirements DO  
+            requirementMap[endIndex] = count  
+        END FOR  
+        
+        FUNCTION dfs(currentIndex, currentInversions, mask)  
+            IF currentIndex == n THEN  
+                LET targetInv = requirementMap.get(n, 0)  
+                RETURN 1 IF currentInversions == targetInv ELSE 0  
+            END IF  
+            
+            IF currentIndex > 0 THEN  
+                LET expectedInv = requirementMap.get(currentIndex, currentInversions)  
+                IF currentInversions != expectedInv THEN  
+                    RETURN 0  
+                END IF  
+            END IF  
+            
+            LET totalWays = 0  
+            FOR candidate FROM 0 TO n - 1 DO  
+                IF (mask & (1 << candidate)) == 0 THEN  
+                    LET updatedInv = currentInversions  
+                    FOR later FROM candidate + 1 TO n - 1 DO  
+                        IF (mask & (1 << later)) != 0 THEN  
+                            updatedInv = updatedInv + 1  
+                        END IF  
+                    END FOR  
+                    totalWays = (totalWays + dfs(currentIndex + 1, updatedInv, mask | (1 << candidate))) % MODULO  
+                END IF  
+            END FOR  
+            RETURN totalWays  
+        END FUNCTION  
+        
+        RETURN dfs(0, 0, 0)  
+    END FUNCTION  
+END CLASS

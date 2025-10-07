@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+        SET w TO LENGTH OF s
+        SET arr_x TO LIST OF 0 REPEATED w PLUS 1 TIMES
+        SET arr_y TO LIST OF 0 REPEATED w PLUS 1 TIMES
+
+        SET idx TO 0
+        WHILE idx LESS THAN w
+            SET arr_x AT idx PLUS 1 TO arr_x AT idx PLUS IF s AT idx EQUALS '0' THEN 1 ELSE 0
+            SET arr_y AT idx PLUS 1 TO arr_y AT idx PLUS IF s AT idx EQUALS '1' THEN 1 ELSE 0
+            SET idx TO idx PLUS 1
+        END WHILE
+
+        FUNCTION count_valid_substrings(p1 parameter p2 parameter) RETURNS INTEGER
+            SET acc TO 0
+            SET u TO p1
+            REPEAT
+                IF u GREATER THAN p2 THEN
+                    BREAK
+                END IF
+
+                PROCEDURE binary_search(a parameter b parameter)
+                    IF a GREATER OR EQUAL b THEN
+                        RETURN a
+                    END IF
+                    SET low_val TO a
+                    SET high_val TO b
+                    WHILE low_val LESS THAN high_val
+                        SET mid_val TO (low_val PLUS high_val) DIV 2
+                        SET zero_segment TO arr_x AT mid_val PLUS 1 MINUS arr_x AT a
+                        SET one_segment TO arr_y AT mid_val PLUS 1 MINUS arr_y AT a
+                        IF zero_segment LESS THAN OR EQUAL k OR one_segment LESS THAN OR EQUAL k THEN
+                            SET low_val TO mid_val PLUS 1
+                        ELSE
+                            SET high_val TO mid_val
+                        END IF
+                    END WHILE
+                    RETURN low_val
+                END PROCEDURE
+
+                SET p TO binary_search(u, p2 PLUS 1)
+                SET length_span TO p MINUS 1 MINUS u PLUS 1
+                IF length_span GREATER THAN OR EQUAL TO 0 THEN
+                    SET acc TO acc PLUS length_span
+                END IF
+                SET u TO u PLUS 1
+            UNTIL FALSE
+            RETURN acc
+        END FUNCTION
+
+        SET output_list TO EMPTY LIST
+        FOR EACH pair l_comma_r IN queries
+            SET val_l TO l_comma_r AT 0
+            SET val_r TO l_comma_r AT 1
+            APPEND count_valid_substrings(val_l, val_r) TO output_list
+        END FOR
+
+        RETURN output_list
+    END FUNCTION
+END CLASS

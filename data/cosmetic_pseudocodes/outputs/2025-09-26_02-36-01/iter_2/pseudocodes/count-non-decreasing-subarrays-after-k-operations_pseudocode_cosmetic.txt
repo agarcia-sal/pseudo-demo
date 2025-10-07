@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION countNonDecreasingSubarrays(nums k)
+        LET length_of_nums BE LENGTH OF nums
+
+        FUNCTION canMakeNonDecreasing(begin count)
+            LET adjustment_cost BE 0
+            LET highest_value BE nums[begin]
+            LET index BE 1
+            WHILE index < count
+                LET current_value BE nums[begin + index]
+                IF current_value < highest_value
+                    LET difference BE highest_value - current_value
+                    SET adjustment_cost TO adjustment_cost + difference
+                END IF
+                IF highest_value < current_value
+                    SET highest_value TO current_value
+                END IF
+                IF adjustment_cost > k
+                    RETURN False
+                END IF
+                SET index TO index + 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        LET total_possible_subarrays BE (length_of_nums * (length_of_nums + 1)) // 2
+        LET count_invalid_subarrays BE 0
+        LET start_pos BE 0
+        WHILE start_pos < length_of_nums
+            LET lower_bound BE 1
+            LET upper_bound BE length_of_nums - start_pos
+            WHILE lower_bound <= upper_bound
+                LET midpoint BE (lower_bound + upper_bound) // 2
+                IF canMakeNonDecreasing(start_pos midpoint)
+                    SET lower_bound TO midpoint + 1
+                ELSE
+                    SET upper_bound TO midpoint - 1
+                END IF
+            END WHILE
+            SET count_invalid_subarrays TO count_invalid_subarrays + (length_of_nums - start_pos - upper_bound)
+            SET start_pos TO start_pos + 1
+        END WHILE
+
+        RETURN total_possible_subarrays - count_invalid_subarrays
+    END FUNCTION
+END CLASS

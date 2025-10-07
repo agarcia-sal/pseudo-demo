@@ -1,0 +1,49 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+	FUNCTION parse_paren_group(group_string)
+		SET depth_counter TO 0
+		SET max_counter TO 0
+
+		FUNCTION recurse_chars(chars_list, index, max_val, current_val)
+			IF index EQUALS LENGTH(chars_list)
+				RETURN max_val
+			END IF
+			SWITCH chars_list[index]
+				CASE '('
+					SET new_current TO current_val + 1
+					SET new_max TO (new_current > max_val) ? new_current : max_val
+					RETURN recurse_chars(chars_list, index + 1, new_max, new_current)
+				CASE ')'
+					SET new_current TO current_val - 1
+					RETURN recurse_chars(chars_list, index + 1, max_val, new_current)
+				DEFAULT
+					RETURN recurse_chars(chars_list, index + 1, max_val, current_val)
+			END SWITCH
+		END FUNCTION
+
+		RETURN recurse_chars(LIST(group_string), 0, 0, 0)
+	END FUNCTION
+
+	SET raw_groups TO []
+	SET temp_string TO ""
+	FOR i FROM 1 TO LENGTH(parentheses_string) + 1
+		IF i <= LENGTH(parentheses_string) AND parentheses_string[i] NOT EQUAL TO ' '
+			SET temp_string TO temp_string + parentheses_string[i]
+		ELSE
+			IF temp_string NOT EQUAL TO ""
+				APPEND temp_string TO raw_groups
+				SET temp_string TO ""
+			END IF
+		END IF
+	END FOR
+
+	SET filtered_groups TO []
+	FOR j FROM 1 TO LENGTH(raw_groups)
+		IF raw_groups[j] NOT EQUAL TO ""
+			APPEND parse_paren_group(raw_groups[j]) TO filtered_groups
+		END IF
+	END FOR
+
+	RETURN filtered_groups
+END FUNCTION
+```

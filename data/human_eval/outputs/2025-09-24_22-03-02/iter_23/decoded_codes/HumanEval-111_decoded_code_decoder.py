@@ -1,0 +1,31 @@
+from typing import Dict
+
+def histogram(test: str) -> Dict[str, int]:
+    dict1 = {}
+    list1 = []
+    t = 0
+
+    list1 = test.split(" ")
+
+    for index_i in range(len(list1)):
+        i = list1[index_i]
+        count_i = 0
+        for index_j in range(len(list1)):
+            if list1[index_j] == i:
+                count_i += 1
+        if count_i > t and i != "":
+            t = count_i
+
+    if t > 0:
+        for index_i in range(len(list1)):
+            i = list1[index_i]
+
+            count_i = 0
+            for index_j in range(len(list1)):
+                if list1[index_j] == i:
+                    count_i += 1
+
+            if count_i == t:
+                dict1[i] = t
+
+    return dict1

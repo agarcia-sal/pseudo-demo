@@ -1,0 +1,89 @@
+CLASS UnionFind
+    FUNCTION __init__(self, total)
+        LET parents_list BE AN EMPTY LIST
+        LET ranks_list BE AN EMPTY LIST
+        LET idx BE 0
+        WHILE idx < total
+            APPEND idx TO parents_list
+            APPEND 1 TO ranks_list
+            SET idx TO idx PLUS 1
+        END WHILE
+        SET self.parent TO parents_list
+        SET self.rank TO ranks_list
+    END FUNCTION
+
+    FUNCTION find(self, element)
+        WHILE NOT (self.parent[element] EQUALS element)
+            SET self.parent[element] TO self.parent[self.parent[element]]
+            SET element TO self.parent[element]
+        END WHILE
+        RETURN element
+    END FUNCTION
+
+    FUNCTION union(self, first, second)
+        LET rootFirst BE self.find(first)
+        LET rootSecond BE self.find(second)
+        IF rootFirst NOT EQUALS rootSecond THEN
+            IF self.rank[rootFirst] GREATER THAN self.rank[rootSecond] THEN
+                SET self.parent[rootSecond] TO rootFirst
+            ELSE
+                IF self.rank[rootFirst] LESS THAN self.rank[rootSecond] THEN
+                    SET self.parent[rootFirst] TO rootSecond
+                ELSE
+                    SET self.parent[rootSecond] TO rootFirst
+                    SET self.rank[rootFirst] TO self.rank[rootFirst] PLUS 1
+                END IF
+            END IF
+        END IF
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION minimumCost(self, count, connections, queries)
+        LET uf BE UnionFind(count)
+        LET maxValue BE (2 EXP 32) MINUS 1
+        LET componentsMask BE AN ARRAY OF SIZE count FILLED WITH maxValue
+
+        LET idx1 BE 0
+        WHILE idx1 LESS THAN LENGTH OF connections
+            LET edge BE connections[idx1]
+            LET nodeA, nodeB, weight BE edge[0], edge[1], edge[2]
+            CALL uf.union(nodeA, nodeB)
+            LET rootNode BE uf.find(nodeA)
+            LET currentMask BE componentsMask[rootNode]
+            LET updatedMask BE currentMask BITWISE AND weight
+            SET componentsMask[rootNode] TO updatedMask
+            SET idx1 TO idx1 PLUS 1
+        END WHILE
+
+        LET compCostMap BE AN EMPTY MAP
+        LET index BE 0
+        WHILE index LESS THAN count
+            LET rootId BE uf.find(index)
+            IF NOT rootId IN compCostMap THEN
+                SET compCostMap[rootId] TO componentsMask[rootId]
+            END IF
+            SET index TO index PLUS 1
+        END WHILE
+
+        LET answerList BE AN EMPTY LIST
+        LET idx2 BE 0
+        WHILE idx2 LESS THAN LENGTH OF queries
+            LET startNode, endNode BE queries[idx2][0], queries[idx2][1]
+            IF startNode EQUALS endNode THEN
+                APPEND 0 TO answerList
+            ELSE
+                LET ancestorStart BE uf.find(startNode)
+                LET ancestorEnd BE uf.find(endNode)
+                IF ancestorStart EQUALS ancestorEnd THEN
+                    APPEND compCostMap[ancestorStart] TO answerList
+                ELSE
+                    APPEND -1 TO answerList
+                END IF
+            END IF
+            SET idx2 TO idx2 PLUS 1
+        END WHILE
+
+        RETURN answerList
+    END FUNCTION
+END CLASS

@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+        SET totalRows TO LENGTH OF grid
+        SET totalCols TO LENGTH OF element at position 0 of grid
+        SET accumulator TO 0
+
+        FUNCTION checkWithinLimit(matrix)
+            SET rowIndex TO 0
+            WHILE rowIndex IS LESS THAN LENGTH OF matrix
+                SET colIndex TO 0
+                WHILE colIndex IS LESS THAN LENGTH OF element at position rowIndex of matrix
+                    IF element at position colIndex of element at position rowIndex of matrix IS GREATER THAN k THEN
+                        RETURN False
+                    END IF
+                    SET colIndex TO colIndex + 1
+                END WHILE
+                SET rowIndex TO rowIndex + 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        FUNCTION verifyNotIncreasing(matrix)
+            FOR each line IN matrix
+                SET index TO 1
+                REPEAT
+                    IF element at position index of line GREATER THAN element at position index - 1 of line THEN
+                        RETURN False
+                    END IF
+                    SET index TO index + 1
+                UNTIL index IS GREATER THAN LENGTH OF line - 1
+            END FOR
+            RETURN True
+        END FUNCTION
+
+        SET startRow TO 0
+        WHILE startRow IS LESS THAN totalRows
+            SET startCol TO 0
+            WHILE startCol IS LESS THAN totalCols
+                SET endRow TO startRow
+                WHILE endRow IS LESS THAN totalRows
+                    SET endCol TO startCol
+                    WHILE endCol IS LESS THAN totalCols
+                        SET extractedMatrix TO EMPTY LIST
+                        SET rowCursor TO startRow
+                        WHILE rowCursor IS LESS THAN OR EQUAL TO endRow
+                            SET sliceRow TO SUBLIST of element at position rowCursor of grid FROM startCol TO endCol INCLUSIVE
+                            APPEND sliceRow TO extractedMatrix
+                            SET rowCursor TO rowCursor + 1
+                        END WHILE
+
+                        SET conditionOne TO checkWithinLimit(extractedMatrix)
+                        SET conditionTwo TO verifyNotIncreasing(extractedMatrix)
+                        IF conditionOne AND conditionTwo THEN
+                            SET accumulator TO accumulator + 1
+                        END IF
+
+                        SET endCol TO endCol + 1
+                    END WHILE
+                    SET endRow TO endRow + 1
+                END WHILE
+                SET startCol TO startCol + 1
+            END WHILE
+            SET startRow TO startRow + 1
+        END WHILE
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

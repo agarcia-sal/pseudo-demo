@@ -1,0 +1,72 @@
+CLASS Solution
+
+    FUNCTION maxScore(inputList)
+    
+        FUNCTION getLength(collection)
+            SET count TO 0
+            SET index TO 0
+            WHILE TRUE
+                IF index LESS THAN (length of collection) THEN
+                    SET count TO count PLUS 1
+                    SET index TO index PLUS 1
+                ELSE
+                    BREAK
+                END IF
+            END WHILE
+            RETURN count
+        END FUNCTION
+    
+        FUNCTION zeroFilledArray(size)
+            SET array TO []
+            SET counter TO 0
+            REPEAT
+                IF counter GREATER OR EQUAL TO size THEN
+                    BREAK
+                ELSE
+                    APPEND 0 TO array
+                    SET counter TO counter PLUS 1
+                END IF
+            UNTIL FALSE
+            RETURN array
+        END FUNCTION
+    
+        SET lengthVal TO getLength(inputList)
+        SET resultDP TO zeroFilledArray(lengthVal)
+    
+        FUNCTION descendingIndexLoop(startVal, endVal, action)
+            SET current TO startVal
+            WHILE current GREATER OR EQUAL TO endVal DO
+                CALL action(current)
+                SET current TO current MINUS 1
+            END WHILE
+        END FUNCTION
+    
+        FUNCTION ascendingIndexLoop(startVal, endVal, action)
+            SET idx TO startVal
+            REPEAT
+                IF idx GREATER THAN endVal THEN
+                    BREAK
+                ELSE
+                    CALL action(idx)
+                    SET idx TO idx PLUS 1
+                END IF
+            UNTIL FALSE
+        END FUNCTION
+    
+        descendingIndexLoop(lengthVal MINUS 2, 0, FUNCTION(i)
+            SET currentMax TO 0
+            ascendingIndexLoop(i PLUS 1, lengthVal MINUS 1, FUNCTION(j)
+                SET intermediateScore TO (j MINUS i) MULTIPLIED BY inputList[j]
+                SET potentialScore TO intermediateScore PLUS resultDP[j]
+                IF currentMax LESS THAN potentialScore THEN
+                    SET currentMax TO potentialScore
+                END IF
+            END FUNCTION)
+            SET resultDP[i] TO currentMax
+        END FUNCTION)
+    
+        RETURN resultDP[0]
+    
+    END FUNCTION
+
+END CLASS

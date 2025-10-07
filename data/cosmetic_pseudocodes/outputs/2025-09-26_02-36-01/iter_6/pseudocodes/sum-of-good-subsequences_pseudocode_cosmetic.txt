@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION sumOfGoodSubsequences(nums)
+      
+        DEFINE modulus AS (10 * 100000000) + 7
+        
+        DEFINE mapF AS a map defaulting to 0
+        DEFINE mapG AS a map defaulting to 0
+        
+        DEFINE helperIncrement AS FUNCTION(m, k, val)
+            m[k] <- (m[k] + val) % modulus
+        END FUNCTION
+        
+        PROCEDURE processAtIndex(index)
+            IF index = LENGTH(nums) THEN
+                RETURN
+            END IF
+            
+            SET currentNum TO nums[index]
+            
+            helperIncrement(mapG, currentNum, 1)
+            helperIncrement(mapF, currentNum, currentNum)
+            
+            SET tempF1 TO (mapF[currentNum - 1] + mapF[currentNum] + ((mapG[currentNum - 1] * currentNum) % modulus)) % modulus
+            mapF[currentNum] <- tempF1
+            
+            SET tempG1 TO (mapG[currentNum] + mapG[currentNum - 1]) % modulus
+            mapG[currentNum] <- tempG1
+            
+            SET tempF2 TO (mapF[currentNum] + mapF[currentNum + 1] + ((mapG[currentNum + 1] * currentNum) % modulus)) % modulus
+            mapF[currentNum] <- tempF2
+            
+            SET tempG2 TO (mapG[currentNum] + mapG[currentNum + 1]) % modulus
+            mapG[currentNum] <- tempG2
+            
+            CALL processAtIndex(index + 1)
+        END PROCEDURE
+        
+        CALL processAtIndex(0)
+        
+        DEFINE valuesF AS LIST OF ALL VALUES in mapF
+        
+        DEFINE accSum AS 0
+        DEFINE idx AS LENGTH(valuesF) - 1
+        
+        WHILE idx >= 0 DO
+            accSum <- accSum + valuesF[idx]
+            idx <- idx - 1
+        END WHILE
+        
+        RETURN accSum % modulus
+    END FUNCTION
+END CLASS

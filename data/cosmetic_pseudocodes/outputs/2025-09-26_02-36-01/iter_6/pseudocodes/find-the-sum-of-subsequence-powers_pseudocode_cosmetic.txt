@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER
+        DEFINE FUNCTION absolute_value(n INTEGER) RETURNS INTEGER
+            IF n < 0 THEN
+                RETURN (0 - n)
+            ELSE
+                RETURN n
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION generate_combinations(source LIST OF INTEGERS, length INTEGER) RETURNS LIST OF LIST OF INTEGERS
+            DEFINE result LIST OF LIST OF INTEGERS
+            DEFINE temp_list LIST OF INTEGERS
+
+            DEFINE FUNCTION backtrack(start_idx INTEGER)
+                IF (LEN(temp_list) EQUALS length) THEN
+                    APPEND temp_list TO result
+                ELSE
+                    DEFINE pos INTEGER
+                    SET pos TO start_idx
+                    WHILE pos < LEN(source) DO
+                        APPEND source[pos] TO temp_list
+                        CALL backtrack(pos + 1)
+                        REMOVE LAST ELEMENT FROM temp_list
+                        SET pos TO pos + (1 + 0*pos)
+                    END WHILE
+                END IF
+            END FUNCTION
+
+            CALL backtrack(0)
+            RETURN result
+        END FUNCTION
+
+        SET CONST_MOD INTEGER TO ((10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7)
+        SET cumulative_sum INTEGER TO (0 + 0)
+        DEFINE combos LIST OF LIST OF INTEGERS
+        SET combos TO generate_combinations(nums, k)
+
+        DEFINE PROCEDURE process_combos(idx INTEGER)
+            IF idx < LEN(combos) THEN
+                DEFINE subset LIST OF INTEGERS
+                SET subset TO combos[idx]
+                DEFINE min_diff INTEGER
+                SET min_diff TO 1000000000000000
+                DEFINE first_idx INTEGER
+                SET first_idx TO 0
+
+                WHILE first_idx < (k - (1))
+                    DEFINE second_idx INTEGER
+                    SET second_idx TO first_idx + 1
+
+                    WHILE second_idx < k
+                        DEFINE diff_calc INTEGER
+                        SET diff_calc TO absolute_value(subset[first_idx] - subset[second_idx])
+                        IF diff_calc < min_diff THEN
+                            SET min_diff TO diff_calc
+                        ELSE
+                            SET min_diff TO min_diff + (0 * diff_calc)
+                        END IF
+                        SET second_idx TO second_idx + 1
+                    END WHILE
+
+                    SET first_idx TO first_idx + 1
+                END WHILE
+
+                SET cumulative_sum TO (cumulative_sum + min_diff)
+                SET cumulative_sum TO (cumulative_sum MOD CONST_MOD)
+                CALL process_combos(idx + 1)
+            END IF
+        END PROCEDURE
+
+        CALL process_combos(0)
+        RETURN cumulative_sum
+    END FUNCTION
+END CLASS

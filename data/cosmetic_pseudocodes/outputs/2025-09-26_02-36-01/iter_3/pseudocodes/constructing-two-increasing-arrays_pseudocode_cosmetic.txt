@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer
+        FUNCTION nxt(x x AS integer y y AS integer) RETURNS integer
+            DECLARE bit_check AS integer
+            bit_check = (x BITWISE_AND (1 XOR y))
+            IF NOT(bit_check EQUALS 0) THEN
+                RETURN (x PLUS 1)
+            ELSE
+                RETURN (x PLUS 2)
+            END IF
+        END FUNCTION
+
+        LET lenA BE LENGTH(nums1)
+        LET lenB BE LENGTH(nums2)
+        DECLARE matrix AS list OF list OF integers
+        matrix = []
+        DECLARE rowCtr AS integer
+        DECLARE colCtr AS integer
+        rowCtr = 0
+        WHILE rowCtr <= lenA
+            DECLARE newRow AS list OF integers
+            colCtr = 0
+            WHILE colCtr <= lenB
+                newRow APPEND 0
+                colCtr = colCtr PLUS 1
+            END WHILE
+            matrix APPEND newRow
+            rowCtr = rowCtr PLUS 1
+        END WHILE
+
+        DECLARE i AS integer
+        i = 1
+        WHILE i <= lenA
+            DECLARE valA AS integer
+            valA = nums1 AT (i MINUS 1)
+            LET prevVal = matrix AT (i MINUS 1) AT 0
+            matrix AT i SET 0 TO nxt(prevVal, valA)
+            i = i PLUS 1
+        END WHILE
+
+        DECLARE j AS integer
+        j = 1
+        WHILE j <= lenB
+            DECLARE valB AS integer
+            valB = nums2 AT (j MINUS 1)
+            LET prevVal = matrix AT 0 AT (j MINUS 1)
+            matrix AT 0 SET j TO nxt(prevVal, valB)
+            j = j PLUS 1
+        END WHILE
+
+        i = 1
+        WHILE i <= lenA
+            DECLARE xVal AS integer
+            xVal = nums1 AT (i MINUS 1)
+            j = 1
+            WHILE j <= lenB
+                DECLARE yVal AS integer
+                yVal = nums2 AT (j MINUS 1)
+                DECLARE fromAbove AS integer
+                fromAbove = nxt(matrix AT (i MINUS 1) AT j, xVal)
+                DECLARE fromLeft AS integer
+                fromLeft = nxt(matrix AT i AT (j MINUS 1), yVal)
+                IF fromAbove LESS_THAN fromLeft THEN
+                    matrix AT i SET j TO fromAbove
+                ELSE
+                    matrix AT i SET j TO fromLeft
+                END IF
+                j = j PLUS 1
+            END WHILE
+            i = i PLUS 1
+        END WHILE
+
+        RETURN matrix AT lenA AT lenB
+    END FUNCTION
+END CLASS

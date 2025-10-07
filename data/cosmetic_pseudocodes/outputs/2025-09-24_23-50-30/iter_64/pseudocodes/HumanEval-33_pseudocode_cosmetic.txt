@@ -1,0 +1,57 @@
+```
+FUNCTION sort_third(original_collection)
+  DECLARE collection_copy ← []
+  DECLARE extracted_values ← []
+  DECLARE reordered_values ← []
+  DECLARE index_counter ← 0
+
+  WHILE index_counter < LENGTH(original_collection) DO
+    APPEND original_collection[index_counter] TO collection_copy
+    INCREMENT index_counter BY 1
+  END WHILE
+
+  FUNCTION gather_divisible_indices(position, accum)
+    IF position >= LENGTH(collection_copy) THEN
+      RETURN accum
+    ELSE
+      IF position MOD 3 = 0 THEN
+        RETURN gather_divisible_indices(position + 1, accum + [collection_copy[position]])
+      ELSE
+        RETURN gather_divisible_indices(position + 1, accum)
+      END IF
+    END IF
+  END FUNCTION
+
+  extracted_values ← gather_divisible_indices(0, [])
+
+  FUNCTION quicksort(sequence)
+    IF LENGTH(sequence) <= 1 THEN
+      RETURN sequence
+    ELSE
+      DECLARE pivot ← sequence[0]
+      DECLARE lesser ← [x : x IN sequence[1:] WHERE x <= pivot]
+      DECLARE greater ← [x : x IN sequence[1:] WHERE x > pivot]
+      RETURN quicksort(lesser) + [pivot] + quicksort(greater)
+    END IF
+  END FUNCTION
+
+  reordered_values ← quicksort(extracted_values)
+
+  DECLARE replace_at_indices ← FUNCTION(i, arr, vals)
+    IF i >= LENGTH(arr) THEN
+      RETURN arr
+    ELSE
+      IF i MOD 3 = 0 THEN
+        arr[i] ← vals[0]
+        RETURN replace_at_indices(i + 1, arr, vals[1:])
+      ELSE
+        RETURN replace_at_indices(i + 1, arr, vals)
+      END IF
+    END IF
+  END FUNCTION
+
+  collection_copy ← replace_at_indices(0, collection_copy, reordered_values)
+
+  RETURN collection_copy
+END FUNCTION
+```

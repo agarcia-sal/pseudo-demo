@@ -1,0 +1,57 @@
+CLASS Solution  
+    FUNCTION maxValue(nums LIST OF INTEGER, k INTEGER) RETURNS INTEGER  
+        CONST maxBits = 128  
+        LET length = LENGTH(nums)  
+        LET f = ARRAY OF DIMENSIONS (length + 1, k + 2, maxBits) FILLED WITH FALSE  
+        f[0][0][0] = TRUE  
+
+        FOR index IN 0 TO length - 1 DO  
+            FOR chosen IN 0 TO k DO  
+                FOR state IN 0 TO maxBits - 1 DO  
+                    IF f[index][chosen][state] THEN  
+                        f[index + 1][chosen][state] = TRUE  
+                        IF chosen + 1 <= k THEN  
+                            LET newState = state BITWISE_OR nums[index]  
+                            f[index + 1][chosen + 1][newState] = TRUE  
+                        END IF  
+                    END IF  
+                END FOR  
+            END FOR  
+        END FOR  
+
+        LET g = ARRAY OF DIMENSIONS (length + 1, k + 2, maxBits) FILLED WITH FALSE  
+        g[length][0][0] = TRUE  
+
+        FOR index IN REVERSE FROM length DOWNTO 1 DO  
+            FOR chosen IN 0 TO k DO  
+                FOR state IN 0 TO maxBits - 1 DO  
+                    IF g[index][chosen][state] THEN  
+                        g[index - 1][chosen][state] = TRUE  
+                        IF chosen + 1 <= k THEN  
+                            LET newState = state BITWISE_OR nums[index - 1]  
+                            g[index - 1][chosen + 1][newState] = TRUE  
+                        END IF  
+                    END IF  
+                END FOR  
+            END FOR  
+        END FOR  
+
+        LET result = 0  
+        FOR pos IN k TO length - k DO  
+            FOR leftState IN 0 TO maxBits - 1 DO  
+                IF f[pos][k][leftState] THEN  
+                    FOR rightState IN 0 TO maxBits - 1 DO  
+                        IF g[pos][k][rightState] THEN  
+                            LET candidate = leftState BITWISE_XOR rightState  
+                            IF candidate > result THEN  
+                                result = candidate  
+                            END IF  
+                        END IF  
+                    END FOR  
+                END IF  
+            END FOR  
+        END FOR  
+
+        RETURN result  
+    END FUNCTION  
+END CLASS

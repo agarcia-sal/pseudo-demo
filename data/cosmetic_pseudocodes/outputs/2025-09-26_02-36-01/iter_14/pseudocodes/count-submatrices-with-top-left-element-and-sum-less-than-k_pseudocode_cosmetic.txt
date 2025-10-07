@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+        FUNCTION addValues(a, b)
+            RETURN a + b
+        END FUNCTION
+
+        IF NOT (grid != null AND grid[0] != null)
+            RETURN 0
+        END IF
+
+        LET rows BE LENGTH OF grid
+        LET cols BE LENGTH OF grid[0]
+        LET accumulator BE ARRAY OF SIZE rows WITH EACH ELEMENT AN ARRAY OF SIZE cols INITIALIZED TO 0
+        LET tally BE 0
+
+        LET p1 BE 0
+        WHILE p1 < rows
+            LET p2 BE 0
+            WHILE p2 < cols
+                IF p1 = 0 AND p2 = 0 THEN
+                    SET accumulator[p1][p2] TO grid[p1][p2]
+                ELSE
+                    IF p1 = 0 THEN
+                        SET accumulator[p1][p2] TO addValues(accumulator[p1][p2 - 1], grid[p1][p2])
+                    ELSE
+                        IF p2 = 0 THEN
+                            SET accumulator[p1][p2] TO addValues(accumulator[p1 - 1][p2], grid[p1][p2])
+                        ELSE
+                            LET temp1 BE addValues(accumulator[p1][p2 - 1], accumulator[p1 - 1][p2])
+                            LET temp2 BE accumulator[p1 - 1][p2 - 1]
+                            SET accumulator[p1][p2] TO addValues(addValues(temp1, -temp2), grid[p1][p2])
+                        END IF
+                    END IF
+                END IF
+
+                IF accumulator[p1][p2] <= k THEN
+                    tally = tally + 1
+                END IF
+
+                p2 = p2 + 1
+            END WHILE
+            p1 = p1 + 1
+        END WHILE
+
+        RETURN tally
+    END FUNCTION
+END CLASS

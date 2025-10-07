@@ -1,0 +1,118 @@
+CLASS Solution
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER
+        FUNCTION powerOfTwo(base INTEGER, exponent INTEGER) RETURNS INTEGER
+            SET result TO 1
+            SET counter TO 0
+            WHILE counter < exponent
+                SET result TO result * base
+                SET counter TO counter + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        FUNCTION create3DBooleanArray(dim1 INTEGER, dim2 INTEGER, dim3 INTEGER) RETURNS LIST
+            SET outerList TO EMPTY LIST
+            SET idx1 TO 0
+            REPEAT
+                EXIT WHEN idx1 >= dim1
+                SET midList TO EMPTY LIST
+                SET idx2 TO 0
+                WHILE idx2 < dim2
+                    SET innerList TO EMPTY LIST
+                    SET idx3 TO 0
+                    REPEAT
+                        EXIT WHEN idx3 >= dim3
+                        CALL innerList.APPEND(FALSE)
+                        SET idx3 TO idx3 + 1
+                    UNTIL FALSE
+                    CALL midList.APPEND(innerList)
+                    SET idx2 TO idx2 + 1
+                END WHILE
+                CALL outerList.APPEND(midList)
+                SET idx1 TO idx1 + 1
+            UNTIL FALSE
+            RETURN outerList
+        END FUNCTION
+
+        FUNCTION boolOr(a BOOLEAN, b BOOLEAN) RETURNS BOOLEAN
+            IF a = TRUE THEN RETURN TRUE
+            IF b = TRUE THEN RETURN TRUE
+            RETURN FALSE
+        END FUNCTION
+
+        FUNCTION maxInt(a INTEGER, b INTEGER) RETURNS INTEGER
+            IF a < b THEN RETURN b ELSE RETURN a
+        END FUNCTION
+
+        SET limit TO powerOfTwo(2, 7)
+        SET lengthNums TO 0
+        SET indexCounter TO 0
+        WHILE TRUE
+            IF indexCounter >= LENGTH(nums) THEN BREAK
+            SET lengthNums TO lengthNums + 1
+            SET indexCounter TO indexCounter + 1
+        END WHILE
+
+        SET fArray TO create3DBooleanArray(lengthNums + 1, k + 2, limit)
+        SET fArray[0][0][0] TO TRUE
+
+        SET outerIdx TO 0
+        WHILE outerIdx < lengthNums
+            SET middleIdx TO 0
+            WHILE middleIdx <= k
+                SET innerIdx TO 0
+                WHILE innerIdx < limit
+                    SET fArray[outerIdx + 1][middleIdx][innerIdx] TO boolOr(fArray[outerIdx + 1][middleIdx][innerIdx], fArray[outerIdx][middleIdx][innerIdx])
+                    SET bitwiseOrValue TO innerIdx BITWISE_OR nums[outerIdx]
+                    SET fArray[outerIdx + 1][middleIdx + 1][bitwiseOrValue] TO boolOr(TRUE, fArray[outerIdx][middleIdx][innerIdx])
+                    SET innerIdx TO innerIdx + 1
+                END WHILE
+                SET middleIdx TO middleIdx + 1
+            END WHILE
+            SET outerIdx TO outerIdx + 1
+        END WHILE
+
+        SET gArray TO create3DBooleanArray(lengthNums + 1, k + 2, limit)
+        SET gArray[lengthNums][0][0] TO TRUE
+
+        SET outerIdx2 TO lengthNums
+        REPEAT
+            IF outerIdx2 <= 0 THEN BREAK
+            SET middleIdx2 TO 0
+            WHILE middleIdx2 <= k
+                SET innerIdx2 TO 0
+                WHILE innerIdx2 < limit
+                    SET gArray[outerIdx2 - 1][middleIdx2][innerIdx2] TO boolOr(gArray[outerIdx2 - 1][middleIdx2][innerIdx2], gArray[outerIdx2][middleIdx2][innerIdx2])
+                    SET bitwiseOrValue2 TO innerIdx2 BITWISE_OR nums[outerIdx2 - 1]
+                    SET gArray[outerIdx2 - 1][middleIdx2 + 1][bitwiseOrValue2] TO boolOr(TRUE, gArray[outerIdx2][middleIdx2][innerIdx2])
+                    SET innerIdx2 TO innerIdx2 + 1
+                END WHILE
+                SET middleIdx2 TO middleIdx2 + 1
+            END WHILE
+            SET outerIdx2 TO outerIdx2 - 1
+        UNTIL FALSE
+
+        SET answer TO 0
+        SET midIndex TO k
+        REPEAT
+            IF midIndex > lengthNums - k - 1 THEN BREAK
+            SET xIndex TO 0
+            WHILE xIndex < limit
+                IF fArray[midIndex][k][xIndex] = TRUE THEN
+                    SET yIndex TO 0
+                    WHILE yIndex < limit
+                        IF gArray[midIndex][k][yIndex] = TRUE THEN
+                            SET xorVal TO xIndex BITWISE_XOR yIndex
+                            SET answer TO maxInt(answer, xorVal)
+                        END IF
+                        SET yIndex TO yIndex + 1
+                    END WHILE
+                END IF
+                SET xIndex TO xIndex + 1
+            END WHILE
+            SET midIndex TO midIndex + 1
+        UNTIL FALSE
+
+        RETURN answer
+    END FUNCTION
+END CLASS

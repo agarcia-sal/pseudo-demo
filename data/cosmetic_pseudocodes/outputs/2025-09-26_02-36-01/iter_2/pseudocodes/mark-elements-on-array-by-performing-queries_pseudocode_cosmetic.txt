@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        ASSIGN heapContent TO []
+        ASSIGN numCounter TO 0
+        LOOP WHILE numCounter < LENGTH(nums)
+            ASSIGN element TO nums[numCounter]
+            APPEND [element, numCounter] TO heapContent
+            SET numCounter TO numCounter + 1
+        END LOOP
+        CALL heapify(heapContent)
+
+        ASSIGN flaggedSet TO SET()
+        ASSIGN aggregate TO 0
+        ASSIGN resultList TO []
+        ASSIGN i TO 0
+        LOOP WHILE i < LENGTH(nums)
+            SET aggregate TO aggregate + nums[i]
+            INCREMENT i BY 1
+        END LOOP
+
+        ASSIGN queryIdx TO 0
+        LOOP WHILE queryIdx < LENGTH(queries)
+            ASSIGN currentIndex TO queries[queryIdx][0]
+            ASSIGN currentK TO queries[queryIdx][1]
+
+            IF NOT (currentIndex IN flaggedSet)
+                ADD currentIndex TO flaggedSet
+                SET aggregate TO aggregate - nums[currentIndex]
+            END IF
+
+            ASSIGN removedCount TO 0
+            WHILE removedCount < currentK AND heapContent != []
+                ASSIGN topEntry TO heappop(heapContent)
+                ASSIGN val TO topEntry[0]
+                ASSIGN idxEntry TO topEntry[1]
+
+                IF idxEntry NOT IN flaggedSet
+                    ADD idxEntry TO flaggedSet
+                    SET aggregate TO aggregate - val
+                    SET removedCount TO removedCount + 1
+                END IF
+            END WHILE
+
+            APPEND aggregate TO resultList
+            SET queryIdx TO queryIdx + 1
+        END LOOP
+
+        RETURN resultList
+    END FUNCTION
+END CLASS

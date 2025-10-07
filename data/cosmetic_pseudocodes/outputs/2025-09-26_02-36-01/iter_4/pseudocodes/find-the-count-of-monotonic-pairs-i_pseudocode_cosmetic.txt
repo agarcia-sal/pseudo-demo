@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        DECLARE CONSTANT MOD AS 1000000007
+        DECLARE size AS LENGTH OF nums
+        DECLARE highestVal AS MAXIMUM value IN nums
+
+        DECLARE dp AS ARRAY OF LENGTH size
+        LET idx_outer BE 0
+        WHILE idx_outer < size
+            DECLARE innerArray1 AS ARRAY OF LENGTH (highestVal + 1)
+            LET idx_inner1 BE 0
+            WHILE idx_inner1 <= highestVal
+                DECLARE innerArray2 AS ARRAY OF LENGTH (highestVal + 1)
+                LET idx_inner2 BE 0
+                WHILE idx_inner2 <= highestVal
+                    innerArray2[idx_inner2] = 0
+                    INCREMENT idx_inner2 BY 1
+                END WHILE
+                innerArray1[idx_inner1] = innerArray2
+                INCREMENT idx_inner1 BY 1
+            END WHILE
+            dp[idx_outer] = innerArray1
+            INCREMENT idx_outer BY 1
+        END WHILE
+
+        LET firstNum BE nums[0]
+        DECLARE var_j AS 0
+        WHILE var_j <= firstNum
+            LET var_k BE firstNum - var_j
+            dp[0][var_j][var_k] = 1
+            INCREMENT var_j BY 1
+        END WHILE
+
+        DECLARE i AS 1
+        REPEAT WHILE i < size
+            LET currentNum BE nums[i]
+            LET j_loop BE 0
+            REPEAT WHILE j_loop <= currentNum
+                LET k_loop BE currentNum - j_loop
+                LET j_prev_loop BE 0
+                REPEAT WHILE j_prev_loop <= j_loop
+                    LET k_prev_loop BE k_loop
+                    REPEAT WHILE k_prev_loop <= highestVal
+                        LET accumulated AS dp[i][j_loop][k_loop] + dp[i - 1][j_prev_loop][k_prev_loop]
+                        LET dp[i][j_loop][k_loop] BE accumulated MOD MOD
+                        INCREMENT k_prev_loop BY 1
+                    END REPEAT
+                    INCREMENT j_prev_loop BY 1
+                END REPEAT
+                INCREMENT j_loop BY 1
+            END REPEAT
+            INCREMENT i BY 1
+        END REPEAT
+
+        LET finalResult BE 0
+        LET j_sum BE 0
+        REPEAT WHILE j_sum <= highestVal
+            LET k_sum BE 0
+            REPEAT WHILE k_sum <= highestVal
+                IF (j_sum + k_sum) == nums[size - 1] THEN
+                    LET sumVal BE finalResult + dp[size - 1][j_sum][k_sum]
+                    finalResult = sumVal MOD MOD
+                END IF
+                INCREMENT k_sum BY 1
+            END REPEAT
+            INCREMENT j_sum BY 1
+        END REPEAT
+
+        RETURN finalResult
+    END FUNCTION
+END CLASS

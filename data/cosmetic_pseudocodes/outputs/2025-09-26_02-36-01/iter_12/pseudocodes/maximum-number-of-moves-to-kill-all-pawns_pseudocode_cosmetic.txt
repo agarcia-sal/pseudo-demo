@@ -1,0 +1,113 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+        SET allowable_moves TO [(1,2),(2,1),(2,-1),(1,-2),(-1,-2),(-2,-1),(-2,1),(-1,2)]
+
+        FUNCTION addToSet(s, v)
+            s[v] = True
+        END FUNCTION
+
+        FUNCTION contains(s, v)
+            RETURN s[v] IS True
+        END FUNCTION
+
+        SET stored_positions TO {}
+        FOR idx FROM 0 TO LENGTH(positions) - 1
+            CALL addToSet(stored_positions, (positions[idx][0], positions[idx][1]))
+        END FOR
+
+        SET pawn_count TO 0
+        FOR key IN stored_positions
+            pawn_count = pawn_count + 1
+        END FOR
+
+        FUNCTION bfsPath(sx, sy, tx, ty)
+            FUNCTION enqueue(queue, val)
+                queue[ LENGTH(queue) ] = val
+            END FUNCTION
+            FUNCTION dequeue(queue)
+                SET front = queue[0]
+                FOR i FROM 0 TO LENGTH(queue) - 2
+                    queue[i] = queue[i + 1]
+                END FOR
+                REMOVE queue[ LENGTH(queue) - 1 ]
+                RETURN front
+            END FUNCTION
+
+            SET q TO [ (sx, sy, 0) ]
+            SET visited_nodes TO {}
+            CALL addToSet(visited_nodes, (sx, sy))
+
+            WHILE LENGTH(q) > 0
+                SET current TO CALL dequeue(q)
+                SET cx = current[0]
+                SET cy = current[1]
+                SET dist = current[2]
+
+                IF cx = tx AND cy = ty THEN
+                    RETURN dist
+                END IF
+
+                FOR mv_idx FROM 0 TO LENGTH(allowable_moves) - 1
+                    SET mdx = allowable_moves[mv_idx][0]
+                    SET mdy = allowable_moves[mv_idx][1]
+                    SET nx = cx + mdx
+                    SET ny = cy + mdy
+
+                    IF nx >= 0 AND nx < 50 AND ny >=0 AND ny < 50 THEN
+                        IF NOT CALL contains(visited_nodes, (nx, ny)) THEN
+                            CALL addToSet(visited_nodes, (nx, ny))
+                            CALL enqueue(q, (nx, ny, dist + 1))
+                        END IF
+                    END IF
+                END FOR
+            END WHILE
+
+            RETURN -1
+        END FUNCTION
+
+        FUNCTION dp(cx, cy, bitmask, alice_turn)
+            IF bitmask = 0 THEN RETURN 0 END IF
+
+            IF alice_turn THEN
+                SET result = 0
+            ELSE
+                SET result = 1.0/0.0
+            END IF
+
+            SET current = 1
+            FOR pos_idx FROM 0 TO pawn_count - 1
+                IF (bitmask & current) != 0 THEN
+                    SET px = positions[pos_idx][0]
+                    SET py = positions[pos_idx][1]
+
+                    SET path_len = CALL bfsPath(cx, cy, px, py)
+
+                    IF path_len != -1 THEN
+                        SET next_mask = bitmask ^ current
+                        IF alice_turn THEN
+                            SET candidate = path_len + CALL dp(px, py, next_mask, NOT alice_turn)
+                            IF candidate > result THEN
+                                SET result = candidate
+                            END IF
+                        ELSE
+                            SET candidate = path_len + CALL dp(px, py, next_mask, NOT alice_turn)
+                            IF candidate < result THEN
+                                SET result = candidate
+                            END IF
+                        END IF
+                    END IF
+                END IF
+                SET current = current * 2
+            END FOR
+
+            RETURN result
+        END FUNCTION
+
+        SET full_mask = 0
+        FOR i FROM 0 TO pawn_count - 1
+            full_mask = full_mask + (2 ^ i)
+        END FOR
+
+        RETURN CALL dp(kx, ky, full_mask, True)
+    END FUNCTION
+END CLASS

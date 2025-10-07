@@ -1,0 +1,49 @@
+CLASS Solution  
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)  
+        SET graph TO a mapping that associates each key with an empty list  
+        FOR each element consisting of u v w IN edges  
+            APPEND the pair of v and w TO the list associated with u in graph  
+            APPEND the pair of u and w TO the list associated with v in graph  
+        END FOR  
+        SET n TO the number of keys in graph  
+        SET result TO a list of zeros of length n  
+
+        FUNCTION dfs(node, parent, distance, path)  
+            IF the remainder of distance DIVIDED BY signalSpeed EQUALS zero THEN  
+                APPEND node TO path  
+            END IF  
+            SET count TO zero  
+            FOR each pair of neighbor and weight IN the list associated with node in graph  
+                IF neighbor NOT EQUALS parent THEN  
+                    INCREMENT count BY the result of dfs called with neighbor parent distance PLUS weight and path  
+                END IF  
+            END FOR  
+            IF the remainder of distance DIVIDED BY signalSpeed EQUALS zero THEN  
+                RETURN count PLUS one  
+            ELSE  
+                RETURN count  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION count_pairs_through_c(c)  
+            SET paths TO an empty list  
+            FOR each pair of neighbor and weight IN the list associated with c in graph  
+                SET path TO an empty list  
+                CALL dfs with neighbor c weight and path  
+                APPEND path TO paths  
+            END FOR  
+            SET total_pairs TO zero  
+            FOR i FROM zero TO the length of paths MINUS one  
+                FOR j FROM i PLUS one TO the length of paths MINUS one  
+                    INCREMENT total_pairs BY the LENGTH OF the element at position i of paths MULTIPLIED BY the LENGTH OF the element at position j of paths  
+                END FOR  
+            END FOR  
+            RETURN total_pairs  
+        END FUNCTION  
+
+        FOR c FROM zero TO n MINUS one  
+            SET the element at position c of result TO count_pairs_through_c called with c  
+        END FOR  
+        RETURN result  
+    END FUNCTION  
+END CLASS

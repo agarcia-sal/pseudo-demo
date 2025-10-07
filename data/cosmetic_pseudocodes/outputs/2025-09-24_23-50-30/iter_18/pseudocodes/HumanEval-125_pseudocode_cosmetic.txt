@@ -1,0 +1,59 @@
+```
+FUNCTION split_words(text)
+    DEFINE helper_replace_commas WITH PARAMETER input_string
+        SET output_string TO empty string
+        SET index_counter TO 0
+        WHILE index_counter LESS THAN LENGTH OF input_string
+            IF input_string AT index_counter EQUALS comma character
+                APPEND space character TO output_string
+            ELSE 
+                APPEND input_string AT index_counter TO output_string
+            END IF
+            INCREMENT index_counter BY 1
+        END WHILE
+        RETURN output_string
+    END DEFINE
+
+    DEFINE helper_split_on_whitespace WITH PARAMETER string_to_split
+        DEFINE result_array AS empty array
+        DEFINE temp_string AS empty string
+        DEFINE position_counter AS 0
+        WHILE position_counter LESS THAN LENGTH OF string_to_split
+            IF string_to_split AT position_counter EQUALS space character
+                IF LENGTH OF temp_string GREATER THAN 0
+                    APPEND temp_string TO result_array
+                    SET temp_string TO empty string
+                END IF
+            ELSE
+                SET temp_string TO temp_string CONCATENATED WITH string_to_split AT position_counter
+            END IF
+            INCREMENT position_counter BY 1
+        END WHILE
+        IF LENGTH OF temp_string GREATER THAN 0
+            APPEND temp_string TO result_array
+        END IF
+        RETURN result_array
+    END DEFINE
+
+    IF NOT (space character IS IN text OR comma character IS IN text)
+        SET accumulator TO 0
+        DEFINE char_index AS 0
+        WHILE char_index LESS THAN LENGTH OF text
+            SET current_char TO text AT char_index
+            DEFINE ascii_val TO ASCII VALUE OF current_char
+            IF (ascii_val MOD 2) EQUALS 0 AND current_char GREATER OR EQUAL TO lowercase 'a' AND current_char LESS OR EQUAL TO lowercase 'z'
+                SET accumulator TO accumulator + 1
+            END IF
+            INCREMENT char_index BY 1
+        END WHILE
+        RETURN accumulator
+    END IF
+
+    IF space character IS IN text
+        RETURN helper_split_on_whitespace(text)
+    END IF
+
+    SET replaced_text TO helper_replace_commas(text)
+    RETURN helper_split_on_whitespace(replaced_text)
+END FUNCTION
+```

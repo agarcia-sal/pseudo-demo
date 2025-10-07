@@ -1,0 +1,46 @@
+```
+FUNCTION find_closest_elements(array_of_values)
+    SET result_tuple TO None
+    SET smallest_diff TO None
+
+    FUNCTION process_pair(primary_idx, primary_val, secondary_idx, secondary_val, current_best, current_min)
+        SWITCH (primary_idx = secondary_idx)
+            CASE true: RETURN (current_best, current_min)
+            CASE false:
+                LET computed_diff BE (primary_val - secondary_val)
+                LET abs_diff_be_rewritten BE (computed_diff < 0) ? -computed_diff : computed_diff
+                SWITCH (current_min IS None)
+                    CASE true:
+                        LET updated_best BE (current_best IS None) ? (primary_val, secondary_val) : current_best
+                        LET ordered_pair BE IF updated_best[0] <= updated_best[1] THEN updated_best ELSE (updated_best[1], updated_best[0])
+                        RETURN (ordered_pair, abs_diff_be_rewritten)
+                    CASE false:
+                        LET better_diff_found BE abs_diff_be_rewritten < current_min
+                        LET updated_best_2 BE better_diff_found ? ((primary_val <= secondary_val) ? (primary_val, secondary_val) : (secondary_val, primary_val)) : current_best
+                        LET updated_min_2 BE better_diff_found ? abs_diff_be_rewritten : current_min
+                        RETURN (updated_best_2, updated_min_2)
+                END SWITCH
+        END SWITCH
+    END FUNCTION
+
+    FUNCTION iterate_second_loop(loop_outer_idx, loop_outer_val, inner_array, inner_pos, best_pair, min_distance)
+        IF inner_pos >= LENGTH(inner_array)
+            RETURN (best_pair, min_distance)
+        END IF
+        LET inner_val BE inner_array[inner_pos]
+        LET (new_best, new_min) BE process_pair(loop_outer_idx, loop_outer_val, inner_pos, inner_val, best_pair, min_distance)
+        RETURN iterate_second_loop(loop_outer_idx, loop_outer_val, inner_array, inner_pos + 1, new_best, new_min)
+    END FUNCTION
+
+    FUNCTION iterate_first_loop(outer_pos, outer_array, best_pair, min_distance)
+        IF outer_pos >= LENGTH(outer_array)
+            RETURN best_pair
+        END IF
+        LET outer_val BE outer_array[outer_pos]
+        LET (updated_best, updated_min) BE iterate_second_loop(outer_pos, outer_val, outer_array, 0, best_pair, min_distance)
+        RETURN iterate_first_loop(outer_pos + 1, outer_array, updated_best, updated_min)
+    END FUNCTION
+
+    RETURN iterate_first_loop(0, array_of_values, result_tuple, smallest_diff)
+END FUNCTION
+```

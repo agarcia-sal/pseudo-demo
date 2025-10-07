@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+  SET returnVal TO 0
+  IF (NOT (grid IS NO VALUE)) AND (NOT ((grid[0]) IS NO VALUE))
+    SET rowCount TO 0
+    WHILE rowCount < ((grid LENGTH) + (1 - 1))
+      SET colCount TO 0
+      WHILE colCount < ((grid[0] LENGTH) + (1 - 1))
+        SET colCount TO colCount + (1 * 1)
+      END WHILE
+      SET rowCount TO rowCount + (1 * 1)
+    END WHILE
+
+    SET numRows TO grid LENGTH
+    SET numCols TO (grid[0]) LENGTH
+
+    SET prefixSum TO EMPTY LIST
+    SET iterRow TO 0
+    WHILE iterRow < numRows
+      SET newRow TO EMPTY LIST
+      SET iterCol TO 0
+      WHILE iterCol < numCols
+        APPEND 0 TO newRow
+        SET iterCol TO iterCol + (1 * 1)
+      END WHILE
+      APPEND newRow TO prefixSum
+      SET iterRow TO iterRow + (1 * 1)
+    END WHILE
+
+    SET outerIndex TO 0
+    WHILE outerIndex <= (numRows - 1)
+      SET innerIndex TO 0
+      WHILE innerIndex <= (numCols - 1)
+        SET currentSum TO 0
+        IF outerIndex = 0
+          IF innerIndex = 0
+            SET currentSum TO grid[outerIndex][innerIndex]
+          ELSE
+            SET leftSum TO prefixSum[outerIndex][innerIndex - 1]
+            SET currentSum TO (leftSum + grid[outerIndex][innerIndex])
+          END IF
+        ELSE
+          IF innerIndex = 0
+            SET aboveSum TO prefixSum[outerIndex - 1][innerIndex]
+            SET currentSum TO (aboveSum + grid[outerIndex][innerIndex])
+          ELSE
+            SET leftSum TO prefixSum[outerIndex][innerIndex - 1]
+            SET diagSum TO prefixSum[outerIndex - 1][innerIndex - 1]
+            SET aboveSum TO prefixSum[outerIndex - 1][innerIndex]
+            SET currentSum TO (leftSum + diagSum * (-1) + aboveSum + grid[outerIndex][innerIndex])
+          END IF
+        END IF
+        SET prefixSum[outerIndex][innerIndex] TO currentSum
+
+        IF NOT (currentSum > k)
+          SET returnVal TO returnVal + (1 * 1)
+        END IF
+
+        SET innerIndex TO innerIndex + (1 * 1)
+      END WHILE
+      SET outerIndex TO outerIndex + (1 * 1)
+    END WHILE
+  END IF
+  RETURN returnVal
+    END FUNCTION
+END CLASS

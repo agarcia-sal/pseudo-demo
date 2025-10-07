@@ -1,0 +1,44 @@
+```
+FUNCTION poly(list_of_coefficients, point)
+    SET result TO 0
+    SET exponent TO 0
+    FOR EACH factor IN list_of_coefficients
+        SET temp_value TO 1
+        SET count TO 0
+        WHILE count IS LESS THAN exponent
+            SET temp_value TO temp_value * point
+            INCREMENT count BY 1
+        END WHILE
+        SET result TO result + factor * temp_value
+        INCREMENT exponent BY 1
+    END FOR
+    RETURN result
+END FUNCTION
+
+FUNCTION find_zero(list_of_coefficients)
+    SET low_bound TO -1.0
+    SET high_bound TO 1.0
+    LOOP
+        SET product TO poly(list_of_coefficients, low_bound) * poly(list_of_coefficients, high_bound)
+        IF product <= 0 THEN BREAK END IF
+        SET low_bound TO low_bound * 2.0
+        SET high_bound TO high_bound * 2.0
+    END LOOP
+
+    SET threshold TO 1e-10
+    FUNCTION difference(a, b)
+        RETURN a - b
+    END FUNCTION
+
+    WHILE ABS(difference(high_bound, low_bound)) > threshold
+        SET midpoint TO (low_bound + high_bound) / 2.0
+        SET mid_product TO poly(list_of_coefficients, midpoint) * poly(list_of_coefficients, low_bound)
+        IF mid_product > 0 THEN
+            SET low_bound TO midpoint
+        ELSE
+            SET high_bound TO midpoint
+        END IF
+    END WHILE
+    RETURN low_bound
+END FUNCTION
+```

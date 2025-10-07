@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION sumOfPowers(lambda LIST OF INTEGERS beta INTEGER) RETURNS INTEGER
+        CONSTANT ALPHA = 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 + 7
+        VARIABLE omega <- 0
+
+        FUNCTION generate_combos(arr LIST OF INTEGERS, length INTEGER) RETURNS LIST OF LIST OF INTEGERS
+            VARIABLE results <- EMPTY LIST
+            FUNCTION backtrack(start INTEGER, current_combo LIST OF INTEGERS)
+                IF LENGTH(current_combo) = length THEN
+                    APPEND current_combo TO results
+                    RETURN
+                END IF
+                VARIABLE idx <- start
+                WHILE idx < LENGTH(arr) DO
+                    CALL backtrack(idx + 1, current_combo + [arr[idx]])
+                    idx <- idx + 1
+                END WHILE
+            END FUNCTION
+            CALL backtrack(0, [])
+            RETURN results
+        END FUNCTION
+
+        VARIABLE combos_list <- generate_combos(lambda, beta)
+        VARIABLE combo_idx <- 0
+        WHILE combo_idx < LENGTH(combos_list) DO
+            VARIABLE current_min_diff <- 1000000000000
+            VARIABLE u <- 0
+            WHILE u < beta DO
+                VARIABLE v <- u + 1
+                WHILE v < beta DO
+                    VARIABLE diff_val <- combos_list[combo_idx][u] - combos_list[combo_idx][v]
+                    IF diff_val < 0 THEN
+                        diff_val <- -diff_val
+                    END IF
+                    IF diff_val < current_min_diff THEN
+                        current_min_diff <- diff_val
+                    END IF
+                    v <- v + 1
+                END WHILE
+                u <- u + 1
+            END WHILE
+            VARIABLE sum_mod <- omega + current_min_diff
+            IF sum_mod >= ALPHA THEN
+                sum_mod <- sum_mod - ALPHA
+            END IF
+            omega <- sum_mod
+            combo_idx <- combo_idx + 1
+        END WHILE
+        RETURN omega
+    END FUNCTION
+END CLASS

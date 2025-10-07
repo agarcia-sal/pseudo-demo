@@ -1,0 +1,93 @@
+CLASS Solution
+    FUNCTION maxTargetNodes(edges1, edges2)
+        INITIALIZE graphA AS a dictionary with default empty list values
+        INITIALIZE graphB AS a dictionary with default empty list values
+
+        SET idx1 TO 0
+        WHILE idx1 LESS THAN LENGTH of edges1
+            LET nodeX, nodeY BE edges1[idx1][0], edges1[idx1][1]
+            APPEND nodeY TO graphA[nodeX]
+            APPEND nodeX TO graphA[nodeY]
+            idx1 = idx1 + 1
+        END WHILE
+
+        SET idx2 TO 0
+        WHILE idx2 LESS THAN LENGTH of edges2
+            LET nodeP, nodeQ BE edges2[idx2][0], edges2[idx2][1]
+            APPEND nodeQ TO graphB[nodeP]
+            APPEND nodeP TO graphB[nodeQ]
+            idx2 = idx2 + 1
+        END WHILE
+
+        SET sizeA TO COUNT keys in graphA
+        SET sizeB TO COUNT keys in graphB
+
+        FUNCTION bfs(treeStructure, origin)
+            INITIALIZE countEven AS 0
+            INITIALIZE countOdd AS 0
+            CREATE firstQueue WITH [(origin, 0)]
+            CREATE seenSet WITH {origin}
+
+            WHILE LENGTH of firstQueue > 0
+                LET currentNode, distance FROM REMOVE first element of firstQueue
+                IF distance MOD 2 = 0 THEN
+                    INCREMENT countEven BY 1
+                ELSE
+                    INCREMENT countOdd BY 1
+                END IF
+
+                SET neighborsArray TO treeStructure[currentNode]
+                SET idxNeighbor TO 0
+                WHILE idxNeighbor < LENGTH of neighborsArray
+                    LET adjacentNode BE neighborsArray[idxNeighbor]
+                    IF adjacentNode NOT IN seenSet THEN
+                        ADD adjacentNode TO seenSet
+                        APPEND (adjacentNode, distance + 1) TO firstQueue
+                    END IF
+                    idxNeighbor = idxNeighbor + 1
+                END WHILE
+            END WHILE
+
+            RETURN countEven, countOdd
+        END FUNCTION
+
+        INITIALIZE countsA AS empty list
+        SET indexA TO 0
+        WHILE indexA < sizeA
+            APPEND bfs(graphA, indexA) TO countsA
+            indexA = indexA + 1
+        END WHILE
+
+        INITIALIZE countsB AS empty list
+        SET indexB TO 0
+        WHILE indexB < sizeB
+            APPEND bfs(graphB, indexB) TO countsB
+            indexB = indexB + 1
+        END WHILE
+
+        INITIALIZE finalList AS empty list
+        SET outerIdx TO 0
+        WHILE outerIdx < sizeA
+            LET evenCountA, oddCountA BE countsA[outerIdx][0], countsA[outerIdx][1]
+            SET maximumTargets TO 0
+            SET innerIdx TO 0
+            WHILE innerIdx < sizeB
+                LET evenCountB, oddCountB BE countsB[innerIdx][0], countsB[innerIdx][1]
+                IF (outerIdx = innerIdx) OR ((outerIdx MODULO 2) = (innerIdx MODULO 2)) THEN
+                    LET possibleTargets BE evenCountB
+                ELSE
+                    LET possibleTargets BE oddCountB
+                END IF
+
+                IF possibleTargets > maximumTargets THEN
+                    SET maximumTargets TO possibleTargets
+                END IF
+                innerIdx = innerIdx + 1
+            END WHILE
+            APPEND (evenCountA + maximumTargets) TO finalList
+            outerIdx = outerIdx + 1
+        END WHILE
+
+        RETURN finalList
+    END FUNCTION
+END CLASS

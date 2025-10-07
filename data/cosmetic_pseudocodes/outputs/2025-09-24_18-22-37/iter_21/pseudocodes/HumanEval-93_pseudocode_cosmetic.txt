@@ -1,0 +1,39 @@
+FUNCTION encode(inputStr)
+    DEFINE vowelsCollection = "aeiouAEIOU"
+    DECLARE mappingDict AS EMPTY DICTIONARY
+    SET idx = 1
+    REPEAT
+        IF idx > LENGTH(vowelsCollection) THEN
+            LEAVE REPEAT
+        END IF
+        DECLARE currentChar = vowelsCollection.at(idx)
+        DECLARE replacementChar = CHAR(ORD(currentChar) + 2)
+        SET mappingDict[currentChar] = replacementChar
+        SET idx = idx + 1
+    UNTIL FALSE
+    DECLARE toggledStr = ""
+    DECLARE position = 0
+    DECLARE strLength = LENGTH(inputStr)
+    WHILE position < strLength DO
+        DECLARE currentChar = inputStr.at(position + 1)
+        IF currentChar >= 'a' AND currentChar <= 'z' THEN
+            SET toggledStr = toggledStr + TO_UPPER(currentChar)
+        ELSE IF currentChar >= 'A' AND currentChar <= 'Z' THEN
+            SET toggledStr = toggledStr + TO_LOWER(currentChar)
+        ELSE
+            SET toggledStr = toggledStr + currentChar
+        END IF
+        SET position = position + 1
+    END WHILE
+    DECLARE finalResult = ""
+    FOR EACH letter IN toggledStr DO
+        SWITCH TRUE
+            CASE mappingDict.CONTAINS_KEY(letter):
+                SET finalResult = finalResult + mappingDict[letter]
+                BREAK
+            DEFAULT:
+                SET finalResult = finalResult + letter
+        END SWITCH
+    END FOR
+    RETURN finalResult
+END FUNCTION

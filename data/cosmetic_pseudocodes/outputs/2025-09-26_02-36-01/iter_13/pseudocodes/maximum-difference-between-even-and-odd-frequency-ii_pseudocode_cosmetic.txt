@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+        SET FNEG TO -1 TIMES (999999999)
+        SET VZERO TO 0
+        SET VONE TO 1
+        SET CHARS TO "zeroonetwothreefour"
+        SET PPAIRS TO []
+        SET IDX TO VZERO
+        FUNCTION generatePairs AUX (STR, OUT)
+            IF IDX >= LENGTH(STR) THEN
+                RETURN
+            END IF
+            FUNCTION inner AUX (J)
+                IF J >= LENGTH(STR) THEN
+                    RETURN
+                END IF
+                IF STR[IDX] != STR[J] THEN
+                    ADD (STR[IDX], STR[J]) TO OUT
+                END IF
+                inner(J + VONE)
+            END FUNCTION
+            inner(IDX + VONE)
+        END FUNCTION
+        FUNCTION collectPairs()
+            SET IDX TO VZERO
+            FUNCTION recurse()
+                IF IDX >= LENGTH(CHARS) THEN RETURN END IF
+                FUNCTION innerAux(J)
+                    IF J >= LENGTH(CHARS) THEN RETURN END IF
+                    IF CHARS[IDX] != CHARS[J] THEN
+                        ADD (CHARS[IDX], CHARS[J]) TO PPAIRS
+                    END IF
+                    innerAux(J + VONE)
+                END FUNCTION
+                innerAux(IDX + VONE)
+                IDX = IDX + VONE
+                recurse()
+            END FUNCTION
+            recurse()
+        END FUNCTION
+        CALL collectPairs()
+        SET ADX TO VZERO
+        SET ANS TO FNEG
+        FUNCTION shorter LENX(){
+            IF LENX >= k THEN RETURN TRUE ELSE RETURN FALSE END IF
+        }
+        FUNCTION parity VAL
+            RETURN VAL MOD 2
+        END FUNCTION
+        FUNCTION MINIMUM(A,B)
+            IF A < B THEN RETURN A ELSE RETURN B END IF
+        END FUNCTION
+        FUNCTION MAXIMUM(A,B)
+            IF A > B THEN RETURN A ELSE RETURN B END IF
+        END FUNCTION
+        FOR EACH PAIR P IN PPAIRS
+            SET MAPMIN TO EMPTY DICTIONARY WITH DEFAULT VALUE 999999999
+            SET PRFA TO [VZERO]
+            SET PRFB TO [VZERO]
+            SET LL TO VZERO
+            FUNCTION process(RDX)
+                IF RDX >= LENGTH(s) THEN RETURN END IF
+                SET CR TO s[RDX]
+                SET LPRFA TO PRFA[LENGTH(PRFA) - VONE]
+                SET LPRFB TO PRFB[LENGTH(PRFB) - VONE]
+                IF CR == P[0] THEN
+                    ADD (LPRFA + VONE) TO PRFA
+                ELSE
+                    ADD VZERO TO PRFA
+                END IF
+                IF CR == P[1] THEN
+                    ADD (LPRFB + VONE) TO PRFB
+                ELSE
+                    ADD VZERO TO PRFB
+                END IF
+                WHILE ((RDX - LL + VONE) >= k) AND (PRFA[LL] < PRFA[LENGTH(PRFA) - VONE]) AND (PRFB[LL] < PRFB[LENGTH(PRFB) - VONE])
+                    SET KEY TO (parity(PRFA[LL]), parity(PRFB[LL]))
+                    SET MAPMIN[KEY] TO MINIMUM(MAPMIN.get(KEY, 999999999), PRFA[LL] - PRFB[LL])
+                    LL = LL + VONE
+                END WHILE
+                SET CURKEY TO (parity(VONE - parity(PRFA[LENGTH(PRFA) - VONE])), parity(PRFB[LENGTH(PRFB) - VONE]))
+                SET DIFF TO PRFA[LENGTH(PRFA) - VONE] - PRFB[LENGTH(PRFB) - VONE] - MAPMIN.get(CURKEY, 999999999)
+                ANS = MAXIMUM(ANS, DIFF)
+                process(RDX + VONE)
+            END FUNCTION
+            CALL process(VZERO)
+        END FOR
+        RETURN ANS
+    END FUNCTION
+END CLASS

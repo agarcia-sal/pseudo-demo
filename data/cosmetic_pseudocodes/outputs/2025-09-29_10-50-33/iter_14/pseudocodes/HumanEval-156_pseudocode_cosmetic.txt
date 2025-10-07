@@ -1,0 +1,25 @@
+FUNCTION int_to_mini_roman(input_value)  
+  SET symbols_map TO {"I", "IV", "V", "IX", "X", "XL", "L", "XC", "C", "CD", "D", "CM", "M"}  
+  SET thresholds TO {1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000}  
+  SET position TO LENGTH(thresholds) - 1  
+  SET assembled_text TO ""  
+  
+  REPEAT  
+    IF NOT (input_value > 0) THEN BREAK  
+  
+    SET current_count TO FLOOR(input_value / thresholds[position])  
+    SET input_value TO input_value - (thresholds[position] * current_count)  
+  
+    FUNCTION append_symbols(times, idx)  
+      IF NOT (times > 0) THEN INVOKE BREAK  
+      SET assembled_text TO assembled_text + symbols_map[idx]  
+      INVOKE append_symbols(times - 1, idx)  
+    END FUNCTION  
+  
+    INVOKE append_symbols(current_count, position)  
+    SET position TO position - 1  
+  
+  UNTIL FALSE  
+  
+  EXECUTE RETURN TO_LOWERCASE(assembled_text)  
+END FUNCTION

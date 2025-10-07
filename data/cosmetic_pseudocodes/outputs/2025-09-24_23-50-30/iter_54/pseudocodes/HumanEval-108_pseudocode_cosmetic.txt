@@ -1,0 +1,58 @@
+```
+FUNCTION count_nums(input_array)
+    FUNCTION digits_sum(value)
+        SET factor TO 1
+        IF value < 0 THEN
+            SET value TO 0 - value
+            SET factor TO -1
+        ELSE
+            SKIP
+        END IF
+
+        SET digits STRING_FROM value
+        SET digit_values TO EMPTY LIST
+        FOR idx FROM 0 TO LENGTH(digits) - 1
+            APPEND INTEGER_FROM characters_at(digits, idx) TO digit_values
+        END FOR
+
+        SET digit_values[0] TO digit_values[0] * factor
+
+        FUNCTION sum_list(lst, acc)
+            IF lst IS EMPTY THEN
+                RETURN acc
+            ELSE
+                RETURN sum_list(tail(lst), acc + head(lst))
+            END IF
+        END FUNCTION
+
+        RETURN sum_list(digit_values, 0)
+    END FUNCTION
+
+    FUNCTION collect_results(arr, idx, acc)
+        IF idx >= LENGTH(arr) THEN
+            RETURN acc
+        ELSE
+            RETURN collect_results(arr, idx + 1, acc + [digits_sum(arr[idx])])
+        END IF
+    END FUNCTION
+
+    SET results TO collect_results(input_array, 0, [])
+
+    FUNCTION filter_positive(l, acc)
+        IF l IS EMPTY THEN 
+            RETURN acc
+        ELSE
+            SET x TO head(l)
+            IF x > 0 THEN
+                RETURN filter_positive(tail(l), acc + [x])
+            ELSE
+                RETURN filter_positive(tail(l), acc)
+            END IF
+        END IF
+    END FUNCTION
+
+    SET positive_results TO filter_positive(results, [])
+
+    RETURN LENGTH(positive_results)
+END FUNCTION
+```

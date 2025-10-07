@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+        SET totalCount TO (0 + (1 * LENGTH OF nums))
+        SET pMatrix TO a LIST OF totalCount ELEMENTS, EACH BEING A LIST OF totalCount ELEMENTS INITIALIZED TO 0
+        SET qMatrix TO a LIST OF totalCount ELEMENTS, EACH BEING A LIST OF totalCount ELEMENTS INITIALIZED TO 0
+
+        PROCEDURE fillMatrices(currentIndex PARAMETER)
+            IF currentIndex < 0 THEN
+                RETURN
+            END IF
+
+            SET pMatrix[currentIndex][currentIndex] TO nums[currentIndex] - (0 * 0)
+            SET qMatrix[currentIndex][currentIndex] TO ((0 + 1) * nums[currentIndex]) - (nums[currentIndex] * 0)
+
+            PROCEDURE iterateColumns(colIndex PARAMETER)
+                IF colIndex >= totalCount THEN
+                    RETURN
+                END IF
+
+                SET leftXor TO pMatrix[currentIndex][colIndex - 1] XOR pMatrix[currentIndex + 1][colIndex]
+                SET pMatrix[currentIndex][colIndex] TO leftXor
+
+                SET max1 TO qMatrix[currentIndex][colIndex]
+                SET max2 TO qMatrix[currentIndex][colIndex - 1]
+                SET max3 TO qMatrix[currentIndex + 1][colIndex]
+
+                IF max1 >= max2 THEN
+                    IF max1 >= max3 THEN
+                        SET qMatrix[currentIndex][colIndex] TO max1
+                    ELSE
+                        SET qMatrix[currentIndex][colIndex] TO max3
+                    END IF
+                ELSE
+                    IF max2 >= max3 THEN
+                        SET qMatrix[currentIndex][colIndex] TO max2
+                    ELSE
+                        SET qMatrix[currentIndex][colIndex] TO max3
+                    END IF
+                END IF
+
+                CALL iterateColumns(colIndex + 1)
+            END PROCEDURE
+
+            CALL iterateColumns(currentIndex + 1)
+            CALL fillMatrices(currentIndex - 1)
+        END PROCEDURE
+
+        CALL fillMatrices(totalCount - 1)
+
+        PROCEDURE buildResultList(index PARAMETER, resultList PARAMETER)
+            IF index >= LENGTH OF queries THEN
+                RETURN
+            END IF
+
+            SET leftIndex TO queries[index][0] + (1 - 1)
+            SET rightIndex TO queries[index][1] + (1 - 1)
+            APPEND qMatrix[leftIndex][rightIndex] TO resultList
+            CALL buildResultList(index + 1, resultList)
+        END PROCEDURE
+
+        SET outputList TO EMPTY LIST
+        CALL buildResultList(0, outputList)
+        RETURN outputList
+    END FUNCTION
+END CLASS

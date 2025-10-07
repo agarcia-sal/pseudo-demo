@@ -1,0 +1,117 @@
+CLASS Solution
+    FUNCTION numberOfSpecialChars(word)
+        DEFINE proc storeFirstOccurrence(collection, sym, idx)
+            IF NOT containsKey(collection, sym) THEN
+                setKeyValue(collection, sym, idx)
+            END IF
+        END DEFINE
+
+        DEFINE proc assignLastOccurrence(collection, sym, idx)
+            setKeyValue(collection, sym, idx)
+        END DEFINE
+
+        DEFINE FUNCTION containsKey(map, key)
+            FOR EACH k IN keysOf(map)
+                IF k = key THEN RETURN true END IF
+            END FOR
+            RETURN false
+        END FUNCTION
+
+        DEFINE FUNCTION keysOf(map)
+            RETURN customKeysList(map)
+        END FUNCTION
+
+        DEFINE FUNCTION customKeysList(map)
+            DEFINE list := empty list
+            FOR EACH entryKey, entryValue IN map
+                appendTo(list, entryKey)
+            END FOR
+            RETURN list
+        END FUNCTION
+
+        DEFINE FUNCTION setKeyValue(map, key, val)
+            map[key] := val
+        END FUNCTION
+
+        DEFINE FUNCTION zippedPairs(listA, listB)
+            DEFINE idx := 0
+            DEFINE result := empty list
+            WHILE idx < lengthOf(listA) AND idx < lengthOf(listB)
+                appendTo(result, (listA[idx], listB[idx]))
+                idx := idx + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        DEFINE FUNCTION lengthOf(seq)
+            DEFINE cnt := 0
+            REPEAT
+                EXIT IF elementAt(seq, cnt) IS undefined
+                cnt := cnt + 1
+            UNTIL false
+            RETURN cnt
+        END FUNCTION
+
+        DEFINE FUNCTION elementAt(seq, pos)
+            IF pos >= 0 AND pos < standardLength(seq)
+                RETURN seq[pos]
+            ELSE
+                RETURN undefined
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION standardLength(seq)
+            # hypothetically returns length for list or string types
+            # this is a built-in abstraction placeholder
+        END FUNCTION
+
+        DEFINE FUNCTION appendTo(list, item)
+            # append item to list implementation
+        END FUNCTION
+
+        DEFINE FUNCTION empty()
+            # returns empty collection or list as appropriate
+        END FUNCTION
+
+        DEFINE VAR freshFirst := empty()
+        DEFINE VAR freshLast := empty()
+
+        DEFINE VAR cursor := 0
+        DEFINE VAR lenWord := standardLength(word)
+        WHILE cursor < lenWord
+            DEFINE VAR chr := elementAt(word, cursor)
+            CALL storeFirstOccurrence(freshFirst, chr, cursor)
+            CALL assignLastOccurrence(freshLast, chr, cursor)
+            cursor := cursor + 1
+        END WHILE
+
+        # build lists of letters
+        DEFINE VAR lL := ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
+        DEFINE VAR uL := ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+
+        DEFINE VAR combo := zippedPairs(lL,uL)
+
+        DEFINE VAR total := 0
+        DEFINE VAR idxZ := 0
+        DEFINE VAR lenCombo := lengthOf(combo)
+        WHILE idxZ < lenCombo
+            DEFINE VAR pair := elementAt(combo, idxZ)
+            DEFINE VAR crL := pair[0]
+            DEFINE VAR crU := pair[1]
+
+            DEFINE VAR crL_in_last := containsKey(freshLast, crL)
+            DEFINE VAR crU_in_first := containsKey(freshFirst, crU)
+
+            IF crL_in_last AND crU_in_first THEN
+                DEFINE VAR valL := freshLast[crL]
+                DEFINE VAR valU := freshFirst[crU]
+                IF valL < valU THEN
+                    total := total + 1
+                END IF
+            END IF
+            idxZ := idxZ + 1
+        END WHILE
+
+        RETURN total
+    END FUNCTION
+END CLASS

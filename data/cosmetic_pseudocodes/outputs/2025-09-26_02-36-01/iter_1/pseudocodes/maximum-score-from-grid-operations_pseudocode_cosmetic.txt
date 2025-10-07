@@ -1,0 +1,38 @@
+CLASS Solution
+    FUNCTION maximumScore(grid)
+        LET size = LENGTH(grid)
+        LET prefixSum = ARRAY OF (size + 1) ARRAYS FILLED WITH zeros, LENGTH (size + 1)
+        LET lastPicked = ARRAY OF (size + 1) FILLED WITH zeros
+        LET lastSkipped = ARRAY OF (size + 1) FILLED WITH zeros
+
+        FOR col FROM 0 TO size - 1
+            FOR row FROM 0 TO size - 1
+                prefixSum[col][row + 1] = prefixSum[col][row] + grid[row][col]
+            END FOR
+        END FOR
+
+        FOR idx FROM 1 TO size - 1
+            LET currentPicked = ARRAY OF (size + 1) FILLED WITH zeros
+            LET currentSkipped = ARRAY OF (size + 1) FILLED WITH zeros
+
+            FOR current FROM 0 TO size
+                FOR previous FROM 0 TO size
+                    IF current > previous THEN
+                        LET segmentScore = prefixSum[idx - 1][current] - prefixSum[idx - 1][previous]
+                        currentPicked[current] = MAX(currentPicked[current], lastSkipped[previous] + segmentScore)
+                        currentSkipped[current] = MAX(currentSkipped[current], lastSkipped[previous] + segmentScore)
+                    ELSE
+                        LET segmentScore = prefixSum[idx][previous] - prefixSum[idx][current]
+                        currentPicked[current] = MAX(currentPicked[current], lastPicked[previous] + segmentScore)
+                        currentSkipped[current] = MAX(currentSkipped[current], lastPicked[previous])
+                    END IF
+                END FOR
+            END FOR
+
+            lastPicked = currentPicked
+            lastSkipped = currentSkipped
+        END FOR
+
+        RETURN MAXIMUM VALUE IN lastPicked
+    END FUNCTION
+END CLASS

@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+
+        FUNCTION modify_frequency(freq LIST OF integers element integer delta integer)
+            SET bit_flag TO integer 1
+            SET index TO integer 0
+            REPEAT
+                IF (element BITWISE-AND bit_flag) NOT EQUAL TO 0
+                    SET temp_val TO freq AT POSITION index
+                    SET temp_val TO temp_val PLUS delta
+                    SET freq AT POSITION index TO temp_val
+                END IF
+                SET bit_flag TO bit_flag MULTIPLIED BY 2
+                SET index TO index PLUS 1
+            UNTIL index GREATER THAN 31
+        END FUNCTION
+
+        FUNCTION derive_combined_or(freq LIST OF integers) RETURNS integer
+            SET accumulator TO integer 0
+            SET cursor TO integer 0
+            WHILE cursor LESS THAN OR EQUAL TO 31
+                IF freq AT POSITION cursor GREATER THAN 0
+                    SET accumulator TO (accumulator BITWISE-OR (1 SHL cursor))
+                END IF
+                SET cursor TO cursor PLUS 1
+            END WHILE
+            RETURN accumulator
+        END FUNCTION
+
+        SET total_length TO LENGTH OF nums
+        SET frequency TO LIST OF integer 0 REPEATED 32 TIMES
+        SET aggregate_or TO integer 0
+        SET window_start TO integer 0
+        SET shortest_length TO positive infinity
+
+        FUNCTION process_right_bound(pos integer)
+            modify_frequency(frequency, nums AT POSITION pos, 1)
+            SET aggregate_or TO aggregate_or BITWISE-OR nums AT POSITION pos
+        END FUNCTION
+
+        FUNCTION try_shrink_window()
+            WHILE aggregate_or GREATER THAN OR EQUAL TO k AND window_start LESS THAN OR EQUAL TO right_idx
+                IF shortest_length GREATER THAN right_idx MINUS window_start PLUS 1
+                    SET shortest_length TO right_idx MINUS window_start PLUS 1
+                END IF
+                modify_frequency(frequency, nums AT POSITION window_start, -1)
+                SET aggregate_or TO derive_combined_or(frequency)
+                SET window_start TO window_start PLUS 1
+            END WHILE
+        END FUNCTION
+
+        SET right_idx TO integer 0
+        WHILE right_idx LESS THAN total_length
+            process_right_bound(right_idx)
+            try_shrink_window()
+            SET right_idx TO right_idx PLUS 1
+        END WHILE
+
+        IF shortest_length EQUALS positive infinity THEN
+            RETURN -1
+        ELSE
+            RETURN shortest_length
+        END IF
+
+    END FUNCTION
+END CLASS

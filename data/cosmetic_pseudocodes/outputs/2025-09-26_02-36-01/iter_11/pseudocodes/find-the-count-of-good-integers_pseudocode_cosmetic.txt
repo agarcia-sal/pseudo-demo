@@ -1,0 +1,122 @@
+CLASS Solution
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer
+        DEFINE factorials AS empty list
+        DEFINE idx AS 0
+        WHILE idx < (n + 1)
+            SET factValue TO 1
+            DEFINE step AS 1
+            WHILE step <= idx
+                SET factValue TO factValue * step
+                SET step TO step + 1
+            END WHILE
+            APPEND factValue TO factorials
+            SET idx TO idx + 1
+        END WHILE
+
+        SET resultAcc TO 0
+        DEFINE visitedStrings AS empty set
+        DEFINE halfBase AS (10 ^ ((n - 1) DIV 2))
+        DEFINE currentNum AS halfBase
+
+        FUNCTION isDivisible(strVal string) RETURNS boolean
+            DEFINE numericVal AS 0
+            DEFINE pos AS 0
+            WHILE pos < LENGTH(strVal)
+                SET numericVal TO numericVal * 10 + (ORD(strVal[pos]) - ORD('0'))
+                SET pos TO pos + 1
+            END WHILE
+            RETURN (numericVal MOD k = 0)
+        END FUNCTION
+
+        FUNCTION charFrequency(s string) RETURNS map
+            DEFINE freqMap AS empty map
+            FOR EACH ch IN s
+                IF ch IN freqMap THEN
+                    SET freqMap[ch] TO freqMap[ch] + 1
+                ELSE
+                    SET freqMap[ch] TO 1
+                END IF
+            END FOR
+            RETURN freqMap
+        END FUNCTION
+
+        FUNCTION sortStringAsc(strVal string) RETURNS string
+            DEFINE charList AS empty list
+            FOR EACH ch IN strVal
+                APPEND ch TO charList
+            END FOR
+            DEFINE swapped AS true
+            WHILE swapped
+                SET swapped TO false
+                FOR i FROM 0 TO LENGTH(charList) - 2
+                    IF charList[i] > charList[i + 1] THEN
+                        DEFINE tempCh AS charList[i]
+                        SET charList[i] TO charList[i + 1]
+                        SET charList[i + 1] TO tempCh
+                        SET swapped TO true
+                    END IF
+                END FOR
+            END WHILE
+            DEFINE sortedStr AS empty string
+            FOR EACH ch IN charList
+                SET sortedStr TO sortedStr + ch
+            END FOR
+            RETURN sortedStr
+        END FUNCTION
+
+        WHILE currentNum < (halfBase * 10)
+            DEFINE strNum AS ""
+            DEFINE tempNum AS currentNum
+            REPEAT
+                DEFINE digitChar AS CHR((tempNum MOD 10) + ORD('0'))
+                SET strNum TO digitChar + strNum
+                SET tempNum TO tempNum DIV 10
+            UNTIL tempNum = 0
+
+            DEFINE revStr AS ""
+            DEFINE revLen AS LENGTH(strNum)
+            REPEAT
+                SET revLen TO revLen - 1
+                IF revLen < 0 THEN
+                    BREAK
+                END IF
+                SET revStr TO revStr + strNum[revLen]
+            UNTIL false
+
+            DEFINE suffixStart AS n MOD 2
+            DEFINE appendedStr AS strNum + SUBSTRING(revStr, suffixStart, LENGTH(revStr) - suffixStart)
+
+            IF NOT isDivisible(appendedStr) THEN
+                SET currentNum TO currentNum + 1
+                CONTINUE
+            END IF
+
+            DEFINE orderedStr AS sortStringAsc(appendedStr)
+            IF orderedStr IN visitedStrings THEN
+                SET currentNum TO currentNum + 1
+                CONTINUE
+            END IF
+
+            ADD orderedStr TO visitedStrings
+
+            DEFINE frequencies AS charFrequency(orderedStr)
+            DEFINE zeroChar AS '0'
+            DEFINE totalRes AS 0
+
+            IF (zeroChar IN frequencies) AND (frequencies[zeroChar] > 0) THEN
+                SET totalRes TO (n - frequencies[zeroChar]) * factorials[n - 1]
+            ELSE
+                SET totalRes TO factorials[n]
+            END IF
+
+            FOR EACH freqKey IN frequencies
+                SET totalRes TO totalRes DIV factorials[frequencies[freqKey]]
+            END FOR
+
+            SET resultAcc TO resultAcc + totalRes
+            SET currentNum TO currentNum + 1
+        END WHILE
+
+        RETURN resultAcc
+    END FUNCTION
+END CLASS

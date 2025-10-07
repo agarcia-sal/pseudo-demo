@@ -1,0 +1,63 @@
+CLASS Solution
+	FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer
+		FUNCTION nxt(x x AS integer y y AS integer) RETURNS integer
+			IF ((x BITAND (1 BITXOR y)) = 1) THEN
+				RETURN x + 1
+			ELSE
+				RETURN x + 2
+			END IF
+		END FUNCTION
+
+		SET len1 TO LENGTH OF nums1
+		SET len2 TO LENGTH OF nums2
+		SET matrix TO list WITH len1 + 1 ROWS EACH HAVING len2 + 1 COLUMNS FILLED WITH 0
+
+		DEFINE fillRow(a a AS integer)
+			DEFINE recurRow(k k AS integer)
+				IF k > len1 THEN
+					RETURN
+				END IF
+				SET val TO nums1[k]
+				SET matrix[k][0] TO nxt(matrix[k - 1][0], val)
+				CALL recurRow(k + 1)
+			END FUNCTION
+			CALL recurRow(1)
+		END FUNCTION
+		CALL fillRow(len1)
+
+		DEFINE fillCol(b b AS integer)
+			DEFINE repeatCol(l l AS integer)
+				WHILE l <= len2 DO
+					SET v TO nums2[l]
+					SET matrix[0][l] TO nxt(matrix[0][l - 1], v)
+					SET l TO l + 1
+				END WHILE
+			END FUNCTION
+			CALL repeatCol(1)
+		END FUNCTION
+		CALL fillCol(len2)
+
+		DEFINE fillMatrix()
+			SET p TO 1
+			WHILE p <= len1 DO
+				SET a_val TO nums1[p]
+				SET q TO 1
+				WHILE q <= len2 DO
+					SET b_val TO nums2[q]
+					SET fromLeft TO nxt(matrix[p - 1][q], a_val)
+					SET fromTop TO nxt(matrix[p][q - 1], b_val)
+					IF fromLeft < fromTop THEN
+						SET matrix[p][q] TO fromLeft
+					ELSE
+						SET matrix[p][q] TO fromTop
+					END IF
+					SET q TO q + 1
+				END WHILE
+				SET p TO p + 1
+			END WHILE
+		END FUNCTION
+		CALL fillMatrix()
+
+		RETURN matrix[len1][len2]
+	END FUNCTION
+END CLASS

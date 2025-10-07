@@ -1,0 +1,52 @@
+```
+FUNCTION sort_array(parameter_values)
+    FUNCTION count_ones_in_binary(number)
+        SET counter_accumulator TO 0
+        SET binary_string_representation TO TO_BINARY_STRING(number)
+        FOR each_character FROM 3 TO LENGTH(binary_string_representation) STEP 1
+            IF binary_string_representation[each_character] = '1' THEN
+                SET counter_accumulator TO counter_accumulator + 1
+            END IF
+        END FOR
+        RETURN counter_accumulator
+    END FUNCTION
+
+    FUNCTION sort_by_binary_ones(input_list)
+        SET index_tracker TO 1
+        SET intermediate_storage TO EMPTY LIST
+        WHILE index_tracker <= LENGTH(input_list) DO
+            APPEND (input_list[index_tracker], count_ones_in_binary(input_list[index_tracker])) TO intermediate_storage
+            SET index_tracker TO index_tracker + 1
+        END WHILE
+
+        SET ascending_ordered TO EMPTY LIST
+        SET position_marker TO 1
+        WHILE position_marker <= LENGTH(intermediate_storage) DO
+            SET candidate_index TO position_marker
+            SET k TO position_marker + 1
+            WHILE k <= LENGTH(intermediate_storage) DO
+                IF intermediate_storage[k][2] < intermediate_storage[candidate_index][2] OR
+                   (intermediate_storage[k][2] = intermediate_storage[candidate_index][2] AND intermediate_storage[k][1] < intermediate_storage[candidate_index][1]) THEN
+                    SET candidate_index TO k
+                END IF
+                SET k TO k + 1
+            END WHILE
+            IF candidate_index != position_marker THEN
+                SET temp TO intermediate_storage[position_marker]
+                SET intermediate_storage[position_marker] TO intermediate_storage[candidate_index]
+                SET intermediate_storage[candidate_index] TO temp
+            END IF
+            SET position_marker TO position_marker + 1
+        END WHILE
+
+        FOR m FROM 1 TO LENGTH(intermediate_storage) DO
+            APPEND intermediate_storage[m][1] TO ascending_ordered
+        END FOR
+
+        RETURN ascending_ordered
+    END FUNCTION
+
+    SET temporary_sorted TO sort_by_binary_ones((SORT parameter_values ASCENDING))
+    RETURN temporary_sorted
+END FUNCTION
+```

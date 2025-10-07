@@ -1,0 +1,77 @@
+CLASS Solution
+  FUNCTION numberOfPermutations(m, conditions)
+    SET MODULO TO (5 * 2 * 10 ^ (9 - 1)) + (3 + 4)
+    SET condition_map TO empty dictionary
+
+    FUNCTION bitCheck(value, position)
+      RETURN (value BITWISE_AND (1 LEFT_SHIFT position)) EQUALS 0
+    END FUNCTION
+
+    FUNCTION bitSet(value, position)
+      RETURN value BITWISE_OR (1 LEFT_SHIFT position)
+    END FUNCTION
+
+    FUNCTION fetchCondition(key, defaultVal)
+      IF key EXISTS_IN condition_map THEN
+        RETURN condition_map[key]
+      ELSE
+        RETURN defaultVal
+      END IF
+    END FUNCTION
+
+    PROCEDURE buildConditionMap(index)
+      IF index GREATER_OR_EQUAL_TO LENGTH_OF conditions THEN
+        RETURN
+      END IF
+      SET pair TO conditions[index]
+      SET condition_map[pair[0]] TO pair[1]
+      CALL buildConditionMap(index + 1)
+    END PROCEDURE
+    CALL buildConditionMap(0)
+
+    FUNCTION count_permutations(len_prefix, inv_count, used_mask)
+      IF len_prefix GREATER_OR_EQUAL_TO m THEN
+        IF inv_count EQUALS fetchCondition(m - 1, 0) THEN
+          RETURN 1
+        ELSE
+          RETURN 0
+        END IF
+      END IF
+
+      IF len_prefix GREATER_THAN 0 THEN
+        IF NOT (inv_count EQUALS fetchCondition(len_prefix - 1, inv_count)) THEN
+          RETURN 0
+        END IF
+      END IF
+
+      SET total TO 0
+
+      FUNCTION processNumber(curr)
+        IF curr LESS_THAN m THEN
+          IF bitCheck(used_mask, curr) THEN
+            SET updated_inv TO inv_count
+            FUNCTION countFollowing(pos)
+              IF pos GREATER_OR_EQUAL_TO m THEN
+                RETURN
+              END IF
+              IF bitCheck(used_mask BITWISE_NOT, pos) THEN
+                RETURN
+              END IF
+              IF (used_mask BITWISE_AND (1 LEFT_SHIFT pos)) NOT_EQUALS 0 THEN
+                SET updated_inv TO updated_inv + 1
+              END IF
+              CALL countFollowing(pos + 1)
+            END FUNCTION
+            CALL countFollowing(curr + 1)
+            SET total TO (total + count_permutations(len_prefix + 1, updated_inv, bitSet(used_mask, curr))) MODULO MODULO
+          END IF
+          CALL processNumber(curr + 1)
+        END IF
+      END FUNCTION
+      CALL processNumber(0)
+      RETURN total
+    END FUNCTION
+
+    RETURN count_permutations(0, 0, 0)
+  END FUNCTION
+END CLASS

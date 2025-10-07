@@ -1,0 +1,42 @@
+FUNCTION parse_nested_parens(paren_string : STRING) RETURNS LIST OF INTEGER
+    FUNCTION parse_paren_group(s : STRING) RETURNS INTEGER
+        SET depth TO 0
+        SET max_depth TO 0
+        FOR index FROM 0 TO LENGTH OF s MINUS 1
+            SET c TO CHARACTER AT s AT index
+            IF c EQUALS '(' THEN
+                SET depth TO depth PLUS 1
+                IF depth GREATER THAN max_depth THEN
+                    SET max_depth TO depth
+                ENDIF
+            ELSE
+                SET depth TO depth MINUS 1
+            ENDIF
+        ENDFOR
+        RETURN max_depth
+    END FUNCTION
+
+    SET result TO LIST WITH ELEMENTS EMPTY
+    SET parts TO LIST WITH ELEMENTS EMPTY
+    SET current_part TO EMPTY STRING
+    FOR index FROM 0 TO LENGTH OF paren_string MINUS 1
+        SET character TO CHARACTER AT paren_string AT index
+        IF character EQUALS ' ' THEN
+            IF current_part NOT EQUAL TO EMPTY STRING THEN
+                APPEND current_part TO parts
+                SET current_part TO EMPTY STRING
+            ENDIF
+        ELSE
+            SET current_part TO CONCATENATE current_part AND character
+        ENDIF
+    ENDFOR
+    IF current_part NOT EQUAL TO EMPTY STRING THEN
+        APPEND current_part TO parts
+    ENDIF
+
+    FOR i FROM 0 TO LENGTH OF parts MINUS 1
+        CALL APPEND WITH ARGUMENTS CALL parse_paren_group WITH ARGUMENTS parts AT i TO result
+    ENDFOR
+
+    RETURN result
+END FUNCTION

@@ -1,0 +1,85 @@
+CLASS Solution
+  FUNCTION numberOfSpecialChars(word)
+    FUNCTION containsKey(coll, key)
+      FOR EACH k IN coll
+        IF k EQUALS key
+          RETURN true
+        END IF
+      END FOR
+      RETURN false
+    END FUNCTION
+
+    FUNCTION getValue(coll, key)
+      FOR EACH (k, v) IN coll
+        IF k EQUALS key
+          RETURN v
+        END IF
+      END FOR
+      RETURN null
+    END FUNCTION
+
+    FUNCTION setValue(coll, key, val)
+      index <- 0
+      WHILE index LESS THAN length of coll
+        (k, v) <- coll[index]
+        IF k EQUALS key
+          coll[index] <- (k, val)
+          RETURN
+        END IF
+        index <- index + 1
+      END WHILE
+      coll APPEND (key, val)
+    END FUNCTION
+
+    FUNCTION zipCollections(c1, c2)
+      result <- empty collection
+      i <- 0
+      WHILE i LESS THAN length of c1 AND i LESS THAN length of c2
+        result APPEND (c1[i], c2[i])
+        i <- i + 1
+      END WHILE
+      RETURN result
+    END FUNCTION
+
+    CONSTANT lowerLetters <- ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+    CONSTANT upperLetters <- ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+
+    firstMap <- empty collection
+    lastMap <- empty collection
+
+    PROCEDURE processIndex(i)
+      IF i GREATER OR EQUAL length of word
+        RETURN
+      END IF
+      c <- word[i]
+      IF NOT containsKey(firstMap, c)
+        setValue(firstMap, c, i)
+      END IF
+      setValue(lastMap, c, i)
+      processIndex(i + 1)
+    END PROCEDURE
+    processIndex(0)
+
+    total <- 0
+    INDEX <- 0
+    REPEAT
+      IF INDEX GREATER OR EQUAL length of lowerLetters OR INDEX GREATER OR EQUAL length of upperLetters
+        EXIT
+      END IF
+      lch <- lowerLetters[INDEX]
+      uch <- upperLetters[INDEX]
+      IF containsKey(lastMap, lch)
+        IF containsKey(firstMap, uch)
+          lval <- getValue(lastMap, lch)
+          uval <- getValue(firstMap, uch)
+          IF lval LESS THAN uval
+            total <- total + 1
+          END IF
+        END IF
+      END IF
+      INDEX <- INDEX + 1
+    UNTIL false
+
+    RETURN total
+  END FUNCTION
+END CLASS

@@ -1,0 +1,60 @@
+CLASS Solution
+{
+    FUNCTION minimumOperations(grid)
+    {
+        LET rowsCount := LENGTH(grid)
+        LET colsCount := LENGTH(grid[0])
+        LET totalOps := 0
+        LET maxDigit := (5 + 4)  // 9
+
+        LET outerIndex := 0
+
+        WHILE outerIndex <= (colsCount - 1)
+        {
+            LET currentCol := outerIndex
+            LET innerIndex := 0
+
+            WHILE innerIndex <= (rowsCount - 2)
+            {
+                IF NOT (grid[innerIndex][currentCol] = grid[innerIndex + 1][currentCol])
+                {
+                    totalOps = totalOps + 1
+                    grid[innerIndex + 1][currentCol] = grid[innerIndex][currentCol]
+                }
+                innerIndex = innerIndex + 1
+            }
+
+            LET rowIter := 0
+            REPEAT
+                IF (currentCol < (colsCount - 1)) AND (grid[rowIter][currentCol] = grid[rowIter][currentCol + 1])
+                {
+                    totalOps = totalOps + 1
+
+                    LET candidateValue := 0
+
+                    FUNCTION findReplacement()
+                    {
+                        IF candidateValue != grid[rowIter][currentCol]
+                        {
+                            grid[rowIter][currentCol + 1] = candidateValue
+                            RETURN TRUE
+                        }
+                        RETURN FALSE
+                    }
+
+                    WHILE candidateValue <= maxDigit
+                    {
+                        IF findReplacement() THEN
+                            BREAK
+                        candidateValue = candidateValue + 1
+                    }
+                }
+                rowIter = rowIter + 1
+            UNTIL rowIter > (rowsCount - 1)
+
+            outerIndex = outerIndex + 1
+        }
+
+        RETURN totalOps
+    }
+}

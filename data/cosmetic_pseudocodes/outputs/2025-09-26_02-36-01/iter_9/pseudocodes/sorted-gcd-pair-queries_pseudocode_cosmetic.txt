@@ -1,0 +1,105 @@
+CLASS Solution
+    FUNCTION gcdValues(nums, queries)
+        FUNCTION max_element(arr)
+            SET idx TO 1
+            SET cur TO arr[1]
+            SET k TO 2
+            WHILE k <= LENGTH(arr)
+                IF arr[k] > cur THEN
+                    SET cur TO arr[k]
+                    SET idx TO k
+                END IF
+                SET k TO k + 1
+            END WHILE
+            RETURN cur
+        END FUNCTION
+
+        FUNCTION count_elements(arr)
+            SET dict_cnt TO EMPTY MAP
+            SET pos TO 1
+            WHILE pos <= LENGTH(arr)
+                IF dict_cnt[arr[pos]] IS UNDEFINED THEN
+                    SET dict_cnt[arr[pos]] TO 0
+                END IF
+                SET dict_cnt[arr[pos]] TO dict_cnt[arr[pos]] + 1
+                SET pos TO pos + 1
+            END WHILE
+            RETURN dict_cnt
+        END FUNCTION
+
+        FUNCTION bisect_right(arr, x)
+            SET low TO 1
+            SET high TO LENGTH(arr) + 1
+            WHILE low < high
+                SET mid TO (low + high) \ 2
+                IF arr[mid] <= x THEN
+                    SET low TO mid + 1
+                ELSE
+                    SET high TO mid
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        SET maxVal TO max_element(nums)
+        SET counts TO count_elements(nums)
+        SET array_g TO ARRAY OF (maxVal+1) ZEROS
+
+        FUNCTION decrement_range(desc_g, start_i, max_v)
+            SET z TO start_i
+            WHILE z <= max_v
+                SET desc_g[start_i] TO desc_g[start_i] - desc_g[z]
+                SET z TO z + start_i
+            END WHILE
+        END FUNCTION
+
+        SET i_var TO maxVal
+        WHILE i_var >= 1
+            SET value_accum TO 0
+            FUNCTION inner_loop(j_var, max_j)
+                IF j_var > max_j THEN
+                    RETURN
+                ELSE
+                    IF counts[j_var] IS DEFINED THEN
+                        SET value_accum TO value_accum + counts[j_var]
+                    END IF
+                    SET array_g[i_var] TO array_g[i_var] - array_g[j_var]
+                    inner_loop(j_var + i_var, max_j)
+                END IF
+            END FUNCTION
+
+            inner_loop(i_var, maxVal)
+            SET array_g[i_var] TO array_g[i_var] + ((value_accum * (value_accum - 1)) \ 2)
+            SET i_var TO i_var - 1
+        END WHILE
+
+        FUNCTION accumulate(arr)
+            SET result_arr TO ARRAY OF LENGTH(arr)
+            SET result_arr[1] TO arr[1]
+            SET z_idx TO 2
+            WHILE z_idx <= LENGTH(arr)
+                SET result_arr[z_idx] TO result_arr[z_idx - 1] + arr[z_idx]
+                SET z_idx TO z_idx + 1
+            END WHILE
+            RETURN result_arr
+        END FUNCTION
+
+        SET pref_sum TO accumulate(array_g)
+        SET output_list TO EMPTY LIST
+
+        FUNCTION process_queries(idx)
+            IF idx > LENGTH(queries) THEN
+                RETURN
+            ELSE
+                SET q_val TO queries[idx]
+                SET pos_ins TO bisect_right(pref_sum, q_val)
+                APPEND pos_ins TO output_list
+                process_queries(idx + 1)
+            END IF
+        END FUNCTION
+
+        process_queries(1)
+
+        RETURN output_list
+    END FUNCTION
+END CLASS

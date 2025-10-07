@@ -1,0 +1,56 @@
+CLASS Solution
+
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer
+
+        FUNCTION nxt(x xi AS integer y yi AS integer) RETURNS integer
+            SET conditionFlag TO ((xi BITWISE_AND 1) XOR yi)
+            IF (conditionFlag EQUALS 1) THEN
+                RETURN (xi PLUS 1)
+            ELSE
+                RETURN (xi PLUS 2)
+            END IF
+        END FUNCTION
+
+        SET lengthA TO LENGTH OF nums1
+        SET lengthB TO LENGTH OF nums2
+        SET table TO LIST WITH (lengthA PLUS 1) ELEMENTS each BEING LIST OF (lengthB PLUS 1) ZEROS
+
+        SET rowCounter TO 1
+        WHILE rowCounter LESS_THAN_OR_EQUALS lengthA
+            SET valX TO nums1 AT rowCounter
+            SET prevVal TO table AT (rowCounter MINUS 1) AT 0
+            SET table AT rowCounter AT 0 TO nxt(prevVal, valX)
+            INCREMENT rowCounter BY 1
+        END WHILE
+
+        SET colCounter TO 1
+        WHILE colCounter LESS_THAN_OR_EQUALS lengthB
+            SET valY TO nums2 AT colCounter
+            SET prevVal TO table AT 0 AT (colCounter MINUS 1)
+            SET table AT 0 AT colCounter TO nxt(prevVal, valY)
+            INCREMENT colCounter BY 1
+        END WHILE
+
+        SET outerIdx TO 1
+        WHILE outerIdx LESS_THAN_OR_EQUALS lengthA
+            SET currentX TO nums1 AT outerIdx
+            SET innerIdx TO 1
+            WHILE innerIdx LESS_THAN_OR_EQUALS lengthB
+                SET currentY TO nums2 AT innerIdx
+                SET candidate1 TO nxt(table AT (outerIdx MINUS 1) AT innerIdx, currentX)
+                SET candidate2 TO nxt(table AT outerIdx AT (innerIdx MINUS 1), currentY)
+                IF (candidate1 LESS_THAN candidate2) THEN
+                    SET table AT outerIdx AT innerIdx TO candidate1
+                ELSE
+                    SET table AT outerIdx AT innerIdx TO candidate2
+                END IF
+                INCREMENT innerIdx BY 1
+            END WHILE
+            INCREMENT outerIdx BY 1
+        END WHILE
+
+        RETURN table AT lengthA AT lengthB
+
+    END FUNCTION
+
+END CLASS

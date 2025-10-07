@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION getPermutationIndex(perm)
+        FUNCTION computeFactorialList(length)
+            FUNCTION recurFact(idx, accList)
+                IF idx GREATER THAN length THEN
+                    RETURN accList
+                ELSE
+                    SET prevVal TO accList AT idx MINUS 2
+                    APPEND prevVal TIMES (idx MINUS 1) TO accList
+                    RETURN recurFact(idx PLUS 1, accList)
+                END IF
+            END FUNCTION
+            RETURN recurFact(2, [1])
+        END FUNCTION
+
+        FUNCTION findPosition(value, collection)
+            FUNCTION searchRec(pos)
+                IF pos EQUALS LENGTH(collection) THEN
+                    RETURN -1
+                ELSE IF collection AT pos EQUALS value THEN
+                    RETURN pos
+                ELSE
+                    RETURN searchRec(pos PLUS 1)
+                END IF
+            END FUNCTION
+            RETURN searchRec(0)
+        END FUNCTION
+
+        FUNCTION removeAtIndex(listVar, idx)
+            FUNCTION helper(accum, currentIndex)
+                IF currentIndex EQUALS LENGTH(listVar) THEN
+                    RETURN accum
+                ELSE IF currentIndex EQUALS idx THEN
+                    RETURN helper(accum, currentIndex PLUS 1)
+                ELSE
+                    RETURN helper(accum PLUS [listVar AT currentIndex], currentIndex PLUS 1)
+                END IF
+            END FUNCTION
+            RETURN helper([], 0)
+        END FUNCTION
+
+        SET lengthVar TO LENGTH(perm)
+        SET moduloVal TO (10 TIMES 10 TIMES 10 TIMES 100000000) PLUS 1
+
+        SET factorialList TO computeFactorialList(lengthVar)
+
+        FUNCTION generateNumList(len, accN)
+            IF LENGTH(accN) EQUALS len THEN
+                RETURN accN
+            ELSE
+                RETURN generateNumList(len, accN PLUS [LENGTH(accN) PLUS 1])
+            END IF
+        END FUNCTION
+        SET availableNums TO generateNumList(lengthVar, [])
+
+        FUNCTION loopIndex(i, currentIndex, nums)
+            IF i GREATER THAN OR EQUAL TO lengthVar THEN
+                RETURN currentIndex
+            ELSE
+                SET positionVal TO findPosition(perm AT i, nums)
+                SET multiplierVal TO factorialList AT (lengthVar MINUS i MINUS 1)
+                SET updatedIndex TO currentIndex PLUS (positionVal TIMES multiplierVal)
+                SET updatedNums TO removeAtIndex(nums, positionVal)
+                RETURN loopIndex(i PLUS 1, updatedIndex, updatedNums)
+            END IF
+        END FUNCTION
+
+        SET result TO loopIndex(0, 0, availableNums)
+        RETURN result MOD moduloVal
+    END FUNCTION
+END CLASS

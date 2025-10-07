@@ -1,0 +1,87 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        FUNCTION incrementDict(dict, key)
+            IF NOT (key IN dict) THEN
+                dict[key] ← 0
+            END IF
+            dict[key] ← dict[key] + 1
+        END FUNCTION
+
+        FUNCTION getLength(strg)
+            RETURN 0 + LENGTH(strg)
+        END FUNCTION
+
+        FUNCTION substrFromTo(text, startIdx, endIdxMinusOne)
+            VAR result ← ""
+            VAR pos ← startIdx
+            WHILE pos <= endIdxMinusOne DO
+                result ← result + text[pos]
+                pos ← pos + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        VAR freqMap ← {}
+        VAR idxArr ← 0
+        WHILE idxArr < getLength(arr) DO
+            VAR currentStr ← arr[idxArr]
+            VAR lenStr ← getLength(currentStr)
+            
+            VAR outerIdx ← 0
+            WHILE outerIdx < lenStr DO
+                VAR innerIdx ← outerIdx + 1
+                REPEAT
+                    IF innerIdx > lenStr THEN BREAK END IF
+                    VAR subTxt ← substrFromTo(currentStr, outerIdx, innerIdx - 1)
+                    CALL incrementDict(freqMap, subTxt)
+                    innerIdx ← innerIdx + 1
+                UNTIL FALSE
+                outerIdx ← outerIdx + 1
+            END WHILE
+            idxArr ← idxArr + 1
+        END WHILE
+
+        VAR results ← []
+        VAR posA ← 0
+        WHILE posA < getLength(arr) DO
+            VAR element ← arr[posA]
+            VAR elLen ← getLength(element)
+            VAR custShortest ← ""
+            VAR startI ← 0
+            WHILE startI < elLen DO
+                VAR endJ ← startI + 1
+                WHILE endJ <= elLen DO
+                    VAR candidate ← substrFromTo(element, startI, endJ - 1)
+                    IF (freqMap[candidate] = 1) THEN
+                        IF (custShortest = "") THEN
+                            custShortest ← candidate
+                        ELSEIF (getLength(candidate) < getLength(custShortest)) THEN
+                            custShortest ← candidate
+                        ELSEIF (getLength(candidate) = getLength(custShortest)) THEN
+                            VAR lessString ← FALSE
+                            VAR x ← 0
+                            WHILE x < getLength(candidate) AND NOT lessString DO
+                                IF candidate[x] < custShortest[x] THEN
+                                    lessString ← TRUE
+                                ELSEIF candidate[x] > custShortest[x] THEN
+                                    lessString ← FALSE
+                                    BREAK
+                                END IF
+                                x ← x + 1
+                            END WHILE
+                            IF lessString THEN
+                                custShortest ← candidate
+                            END IF
+                        END IF
+                    END IF
+                    endJ ← endJ + 1
+                END WHILE
+                startI ← startI + 1
+            END WHILE
+            results APPEND custShortest
+            posA ← posA + 1
+        END WHILE
+
+        RETURN results
+    END FUNCTION
+END CLASS

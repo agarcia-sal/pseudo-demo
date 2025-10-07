@@ -1,0 +1,31 @@
+FUNCTION sort_third(array_data)
+    DEFINE FUNCTION gather_indices(idx, accu)
+        IF idx >= LENGTH(array_data) THEN
+            RETURN accu
+        ELSE
+            RETURN gather_indices(idx + 3, accu + [array_data[idx]])
+        END IF
+    END FUNCTION
+
+    DEFINE FUNCTION place_indices(idx, values, arr)
+        IF idx >= LENGTH(arr) THEN
+            RETURN arr
+        ELSE
+            LET arr_updated BE COPY OF arr
+            SET arr_updated[idx] TO values[0]
+            RETURN place_indices(idx + 3, SLICE(values, 1, LENGTH(values)), arr_updated)
+        END IF
+    END FUNCTION
+
+    LET temp_arr BE []
+    FOR i FROM 0 TO LENGTH(array_data) - 1 DO
+        temp_arr = temp_arr + [array_data[i]]
+    END FOR
+
+    LET extracted BE gather_indices(0, [])
+    LET sorted_extracted BE (extracted SORTED ASCENDING)
+
+    LET result_arr BE place_indices(0, sorted_extracted, temp_arr)
+
+    RETURN result_arr
+END FUNCTION

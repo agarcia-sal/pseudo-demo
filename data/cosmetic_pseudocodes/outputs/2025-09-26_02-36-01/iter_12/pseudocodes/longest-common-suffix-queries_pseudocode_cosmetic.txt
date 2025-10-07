@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+        SET map_suffixes TO empty dictionary mapping STRING to INTEGER
+
+        DEFINE FUNCTION compute_substring(str_val STRING, startPos INTEGER) RETURNS STRING
+            RETURN SUBSTRING(str_val, startPos, LENGTH(str_val) - startPos)
+        END FUNCTION
+
+        DEFINE FUNCTION is_shorter_or_equal_length_and_smaller_index(a_index INTEGER, b_index INTEGER) RETURNS BOOLEAN
+            IF LENGTH(wordsContainer ELEMENT AT a_index) < LENGTH(wordsContainer ELEMENT AT b_index) THEN
+                RETURN TRUE
+            ELSE
+                IF LENGTH(wordsContainer ELEMENT AT a_index) = LENGTH(wordsContainer ELEMENT AT b_index) THEN
+                    RETURN (a_index < b_index)
+                ELSE
+                    RETURN FALSE
+                END IF
+            END IF
+        END FUNCTION
+
+        SET iterator_outer TO 0
+        WHILE iterator_outer < LENGTH(wordsContainer)
+            SET current_word TO wordsContainer ELEMENT AT iterator_outer
+            SET iterator_inner TO 0
+            WHILE iterator_inner <= LENGTH(current_word) - 1
+                SET current_suffix TO compute_substring(current_word, iterator_inner)
+                IF NOT map_suffixes CONTAINS KEY current_suffix THEN
+                    SET map_suffixes ELEMENT AT current_suffix TO iterator_outer
+                ELSE
+                    SET stored_index TO map_suffixes ELEMENT AT current_suffix
+                    IF is_shorter_or_equal_length_and_smaller_index(iterator_outer, stored_index) THEN
+                        SET map_suffixes ELEMENT AT current_suffix TO iterator_outer
+                    END IF
+                END IF
+                SET iterator_inner TO iterator_inner + 1
+            END WHILE
+            SET iterator_outer TO iterator_outer + 1
+        END WHILE
+
+        FUNCTION get_best_match(query query TO STRING) RETURNS INTEGER
+            SET length_query TO LENGTH(query)
+            SET position TO 0
+
+            WHILE position < length_query
+                SET suffix TO compute_substring(query, position)
+                IF map_suffixes CONTAINS KEY suffix THEN
+                    RETURN map_suffixes ELEMENT AT suffix
+                END IF
+                SET position TO position + 1
+            END WHILE
+
+            SET min_index TO 0
+            SET min_length TO LENGTH(wordsContainer ELEMENT AT 0)
+            SET pointer TO 1
+            WHILE pointer < LENGTH(wordsContainer)
+                SET candidate_length TO LENGTH(wordsContainer ELEMENT AT pointer)
+                IF candidate_length < min_length THEN
+                    SET min_length TO candidate_length
+                    SET min_index TO pointer
+                ELSE IF candidate_length = min_length AND pointer < min_index THEN
+                    SET min_index TO pointer
+                END IF
+                SET pointer TO pointer + 1
+            END WHILE
+
+            RETURN min_index
+        END FUNCTION
+
+        FUNCTION append_element_to_list(list_ref LIST OF INTEGER, val INTEGER)
+            SET length_list TO LENGTH(list_ref)
+            SET list_ref ELEMENT AT length_list TO val
+        END FUNCTION
+
+        SET collected_results TO empty list of integer
+        SET idx_query TO 0
+        WHILE idx_query < LENGTH(wordsQuery)
+            CALL append_element_to_list(collected_results, get_best_match(wordsQuery ELEMENT AT idx_query))
+            SET idx_query TO idx_query + 1
+        END WHILE
+
+        RETURN collected_results
+    END FUNCTION
+END CLASS

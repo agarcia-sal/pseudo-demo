@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION maxPalindromesAfterOperations(words)
+        DEFINE FUNCTION buildCounter(textList)
+            DECLARE map = empty map with default 0
+            FOR each str IN textList DO
+                DECLARE idx = 1
+                WHILE idx <= LENGTH(str) DO
+                    SET keyChar = str[idx]
+                    SET map[keyChar] = map[keyChar] + 1
+                    SET idx = idx + 1
+                END WHILE
+            END FOR
+            RETURN map
+        END FUNCTION
+
+        DECLARE freqMap = buildCounter(words)
+        DECLARE pairSum = 0
+        DECLARE singleSum = 0
+
+        DECLARE valueIterator = ITERATOR OVER freqMap VALUES
+        FUNCTION processNextValue()
+            IF NOT HAS_NEXT(valueIterator) THEN RETURN END IF
+            DECLARE val = NEXT(valueIterator)
+            SET pairSum = pairSum + (val DIV 2)
+            SET singleSum = singleSum + (val - 2 * (val DIV 2))
+            CALL processNextValue()
+        END FUNCTION
+        CALL processNextValue()
+
+        DEFINE FUNCTION lengthAscending(a, b)
+            RETURN (LENGTH(a) > LENGTH(b))
+        END FUNCTION
+        SET words = SORTED(words, lengthAscending)
+
+        DECLARE palindromeCount = 0
+        DECLARE indexPointer = 1
+        FUNCTION consumeWords()
+            IF indexPointer > LENGTH(words) THEN RETURN END IF
+            DECLARE currentWord = words[indexPointer]
+            DECLARE requiredPairs = LENGTH(currentWord) DIV 2
+            IF pairSum >= requiredPairs THEN
+                SET pairSum = pairSum - requiredPairs
+                SET palindromeCount = palindromeCount + 1
+            END IF
+            SET indexPointer = indexPointer + 1
+            CALL consumeWords()
+        END FUNCTION
+        CALL consumeWords()
+
+        RETURN palindromeCount
+    END FUNCTION
+END CLASS

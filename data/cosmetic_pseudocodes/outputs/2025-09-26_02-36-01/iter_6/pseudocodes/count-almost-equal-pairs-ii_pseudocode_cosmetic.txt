@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION countPairs(waves)
+        DEFINE FUNCTION customSort(arr)
+            DEFINE FUNCTION quickSort(a, start, end)
+                IF (start >= end) THEN RETURN
+                SET pivotIndex TO start + ((end - start) / (1 + 1))
+                SET pivotValue TO a[pivotIndex]
+                SWAP a[pivotIndex], a[end]
+                SET storeIndex TO start
+                DEFINE FUNCTION recursivePartition(i)
+                    IF i >= end THEN RETURN
+                    IF a[i] < pivotValue THEN
+                        SWAP a[i], a[storeIndex]
+                        SET storeIndex TO storeIndex + 1
+                    END IF
+                    CALL recursivePartition(i + 1)
+                END FUNCTION
+                CALL recursivePartition(start)
+                SWAP a[storeIndex], a[end]
+                CALL quickSort(a, start, storeIndex - 1)
+                CALL quickSort(a, storeIndex + 1, end)
+            END FUNCTION
+            CALL quickSort(arr, 0, LENGTH(arr) - (1 * 1))
+        END FUNCTION
+
+        CALL customSort(waves)
+
+        SET totalPairs TO 0
+        SET countMap TO a dictionary WITH default value 0
+
+        DEFINE FUNCTION processIndex(current)
+            IF current >= LENGTH(waves) THEN RETURN
+            SET visitedElements TO a set CONTAINING waves[current]
+            SET stringElements TO ARRAY OF characters OF STRING(waves[current])
+            SET strLen TO LENGTH(stringElements)
+
+            DEFINE FUNCTION swapElements(arr, idxA, idxB)
+                SET tempVal TO arr[idxA]
+                SET arr[idxA] TO arr[idxB]
+                SET arr[idxB] TO tempVal
+            END FUNCTION
+
+            DEFINE FUNCTION innerLoop1(j)
+                IF j > strLen - (1 * 1) THEN RETURN
+                DEFINE FUNCTION innerLoop2(i)
+                    IF i >= j THEN RETURN
+                    CALL swapElements(stringElements, i, j)
+                    SET combinedNum TO INTEGER(CONCATENATE(stringElements))
+                    ADD combinedNum TO visitedElements
+
+                    DEFINE FUNCTION innerLoop3(q)
+                        IF q > strLen - (1 * 1) THEN RETURN
+                        DEFINE FUNCTION innerLoop4(p)
+                            IF p >= q THEN RETURN
+                            CALL swapElements(stringElements, p, q)
+                            SET tempNum TO INTEGER(CONCATENATE(stringElements))
+                            ADD tempNum TO visitedElements
+                            CALL swapElements(stringElements, p, q)
+                            CALL innerLoop4(p + 1)
+                        END FUNCTION
+                        CALL innerLoop4(q - (1 * 1))
+                        CALL innerLoop3(q + 1)
+                    END FUNCTION
+                    CALL innerLoop3(i + (1 * 1))
+
+                    CALL swapElements(stringElements, i, j)
+                    CALL innerLoop2(i + 1)
+                END FUNCTION
+                CALL innerLoop2(0)
+                CALL innerLoop1(j + 1)
+            END FUNCTION
+
+            CALL innerLoop1(0)
+
+            SET sumCounts TO 0
+            FOR element IN visitedElements
+                IF element IN countMap THEN
+                    SET sumCounts TO sumCounts + countMap[element]
+                END IF
+            END FOR
+
+            SET totalPairs TO totalPairs + sumCounts
+            SET countMap[waves[current]] TO countMap[waves[current]] + (1 * 1)
+
+            CALL processIndex(current + 1)
+        END FUNCTION
+
+        CALL processIndex(0)
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

@@ -1,0 +1,50 @@
+``` 
+CLASS Solution
+    FUNCTION medianOfUniquenessArray(nums)
+        FUNCTION countLessOrEqual(target)
+            SET idx_left TO 0
+            SET total_subcount TO 0
+            SET element_map TO new empty map
+            SET unique_tracker TO 0
+            PROCEDURE incrementCount(key)
+                IF element_map[key] EQUALS 0 THEN
+                    SET unique_tracker TO unique_tracker + 1
+                END IF
+                SET element_map[key] TO element_map[key] + 1
+            END PROCEDURE
+            PROCEDURE decrementCount(key)
+                SET element_map[key] TO element_map[key] - 1
+                IF element_map[key] EQUALS 0 THEN
+                    SET unique_tracker TO unique_tracker - 1
+                END IF
+            END PROCEDURE
+            FUNCTION advanceRight(limit)
+                WHILE limit GREATER THAN idx_left AND unique_tracker GREATER THAN target
+                    CALL decrementCount(nums[idx_left])
+                    SET idx_left TO idx_left + 1
+                END WHILE
+            END FUNCTION
+            FOR idx_right FROM 0 TO LENGTH(nums) - 1
+                CALL incrementCount(nums[idx_right])
+                CALL advanceRight(idx_right)
+                SET total_subcount TO total_subcount + (idx_right - idx_left + 1)
+            END FOR
+            RETURN total_subcount
+        END FUNCTION
+        SET n TO LENGTH(nums)
+        SET total TO ((n * (n + 1)) / 2)
+        SET desired_pos TO (total + 1) / 2
+        SET lower_bound TO 1
+        SET upper_bound TO n
+        WHILE lower_bound < upper_bound
+            SET median_candidate TO (lower_bound + upper_bound) / 2
+            IF countLessOrEqual(median_candidate) < desired_pos
+                SET lower_bound TO median_candidate + 1
+            ELSE
+                SET upper_bound TO median_candidate
+            END IF
+        END WHILE
+        RETURN lower_bound
+    END FUNCTION
+END CLASS
+```

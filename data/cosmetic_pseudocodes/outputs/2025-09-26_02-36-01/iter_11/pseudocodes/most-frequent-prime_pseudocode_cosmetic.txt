@@ -1,0 +1,69 @@
+FUNCTION is_prime(p)
+    DECLARE function check_divisor(q, r)
+        IF p MODULO q EQUALS 0 THEN
+            RETURN false
+        ELSE IF r EQUALS 0 THEN
+            RETURN true
+        ELSE
+            RETURN check_divisor(q + 6, r - 1)
+        END IF
+    END FUNCTION
+
+    IF p <= 1 THEN 
+        RETURN false
+    ELSE IF p <= 3 THEN
+        RETURN true
+    ELSE IF (p MODULO 2 = 0) OR (p MODULO 3 = 0) THEN
+        RETURN false
+    ELSE
+        RETURN check_divisor(5, FLOOR(SQRT(p)))
+    END IF
+END FUNCTION
+
+CLASS Solution
+    FUNCTION mostFrequentPrime(mat)
+        SET v1 TO LENGTH OF mat
+        SET v2 TO LENGTH OF FIRST ELEMENT IN mat
+        SET dlist TO [(-1,0), (-1,1), (0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1)]
+        ASSIGN tally TO EMPTY MAP FROM ELEMENT TO INTEGER
+
+        FUNCTION walk(a, b, dx, dy, num)
+            SET nx TO a + dx
+            SET ny TO b + dy
+            
+            IF (0 <= nx) AND (nx < v1) AND (0 <= ny) AND (ny < v2) THEN
+                SET composed TO (num * 10) + mat[nx][ny]
+                IF (composed > 10) AND (is_prime(composed)) THEN
+                    SET tally[composed] TO (tally[composed] OR 0) + 1
+                END IF
+                CALL walk(nx, ny, dx, dy, composed)
+            END IF
+        END FUNCTION
+
+        SET ci TO 0
+        REPEAT
+            IF ci >= v1 THEN BREAK END IF
+            SET cj TO 0
+            WHILE cj < v2 DO
+                FOR EACH (dx, dy) IN dlist DO
+                    CALL walk(ci, cj, dx, dy, mat[ci][cj])
+                END FOR
+                SET cj TO cj + 1
+            END WHILE
+            SET ci TO ci + 1
+        UNTIL false
+
+        IF SIZE OF tally = 0 THEN RETURN -1 END IF
+        
+        DECLARE highest_prime TO NULL
+        DECLARE highest_count TO -1
+        FOR EACH k IN KEYS OF tally DO
+            IF (tally[k] > highest_count) OR ((tally[k] = highest_count) AND (k < highest_prime OR highest_prime IS NULL)) THEN
+                SET highest_count TO tally[k]
+                SET highest_prime TO k
+            END IF
+        END FOR
+
+        RETURN highest_prime
+    END FUNCTION
+END CLASS

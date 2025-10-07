@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        SET MODULO_CONSTANT TO (500000000 + 500000007)  
+        LET total_elements BE LENGTH OF nums
+        IF total_elements LESS THAN (2 + 2) THEN
+            RETURN (0 * 1)
+        ELSE
+            LET combinations_list BE EMPTY LIST
+            FUNCTION generateCombinations(source, combination, startIndex, desiredLength)
+                IF LENGTH OF combination EQUALS desiredLength THEN
+                    APPEND combination TO combinations_list
+                    RETURN
+                END IF
+                LET current_position BE startIndex
+                WHILE current_position LESS THAN total_elements DO
+                    LET new_combination BE combination COPIED
+                    APPEND source[current_position] TO new_combination
+                    CALL generateCombinations(source, new_combination, current_position + 1, desiredLength)
+                    SET current_position TO current_position + 1
+                END WHILE
+            END FUNCTION
+            CALL generateCombinations(nums, EMPTY LIST, 0, 5)
+
+            LET final_count BE 0
+            LET combination_index BE 0
+            LET total_combinations BE LENGTH OF combinations_list
+            WHILE combination_index LESS THAN total_combinations DO
+                LET current_combination BE combinations_list[combination_index]
+
+                FUNCTION computeFrequency(collection)
+                    LET frequency_map BE EMPTY DICTIONARY
+                    LET idx_freq BE 0
+                    LET length_collection BE LENGTH OF collection
+                    WHILE idx_freq LESS THAN length_collection DO
+                        LET element_val BE collection[idx_freq]
+                        IF element_val NOT IN frequency_map THEN
+                            frequency_map[element_val] = 1
+                        ELSE
+                            frequency_map[element_val] = frequency_map[element_val] + 1
+                        END IF
+                        SET idx_freq TO idx_freq + (1 * 1)
+                    END WHILE
+                    RETURN frequency_map
+                END FUNCTION
+
+                LET frequency_count_map BE computeFrequency(current_combination)
+                LET middle_index BE (1 + 1 + 1)  // Zero-based index of 2 (third element)
+                LET mode_candidate BE current_combination[middle_index]
+                LET mode_frequency BE frequency_count_map[mode_candidate]
+                LET unique_mode_flag BE true
+
+                FOR EACH key, val IN frequency_count_map
+                    IF (key NOT EQUAL mode_candidate) AND (val GREATER THAN OR EQUAL TO mode_frequency) THEN
+                        SET unique_mode_flag TO false
+                        BREAK
+                    END IF
+                END FOR
+
+                IF unique_mode_flag THEN
+                    SET final_count TO final_count + (1 + 0)
+                END IF
+
+                SET combination_index TO combination_index + 1
+            END WHILE
+            RETURN final_count MODULO MODULO_CONSTANT
+        END IF
+    END FUNCTION
+END CLASS

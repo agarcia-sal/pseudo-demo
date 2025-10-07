@@ -1,0 +1,66 @@
+CLASS Solution  
+    FUNCTION countSubmatrices(grid, k)  
+        IF grid EQUALS no value OR element at position zero of grid EQUALS no value  
+            RETURN 0  
+        END IF  
+
+        SET t0 TO 0  
+        SET t1 TO LENGTH(grid)  
+        SET t2 TO LENGTH(element at position 0 of grid)  
+
+        FUNCTION compute_prefix(arr, x, y)  
+            IF x EQUALS 0 AND y EQUALS 0  
+                RETURN element at position y of element at position x of arr  
+            ELSE IF x EQUALS 0  
+                RETURN element at position y MINUS 1 of element at position x of prefix_arr() PLUS element at position y of element at position x of arr  
+            ELSE IF y EQUALS 0  
+                RETURN element at position y of element at position x MINUS 1 of prefix_arr() PLUS element at position y of element at position x of arr  
+            ELSE  
+                RETURN element at position y of element at position x MINUS 1 of prefix_arr()  
+                     PLUS element at position y MINUS 1 of element at position x of prefix_arr()  
+                     MINUS element at position y MINUS 1 of element at position x MINUS 1 of prefix_arr()  
+                     PLUS element at position y of element at position x of arr  
+            END IF  
+        END FUNCTION  
+
+        SET prefix_arr TO FUNCTION() RETURN prefix_sum END FUNCTION  
+        SET prefix_sum TO list with t1 elements each being list with t2 zeros  
+        SET count_accumulator TO 0  
+
+        PROCEDURE rec_ixi(xi)  
+            IF xi GREATER THAN OR EQUAL TO t1 THEN  
+                RETURN  
+            END IF  
+            PROCEDURE rec_yj(yj)  
+                IF yj GREATER THAN OR EQUAL TO t2 THEN  
+                    RETURN  
+                END IF  
+                FUNCTION calc_value()  
+                    IF xi EQUALS 0 AND yj EQUALS 0 THEN  
+                        RETURN element at position yj of element at position xi of grid  
+                    ELSE IF xi EQUALS 0 THEN  
+                        RETURN element at position yj MINUS 1 of element at position xi of prefix_sum PLUS element at position yj of element at position xi of grid  
+                    ELSE IF yj EQUALS 0 THEN  
+                        RETURN element at position yj of element at position xi MINUS 1 of prefix_sum PLUS element at position yj of element at position xi of grid  
+                    ELSE  
+                        RETURN element at position yj of element at position xi MINUS 1 of prefix_sum  
+                             PLUS element at position yj MINUS 1 of element at position xi of prefix_sum  
+                             MINUS element at position yj MINUS 1 of element at position xi MINUS 1 of prefix_sum  
+                             PLUS element at position yj of element at position xi of grid  
+                    END IF  
+                END FUNCTION  
+                SET element at position yj of element at position xi of prefix_sum TO calc_value()  
+                IF element at position yj of element at position xi of prefix_sum LESS THAN OR EQUAL TO k THEN  
+                    SET count_accumulator TO count_accumulator PLUS 1  
+                END IF  
+                CALL rec_yj(yj PLUS 1)  
+            END PROCEDURE  
+            CALL rec_yj(0)  
+            CALL rec_ixi(xi PLUS 1)  
+        END PROCEDURE  
+
+        CALL rec_ixi(0)  
+
+        RETURN count_accumulator  
+    END FUNCTION  
+END CLASS

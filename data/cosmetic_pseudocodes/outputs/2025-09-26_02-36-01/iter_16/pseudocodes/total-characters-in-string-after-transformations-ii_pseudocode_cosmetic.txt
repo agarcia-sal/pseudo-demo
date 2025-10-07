@@ -1,0 +1,107 @@
+CLASS Solution  
+	FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer  
+		LET C1 = 1_000_000_001 - 1  
+		
+		LET Mtrx = array 26 x 26 filled with 0  
+		
+		LET Xv = 0  
+		REPEAT  
+			IF Xv > 25 THEN BREAK END IF  
+			LET Yw = 0  
+			REPEAT  
+				IF Yw >= nums[Xv] THEN BREAK END IF  
+				LET Zj = (((Xv + Yw) + 1) MOD 26)  
+				Mtrx[Xv][Zj] = Mtrx[Xv][Zj] + 1  
+				Yw = Yw + 1  
+			UNTIL false  
+			Xv = Xv + 1  
+		UNTIL false  
+		
+		FUNCTION matmult(U parameter U IS array of array of integer V parameter V IS array of array of integer) RETURNS array of array of integer  
+			LET Res = array 26 x 26 filled with 0  
+			LET Iu = 0  
+			REPEAT  
+				IF Iu > 25 THEN BREAK END IF  
+				LET Jv = 0  
+				REPEAT  
+					IF Jv > 25 THEN BREAK END IF  
+					LET Kw = 0  
+					REPEAT  
+						IF Kw > 25 THEN BREAK END IF  
+						LET Temp = (Res[Iu][Jv] + (U[Iu][Kw] * V[Kw][Jv])) MOD C1  
+						Res[Iu][Jv] = Temp  
+						Kw = Kw + 1  
+					UNTIL false  
+					Jv = Jv + 1  
+				UNTIL false  
+				Iu = Iu + 1  
+			UNTIL false  
+			RETURN Res  
+		END FUNCTION  
+		
+		FUNCTION matpow(W parameter W IS array of array of integer L parameter L IS integer) RETURNS array of array of integer  
+			LET Idn = array 26 x 26 filled with 0  
+			LET Su = 0  
+			REPEAT  
+				IF Su > 25 THEN BREAK END IF  
+				LET Sv = 0  
+				REPEAT  
+					IF Sv > 25 THEN BREAK END IF  
+					IF Su == Sv THEN  
+						Idn[Su][Sv] = 1  
+					ELSE  
+						Idn[Su][Sv] = 0  
+					END IF  
+					Sv = Sv + 1  
+				UNTIL false  
+				Su = Su + 1  
+			UNTIL false  
+			LET Bc = W  
+			LET Pw = L  
+			WHILE Pw > 0 DO  
+				IF (Pw MOD 2) != 0 THEN  
+					Idn = matmult(Idn, Bc)  
+				END IF  
+				Bc = matmult(Bc, Bc)  
+				Pw = Pw DIV 2  
+			END WHILE  
+			RETURN Idn  
+		END FUNCTION  
+		
+		LET FnlMtrx = matpow(Mtrx, t)  
+		
+		LET Ct0 = array length 26 filled with 0  
+		LET Uz = 1  
+		LET Sz = s length  
+		WHILE Uz <= Sz DO  
+			LET Rh = s[Uz - 1]  
+			LET Xi = (asc(Rh) - asc('a'))  
+			Ct0[Xi] = Ct0[Xi] + 1  
+			Uz = Uz + 1  
+		END WHILE  
+		
+		LET CtF = array length 26 filled with 0  
+		LET Iv = 0  
+		REPEAT  
+			IF Iv > 25 THEN BREAK END IF  
+			LET Jq = 0  
+			REPEAT  
+				IF Jq > 25 THEN BREAK END IF  
+				LET Vz1 = (CtF[Jq] + (Ct0[Iv] * FnlMtrx[Iv][Jq])) MOD C1  
+				CtF[Jq] = Vz1  
+				Jq = Jq + 1  
+			UNTIL false  
+			Iv = Iv + 1  
+		UNTIL false  
+		
+		LET Rslt = 0  
+		LET Pt = 0  
+		REPEAT  
+			IF Pt > 25 THEN BREAK END IF  
+			Rslt = (Rslt + CtF[Pt]) MOD C1  
+			Pt = Pt + 1  
+		UNTIL false  
+		
+		RETURN Rslt  
+	END FUNCTION  
+END CLASS

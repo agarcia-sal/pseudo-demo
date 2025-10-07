@@ -1,0 +1,77 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+        SET self.mod TO mod  
+        SET self.p TO EMPTY_LIST  
+        SET self.h TO EMPTY_LIST  
+        SET m TO (LENGTH OF s) + 1  
+        FOR idx FROM 0 TO m MINUS 1  
+            IF idx EQUALS 0  
+                APPEND 1 TO self.p  
+                APPEND 0 TO self.h  
+            ELSE  
+                SET x TO (self.h AT idx MINUS 1 MULTIPLIED BY base PLUS UNICODE OF s AT idx MINUS 1) MOD mod  
+                APPEND x TO self.h  
+                SET y TO (self.p AT idx MINUS 1 MULTIPLIED BY base) MOD mod  
+                APPEND y TO self.p  
+            END IF  
+        END FOR  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        SET diff TO (self.h AT r) MINUS ((self.h AT l MINUS 1) MULTIPLIED BY (self.p AT r MINUS l PLUS 1))  
+        RETURN ((diff MOD self.mod) PLUS self.mod) MOD self.mod  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+        SET n TO LENGTH OF s  
+        SET g TO LIST OF n EMPTY_LISTS  
+        FOR x FROM 1 TO n MINUS 1  
+            APPEND x TO g AT parent AT x  
+        END FOR  
+
+        SET dfsStr TO EMPTY_LIST  
+        SET pos TO EMPTY_DICTIONARY  
+
+        FUNCTION dfs(i)  
+            SET startPos TO LENGTH OF dfsStr PLUS 1  
+            FOR node IN g AT i  
+                CALL dfs(node)  
+            END FOR  
+            APPEND s AT i TO dfsStr  
+            SET endPos TO LENGTH OF dfsStr  
+            SET pos AT i TO PAIR(startPos, endPos)  
+        END FUNCTION  
+
+        CALL dfs(0)  
+
+        SET base TO 33331  
+        SET mod TO 998244353  
+        SET h1 TO NEW Hashing WITH dfsStr, base, mod  
+        SET reversedStr TO EMPTY_LIST  
+        FOR index FROM LENGTH OF dfsStr MINUS 1 DOWNTO 0 STEP -1  
+            APPEND dfsStr AT index TO reversedStr  
+        END FOR  
+        SET h2 TO NEW Hashing WITH reversedStr, base, mod  
+
+        SET ans TO EMPTY_LIST  
+        FOR i FROM 0 TO n MINUS 1  
+            SET l TO pos AT i AT 1  
+            SET r TO pos AT i AT 2  
+            SET lengthVal TO r MINUS l PLUS 1  
+            IF (lengthVal MOD 2) EQUALS 0 THEN  
+                SET halfLen TO lengthVal DIVIDED BY 2  
+                SET val1 TO h1.query(l, l PLUS halfLen MINUS 1)  
+                SET val2 TO h2.query(n MINUS r PLUS 1, n MINUS r PLUS halfLen)  
+            ELSE  
+                SET halfLen TO (lengthVal MINUS 1) DIVIDED BY 2  
+                SET val1 TO h1.query(l, l PLUS halfLen)  
+                SET val2 TO h2.query(n MINUS r PLUS 1, n MINUS r PLUS halfLen PLUS 1)  
+            END IF  
+            APPEND (val1 EQUALS val2) TO ans  
+        END FOR  
+
+        RETURN ans  
+    END FUNCTION  
+END CLASS

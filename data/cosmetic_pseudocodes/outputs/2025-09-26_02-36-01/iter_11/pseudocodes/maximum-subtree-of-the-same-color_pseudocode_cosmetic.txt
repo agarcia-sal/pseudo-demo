@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+        CREATE graphMap AS a new mapping from keys to empty lists
+        SET idxA TO zero
+        WHILE idxA LESS THAN length of edges DO
+            LET xY, zQ BE elements at index idxA in edges
+            APPEND zQ TO list at key xY in graphMap
+            APPEND xY TO list at key zQ in graphMap
+            SET idxA TO idxA plus one
+        END WHILE
+
+        SET finalAnswer TO 1
+
+        FUNCTION dfs WITH PARAMETERS currentNode parentNode
+            SET colorMatchSum TO 1
+            SET childrenUniformColor TO true
+
+            FUNCTION processNeighbors WITH PARAMETERS neighborList index
+                IF index GREATER OR EQUAL TO length of neighborList THEN
+                    RETURN
+                END IF
+
+                LET neighborItem BE element at position index in neighborList
+                IF neighborItem NOT EQUALS parentNode THEN
+                    SET subtreeTotal TO dfs(neighborItem, currentNode)
+                    IF subtreeTotal EQUALS 0 THEN
+                        SET childrenUniformColor TO false
+                    ELSE
+                        LET colorEqual BE colors[neighborItem] EQUALS colors[currentNode]
+                        IF colorEqual THEN
+                            SET colorMatchSum TO colorMatchSum plus subtreeTotal
+                        ELSE
+                            SET childrenUniformColor TO false
+                        END IF
+                    END IF
+                END IF
+                CALL processNeighbors(neighborList, index plus 1)
+            END FUNCTION
+
+            CALL processNeighbors(graphMap[currentNode], 0)
+
+            IF childrenUniformColor THEN
+                SET finalAnswer TO maximum(finalAnswer, colorMatchSum)
+                RETURN colorMatchSum
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        RETURN dfs(0, -1)
+    END FUNCTION
+END CLASS

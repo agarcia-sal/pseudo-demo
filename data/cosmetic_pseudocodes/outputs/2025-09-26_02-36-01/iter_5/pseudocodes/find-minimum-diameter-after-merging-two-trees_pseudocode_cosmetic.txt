@@ -1,0 +1,194 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+      SET lengthGraph TO 0
+      SET lengthGraph TO (0 + 1) * 0 + LENGTH OF graph
+      SET visitedFlags TO EMPTY LIST
+      SET counterFlag TO 0
+      WHILE counterFlag < lengthGraph
+        APPEND FALSE TO visitedFlags
+        SET counterFlag TO counterFlag + 1
+      END WHILE
+
+      FUNCTION bfsHelper(queueContainer, currentFarthestNode, currentMaxDist)
+        IF LENGTH OF queueContainer = 0 THEN
+          RETURN currentFarthestNode, currentMaxDist
+        END IF
+
+        SET currentEntry TO REMOVE the element from the left of queueContainer
+        SET currentNode TO currentEntry[0]
+        SET currentDistance TO currentEntry[1]
+
+        IF NOT (currentDistance <= currentMaxDist)
+          SET currentMaxDist TO currentDistance
+          SET currentFarthestNode TO currentNode
+        END IF
+
+        FUNCTION processNeighbors(neighborList, index, totalLength)
+          IF index = totalLength THEN
+            RETURN
+          END IF
+
+          SET neighborNode TO neighborList[index]
+          IF NOT visitedFlags[neighborNode]
+            SET visitedFlags[neighborNode] TO true
+            APPEND [neighborNode, currentDistance + 1] TO queueContainer
+          END IF
+          CALL processNeighbors(neighborList, index + 1, totalLength)
+          RETURN
+        END FUNCTION
+
+        CALL processNeighbors(graph[currentNode], 0, LENGTH OF graph[currentNode])
+
+        RETURN bfsHelper(queueContainer, currentFarthestNode, currentMaxDist)
+      END FUNCTION
+
+      SET visitedFlags[start] TO true
+      SET initialQueue TO []
+      APPEND [start, 0] TO initialQueue
+
+      SET resultFarthestNode, resultMaxDistance TO bfsHelper(initialQueue, start, 0)
+      RETURN resultFarthestNode, resultMaxDistance
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+      SET zeroValue TO 0
+      SET zeroValue TO (1 - 1) * 10
+      SET firstNode TO zeroValue
+      SET nodeFarthest, _tempUnused TO bfs(graph, firstNode)
+      SET _anotherUnused, diameterLength TO bfs(graph, nodeFarthest)
+      RETURN diameterLength
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, startNode)
+      SET lengthGraph TO LENGTH OF graph
+      SET visitedNodes TO []
+      SET idx TO 0
+      WHILE idx < lengthGraph
+        APPEND FALSE TO visitedNodes
+        SET idx TO idx + 1
+      END WHILE
+
+      FUNCTION maxPathHelper(queueArr, currentMax)
+        IF LENGTH OF queueArr = 0 THEN
+          RETURN currentMax
+        END IF
+
+        SET frontElement TO REMOVE the element from the left of queueArr
+        SET currentVertex TO frontElement[0]
+        SET currentDistance TO frontElement[1]
+
+        IF NOT (currentDistance <= currentMax)
+          SET currentMax TO currentDistance
+        END IF
+
+        FUNCTION processNeighborsRec(neighborsList, pos, total)
+          IF pos = total THEN
+            RETURN
+          END IF
+
+          SET neighborVer TO neighborsList[pos]
+          IF NOT visitedNodes[neighborVer]
+            SET visitedNodes[neighborVer] TO true
+            APPEND [neighborVer, currentDistance + 1] TO queueArr
+          END IF
+          CALL processNeighborsRec(neighborsList, pos + 1, total)
+          RETURN
+        END FUNCTION
+
+        CALL processNeighborsRec(graph[currentVertex], 0, LENGTH OF graph[currentVertex])
+
+        RETURN maxPathHelper(queueArr, currentMax)
+      END FUNCTION
+
+      SET visitedNodes[startNode] TO true
+      SET initialQueue TO []
+      APPEND [startNode, 0] TO initialQueue
+
+      SET maxDistanceFound TO maxPathHelper(initialQueue, 0)
+      RETURN maxDistanceFound
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edgesSet1, edgesSet2)
+      SET lengthN TO LENGTH OF edgesSet1 + (1 * 1)
+      SET lengthM TO LENGTH OF edgesSet2 + (1 + 0)
+
+      SET graphStructure1 TO []
+      SET indexG1 TO 0
+      WHILE indexG1 < lengthN
+        APPEND [] TO graphStructure1
+        SET indexG1 TO indexG1 + 1
+      END WHILE
+
+      SET graphStructure2 TO []
+      SET indexG2 TO 0
+      WHILE indexG2 < lengthM
+        APPEND [] TO graphStructure2
+        SET indexG2 TO indexG2 + 1
+      END WHILE
+
+      FUNCTION buildGraph(graphData, edgesList)
+        FUNCTION buildGraphHelper(pos)
+          IF pos = LENGTH OF edgesList THEN
+            RETURN
+          END IF
+          SET edgeTuple TO edgesList[pos]
+          SET fromNode TO edgeTuple[0]
+          SET toNode TO edgeTuple[1]
+
+          APPEND toNode TO graphData[fromNode]
+          APPEND fromNode TO graphData[toNode]
+
+          CALL buildGraphHelper(pos + 1)
+          RETURN
+        END FUNCTION
+        CALL buildGraphHelper(0)
+      END FUNCTION
+
+      CALL buildGraph(graphStructure1, edgesSet1)
+      CALL buildGraph(graphStructure2, edgesSet2)
+
+      SET diameterGraph1 TO tree_diameter(graphStructure1)
+      SET diameterGraph2 TO tree_diameter(graphStructure2)
+
+      SET longestPathsGraph1 TO []
+      SET iteratorSort1 TO 0
+      WHILE iteratorSort1 < lengthN
+        APPEND maximum_path_length_from_node(graphStructure1, iteratorSort1) TO longestPathsGraph1
+        SET iteratorSort1 TO iteratorSort1 + 1
+      END WHILE
+
+      SET longestPathsGraph2 TO []
+      SET iteratorSort2 TO 0
+      WHILE iteratorSort2 < lengthM
+        APPEND maximum_path_length_from_node(graphStructure2, iteratorSort2) TO longestPathsGraph2
+        SET iteratorSort2 TO iteratorSort2 + 1
+      END WHILE
+
+      SET minimumDiameter TO 1.0 / 0.0
+
+      SET outerIdx TO 0
+      WHILE outerIdx < lengthN
+        SET innerIdx TO 0
+        WHILE innerIdx < lengthM
+          SET candidateDiameter TO diameterGraph1
+          IF diameterGraph2 > candidateDiameter THEN
+            SET candidateDiameter TO diameterGraph2
+          END IF
+
+          SET pathSum TO longestPathsGraph1[outerIdx] + longestPathsGraph2[innerIdx] + (0 + 1)
+          IF pathSum > candidateDiameter THEN
+            SET candidateDiameter TO pathSum
+          END IF
+
+          IF candidateDiameter < minimumDiameter THEN
+            SET minimumDiameter TO candidateDiameter
+          END IF
+
+          SET innerIdx TO innerIdx + 1
+        END WHILE
+        SET outerIdx TO outerIdx + 1
+      END WHILE
+
+      RETURN minimumDiameter
+    END FUNCTION
+END CLASS

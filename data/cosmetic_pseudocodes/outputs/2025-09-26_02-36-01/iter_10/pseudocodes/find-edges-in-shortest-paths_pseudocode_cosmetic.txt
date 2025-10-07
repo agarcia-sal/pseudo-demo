@@ -1,0 +1,161 @@
+CLASS Solution
+    FUNCTION findAnswer(n, edges)
+        FUNCTION makeGraph(mapping)
+            PROCEDURE addEdge(a, b, c)
+                LET neighborsA = mapping[a]
+                LET neighborsB = mapping[b]
+                neighborsA[|neighborsA| + 1] ← (b, c)
+                neighborsB[|neighborsB| + 1] ← (a, c)
+            END PROCEDURE
+
+            LET idx ← 1
+            WHILE idx ≤ |edges|
+                LET e ← edges[idx]
+                addEdge(e[1], e[2], e[3])
+                idx ← idx + 1
+            END WHILE
+        END FUNCTION
+
+        LET connMap ← empty mapping defaulting to empty list
+        connMap ← makeGraph(connMap)
+
+        LET infinity ← 10 ^ 9 * 10 ^ 9  // Arbitrary large number representing ∞
+        LET distances ← array of size n filled with infinity
+        distances[1] ← 0
+
+        FUNCTION pushHeap(heapArr, entry)
+            PROCEDURE siftUp(pos)
+                IF pos = 1 THEN RETURN END IF
+                LET parent ← pos // 2
+                IF heapArr[parent][1] > heapArr[pos][1] THEN
+                    LET tmp ← heapArr[parent]
+                    heapArr[parent] ← heapArr[pos]
+                    heapArr[pos] ← tmp
+                    siftUp(parent)
+                END IF
+            END PROCEDURE
+            heapArr[|heapArr| + 1] ← entry
+            siftUp(|heapArr|)
+        END FUNCTION
+
+        FUNCTION popHeap(heapArr)
+            PROCEDURE siftDown(pos)
+                LET len ← |heapArr|
+                LET smallest ← pos
+                LET leftChild ← 2 * pos
+                LET rightChild ← 2 * pos + 1
+
+                IF leftChild ≤ len AND heapArr[leftChild][1] < heapArr[smallest][1] THEN
+                    smallest ← leftChild
+                END IF
+                IF rightChild ≤ len AND heapArr[rightChild][1] < heapArr[smallest][1] THEN
+                    smallest ← rightChild
+                END IF
+                IF smallest ≠ pos THEN
+                    LET tmp ← heapArr[pos]
+                    heapArr[pos] ← heapArr[smallest]
+                    heapArr[smallest] ← tmp
+                    siftDown(smallest)
+                END IF
+            END PROCEDURE
+
+            LET topElement ← heapArr[1]
+            heapArr[1] ← heapArr[|heapArr|]
+            REMOVE last element of heapArr
+            siftDown(1)
+            RETURN topElement
+        END FUNCTION
+
+        LET priorityQueue ← [(0, 0)]
+        FUNCTION isEmpty(lst)
+            RETURN |lst| = 0
+        END FUNCTION
+
+        WHILE NOT isEmpty(priorityQueue)
+            LET current ← popHeap(priorityQueue)
+            LET distU ← current[1]
+            LET nodeU ← current[2]
+            IF distU > distances[nodeU + 1] THEN CONTINUE END IF
+
+            PROCEDURE relaxEdges(neighList)
+                LET i ← 1
+                WHILE i ≤ |neighList|
+                    LET neighbor ← neighList[i]
+                    LET nodeV ← neighbor[1]
+                    LET weightUV ← neighbor[2]
+                    LET newDist ← distU + weightUV
+                    IF newDist < distances[nodeV + 1] THEN
+                        distances[nodeV + 1] ← newDist
+                        pushHeap(priorityQueue, (newDist, nodeV))
+                    END IF
+                    i ← i + 1
+                END WHILE
+            END PROCEDURE
+
+            relaxEdges(connMap[nodeU])
+        END WHILE
+
+        LET edgesSet ← empty set
+        LET lastIdx ← n - 1
+        LET traversalStack ← [(lastIdx, distances[lastIdx + 1])]
+        LET visitedFlags ← array size n filled with False
+
+        FUNCTION popStack(s)
+            LET val ← s[|s|]
+            REMOVE last element of s
+            RETURN val
+        END FUNCTION
+
+        WHILE |traversalStack| > 0
+            LET topPair ← popStack(traversalStack)
+            LET currNode ← topPair[1]
+            LET currDist ← topPair[2]
+            IF visitedFlags[currNode + 1] = True THEN CONTINUE END IF
+            visitedFlags[currNode + 1] ← True
+
+            LET neighborsList ← connMap[currNode]
+            LET pos ← 1
+            WHILE pos ≤ |neighborsList|
+                LET adj ← neighborsList[pos]
+                LET nxtNode ← adj[1]
+                LET edgeWt ← adj[2]
+
+                IF currDist = distances[nxtNode + 1] + edgeWt THEN
+                    LET a ← currNode
+                    LET b ← nxtNode
+                    IF a > b THEN
+                        LET tempSwap ← a
+                        a ← b
+                        b ← tempSwap
+                    END IF
+                    edgesSet[(a, b)] ← True
+                    traversalStack[|traversalStack| + 1] ← (nxtNode, distances[nxtNode + 1])
+                END IF
+                pos ← pos + 1
+            END WHILE
+        END WHILE
+
+        LET result ← empty list
+        LET posEdge ← 1
+        WHILE posEdge ≤ |edges|
+            LET ed ← edges[posEdge]
+            LET x ← ed[1]
+            LET y ← ed[2]
+            LET minV ← x
+            LET maxV ← y
+            IF minV > maxV THEN
+                LET tmp ← minV
+                minV ← maxV
+                maxV ← tmp
+            END IF
+            IF edgesSet[(minV, maxV)] = True THEN
+                result[|result| + 1] ← True
+            ELSE
+                result[|result| + 1] ← False
+            END IF
+            posEdge ← posEdge + 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

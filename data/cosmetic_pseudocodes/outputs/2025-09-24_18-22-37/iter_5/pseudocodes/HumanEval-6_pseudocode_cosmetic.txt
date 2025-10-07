@@ -1,0 +1,48 @@
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        SET max_depth_var TO 0
+        SET depth_counter TO 0
+        SET index_counter TO 0
+        WHILE index_counter < LENGTH OF group_string
+            SET current_char TO CHAR AT group_string[index_counter]
+            SWITCH current_char
+                CASE '('
+                    SET depth_counter TO depth_counter + 1
+                    IF depth_counter > max_depth_var THEN
+                        SET max_depth_var TO depth_counter
+                    END IF
+                DEFAULT
+                    SET depth_counter TO depth_counter - 1
+            END SWITCH
+            SET index_counter TO index_counter + 1
+        END WHILE
+        RETURN max_depth_var
+    END FUNCTION
+
+    SET split_groups TO EMPTY LIST
+    SET temp_string TO ""
+    SET i TO 0
+    WHILE i < LENGTH OF parentheses_string
+        IF CHAR AT parentheses_string[i] = ' ' THEN
+            IF temp_string != "" THEN
+                APPEND temp_string TO split_groups
+                SET temp_string TO ""
+            END IF
+        ELSE
+            SET temp_string TO temp_string + CHAR AT parentheses_string[i]
+        END IF
+        SET i TO i + 1
+    END WHILE
+    IF temp_string != "" THEN
+        APPEND temp_string TO split_groups
+    END IF
+
+    SET result_collection TO EMPTY LIST
+    FOR j FROM 0 TO LENGTH OF split_groups - 1
+        SET element TO split_groups[j]
+        IF element != "" THEN
+            APPEND parse_paren_group(element) TO result_collection
+        END IF
+    END FOR
+    RETURN result_collection
+END FUNCTION

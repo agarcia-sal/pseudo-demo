@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION maximumStrength(nums k)
+        FUNCTION customMax(a b)
+            IF a GREATER THAN b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        FUNCTION lengthOf(list)
+            SET counter TO 0
+            WHILE TRUE
+                IF counter EQUALS list LENGTH THEN
+                    BREAK
+                END IF
+                INCREMENT counter BY 1
+            END WHILE
+            RETURN counter
+        END FUNCTION
+
+        FUNCTION negativeInfinity()
+            RETURN -(10 POWER 9)  // Large negative constant to simulate -∞
+        END FUNCTION
+
+        SET sizeNums TO lengthOf(nums)
+        SET table TO []
+        SET idx0 TO 0
+        WHILE idx0 LESS THAN sizeNums PLUS 1
+            SET tempList TO []
+            SET idx1 TO 0
+            WHILE idx1 LESS THAN k PLUS 1
+                tempList ADD negativeInfinity()
+                idx1 INCREMENT BY 1
+            END WHILE
+            table ADD tempList
+            idx0 INCREMENT BY 1
+        END WHILE
+
+        SET table[0][0] TO 0
+
+        SET outerCounter TO 1
+        WHILE outerCounter LESS THAN OR EQUAL TO sizeNums
+            SET middleCounter TO 1
+            WHILE middleCounter LESS THAN OR EQUAL TO k
+                SET runningSum TO 0
+                SET innerCounter TO outerCounter
+                WHILE innerCounter GREATER THAN OR EQUAL TO 1
+                    SET runningSum TO runningSum PLUS nums[innerCounter MINUS 1]
+                    IF (middleCounter MOD 2) EQUALS 1 THEN
+                        SET coefficient TO (k MINUS middleCounter MINUS 1) PLUS 1
+                    ELSE
+                        SET coefficient TO -((k MINUS middleCounter MINUS 1) PLUS 1)
+                    END IF
+
+                    SET candidateValue TO table[innerCounter MINUS 1][middleCounter MINUS 1] PLUS coefficient MULTIPLIED BY runningSum
+                    SET table[outerCounter][middleCounter] TO customMax(table[outerCounter][middleCounter], candidateValue)
+
+                    innerCounter DECREMENT BY 1
+                END WHILE
+
+                SET table[outerCounter][middleCounter] TO customMax(table[outerCounter][middleCounter], table[outerCounter MINUS 1][middleCounter])
+
+                middleCounter INCREMENT BY 1
+            END WHILE
+            outerCounter INCREMENT BY 1
+        END WHILE
+
+        RETURN table[sizeNums][k]
+    END FUNCTION
+END CLASS

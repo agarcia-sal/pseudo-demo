@@ -1,0 +1,29 @@
+```
+FUNCTION mean_absolute_deviation(collection_of_values)
+    FUNCTION accumulator(current_total, current_index)
+        IF current_index >= SIZE OF collection_of_values THEN
+            RETURN current_total
+        ELSE
+            RETURN accumulator(current_total + collection_of_values[current_index], current_index + 1)
+        END IF
+    END FUNCTION
+
+    SET aggregate_sum TO accumulator(0, 0)
+    SET average_result TO aggregate_sum / SIZE OF collection_of_values
+
+    FUNCTION deviation_aggregator(running_total, cursor)
+        IF cursor >= SIZE OF collection_of_values THEN
+            RETURN running_total
+        ELSE
+            SET delta TO collection_of_values[cursor] - average_result
+            SET contribution TO delta * (IF delta < 0 THEN -1 ELSE 1 END IF)
+            RETURN deviation_aggregator(running_total + contribution, cursor + 1)
+        END IF
+    END FUNCTION
+
+    SET sum_deviation TO deviation_aggregator(0, 0)
+    SET result_value TO sum_deviation / SIZE OF collection_of_values
+
+    RETURN result_value
+END FUNCTION
+```

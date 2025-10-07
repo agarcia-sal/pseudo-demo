@@ -1,0 +1,57 @@
+CLASS Solution  
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER  
+        DEFINE suffixDictionary AS new empty dictionary STRING -> INTEGER  
+        
+        DECLARE pos AS INTEGER = 0  
+        WHILE pos < LENGTH(wordsContainer) DO  
+            LET currentWord BE wordsContainer[pos]  
+            LET charIndex BE 0  
+            WHILE charIndex <= LENGTH(currentWord) - 1 DO  
+                LET subStr = currentWord[from charIndex TO end]  
+                IF (NOT subStr IN suffixDictionary) THEN  
+                    suffixDictionary[subStr] = pos  
+                ELSE  
+                    LET mappedIdx = suffixDictionary[subStr]  
+                    LET storedWord = wordsContainer[mappedIdx]  
+                    IF (LENGTH(currentWord) < LENGTH(storedWord)) OR ((LENGTH(currentWord) = LENGTH(storedWord)) AND (pos < mappedIdx)) THEN  
+                        suffixDictionary[subStr] = pos  
+                    END IF  
+                END IF  
+                charIndex = charIndex + 1  
+            END WHILE  
+            pos = pos + 1  
+        END WHILE  
+        
+        FUNCTION get_best_match(query query TO STRING) RETURNS INTEGER  
+            DECLARE startPos AS INTEGER = 0  
+            WHILE startPos <= LENGTH(query) - 1 DO  
+                LET trialSuffix = query[startPos : LENGTH(query)]  
+                IF trialSuffix IN suffixDictionary THEN  
+                    RETURN suffixDictionary[trialSuffix]  
+                END IF  
+                startPos = startPos + 1  
+            END WHILE  
+            
+            LET minLen = INFINITY  
+            LET minIndex = -1  
+            DECLARE idx AS INTEGER = 0  
+            WHILE idx < LENGTH(wordsContainer) DO  
+                LET candidate = wordsContainer[idx]  
+                LET candidateLength = LENGTH(candidate)  
+                IF candidateLength < minLen OR (candidateLength = minLen AND idx < minIndex) THEN  
+                    minLen = candidateLength  
+                    minIndex = idx  
+                END IF  
+                idx = idx + 1  
+            END WHILE  
+            RETURN minIndex  
+        END FUNCTION  
+        
+        LET answers BE new empty LIST OF INTEGER  
+        FOR EACH q IN wordsQuery DO  
+            LET matchedIdx = get_best_match(q)  
+            answers APPEND matchedIdx  
+        END FOR  
+        RETURN answers  
+    END FUNCTION  
+END CLASS

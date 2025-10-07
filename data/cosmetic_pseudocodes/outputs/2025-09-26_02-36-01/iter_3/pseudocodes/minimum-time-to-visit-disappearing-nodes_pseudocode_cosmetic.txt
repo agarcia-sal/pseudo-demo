@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION minimumTime(total_nodes, edge_list, vanish_times)
+        DEFINE adjacency_map AS mapping defaulting to empty list
+        INDEX edge_counter TO 0
+        WHILE edge_counter LESS THAN LENGTH OF edge_list
+            EXTRACT node_start, node_end, edge_len FROM edge_list AT POSITION edge_counter
+            ADD (node_end, edge_len) TO adjacency_map[node_start]
+            ADD (node_start, edge_len) TO adjacency_map[node_end]
+            INCREMENT edge_counter BY 1
+        END WHILE
+
+        CREATE minimal_distances ARRAY sized total_nodes FILLED WITH large_number
+        ASSIGN minimal_distances[0] TO numeric_zero
+
+        CREATE priority_queue HOLDING (numeric_zero, numeric_zero)
+
+        WHILE SIZE OF priority_queue IS GREATER THAN numeric_zero
+            EXTRACT (dist_current, node_current) BY REMOVING SMALLEST FIRST ELEMENT FROM priority_queue
+
+            SET expired_check TO (dist_current GREATER THAN OR EQUAL TO vanish_times[node_current])
+            IF expired_check IS true
+                CONTINUE
+            END IF
+
+            SET outdated_check TO (dist_current GREATER THAN minimal_distances[node_current])
+            IF outdated_check IS true
+                CONTINUE
+            END IF
+
+            FOR EACH (neighbor_node, edge_weight) IN adjacency_map[node_current]
+                COMPUTE path_cost AS dist_current PLUS edge_weight
+
+                SET valid_path TO (path_cost LESS THAN minimal_distances[neighbor_node]) AND (path_cost LESS THAN vanish_times[neighbor_node])
+                IF valid_path
+                    ASSIGN minimal_distances[neighbor_node] WITH path_cost
+                    INSERT (path_cost, neighbor_node) INTO priority_queue TO MAINTAIN HEAP ORDER
+                END IF
+            END FOR
+        END WHILE
+
+        INITIALIZE output_array OF SIZE total_nodes FILLED WITH negative_one
+        SET index_counter TO numeric_zero
+        REPEAT WHILE index_counter LESS THAN total_nodes
+            IF minimal_distances[index_counter] LESS THAN vanish_times[index_counter]
+                ASSIGN output_array[index_counter] WITH minimal_distances[index_counter]
+            END IF
+            INCREMENT index_counter BY 1
+        END REPEAT
+
+        RETURN output_array
+    END FUNCTION
+END CLASS

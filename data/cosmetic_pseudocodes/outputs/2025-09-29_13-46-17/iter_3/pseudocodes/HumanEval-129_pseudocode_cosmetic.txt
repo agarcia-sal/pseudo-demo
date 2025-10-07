@@ -1,0 +1,53 @@
+```
+FUNCTION minPath(grid, k)
+    SET sizeGrid TO LENGTH OF grid
+    SET constantValue TO (sizeGrid * sizeGrid) + 1
+    PROCEDURE processCell(rowIndex, colIndex)
+        IF grid AT rowIndex AND colIndex = 1 THEN
+            SET neighbors TO EMPTY LIST
+            IF rowIndex > 0 THEN
+                APPEND grid AT (rowIndex - 1) AND colIndex TO neighbors
+            END IF
+            IF colIndex > 0 THEN
+                APPEND grid AT rowIndex AND (colIndex - 1) TO neighbors
+            END IF
+            IF rowIndex < sizeGrid - 1 THEN
+                APPEND grid AT (rowIndex + 1) AND colIndex TO neighbors
+            END IF
+            IF colIndex < sizeGrid - 1 THEN
+                APPEND grid AT rowIndex AND (colIndex + 1) TO neighbors
+            END IF
+            RETURN MINIMUM ELEMENT OF neighbors
+        END IF
+        RETURN constantValue
+    END PROCEDURE
+
+    FUNCTION iterateRow(indexRow)
+        IF indexRow = sizeGrid THEN RETURN constantValue END IF
+        FUNCTION iterateCol(indexCol, currentVal)
+            IF indexCol = sizeGrid THEN RETURN currentVal END IF
+            SET candidate TO processCell(indexRow, indexCol)
+            SET nextVal TO candidate
+            IF currentVal < candidate THEN nextVal = currentVal END IF
+            RETURN iterateCol(indexCol + 1, nextVal)
+        END FUNCTION
+        SET valRow TO iterateCol(0, constantValue)
+        SET valRest TO iterateRow(indexRow + 1)
+        IF valRow < valRest THEN RETURN valRow ELSE RETURN valRest END IF
+    END FUNCTION
+
+    SET minVal TO iterateRow(0)
+
+    FUNCTION buildAnswer(indexAnswer, accumulator)
+        IF indexAnswer = k THEN RETURN accumulator END IF
+        IF indexAnswer MOD 2 = 0 THEN
+            APPEND 1 TO accumulator
+        ELSE
+            APPEND minVal TO accumulator
+        END IF
+        RETURN buildAnswer(indexAnswer + 1, accumulator)
+    END FUNCTION
+
+    RETURN buildAnswer(0, EMPTY LIST)
+END FUNCTION
+```

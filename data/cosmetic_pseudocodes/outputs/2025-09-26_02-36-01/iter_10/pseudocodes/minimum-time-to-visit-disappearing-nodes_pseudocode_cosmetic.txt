@@ -1,0 +1,110 @@
+CLASS Solution  
+    FUNCTION minimumTime(n, edges, disappear)  
+        DEFINE FUNCTION InsertHeapElement(heap, val)  
+            APPEND val TO heap  
+            SET pos TO LENGTH OF heap MINUS 1  
+            WHILE pos GREATER THAN 0  
+                SET parent TO (pos MINUS 1) DIV 2  
+                IF heap[parent][0] GREATER THAN heap[pos][0] THEN  
+                    SWAP heap[parent], heap[pos]  
+                    SET pos TO parent  
+                ELSE  
+                    BREAK  
+                END IF  
+            END WHILE  
+        END FUNCTION
+
+        DEFINE FUNCTION ExtractHeapMin(heap)  
+            IF LENGTH OF heap EQUALS 0 THEN RETURN NULL END IF  
+            SET rootVal TO heap[0]  
+            SET lastVal TO heap[LENGTH OF heap MINUS 1]  
+            REMOVE last element from heap  
+            IF LENGTH OF heap EQUALS 0 THEN RETURN rootVal END IF  
+            SET heap[0] TO lastVal  
+            SET idx TO 0  
+            SET sz TO LENGTH OF heap  
+            WHILE TRUE  
+                SET leftIdx TO (2 TIMES idx) PLUS 1  
+                SET rightIdx TO (2 TIMES idx) PLUS 2  
+                SET smallest TO idx  
+                IF leftIdx LESS THAN sz AND heap[leftIdx][0] LESS THAN heap[smallest][0] THEN SET smallest TO leftIdx END IF  
+                IF rightIdx LESS THAN sz AND heap[rightIdx][0] LESS THAN heap[smallest][0] THEN SET smallest TO rightIdx END IF  
+                IF smallest EQUALS idx THEN BREAK END IF  
+                SWAP heap[idx], heap[smallest]  
+                SET idx TO smallest  
+            END WHILE  
+            RETURN rootVal  
+        END FUNCTION
+
+        // Build adjacency list 'graph' mapping nodes to list of (neighbor,length)
+        SET adjList TO empty map defaulting to empty list  
+        RECURSIVE FUNCTION processEdges(pos)  
+            IF pos EQUALS LENGTH OF edges THEN RETURN END IF  
+            SET edgeTriple TO edges[pos]  
+            SET a TO edgeTriple[0]  
+            SET b TO edgeTriple[1]  
+            SET w TO edgeTriple[2]  
+            APPEND (b, w) TO adjList[a]  
+            APPEND (a, w) TO adjList[b]  
+            CALL processEdges(pos PLUS 1)  
+        END FUNCTION  
+        CALL processEdges(0)  
+
+        // Initialize distances array with infinity except start node zero
+        SET distArray TO empty list  
+        FOR idx FROM 0 TO n MINUS 1 DO  
+            APPEND +1 TIMES (1 TIMES 10 TO THE POWER OF 9 PLUS 7) TO distArray // represent infinite large number  
+        END FOR  
+        SET distArray[0] TO 0  
+
+        // Min heap for Dijkstra's algorithm, store pairs (distance,node)
+        SET heapList TO empty list  
+        CALL InsertHeapElement(heapList, (0, 0))  
+
+        FUNCTION DijkstraLoop()  
+            WHILE LENGTH OF heapList GREATER THAN 0 DO  
+                SET currentPair TO ExtractHeapMin(heapList)  
+                SET curDist TO currentPair[0]  
+                SET curNode TO currentPair[1]  
+
+                IF curDist GREATER THAN OR EQUAL TO disappear[curNode] THEN  
+                    CONTINUE  
+                END IF  
+
+                IF curDist GREATER THAN distArray[curNode] THEN  
+                    CONTINUE  
+                END IF  
+
+                // Iterate over neighbors of curNode  
+                FOR EACH nbrPair IN adjList[curNode] DO  
+                    SET neigh TO nbrPair[0]  
+                    SET leng TO nbrPair[1]  
+                    SET computedDist TO curDist PLUS leng  
+
+                    IF computedDist LESS THAN distArray[neigh] AND computedDist LESS THAN disappear[neigh] THEN  
+                        SET distArray[neigh] TO computedDist  
+                        CALL InsertHeapElement(heapList, (computedDist, neigh))  
+                    END IF  
+                END FOR  
+            END WHILE  
+        END FUNCTION  
+
+        CALL DijkstraLoop()  
+
+        // Build result list initializing with minus one  
+        SET outputList TO empty list  
+        SET posCounter TO 0  
+        LABEL buildResultLoop  
+        IF posCounter GREATER THAN OR EQUAL TO n THEN GOTO endBuildResultLoop END IF  
+        IF distArray[posCounter] LESS THAN disappear[posCounter] THEN  
+            SET outputList[posCounter] TO distArray[posCounter]  
+        ELSE  
+            SET outputList[posCounter] TO -1  
+        END IF  
+        SET posCounter TO posCounter PLUS 1  
+        GOTO buildResultLoop  
+        LABEL endBuildResultLoop  
+
+        RETURN outputList  
+    END FUNCTION  
+END CLASS

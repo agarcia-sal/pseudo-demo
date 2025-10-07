@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION countOfPairs(n parameter, x parameter, y parameter) RETURNS list of integer
+        DECLARE outputList AS list of integer WITH SIZE n INITIALIZED TO 0
+
+        FUNCTION bfs(start parameter)
+            DECLARE visitedFlags AS list of boolean WITH SIZE (n + 1) FILLED WITH False
+            DECLARE distVals AS list of integer WITH SIZE (n + 1) FILLED WITH 0
+            DECLARE dqQueue AS double ended queue
+            CALL dqQueue.enqueue_back(start)
+            SET visitedFlags[start] = True
+
+            PERFORM
+                IF dqQueue.is_empty() THEN
+                    EXIT PERFORM
+                END IF
+
+                DECLARE currNode AS integer
+                SET currNode = dqQueue.dequeue_front()
+
+                DECLARE neighborsList AS list of integer
+                SET neighborsList = [currNode - 1, currNode + 1]
+
+                FOR EACH nbr IN neighborsList DO
+                    DECLARE withinRange AS boolean
+                    SET withinRange = (nbr >= 1) AND (nbr <= n)
+                    DECLARE notVisited AS boolean
+                    SET notVisited = (visitedFlags[nbr] = False)
+                    IF withinRange AND notVisited THEN
+                        SET visitedFlags[nbr] = True
+                        SET distVals[nbr] = distVals[currNode] + 1
+                        CALL dqQueue.enqueue_back(nbr)
+                    END IF
+                END FOR
+
+                IF (currNode = x) AND (visitedFlags[y] = False) THEN
+                    SET visitedFlags[y] = True
+                    SET distVals[y] = distVals[currNode] + 1
+                    CALL dqQueue.enqueue_back(y)
+                END IF
+
+                IF (currNode = y) AND (visitedFlags[x] = False) THEN
+                    SET visitedFlags[x] = True
+                    SET distVals[x] = distVals[currNode] + 1
+                    CALL dqQueue.enqueue_back(x)
+                END IF
+            END PERFORM
+
+            DECLARE iteratorNum AS integer
+            SET iteratorNum = 1
+            WHILE iteratorNum <= n DO
+                IF distVals[iteratorNum] > 0 THEN
+                    SET outputList[distVals[iteratorNum] - 1] = outputList[distVals[iteratorNum] - 1] + 1
+                END IF
+                SET iteratorNum = iteratorNum + 1
+            END WHILE
+        END FUNCTION
+
+        DECLARE indexCounter AS integer
+        SET indexCounter = 1
+        WHILE indexCounter <= n DO
+            CALL bfs(indexCounter)
+            SET indexCounter = indexCounter + 1
+        END WHILE
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

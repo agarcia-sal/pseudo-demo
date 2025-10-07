@@ -1,0 +1,72 @@
+CLASS Solution
+  FUNCTION countPairsOfConnectableServers(edges, signalSpeed)
+    LET adjacency_map BE an empty mapping with default empty lists
+    PROCEDURE buildGraph(index)
+      IF index EQUALS LENGTH(edges) THEN
+        RETURN
+      END IF
+      LET src, tgt, wgt BE edges[index][0], edges[index][1], edges[index][2]
+      INSERT [tgt, wgt] INTO adjacency_map[src]
+      INSERT [src, wgt] INTO adjacency_map[tgt]
+      buildGraph(index PLUS 1)
+    END PROCEDURE
+
+    buildGraph(0)
+    LET total_nodes BE LENGTH(KEYS(adjacency_map))
+    LET results_array BE ARRAY OF total_nodes ZEROS
+
+    FUNCTION depthSearch(curr_node, prev_node, dist, collected_nodes)
+      LET mod_result BE dist MODULO signalSpeed
+      IF mod_result EQUALS 0 THEN
+        APPEND curr_node INTO collected_nodes
+      END IF
+      LET acc_count BE 0
+      LET neighbors_list BE adjacency_map[curr_node]
+      LET idx BE 0
+      WHILE idx LESS THAN LENGTH(neighbors_list)
+        LET adj_node, edge_wgt BE neighbors_list[idx][0], neighbors_list[idx][1]
+        IF adj_node NOT EQUALS prev_node THEN
+          acc_count = acc_count PLUS depthSearch(adj_node, curr_node, dist PLUS edge_wgt, collected_nodes)
+        END IF
+        idx = idx PLUS 1
+      END WHILE
+      IF mod_result EQUALS 0 THEN
+        RETURN acc_count PLUS 1
+      ELSE
+        RETURN acc_count
+      END IF
+    END FUNCTION
+
+    FUNCTION pairsCountViaCenter(center_node)
+      LET collected_paths BE EMPTY ARRAY
+      LET neighbors_for_center BE adjacency_map[center_node]
+      LET pointer BE 0
+      WHILE pointer LESS THAN LENGTH(neighbors_for_center)
+        LET neighbor_node, neighbor_wgt BE neighbors_for_center[pointer][0], neighbors_for_center[pointer][1]
+        LET current_path BE EMPTY ARRAY
+        CALL depthSearch(neighbor_node, center_node, neighbor_wgt, current_path)
+        APPEND current_path INTO collected_paths
+        pointer = pointer PLUS 1
+      END WHILE
+
+      LET combined_pairs BE 0
+      FOR m FROM 0 TO LENGTH(collected_paths) MINUS 2 DO
+        FOR n FROM m PLUS 1 TO LENGTH(collected_paths) MINUS 1 DO
+          LET len_m BE LENGTH(collected_paths[m])
+          LET len_n BE LENGTH(collected_paths[n])
+          combined_pairs = combined_pairs PLUS (len_m TIMES len_n)
+        END FOR
+      END FOR
+      RETURN combined_pairs
+    END FUNCTION
+
+
+    LET iterator BE 0
+    LOOP WHILE iterator LESS THAN total_nodes
+      results_array[iterator] = pairsCountViaCenter(iterator)
+      iterator = iterator PLUS 1
+    END LOOP
+
+    RETURN results_array
+  END FUNCTION
+END CLASS

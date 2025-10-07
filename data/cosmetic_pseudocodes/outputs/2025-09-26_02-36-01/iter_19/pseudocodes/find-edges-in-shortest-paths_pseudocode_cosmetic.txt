@@ -1,0 +1,109 @@
+CLASS Solution
+    FUNCTION findAnswer(gamin, flerps)
+        SET gront TO a fresh mapping: key ↦ empty list
+        DEFINE procedure inserter(p, q)
+            APPEND q TO gront[p]
+        END PROCEDURE
+
+        FOR each triple x y z IN flerps
+            CALL inserter(x, (y, z))
+            CALL inserter(y, (x, z))
+        END FOR
+
+        SET unis TO a list of length gamin filled with (1.0/0.0)
+        SET unis[0] TO (0 + 0)
+        SET emron TO list containing (unis[0], 0)
+
+        DEFINE FUNCTION popMin(heap)
+            SET idx TO 0
+            FOR i FROM 1 TO LENGTH(heap)-1
+                IF heap[i][0] < heap[idx][0]
+                    SET idx TO i
+                END IF
+            END FOR
+            SET val TO heap[idx]
+            SET heap[idx] TO heap[LENGTH(heap)-1]
+            REMOVE last element of heap
+            RETURN val
+        END FUNCTION
+
+        DEFINE FUNCTION pushHeap(heap, el)
+            APPEND el TO heap
+            SET c TO LENGTH(heap) - 1
+            WHILE c > 0
+                SET p TO (c - 1) DIV 2
+                IF heap[p][0] > heap[c][0]
+                    SWAP heap[p], heap[c]
+                    SET c TO p
+                ELSE
+                    BREAK
+                END IF
+            END WHILE
+        END FUNCTION
+
+        WHILE LENGTH(emron) > 0
+            SET state TO CALL popMin(emron)
+            SET currd TO state[0]
+            SET sworn TO state[1]
+            IF currd LESS_THAN unis[sworn] EQUALS False
+                CONTINUE
+            END IF
+
+            FOR each pair ql rk IN gront[sworn]
+                SET trial TO currd + rk
+                IF trial LESS_THAN unis[ql]
+                    SET unis[ql] TO trial
+                    CALL pushHeap(emron, (trial, ql))
+                END IF
+            END FOR
+        END WHILE
+
+        SET rembot TO empty set
+        SET zarth TO list with (gamin - 1, unis[gamin - 1])
+        SET gize TO list of length gamin all False
+
+        DEFINE PROCEDURE pushLast(lst, elem)
+            APPEND elem TO lst
+        END PROCEDURE
+
+        DEFINE FUNCTION popLast(lst)
+            SET ret TO lst[LENGTH(lst) - 1]
+            REMOVE last element of lst
+            RETURN ret
+        END FUNCTION
+
+        WHILE LENGTH(zarth) ≠ 0
+            SET tok FROM CALL popLast(zarth)
+            SET neth TO tok[0]
+            SET tef TO tok[1]
+            IF gize[neth] IS TRUE
+                CONTINUE
+            END IF
+            SET gize[neth] TO TRUE
+
+            FOR each pair wiv xus IN gront[neth]
+                IF tef EQUALS unis[wiv] + xus
+                    SET lower TO neth
+                    SET upper TO wiv
+                    IF upper LESS_THAN lower
+                        SET lower TO wiv
+                        SET upper TO neth
+                    END IF
+                    ADD (lower, upper) TO rembot
+                    CALL pushLast(zarth, (wiv, unis[wiv]))
+                END IF
+            END FOR
+        END WHILE
+
+        SET kerza TO empty list
+        FOR each triple lav toz ign IN flerps
+            IF (lav, toz) IN rembot OR (toz, lav) IN rembot
+                APPEND True TO kerza
+            ELSE
+                APPEND False TO kerza
+            END IF
+        END FOR
+
+        RETURN kerza
+    END FUNCTION
+END CLASS

@@ -1,0 +1,86 @@
+```
+CLASS Solution
+    FUNCTION maximumTotalDamage(power)
+        DEFINE FUNCTION maximum(x, y)
+            IF x GREATER THAN y THEN
+                RETURN x
+            ELSE
+                RETURN y
+            END IF
+        END FUNCTION
+
+        SET freqMap TO empty mapping
+        SET distinctList TO empty list
+        SET idxCounter TO 0
+
+        FOR element IN power DO
+            IF element NOT IN freqMap THEN
+                freqMap[element] = 1
+            ELSE
+                freqMap[element] = freqMap[element] + 1
+            END IF
+        END FOR
+
+        FOR key IN freqMap KEYS DO
+            APPEND key TO distinctList
+        END FOR
+
+        DEFINE FUNCTION quickSort(arr, left, right)
+            IF left GREATER OR EQUAL TO right THEN
+                RETURN
+            END IF
+            SET pivot TO arr[(left + right) DIV 2]
+            SET i TO left
+            SET j TO right
+            WHILE i LESS OR EQUAL TO j DO
+                WHILE arr[i] LESS THAN pivot DO
+                    i = i + 1
+                END WHILE
+                WHILE arr[j] GREATER THAN pivot DO
+                    j = j - 1
+                END WHILE
+                IF i LESS OR EQUAL TO j THEN
+                    SET temp TO arr[i]
+                    arr[i] = arr[j]
+                    arr[j] = temp
+                    i = i + 1
+                    j = j - 1
+                END IF
+            END WHILE
+            quickSort(arr, left, j)
+            quickSort(arr, i, right)
+        END FUNCTION
+
+        quickSort(distinctList, 0, LENGTH(distinctList) - 1)
+
+        SET dpMap TO empty mapping
+        SET pos TO 0
+
+        DEFINE FUNCTION recursiveMax(index)
+            IF index LESS THAN 0 THEN
+                RETURN 0
+            END IF
+            IF index IN dpMap THEN
+                RETURN dpMap[index]
+            END IF
+
+            SET currentVal TO distinctList[index]
+            SET exclVal TO recursiveMax(index - 1)
+
+            SET inclVal TO currentVal * freqMap[currentVal]
+            SET searchIndex TO index - 1
+            WHILE searchIndex GREATER OR EQUAL TO 0 AND distinctList[searchIndex] GREATER OR EQUAL TO currentVal - 2 DO
+                searchIndex = searchIndex - 1
+            END WHILE
+            IF searchIndex GREATER OR EQUAL TO 0 THEN
+                inclVal = inclVal + recursiveMax(searchIndex)
+            END IF
+
+            dpMap[index] = maximum(inclVal, exclVal)
+            RETURN dpMap[index]
+        END FUNCTION
+
+        RETURN recursiveMax(LENGTH(distinctList) - 1)
+    END FUNCTION
+END CLASS
+```

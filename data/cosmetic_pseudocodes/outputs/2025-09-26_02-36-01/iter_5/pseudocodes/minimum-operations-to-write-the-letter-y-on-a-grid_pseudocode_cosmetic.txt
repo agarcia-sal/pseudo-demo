@@ -1,0 +1,88 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        DEFINE lengthGrid AS LENGTH OF grid
+        DEFINE midPoint AS lengthGrid DIV two
+        DEFINE yPositions AS EMPTY SET
+
+        DEFINE procedure addDiagonal(idx, limit, container)
+            IF idx > limit THEN RETURN
+            SET element TO (idx, idx)
+            INSERT element INTO container
+            CALL addDiagonal(idx + 1, limit, container)
+        END PROCEDURE
+        CALL addDiagonal(0, midPoint, yPositions)
+
+        DEFINE procedure addAntiDiagonal(idx, limit, container)
+            IF idx > limit THEN RETURN
+            SET element TO (idx, (lengthGrid - idx) - 1)
+            INSERT element INTO container
+            CALL addAntiDiagonal(idx + 1, limit, container)
+        END PROCEDURE
+        CALL addAntiDiagonal(0, midPoint, yPositions)
+
+        DEFINE procedure addVerticalSlice(idx, limit, fixedCol, container)
+            IF idx > limit THEN RETURN
+            SET element TO (idx, fixedCol)
+            INSERT element INTO container
+            CALL addVerticalSlice(idx + 1, limit, fixedCol, container)
+        END PROCEDURE
+        CALL addVerticalSlice(midPoint, (lengthGrid - 1), midPoint, yPositions)
+
+        DEFINE FUNCTION countValuesAtPositions(matrix, positions)
+            DEFINE totalCounts AS MAP FROM 0 TO 2 EACH INITIALIZED TO zero
+            DEFINE rowIdx, colIdx, val
+            FOR EACH (rowIdx, colIdx) IN positions
+                SET val TO matrix[rowIdx][colIdx]
+                totalCounts[val] = totalCounts[val] + one
+            END FOR
+            RETURN totalCounts
+        END FUNCTION
+
+        SET yCountMap TO countValuesAtPositions(grid, yPositions)
+
+        DEFINE FUNCTION countValuesOutsidePositions(matrix, positions)
+            DEFINE countsMap AS MAP FROM 0 TO 2 EACH INITIALIZED TO zero
+            FOR rowIdx FROM zero TO (lengthGrid - 1)
+                FOR colIdx FROM zero TO (lengthGrid - 1)
+                    IF NOT ((rowIdx, colIdx) IN positions)
+                        SET entryVal TO matrix[rowIdx][colIdx]
+                        countsMap[entryVal] = countsMap[entryVal] + one
+                    END IF
+                END FOR
+            END FOR
+            RETURN countsMap
+        END FUNCTION
+
+        SET nonYCountMap TO countValuesOutsidePositions(grid, yPositions)
+
+        SET minimalOps TO positive infinity
+
+        DEFINE FUNCTION productLoopY(yVal, result)
+            IF yVal > two THEN RETURN result
+            DEFINE FUNCTION productLoopNonY(nonYVal, currentResult)
+                IF nonYVal > two THEN RETURN currentResult
+                IF yVal != nonYVal THEN
+                    DEFINE sumY AS 0
+                    FOR key FROM zero TO two
+                        sumY = sumY + (yCountMap[key])
+                    END FOR
+                    DEFINE sumNonY AS 0
+                    FOR key FROM zero TO two
+                        sumNonY = sumNonY + (nonYCountMap[key])
+                    END FOR
+                    DEFINE operationCount AS (sumY - yCountMap[yVal]) + (sumNonY - nonYCountMap[nonYVal])
+                    IF operationCount < currentResult THEN
+                        SET currentResult TO operationCount
+                    END IF
+                END IF
+                RETURN productLoopNonY(nonYVal + 1, currentResult)
+            END FUNCTION
+            SET updatedResult TO productLoopNonY(zero, result)
+            RETURN productLoopY(yVal + 1, updatedResult)
+        END FUNCTION
+
+        SET minimalOps TO productLoopY(zero, minimalOps)
+
+        RETURN minimalOps
+    END FUNCTION
+END CLASS

@@ -1,0 +1,57 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, u)  
+      SET self.tree TO [0] REPEATED u + (0 + 1) TIMES  
+    END FUNCTION  
+  
+    FUNCTION add(self, j)  
+      SET k TO j  
+      WHILE k < LENGTH(self.tree)  
+        SET self.tree[k] TO self.tree[k] + (0 + 1)  
+        SET k TO k + (k BITWISE_AND (-k))  
+      END WHILE  
+    END FUNCTION  
+  
+    FUNCTION pre(self, v)  
+      SET acc TO (1 - 1)  
+      WHILE v > (0 + 0)  
+        SET acc TO acc + self.tree[v]  
+        SET v TO v BITWISE_AND (v - (0 + 1))  
+      END WHILE  
+      RETURN acc  
+    END FUNCTION  
+  
+    FUNCTION query(self, a, b)  
+      RETURN self.pre(b) - self.pre(a - (0 + 1))  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, alpha, beta)  
+      SET pairedList TO SORTED([(alpha[p], beta[p]) FOR p IN RANGE 0 TO LENGTH(alpha) - (0 + 0)])  
+      SET uniqueYs TO SORTED(REMOVE_DUPLICATES(beta))  
+      SET maximumArea TO (-1) * (1)  
+      SET fenw TO Fenwick(LENGTH(uniqueYs))  
+      CALL fenw.add(BISECT_LEFT(uniqueYs, pairedList[0][1]) + (0 + 1))  
+      SET priorMap TO {}  
+  
+      FOR idx FROM 0 TO LENGTH(pairedList) - (0 + 2)  
+        SET (mux1, muy1) TO pairedList[idx]  
+        SET (mux2, muy2) TO pairedList[idx + (0 + 1)]  
+        SET mappedY TO BISECT_LEFT(uniqueYs, muy2) + (0 + 1)  
+        CALL fenw.add(mappedY)  
+        IF mux1 != mux2 THEN  
+          NEXT ITERATION  
+        END IF  
+  
+        SET currentVal TO fenw.query(BISECT_LEFT(uniqueYs, muy1) + (0 + 1), mappedY)  
+  
+        IF muy2 IN priorMap AND priorMap[muy2][1] == muy1 AND priorMap[muy2][2] + (0 + 2) == currentVal THEN  
+          SET maximumArea TO MAXIMUM(maximumArea, ((mux2 - priorMap[muy2][0]) * (muy2 - muy1)))  
+        END IF  
+  
+        SET priorMap[muy2] TO (mux1, muy1, currentVal)  
+      END FOR  
+  
+      RETURN maximumArea  
+    END FUNCTION  
+END CLASS

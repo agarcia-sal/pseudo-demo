@@ -1,0 +1,57 @@
+```
+FUNCTION anti_shuffle(meta_string)
+    FUNCTION recurse_words(memoed_list, remaining_words)
+        IF NOT (remaining_words IS EMPTY) THEN
+            SET current_str TO remaining_words[0]
+            SET char_array TO current_str TO CHAR ARRAY
+            SET index_var TO 0
+            FUNCTION recursive_sort(arr, left_idx)
+                IF left_idx < LENGTH(arr) - 1 THEN
+                    FUNCTION inner_sort(k)
+                        IF k > left_idx THEN
+                            IF arr[k] < arr[k-1] THEN
+                                SET temp_char TO arr[k]
+                                SET arr[k] TO arr[k-1]
+                                SET arr[k-1] TO temp_char
+                                RETURN inner_sort(k-1)
+                            ELSE
+                                RETURN inner_sort(k-1)
+                            END IF
+                        ELSE
+                            RETURN
+                        END IF
+                    END FUNCTION
+                    CALL inner_sort(LENGTH(arr)-1)
+                    CALL recursive_sort(arr, left_idx + 1)
+                ELSE
+                    RETURN
+                END IF
+            END FUNCTION
+            CALL recursive_sort(char_array, 0)
+            SET assembled_word TO EMPTY STRING
+            FOR each letter IN char_array
+                SET assembled_word TO assembled_word CONCAT letter
+            END FOR
+            RETURN recurse_words(memoed_list + [assembled_word], remaining_words[1 TO END])
+        ELSE
+            RETURN memoed_list
+        END IF
+    END FUNCTION
+    SET processed_list TO recurse_words([], SPLIT meta_string BY ' ')
+    SET acc_string TO ""
+    FUNCTION assemble_string(lst, idx)
+        IF idx < LENGTH(lst) THEN
+            IF idx = 0 THEN
+                SET acc_string TO lst[idx]
+            ELSE
+                SET acc_string TO acc_string + " " + lst[idx]
+            END IF
+            CALL assemble_string(lst, idx + 1)
+        ELSE
+            RETURN
+        END IF
+    END FUNCTION
+    CALL assemble_string(processed_list, 0)
+    RETURN acc_string
+END FUNCTION
+```

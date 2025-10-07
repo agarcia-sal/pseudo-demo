@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION maxPartitionsAfterOperations(s parameter k parameter)
+        FUNCTION max_partitions(s parameter k parameter)
+            SET alpha_base variable TO ASCII code FOR 'a'
+            SET size_variable TO 0
+            SET distinct_set variable TO empty mapping FROM character TO boolean
+            FUNCTION loop_chars(index parameter)
+                IF index parameter EQUALS LENGTH OF s parameter THEN
+                    RETURN
+                END IF
+                IF size_variable LESS THAN k parameter THEN
+                    IF distinct_set DOES NOT HAVE KEY s parameter[index parameter] THEN
+                        SET distinct_set[s parameter[index parameter]] TO true
+                        INCREMENT size_variable BY 1
+                    END IF
+                ELSE
+                    IF distinct_set HAS KEY s parameter[index parameter] THEN
+                        loop_chars(index parameter + 1)
+                        RETURN
+                    ELSE
+                        INCREMENT count variable BY 1
+                        CLEAR distinct_set
+                        SET distinct_set[s parameter[index parameter]] TO true
+                        SET size_variable TO 1
+                    END IF
+                END IF
+                loop_chars(index parameter + 1)
+            END FUNCTION
+            SET count variable TO 0
+            CALL loop_chars(0)
+            IF size_variable GREATER THAN 0 THEN
+                INCREMENT count variable BY 1
+            END IF
+            RETURN count variable
+        END FUNCTION
+
+        SET result variable TO max_partitions(s parameter k parameter)
+        SET pos variable TO 0
+        WHILE pos LESS THAN LENGTH OF s parameter
+            SET letter_code variable TO ASCII code FOR 'a'
+            REPEAT
+                IF letter_code GREATER THAN ASCII code FOR 'z' THEN
+                    BREAK
+                END IF
+                SET candidate_char variable TO CHARACTER REPRESENTED BY letter_code
+                IF candidate_char EQUALS s parameter[pos] THEN
+                    INCREMENT letter_code BY 1
+                    CONTINUE
+                END IF
+                SET prefix_str variable TO ""
+                FUNCTION build_prefix(idx parameter)
+                    IF idx GREATER OR EQUAL TO pos THEN
+                        RETURN
+                    END IF
+                    SET prefix_str TO prefix_str + s parameter[idx]
+                    build_prefix(idx + 1)
+                END FUNCTION
+                CALL build_prefix(0)
+                SET suffix_str variable TO ""
+                FUNCTION build_suffix(idx parameter)
+                    IF idx GREATER OR EQUAL TO LENGTH OF s parameter THEN
+                        RETURN
+                    END IF
+                    SET suffix_str TO suffix_str + s parameter[idx]
+                    build_suffix(idx + 1)
+                END FUNCTION
+                CALL build_suffix(pos + 1)
+                SET new_string variable TO prefix_str + candidate_char + suffix_str
+                SET comp variable TO max_partitions(new_string k parameter)
+                IF comp GREATER THAN result variable THEN
+                    SET result variable TO comp
+                END IF
+                INCREMENT letter_code BY 1
+            UNTIL false
+            INCREMENT pos BY 1
+        END WHILE
+        RETURN result variable
+    END FUNCTION
+END CLASS

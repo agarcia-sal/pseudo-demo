@@ -1,0 +1,53 @@
+```
+FUNCTION sort_third(list_input)
+    DEFINE helper_extract_div3(idx_seq, acc) AS
+        IF idx_seq IS EMPTY THEN
+            RETURN acc
+        ELSE
+            LET hd = FIRST(idx_seq)
+            LET tl = REST(idx_seq)
+            IF (hd MOD 3) = 0 THEN
+                RETURN helper_extract_div3(tl, acc + [list_input[hd]])
+            ELSE
+                RETURN helper_extract_div3(tl, acc)
+            ENDIF
+        ENDIF
+    END
+
+    LET copied_list <- []
+    FOR element_item IN list_input DO
+        copied_list = copied_list + [element_item]
+    END FOR
+
+    LET indices <- [0..LENGTH(copied_list)-1]
+    LET div_by_three_values <- helper_extract_div3(indices, [])
+
+    LET compare_numbers(a,b) AS
+        RETURN (a < b)
+    END
+
+    LET ordered_values <- []
+    WHILE LENGTH(div_by_three_values) > 0 DO
+        LET min_val <- div_by_three_values[0]
+        LET min_pos <- 0
+        FOR pos FROM 1 TO LENGTH(div_by_three_values)-1 DO
+            IF compare_numbers(div_by_three_values[pos], min_val) THEN
+                min_val = div_by_three_values[pos]
+                min_pos = pos
+            ENDIF
+        END FOR
+        ordered_values = ordered_values + [min_val]
+        div_by_three_values = div_by_three_values[0:min_pos] + div_by_three_values[min_pos+1:]
+    END WHILE
+
+    LET idx_counter <- 0
+    FOR idx IN indices DO
+        IF (idx MOD 3)=0 THEN
+            copied_list[idx] = ordered_values[idx_counter]
+            idx_counter = idx_counter + 1
+        ENDIF
+    END FOR
+
+    RETURN copied_list
+END FUNCTION
+```

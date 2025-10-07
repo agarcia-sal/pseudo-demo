@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION maximumScore(grid)
+        LET lengthValue BE LENGTH(grid)
+        LET prefixMatrix BE LIST(lengthValue + (1), LIST(lengthValue + (0)))
+        LET previousSelected BE LIST(lengthValue + (1), 0)
+        LET previousSkipped BE LIST(lengthValue + (1), 0)
+
+        DEFINE PROCEDURE fillPrefix(currentColumn, currentRow)
+            IF currentColumn LESS THAN lengthValue THEN
+                IF currentRow LESS THAN lengthValue THEN
+                    LET computedSum BE prefixMatrix[currentColumn][currentRow] + grid[currentRow][currentColumn]
+                    prefixMatrix[currentColumn][currentRow + 1] = computedSum
+                    CALL fillPrefix(currentColumn, currentRow + 1)
+                ELSE
+                    CALL fillPrefix(currentColumn + 1, 0)
+                END IF
+            END IF
+        END PROCEDURE
+        CALL fillPrefix(0, 0)
+
+        DEFINE FUNCTION processColumn(colIndex, selectedPrev, skippedPrev)
+            IF colIndex EQUALS lengthValue THEN
+                RETURN (selectedPrev, skippedPrev)
+            END IF
+
+            LET selectedCurrent BE LIST(lengthValue + 1, 0)
+            LET skippedCurrent BE LIST(lengthValue + 1, 0)
+
+            DEFINE PROCEDURE processCurr(currIndex)
+                IF currIndex GREATER THAN lengthValue THEN
+                    RETURN
+                END IF
+
+                DEFINE PROCEDURE iteratePrev(prevIndex)
+                    IF prevIndex GREATER THAN lengthValue THEN
+                        RETURN
+                    END IF
+
+                    IF currIndex GREATER THAN prevIndex THEN
+                        LET segmentScore BE prefixMatrix[colIndex - 1][currIndex] - prefixMatrix[colIndex - 1][prevIndex]
+                        selectedCurrent[currIndex] = MAX(selectedCurrent[currIndex], skippedPrev[prevIndex] + segmentScore)
+                        skippedCurrent[currIndex] = MAX(skippedCurrent[currIndex], skippedPrev[prevIndex] + segmentScore)
+                    ELSE
+                        LET segmentScore BE prefixMatrix[colIndex][prevIndex] - prefixMatrix[colIndex][currIndex]
+                        selectedCurrent[currIndex] = MAX(selectedCurrent[currIndex], selectedPrev[prevIndex] + segmentScore)
+                        skippedCurrent[currIndex] = MAX(skippedCurrent[currIndex], selectedPrev[prevIndex])
+                    END IF
+
+                    CALL iteratePrev(prevIndex + 1)
+                END PROCEDURE
+                CALL iteratePrev(0)
+                CALL processCurr(currIndex + 1)
+            END PROCEDURE
+            CALL processCurr(0)
+
+            RETURN processColumn(colIndex + 1, selectedCurrent, skippedCurrent)
+        END FUNCTION
+
+        LET (finalSelected, finalSkipped) BE processColumn(1, previousSelected, previousSkipped)
+
+        LET maxResult BE 0
+        FOR val IN finalSelected DO
+            IF val GREATER THAN maxResult THEN
+                maxResult = val
+            END IF
+        END FOR
+
+        RETURN maxResult
+    END FUNCTION
+END CLASS

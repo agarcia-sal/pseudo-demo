@@ -1,0 +1,51 @@
+```  
+CLASS Solution  
+    FUNCTION sumOfPower(nums parameter, k parameter)  
+        DEFINE CONSTANT M AS 1000000000 + 7  
+        LET u BE LENGTH OF nums  
+        CREATE ARRAY dp OF SIZE u + 1, EACH ELEMENT IS ARRAY OF SIZE k + 1 FILLED WITH 0  
+        ASSIGN dp[0][0] TO 1  
+        
+        LET idx BE 1  
+        WHILE idx <= u  
+            LET p BE 0  
+            WHILE p <= k  
+                ASSIGN dp[idx][p] TO dp[idx - 1][p]  
+                IF p >= nums[idx - 1] THEN  
+                    ASSIGN dp[idx][p] TO dp[idx][p] + dp[idx - 1][p - nums[idx - 1]]  
+                END IF  
+                ASSIGN dp[idx][p] TO dp[idx][p] MODULO M  
+                SET p TO p + 1  
+            END WHILE  
+            SET idx TO idx + 1  
+        END WHILE  
+        
+        LET totalPowerSum BE 0  
+        LET limit BE (2 ^ u) - 1  
+        DEFINE FUNCTION countBitsAndSum(x) RETURNS tuple(sumVal, bitCount)  
+            LET sVal BE 0  
+            LET bCount BE 0  
+            LET bitPos BE 0  
+            WHILE bitPos < u  
+                IF ((x >> bitPos) AND 1) = 1 THEN  
+                    SET sVal TO sVal + nums[bitPos]  
+                    SET bCount TO bCount + 1  
+                END IF  
+                SET bitPos TO bitPos + 1  
+            END WHILE  
+            RETURN (sVal, bCount)  
+        END FUNCTION  
+        
+        LET current BE 1  
+        REPEAT  
+            LET (accSum, cnt) BE countBitsAndSum(current)  
+            IF accSum = k THEN  
+                SET totalPowerSum TO (totalPowerSum + (2 ^ (u - cnt))) MODULO M  
+            END IF  
+            SET current TO current + 1  
+        UNTIL current > limit  
+        
+        RETURN totalPowerSum  
+    END FUNCTION  
+END CLASS  
+```

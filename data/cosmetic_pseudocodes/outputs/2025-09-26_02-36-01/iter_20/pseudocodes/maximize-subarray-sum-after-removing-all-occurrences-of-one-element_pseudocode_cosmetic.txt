@@ -1,0 +1,89 @@
+CLASS Solution
+    FUNCTION maxSubarraySum(nums)
+        FUNCTION kadane(arr)
+            FUNCTION local_max(a, b)
+                IF a GREATER THAN b
+                    RETURN a
+                ELSE
+                    RETURN b
+                END IF
+            END FUNCTION
+
+            FUNCTION sum_vals(a, b)
+                RETURN a PLUS b
+            END FUNCTION
+
+            SET idx TO 1
+            SET acc1 TO arr[1]
+            SET acc2 TO arr[1]
+
+            WHILE idx LESS THAN LENGTH of arr
+                SET current TO arr[idx PLUS 1]
+
+                SET cmp1 TO local_max(current, sum_vals(acc1, current))
+                SET acc1 TO cmp1
+
+                IF acc2 LESS THAN acc1
+                    SET acc2 TO acc1
+                END IF
+
+                SET idx TO idx PLUS 1
+            END WHILE
+
+            RETURN acc2
+        END FUNCTION
+
+        SET result_max TO kadane(nums)
+
+        FUNCTION unique_set(input_list)
+            SET tracker TO empty dictionary
+            SET result_list TO empty list
+
+            SET pos TO 0
+            WHILE pos LESS THAN LENGTH of input_list
+                SET val TO input_list[pos]
+                IF NOT tracker HAS KEY val
+                    SET tracker[val] TO true
+                    APPEND val TO result_list
+                END IF
+                SET pos TO pos PLUS 1
+            END WHILE
+
+            RETURN result_list
+        END FUNCTION
+
+        SET uniques TO unique_set(nums)
+
+        FUNCTION filtered_list(base_list, exclude_val)
+            SET collector TO empty list
+
+            FUNCTION recursive_filter(lst, ignored, acc, i)
+                IF i GREATER OR EQUAL TO LENGTH of lst
+                    RETURN acc
+                ELSE
+                    IF lst[i] NOT EQUALS ignored
+                        APPEND lst[i] TO acc
+                    END IF
+                    RETURN recursive_filter(lst, ignored, acc, i PLUS 1)
+                END IF
+            END FUNCTION
+
+            RETURN recursive_filter(base_list, exclude_val, collector, 0)
+        END FUNCTION
+
+        SET ind TO 0
+        WHILE ind LESS THAN LENGTH of uniques
+            SET candidate TO uniques[ind]
+            SET filtered TO filtered_list(nums, candidate)
+            IF LENGTH of filtered GREATER THAN 0
+                SET trial TO kadane(filtered)
+                IF result_max LESS THAN trial
+                    SET result_max TO trial
+                END IF
+            END IF
+            SET ind TO ind PLUS 1
+        END WHILE
+
+        RETURN result_max
+    END FUNCTION
+END CLASS

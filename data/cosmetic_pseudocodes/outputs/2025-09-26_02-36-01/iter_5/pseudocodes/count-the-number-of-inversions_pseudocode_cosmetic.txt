@@ -1,0 +1,79 @@
+CLASS Solution  
+    FUNCTION numberOfPermutations(n, requirements)  
+        SET modulus TO (9 + 1) ^ 9 + 7  
+        SET conditions_map TO {}  
+        
+        PROCEDURE populateRequirements(index)  
+            IF index == LENGTH(requirements) THEN  
+                RETURN  
+            END IF  
+            LET pair = requirements[index]  
+            LET key = pair[0]  
+            LET value = pair[1]  
+            conditions_map[key] = value  
+            CALL populateRequirements(index + 1)  
+        END PROCEDURE  
+        CALL populateRequirements(0)  
+        
+        FUNCTION count_permutations(len_prefix, current_inv, bits_used)  
+            IF len_prefix == n THEN  
+                LET req_val = 0  
+                IF conditions_map CONTAINS KEY n - 1 THEN  
+                    req_val = conditions_map[n - 1]  
+                END IF  
+                LET result = 0  
+                IF current_inv == req_val THEN  
+                    result = 1  
+                END IF  
+                RETURN result  
+            END IF  
+            
+            IF len_prefix > 0 THEN  
+                LET expected_inv = current_inv  
+                IF conditions_map CONTAINS KEY len_prefix - 1 THEN  
+                    expected_inv = conditions_map[len_prefix - 1]  
+                END IF  
+                IF current_inv != expected_inv THEN  
+                    RETURN 0  
+                END IF  
+            END IF  
+            
+            LET total_count = 0  
+            FUNCTION loop_over_nums(curr_num)  
+                IF curr_num == n THEN  
+                    RETURN 0  
+                END IF  
+                LET partial_acc = 0  
+                LET bit_mask = 1 << curr_num  
+                LET is_used = bits_used & bit_mask  
+                IF is_used == 0 THEN  
+                    LET inv_increment = current_inv  
+                    FUNCTION count_future_bits(j)  
+                        IF j == n THEN  
+                            RETURN 0  
+                        END IF  
+                        LET additional = 0  
+                        LET check_mask = 1 << j  
+                        IF (bits_used & check_mask) != 0 THEN  
+                            additional = 1  
+                        END IF  
+                        RETURN additional + count_future_bits(j + 1)  
+                    END FUNCTION  
+                    LET additional_inversions = count_future_bits(curr_num + 1)  
+                    LET new_inv = inv_increment + additional_inversions  
+                    LET new_bits_used = bits_used | bit_mask  
+                    LET result_of_recursion = count_permutations(len_prefix + 1, new_inv, new_bits_used)  
+                    LET sum_value = (total_count + result_of_recursion) % modulus  
+                    total_count = sum_value  
+                END IF  
+                partial_acc = total_count + loop_over_nums(curr_num + 1)  
+                RETURN partial_acc - total_count  
+            END FUNCTION  
+            CALL loop_over_nums(0)  
+            RETURN total_count  
+        END FUNCTION  
+        
+        LET final_result = count_permutations(0, 0, 0)  
+        RETURN final_result  
+    END FUNCTION  
+END CLASS

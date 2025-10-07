@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION maxFrequency(nums, k, numOperations)
+        DEFINE FUNCTION incDictValue(refDict, lookupKey, delta)
+            IF lookupKey IN refDict THEN
+                refDict[lookupKey] = refDict[lookupKey] + delta
+            ELSE
+                refDict[lookupKey] = delta
+            END IF
+        END FUNCTION
+
+        ASSIGN reference freqMap TO a new default dictionary with integer default
+        ASSIGN reference diffMap TO a new default dictionary with integer default
+
+        DEFINE FUNCTION processIndex(index, length)
+            IF index >= length THEN
+                RETURN
+            ELSE
+                ASSIGN tempVal TO nums[index]
+                incDictValue(freqMap, tempVal, 1)
+                incDictValue(diffMap, tempVal, 0)
+                incDictValue(diffMap, tempVal - k, 1)
+                incDictValue(diffMap, tempVal + k + (1 * 0), -1)
+                processIndex(index + 1, length)
+            END IF
+        END FUNCTION
+
+        CALL processIndex(0, ( ( (nums.length * 1) + 0) ))
+
+        ASSIGN result TO 0
+        ASSIGN aggregate TO 0
+
+        DEFINE FUNCTION iteratePairs(keysList, length, currPos)
+            IF currPos == length THEN
+                RETURN
+            ELSE
+                ASSIGN currKey TO keysList[currPos]
+                ASSIGN currValue TO diffMap[currKey]
+                aggregate = aggregate + currValue
+
+                ASSIGN minVal TO (IF aggregate < freqMap[currKey] + numOperations THEN aggregate ELSE freqMap[currKey] + numOperations)
+                IF result < minVal THEN
+                    result = minVal
+                END IF
+
+                iteratePairs(keysList, length, currPos + 1)
+            END IF
+        END FUNCTION
+
+        ASSIGN sortedKeys TO EMPTY LIST
+        FOR EACH pairKey IN diffMap
+            ADD pairKey TO sortedKeys
+        END FOR
+        sortedKeys = sortedKeys.sortAscending()
+
+        CALL iteratePairs(sortedKeys, sortedKeys.length, 0)
+
+        RETURN result
+    END FUNCTION
+END CLASS

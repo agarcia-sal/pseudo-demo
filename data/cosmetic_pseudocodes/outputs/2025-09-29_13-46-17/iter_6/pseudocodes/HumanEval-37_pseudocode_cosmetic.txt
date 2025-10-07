@@ -1,0 +1,116 @@
+```
+FUNCTION sort_even(list_of_elements)
+	return GET_RESULT(0, [], SPLIT_ELEMENTS(list_of_elements, 0, [], []))
+	
+	FUNCTION SPLIT_ELEMENTS(inputList, idx, evens_acc, odds_acc)
+		IF idx >= LENGTH(inputList)
+			RETURN (evens_acc, odds_acc)
+		ELSE
+			IF (idx % 2) = 0
+				RETURN SPLIT_ELEMENTS(inputList, idx + 1, APPEND_TO(evens_acc, inputList[idx]), odds_acc)
+			ELSE
+				RETURN SPLIT_ELEMENTS(inputList, idx + 1, evens_acc, APPEND_TO(odds_acc, inputList[idx]))
+	
+	FUNCTION GET_RESULT(iter, acc, tupleList)
+		SET (evenList, oddList) = tupleList
+		IF iter >= MIN(LENGTH(evenList), LENGTH(oddList))
+			IF LENGTH(evenList) > LENGTH(oddList)
+				RETURN CONCATENATE(acc, [evenList[LENGTH(evenList) - 1]])
+			ELSE
+				RETURN acc
+		ELSE
+			RETURN GET_RESULT(iter + 1, CONCATENATE(acc, [evenList[iter], oddList[iter]]), (evenList, oddList))
+	
+	// sort function redefined as recursive insertion sort to maximize transformation
+	FUNCTION sort(arr)
+		RETURN RECURSIVE_SORT(arr, 1)
+		
+		FUNCTION RECURSIVE_SORT(arrayParam, pos)
+			IF pos >= LENGTH(arrayParam)
+				RETURN arrayParam
+			ELSE
+				SET keyValue = arrayParam[pos]
+				SET j = pos - 1
+				
+				FUNCTION SHIFT_LEFT(arrayShft, idx, keyVal)
+					IF idx < 0 OR arrayShft[idx] <= keyVal
+						RETURN arrayShft
+					ELSE
+						SET modifiedArray = INSERT_AT(arrayShft, idx + 1, arrayShft[idx])
+						SET shortenedArray = REMOVE_AT(modifiedArray, idx)
+						RETURN SHIFT_LEFT(shortenedArray, idx - 1, keyVal)
+				
+				SET partiallySorted = SHIFT_LEFT(arrayParam, j, keyValue)
+
+				SET insertedArray = UPDATE_AT(partiallySorted, j + 1, keyValue)
+				
+				RETURN RECURSIVE_SORT(insertedArray, pos + 1)
+
+	// replacing call to "SORT" on even-indexed elements
+	FUNCTION CONCATENATE(l1, l2)
+		RETURN FOLD_LEFT(l2, l1, FUNCTION(acc, el) RETURN APPEND_TO(acc, el))
+	
+	FUNCTION APPEND_TO(lst, element)
+		RETURN lst + [element]
+
+	FUNCTION MIN(a, b)
+		IF a <= b THEN RETURN a ELSE RETURN b
+		
+	FUNCTION LENGTH(someList)
+		SET count = 0
+		FOR _ IN someList
+			SET count = count + 1
+		RETURN count
+
+	FUNCTION UPDATE_AT(lst, idx, val)
+		RETURN SLICE(lst, 0, idx) + [val] + SLICE(lst, idx + 1, LENGTH(lst))
+
+	FUNCTION REMOVE_AT(lst, idx)
+		RETURN SLICE(lst, 0, idx) + SLICE(lst, idx + 1, LENGTH(lst))
+
+	FUNCTION INSERT_AT(lst, idx, val)
+		RETURN SLICE(lst, 0, idx) + [val] + SLICE(lst, idx, LENGTH(lst))
+
+	FUNCTION SLICE(lst, start, end)
+		SET res = []
+		SET i = start
+		WHILE i < end
+			SET res = APPEND_TO(res, lst[i])
+			SET i = i + 1
+		RETURN res
+	
+	// invoking the recursive sort explicitly and replacing sorting line
+	SET even_indexed_elements = sort((function(eList)
+		FUNCTION internal_sort(l)
+			IF LENGTH(l) <= 1
+				RETURN l
+			ELSE
+				RETURN sort(l)
+		RETURN internal_sort(eList)
+	)(GET_EVEN_INDICES(list_of_elements)))
+	
+	FUNCTION GET_EVEN_INDICES(lst)
+		RETURN GET_EVEN_INDICES_HELPER(lst, 0, [])
+		
+		FUNCTION GET_EVEN_INDICES_HELPER(l, currIdx, acc)
+			IF currIdx >= LENGTH(l)
+				RETURN acc
+			ELSE IF (currIdx % 2) = 0
+				RETURN GET_EVEN_INDICES_HELPER(l, currIdx + 1, APPEND_TO(acc, l[currIdx]))
+			ELSE
+				RETURN GET_EVEN_INDICES_HELPER(l, currIdx + 1, acc)
+	
+	FUNCTION GET_ODD_INDICES(lst)
+		RETURN GET_ODD_INDICES_HELPER(lst, 0, [])
+		
+		FUNCTION GET_ODD_INDICES_HELPER(l, currIdx, acc)
+			IF currIdx >= LENGTH(l)
+				RETURN acc
+			ELSE IF (currIdx % 2) != 0
+				RETURN GET_ODD_INDICES_HELPER(l, currIdx + 1, APPEND_TO(acc, l[currIdx]))
+			ELSE
+				RETURN GET_ODD_INDICES_HELPER(l, currIdx + 1, acc)
+	
+	SET odd_indexed_elements = GET_ODD_INDICES(list_of_elements)
+END FUNCTION
+```

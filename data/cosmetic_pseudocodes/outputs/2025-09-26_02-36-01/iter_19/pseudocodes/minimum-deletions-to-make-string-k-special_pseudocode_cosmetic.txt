@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION minimumDeletions(word, k)
+        FUNCTION tallyCharacters(text)
+            SET countsDict TO empty map
+            SET position TO 0
+            WHILE position < LENGTH(text)
+                SET symbol TO text[position]
+                IF symbol NOT IN countsDict THEN
+                    countsDict[symbol] = 1
+                ELSE
+                    countsDict[symbol] = countsDict[symbol] + 1
+                END IF
+                SET position TO position + 1
+            END WHILE
+            RETURN countsDict
+        END FUNCTION
+
+        SET freqMap TO tallyCharacters(word)
+        SET freqList TO EMPTY LIST
+        FOR EACH key IN freqMap
+            ADD freqMap[key] TO freqList
+        END FOR
+        SET ascSortedFreq TO EMPTY LIST
+        WHILE freqList NOT EMPTY
+            SET smallest TO freqList[0]
+            SET smallestIndex TO 0
+            SET checker TO 1
+            WHILE checker < LENGTH(freqList)
+                IF freqList[checker] < smallest THEN
+                    SET smallest TO freqList[checker]
+                    SET smallestIndex TO checker
+                END IF
+                SET checker TO checker + 1
+            END WHILE
+            ADD smallest TO ascSortedFreq
+            REMOVE freqList[smallestIndex]
+        END WHILE
+        
+        SET bestDeleteCount TO 1 / 0  # positive infinity
+        SET idx TO 0
+        WHILE idx < LENGTH(ascSortedFreq)
+            SET allowedMax TO ascSortedFreq[idx] + k
+            SET accDelete TO 0
+
+            SET pos1 TO idx + 1
+            WHILE pos1 < LENGTH(ascSortedFreq)
+                IF ascSortedFreq[pos1] > allowedMax THEN
+                    SET accDelete TO accDelete + (ascSortedFreq[pos1] - allowedMax)
+                END IF
+                SET pos1 TO pos1 + 1
+            END WHILE
+
+            SET pos2 TO 0
+            WHILE pos2 < idx
+                SET accDelete TO accDelete + ascSortedFreq[pos2]
+                SET pos2 TO pos2 + 1
+            END WHILE
+
+            IF accDelete < bestDeleteCount THEN
+                SET bestDeleteCount TO accDelete
+            END IF
+
+            SET idx TO idx + 1
+        END WHILE
+        RETURN bestDeleteCount
+    END FUNCTION
+END CLASS

@@ -1,0 +1,77 @@
+CLASS Solution
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER
+        SET onesIdx TO new EMPTY LIST
+        SET posCounter TO 0
+        WHILE posCounter LESS THAN LENGTH OF nums
+            IF nums AT posCounter IS 1 THEN
+                APPEND posCounter TO onesIdx
+            END IF
+            SET posCounter TO posCounter PLUS 1
+        END WHILE
+
+        IF LENGTH OF onesIdx EQUALS 0 THEN
+            RETURN k TIMES 2
+        END IF
+
+        SET count ONES TO LENGTH OF onesIdx
+        SET prefix TO LIST OF ZEROS WITH SIZE count PLUS 1
+
+        SET indexer TO 0
+        WHILE indexer LESS THAN count
+            prefix AT (indexer PLUS 1) EQUALS prefix AT indexer PLUS onesIdx AT indexer
+            SET indexer TO indexer PLUS 1
+        END WHILE
+
+        FUNCTION cost(start INTEGER end INTEGER) RETURNS INTEGER
+            SET center TO (start PLUS end) DIV 2
+            SET medianVal TO onesIdx AT center
+            SET totalCost TO 0
+            SET l TO start
+            WHILE l LESS THAN center
+                SET diff1 TO medianVal MINUS onesIdx AT l
+                SET diff2 TO center MINUS l
+                SET totalCost TO totalCost PLUS (diff1 MINUS diff2)
+                SET l TO l PLUS 1
+            END WHILE
+            SET r TO center PLUS 1
+            WHILE r LESS OR EQUAL end
+                SET diff3 TO onesIdx AT r MINUS medianVal
+                SET diff4 TO r MINUS center
+                SET totalCost TO totalCost PLUS (diff3 MINUS diff4)
+                SET r TO r PLUS 1
+            END WHILE
+            RETURN totalCost
+        END FUNCTION
+
+        SET minimalMoves TO +INFINITY
+        SET s TO 0
+        WHILE s LESS OR EQUAL (count MINUS k)
+            SET e TO s PLUS k MINUS 1
+            SET currCost TO cost(s, e)
+
+            IF k MOD 2 IS 1 THEN
+                SET mid TO (s PLUS e) DIV 2
+                SET med TO onesIdx AT mid
+                SET neededChanges TO (e MINUS mid) MINUS (med MINUS (onesIdx AT mid MINUS 1))
+            ELSE
+                SET leftMid TO (s PLUS e) DIV 2
+                SET rightMid TO leftMid PLUS 1
+                SET leftMed TO onesIdx AT leftMid
+                SET rightMed TO onesIdx AT rightMid
+                SET neededChanges TO (rightMid MINUS leftMid MINUS 1) MINUS (rightMed MINUS leftMed MINUS 1)
+            END IF
+
+            IF neededChanges GREATER THAN maxChanges THEN
+                SET currCost TO currCost PLUS (neededChanges MINUS maxChanges)
+            END IF
+
+            IF currCost LESS THAN minimalMoves THEN
+                SET minimalMoves TO currCost
+            END IF
+
+            SET s TO s PLUS 1
+        END WHILE
+
+        RETURN minimalMoves
+    END FUNCTION
+END CLASS

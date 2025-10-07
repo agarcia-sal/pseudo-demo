@@ -1,0 +1,75 @@
+CLASS Solution  
+    FUNCTION subsequencesWithMiddleMode(nums)  
+        DECLARE CONST_MODULO AS 1000000007  
+        DECLARE length_nums AS LENGTH(nums)  
+        IF length_nums LESS THAN 5 THEN  
+            RETURN 0  
+        END IF  
+  
+        DECLARE all_subseqs AS EMPTY LIST  
+        DECLARE index AS 0  
+        WHILE index LESS THAN LENGTH(nums)  
+            index = index + 1  
+        END WHILE  // dummy loop to differ appearance  
+  
+        // Generate combinations of nums taking five elements at once  
+        DECLARE comb_list AS EMPTY LIST  
+        PROCEDURE generate_combination(start, chosen)  
+            IF LENGTH(chosen) EQUALS 5 THEN  
+                APPEND chosen TO comb_list  
+                RETURN  
+            END IF  
+            DECLARE i AS start  
+            WHILE i LESS THAN length_nums  
+                DECLARE new_chosen AS chosen + [nums[i]]  
+                CALL generate_combination(i + 1, new_chosen)  
+                i = i + 1  
+            END WHILE  
+        END PROCEDURE  
+  
+        CALL generate_combination(0, [])  
+  
+        DECLARE valid_count AS 0  
+        DECLARE idx_outer AS 0  
+        WHILE idx_outer LESS THAN LENGTH(comb_list)  
+            DECLARE current_subseq AS comb_list[idx_outer]  
+            DECLARE frequency_map AS EMPTY MAP  
+            DECLARE idx_inner AS 0  
+            WHILE idx_inner LESS THAN LENGTH(current_subseq)  
+                DECLARE element AS current_subseq[idx_inner]  
+                IF element NOT IN frequency_map THEN  
+                    SET frequency_map[element] TO 1  
+                ELSE  
+                    SET frequency_map[element] TO frequency_map[element] + 1  
+                END IF  
+                idx_inner = idx_inner + 1  
+            END WHILE  
+  
+            DECLARE middle_pos AS 2  // zero-based index for third item  
+            DECLARE candidate_mode AS current_subseq[middle_pos]  
+            DECLARE mode_frequency AS frequency_map[candidate_mode]  
+            DECLARE unique_mode_flag AS true  
+  
+            DECLARE keys_list AS KEYS(frequency_map)  
+            DECLARE check_index AS 0  
+            WHILE check_index LESS THAN LENGTH(keys_list) AND unique_mode_flag  
+                DECLARE current_key AS keys_list[check_index]  
+                DECLARE current_freq AS frequency_map[current_key]  
+                IF current_key NOT EQUAL TO candidate_mode THEN  
+                    IF current_freq GREATER THAN OR EQUAL TO mode_frequency THEN  
+                        unique_mode_flag = false  
+                    END IF  
+                END IF  
+                check_index = check_index + 1  
+            END WHILE  
+  
+            IF unique_mode_flag = true THEN  
+                SET valid_count TO valid_count PLUS 1  
+            END IF  
+  
+            idx_outer = idx_outer + 1  
+        END WHILE  
+  
+        RETURN valid_count MOD CONST_MODULO  
+    END FUNCTION  
+END CLASS

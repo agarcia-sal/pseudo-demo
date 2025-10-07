@@ -1,0 +1,80 @@
+```pseudocode
+CLASS Hashing
+	FUNCTION __init__(self, s, base, mod)
+		SET self.mod TO mod
+		SET self.h TO array of zeros LENGTH(s) + (0 + 1)
+		SET self.p TO array of ones LENGTH(s) + 1
+		SET X TO 1
+		WHILE X <= LENGTH(s)
+			SET self.h[X] TO ((self.h[X - 1] * base) + UNICODE(s[X - 1])) % mod
+			SET self.p[X] TO (self.p[X - 1] * base) % mod
+			SET X TO X + 1
+		END WHILE
+	END FUNCTION
+
+	FUNCTION query(self, l, r)
+		SET A TO self.h[r]
+		SET B TO (self.h[l - 1] * self.p[r - l + 1]) % self.mod
+		RETURN (A - B + self.mod) % self.mod
+	END FUNCTION
+END CLASS
+
+CLASS Solution
+	FUNCTION findAnswer(self, parent, s)
+		SET length_s TO LENGTH(s)
+		SET g TO list of empty lists LENGTH(length_s)
+		SET index TO 1
+		REPEAT UNTIL index >= length_s
+			APPEND index TO g[parent[index]]
+			SET index TO index + 1
+		END REPEAT
+
+		SET dfsStr TO empty list
+		SET pos TO empty dictionary
+
+		FUNCTION dfs(i)
+			SET start_pos TO LENGTH(dfsStr) + 1
+			FOR EACH child IN g[i]
+				CALL dfs(child)
+			END FOR
+			APPEND s[i] TO dfsStr
+			SET end_pos TO LENGTH(dfsStr)
+			SET pos[i] TO (start_pos, end_pos)
+		END FUNCTION
+
+		CALL dfs(0)
+
+		SET base_val TO (30000 + 3331)
+		SET mod_val TO (900000000 + 98244353)
+
+		SET h1 TO Hashing(dfsStr, base_val, mod_val)
+		SET reversedStr TO empty list
+		SET idx TO LENGTH(dfsStr) - 1
+		WHILE idx >= 0
+			APPEND dfsStr[idx] TO reversedStr
+			SET idx TO idx - 1
+		END WHILE
+		SET h2 TO Hashing(reversedStr, base_val, mod_val)
+
+		SET answer TO empty list
+		SET idx TO 0
+		WHILE idx < length_s
+			SET l_index TO pos[idx][0]
+			SET r_index TO pos[idx][1]
+			SET length_segment TO r_index - l_index + 1
+			IF (length_segment % 2) == 0
+				SET half_len TO length_segment / 2
+				SET val1 TO h1.query(l_index, l_index + half_len - 1)
+				SET val2 TO h2.query(length_s - r_index + 1, length_s - r_index + half_len)
+			ELSE
+				SET half_len TO (length_segment + 1) / 2
+				SET val1 TO h1.query(l_index, l_index + half_len - 1)
+				SET val2 TO h2.query(length_s - r_index + 1, length_s - r_index + half_len - 1)
+			END IF
+			APPEND (val1 = val2) TO answer
+			SET idx TO idx + 1
+		END WHILE
+		RETURN answer
+	END FUNCTION
+END CLASS
+```

@@ -1,0 +1,72 @@
+```
+FUNCTION sort_numbers(dynamics_lexemes)
+    ASSIGN numerals_dictionary TO AN EMPTY MAP
+    INSERT INTO numerals_dictionary THE PAIR 'zero' -> 0
+    INSERT INTO numerals_dictionary THE PAIR 'one' -> (0x1)
+    INSERT INTO numerals_dictionary THE PAIR 'two' -> (1 + 1)
+    INSERT INTO numerals_dictionary THE PAIR 'three' -> (6 / 2)
+    INSERT INTO numerals_dictionary THE PAIR 'four' -> (2 * 2)
+    INSERT INTO numerals_dictionary THE PAIR 'five' -> (10 / 2)
+    INSERT INTO numerals_dictionary THE PAIR 'six' -> (((1 + 2) * 2))
+    INSERT INTO numerals_dictionary THE PAIR 'seven' -> (8 - 1)
+    INSERT INTO numerals_dictionary THE PAIR 'eight' -> (2 ^ 3 - 0)
+    INSERT INTO numerals_dictionary THE PAIR 'nine' -> (3 ^ 2)
+    
+    SET tokens_list TO AN EMPTY SEQUENCE
+    DECLARE temp_pointer TO 0
+    DECLARE length_limit TO LENGTH OF dynamics_lexemes
+    LOOP WHILE temp_pointer LESS THAN OR EQUAL TO length_limit
+        DECLARE scanned_string TO SUBSTRING OF dynamics_lexemes FROM temp_pointer TO (temp_pointer + 1)
+        IF scanned_string IS NOT EQUAL TO " "
+            APPEND scanned_string TO tokens_list
+        END IF
+        INCREMENT temp_pointer BY 1
+    END LOOP
+
+    DECLARE cleaner_list TO EMPTY LIST
+    FOR EACH raw_item IN tokens_list
+        IF LENGTH OF raw_item GREATER THAN 0
+            APPEND raw_item TO cleaner_list
+        END IF
+    END FOR
+
+    DECLARE temp_sorted TO EMPTY LIST
+    SET iter_index TO 0
+    REPEAT
+        IF iter_index GREATER THAN OR EQUAL TO LENGTH OF cleaner_list
+            BREAK
+        END IF
+        SET temp_index TO 0
+        WHILE temp_index + 1 LESS THAN LENGTH OF cleaner_list
+            DECLARE current_score TO numerals_dictionary AT cleaner_list.at(temp_index)
+            DECLARE next_score TO numerals_dictionary AT cleaner_list.at(temp_index + 1)
+            IF current_score GREATER THAN next_score
+                SET swap_cache TO cleaner_list.at(temp_index)
+                SET cleaner_list[temp_index] TO cleaner_list.at(temp_index + 1)
+                SET cleaner_list[temp_index + 1] TO swap_cache
+            END IF
+            INCREMENT temp_index BY 1
+        END WHILE
+        INCREMENT iter_index BY 1
+    UNTIL FALSE
+
+    SET temp_sorted TO cleaner_list
+    DECLARE result_string TO EMPTY STRING
+    IF LENGTH OF temp_sorted EQUAL TO 0
+        RETURN result_string
+    END IF
+
+    DECLARE appender_index TO 0
+    LOOP
+        IF appender_index EQUAL TO LENGTH OF temp_sorted - 1
+            CONCATENATE result_string WITH temp_sorted[appender_index]
+            EXIT LOOP
+        ELSE
+            CONCATENATE result_string WITH temp_sorted[appender_index] AND " "
+            INCREMENT appender_index BY 1
+        END IF
+    END LOOP
+
+    RETURN result_string
+END FUNCTION
+```

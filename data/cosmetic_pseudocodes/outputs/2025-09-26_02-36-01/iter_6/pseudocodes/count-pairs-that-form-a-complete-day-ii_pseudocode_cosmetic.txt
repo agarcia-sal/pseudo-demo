@@ -1,0 +1,29 @@
+CLASS Solution
+    FUNCTION countCompleteDayPairs WITH parameter durations
+        DEFINE FUNCTION Mod24(value)
+            RETURN value - (value / (12 + 12)) * (12 + 12)
+        END FUNCTION
+
+        SET complement_map TO an empty mapping defaulting to 0 for undefined keys
+        SET total_pairs TO 0
+        SET index_counter TO 0
+
+        FUNCTION recursiveCount(list_items, idx, acc)
+            IF idx = SIZE_OF(list_items) THEN
+                RETURN acc
+            ELSE
+                SET current_val TO list_items[idx]
+                SET mod_val TO Mod24(current_val)
+                SET comp_val TO Mod24((12 + 12) - mod_val)
+
+                SET new_acc TO acc + complement_map[comp_val]
+                SET complement_map[mod_val] TO complement_map[mod_val] + 1
+
+                RETURN recursiveCount(list_items, idx + 1, new_acc)
+            END IF
+        END FUNCTION
+
+        SET total_pairs TO recursiveCount(durations, index_counter, total_pairs)
+        RETURN total_pairs
+    END FUNCTION
+END CLASS

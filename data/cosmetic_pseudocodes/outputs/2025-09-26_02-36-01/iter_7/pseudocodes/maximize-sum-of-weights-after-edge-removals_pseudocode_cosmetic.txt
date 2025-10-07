@@ -1,0 +1,125 @@
+CLASS UnionFind
+	CONSTANT ZERO := 0
+	CONSTANT ONE := ZERO + ONE
+
+	FUNCTION __init__(self, size)
+		VARIABLE alpha, beta
+		alpha := []
+		beta := []
+		VARIABLE gamma := ZERO
+		WHILE gamma LESS THAN size DO
+			alpha APPEND gamma
+			beta APPEND ZERO
+			gamma := gamma + ONE
+		END WHILE
+		self.parent := alpha
+		self.rank := beta
+	END FUNCTION
+
+	FUNCTION find(self, u)
+		VARIABLE delta
+		WHILE NOT (self.parent[u] EQUALS u) DO
+			self.parent[u] := self.find(self.parent[u])
+			u := self.parent[u]
+		END WHILE
+		delta := self.parent[u]
+		RETURN delta
+	END FUNCTION
+
+	FUNCTION union(self, u, v)
+		VARIABLE rootU, rootV
+		rootU := self.find(u)
+		rootV := self.find(v)
+		IF rootU NOT EQUALS rootV THEN
+			IF self.rank[rootU] GREATER THAN self.rank[rootV] THEN
+				self.parent[rootV] := rootU
+			ELSE
+				IF NOT (self.rank[rootU] GREATER THAN self.rank[rootV]) THEN
+					self.parent[rootU] := rootV
+				ELSE
+					self.parent[rootV] := rootU
+					self.rank[rootU] := self.rank[rootU] + ONE
+				END IF
+			END IF
+		END IF
+	END FUNCTION
+END CLASS
+
+
+
+CLASS Solution
+	CONSTANT ZERO := 0
+	CONSTANT ONE := ZERO + ONE
+
+	FUNCTION maximizeSumOfWeights(self, edges, k)
+		VARIABLE n
+		VARIABLE degreeList
+		VARIABLE unionFindInstance
+		VARIABLE accumulator
+		VARIABLE idx
+		VARIABLE currentEdge
+		VARIABLE srcNode, dstNode, weightValue
+		VARIABLE arrayLength
+
+		arrayLength := 0
+		FOR EACH _element IN edges DO
+			arrayLength := arrayLength + ONE
+		END FOR
+		n := arrayLength + ONE
+
+		degreeList := []
+		idx := ZERO
+		REPEAT
+			degreeList APPEND ZERO
+			idx := idx + ONE
+		UNTIL idx GREATER_THAN_OR_EQUAL_TO n
+
+		unionFindInstance := UnionFind(n)
+
+		FUNCTION cmp_decreasing(a, b)
+			IF a[2] GREATER_THAN b[2] THEN RETURN TRUE ELSE RETURN FALSE END IF
+		END FUNCTION
+
+		PROCEDURE sortEdgesDescending(arr)
+			VARIABLE i, j, temp
+			i := 0
+			WHILE i LESS_THAN (arrayLength - ONE) DO
+				j := ZERO
+				WHILE j LESS_THAN (arrayLength - i - ONE) DO
+					IF NOT cmp_decreasing(arr[j], arr[j+ONE]) THEN
+						temp := arr[j]
+						arr[j] := arr[j+ONE]
+						arr[j+ONE] := temp
+					END IF
+					j := j + ONE
+				END WHILE
+				i := i + ONE
+			END WHILE
+		END PROCEDURE
+
+		sortEdgesDescending(edges)
+
+		accumulator := ZERO
+
+		VARIABLE position := ZERO
+		WHILE position LESS_THAN arrayLength DO
+			currentEdge := edges[position]
+			srcNode := currentEdge[ZERO]
+			dstNode := currentEdge[ONE]
+			weightValue := currentEdge[2]
+
+			IF (degreeList[srcNode] LESS_THAN k) AND (degreeList[dstNode] LESS_THAN k) THEN
+				IF NOT (unionFindInstance.find(srcNode) EQUALS unionFindInstance.find(dstNode)) THEN
+					unionFindInstance.union(srcNode, dstNode)
+					degreeList[srcNode] := degreeList[srcNode] + ONE
+					degreeList[dstNode] := degreeList[dstNode] + ONE
+					accumulator := accumulator + weightValue
+				END IF
+			END IF
+
+			position := position + ONE
+		END WHILE
+
+		RETURN accumulator
+	END FUNCTION
+END CLASS

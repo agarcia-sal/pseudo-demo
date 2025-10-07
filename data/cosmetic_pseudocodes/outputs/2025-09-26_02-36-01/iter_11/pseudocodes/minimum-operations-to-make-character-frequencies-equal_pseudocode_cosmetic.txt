@@ -1,0 +1,92 @@
+CLASS Solution  
+    FUNCTION makeStringGood(s)  
+        SET qzghb TO a sequence of 26 zeros  
+        SET auvnd TO 0  
+        WHILE auvnd LESS THAN LENGTH of s  
+            SET zyxwr TO ASCII VALUE of s[auvnd]  
+            SET uppem TO ASCII VALUE of 'a'  
+            SET qzghb[zyxwr - uppem] TO qzghb[zyxwr - uppem] + 1  
+            SET auvnd TO auvnd + 1  
+        END WHILE  
+
+        FUNCTION assembleMinOps(ops)  
+            SET rcxmy TO ops[0]  
+            SET itjvn TO 1  
+            REPEAT UNTIL itjvn EQUALS LENGTH of ops  
+                IF ops[itjvn] LESS THAN rcxmy THEN  
+                    SET rcxmy TO ops[itjvn]  
+                END IF  
+                SET itjvn TO itjvn + 1  
+            END REPEAT  
+            RETURN rcxmy  
+        END FUNCTION  
+
+        FUNCTION rangeIterator(startVal, endVal)  
+            SET currentVal TO startVal  
+            RETURN FUNCTION()  
+                IF currentVal GREATER THAN endVal THEN RETURN NULL END IF  
+                SET retVal TO currentVal  
+                SET currentVal TO currentVal + 1  
+                RETURN retVal  
+            END FUNCTION  
+        END FUNCTION  
+
+        SET topCount TO 0  
+        SET idxIter TO 0  
+        WHILE idxIter LESS THAN LENGTH of qzghb  
+            IF qzghb[idxIter] GREATER THAN topCount THEN  
+                SET topCount TO qzghb[idxIter]  
+            END IF  
+            SET idxIter TO idxIter + 1  
+        END WHILE  
+
+        SET accumOps TO []  
+        SET rangeNext TO rangeIterator(1, topCount)  
+        WHILE TRUE  
+            SET tgtVal TO rangeNext()  
+            IF tgtVal IS NULL THEN BREAK END IF  
+            SET opRes TO _getMinOperations(qzghb, tgtVal)  
+            APPEND opRes TO accumOps  
+        END WHILE  
+
+        RETURN assembleMinOps(accumOps)  
+    END FUNCTION  
+
+    FUNCTION _getMinOperations(count, target)  
+        SET ixrdao TO 27 zeros  
+        SET indAfter TO 25  
+        FUNCTION minVal(a, b)  
+            IF a LESS THAN b THEN RETURN a ELSE RETURN b END IF  
+        END FUNCTION  
+
+        WHILE indAfter >= 0  
+            SET dltAll TO count[indAfter]  
+            IF target GREATER THAN count[indAfter] THEN  
+                SET dltOrIns TO target - count[indAfter]  
+            ELSE  
+                SET dltOrIns TO count[indAfter] - target  
+            END IF  
+            SET baseRes TO minVal(dltAll, dltOrIns + ixrdao[indAfter])  
+
+            IF indAfter + 1 LESS THAN 26 AND count[indAfter + 1] LESS THAN target THEN  
+                SET nxtDfct TO target - count[indAfter + 1]  
+                IF count[indAfter] LESS THAN OR EQUAL TO target THEN  
+                    SET chgNeeded TO count[indAfter]  
+                ELSE  
+                    SET chgNeeded TO count[indAfter] - target  
+                END IF  
+
+                IF nxtDfct GREATER THAN chgNeeded THEN  
+                    SET chgToTarget TO chgNeeded + (nxtDfct - chgNeeded)  
+                ELSE  
+                    SET chgToTarget TO nxtDfct + (chgNeeded - nxtDfct)  
+                END IF  
+
+                SET baseRes TO minVal(baseRes, chgToTarget + ixrdao[indAfter] + 1)  
+            END IF  
+            SET ixrdao[indAfter] TO baseRes  
+            SET indAfter TO indAfter - 1  
+        END WHILE  
+        RETURN ixrdao[0]  
+    END FUNCTION  
+END CLASS

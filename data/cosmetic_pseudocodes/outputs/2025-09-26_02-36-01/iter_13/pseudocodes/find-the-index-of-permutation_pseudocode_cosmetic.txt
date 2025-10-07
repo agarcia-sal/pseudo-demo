@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION getPermutationIndex(perm)
+        DEFINE MAX_MODULUS AS (5 * 2) ^ 9 + 1
+        LET lengthVal BE SIZE OF perm
+        LET factorialList BE ARRAY OF SIZE lengthVal WITH ALL ELEMENTS INITIALIZED TO 1
+
+        FUNCTION buildFactorials(pos, limit, container)
+            IF pos > limit THEN
+                RETURN
+            ELSE
+                LET priorFact BE container[pos - 1]
+                LET currentFact BE priorFact * pos
+                SET container[pos] TO currentFact
+                CALL buildFactorials(pos + 1, limit, container)
+            ENDIF
+        END FUNCTION
+
+        CALL buildFactorials(2, lengthVal - 1, factorialList)
+
+        FUNCTION createNumberList(start, end, acc)
+            IF start > end THEN
+                RETURN acc
+            ELSE
+                RETURN createNumberList(start + 1, end, acc + [start])
+            ENDIF
+        END FUNCTION
+
+        LET availableNumbers BE createNumberList(1, lengthVal, [])
+
+        FUNCTION findPositionAndRemove(value, list)
+            FUNCTION helperSearch(lst, idx)
+                IF lst IS EMPTY THEN
+                    RETURN -1
+                ELSEIF lst[0] = value THEN
+                    RETURN idx
+                ELSE
+                    RETURN helperSearch(lst[1:], idx + 1)
+                ENDIF
+            END FUNCTION
+
+            LET posFound BE helperSearch(list, 0)
+            LET beforePart BE list[0:posFound]
+            LET afterPart BE list[posFound + 1:]
+            LET newList BE beforePart + afterPart
+            RETURN (posFound, newList)
+        END FUNCTION
+
+        LET totalIndex BE 0
+        LET iteration BE 0
+
+        WHILE iteration < lengthVal DO
+            LET currentVal BE perm[iteration]
+            LET (position, updatedNumbers) BE findPositionAndRemove(currentVal, availableNumbers)
+            LET factorIndex BE lengthVal - iteration - 1
+            LET additionVal BE position * factorialList[factorIndex]
+            SET totalIndex TO totalIndex + additionVal
+            SET availableNumbers TO updatedNumbers
+            SET iteration TO iteration + 1
+        END WHILE
+
+        RETURN totalIndex MOD MAX_MODULUS
+    END FUNCTION
+END CLASS

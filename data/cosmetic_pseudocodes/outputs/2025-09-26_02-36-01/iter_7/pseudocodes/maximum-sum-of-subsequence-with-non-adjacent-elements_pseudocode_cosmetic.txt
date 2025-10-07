@@ -1,0 +1,52 @@
+CLASS Solution  
+	FUNCTION maximumSumSubsequence(nums, queries)  
+		CONST LIMIT ← (10 ^ 9) + 1  
+		LET lengthCount ← LENGTH(nums)  
+		
+		LET takeDP ← ARRAY(lengthCount) FILLED WITH SET(0)  
+		LET skipDP ← ARRAY(lengthCount) FILLED WITH SET(0)  
+		
+		ASSIGN takeDP[0] ← IF 0 > nums[0] THEN 0 ELSE nums[0] ENDIF  
+		ASSIGN skipDP[0] ← 0  
+		
+		LET iterator ← 1  
+		WHILE iterator < lengthCount DO  
+			ASSIGN takeDP[iterator] ← IF 0 > (skipDP[iterator - 1] + nums[iterator]) THEN 0 ELSE (skipDP[iterator - 1] + nums[iterator]) ENDIF  
+			ASSIGN skipDP[iterator] ← IF skipDP[iterator - 1] > takeDP[iterator - 1] THEN skipDP[iterator - 1] ELSE takeDP[iterator - 1] ENDIF  
+			iterator ← iterator + 1  
+		END WHILE  
+		
+		LET accumulatedResult ← 0  
+
+		FUNCTION updateDP(startIndex)  
+			LET idx ← startIndex + 1  
+			REPEAT  
+				IF NOT (idx < lengthCount) THEN  
+					RETURN  
+				ENDIF  
+				ASSIGN takeDP[idx] ← IF 0 > (skipDP[idx - 1] + nums[idx]) THEN 0 ELSE skipDP[idx - 1] + nums[idx] ENDIF  
+				ASSIGN skipDP[idx] ← IF skipDP[idx - 1] > takeDP[idx - 1] THEN skipDP[idx - 1] ELSE takeDP[idx - 1] ENDIF  
+				idx ← idx + 1  
+			UNTIL FALSE  
+		END FUNCTION  
+		
+		FOR EACH (position, val) IN queries DO  
+			nums[position] ← val  
+			
+			IF position = 0 THEN  
+				takeDP[position] ← IF 0 > nums[position] THEN 0 ELSE nums[position] ENDIF  
+				skipDP[position] ← 0  
+			ELSE  
+				takeDP[position] ← IF 0 > (skipDP[position - 1] + nums[position]) THEN 0 ELSE (skipDP[position - 1] + nums[position]) ENDIF  
+				skipDP[position] ← IF skipDP[position - 1] > takeDP[position - 1] THEN skipDP[position - 1] ELSE takeDP[position - 1] ENDIF  
+			END IF  
+			
+			updateDP(position)  
+			
+			LET maxEndVal ← IF takeDP[lengthCount - 1] > skipDP[lengthCount - 1] THEN takeDP[lengthCount - 1] ELSE skipDP[lengthCount - 1] ENDIF  
+			accumulatedResult ← (accumulatedResult + maxEndVal) % LIMIT  
+		END FOR  
+		
+		RETURN accumulatedResult  
+	END FUNCTION  
+END CLASS

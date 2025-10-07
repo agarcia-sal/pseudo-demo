@@ -1,0 +1,58 @@
+```pseudocode
+CLASS Solution
+	FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+		FUNCTION delta_update(freq LIST OF integers val integer delta integer)
+			SET bit_flag TO 1
+			SET idx TO 0
+			WHILE idx LESS THAN 32
+				IF (val BITWISE_AND bit_flag) NOT_EQUALS 0 THEN
+					SET freq[idx] TO freq[idx] PLUS delta
+				END IF
+				SET bit_flag TO bit_flag TIMES 2
+				SET idx TO idx PLUS 1
+			END WHILE
+		END FUNCTION
+
+		FUNCTION aggregate_or(freq LIST OF integers) RETURNS integer
+			SET acc TO 0
+			SET pos TO 0
+			REPEAT UNTIL pos EQUALS 32
+				IF freq[pos] GREATER_THAN 0
+					SET acc TO acc BITWISE_OR (1 SHIFT_LEFT pos)
+				END IF
+				SET pos TO pos PLUS 1
+			END REPEAT
+			RETURN acc
+		END FUNCTION
+
+		SET length_nums TO LENGTH OF nums
+		SET counts TO LIST OF 0 REPEATED 32 TIMES
+		SET or_value TO 0
+		SET start_idx TO 0
+		SET best_len TO INFINITY
+
+		SET end_idx TO 0
+		WHILE end_idx LESS_THAN length_nums
+			CALL delta_update WITH counts nums[end_idx] 1
+			SET or_value TO or_value BITWISE_OR nums[end_idx]
+
+			WHILE or_value GREATER_THAN_OR_EQUAL k AND start_idx LESS_THAN_OR_EQUAL end_idx
+				IF best_len GREATER_THAN (end_idx MINUS start_idx PLUS 1)
+					SET best_len TO (end_idx MINUS start_idx PLUS 1)
+				END IF
+				CALL delta_update WITH counts nums[start_idx] -1
+				SET or_value TO CALL aggregate_or WITH counts
+				SET start_idx TO start_idx PLUS 1
+			END WHILE
+
+			SET end_idx TO end_idx PLUS 1
+		END WHILE
+
+		IF best_len EQUALS INFINITY
+			RETURN -1
+		ELSE
+			RETURN best_len
+		END IF
+	END FUNCTION
+END CLASS
+```

@@ -1,0 +1,41 @@
+CLASS Solution
+    FUNCTION largestSquareArea(bottomLeft, topRight)
+        FUNCTION intersecting_square_area(bl1, tr1, bl2, tr2)
+            PROCEDURE max_val(a, b) RETURN (a + b + ABS(a - b)) / 2 END PROCEDURE
+            PROCEDURE min_val(a, b) RETURN (a + b - ABS(a - b)) / 2 END PROCEDURE
+
+            SET u1 TO max_val(bl1[0], bl2[0])
+            SET u2 TO min_val(tr1[0], tr2[0])
+            SET v1 TO max_val(bl1[1], bl2[1])
+            SET v2 TO min_val(tr1[1], tr2[1])
+
+            IF u1 >= u2 OR v1 >= v2 THEN
+                RETURN 0
+            END IF
+
+            SET side_length TO min_val(u2 - u1, v2 - v1)
+
+            RETURN side_length * side_length
+        END FUNCTION
+
+        FUNCTION recursive_i(idx, high, acc)
+            IF idx > high THEN RETURN acc END IF
+
+            FUNCTION recursive_j(jdx, highj, current_max)
+                IF jdx > highj THEN RETURN current_max END IF
+
+                SET area_here TO intersecting_square_area(bottomLeft[idx], topRight[idx], bottomLeft[jdx], topRight[jdx])
+                SET updated_max TO (area_here + current_max + ABS(area_here - current_max)) / 2
+
+                RETURN recursive_j(jdx + 1, highj, updated_max)
+            END FUNCTION
+
+            SET max_for_i TO recursive_j(idx + 1, high, acc)
+            SET new_acc TO (max_for_i + acc + ABS(max_for_i - acc)) / 2
+
+            RETURN recursive_i(idx + 1, high, new_acc)
+        END FUNCTION
+
+        RETURN recursive_i(0, LEN(bottomLeft) - 1, 0)
+    END FUNCTION
+END CLASS

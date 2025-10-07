@@ -1,0 +1,47 @@
+```
+CLASS Solution
+    FUNCTION findPermutation(nums)
+        FUNCTION explore(current_mask, previous_value)
+            IF NOT (current_mask XOR (((1 << LENGTH(nums)) - 1))) THEN
+                RETURN ABS(previous_value - nums[0])
+            ELSE
+                VARIABLE min_result ← +∞
+                VARIABLE index_var ← 0
+                WHILE index_var < LENGTH(nums) DO
+                    IF ((current_mask >> index_var) & 1) == 0 THEN
+                        VARIABLE temp_calc ← ABS(previous_value - nums[index_var]) + explore(current_mask | (1 << index_var), index_var)
+                        IF min_result > temp_calc THEN
+                            min_result ← temp_calc
+                        END IF
+                    END IF
+                    index_var ← index_var + 1
+                END WHILE
+                RETURN min_result
+            END IF
+        END FUNCTION
+
+        FUNCTION buildSolution(accum_mask, last_idx)
+            CALL ans.APPEND(last_idx)
+            IF accum_mask == ((1 << LENGTH(nums)) - 1) THEN
+                RETURN
+            ELSE
+                VARIABLE target ← explore(accum_mask, last_idx)
+                FOR iterator_var FROM 0 TO LENGTH(nums) - 1 STEP 1 DO
+                    IF ((accum_mask >> iterator_var) & 1) == 0 THEN
+                        VARIABLE candidate_score ← ABS(last_idx - nums[iterator_var]) + explore(accum_mask | (1 << iterator_var), iterator_var)
+                        IF candidate_score == target THEN
+                            CALL buildSolution(accum_mask | (1 << iterator_var), iterator_var)
+                            EXIT FOR
+                        END IF
+                    END IF
+                END FOR
+            END IF
+        END FUNCTION
+
+        VARIABLE length_val ← LENGTH(nums)
+        VARIABLE ans ← []
+        CALL buildSolution(1 << 0, 0)
+        RETURN ans
+    END FUNCTION
+END CLASS
+```

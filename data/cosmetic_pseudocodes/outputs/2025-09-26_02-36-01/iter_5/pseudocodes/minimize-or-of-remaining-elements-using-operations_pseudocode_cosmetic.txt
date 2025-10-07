@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION minOrAfterOperations(nums k)
+        FUNCTION canAchieve(target_or k)
+            SET def_and TO -1
+            SET ops_counter TO 0
+
+            FUNCTION recur_check(idx def_and ops_counter)
+                IF idx EQUALS LENGTH(nums)
+                    RETURN TRUE
+                END IF
+
+                SET current_val TO nums[idx]
+                SET updated_and TO def_and
+
+                IF def_and EQUALS -1
+                    SET updated_and TO current_val
+                    SET increment_needed TO 0
+                ELSE
+                    SET updated_and TO def_and BITWISE_AND current_val
+                    IF (updated_and BITWISE_AND target_or) EQUALS 0
+                        SET updated_and TO -1
+                        SET increment_needed TO 0
+                    ELSE
+                        SET increment_needed TO 1
+                    END IF
+                END IF
+
+                SET new_ops TO ops_counter + increment_needed
+                IF new_ops GREATER_THAN k
+                    RETURN FALSE
+                ELSE
+                    RETURN recur_check(idx + 1 updated_and new_ops)
+                END IF
+            END FUNCTION
+
+            RETURN recur_check(0 def_and ops_counter)
+        END FUNCTION
+
+        SET upper_limit TO (1 << 30) - 1
+        SET answer_value TO upper_limit
+
+        SET bit_pos TO 0
+        WHILE bit_pos LESS_THAN 30
+            SET mask_val TO (1 << bit_pos)
+            IF (answer_value BITWISE_AND mask_val) EQUALS 0
+                SET bit_pos TO bit_pos + 1
+                CONTINUE
+            END IF
+
+            SET test_val TO BITWISE_NOT(answer_value) BITWISE_XOR mask_val
+
+            IF canAchieve(test_val k)
+                SET answer_value TO answer_value BITWISE_AND BITWISE_NOT(mask_val)
+            END IF
+
+            SET bit_pos TO bit_pos + 1
+        END WHILE
+
+        RETURN answer_value
+    END FUNCTION
+END CLASS

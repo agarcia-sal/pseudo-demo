@@ -1,0 +1,124 @@
+CLASS Fenwick
+    FUNCTION __init__(self, n)
+      SET self.tree TO a list initialized by a helper NEW_ZERO_LIST of argument n PLUS 1
+    END FUNCTION
+
+    FUNCTION add(self, i)
+      CALL add_recursive(self, i)
+    END FUNCTION
+
+    FUNCTION add_recursive(self, idx)
+      IF idx GREATER THAN OR EQUAL TO LENGTH_OF(self.tree)
+        RETURN
+      END IF
+
+      INCREMENT ELEMENT_AT(self.tree, idx) BY 1
+      CALL add_recursive(self, idx PLUS (idx BITWISE_AND (NEGATE idx)))
+    END FUNCTION
+
+    FUNCTION pre(self, i)
+      SET total TO 0
+      WHILE i GREATER THAN 0
+        SET total TO total PLUS ELEMENT_AT(self.tree, i)
+        SET i TO (i BITWISE_AND (i MINUS 1))
+      END WHILE
+      RETURN total
+    END FUNCTION
+
+    FUNCTION query(self, l, r)
+      SET left_val TO self.pre(l MINUS 1)
+      SET right_val TO self.pre(r)
+      RETURN right_val MINUS left_val
+    END FUNCTION
+
+    FUNCTION NEW_ZERO_LIST(size)
+      SET output TO EMPTY_LIST
+      SET counter TO 0
+      WHILE counter LESS THAN size
+        APPEND 0 TO output
+        INCREMENT counter BY 1
+      END WHILE
+      RETURN output
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)
+    SET point_pairs TO SORTED_LIST(by x THEN y) OF ZIP(xCoord, yCoord)
+
+    FUNCTION unique_sorted_list(input_list)
+      SET temp_list TO EMPTY_LIST
+      FOR idx FROM 0 TO (LENGTH_OF(input_list) MINUS 1)
+        IF idx EQUALS 0 OR NOT(input_list[idx] EQUALS input_list[idx MINUS 1])
+          APPEND input_list[idx] TO temp_list
+        END IF
+      END FOR
+      RETURN temp_list
+    END FUNCTION
+
+    SET ys TO unique_sorted_list(SORTED_LIST(yCoord))
+
+    FUNCTION bisect_left_custom(sorted_list, val)
+      RETURN bisect_left_impl(sorted_list, val, 0, LENGTH_OF(sorted_list))
+    END FUNCTION
+
+    FUNCTION bisect_left_impl(arr, target, low, high)
+      IF low GREATER THAN OR EQUAL TO high
+        RETURN low
+      END IF
+      SET mid TO low PLUS ((high MINUS low) DIVIDED_BY 2)
+      IF ELEMENT_AT(arr, mid) LESS THAN target
+        RETURN bisect_left_impl(arr, target, mid PLUS 1, high)
+      ELSE
+        RETURN bisect_left_impl(arr, target, low, mid)
+      END IF
+    END FUNCTION
+
+    SET ans TO NEGATE 1
+    SET fenw TO Fenwick(LENGTH_OF(ys))
+    CALL fenw.add(bisect_left_custom(ys, ELEMENT_AT(point_pairs, 0)[1]) PLUS 1)
+
+    SET pre_map TO EMPTY_DICTIONARY
+
+    FUNCTION iterate_pairs(pairs)
+      IF LENGTH_OF(pairs) LESS THAN 2
+        RETURN
+      END IF
+      CALL process_pair(pairs, 0)
+    END FUNCTION
+
+    FUNCTION process_pair(lst, idx)
+      IF idx GREATER_THAN LENGTH_OF(lst) MINUS 2
+        RETURN
+      END IF
+      SET a TO ELEMENT_AT(lst, idx)
+      SET b TO ELEMENT_AT(lst, idx PLUS 1)
+
+      SET y_val TO bisect_left_custom(ys, b[1]) PLUS 1
+      CALL fenw.add(y_val)
+
+      IF a[0] NOT EQUALS b[0]
+        CALL process_pair(lst, idx PLUS 1)
+        RETURN
+      END IF
+
+      SET cur_val TO fenw.query(bisect_left_custom(ys, a[1]) PLUS 1, y_val)
+      IF b[1] IN pre_map
+         SET stored TO pre_map[b[1]]
+         IF stored[1] EQUALS a[1] AND (stored[2] PLUS 2) EQUALS cur_val
+           SET area_candidate TO (b[0] MINUS stored[0]) TIMES (b[1] MINUS a[1])
+           IF area_candidate GREATER THAN ans
+             SET ans TO area_candidate
+           END IF
+         END IF
+      END IF
+
+      SET pre_map[b[1]] TO (a[0], a[1], cur_val)
+
+      CALL process_pair(lst, idx PLUS 1)
+    END FUNCTION
+
+    CALL iterate_pairs(point_pairs)
+    RETURN ans
+    END FUNCTION
+END CLASS

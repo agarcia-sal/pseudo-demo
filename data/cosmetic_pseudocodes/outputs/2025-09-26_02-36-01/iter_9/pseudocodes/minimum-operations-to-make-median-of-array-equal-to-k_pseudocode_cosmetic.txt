@@ -1,0 +1,89 @@
+CLASS Solution
+    FUNCTION minOperationsToMakeMedianK(alpha beta)
+        CALL bubbleSortAscending(beta)
+        SET theta TO LENGTH(beta)
+        SET mu TO FLOOR(theta / 2)
+        IF getElement(beta, mu) == alpha THEN
+            RETURN 0
+        END IF
+
+        SET sigma TO 0
+        IF lessThan(getElement(beta, mu), alpha) THEN
+            PERFORM incrementTowardAlpha(beta, mu, theta, alpha, sigma)
+        ELSE
+            PERFORM decrementTowardAlpha(beta, mu, alpha, sigma)
+        END IF
+
+        RETURN sigma
+    END FUNCTION
+
+
+    PROCEDURE bubbleSortAscending(arr)
+        SET zeta TO LENGTH(arr)
+        SET psi TO 0
+        WHILE psi < zeta - 1
+            SET omicron TO 0
+            WHILE omicron < zeta - psi - 1
+                IF greaterThan(arr[omicron], arr[omicron + 1])
+                    CALL swapElements(arr, omicron, omicron + 1)
+                END IF
+                SET omicron TO omicron + 1
+            END WHILE
+            SET psi TO psi + 1
+        END WHILE
+    END PROCEDURE
+
+
+    PROCEDURE swapElements(arr, idx1, idx2)
+        SET tempVar TO arr[idx1]
+        SET arr[idx1] TO arr[idx2]
+        SET arr[idx2] TO tempVar
+    END PROCEDURE
+
+
+    FUNCTION getElement(arr, idx)
+        RETURN arr[idx]
+    END FUNCTION
+
+
+    FUNCTION lessThan(val1, val2)
+        RETURN NOT (val1 >= val2)
+    END FUNCTION
+
+
+    FUNCTION greaterThan(val1, val2)
+        RETURN val1 > val2
+    END FUNCTION
+
+
+    PROCEDURE incrementTowardAlpha(arr, muRef, totalLength, alphaVal, sigmaRef)
+        DEFINE LOCAL FUNCTION reachesLimit(index, limit)
+            RETURN index >= limit
+        END FUNCTION
+
+        WHILE lessThan(getElement(arr, muRef), alphaVal)
+            SET diff TO alphaVal - getElement(arr, muRef)
+            SET sigmaRef TO sigmaRef + diff
+            SET muRef TO muRef + 1
+            IF reachesLimit(muRef, totalLength)
+                BREAK
+            END IF
+        END WHILE
+    END PROCEDURE
+
+
+    PROCEDURE decrementTowardAlpha(arr, muRef, alphaVal, sigmaRef)
+        DEFINE LOCAL FUNCTION belowZero(idx)
+            RETURN idx < 0
+        END FUNCTION
+
+        WHILE greaterThan(getElement(arr, muRef), alphaVal)
+            SET diff TO getElement(arr, muRef) - alphaVal
+            SET sigmaRef TO sigmaRef + diff
+            SET muRef TO muRef - 1
+            IF belowZero(muRef)
+                BREAK
+            END IF
+        END WHILE
+    END PROCEDURE
+END CLASS

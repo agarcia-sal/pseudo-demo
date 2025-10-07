@@ -1,0 +1,104 @@
+CLASS Solution
+    FUNCTION minLength(s parameter, numOps parameter)
+        FUNCTION longest_uniform_substring(s parameter)
+            SET alpha TO 1
+            SET omega TO 0
+            PROCEDURE update_max(current, max_ref)
+                IF max_ref < current THEN
+                    SET max_ref TO current
+                END IF
+            END PROCEDURE
+
+            PROCEDURE loop_check(i, max_ref, curr_len_ref)
+                IF s[i] = s[i - 1] THEN
+                    SET curr_len_ref TO curr_len_ref + alpha
+                ELSE
+                    call update_max(curr_len_ref, max_ref)
+                    SET curr_len_ref TO alpha
+                END IF
+            END PROCEDURE
+
+            SET max_ref TO omega
+            SET curr_len_ref TO alpha
+            SET len_s TO LENGTH(s)
+            SET idx TO alpha
+
+            WHILE idx < len_s DO
+                call loop_check(idx, max_ref, curr_len_ref)
+                SET idx TO idx + alpha
+            END WHILE
+
+            IF max_ref > curr_len_ref THEN
+                RETURN max_ref
+            ELSE
+                RETURN curr_len_ref
+            END IF
+        END FUNCTION
+
+        PROCEDURE count_ones(x parameter)
+            SET count TO 0
+            SET temp TO x
+            WHILE temp ≠ 0 DO
+                SET count TO count + (temp BITWISE AND 1)
+                SET temp TO temp RIGHT SHIFT 1
+            END WHILE
+            RETURN count
+        END PROCEDURE
+
+        PROCEDURE flip_char(c parameter)
+            IF c = '0' THEN
+                RETURN '1'
+            ELSE
+                RETURN '0'
+            END IF
+        END PROCEDURE
+
+        SET n TO LENGTH(s)
+        SET upper_bound TO 1 LEFT SHIFT n
+        SET minimum_length TO n
+        SET iteration_var TO 0
+
+        REPEAT
+            IF iteration_var >= upper_bound THEN
+                BREAK
+            END IF
+
+            IF count_ones(iteration_var) > numOps THEN
+                SET iteration_var TO iteration_var + 1
+                CONTINUE
+            END IF
+
+            PROCEDURE apply_flips(base_list parameter, mask parameter)
+                SET result_list TO []
+                SET pos TO 0
+
+                WHILE pos < LENGTH(base_list) DO
+                    IF (mask BITWISE AND (1 LEFT SHIFT pos)) ≠ 0 THEN
+                        APPEND flip_char(base_list[pos]) TO result_list
+                    ELSE
+                        APPEND base_list[pos] TO result_list
+                    END IF
+                    SET pos TO pos + 1
+                END WHILE
+
+                RETURN result_list
+            END PROCEDURE
+
+            SET base_list TO []
+            FOR k FROM 0 TO n - 1 DO
+                APPEND s[k] TO base_list
+            END FOR
+
+            SET candidate_str TO apply_flips(base_list, iteration_var)
+            SET candidate_length TO longest_uniform_substring(candidate_str)
+
+            IF minimum_length > candidate_length THEN
+                SET minimum_length TO candidate_length
+            END IF
+
+            SET iteration_var TO iteration_var + 1
+        UNTIL FALSE
+
+        RETURN minimum_length
+    END FUNCTION
+END CLASS

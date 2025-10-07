@@ -1,0 +1,38 @@
+FUNCTION poly WITH PARAMETERS xs AS list, x AS float
+    SET result TO 0.0
+    FOR i FROM 0 TO LENGTH OF xs MINUS 1
+        SET coeff TO xs AT INDEX i
+        SET power TO 1.0
+        FOR j FROM 1 TO i
+            SET power TO power MULTIPLY BY x
+        END FOR
+        SET term TO coeff MULTIPLY BY power
+        SET result TO result PLUS term
+    END FOR
+    RETURN result
+END FUNCTION
+
+FUNCTION find_zero WITH PARAMETER xs AS list
+    SET begin TO -1.0
+    SET end TO 1.0
+    SET poly_begin TO CALL poly WITH xs, begin
+    SET poly_end TO CALL poly WITH xs, end
+    WHILE poly_begin MULTIPLY BY poly_end GREATER THAN 0
+        SET begin TO begin MULTIPLY BY 2.0
+        SET end TO end MULTIPLY BY 2.0
+        SET poly_begin TO CALL poly WITH xs, begin
+        SET poly_end TO CALL poly WITH xs, end
+    END WHILE
+    WHILE end MINUS begin GREATER THAN 0.0000000001
+        SET center TO (begin PLUS end) DIVIDE BY 2.0
+        SET poly_center TO CALL poly WITH xs, center
+        IF poly_center MULTIPLY BY poly_begin GREATER THAN 0
+            SET begin TO center
+            SET poly_begin TO poly_center
+        ELSE
+            SET end TO center
+            SET poly_end TO poly_center
+        END IF
+    END WHILE
+    RETURN begin
+END FUNCTION

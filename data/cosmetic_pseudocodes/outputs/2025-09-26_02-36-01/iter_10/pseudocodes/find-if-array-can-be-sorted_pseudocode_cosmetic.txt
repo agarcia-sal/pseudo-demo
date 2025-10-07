@@ -1,0 +1,88 @@
+CLASS Solution
+	Function canSortArray(nums)
+		Function bitCount(x)
+			Function countOnes(val, acc)
+				IF val = 0 THEN
+					Return acc
+				Else
+					Return countOnes(val >> 1, acc + (val & 1))
+				END IF
+			END FUNCTION
+			Return countOnes(x, 0)
+		END FUNCTION
+
+		LET lenNums BE LENGTH(nums)
+		LET sortedCopy BE []
+		FOR idx FROM 0 TO lenNums - 1
+			APPEND nums[idx] TO sortedCopy
+		END FOR
+
+		LET sortedCopy2 BE []
+		FOR x FROM 0 TO lenNums - 1
+			SET sortedCopy2[x] = sortedCopy[x]
+		END FOR
+
+		LET comparator = FUNCTION(a, b)
+			RETURN a - b
+		END FUNCTION
+
+		LET swapped, tempVal, pos0, pos1 BE 0, 0, 0, 0
+
+		// helper procedure to sort ascending using the basic comparator
+		Function simpleSort(arr)
+			Function bubbleRecur(i, j, arrInner)
+				IF i >= LENGTH(arrInner) THEN
+					RETURN arrInner
+				END IF
+				IF j >= LENGTH(arrInner) - 1 THEN
+					RETURN bubbleRecur(i + 1, 0, arrInner)
+				END IF
+
+				LET leftVal, rightVal BE arrInner[j], arrInner[j + 1]
+				IF comparator(leftVal, rightVal) > 0 THEN
+					LET temporary BE arrInner[j]
+					SET arrInner[j] = arrInner[j + 1]
+					SET arrInner[j + 1] = temporary
+				END IF
+				RETURN bubbleRecur(i, j + 1, arrInner)
+			END FUNCTION
+			RETURN bubbleRecur(0, 0, arr)
+		END FUNCTION
+
+		SET sortedCopy2 = simpleSort(sortedCopy2)
+
+		Function swapAdjacentByBitCount(arr, limit, outerInd)
+			IF outerInd >= limit THEN
+				RETURN
+			END IF
+			Function innerSwap(j, limitInner, arrInner)
+				IF j >= limitInner THEN
+					RETURN
+				END IF
+				LET left, right BE arrInner[j], arrInner[j + 1]
+				IF bitCount(left) = bitCount(right) AND left > right THEN
+					LET tempHolder BE arrInner[j]
+					SET arrInner[j] = arrInner[j + 1]
+					SET arrInner[j + 1] = tempHolder
+				END IF
+				innerSwap(j + 1, limitInner, arrInner)
+			END FUNCTION
+			innerSwap(0, limit - 1, arr)
+			swapAdjacentByBitCount(arr, limit, outerInd + 1)
+		END FUNCTION
+
+		swapAdjacentByBitCount(nums, lenNums, 0)
+
+		Function arraysEqual(a1, a2, index)
+			IF index = LENGTH(a1) THEN
+				RETURN true
+			END IF
+			IF a1[index] <> a2[index] THEN
+				RETURN false
+			END IF
+			RETURN arraysEqual(a1, a2, index + 1)
+		END FUNCTION
+
+		RETURN arraysEqual(nums, sortedCopy2, 0)
+	END FUNCTION
+END CLASS

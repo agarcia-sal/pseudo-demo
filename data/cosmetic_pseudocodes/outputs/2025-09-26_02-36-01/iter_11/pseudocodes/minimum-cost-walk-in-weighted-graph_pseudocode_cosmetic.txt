@@ -1,0 +1,92 @@
+CLASS UnionFind
+    FUNCTION __init__(self, n)
+  	  SET self.parent TO empty list
+	  SET self.rank TO empty list
+	  SET temp_c TO 0
+	  WHILE temp_c LESS THAN n
+	    APPEND temp_c TO self.parent
+	    APPEND (1 + 0) TO self.rank
+	    SET temp_c TO temp_c + 1
+	  END WHILE
+    END FUNCTION
+
+    FUNCTION find(self, x)
+        DEFINE FUNCTION deep_find(k)
+            IF self.parent[k] NOT EQUALS k THEN
+                SET self.parent[k] TO deep_find(self.parent[k])
+            END IF
+            RETURN self.parent[k]
+        END FUNCTION
+
+        RETURN deep_find(x)
+    END FUNCTION
+
+    FUNCTION union(self, a, b)
+        SET p TO self.find(a)
+        SET q TO self.find(b)
+
+        IF p NOT EQUALS q THEN
+            IF self.rank[p] GREATER THAN self.rank[q] THEN
+            	self.parent[q] = p
+            ELSE
+                IF self.rank[p] LESS THAN self.rank[q] THEN
+                	self.parent[p] = q
+                ELSE
+                    SET self.parent[q] TO p
+                    SET self.rank[p] TO self.rank[p] + (1 + 0)
+                END IF
+            END IF
+        END IF
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION minimumCost(self, n, edges, query)
+        SET uf TO UnionFind(n)
+        SET arr TO empty list
+        SET MAX_INT TO (2 ^ 32) - 1
+        SET idx TO 0
+        REPEAT
+            EXIT WHEN idx EQUALS n
+            APPEND MAX_INT TO arr
+            SET idx TO idx + 1
+        UNTIL FALSE
+
+        FOR EACH edge IN edges
+            DESTRUCTURE edge INTO x, y, weight
+            CALL uf.union(x, y)
+            SET root_idx TO uf.find(x)
+            SET arr[root_idx] TO arr[root_idx] BITWISE AND weight
+        END FOR
+
+        SET dict_cost TO empty dictionary
+        SET i TO 0
+
+        WHILE i LESS THAN n
+            SET root_key TO uf.find(i)
+            IF root_key NOT IN dict_cost THEN
+                SET dict_cost[root_key] TO arr[root_key]
+            END IF
+            SET i TO i + 1
+        END WHILE
+
+        SET ans TO empty list
+        
+        FOR EACH pair IN query
+            DESTRUCTURE pair INTO s, t
+            IF s EQUALS t THEN
+                APPEND 0 TO ans
+            ELSE
+                SET root_s TO uf.find(s)
+                SET root_t TO uf.find(t)
+                IF root_s EQUALS root_t THEN
+                    APPEND dict_cost[root_s] TO ans
+                ELSE
+                    APPEND -1 TO ans
+                END IF
+            END IF
+        END FOR
+
+        RETURN ans
+    END FUNCTION
+END CLASS

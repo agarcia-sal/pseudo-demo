@@ -1,0 +1,40 @@
+```
+FUNCTION encode(text)
+    DECLARE target VOWELS as SET = {'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'}
+    DECLARE shift_map as MAP = EMPTY_MAP
+    FOR EACH symbol IN target VOWELS DO
+        INSERT INTO shift_map KEY symbol VALUE CHAR(ORD(symbol) + 2)
+    END FOR
+
+    FUNCTION swap_case(str)
+        INITIALIZE idx TO 0
+        INITIALIZE swapped_chars TO EMPTY LIST
+        WHILE idx < LENGTH(str) DO
+            LET ch = str[idx]
+            IF ch EQUALS TO UPPERCASE(ch) THEN
+                APPEND LOWERCASE(ch) TO swapped_chars
+            ELSE
+                APPEND UPPERCASE(ch) TO swapped_chars
+            END IF
+            INCREMENT idx BY 1
+        END WHILE
+        RETURN JOIN(swapped_chars)
+    END FUNCTION
+
+    LET transformed_text = swap_case(text)
+
+    INITIALIZE output_chars AS LIST
+    LET i = 0
+    WHILE i < LENGTH(transformed_text) DO
+        LET c = transformed_text[i]
+        IF c IN target VOWELS THEN
+            APPEND shift_map[c] TO output_chars
+        ELSE
+            APPEND c TO output_chars
+        END IF
+        i = i + 1
+    END WHILE
+
+    RETURN JOIN(output_chars)
+END FUNCTION
+```

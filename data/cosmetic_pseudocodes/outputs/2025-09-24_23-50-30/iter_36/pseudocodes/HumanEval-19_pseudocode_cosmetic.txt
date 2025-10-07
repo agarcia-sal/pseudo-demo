@@ -1,0 +1,59 @@
+```
+FUNCTION sort_numbers(string_of_number_words)
+    SET mapping_table TO
+        DICTIONARY WITH KEYS AND VALUES:
+            'zero': 0,
+            'one': 1,
+            'two': 2,
+            'three': 3,
+            'four': 4,
+            'five': 5,
+            'six': 6,
+            'seven': 7,
+            'eight': 8,
+            'nine': 9
+    DEFINE FUNCTION split_and_filter(input_string, index, acc)
+        IF index IS GREATER THAN LENGTH OF input_string THEN
+            RETURN acc
+        END IF
+        SET current_word TO EMPTY STRING
+        WHILE index LESS THAN OR EQUAL TO LENGTH OF input_string AND input_string[index] IS NOT SPACE
+            APPEND input_string[index] TO current_word
+            INCREMENT index BY 1
+        END WHILE
+        IF current_word IS NOT EMPTY
+            APPEND current_word TO acc
+        END IF
+        WHILE index LESS THAN OR EQUAL TO LENGTH OF input_string AND input_string[index] IS SPACE
+            INCREMENT index BY 1
+        END WHILE
+        RETURN split_and_filter(input_string, index, acc)
+    END FUNCTION
+    SET temp_list TO split_and_filter(string_of_number_words, 1, EMPTY LIST)
+
+    DEFINE FUNCTION quicksort(list_in)
+        IF list_in IS EMPTY OR HAS LENGTH 1 THEN
+            RETURN list_in
+        ELSE
+            SET pivot TO list_in[1]
+            SET less_than_pivot TO EMPTY LIST
+            SET greater_equal_pivot TO EMPTY LIST
+            FOR EACH element IN list_in WITH INDEX FROM 2 TO LENGTH OF list_in
+                IF mapping_table[element] LESS THAN mapping_table[pivot]
+                    APPEND element TO less_than_pivot
+                ELSE
+                    APPEND element TO greater_equal_pivot
+                END IF
+            END FOR
+            RETURN CONCATENATE(
+                quicksort(less_than_pivot),
+                LIST CONTAINING pivot,
+                quicksort(greater_equal_pivot)
+            )
+        END IF
+    END FUNCTION
+
+    SET ordered_words TO quicksort(temp_list)
+    RETURN CONCATENATE_STRINGS(ordered_words, ' ')
+END FUNCTION
+```

@@ -1,0 +1,45 @@
+CLASS Solution
+    FUNCTION maxSubstringLength(s)
+        LET totalFrequencies BE an empty map
+        FOR position FROM 0 TO LENGTH(s) - 1
+            IF s[position] NOT IN totalFrequencies THEN
+                totalFrequencies[s[position]] := 0
+            END IF
+            totalFrequencies[s[position]] := totalFrequencies[s[position]] + 1
+        END FOR
+
+        LET resultMax BE -1
+        LET startIdx BE 0
+        WHILE startIdx <= LENGTH(s) - 1
+            LET partialFrequencies BE an empty map
+            LET endIdx BE startIdx
+            WHILE endIdx <= LENGTH(s) - 1
+                LET currentChar BE s[endIdx]
+                IF currentChar NOT IN partialFrequencies THEN
+                    partialFrequencies[currentChar] := 0
+                END IF
+                partialFrequencies[currentChar] := partialFrequencies[currentChar] + 1
+
+                LET allKeysMeetCondition BE true
+                FOR each keyChar IN KEYS(partialFrequencies)
+                    IF partialFrequencies[keyChar] < totalFrequencies[keyChar] THEN
+                        allKeysMeetCondition := false
+                        BREAK
+                    END IF
+                END FOR
+
+                IF allKeysMeetCondition AND LENGTH(KEYS(partialFrequencies)) < LENGTH(KEYS(totalFrequencies)) THEN
+                    LET substringLength BE (endIdx - startIdx) + 1
+                    IF substringLength > resultMax THEN
+                        resultMax := substringLength
+                    END IF
+                END IF
+
+                endIdx := endIdx + 1
+            END WHILE
+            startIdx := startIdx + 1
+        END WHILE
+
+        RETURN resultMax
+    END FUNCTION
+END CLASS

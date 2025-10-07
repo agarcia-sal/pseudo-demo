@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer  
+        FUNCTION nxt(x x AS integer y y AS integer) RETURNS integer  
+            LET bitCheck BE (x BITWISE_AND (1 BITWISE_XOR y))  
+            IF bitCheck NOT_EQUALS 0 THEN  
+                RETURN x PLUS 1  
+            ELSE  
+                RETURN x PLUS 2  
+            END IF  
+        END FUNCTION  
+
+        LET lengthA BE SIZE OF nums1  
+        LET lengthB BE SIZE OF nums2  
+        LET f_matrix BE a list WITH (lengthA PLUS 1) ELEMENTS, EACH a list WITH (lengthB PLUS 1) ELEMENTS SET TO 0  
+
+        LET counterA BE 1  
+        WHILE counterA LESS_OR_EQUAL lengthA  
+            LET valA BE nums1 AT (counterA MINUS 1)  
+            LET precursor BE f_matrix AT (counterA MINUS 1) AT 0  
+            SET f_matrix AT counterA AT 0 TO nxt(precursor, valA)  
+            INCREMENT counterA BY 1  
+        END WHILE  
+
+        LET counterB BE 1  
+        WHILE counterB LESS_OR_EQUAL lengthB  
+            LET valB BE nums2 AT (counterB MINUS 1)  
+            LET precursorB BE f_matrix AT 0 AT (counterB MINUS 1)  
+            SET f_matrix AT 0 AT counterB TO nxt(precursorB, valB)  
+            SET counterB TO counterB PLUS 1  
+        END WHILE  
+
+        LET outerIdx BE 1  
+        WHILE outerIdx LESS_OR_EQUAL lengthA  
+            LET currentX BE nums1 AT (outerIdx MINUS 1)  
+            LET innerIdx BE 1  
+            WHILE innerIdx LESS_OR_EQUAL lengthB  
+                LET currentY BE nums2 AT (innerIdx MINUS 1)  
+
+                LET leftVal BE nxt(f_matrix AT (outerIdx MINUS 1) AT innerIdx, currentX)  
+                LET topVal BE nxt(f_matrix AT outerIdx AT (innerIdx MINUS 1), currentY)  
+
+                IF leftVal LESS_THAN_OR_EQUAL topVal THEN  
+                    SET f_matrix AT outerIdx AT innerIdx TO leftVal  
+                ELSE  
+                    SET f_matrix AT outerIdx AT innerIdx TO topVal  
+                END IF  
+
+                INCREMENT innerIdx BY 1  
+            END WHILE  
+            outerIdx = outerIdx PLUS 1  
+        END WHILE  
+
+        RETURN f_matrix AT lengthA AT lengthB  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,45 @@
+CLASS Solution
+    FUNCTION mostFrequentIDs(nums PARAMETER, freq PARAMETER)
+        LET frequency_map BE a dictionary mapping keys to integer defaulting zero
+        LET heap_storage BE an empty list
+        LET output_list BE an empty list
+
+        FUNCTION prune_heap()
+            WHILE NOT (heap_storage IS EMPTY) AND (frequency_map[heap_storage[0][1]] ≠ (-1 * heap_storage[0][0]))
+                DO
+                    LET _discard BE heap_storage[0]
+                    REMOVE heap_storage[0]
+                END
+            END WHILE
+            RETURN
+        END FUNCTION
+
+        FUNCTION process_index(index PARAMETER)
+            IF index = LENGTH(nums)
+                RETURN
+            END IF
+
+            LET current_num BE nums[index]
+            LET current_freq BE freq[index]
+
+            LET frequency_map[current_num] BE frequency_map[current_num] + current_freq
+
+            LET neg_count BE -1 * frequency_map[current_num]
+            INSERT [neg_count, current_num] INTO heap_storage at the end
+
+            prune_heap()
+
+            IF heap_storage IS NOT EMPTY
+                LET top_val BE -1 * heap_storage[0][0]
+                APPEND top_val TO output_list
+            ELSE
+                APPEND 0 TO output_list
+            END IF
+
+            CALL process_index(index + 1)
+        END FUNCTION
+
+        CALL process_index(0)
+        RETURN output_list
+    END FUNCTION
+END CLASS

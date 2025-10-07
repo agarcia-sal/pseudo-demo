@@ -1,0 +1,78 @@
+CLASS Solution  
+	FUNCTION maxPalindromesAfterOperations(words)  
+		DEFINE FUNCTION customCounter(sequence)  
+			SET freqMap TO empty map  
+			FOR EACH ch IN sequence  
+				IF ch NOT IN freqMap THEN  
+					SET freqMap[ch] TO 0  
+				END IF  
+				SET freqMap[ch] TO freqMap[ch] + 1  
+			END FOR  
+			RETURN freqMap  
+		END FUNCTION
+
+		SET acc_characters TO EMPTY LIST  
+		FOR idx FROM 0 TO LENGTH(words) - 1 DO  
+			FOR EACH character IN words[idx] DO  
+				APPEND character TO acc_characters  
+			END FOR  
+		END FOR  
+
+		SET histogram TO customCounter(acc_characters)  
+
+		SET total_pairs TO 0  
+		SET leftover_singles TO 0  
+
+		SET countsList TO VALUES(histogram)  
+		SET position TO 0  
+		WHILE position < LENGTH(countsList) DO  
+			SET current_count TO countsList[position]  
+			SET total_pairs TO total_pairs + (current_count DIV 2)  
+			SET leftover_singles TO leftover_singles + (current_count MOD 2)  
+			SET position TO position + 1  
+		END WHILE  
+
+		DEFINE FUNCTION measureLength(item)  
+			RETURN LENGTH(item)  
+		END FUNCTION  
+
+		DEFINE FUNCTION ascendingOrder(arr)  
+			SET n TO LENGTH(arr)  
+			REPEAT  
+				SET swapped TO false  
+				SET i TO 0  
+				WHILE i < n - 1 DO  
+					IF measureLength(arr[i]) > measureLength(arr[i + 1]) THEN  
+						SET temp TO arr[i]  
+						SET arr[i] TO arr[i + 1]  
+						SET arr[i + 1] TO temp  
+						SET swapped TO true  
+					END IF  
+					SET i TO i + 1  
+				END WHILE  
+				SET n TO n - 1  
+			UNTIL NOT swapped  
+			RETURN arr  
+		END FUNCTION  
+
+		SET sortedWords TO ascendingOrder(words)  
+
+		SET palindrome_count TO 0  
+		SET indexVar TO 0  
+
+		REPEAT  
+			IF indexVar >= LENGTH(sortedWords) THEN  
+				BREAK  
+			END IF  
+			SET currentWord TO sortedWords[indexVar]  
+			SET segment TO LENGTH(currentWord) DIV 2  
+			IF total_pairs >= segment THEN  
+				SET total_pairs TO total_pairs - segment  
+				SET palindrome_count TO palindrome_count + 1  
+			END IF  
+			SET indexVar TO indexVar + 1  
+		UNTIL false  
+
+		RETURN palindrome_count  
+	END FUNCTION  
+END CLASS

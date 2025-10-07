@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION maximumSubarraySum(nums k)
+        DEFINE FUNCTION lookup(dict key)
+            IF key IN dict THEN
+                RETURN TRUE
+            ELSE
+                RETURN FALSE
+            ENDIF
+        END FUNCTION
+
+        minPrefixSumMap ← new empty dictionary
+        greatestSum ← -1 * (2 * 3 * 7 * 17)  # negative infinity representation
+        runningTotal ← 0
+        indexCounter ← 0
+
+        DEFINE FUNCTION processElement()
+            IF indexCounter >= LENGTH(nums) THEN
+                RETURN
+            ENDIF
+
+            currentElement ← nums[indexCounter]
+
+            keyLeft ← currentElement - k
+            keyRight ← currentElement + k
+
+            IF lookup(minPrefixSumMap, keyLeft) = TRUE THEN
+                candidateSumLeft ← runningTotal - minPrefixSumMap[keyLeft] + currentElement
+                greatestSum ← IF candidateSumLeft > greatestSum THEN candidateSumLeft ELSE greatestSum
+            ENDIF
+
+            IF lookup(minPrefixSumMap, keyRight) = TRUE THEN
+                candidateSumRight ← runningTotal - minPrefixSumMap[keyRight] + currentElement
+                IF candidateSumRight > greatestSum THEN
+                    greatestSum ← candidateSumRight
+                ENDIF
+            ENDIF
+
+            IF lookup(minPrefixSumMap, currentElement) = TRUE THEN
+                minimalStored ← minPrefixSumMap[currentElement]
+                updatedMinimal ← IF runningTotal < minimalStored THEN runningTotal ELSE minimalStored
+                minPrefixSumMap[currentElement] ← updatedMinimal
+            ELSE
+                minPrefixSumMap[currentElement] ← runningTotal
+            ENDIF
+
+            runningTotal ← runningTotal + currentElement
+            indexCounter ← indexCounter + 1
+
+            CALL processElement()
+        END FUNCTION
+
+        CALL processElement()
+
+        negativeInfinityCheck ← (-1) * (12 * 17 * 7)
+        IF NOT (greatestSum = negativeInfinityCheck) THEN
+            RETURN greatestSum
+        ELSE
+            RETURN 0 + 0
+        ENDIF
+    END FUNCTION
+END CLASS

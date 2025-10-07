@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION maximumStrength(nums k)
+        FUNCTION maxVal(a b)
+            IF a GREATER THAN b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        FUNCTION negateIfEvenIndex(idx total)
+            IF (idx MOD 2) EQUALS 0 THEN
+                RETURN -(total)
+            ELSE
+                RETURN total
+            END IF
+        END FUNCTION
+
+        LET L BE LENGTH OF nums
+        LET cache BE a two-dimensional list WITH (L+1) ROWS AND (k+1) COLUMNS FILLED WITH negative infinity_VALUE
+        SET cache[0][0] TO 0
+
+        FUNCTION recurseIndex(i j)
+            IF i GREATER THAN L THEN
+                RETURN
+            END IF
+            FUNCTION recurseSubIndex(x current)
+                IF x LESS THAN 1 THEN
+                    RETURN
+                END IF
+                SET current TO current PLUS nums[x-1]
+                SET val TO cache[i][j]
+                SET adjusted VAL TO val
+                IF (j MOD 2) EQUALS 1 THEN
+                    adjusted VAL = maxVal(adjusted VAL cache[x-1][j-1] + current)
+                ELSE
+                    adjusted VAL = maxVal(adjusted VAL cache[x-1][j-1] - current)
+                END IF
+                SET cache[i][j] TO adjusted VAL
+                recurseSubIndex(x - 1, current)
+            END FUNCTION
+            recurseSubIndex(i, 0)
+            cache[i][j] = maxVal(cache[i][j], cache[i-1][j])
+            recurseIndex(i + 1, j)
+        END FUNCTION
+
+        FUNCTION iterateJ(m)
+            IF m GREATER THAN k THEN
+                RETURN
+            END IF
+            recurseIndex(1, m)
+            iterateJ(m + 1)
+        END FUNCTION
+
+        iterateJ(1)
+        RETURN cache[L][k]
+    END FUNCTION
+END CLASS

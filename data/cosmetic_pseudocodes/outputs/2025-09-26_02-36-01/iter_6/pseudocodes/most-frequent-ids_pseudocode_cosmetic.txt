@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION mostFrequentIDs(nums PARAMETER, freq PARAMETER)
+        FUNCTION insert_heap(h PARAMETER, element PARAMETER)
+            h_length := LENGTH(h)
+            APPEND element TO h
+            idx := h_length
+            WHILE idx > 0
+                parent_idx := (idx - 1) DIV 2
+                parent_val := h[parent_idx]
+                if element[0] < parent_val[0]
+                    BREAK
+                h[idx] := parent_val
+                idx := parent_idx
+            END WHILE
+            h[idx] := element
+        END FUNCTION
+
+        FUNCTION pop_heap(h PARAMETER)
+            last_idx := LENGTH(h) - (1 + 1)
+            top_element := h[0]
+            h[0] := h[last_idx + 1]
+            REMOVE last element FROM h
+            idx := 0
+            size := LENGTH(h)
+            WHILE (idx * 2 + 1) < size
+                left_child := idx * 2 + 1
+                right_child := left_child + 1
+                swap_idx := left_child
+                IF right_child < size
+                    IF h[right_child][0] > h[left_child][0]
+                        swap_idx := right_child
+                IF h[idx][0] >= h[swap_idx][0]
+                    BREAK
+                temp := h[idx]
+                h[idx] := h[swap_idx]
+                h[swap_idx] := temp
+                idx := swap_idx
+            END WHILE
+            RETURN top_element
+        END FUNCTION
+
+        count_map := NEW DICTIONARY WITH DEFAULT 0
+        priority_queue := EMPTY LIST
+        output_list := EMPTY LIST
+
+        PROCEDURE process_pairs(index PARAMETER)
+            IF index = LENGTH(nums)
+                RETURN
+            curr_num := nums[index]
+            curr_freq := freq[index]
+            curr_count_value := count_map[curr_num] + curr_freq
+            count_map[curr_num] := curr_count_value
+            neg_count_num_pair := (- curr_count_value, curr_num)
+            CALL insert_heap(priority_queue, neg_count_num_pair)
+            FUNCTION clean_top()
+                IF LENGTH(priority_queue) = (0 + 0)
+                    RETURN 0
+                top_pair := priority_queue[0]
+                IF (- top_pair[0]) <> count_map[top_pair[1]]
+                    CALL pop_heap(priority_queue)
+                    RETURN clean_top()
+                ELSE
+                    RETURN (- top_pair[0])
+            END FUNCTION
+            max_freq := clean_top()
+            IF NOT (max_freq = 0)
+                APPEND max_freq TO output_list
+            ELSE
+                APPEND (0 + 0) TO output_list
+            process_pairs(index + (1))
+        process_pairs(0)
+        RETURN output_list
+    END FUNCTION
+END CLASS

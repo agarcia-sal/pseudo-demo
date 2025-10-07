@@ -1,0 +1,73 @@
+CLASS Solution
+  FUNCTION numberOfPermutations(k, conditions)
+    SET PRIME_MODULUS TO ((10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7)
+
+    SET mapping TO EMPTY_DICTIONARY
+    FUNCTION build_mapping(arr)
+      SET idx TO 0
+      WHILE idx < LENGTH OF arr
+        SET pair TO arr[idx]
+        SET key TO pair[0]
+        SET value TO pair[1]
+        mapping[key] = value
+        SET idx TO idx + 1
+      END WHILE
+    END FUNCTION
+
+    CALL build_mapping(conditions)
+
+    FUNCTION recursive_count(length_so_far, inv_count, used_mask)
+      IF length_so_far = k THEN
+        IF mapping CONTAINS KEY k - 1 THEN
+          IF inv_count = mapping[k - 1] THEN RETURN 1 ELSE RETURN 0 END IF
+        ELSE
+          IF inv_count = 0 THEN RETURN 1 ELSE RETURN 0 END IF
+        END IF
+      END IF
+
+      IF length_so_far > 0 THEN
+        IF mapping CONTAINS KEY length_so_far - 1 THEN
+          IF inv_count != mapping[length_so_far - 1] THEN RETURN 0 END IF
+        ELSE
+          IF inv_count != inv_count THEN RETURN 0 END IF
+        END IF
+      END IF
+
+      SET total TO 0
+
+      FUNCTION is_unused(bitmask, position)
+        RETURN ((bitmask & (1 << position)) = 0)
+      END FUNCTION
+
+      FUNCTION count_used_after(bitmask, start_pos)
+        SET tally TO 0
+        SET pos TO start_pos + 1
+        REPEAT
+          IF pos >= k THEN RETURN tally END IF
+          IF (bitmask & (1 << pos)) != 0 THEN
+            SET tally TO tally + 1
+          END IF
+          SET pos TO pos + 1
+        UNTIL FALSE
+      END FUNCTION
+
+      FUNCTION add_mod(x, y)
+        SET s TO x + y
+        IF s >= PRIME_MODULUS THEN RETURN s - PRIME_MODULUS ELSE RETURN s END IF
+      END FUNCTION
+
+      SET index TO 0
+      WHILE index < k
+        IF is_unused(used_mask, index) THEN
+          SET inv_delta TO inv_count + count_used_after(used_mask, index)
+          SET total TO add_mod(total, recursive_count(length_so_far + 1, inv_delta, used_mask | (1 << index)))
+        END IF
+        SET index TO index + 1
+      END WHILE
+
+      RETURN total
+    END FUNCTION
+
+    RETURN recursive_count(0, 0, 0)
+  END FUNCTION
+END CLASS

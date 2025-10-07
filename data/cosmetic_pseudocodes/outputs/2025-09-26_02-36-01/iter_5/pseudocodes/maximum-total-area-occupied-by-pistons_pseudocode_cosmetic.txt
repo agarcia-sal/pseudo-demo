@@ -1,0 +1,42 @@
+CLASS Solution 
+    FUNCTION maxArea(height, positions, directions)
+        SET count TO LENGTH(positions)
+        SET maximum_area TO 0
+        SET index_outer TO 1
+        WHILE index_outer <= height * 2
+            SET idx_inner TO 0
+            WHILE idx_inner < count
+                IF (positions[idx_inner] = 0) AND (directions[idx_inner] = 'D')
+                    SET directions TO CONCAT(SUBSTRING(directions, 0, idx_inner - 1 + 1), 'U', SUBSTRING(directions, idx_inner + 1, LENGTH(directions) - 1))
+                ELSE
+                    IF (positions[idx_inner] = height) AND (directions[idx_inner] = 'U')
+                        SET directions TO CONCAT(SUBSTRING(directions, 0, idx_inner - 1 + 1), 'D', SUBSTRING(directions, idx_inner + 1, LENGTH(directions) - 1))
+                    END IF
+                END IF
+
+                IF directions[idx_inner] = 'U'
+                    SET positions TO SET_AT(positions, idx_inner, positions[idx_inner] + 1)
+                ELSE
+                    SET positions TO SET_AT(positions, idx_inner, positions[idx_inner] - 1)
+                END IF
+
+                SET idx_inner TO idx_inner + 1
+            END WHILE
+
+            SET sum_current TO 0
+            SET idx_sum TO 0
+            WHILE idx_sum < count
+                SET sum_current TO sum_current + positions[idx_sum]
+                SET idx_sum TO idx_sum + 1
+            END WHILE
+
+            IF maximum_area < sum_current
+                SET maximum_area TO sum_current
+            END IF
+
+            SET index_outer TO index_outer + 1
+        END WHILE
+
+        RETURN maximum_area
+    END FUNCTION
+END CLASS

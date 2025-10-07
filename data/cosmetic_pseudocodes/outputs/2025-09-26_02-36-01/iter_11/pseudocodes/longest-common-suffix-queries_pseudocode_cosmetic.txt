@@ -1,0 +1,69 @@
+CLASS Solution  
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER  
+        SET mapping_suffixes TO dictionary_from_empty STRING->INTEGER  
+
+        FUNCTION helper_find_minimum_index() RETURNS INTEGER
+            SET curr_min_len TO large_number
+            SET curr_min_idx TO -1
+            SET pos_idx TO 0
+            WHILE pos_idx < LENGTH wordsContainer DO
+                SET curr_word TO wordsContainer[pos_idx]
+                SET curr_len TO LENGTH curr_word
+                IF curr_len < curr_min_len OR (curr_len = curr_min_len AND pos_idx < curr_min_idx) THEN
+                    SET curr_min_len TO curr_len
+                    SET curr_min_idx TO pos_idx
+                END IF
+                SET pos_idx TO pos_idx + 1
+            END WHILE
+            RETURN curr_min_idx
+        END FUNCTION
+
+        FUNCTION helper_get_match(str_query string) RETURNS INTEGER
+            SET len_q TO LENGTH str_query
+            SET idx_q TO 0
+            REPEAT
+                SET suffix_part TO SUBSTRING str_query FROM idx_q TO len_q
+                IF mapping_suffixes HAS_KEY suffix_part THEN
+                    RETURN mapping_suffixes[suffix_part]
+                END IF
+                SET idx_q TO idx_q + 1
+            UNTIL idx_q > len_q - 1
+            RETURN helper_find_minimum_index()
+        END FUNCTION
+
+        SET outer_i TO 0
+        WHILE outer_i < LENGTH wordsContainer DO
+            SET curr_word2 TO wordsContainer[outer_i]
+            SET max_i TO LENGTH curr_word2 - 1
+            SET inner_j TO 0
+            REPEAT
+                SET subfix_look TO ""
+                SET start_substring TO inner_j
+                WHILE start_substring <= max_i DO
+                    SET subfix_look TO subfix_look + curr_word2[start_substring]
+                    SET start_substring TO start_substring + 1
+                END WHILE
+                IF NOT mapping_suffixes HAS_KEY subfix_look THEN
+                    SET mapping_suffixes[subfix_look] TO outer_i
+                ELSE
+                    SET prev_index TO mapping_suffixes[subfix_look]
+                    SET prev_word TO wordsContainer[prev_index]
+                    SET curr_lenw TO LENGTH curr_word2
+                    SET prev_lenw TO LENGTH prev_word
+                    IF (curr_lenw < prev_lenw) OR (curr_lenw = prev_lenw AND outer_i < prev_index) THEN
+                        SET mapping_suffixes[subfix_look] TO outer_i
+                    END IF
+                END IF
+                SET inner_j TO inner_j + 1
+            UNTIL inner_j > max_i
+            SET outer_i TO outer_i + 1
+        END WHILE
+
+        SET res_arr TO empty LIST OF INTEGER  
+        FOR each target IN wordsQuery DO
+            SET res_arr LENGTH TO res_arr LENGTH + 1
+            SET res_arr[res_arr LENGTH - 1] TO helper_get_match(target)
+        END FOR  
+        RETURN res_arr  
+    END FUNCTION  
+END CLASS

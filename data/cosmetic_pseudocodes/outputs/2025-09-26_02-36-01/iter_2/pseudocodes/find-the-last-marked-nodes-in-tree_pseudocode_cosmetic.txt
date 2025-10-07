@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION lastMarkedNodes(edges)
+        FUNCTION dfs(current_node, parent_node, distance_array)
+            SET index = 0
+            WHILE index LESS THAN LENGTH OF g[current_node]
+                SET neighbor = g[current_node][index]
+                IF neighbor NOT EQUALS parent_node
+                    SET distance_array[neighbor] = distance_array[current_node] ADD 1
+                    CALL dfs(neighbor, current_node, distance_array)
+                END IF
+                INCREMENT index BY 1
+            END WHILE
+        END FUNCTION
+
+        SET total_nodes = LENGTH OF edges ADD 1
+        SET g TO ARRAY OF size total_nodes FILLED WITH EMPTY LISTS
+        FOR edge_index FROM 0 TO LENGTH OF edges MINUS 1
+            SET node_u = edges[edge_index][zero]
+            SET node_v = edges[edge_index][one]
+            CALL g[node_u].APPEND(node_v)
+            CALL g[node_v].APPEND(node_u)
+        END FOR
+
+        SET distance_first = ARRAY OF total_nodes ELEMENTS ALL EQUAL TO -1
+        ASSIGN distance_first[0] = 0
+        CALL dfs(0, -1, distance_first)
+        SET node_a = INDEX OF MAXIMUM VALUE IN distance_first
+
+        SET distance_second = ARRAY OF total_nodes FILLED WITH -1
+        ASSIGN distance_second[node_a] = zero
+        CALL dfs(node_a, -1, distance_second)
+        SET node_b = INDEX OF MAXIMUM VALUE IN distance_second
+
+        SET distance_third = ARRAY OF total_nodes ALL SET TO NEGATIVE ONE
+        ASSIGN distance_third[node_b] = 0
+        CALL dfs(node_b, -1, distance_third)
+
+        INITIALIZE output TO EMPTY LIST
+        SET idx = 0
+        WHILE idx LESS THAN total_nodes
+            SET dist_two_val = distance_second[idx]
+            SET dist_three_val = distance_third[idx]
+            IF dist_two_val GREATER THAN dist_three_val
+                CALL output.APPEND(node_a)
+            ELSE
+                CALL output.APPEND(node_b)
+            END IF
+            INCREMENT idx BY 1
+        END WHILE
+
+        RETURN output
+    END FUNCTION
+END CLASS

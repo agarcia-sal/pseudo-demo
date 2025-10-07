@@ -1,0 +1,99 @@
+CLASS Hashing  
+    FUNCTION __init__(self, sequence, multiplier, divisor)  
+        SET self.mod TO divisor  
+        SET self.h TO array filled with zeros of size (length of sequence) plus one  
+        SET self.p TO array filled with ones of size (length of sequence) plus one  
+        
+        FUNCTION iterate(index)  
+            IF index GREATER THAN length of sequence THEN  
+                RETURN  
+            END IF  
+            SET prevHash TO self.h[index minus one]  
+            SET currCharCode TO UNICODE code point of sequence at index minus one  
+            SET tempHash TO (prevHash times multiplier) plus currCharCode  
+            SET self.h[index] TO remainder of (tempHash) modulo divisor  
+            SET self.p[index] TO remainder of (self.p[index minus one] times multiplier) modulo divisor  
+            CALL iterate WITH argument index plus one  
+        END FUNCTION  
+        
+        CALL iterate WITH argument one  
+    END FUNCTION  
+
+    FUNCTION query(self, left, right)  
+        SET diffHash TO self.h[right] minus (self.h[left minus one] times self.p[right minus left plus one])  
+        SET result TO remainder of diffHash modulo self.mod  
+        IF result less than zero THEN  
+            SET result TO result plus self.mod  
+        END IF  
+        RETURN result  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parentList, stringInput)  
+        SET nodeCount TO length of stringInput  
+        SET adjacency TO list containing nodeCount empty lists  
+        SET dfsSequence TO empty list  
+        SET indexRanges TO empty map  
+
+        FUNCTION traverse(node)  
+            SET startPos TO length of dfsSequence plus one  
+            FUNCTION loopChildren(children, current)  
+                IF current GREATER THAN length of children THEN  
+                    RETURN  
+                END IF  
+                CALL traverse WITH argument children at (current minus one)  
+                CALL loopChildren WITH arguments children and (current plus one)  
+            END FUNCTION  
+            CALL loopChildren WITH arguments adjacency at node and one  
+            APPEND stringInput at node TO dfsSequence  
+            SET endPos TO length of dfsSequence  
+            SET indexRanges[node] TO tuple of startPos and endPos  
+        END FUNCTION  
+
+        FUNCTION buildGraph(index)  
+            IF index GREATER OR EQUAL nodeCount THEN  
+                RETURN  
+            END IF  
+            IF index GREATER THAN zero THEN  
+                APPEND index TO adjacency at parentList at index  
+            END IF  
+            CALL buildGraph WITH argument index plus one  
+        END FUNCTION  
+        CALL buildGraph WITH argument zero  
+
+        CALL traverse WITH argument zero  
+
+        SET baseVal TO 33000 plus 331  // 33331  
+        SET modulusVal TO 998000000 plus 244000 plus 353  // 998244353  
+        SET forwardHash TO new Hashing(dfsSequence, baseVal, modulusVal)  
+        SET reversedHash TO new Hashing(reverse of dfsSequence, baseVal, modulusVal)  
+
+        SET resultList TO empty list  
+
+        FUNCTION checkAll(index)  
+            IF index EQUALS nodeCount THEN  
+                RETURN  
+            END IF  
+            SET interval TO indexRanges[index]  
+            SET leftIdx TO interval first element  
+            SET rightIdx TO interval second element  
+            SET lengthSeg TO rightIdx minus leftIdx plus one  
+            IF lengthSeg modulo 2 EQUALS zero THEN  
+                SET halfLength TO lengthSeg divided by 2  
+                SET firstHalfHash TO forwardHash.query(leftIdx, leftIdx plus halfLength minus one)  
+                SET secondHalfHash TO reversedHash.query(nodeCount minus rightIdx plus one, nodeCount minus rightIdx plus one plus halfLength minus one)  
+            ELSE  
+                SET halfRounded TO (lengthSeg minus one) divided by 2  
+                SET firstHalfHash TO forwardHash.query(leftIdx, leftIdx plus halfRounded)  
+                SET secondHalfHash TO reversedHash.query(nodeCount minus rightIdx plus one, nodeCount minus rightIdx plus one plus halfRounded)  
+            END IF  
+            APPEND (firstHalfHash EQUALS secondHalfHash) TO resultList  
+            CALL checkAll WITH argument index plus one  
+        END FUNCTION  
+        
+        CALL checkAll WITH argument zero  
+
+        RETURN resultList  
+    END FUNCTION  
+END CLASS

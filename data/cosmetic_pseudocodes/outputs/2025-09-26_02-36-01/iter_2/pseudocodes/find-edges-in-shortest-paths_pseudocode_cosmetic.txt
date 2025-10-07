@@ -1,0 +1,63 @@
+CLASS Solution  
+    FUNCTION findAnswer(n, edges)  
+        LET adjacency_map BE a new dictionary with default empty arrays  
+        INDEX idx ← 0  
+        WHILE idx < LENGTH(edges)  
+            LET src, dst, wgt BE edges[idx][0], edges[idx][1], edges[idx][2]  
+            APPEND (dst, wgt) TO adjacency_map[src]  
+            APPEND (src, wgt) TO adjacency_map[dst]  
+            INCREMENT idx BY 1  
+        END WHILE  
+      
+        LET distances BE an array of size n filled with positive infinity  
+        ASSIGN distances[0] ← 0  
+        LET heap_list BE [(0, 0)]  
+      
+        WHILE LENGTH(heap_list) > 0  
+            POP (curr_distance, node) WITH smallest curr_distance FROM heap_list  
+            IF curr_distance > distances[node] THEN  
+                CONTINUE  
+            END IF  
+      
+            FOR EACH (neighbor, weight) IN adjacency_map[node] DO  
+                LET possible_distance BE curr_distance + weight  
+                IF possible_distance < distances[neighbor] THEN  
+                    ASSIGN distances[neighbor] ← possible_distance  
+                    INSERT (possible_distance, neighbor) INTO heap_list KEEPING heap property  
+                END IF  
+            END FOR  
+        END WHILE  
+      
+        LET critical_edges BE an empty set  
+        LET to_visit BE [(n - 1, distances[n - 1])]  
+        LET visited_flags BE an array of n boolean False elements  
+      
+        WHILE LENGTH(to_visit) > 0  
+            POP (curr_node, curr_dist) FROM the end of to_visit  
+            IF visited_flags[curr_node] IS True THEN  
+                CONTINUE  
+            END IF  
+            ASSIGN visited_flags[curr_node] ← True  
+      
+            FOR EACH (adj_node, edge_cost) IN adjacency_map[curr_node] DO  
+                LET check_value BE distances[adj_node] + edge_cost  
+                IF curr_dist = check_value THEN  
+                    LET low_idx BE MIN(curr_node, adj_node)  
+                    LET high_idx BE MAX(curr_node, adj_node)  
+                    INSERT (low_idx, high_idx) INTO critical_edges  
+                    APPEND (adj_node, distances[adj_node]) TO to_visit  
+                END IF  
+            END FOR  
+        END WHILE  
+      
+        LET result_list BE empty list  
+        FOR EACH entry IN edges DO  
+            LET a, b BE entry[0], entry[1]  
+            LET min_node BE (a < b) ? a : b  
+            LET max_node BE (a >= b) ? a : b  
+            APPEND ( (min_node, max_node) IN critical_edges ) TO result_list  
+        END FOR  
+      
+        RETURN result_list  
+    END FUNCTION  
+END CLASS

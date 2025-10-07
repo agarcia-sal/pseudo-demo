@@ -1,0 +1,82 @@
+CLASS Solution
+	FUNCTION sumOfGoodSubsequences(alpha)
+		CONST modulus = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+		DEFINE counts AS MAP WITH DEFAULT 0
+		DEFINE accumulators AS MAP WITH DEFAULT 0
+
+		DEFINE PROCEDURE addMod(a, b)
+			DECLARE temp_sum = a + b
+			IF temp_sum >= modulus THEN
+				RETURN temp_sum - modulus
+			ELSE
+				RETURN temp_sum
+			END IF
+		END PROCEDURE
+		
+		DEFINE FUNCTION getMapSafe(m, k)
+			IF k NOT IN m THEN
+				RETURN 0
+			ELSE
+				RETURN m[k]
+			END IF
+		END FUNCTION
+
+		DECLARE index = 0
+		DECLARE length_alpha = 0
+		length_alpha = 0
+		WHILE index < LENGTH(alpha) DO
+			length_alpha = length_alpha + 1
+			index = index + 1
+		END WHILE
+
+		DEFINE PROCEDURE processElement(elem)
+			counts[elem] = addMod(getMapSafe(counts, elem), 1)
+
+			accumulators[elem] = addMod(getMapSafe(accumulators, elem), elem)
+
+			DECLARATION part1 = getMapSafe(accumulators, elem)
+			DECLARATION part2 = getMapSafe(accumulators, elem - 1)
+			DECLARATION part3 = getMapSafe(counts, elem - 1) * elem
+			DECLARATION new_accumulator = part1 + part2 + part3
+
+			accumulators[elem] = new_accumulator % modulus
+
+			counts[elem] = addMod(getMapSafe(counts, elem), getMapSafe(counts, elem - 1))
+
+			DECLARATION part4 = getMapSafe(accumulators, elem)
+			DECLARATION part5 = getMapSafe(accumulators, elem + 1)
+			DECLARATION part6 = getMapSafe(counts, elem + 1) * elem
+			DECLARATION new_accumulator2 = part4 + part5 + part6
+
+			accumulators[elem] = new_accumulator2 % modulus
+
+			counts[elem] = addMod(getMapSafe(counts, elem), getMapSafe(counts, elem + 1))
+		END PROCEDURE
+
+		DEFINE PROCEDURE iterateElements(idx)
+			IF idx >= length_alpha THEN
+				RETURN
+			END IF
+			processElement(alpha[idx])
+			iterateElements(idx + 1)
+		END PROCEDURE
+
+		iterateElements(0)
+
+		DEFINE PROCEDURE accumulateTotal(m)
+			DECLARE sum_accumulator = 0
+			DEFINE idx = 0
+			DEFINE keys = KEYS(m)
+			WHILE idx < LENGTH(keys) DO
+				sum_accumulator = sum_accumulator + m[keys[idx]]
+				idx = idx + 1
+			END WHILE
+			RETURN sum_accumulator
+		END PROCEDURE
+
+		DECLARATION overall_sum = accumulateTotal(accumulators)
+		DECLARATION answer = overall_sum % modulus
+
+		RETURN answer
+	END FUNCTION
+END CLASS

@@ -1,0 +1,42 @@
+```
+FUNCTION encode(inputText)
+    DEFINE vowelSet AS "aeiouAEIOU"
+    DEFINE substitutionMap AS EMPTY MAP
+    PROCEDURE buildMap(index)
+        IF index >= LENGTH(vowelSet) THEN
+            RETURN
+        ELSE
+            LET currentChar BE vowelSet[index]
+            LET mappedChar BE CHAR(ASCII(currentChar) + 2)
+            SET substitutionMap[currentChar] = mappedChar
+            CALL buildMap(index + 1)
+    END PROCEDURE
+
+    CALL buildMap(0)
+
+    FUNCTION toggleCase(str, pos, acc)
+        IF pos >= LENGTH(str) THEN
+            RETURN acc
+        ELSE
+            LET c BE str[pos]
+            LET toggled BE IF c >= 'a' AND c <= 'z' THEN TO_UPPER(c) ELSE TO_LOWER(c)
+            RETURN toggleCase(str, pos + 1, acc + toggled)
+    END FUNCTION
+
+    LET transformedText BE toggleCase(inputText, 0, "")
+
+    FUNCTION replaceChars(pos, acc)
+        IF pos >= LENGTH(transformedText) THEN
+            RETURN acc
+        ELSE
+            LET charAtPos BE transformedText[pos]
+            LET replacement BE substitutionMap[charAtPos]
+            IF replacement IS DEFINED THEN
+                RETURN replaceChars(pos + 1, acc + replacement)
+            ELSE
+                RETURN replaceChars(pos + 1, acc + charAtPos)
+    END FUNCTION
+
+    RETURN replaceChars(0, "")
+END FUNCTION
+```

@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION minimumCost(m n horizontalCut verticalCut)
+        PROC sortDesc(arr)
+            SET idxMax TO 0
+            REPEAT
+                SET swapped TO FALSE
+                SET idxMax TO LENGTH(arr) - 1
+                SET u TO 0
+                WHILE u LESS THAN idxMax
+                    IF arr[u] LESS THAN arr[u + 1]
+                        SET tempVal TO arr[u]
+                        SET arr[u] TO arr[u + 1]
+                        SET arr[u + 1] TO tempVal
+                        SET swapped TO TRUE
+                    END IF
+                    INCREMENT u BY 1
+                END WHILE
+            UNTIL NOT swapped
+        END PROC
+
+        CALL sortDesc(horizontalCut)
+        CALL sortDesc(verticalCut)
+
+        SET totalPrice TO 0
+        SET pointerH TO 0
+        SET pointerV TO 0
+        SET countH TO 1
+        SET countV TO 1
+
+        FUNCTION isStillCutNeeded()
+            RETURN (pointerH LESS THAN (m - 1)) OR (pointerV LESS THAN (n - 1))
+        END FUNCTION
+
+        FUNCTION horizontalGreater()
+            RETURN (pointerH LESS THAN (m - 1)) AND (horizontalCut[pointerH] GREATER THAN verticalCut[pointerV])
+        END FUNCTION
+
+        WHILE TRUE
+            IF NOT isStillCutNeeded()
+                BREAK
+            END IF
+
+            IF (pointerV EQUALS (n - 1)) OR horizontalGreater()
+                SET partCost TO horizontalCut[pointerH] MULTIPLIED BY countV
+                SET totalPrice TO totalPrice + partCost
+                SET countH TO countH + 1
+                SET pointerH TO pointerH + 1
+            ELSE
+                SET partCost TO verticalCut[pointerV] MULTIPLIED BY countH
+                SET totalPrice TO totalPrice + partCost
+                SET countV TO countV + 1
+                SET pointerV TO pointerV + 1
+            END IF
+        END WHILE
+
+        RETURN totalPrice
+    END FUNCTION
+END CLASS

@@ -1,0 +1,152 @@
+CLASS Solution
+    FUNCTION findAnswer(alpha, beta)
+        FUNCTION buildGraph(gamma)
+            SET delta TO new mapping with default empty list
+            FUNCTION insertEdge(epsilon, zeta, eta)
+                APPEND (zeta, eta) TO delta[epsilon]
+            END FUNCTION
+            FOR index FROM 0 TO LENGTH(gamma) - 1 DO
+                SET kappa TO gamma[index]
+                CALL insertEdge(kappa[0], kappa[1], kappa[2])
+                CALL insertEdge(kappa[1], kappa[0], kappa[2])
+            END FOR
+            RETURN delta
+        END FUNCTION
+
+        FUNCTION popMin(heap)
+            FUNCTION swap(iota, theta)
+                SET temp TO heap[iota]
+                SET heap[iota] TO heap[theta]
+                SET heap[theta] TO temp
+            END FUNCTION
+
+            SET lambd TO LENGTH(heap) - 1
+            CALL swap(0, lambd)
+            SET omicron TO heap[lambd]
+            REMOVE last element from heap
+
+            SET rho TO 0
+            WHILE TRUE
+                SET sigma TO 2 * rho + 1
+                SET tau TO 2 * rho + 2
+                IF sigma >= LENGTH(heap)
+                    BREAK
+                END IF
+                IF tau < LENGTH(heap) AND heap[tau][0] < heap[sigma][0]
+                    SET sigma TO tau
+                END IF
+                IF heap[rho][0] <= heap[sigma][0]
+                    BREAK
+                END IF
+                CALL swap(rho, sigma)
+                SET rho TO sigma
+            END WHILE
+            RETURN omicron
+        END FUNCTION
+
+        FUNCTION pushHeap(heap, element)
+            APPEND element TO heap
+            SET upsilon TO LENGTH(heap) - 1
+            WHILE upsilon > 0
+                SET phi TO (upsilon - 1) DIV 2
+                IF heap[phi][0] <= heap[upsilon][0]
+                    BREAK
+                END IF
+                SET temp TO heap[phi]
+                SET heap[phi] TO heap[upsilon]
+                SET heap[upsilon] TO temp
+                SET upsilon TO phi
+            END WHILE
+        END FUNCTION
+
+        FUNCTION isEmpty(collection)
+            RETURN LENGTH(collection) == 0
+        END FUNCTION
+
+        FUNCTION minValue()
+            RETURN 1 / 0
+        END FUNCTION
+
+        SET graphStruct TO buildGraph(beta)
+
+        SET distArr TO new list with alpha elements all set to minValue()
+        SET distArr[0] TO 0
+
+        SET heapQueue TO [(0, 0)]
+
+        FUNCTION relaxEdges()
+            WHILE NOT isEmpty(heapQueue)
+                SET curr TO popMin(heapQueue)
+                SET currDist TO curr[0]
+                SET currNode TO curr[1]
+
+                IF distArr[currNode] < currDist
+                    CONTINUE
+                END IF
+
+                FOR EACH pair IN graphStruct[currNode]
+                    SET vertex TO pair[0]
+                    SET weight TO pair[1]
+                    SET newDist TO currDist + weight
+                    IF newDist < distArr[vertex]
+                        SET distArr[vertex] TO newDist
+                        CALL pushHeap(heapQueue, (newDist, vertex))
+                    END IF
+                END FOR
+            END WHILE
+        END FUNCTION
+
+        CALL relaxEdges()
+
+        SET visitedFlag TO new list of alpha elements initialized False
+        SET edgeSet TO empty set
+        SET pendingStack TO [(alpha - 1, distArr[alpha - 1])]
+
+        FUNCTION tracePath()
+            WHILE LENGTH(pendingStack) > 0
+                SET nodeInfo TO pendingStack[-1]
+                REMOVE last element from pendingStack
+
+                SET nodeX TO nodeInfo[0]
+                SET distX TO nodeInfo[1]
+
+                IF visitedFlag[nodeX]
+                    CONTINUE
+                END IF
+                SET visitedFlag[nodeX] TO True
+
+                FOR EACH neighbor IN graphStruct[nodeX]
+                    SET nodeY TO neighbor[0]
+                    SET wgt TO neighbor[1]
+
+                    IF distX == distArr[nodeY] + wgt
+                        IF nodeX < nodeY
+                            SET edgePair TO (nodeX, nodeY)
+                        ELSE
+                            SET edgePair TO (nodeY, nodeX)
+                        END IF
+                        ADD edgePair TO edgeSet
+                        APPEND (nodeY, distArr[nodeY]) TO pendingStack
+                    END IF
+                END FOR
+            END WHILE
+        END FUNCTION
+
+        CALL tracePath()
+
+        SET resultList TO empty list
+
+        FOR i FROM 0 TO LENGTH(beta) - 1
+            SET edgeA TO beta[i][0]
+            SET edgeB TO beta[i][1]
+            IF edgeA < edgeB
+                SET queryEdge TO (edgeA, edgeB)
+            ELSE
+                SET queryEdge TO (edgeB, edgeA)
+            END IF
+            APPEND (queryEdge IN edgeSet) TO resultList
+        END FOR
+
+        RETURN resultList
+    END FUNCTION
+END CLASS

@@ -1,0 +1,47 @@
+```
+FUNCTION sort_numbers(input_string)
+  LET mapping_dictionary BE {
+    'nine': 9,
+    'eight': 8,
+    'seven': 7,
+    'six': 6,
+    'five': 5,
+    'four': 4,
+    'three': 3,
+    'two': 2,
+    'one': 1,
+    'zero': 0
+  }
+  
+  FUNCTION obtain_valid_tokens(phrase, index, acc)
+    IF index EQUALS LENGTH(phrase) THEN
+      RETURN acc
+    LET segment BE phrase[index]
+    RETURN obtain_valid_tokens(phrase, index + 1, (segment IN mapping_dictionary AND segment NOT EQUAL TO '') ? acc + [segment] : acc)
+  END FUNCTION
+  
+  LET tokens_filtered BE obtain_valid_tokens(SPLIT input_string BY ' ', 0, [])
+  
+  FUNCTION merge_sort(array)
+    IF LENGTH(array) < 2 THEN RETURN array
+    LET mid_point BE LENGTH(array) DIVIDED BY 2
+    LET left_part BE merge_sort(SUBARRAY(array, 0, mid_point))
+    LET right_part BE merge_sort(SUBARRAY(array, mid_point, LENGTH(array)))
+    
+    FUNCTION merge_arrays(left_array, right_array, merged_acc)
+      IF LENGTH(left_array) EQUALS 0 THEN RETURN merged_acc + right_array
+      IF LENGTH(right_array) EQUALS 0 THEN RETURN merged_acc + left_array
+      LET first_left VALUE mapping_dictionary[left_array[0]]
+      LET first_right VALUE mapping_dictionary[right_array[0]]
+      RETURN (first_left LESS OR EQUAL first_right) ? merge_arrays(SLICE left_array FROM 1, right_array, merged_acc + [left_array[0]]) 
+                                                : merge_arrays(left_array, SLICE right_array FROM 1, merged_acc + [right_array[0]])
+    END FUNCTION
+    
+    RETURN merge_arrays(left_part, right_part, [])
+  END FUNCTION
+  
+  LET final_sorted_tokens BE merge_sort(tokens_filtered)
+  
+  RETURN CONCATENATE final_sorted_tokens WITH ' '
+END FUNCTION
+```

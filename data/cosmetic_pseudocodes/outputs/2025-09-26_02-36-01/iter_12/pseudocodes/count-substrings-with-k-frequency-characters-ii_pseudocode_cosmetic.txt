@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION numberOfSubstrings(s parameter, k parameter)  
+        FUNCTION hasCharAtLeastK(freqMap)  
+            SET flag TO false  
+            SET keysList TO getKeys(freqMap)  
+            SET idx TO 0  
+            WHILE idx LESS THAN length(keysList) AND flag EQUALS false  
+                SET keyChar TO keysList at idx  
+                IF freqMap at keyChar GREATER THAN OR EQUAL TO k THEN  
+                    SET flag TO true  
+                END IF  
+                SET idx TO idx PLUS 1  
+            END WHILE  
+            RETURN flag  
+        END FUNCTION  
+
+        SET frequencyMap TO empty map  
+        SET totalSubstrings TO 0  
+        SET windowStart TO 0  
+
+        SET position TO 0  
+        WHILE position LESS THAN length(s)  
+            SET currentChar TO s at position  
+            FUNCTION incrementCharCount(char, map)  
+                IF char IN map THEN  
+                    SET map at char TO map at char PLUS 1  
+                ELSE  
+                    SET map at char TO 1  
+                END IF  
+            END FUNCTION  
+            incrementCharCount(currentChar, frequencyMap)  
+
+            WHILE hasCharAtLeastK(frequencyMap)  
+                SET charToRemove TO s at windowStart  
+                FUNCTION decrementCharCount(char, map)  
+                    SET map at char TO map at char MINUS 1  
+                    IF map at char EQUALS 0 THEN  
+                        CALL map REMOVE key char  
+                    END IF  
+                END FUNCTION  
+                decrementCharCount(charToRemove, frequencyMap)  
+                SET windowStart TO windowStart PLUS 1  
+            END WHILE  
+
+            FUNCTION addToTotal(currentTotal, value)  
+                RETURN currentTotal PLUS value  
+            END FUNCTION  
+            SET totalSubstrings TO addToTotal(totalSubstrings, windowStart)  
+
+            SET position TO position PLUS 1  
+        END WHILE  
+
+        RETURN totalSubstrings  
+    END FUNCTION  
+END CLASS

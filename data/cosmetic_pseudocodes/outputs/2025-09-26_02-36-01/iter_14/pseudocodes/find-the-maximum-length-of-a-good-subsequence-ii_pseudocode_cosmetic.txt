@@ -1,0 +1,50 @@
+CLASS Solution  
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)  
+      SET totalElements TO LENGTH(nums)  
+      SET dpMatrix TO a 2D LIST FILLED WITH 0s, SIZE totalElements BY (k + 1)  
+      SET frequencyMaps TO a LIST OF DEFAULT_DICTIONARYs WITH DEFAULT 0, LENGTH (k + 1)  
+      SET topStats TO a 2D LIST FILLED WITH 0s, SIZE (k + 1) BY 3  
+      SET resultMax TO 0  
+      
+      PROCEDURE updateTopStats(statIndex, candidateValue, candidateElement)  
+          IF topStats[statIndex][0] ≠ candidateElement THEN  
+              IF candidateValue ≥ topStats[statIndex][1] THEN  
+                  SET topStats[statIndex][2] TO topStats[statIndex][1]  
+                  SET topStats[statIndex][1] TO candidateValue  
+                  SET topStats[statIndex][0] TO candidateElement  
+              ELSE  
+                  SET topStats[statIndex][2] TO MAX(topStats[statIndex][2], candidateValue)  
+              END IF  
+          ELSE  
+              SET topStats[statIndex][1] TO MAX(topStats[statIndex][1], candidateValue)  
+          END IF  
+      END PROCEDURE  
+      
+      SET outerCounter TO 0  
+      WHILE outerCounter < totalElements DO  
+          SET currentNum TO nums[outerCounter]  
+          SET innerCounter TO 0  
+          WHILE innerCounter ≤ k DO  
+              SET dpMatrix[outerCounter][innerCounter] TO frequencyMaps[innerCounter][currentNum]  
+              
+              IF innerCounter > 0 THEN  
+                  IF topStats[innerCounter - 1][0] ≠ nums[outerCounter] THEN  
+                      SET dpMatrix[outerCounter][innerCounter] TO MAX(dpMatrix[outerCounter][innerCounter], topStats[innerCounter - 1][1])  
+                  ELSE  
+                      SET dpMatrix[outerCounter][innerCounter] TO MAX(dpMatrix[outerCounter][innerCounter], topStats[innerCounter - 1][2])  
+                  END IF  
+              END IF  
+              
+              SET dpMatrix[outerCounter][innerCounter] TO dpMatrix[outerCounter][innerCounter] + 1  
+              SET frequencyMaps[innerCounter][nums[outerCounter]] TO MAX(frequencyMaps[innerCounter][nums[outerCounter]], dpMatrix[outerCounter][innerCounter])  
+              CALL updateTopStats(innerCounter, dpMatrix[outerCounter][innerCounter], currentNum)  
+              SET resultMax TO MAX(resultMax, dpMatrix[outerCounter][innerCounter])  
+              
+              SET innerCounter TO innerCounter + 1  
+          END WHILE  
+          SET outerCounter TO outerCounter + 1  
+      END WHILE  
+      
+      RETURN resultMax  
+    END FUNCTION  
+END CLASS

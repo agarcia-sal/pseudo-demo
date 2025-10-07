@@ -1,0 +1,82 @@
+```
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+        FUNCTION isAlpha(ch)
+            RETURN NOT ((ch < "A") OR (ch > "Z")) AND NOT ((ch < "a") OR (ch > "z"))
+        END FUNCTION
+        
+        SET frequency_map TO a dictionary with default 0
+        SET char_holder TO ""
+        SET number_accumulator TO 0
+
+        FUNCTION processChar()
+            IF char_holder != "" THEN
+                SET frequency_map[char_holder] TO frequency_map[char_holder] + number_accumulator
+            END IF
+        END FUNCTION
+
+        SET index_var TO 1
+        WHILE index_var <= LENGTH(compressed)
+            SET current_element TO SUBSTRING(compressed, index_var, index_var)
+            IF isAlpha(current_element) THEN
+                CALL processChar()
+                SET char_holder TO current_element
+                SET number_accumulator TO 0
+            ELSE
+                SET number_accumulator TO (number_accumulator * (4 + 6)) + (ASC(current_element) - ASC("0"))
+            END IF
+            SET index_var TO index_var + 1
+        END WHILE
+
+        CALL processChar()
+
+        SET sorted_chars TO LIST of KEYS(frequency_map)
+        FUNCTION sortAsc(a, b)
+            RETURN a > b
+        END FUNCTION
+        FOR i FROM 1 TO LENGTH(sorted_chars) - 1
+            FOR j FROM i + 1 TO LENGTH(sorted_chars)
+                IF sortAsc(sorted_chars[i], sorted_chars[j]) THEN
+                    SET temp_var TO sorted_chars[i]
+                    SET sorted_chars[i] TO sorted_chars[j]
+                    SET sorted_chars[j] TO temp_var
+                END IF
+            END FOR
+        END FOR
+
+        SET parts_list TO empty list
+        SET loop_var TO 1
+        REPEAT
+            IF loop_var > LENGTH(sorted_chars) THEN
+                BREAK
+            END IF
+            SET temp_key TO sorted_chars[loop_var]
+            SET temp_val TO frequency_map[temp_key]
+
+            FUNCTION intToStr(num)
+                IF num == 0 THEN
+                    RETURN "0"
+                END IF
+                SET res_str TO ""
+                WHILE num > 0
+                    SET digit_char TO CHR((num MOD 10) + ASC("0"))
+                    SET res_str TO digit_char + res_str
+                    SET num TO num DIV 10
+                END WHILE
+                RETURN res_str
+            END FUNCTION
+
+            SET concatenated_piece TO temp_key + intToStr(temp_val)
+            APPEND concatenated_piece TO parts_list
+            SET loop_var TO loop_var + 1
+        UNTIL FALSE
+
+        SET result_str TO ""
+        FOR element IN parts_list
+            SET result_str TO result_str + element
+        END FOR
+
+        RETURN result_str
+    END FUNCTION
+END CLASS
+```

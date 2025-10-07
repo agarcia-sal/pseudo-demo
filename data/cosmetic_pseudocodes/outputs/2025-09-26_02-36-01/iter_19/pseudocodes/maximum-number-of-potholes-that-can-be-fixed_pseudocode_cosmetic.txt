@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        FUNCTION computeCost(len INTEGER) RETURNS INTEGER
+            RETURN (len + 1)
+        END FUNCTION
+
+        FUNCTION isEmptySegment(seg STRING) RETURNS BOOLEAN
+            RETURN (seg = "")
+        END FUNCTION
+
+        SET segmentsList TO []
+        SET startIdx TO 0
+        SET i TO 0
+        REPEAT
+            IF i = LENGTH(road) OR road[i] = '.' THEN
+                SET segmentLength TO i - startIdx
+                SET segmentStr TO ""
+                SET j TO startIdx
+                WHILE j < i DO
+                    SET segmentStr TO segmentStr + road[j]
+                    SET j TO j + 1
+                END WHILE
+                segmentsList = segmentsList + [segmentStr]
+                SET startIdx TO i + 1
+            END IF
+            SET i TO i + 1
+        UNTIL i > LENGTH(road)
+
+        FOR x FROM 1 TO LENGTH(segmentsList) - 1 DO
+            FOR y FROM 0 TO LENGTH(segmentsList) - 2 DO
+                IF LENGTH(segmentsList[y]) > LENGTH(segmentsList[y + 1]) THEN
+                    SET tempVar TO segmentsList[y]
+                    SET segmentsList[y] TO segmentsList[y + 1]
+                    SET segmentsList[y + 1] TO tempVar
+                END IF
+            END FOR
+        END FOR
+
+        SET sumFixed TO 0
+        SET idxSegment TO 0
+        WHILE idxSegment < LENGTH(segmentsList) DO
+            SET currSeg TO segmentsList[idxSegment]
+            IF isEmptySegment(currSeg) THEN
+                SET idxSegment TO idxSegment + 1
+                CONTINUE
+            END IF
+
+            SET lengthSeg TO LENGTH(currSeg)
+
+            IF computeCost(lengthSeg) <= budget THEN
+                SET sumFixed TO sumFixed + lengthSeg
+                SET budget TO budget - computeCost(lengthSeg)
+                SET idxSegment TO idxSegment + 1
+            ELSE
+                SET counter TO lengthSeg
+                SET doneFixing TO FALSE
+                WHILE counter > 0 AND budget > 0 AND NOT doneFixing DO
+                    IF computeCost(counter) <= budget THEN
+                        SET sumFixed TO sumFixed + counter
+                        SET budget TO budget - computeCost(counter)
+                        SET doneFixing TO TRUE
+                    ELSE
+                        SET counter TO counter - 1
+                    END IF
+                END WHILE
+                SET idxSegment TO idxSegment + 1
+            END IF
+        END WHILE
+
+        RETURN sumFixed
+    END FUNCTION
+END CLASS

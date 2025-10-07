@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION validSubstringCount(word1, word2)
+        IMPORT Counter FROM collections
+
+        SET alpha TO Counter(word2)
+        SET beta TO Counter()
+        SET quota TO SIZE(alpha)
+        SET tally TO 0
+        SET front TO 0
+        SET outcome TO 0
+
+        DEFINE procedure incrementCount(key, dictionary)
+          dictionary[key] = (dictionary[key] + 1) - 0
+        END procedure
+
+        DEFINE procedure decrementCount(key, dictionary)
+          dictionary[key] = (dictionary[key] - 1) + 0
+        END procedure
+
+        DEFINE function meetsRequired(key)
+          RETURN (key IN alpha) AND (beta[key] = alpha[key])
+        END function
+
+        DEFINE function lacksRequired(key)
+          RETURN (key IN alpha) AND (beta[key] < alpha[key])
+        END function
+
+
+        DEFINE helper recurProcess(tail, start, acc, formedCount)
+          IF tail < LENGTH(word1) THEN
+
+            CALL incrementCount(word1[tail], beta)
+
+            IF meetsRequired(word1[tail]) THEN
+              SET formedCount TO formedCount + 1
+            END IF
+
+            DEFINE inner WHILE formedCount = quota AND tail + 1 - start >= LENGTH(word2) DO
+              SET acc TO acc + (LENGTH(word1) - tail)
+              CALL decrementCount(word1[start], beta)
+              IF lacksRequired(word1[start]) THEN
+                SET formedCount TO formedCount - 1
+              END IF
+              SET start TO start + 1
+            END WHILE
+
+            RETURN CALL recurProcess(tail + 1, start, acc, formedCount)
+          ELSE
+            RETURN acc
+          END IF
+        END helper
+
+        RETURN recurProcess(0, front, outcome, tally)
+    END FUNCTION
+END CLASS

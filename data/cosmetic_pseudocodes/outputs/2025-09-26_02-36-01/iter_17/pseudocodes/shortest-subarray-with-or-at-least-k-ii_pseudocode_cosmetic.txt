@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+
+        FUNCTION update_count(hist LIST OF integers val integer inc integer)
+            SET bit TO 1
+            SET idx TO 0
+            WHILE idx LESS THAN 32
+                IF (val BITWISE-AND bit) NOT EQUAL 0 THEN
+                    SET hist[idx] TO hist[idx] + inc
+                END IF
+                SET bit TO bit * 2
+                SET idx TO idx + 1
+            END WHILE
+        END FUNCTION
+
+        FUNCTION compute_current_or(hist LIST OF integers) RETURNS integer
+            SET acc TO 0
+            SET pos TO 0
+            WHILE pos LESS THAN 32
+                IF hist[pos] GREATER THAN 0 THEN
+                    SET acc TO acc OR (1 LEFT-SHIFT pos)
+                END IF
+                SET pos TO pos + 1
+            END WHILE
+            RETURN acc
+        END FUNCTION
+
+        SET length_nums TO LENGTH OF nums
+        SET frequencies TO LIST OF 32 ZEROS
+        SET or_value TO 0
+        SET start_idx TO 0
+        SET min_len TO +∞
+
+        SET current_idx TO 0
+        WHILE current_idx LESS THAN length_nums
+            CALL update_count(frequencies, nums[current_idx], 1)
+            SET or_value TO or_value OR nums[current_idx]
+
+            WHILE (or_value GREATER-OR-EQUAL k) AND (start_idx LESS-OR-EQUAL current_idx)
+                IF min_len GREATER THAN (current_idx - start_idx + 1) THEN
+                    SET min_len TO current_idx - start_idx + 1
+                END IF
+                CALL update_count(frequencies, nums[start_idx], -1)
+                SET or_value TO compute_current_or(frequencies)
+                SET start_idx TO start_idx + 1
+            END WHILE
+
+            SET current_idx TO current_idx + 1
+        END WHILE
+
+        IF min_len EQUAL +∞ THEN
+            RETURN -1
+        ELSE
+            RETURN min_len
+        END IF
+    END FUNCTION
+END CLASS

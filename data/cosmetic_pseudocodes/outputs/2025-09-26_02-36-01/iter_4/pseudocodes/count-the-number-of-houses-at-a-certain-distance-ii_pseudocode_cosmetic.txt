@@ -1,0 +1,67 @@
+CLASS Solution  
+    FUNCTION countOfPairs(n, x, y)  
+        IF NOT (x LESS THAN OR EQUAL TO y) THEN  
+            SET swap_tmp TO x  
+            SET x TO y  
+            SET y TO swap_tmp  
+        END IF  
+        
+        FUNCTION bfs(start)  
+            DECLARE visited AS array OF BOOLEAN OF SIZE n PLUS one INITIALIZED TO False  
+            DECLARE dist AS array OF INTEGER OF SIZE n PLUS one FILLED WITH zero  
+            DECLARE queue AS deque CONTAINING start  
+            ASSIGN True TO visited AT INDEX start  
+            
+            WHILE LENGTH(queue) NOT EQUAL TO zero DO  
+                SET curr TO REMOVE_FIRST_ELEMENT(queue)  
+                
+                DECLARE adj_nodes AS ARRAY WITH ELEMENTS curr MINUS one AND curr PLUS one  
+                SET idx TO 0  
+                WHILE idx LESS THAN LENGTH(adj_nodes) DO  
+                    SET neighbor TO adj_nodes AT INDEX idx  
+                    IF neighbor GREATER THAN OR EQUAL TO one AND neighbor LESS THAN OR EQUAL TO n THEN  
+                        IF visited AT INDEX neighbor EQUALS False THEN  
+                            SET visited AT neighbor TO True  
+                            SET dist AT neighbor TO dist AT curr PLUS 1  
+                            APPEND neighbor TO queue  
+                        END IF  
+                    END IF  
+                    SET idx TO idx PLUS 1  
+                END WHILE  
+                
+                IF curr EQUALS x THEN  
+                    IF NOT (visited AT y) THEN  
+                        SET visited AT y TO True  
+                        SET dist AT y TO dist AT curr PLUS 1  
+                        APPEND y TO queue  
+                    END IF  
+                ELSE IF curr EQUALS y THEN  
+                    IF visited AT x EQUALS False THEN  
+                        SET visited AT x TO True  
+                        SET dist AT x TO dist AT curr PLUS 1  
+                        APPEND x TO queue  
+                    END IF  
+                END IF  
+            END WHILE  
+            
+            RETURN SUBARRAY dist FROM INDEX one TO END  
+        END FUNCTION  
+        
+        DECLARE tally AS ARRAY OF INTEGER OF SIZE n FILLED WITH zero  
+        SET index_i TO one  
+        WHILE index_i LESS THAN OR EQUAL TO n DO  
+            SET bfs_distances TO bfs(index_i)  
+            SET index_d TO zero  
+            WHILE index_d LESS THAN LENGTH(bfs_distances) DO  
+                SET distance_value TO bfs_distances AT index_d  
+                IF distance_value GREATER THAN zero THEN  
+                    SET tally AT (distance_value MINUS one) TO tally AT (distance_value MINUS one) PLUS 1  
+                END IF  
+                SET index_d TO index_d PLUS 1  
+            END WHILE  
+            SET index_i TO index_i PLUS 1  
+        END WHILE  
+        
+        RETURN tally  
+    END FUNCTION  
+END CLASS

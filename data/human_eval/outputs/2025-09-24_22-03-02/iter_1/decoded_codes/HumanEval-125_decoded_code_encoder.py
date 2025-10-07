@@ -1,0 +1,7 @@
+def process_text(txt):
+    if " " in txt:
+        return txt.split()
+    elif "," in txt:
+        return txt.replace(",", " ").split()
+    else:
+        return sum(1 for c in txt if c.islower() and ord(c) % 2 == 0)

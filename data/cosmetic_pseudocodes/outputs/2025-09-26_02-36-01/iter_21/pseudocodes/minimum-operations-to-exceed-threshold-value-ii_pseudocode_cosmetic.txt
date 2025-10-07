@@ -1,0 +1,88 @@
+CLASS Solution  
+    FUNCTION minOperations(nums parameter k parameter)  
+        PROCEDURE buildHeap(arr parameter)  
+            SET p TO (LENGTH of arr) DIV 2  
+            REPEAT  
+                IF p IS LESS THAN zero THEN EXIT REPEAT  
+                CALL siftDown(arr, p, LENGTH of arr)  
+                DECREMENT p BY one  
+            UNTIL false  
+        END PROCEDURE  
+
+        PROCEDURE siftDown(heapArr parameter, startIndex parameter, heapSize parameter)  
+            SET root TO startIndex  
+            REPEAT  
+                SET child TO (root * 2) + 1  
+                IF child GREATER OR EQUAL TO heapSize THEN  
+                    BREAK  
+                ENDIF  
+                IF child + 1 LESS THAN heapSize THEN  
+                    IF heapArr[child + 1] LESS THAN heapArr[child] THEN  
+                        SET child TO child + 1  
+                    ENDIF  
+                ENDIF  
+                IF heapArr[root] GREATER THAN heapArr[child] THEN  
+                    SET temp TO heapArr[root]  
+                    SET heapArr[root] TO heapArr[child]  
+                    SET heapArr[child] TO temp  
+                    SET root TO child  
+                ELSE  
+                    BREAK  
+                ENDIF  
+            UNTIL false  
+        END PROCEDURE  
+
+        PROCEDURE popHeap(heapList parameter) RETURNS integer  
+            SET smallest TO heapList[0]  
+            SET endIndex TO LENGTH of heapList MINUS 1  
+            SET heapList[0] TO heapList[endIndex]  
+            REMOVE last element FROM heapList  
+            CALL siftDown(heapList, 0, LENGTH of heapList)  
+            RETURN smallest  
+        END PROCEDURE  
+
+        PROCEDURE pushHeap(heapList parameter, value parameter)  
+            APPEND value TO heapList  
+            SET idx TO LENGTH of heapList MINUS 1  
+            REPEAT  
+                IF idx EQUAL TO zero THEN EXIT REPEAT  
+                SET parentIdx TO (idx MINUS 1) DIV 2  
+                IF heapList[parentIdx] GREATER THAN heapList[idx] THEN  
+                    SET tempVal TO heapList[parentIdx]  
+                    SET heapList[parentIdx] TO heapList[idx]  
+                    SET heapList[idx] TO tempVal  
+                    SET idx TO parentIdx  
+                ELSE  
+                    BREAK  
+                ENDIF  
+            UNTIL false  
+        END PROCEDURE  
+
+        CALL buildHeap(nums)  
+
+        SET opCount TO 0  
+
+        WHILE true  
+            IF NOT (nums[0] LESS THAN k) THEN BREAK ENDIF  
+            IF LENGTH of nums LESS OR EQUAL TO 1 THEN BREAK ENDIF  
+
+            SET firstVal TO popHeap(nums)  
+            SET secondVal TO popHeap(nums)  
+
+            SET doubleMin TO firstVal  
+            SET maxVal TO secondVal  
+            IF secondVal LESS THAN firstVal THEN  
+                SET doubleMin TO secondVal  
+                SET maxVal TO firstVal  
+            ENDIF  
+
+            SET combined TO (doubleMin + doubleMin) + maxVal  
+
+            CALL pushHeap(nums, combined)  
+
+            SET opCount TO opCount PLUS 1  
+        END WHILE  
+
+        RETURN opCount  
+    END FUNCTION  
+END CLASS

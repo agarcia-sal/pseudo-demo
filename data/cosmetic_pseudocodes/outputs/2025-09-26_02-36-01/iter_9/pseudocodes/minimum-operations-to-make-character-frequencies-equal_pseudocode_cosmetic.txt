@@ -1,0 +1,92 @@
+CLASS Solution
+
+    FUNCTION makeStringGood(s)
+        DEFINE FUNCTION ordinal(ch)
+            RETURN ASCII_VALUE_OF(ch)
+        END FUNCTION
+
+        DEFINE FUNCTION createZeroList(length)
+            SET listVar TO EMPTY LIST
+            REPEAT length TIMES
+                APPEND 0 TO listVar
+            END REPEAT
+            RETURN listVar
+        END FUNCTION
+
+        SET alphaCount TO createZeroList(26)
+        SET idx TO 0
+        WHILE idx LESS THAN LENGTH_OF(s)
+            SET charVal TO ordinal(s[idx])
+            SET baseVal TO ordinal('a')
+            SET posIndex TO charVal - baseVal
+            SET alphaCount[posIndex] TO alphaCount[posIndex] + 1
+            SET idx TO idx + 1
+        END WHILE
+
+        DEFINE FUNCTION _getMinOperations(freqArray, targetVal)
+            SET dpArr TO createZeroList(27)
+            SET currIndex TO 25
+
+            WHILE currIndex GREATER OR EQUAL TO 0
+                SET deleteAll TO freqArray[currIndex]
+
+                IF targetVal > freqArray[currIndex] THEN
+                    SET deleteOrInsert TO targetVal - freqArray[currIndex]
+                ELSE
+                    SET deleteOrInsert TO freqArray[currIndex] - targetVal
+                END IF
+
+                SET option1 TO MINIMUM(deleteAll, deleteOrInsert + dpArr[currIndex + 1])
+
+                IF (currIndex + 1) < 26 AND freqArray[currIndex + 1] < targetVal THEN
+                    SET nextDeficit TO targetVal - freqArray[currIndex + 1]
+
+                    IF freqArray[currIndex] <= targetVal THEN
+                        SET needToChange TO freqArray[currIndex]
+                    ELSE
+                        SET needToChange TO freqArray[currIndex] - targetVal
+                    END IF
+
+                    IF nextDeficit > needToChange THEN
+                        SET combinedChange TO needToChange + (nextDeficit - needToChange)
+                    ELSE
+                        SET combinedChange TO nextDeficit + (needToChange - nextDeficit)
+                    END IF
+
+                    SET option2 TO MINIMUM(option1, combinedChange + dpArr[currIndex + 2])
+                ELSE
+                    SET option2 TO option1
+                END IF
+
+                SET dpArr[currIndex] TO option2
+                SET currIndex TO currIndex - 1
+            END WHILE
+
+            RETURN dpArr[0]
+        END FUNCTION
+
+        SET maxFreq TO 0
+        FOR elt IN alphaCount
+            IF elt > maxFreq THEN
+                SET maxFreq TO elt
+            END IF
+        END FOR
+
+        SET searchVal TO 1
+        SET resultVal TO dpArrPlaceholder
+        SET firstTime TO TRUE
+        WHILE searchVal <= maxFreq
+            SET tempRes TO _getMinOperations(alphaCount, searchVal)
+            IF firstTime THEN
+                SET resultVal TO tempRes
+                SET firstTime TO FALSE
+            ELSE IF tempRes < resultVal THEN
+                SET resultVal TO tempRes
+            END IF
+            SET searchVal TO searchVal + 1
+        END WHILE
+
+        RETURN resultVal
+    END FUNCTION
+
+END CLASS

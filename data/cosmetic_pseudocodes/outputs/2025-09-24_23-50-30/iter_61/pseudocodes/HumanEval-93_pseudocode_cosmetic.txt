@@ -1,0 +1,38 @@
+```
+FUNCTION encode(inputStr)
+	SET alphabetSet TO {'a','e','i','o','u','A','E','I','O','U'}
+	DEFINE replacementMap AS MAP
+	FOR EACH idx FROM 0 TO LENGTH(alphabetSet) - 1
+		SET currentChar TO ELEMENT AT idx IN alphabetSet
+		SET replacementChar TO CHARACTER_WITH_ASCII(ASCII_VALUE_OF currentChar + 2)
+		ADD TO replacementMap KEY currentChar VALUE replacementChar
+	END FOR
+	
+	FUNCTION swapCaseRec(pos, acc)
+		IF pos = LENGTH(inputStr) THEN RETURN acc END IF
+		SET charAtPos TO CHARACTER_AT(inputStr, pos)
+		SET swappedChar TO 
+			CASE TRUE OF
+				WHEN charAtPos >= 'a' AND charAtPos <= 'z' THEN TO_UPPER(charAtPos)
+				WHEN charAtPos >= 'A' AND charAtPos <= 'Z' THEN TO_LOWER(charAtPos)
+				ELSE charAtPos
+			END CASE
+		RETURN swapCaseRec(pos + 1, CONCAT(acc, swappedChar))
+	END FUNCTION
+	
+	SET swapped TO swapCaseRec(0, "")
+	
+	FUNCTION replaceVowelsRec(index, result)
+		IF index = LENGTH(swapped) THEN RETURN result END IF
+		SET character TO CHARACTER_AT(swapped, index)
+		SET toAppend TO
+			CASE TRUE OF
+				WHEN character IN alphabetSet THEN replacementMap[character]
+				ELSE character
+			END CASE
+		RETURN replaceVowelsRec(index + 1, CONCAT(result, toAppend))
+	END FUNCTION
+	
+	RETURN replaceVowelsRec(0, "")
+END FUNCTION
+```

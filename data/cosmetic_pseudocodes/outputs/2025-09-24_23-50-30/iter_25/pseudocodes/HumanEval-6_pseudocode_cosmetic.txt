@@ -1,0 +1,48 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        SET depth_tracker TO 0
+        SET max_tracker TO 0
+        SET index TO 0
+        WHILE index < LENGTH(group_string)
+            SET symbol TO group_string[index]
+            IF NOT (symbol != '(')
+                SET depth_tracker TO depth_tracker + 1
+                IF depth_tracker > max_tracker THEN
+                    SET max_tracker TO depth_tracker
+                END IF
+            ELSE
+                SET depth_tracker TO depth_tracker - 1
+            END IF
+            SET index TO index + 1
+        END WHILE
+        RETURN max_tracker
+    END FUNCTION
+
+    SET segment_list TO []
+    SET start_idx TO 0
+    SET current_idx TO 0
+    WHILE current_idx <= LENGTH(parentheses_string)
+        IF current_idx = LENGTH(parentheses_string) OR parentheses_string[current_idx] = ' '
+            SET segment_length TO current_idx - start_idx
+            IF segment_length > 0 THEN
+                APPEND SUBSTRING(parentheses_string, start_idx, segment_length) TO segment_list
+            END IF
+            SET start_idx TO current_idx + 1
+        END IF
+        SET current_idx TO current_idx + 1
+    END WHILE
+
+    SET result_list TO []
+    SET iter_idx TO 0
+    WHILE iter_idx < LENGTH(segment_list)
+        SET element TO segment_list[iter_idx]
+        IF element != ""
+            APPEND parse_paren_group(element) TO result_list
+        END IF
+        SET iter_idx TO iter_idx + 1
+    END WHILE
+
+    RETURN result_list
+END FUNCTION
+```

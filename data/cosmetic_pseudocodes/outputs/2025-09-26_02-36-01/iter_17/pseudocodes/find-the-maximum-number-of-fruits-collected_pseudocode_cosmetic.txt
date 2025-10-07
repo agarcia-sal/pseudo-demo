@@ -1,0 +1,64 @@
+CLASS Solution  
+	FUNCTION maxCollectedFruits(fruits)  
+		LET totalLength BE LENGTH OF fruits  
+		
+		LET shiftsA BE LIST OF PAIRS (1, 1), (0, 1)  
+		LET shiftsB BE LIST OF PAIRS (1, 0), (1, -1), (1, 1)  
+		LET shiftsC BE LIST OF PAIRS (-1, 1), (0, 1), (1, 1)  
+		
+		LET cache BE EMPTY DICTIONARY  
+		
+		FUNCTION dp(a1, b1, a2, b2, a3, b3)  
+			WHILE TRUE  
+				IF ( a1 < 0 OR a1 >= totalLength OR b1 < 0 OR b1 >= totalLength OR a2 < 0 OR a2 >= totalLength OR b2 < 0 OR b2 >= totalLength OR a3 < 0 OR a3 >= totalLength OR b3 < 0 OR b3 >= totalLength ) THEN  
+					RETURN -∞  
+				END IF  
+				
+				IF (a1 = b1 AND b1 = a2 AND a2 = b2 AND b2 = a3 AND a3 = b3 AND b3 = totalLength - 1) THEN  
+					RETURN fruits[totalLength - 1][totalLength - 1]  
+				END IF  
+				
+				LET keyTuple BE TUPLE(a1, b1, a2, b2, a3, b3)  
+				IF keyTuple IN cache THEN  
+					RETURN cache[keyTuple]  
+				END IF  
+				
+				LET val1 BE fruits[b1][a1]  
+				LET val2 BE fruits[b2][a2]  
+				LET val3 BE fruits[b3][a3]  
+				
+				LET sumCollected BE val1  
+				
+				IF ( (a1 = a2 AND b1 = b2) OR (a1 = a3 AND b1 = b3) ) THEN  
+					sumCollected = sumCollected + 0  
+				ELSE  
+					sumCollected = sumCollected + val2  
+				END IF  
+				
+				IF (a2 = a3 AND b2 = b3) THEN  
+					sumCollected = sumCollected + 0  
+				ELSE  
+					sumCollected = sumCollected + val3  
+				END IF  
+				
+				LET currentMax BE -∞  
+				
+				FOR EACH (stepA, stepB) IN shiftsA DO  
+					FOR EACH (stepC, stepD) IN shiftsB DO  
+						FOR EACH (stepE, stepF) IN shiftsC DO  
+							LET nextVal BE dp(a1 + stepA, b1 + stepB, a2 + stepC, b2 + stepD, a3 + stepE, b3 + stepF)  
+							IF nextVal > currentMax THEN  
+								currentMax = nextVal  
+							END IF  
+						END FOR  
+					END FOR  
+				END FOR  
+				
+				cache[keyTuple] = sumCollected + currentMax  
+				RETURN sumCollected + currentMax  
+			END WHILE  
+		END FUNCTION  
+		
+		RETURN dp(0, 0, 0, totalLength - 1, totalLength - 1, 0)  
+	END FUNCTION  
+END CLASS

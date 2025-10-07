@@ -1,0 +1,38 @@
+```
+FUNCTION check_dict_case(dictionary)
+    FUNC analyze_key_list(keysList, currentState, index) RETURNS STRING
+        IF index >= LENGTH OF keysList THEN RETURN currentState END IF
+
+        VAR currentKey := keysList[index]
+
+        IF NOT (currentKey IS INSTANCE OF STRING) THEN
+            RETURN "mixed"
+        END IF
+
+        VAR newState := currentState
+
+        IF currentState = "start" THEN
+            IF currentKey = TO_UPPERCASE(currentKey) THEN
+                newState := "upper"
+            ELSE IF currentKey = TO_LOWERCASE(currentKey) THEN
+                newState := "lower"
+            ELSE
+                RETURN "mixed"
+            END IF
+        ELSE
+            IF (newState = "upper" AND currentKey != TO_UPPERCASE(currentKey)) OR
+               (newState = "lower" AND currentKey != TO_LOWERCASE(currentKey)) THEN
+                RETURN "mixed"
+            END IF
+        END IF
+
+        RETURN analyze_key_list(keysList, newState, index + 1)
+    END FUNC
+
+    VAR keysArray := dictionary KEYS
+    IF LENGTH OF keysArray = 0 THEN RETURN False END IF
+
+    VAR finalState := analyze_key_list(keysArray, "start", 0)
+    RETURN (finalState = "upper") OR (finalState = "lower")
+END FUNCTION
+```

@@ -1,0 +1,42 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+	DEFINE parse_paren_group AS FUNCTION (param_string)
+		INITIALIZE depth_counter = 0
+		INITIALIZE max_level = 0
+		SET index_pos = 0
+		WHILE index_pos < LENGTH(param_string)
+			IF NOT (param_string[index_pos] != '(')
+				ASSIGN depth_counter = depth_counter + 1
+				IF depth_counter > max_level THEN
+					ASSIGN max_level = depth_counter
+				END IF
+			ELSE
+				ASSIGN depth_counter = depth_counter - 1
+			END IF
+			INCREMENT index_pos BY 1
+		END WHILE
+		RETURN max_level
+	END FUNCTION
+
+	ASSIGN split_groups = []
+	DECLARE start_idx = 0
+	LOOP FOREVER
+		ASSIGN space_idx = FIND(parentheses_string, ' ', start_idx)
+		IF space_idx EQUALS -1 THEN
+			APPEND SUBSTRING(parentheses_string, start_idx, LENGTH(parentheses_string)) TO split_groups
+			BREAK
+		END IF
+		APPEND SUBSTRING(parentheses_string, start_idx, space_idx) TO split_groups
+		ASSIGN start_idx = space_idx + 1
+	END LOOP
+
+	ASSIGN result_list = []
+	FOR EACH item IN split_groups
+		IF NOT (LENGTH(item) = 0)
+			APPEND parse_paren_group(item) TO result_list
+		END IF
+	END FOR
+
+	RETURN result_list
+END FUNCTION
+```

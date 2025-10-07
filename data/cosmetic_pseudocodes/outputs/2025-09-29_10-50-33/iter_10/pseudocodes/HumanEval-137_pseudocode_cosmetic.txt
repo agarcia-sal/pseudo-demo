@@ -1,0 +1,30 @@
+FUNCTION compare_one(a, b) {
+    ASSIGN omega TO a
+    ASSIGN sigma TO b
+
+    EXECUTE {
+        CASE (typeof(omega) == string) : 
+            ASSIGN omega TO map(char -> (char == ',' ? '.' : char), omega)
+        OTHERWISE : 
+            NO-OP
+    }
+
+    EXECUTE {
+        SWITCH(true):
+            CASE (typeof(sigma) == string) :
+                ASSIGN sigma TO reduce((acc, ch) -> acc + (ch == ',' ? '.' : ch), sigma, "")
+            DEFAULT :
+                BREAK
+    }
+
+    DEFINE convert_a AS TO_FLOAT(omega)
+    DEFINE convert_b AS TO_FLOAT(sigma)
+
+    IF NOT (convert_a != convert_b) THEN
+        RETURN null
+    ENDIF
+
+    IF (convert_a > convert_b) THEN RETURN a
+    ELSE RETURN b
+    FI
+}

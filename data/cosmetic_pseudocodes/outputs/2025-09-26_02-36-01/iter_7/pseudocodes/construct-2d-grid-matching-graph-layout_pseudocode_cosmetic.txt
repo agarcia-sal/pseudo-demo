@@ -1,0 +1,100 @@
+CLASS Solution
+	FUNCTION constructGridLayout(n, edges)
+		DEFINE emptyGraph AS list WITH size n FILLED WITH empty lists
+		DEFINE idxCurrent AS integer ZERO
+		WHILE idxCurrent LESS THAN length of edges
+			DEFINE nodeA AS first element OF edges at idxCurrent
+			DEFINE nodeB AS second element OF edges at idxCurrent
+			PUSH nodeB INTO emptyGraph[nodeA]
+			PUSH nodeA INTO emptyGraph[nodeB]
+			idxCurrent ← idxCurrent PLUS 1
+		END WHILE
+
+		DEFINE degreeMapping AS list WITH size 5 FILLED WITH (0 MINUS 1)
+		DEFINE iterIndex AS integer ZERO
+		DEFINE tableau AS emptyGraph
+		REPEAT
+			IF iterIndex GREATER THAN OR EQUAL TO length of tableau THEN
+				EXIT REPEAT
+			END IF
+			DEFINE neighborsList AS tableau[iterIndex]
+			degreeMapping[length of neighborsList] ← iterIndex
+			iterIndex ← iterIndex PLUS 1
+		END REPEAT
+
+		IF degreeMapping[1] IS NOT EQUAL (0 MINUS 1) THEN
+			DEFINE activeRow AS list CONTAINING degreeMapping[1]
+		ELSE
+			IF degreeMapping[4] IS EQUAL (0 MINUS 1) THEN
+				DEFINE selectedNode AS degreeMapping[2]
+				DEFINE potentialRow AS list
+				DEFINE iterNeighbor AS integer ZERO
+				def neighborsOfSelected ← tableau[selectedNode]
+				WHILE iterNeighbor LESS THAN length of neighborsOfSelected
+					DEFINE candidate AS neighborsOfSelected[iterNeighbor]
+					IF length of tableau[candidate] IS EQUAL TO 2 THEN
+						potentialRow ← list CONTAINING selectedNode AND candidate
+						EXIT WHILE
+					END IF
+					iterNeighbor ← iterNeighbor PLUS 1
+				END WHILE
+				activeRow ← potentialRow
+			ELSE
+				DEFINE startNode AS degreeMapping[2]
+				activeRow ← list CONTAINING startNode
+				DEFINE previousNode AS startNode
+				DEFINE candidates AS tableau[startNode]
+				DEFINE proceedNode AS candidates[0]
+				WHILE length of tableau[proceedNode] GREATER THAN 2
+					APPEND proceedNode TO activeRow
+					DEFINE neighborsIter AS integer ZERO
+					DEFINE neighborsList AS tableau[proceedNode]
+					WHILE neighborsIter LESS THAN length of neighborsList
+						DEFINE candidateNeighbor AS neighborsList[neighborsIter]
+						IF candidateNeighbor NOT EQUAL previousNode AND length of tableau[candidateNeighbor] LESS THAN 4 THEN
+							previousNode ← proceedNode
+							proceedNode ← candidateNeighbor
+							EXIT WHILE
+						END IF
+						neighborsIter ← neighborsIter PLUS 1
+					END WHILE
+				END WHILE
+				APPEND proceedNode TO activeRow
+			END IF
+		END IF
+
+		DEFINE resultGrid AS list CONTAINING activeRow
+		DEFINE visitedFlags AS list OF booleans WITH size n ALL false
+
+		DEFINE loopCounter AS integer 1
+		DEFINE totalIterations AS ((n DIV length of activeRow) MINUS 1)
+		WHILE loopCounter LESS THAN OR EQUAL TO totalIterations
+			DEFINE idxMark AS integer ZERO
+			WHILE idxMark LESS THAN length of activeRow
+				visitedFlags[activeRow[idxMark]] ← true
+				idxMark ← idxMark PLUS 1
+			END WHILE
+			DEFINE nextLevelRow AS empty list
+			DEFINE idxCurrentInner AS integer ZERO
+			WHILE idxCurrentInner LESS THAN length of activeRow
+				DEFINE currentElement AS activeRow[idxCurrentInner]
+				DEFINE currentNeighbors AS tableau[currentElement]
+				DEFINE idxNeighbor AS integer ZERO
+				WHILE idxNeighbor LESS THAN length of currentNeighbors
+					DEFINE neighborElement AS currentNeighbors[idxNeighbor]
+					IF visitedFlags[neighborElement] IS false THEN
+						APPEND neighborElement TO nextLevelRow
+						EXIT WHILE
+					END IF
+					idxNeighbor ← idxNeighbor PLUS 1
+				END WHILE
+				idxCurrentInner ← idxCurrentInner PLUS 1
+			END WHILE
+			APPEND nextLevelRow TO resultGrid
+			activeRow ← nextLevelRow
+			loopCounter ← loopCounter PLUS 1
+		END WHILE
+
+		RETURN resultGrid
+	END FUNCTION
+END CLASS

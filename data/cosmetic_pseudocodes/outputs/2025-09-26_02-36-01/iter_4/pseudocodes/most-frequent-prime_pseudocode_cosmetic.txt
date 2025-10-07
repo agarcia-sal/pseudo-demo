@@ -1,0 +1,88 @@
+FUNCTION is_prime(number)  
+    DECLARE threshold_one AS 1  
+    DECLARE threshold_three AS 3  
+    DECLARE divisor_two AS 2  
+    DECLARE divisor_three AS 3  
+    DECLARE current_candidate AS 5  
+    DECLARE step_increment AS 6  
+
+    IF NOT (number GREATER THAN threshold_one)  
+        RETURN false  
+    ELSE IF number LESS THAN OR EQUAL TO threshold_three  
+        RETURN true  
+    END IF
+
+    IF (number MOD divisor_two EQUALS 0) OR (number MOD divisor_three EQUALS 0)  
+        RETURN false  
+    END IF  
+
+    WHILE current_candidate * current_candidate <= number  
+        DECLARE condition_one AS (number MOD current_candidate)  
+        DECLARE condition_two AS (number MOD (current_candidate + 2))  
+        IF (condition_one EQUALS 0) OR (condition_two EQUALS 0)  
+            RETURN false  
+        END IF  
+        current_candidate = current_candidate + step_increment  
+    END WHILE  
+
+    RETURN true  
+END FUNCTION  
+
+CLASS Solution  
+    FUNCTION mostFrequentPrime(matrix)  
+        DECLARE row_count AS LENGTH OF matrix  
+        DECLARE col_count AS LENGTH OF ELEMENT AT INDEX zero OF matrix  
+        DECLARE movement_vectors AS LIST OF: (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)  
+        DECLARE prime_occurrences AS EMPTY MAP FROM ELEMENTS TO INTEGER  
+
+        FUNCTION traverse(x_coord, y_coord, delta_x, delta_y, accumulated_num)  
+            DECLARE next_x AS x_coord + delta_x  
+            DECLARE next_y AS y_coord + delta_y  
+            IF (next_x >= 0) AND (next_x < row_count) AND (next_y >= 0) AND (next_y < col_count) THEN  
+                DECLARE extended_num AS (accumulated_num * 10) + ELEMENT AT [next_x][next_y] OF matrix  
+                IF (extended_num > 10) AND (is_prime(extended_num) EQUALS true)  
+                    IF extended_num IN prime_occurrences  
+                        prime_occurrences[extended_num] = prime_occurrences[extended_num] + 1  
+                    ELSE  
+                        prime_occurrences[extended_num] = 1  
+                    END IF  
+                END IF  
+                CALL traverse(next_x, next_y, delta_x, delta_y, extended_num)  
+            END IF  
+        END FUNCTION  
+
+        DECLARE row_index AS 0  
+        WHILE row_index < row_count  
+            DECLARE col_index AS 0  
+            WHILE col_index < col_count  
+                DECLARE vector_index AS 0  
+                WHILE vector_index < LENGTH OF movement_vectors  
+                    DECLARE vector_pair AS movement_vectors[vector_index]  
+                    DECLARE dx AS vector_pair[0]  
+                    DECLARE dy AS vector_pair[1]  
+                    DECLARE starting_val AS ELEMENT AT [row_index][col_index] OF matrix  
+                    CALL traverse(row_index, col_index, dx, dy, starting_val)  
+                    vector_index = vector_index + 1  
+                END WHILE  
+                col_index = col_index + 1  
+            END WHILE  
+            row_index = row_index + 1  
+        END WHILE  
+
+        IF SIZE OF prime_occurrences EQUALS 0  
+            RETURN -1  
+        END IF  
+
+        DECLARE max_frequency AS -1  
+        DECLARE candidate_prime AS -1  
+        FOR EACH prime_value IN KEYS OF prime_occurrences  
+            DECLARE freq AS prime_occurrences[prime_value]  
+            IF (freq > max_frequency) OR ((freq = max_frequency) AND (prime_value > candidate_prime))  
+                max_frequency = freq  
+                candidate_prime = prime_value  
+            END IF  
+        END FOR  
+
+        RETURN candidate_prime  
+    END FUNCTION  
+END CLASS

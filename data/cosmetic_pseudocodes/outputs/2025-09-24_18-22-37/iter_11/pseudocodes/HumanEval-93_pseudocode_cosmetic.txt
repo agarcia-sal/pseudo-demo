@@ -1,0 +1,55 @@
+FUNCTION encode(message_input)  
+    SET vowels_list TO "AEIOUaeiou"  
+    DECLARE replacement_map AS DICTIONARY  
+    SET index_counter TO 0  
+    WHILE index_counter < LENGTH OF vowels_list  
+        SET current_char TO vowels_list AT index_counter  
+        SET ascii_original TO ASCII VALUE OF current_char  
+        SET ascii_shifted TO ascii_original + 0x2  
+        SET replacement_char TO CHARACTER REPRESENTED BY ascii_shifted  
+        ASSIGN replacement_map[ current_char ] = replacement_char  
+        SET index_counter TO index_counter + 1  
+    END WHILE  
+
+    DECLARE swapped_message AS STRING  
+    SET position TO 0  
+    WHILE position < LENGTH OF message_input  
+        DECLARE char_in_message AS CHARACTER  
+        SET char_in_message TO message_input AT position  
+
+        IF char_in_message >= 'a' AND char_in_message <= 'z' THEN  
+            DECLARE uppercase_equiv AS CHARACTER  
+            SET uppercase_equiv TO CHARACTER WITH ASCII VALUE (ASCII VALUE OF char_in_message - 0x20)  
+            SET swapped_char TO uppercase_equiv  
+        ELSE IF char_in_message >= 'A' AND char_in_message <= 'Z' THEN  
+            DECLARE lowercase_equiv AS CHARACTER  
+            SET lowercase_equiv TO CHARACTER WITH ASCII VALUE (ASCII VALUE OF char_in_message + 0x20)  
+            SET swapped_char TO lowercase_equiv  
+        ELSE  
+            SET swapped_char TO char_in_message  
+        END IF  
+
+        APPEND swapped_char TO swapped_message  
+        SET position TO position + 1  
+    END WHILE  
+
+    DECLARE encoded_message AS STRING  
+    DECLARE iterator_pos TO 0  
+
+    WHILE iterator_pos < LENGTH OF swapped_message  
+        DECLARE current_symbol AS CHARACTER  
+        SET current_symbol TO swapped_message AT iterator_pos  
+
+        SWITCH TRUE  
+            CASE current_symbol IN replacement_map:  
+                APPEND replacement_map[ current_symbol ] TO encoded_message  
+                BREAK  
+            DEFAULT:  
+                APPEND current_symbol TO encoded_message  
+        END SWITCH  
+
+        SET iterator_pos TO iterator_pos + 1  
+    END WHILE  
+
+    RETURN encoded_message  
+END FUNCTION

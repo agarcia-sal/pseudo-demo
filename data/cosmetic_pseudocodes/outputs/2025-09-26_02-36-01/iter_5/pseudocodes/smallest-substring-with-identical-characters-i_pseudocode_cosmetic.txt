@@ -1,0 +1,85 @@
+CLASS Solution
+    FUNCTION minLength(s parameter, numOps parameter)
+        FUNCTION longest_uniform_substring(s parameter)
+            VARIABLE maxLength NUMBER ← 0
+            VARIABLE count NUMBER ← 1
+
+            PROCEDURE recurse(position NUMBER)
+                IF position IS GREATER THAN OR EQUAL TO LENGTH OF s THEN
+                    IF maxLength IS LESS THAN count THEN
+                        maxLength ← count
+                    END IF
+                    RETURN
+                END IF
+
+                IF s[position] = s[position - 1] THEN
+                    count ← count + 1
+                ELSE
+                    IF maxLength < count THEN
+                        maxLength ← count
+                    END IF
+                    count ← 1
+                END IF
+
+                CALL recurse(position + 1)
+            END PROCEDURE
+
+            CALL recurse(1)
+
+            RETURN (IF maxLength > count THEN maxLength ELSE count)
+        END FUNCTION
+
+        VARIABLE answer NUMBER ← LENGTH OF s
+        VARIABLE upperBound NUMBER ← (2 * (2 ^ (LENGTH OF s - 1))) - (2 ^ (LENGTH OF s - 1))
+        VARIABLE limit NUMBER ← 1 << (LENGTH OF s)  // kept as original meaning to shift by length of s
+
+        VARIABLE iter NUMBER ← 0
+        WHILE iter < limit
+            VARIABLE bitCount FUNCTION
+                INPUT val NUMBER
+                VARIABLE result NUMBER ← 0
+
+                WHILE val > 0
+                    IF (val & 1) ≠ 0 THEN
+                        result ← result + 1
+                    END IF
+                    val ← val >> 1
+                END WHILE
+                RETURN result
+            END FUNCTION
+
+            IF bitCount(iter) > numOps THEN
+                iter ← iter + 1
+                CONTINUE
+            END IF
+
+            VARIABLE modifiableList LIST ← []
+            VARIABLE idx NUMBER ← 0
+            WHILE idx < LENGTH OF s
+                APPEND modifiableList WITH s[idx]
+                idx ← idx + 1
+            END WHILE
+
+            VARIABLE bitIndex NUMBER ← 0
+            WHILE bitIndex < LENGTH OF s
+                VARIABLE mask NUMBER ← 1 << bitIndex
+                IF (iter & mask) ≠ 0 THEN
+                    VARIABLE currentChar CHARACTER ← modifiableList[bitIndex]
+                    VARIABLE newChar CHARACTER ← (IF currentChar = '0' THEN '1' ELSE '0')
+                    modifiableList[bitIndex] ← newChar
+                END IF
+                bitIndex ← bitIndex + 1
+            END WHILE
+
+            VARIABLE lengthCandidate NUMBER ← longest_uniform_substring(modifiableList)
+
+            IF answer > lengthCandidate THEN
+                answer ← lengthCandidate
+            END IF
+
+            iter ← iter + 1
+        END WHILE
+
+        RETURN answer
+    END FUNCTION
+END CLASS

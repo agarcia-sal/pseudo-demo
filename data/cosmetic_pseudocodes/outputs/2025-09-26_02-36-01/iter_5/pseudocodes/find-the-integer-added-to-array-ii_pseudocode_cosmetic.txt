@@ -1,0 +1,104 @@
+CLASS Solution
+    FUNCTION minimumAddedInteger(nums1 RETURNS List OF integer, nums2 RETURNS List OF integer) RETURNS integer
+        PROCEDURE quickSort(L, left, right)
+            IF (left < right)
+                SET pivotIndex TO left
+                SET pivotValue TO L[pivotIndex]
+                SET i TO left + 1
+                SET j TO right
+                WHILE (i <= j)
+                    WHILE (i <= right AND L[i] <= pivotValue)
+                        INCREMENT i BY 1
+                    END WHILE
+                    WHILE (j > left AND L[j] >= pivotValue)
+                        DECREMENT j BY 1
+                    END WHILE
+                    IF (i < j)
+                        SET tempVar TO L[i]
+                        SET L[i] TO L[j]
+                        SET L[j] TO tempVar
+                    END IF
+                END WHILE
+                SET tempVar TO L[pivotIndex]
+                SET L[pivotIndex] TO L[j]
+                SET L[j] TO tempVar
+                CALL quickSort(L, left, j - 1)
+                CALL quickSort(L, j + 1, right)
+            END IF
+        END PROCEDURE
+
+        PROCEDURE sort(L)
+            CALL quickSort(L, 0, (L.length - 1))
+        END PROCEDURE
+
+        CALL sort(nums1)
+        CALL sort(nums2)
+
+        FUNCTION checkCondition(A, B, offset, idx) RETURNS boolean
+            IF idx >= A.length
+                RETURN TRUE
+            ELSE
+                IF (A[idx] + offset) = B[idx]
+                    RETURN checkCondition(A, B, offset, idx + 1)
+                ELSE
+                    RETURN FALSE
+                END IF
+            END IF
+        END FUNCTION
+
+        FUNCTION buildNewList(origList, skipStart, skipEnd) RETURNS List OF integer
+            SET resultingList TO empty list
+            PROCEDURE recurAdd(pos)
+                IF pos >= origList.length
+                    RETURN
+                END IF
+                IF NOT (pos >= skipStart AND pos <= skipEnd)
+                    CALL resultingList.append(origList[pos])
+                END IF
+                CALL recurAdd(pos + 1)
+            END PROCEDURE
+            CALL recurAdd(0)
+            RETURN resultingList
+        END FUNCTION
+
+        FUNCTION nestedLoop(a, b) RETURNS integer
+            PROCEDURE outerLoop(i)
+                IF i > (a.length - 2)
+                    RETURN null
+                ELSE
+                    FUNCTION innerLoop(j)
+                        IF j > (a.length - 1)
+                            RETURN outerLoop(i + 1)
+                        ELSE
+                            SET filtered TO buildNewList(a, i, j)
+                            SET delta TO b[0] - filtered[0]
+
+                            FUNCTION verifyCondition(idx)
+                                IF idx >= b.length
+                                    RETURN TRUE
+                                ELSE
+                                    IF (filtered[idx] + delta) = b[idx]
+                                        RETURN verifyCondition(idx + 1)
+                                    ELSE
+                                        RETURN FALSE
+                                    END IF
+                                END IF
+                            END FUNCTION
+
+                            IF verifyCondition(0)
+                                RETURN delta
+                            ELSE
+                                RETURN innerLoop(j + 1)
+                            END IF
+                        END IF
+                    END FUNCTION
+                    RETURN innerLoop(i + 1)
+                END IF
+            END PROCEDURE
+            RETURN outerLoop(0)
+        END FUNCTION
+
+        SET result TO nestedLoop(nums1, nums2)
+        RETURN result
+    END FUNCTION
+END CLASS

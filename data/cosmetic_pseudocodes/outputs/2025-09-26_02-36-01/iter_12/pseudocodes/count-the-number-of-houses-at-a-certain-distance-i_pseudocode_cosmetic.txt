@@ -1,0 +1,118 @@
+CLASS Solution
+    FUNCTION countOfPairs(n parameter, x parameter, y parameter) RETURNS list of integer
+
+        FUNCTION enqueueHelper(dq parameter, val parameter)
+            dq.insertAtEnd(val)
+        END FUNCTION
+
+        FUNCTION dequeueHelper(dq parameter) RETURNS integer
+            RETURN dq.removeFromFront()
+        END FUNCTION
+
+        FUNCTION makeFalseList(size parameter) RETURNS list of boolean
+            SET tempList TO empty list
+            SET index TO 0
+            REPEAT
+                IF index EQUALS size THEN
+                    BREAK
+                END IF
+                APPEND False TO tempList
+                SET index TO index PLUS 1
+            UNTIL False
+            RETURN tempList
+        END FUNCTION
+
+        FUNCTION makeZeroList(size parameter) RETURNS list of integer
+            SET zeros TO empty list
+            SET counter TO 0
+            REPEAT
+                IF counter EQUALS size THEN
+                    EXIT
+                END IF
+                APPEND 0 TO zeros
+                SET counter TO counter PLUS 1
+            UNTIL counter > size
+            RETURN zeros
+        END FUNCTION
+
+        SET output TO makeZeroList(n)
+
+        FUNCTION bfs(start parameter)
+            SET visitedFlags TO makeFalseList(n PLUS 1)
+            SET distances TO makeZeroList(n PLUS 1)
+            SET dq TO empty double ended queue
+            CALL enqueueHelper WITH dq, start
+            SET visitedFlags[start] TO True
+
+            FUNCTION neighbors(currentVal parameter) RETURNS list of integer
+                RETURN [currentVal MINUS 1, currentVal PLUS 1]
+            END FUNCTION
+
+            LABEL mainLoop
+            WHILE True
+                IF dq.isEmpty() THEN
+                    BREAK mainLoop
+                END IF
+
+                SET node TO dequeueHelper(dq)
+
+                SET adjacentNodes TO neighbors(node)
+                SET idx TO 0
+                REPEAT
+                    IF idx >= 2 THEN
+                        BREAK
+                    END IF
+                    SET neighborNode TO adjacentNodes[idx]
+                    IF neighborNode >= 1 AND neighborNode <= n THEN
+                        IF visitedFlags[neighborNode] EQUALS False THEN
+                            SET visitedFlags[neighborNode] TO True
+                            SET distances[neighborNode] TO distances[node] PLUS (1 * 1)
+                            CALL enqueueHelper WITH dq, neighborNode
+                        END IF
+                    END IF
+                    SET idx TO idx PLUS 1
+                UNTIL FALSE
+
+                IF node EQUALS x THEN
+                    IF visitedFlags[y] EQUALS False THEN
+                        SET visitedFlags[y] TO True
+                        SET distances[y] TO distances[node] PLUS 1
+                        CALL enqueueHelper WITH dq, y
+                    END IF
+                END IF
+
+                IF node EQUALS y THEN
+                    IF visitedFlags[x] EQUALS False THEN
+                        SET visitedFlags[x] TO True
+                        SET distances[x] TO distances[node] PLUS 1
+                        CALL enqueueHelper WITH dq, x
+                    END IF
+                END IF
+            END WHILE
+
+            SET pos TO 1
+            REPEAT
+                IF pos > n THEN
+                    BREAK
+                END IF
+                IF distances[pos] > 0 THEN
+                    SET outputAtIndex TO distances[pos] MINUS 1
+                    SET currentCount TO output[outputAtIndex]
+                    SET output[outputAtIndex] TO currentCount PLUS 1
+                END IF
+                SET pos TO pos PLUS 1
+            UNTIL False
+        END FUNCTION
+
+        SET iter TO 1
+        REPEAT
+            IF iter > n THEN
+                BREAK
+            END IF
+            CALL bfs WITH iter
+            SET iter TO iter PLUS 1
+        UNTIL FALSE
+
+        RETURN output
+    END FUNCTION
+END CLASS

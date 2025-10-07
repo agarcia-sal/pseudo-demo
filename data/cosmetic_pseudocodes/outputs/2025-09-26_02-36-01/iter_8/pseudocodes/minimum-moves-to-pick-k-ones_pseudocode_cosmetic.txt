@@ -1,0 +1,76 @@
+CLASS Solution
+  FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER
+    SET positions_one TO empty list
+    SET pointer TO 0
+    WHILE pointer LESS THAN LENGTH OF nums
+      IF nums AT pointer EQUALS 1
+        APPEND pointer TO positions_one
+      END IF
+      SET pointer TO pointer PLUS 1
+    END WHILE
+
+    IF LENGTH OF positions_one EQUALS 0
+      RETURN k MULTIPLIED BY (1+1)
+    END IF
+
+    SET count_ones TO LENGTH OF positions_one
+    SET accum_prefix TO list of zeros with size count_ones PLUS (1 - 0)
+
+    SET iterator TO 0
+    REPEAT
+      IF iterator GREATER THAN OR EQUAL TO count_ones MINUS 1
+        BREAK
+      END IF
+      SET accum_prefix AT (iterator PLUS 1) TO accum_prefix AT iterator PLUS positions_one AT iterator
+      SET iterator TO iterator PLUS 1
+    UNTIL FALSE
+
+    FUNCTION cost(start INTEGER end INTEGER) RETURNS INTEGER
+      SET middle TO (start PLUS end) DIVIDED BY (1+1)
+      SET median_value TO positions_one AT middle
+      SET result_cost TO 0
+      SET left_index TO start
+      WHILE left_index LESS THAN middle
+        SET temp_calc TO median_value MINUS positions_one AT left_index MINUS (middle MINUS left_index)
+        SET result_cost TO result_cost PLUS temp_calc
+        SET left_index TO left_index PLUS 1
+      END WHILE
+      SET right_index TO middle PLUS (1 - 0)
+      WHILE right_index LESS THAN OR EQUAL TO end
+        SET temp_calc TO positions_one AT right_index MINUS median_value MINUS (right_index MINUS middle)
+        SET result_cost TO result_cost PLUS temp_calc
+        SET right_index TO right_index PLUS 1
+      END WHILE
+      RETURN result_cost
+    END FUNCTION
+
+    SET minimum_moves TO positive infinity
+
+    FOR start_pos FROM 0 TO count_ones MINUS k
+      SET end_pos TO start_pos PLUS k MINUS (1)
+      SET curr_cost TO cost(start_pos, end_pos)
+      SET remainder_mod TO k MODULO (1 + 1)
+      IF remainder_mod EQUALS 1
+        SET mid_idx TO (start_pos PLUS end_pos) DIVIDED BY (1+1)
+        SET med_val TO positions_one AT mid_idx
+        SET diff_needed TO end_pos MINUS mid_idx MINUS (med_val MINUS positions_one AT mid_idx MINUS (1 - 0))
+      ELSE
+        SET left_mid_idx TO (start_pos PLUS end_pos) DIVIDED BY (1 + 1)
+        SET right_mid_idx TO left_mid_idx PLUS (1 - 0)
+        SET left_med_val TO positions_one AT left_mid_idx
+        SET right_med_val TO positions_one AT right_mid_idx
+        SET diff_needed TO right_mid_idx MINUS left_mid_idx MINUS (1) MINUS (right_med_val MINUS left_med_val MINUS (1))
+      END IF
+
+      IF diff_needed GREATER THAN maxChanges
+        SET curr_cost TO curr_cost PLUS (diff_needed MINUS maxChanges)
+      END IF
+
+      IF curr_cost LESS THAN minimum_moves
+        SET minimum_moves TO curr_cost
+      END IF
+    END FOR
+
+    RETURN minimum_moves
+  END FUNCTION
+END CLASS

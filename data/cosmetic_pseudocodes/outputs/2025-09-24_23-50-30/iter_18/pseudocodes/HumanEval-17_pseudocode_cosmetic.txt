@@ -1,0 +1,35 @@
+```
+FUNCTION parse_music(music_string)
+    DEFINE HelperProcess(notes_array, index, acc)
+        IF index >= LENGTH(notes_array)
+            RETURN acc
+        END IF
+        SET mapping_dict TO DICTIONARY WITH KEYS 'o', 'o|', '.|' AND VALUES 4, 2, 1
+        IF notes_array[index] IS NOT EMPTY
+            SET val TO mapping_dict[notes_array[index]]
+            SET new_acc TO acc + [val]
+            RETURN HelperProcess(notes_array, index + 1, new_acc)
+        ELSE
+            RETURN HelperProcess(notes_array, index + 1, acc)
+        END IF
+    END DEFINE
+
+    SET splitted_notes TO []
+    SET cur_pos TO 0
+    SET start_pos TO 0
+    WHILE cur_pos < LENGTH(music_string)
+        IF music_string[cur_pos] = ' '
+            IF start_pos < cur_pos
+                SET splitted_notes TO splitted_notes + [SUBSTRING(music_string, start_pos, cur_pos)]
+            END IF
+            SET start_pos TO cur_pos + 1
+        END IF
+        SET cur_pos TO cur_pos + 1
+    END WHILE
+    IF start_pos < LENGTH(music_string)
+        SET splitted_notes TO splitted_notes + [SUBSTRING(music_string, start_pos, LENGTH(music_string))]
+    END IF
+
+    RETURN HelperProcess(splitted_notes, 0, [])
+END FUNCTION
+```

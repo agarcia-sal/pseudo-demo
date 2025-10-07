@@ -1,0 +1,42 @@
+```
+FUNCTION sort_even(list_of_elements)
+    INITIALIZE indexed_map AS MAP FROM INTEGER TO ELEMENT
+    INITIALIZE result_sequence AS SEQUENCE
+    DEFINE FUNCTION collect_indices(position, input_sequence)
+        IF position >= LENGTH(input_sequence)
+            RETURN
+        SET indexed_map[position] = GET(input_sequence, position)
+        CALL collect_indices(position + 2, input_sequence)
+    END FUNCTION
+
+    CALL collect_indices(0, list_of_elements)
+
+    SET keys_list TO KEYS(indexed_map)
+    SORT keys_list IN ASCENDING ORDER
+
+    DEFINE FUNCTION build_sorted_elements(keys_seq, accumulation)
+        IF keys_seq IS EMPTY
+            RETURN accumulation
+        SET current_index TO HEAD(keys_seq)
+        SET accumulation TO accumulation + [indexed_map[current_index]]
+        RETURN build_sorted_elements(TAIL(keys_seq), accumulation)
+    END FUNCTION
+
+    SET sorted_evens TO build_sorted_elements(keys_list, [])
+
+    INITIALIZE odd_positions AS LIST
+    SET pos_counter TO 1
+    WHILE pos_counter < LENGTH(list_of_elements)
+        ADD GET(list_of_elements, pos_counter) TO odd_positions
+        INCREMENT pos_counter BY 2
+
+    INITIALIZE assembled_result AS EMPTY LIST
+    FOR i FROM 0 TO MINIMUM(LENGTH(sorted_evens), LENGTH(odd_positions)) - 1
+        EXTEND assembled_result BY [GET(sorted_evens, i), GET(odd_positions, i)]
+
+    IF LENGTH(sorted_evens) - LENGTH(odd_positions) > 0 THEN
+        EXTEND assembled_result BY [GET(sorted_evens, LENGTH(sorted_evens) - 1)]
+
+    RETURN assembled_result
+END FUNCTION
+```

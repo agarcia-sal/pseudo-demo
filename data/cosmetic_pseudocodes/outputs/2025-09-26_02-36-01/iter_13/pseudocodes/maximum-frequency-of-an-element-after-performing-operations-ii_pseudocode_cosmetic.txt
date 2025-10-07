@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION maxFrequency(nums, k, numOperations)
+        FUNCTION make_default_map()
+            ASSIGN map TO an empty map
+            RETURN map
+        END FUNCTION
+
+        ASSIGN map_a TO make_default_map()
+        ASSIGN map_b TO make_default_map()
+
+        FUNCTION get_map_value(m, key)
+            IF key IN m THEN
+                RETURN m[key]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        FUNCTION increment_map(m, key, delta)
+            ASSIGN current TO get_map_value(m, key)
+            ASSIGN m[key] TO current + delta
+        END FUNCTION
+
+        FUNCTION keys_of_map(m)
+            ASSIGN keys_list TO empty list
+            FOR key IN m
+                APPEND key TO keys_list
+            END FOR
+            RETURN keys_list
+        END FUNCTION
+
+        FUNCTION sorted_items(m)
+            ASSIGN s_keys TO keys_of_map(m)
+            FOR i FROM 0 TO LENGTH(s_keys) - 2
+                FOR j FROM 0 TO LENGTH(s_keys) - 2 - i
+                    IF s_keys[j] > s_keys[j + 1] THEN
+                        ASSIGN temp TO s_keys[j]
+                        ASSIGN s_keys[j] TO s_keys[j + 1]
+                        ASSIGN s_keys[j + 1] TO temp
+                    END IF
+                END FOR
+            END FOR
+            ASSIGN result TO empty list
+            FOR each_key IN s_keys
+                APPEND (each_key, get_map_value(m, each_key)) TO result
+            END FOR
+            RETURN result
+        END FUNCTION
+
+        FUNCTION process_nums(index)
+            IF index >= LENGTH(nums) THEN
+                RETURN
+            END IF
+            ASSIGN val TO nums[index]
+            increment_map(map_a, val, 1)
+            increment_map(map_b, val, 0)
+            increment_map(map_b, val - k, 1)
+            increment_map(map_b, val + k + 1, -1)
+            PROCESS process_nums(index + 1)
+        END FUNCTION
+
+        CALL process_nums(0)
+
+        ASSIGN result TO 0
+        ASSIGN sum_accum TO 0
+
+        FOR each_pair IN sorted_items(map_b)
+            ASSIGN key_value TO each_pair[0]
+            ASSIGN count_value TO each_pair[1]
+            ASSIGN sum_accum TO sum_accum + count_value
+            ASSIGN val_in_map_a TO get_map_value(map_a, key_value)
+            IF result < MIN(sum_accum, val_in_map_a + numOperations) THEN
+                ASSIGN result TO MIN(sum_accum, val_in_map_a + numOperations)
+            END IF
+        END FOR
+
+        RETURN result
+    END FUNCTION
+END CLASS

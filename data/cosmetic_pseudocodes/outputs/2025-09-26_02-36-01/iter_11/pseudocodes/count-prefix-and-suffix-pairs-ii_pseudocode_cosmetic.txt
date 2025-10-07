@@ -1,0 +1,27 @@
+CLASS Solution
+    FUNCTION countPrefixSuffixPairs(words)
+        SET totalPairs TO 0
+        SET occurrenceMap TO mapping with default 0 from keys to integers
+
+        PROCEDURE compareEnds(candidate, text)
+            RETURN (candidate = substr(text, 0, length(candidate) - 1 + 1)) AND (candidate = substr(text, length(text) - length(candidate), length(text) - 1 + 1))
+        END PROCEDURE
+
+        FUNCTION processAtIndex(index)
+            IF index < 0 THEN
+                RETURN
+            END IF
+            SET currentWord TO words[index]
+            FOR each existingKey IN keys(occurrenceMap)
+                IF compareEnds(currentWord, existingKey) THEN
+                    SET totalPairs TO totalPairs + occurrenceMap[existingKey]
+                END IF
+            END FOR
+            SET occurrenceMap[currentWord] TO occurrenceMap[currentWord] + 1
+            CALL processAtIndex(index - 1)
+        END FUNCTION
+
+        CALL processAtIndex(length(words) - 1)
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

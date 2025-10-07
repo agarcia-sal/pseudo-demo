@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION lastNonEmptyString(s)
+        FUNCTION computeFrequencyMap(str)
+            LET mapAcc = empty map
+            FUNCTION recurFreq(index)
+                IF not (index < length of str) THEN
+                    RETURN mapAcc
+                ELSE
+                    LET ccc = character at str index
+                    IF (ccc IN keys of mapAcc) THEN
+                        LET mapAcc = mapAcc with ccc mapped to (mapAcc[ccc] + 1)
+                    ELSE
+                        LET mapAcc = mapAcc with ccc mapped to (0 + 1)
+                    END IF
+                    RETURN recurFreq(index + 1)
+                END IF
+            END FUNCTION
+            RETURN recurFreq(0)
+        END FUNCTION
+
+        LET xz = computeFrequencyMap(s)
+
+        LET foundMax = 0
+        FUNCTION findMaxValue(kset, currentMax)
+            IF kset IS empty THEN RETURN currentMax END IF
+            LET firstKey = arbitrary element from kset
+            LET restKeys = kset minus firstKey
+            LET candidate = xz[firstKey]
+            LET newMax = (candidate > currentMax) AND candidate OR currentMax
+            RETURN findMaxValue(restKeys, newMax)
+        END FUNCTION
+        LET foundMax = findMaxValue(keys of xz, 0)
+
+        LET maxFreq_set = empty set
+        FUNCTION buildMaxSet(kset)
+          IF kset IS empty THEN RETURN maxFreq_set END IF
+          LET firstK = arbitrary element from kset
+          LET restK = kset minus firstK
+          IF xz[firstK] = foundMax THEN
+            LET maxFreq_set = maxFreq_set UNION {firstK}
+          END IF
+          RETURN buildMaxSet(restK)
+        END FUNCTION
+        LET maxFreq_set = buildMaxSet(keys of xz)
+
+        LET resList = empty list
+        FUNCTION collectChars(idx)
+            IF idx < 0 THEN RETURN END IF
+            LET cc = character at s idx
+            IF NOT (cc NOT IN maxFreq_set) THEN
+                LET resList = resList APPEND cc
+                LET maxFreq_set = maxFreq_set minus {cc}
+            END IF
+            RETURN collectChars(idx - 1)
+        END FUNCTION
+        CALL collectChars(length of s - 1)
+
+        LET assembled = empty string
+        LET pos = length of resList - 1
+        WHILE pos >= 0 DO
+            LET assembled = assembled + resList[pos]
+            LET pos = pos - 1
+        END WHILE
+
+        RETURN assembled
+    END FUNCTION
+END CLASS

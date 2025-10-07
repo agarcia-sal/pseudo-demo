@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION numberOfPermutations(n, requirements)
+        SET CONST_MODULO TO (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+        SET demands_map TO {}
+        FOR pair_index FROM 0 TO LENGTH(requirements) - 1
+            SET key_val TO requirements[pair_index]
+            SET demands_map[key_val[0]] TO key_val[1]
+        END FOR
+
+        FUNCTION count_permutations(prefix_len, inversion_count, used_mask)
+            SET res_flag TO 0
+            IF prefix_len = n THEN
+                IF inversion_count = (demands_map[prefix_len] OR 0) THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            IF prefix_len > 0 THEN
+                SET check_val TO demands_map[prefix_len] OR inversion_count
+                IF inversion_count ≠ check_val THEN
+                    RETURN 0
+                END IF
+            END IF
+
+            SET total_count TO 0
+            SET index_to TRY := 0
+            count_loop: WHILE index_to < n DO
+                SET bit_flag TO used_mask BITWISE_AND (1 LEFT_SHIFT index_to)
+                IF bit_flag = 0 THEN
+                    SET temp_inversions TO inversion_count
+                    SET scan_pos TO index_to + 1
+                    WHILE scan_pos < n DO
+                        IF (used_mask BITWISE_AND (1 LEFT_SHIFT scan_pos)) ≠ 0 THEN
+                            temp_inversions ← temp_inversions + 1
+                        END IF
+                        scan_pos ← scan_pos + 1
+                    END WHILE
+                    SET next_used TO used_mask BITWISE_OR (1 LEFT_SHIFT index_to)
+                    SET total_count ← (total_count + count_permutations(prefix_len + 1, temp_inversions, next_used)) MOD CONST_MODULO
+                END IF
+                index_to ← index_to + 1
+            END WHILE
+
+            RETURN total_count
+        END FUNCTION
+
+        RETURN count_permutations(0, 0, 0)
+    END FUNCTION
+END CLASS

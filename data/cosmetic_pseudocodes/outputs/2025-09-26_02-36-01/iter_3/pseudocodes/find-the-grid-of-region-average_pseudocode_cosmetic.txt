@@ -1,0 +1,100 @@
+CLASS Solution
+	FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+		SET rowCount TO LENGTH OF image
+		SET colCount TO LENGTH OF image[0]
+		SET outputGrid TO []
+		WHILE LENGTH OF outputGrid LESS THAN rowCount
+			SET row TO []
+			WHILE LENGTH OF row LESS THAN colCount
+				row APPEND 0
+			END WHILE
+			outputGrid APPEND row
+		END WHILE
+		SET tallyGrid TO []
+		WHILE LENGTH OF tallyGrid LESS THAN rowCount
+			SET row TO []
+			WHILE LENGTH OF row LESS THAN colCount
+				row APPEND 0
+			END WHILE
+			tallyGrid APPEND row
+		END WHILE
+
+		FUNCTION is_valid_region(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE boolean
+			SET deltaPairs TO [( -1 , 0 ), ( 1 , 0 ), ( 0 , -1 ), ( 0 , 1 )]
+			SET iVal TO x
+			WHILE iVal NOT EQUAL x + 3
+				SET jVal TO y
+				WHILE jVal NOT EQUAL y + 3
+					FOR EACH (dx, dy) IN deltaPairs
+						SET neighborX TO iVal + dx
+						SET neighborY TO jVal + dy
+						IF neighborX >= 0 AND neighborX < x + 3 AND neighborY >= 0 AND neighborY < y + 3 THEN
+							SET diffVal TO image[iVal][jVal] - image[neighborX][neighborY]
+							IF diffVal < 0 THEN
+								SET diffVal TO -diffVal
+							END IF
+							IF diffVal > threshold THEN
+								RETURN False
+							END IF
+						END IF
+					END FOR
+					SET jVal TO jVal + 1
+				END WHILE
+				SET iVal TO iVal + 1
+			END WHILE
+			RETURN True
+		END FUNCTION
+
+		FUNCTION calculate_average(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE integer
+			SET sumVal TO 0
+			SET rowIdx TO x
+			WHILE rowIdx NOT EQUAL x + 3
+				SET colIdx TO y
+				WHILE colIdx NOT EQUAL y + 3
+					SET sumVal TO sumVal + image[rowIdx][colIdx]
+					SET colIdx TO colIdx + 1
+				END WHILE
+				SET rowIdx TO rowIdx + 1
+			END WHILE
+			SET averageVal TO sumVal // 9
+			RETURN averageVal
+		END FUNCTION
+
+		SET iIter TO 0
+		WHILE iIter <= rowCount - 3
+			SET jIter TO 0
+			WHILE jIter <= colCount - 3
+				IF is_valid_region(iIter jIter) EQUALS True THEN
+					SET avgVal TO calculate_average(iIter jIter)
+					SET xIter TO iIter
+					WHILE xIter NOT EQUAL iIter + 3
+						SET yIter TO jIter
+						WHILE yIter NOT EQUAL jIter + 3
+							outputGrid[xIter][yIter] = outputGrid[xIter][yIter] + avgVal
+							tallyGrid[xIter][yIter] = tallyGrid[xIter][yIter] + 1
+							SET yIter TO yIter + 1
+						END WHILE
+						SET xIter TO xIter + 1
+					END WHILE
+				END IF
+				SET jIter TO jIter + 1
+			END WHILE
+			SET iIter TO iIter + 1
+		END WHILE
+
+		SET idxRow TO 0
+		WHILE idxRow NOT EQUAL rowCount
+			SET idxCol TO 0
+			WHILE idxCol NOT EQUAL colCount
+				IF tallyGrid[idxRow][idxCol] > 0 THEN
+					outputGrid[idxRow][idxCol] = outputGrid[idxRow][idxCol] // tallyGrid[idxRow][idxCol]
+				ELSE
+					outputGrid[idxRow][idxCol] = image[idxRow][idxCol]
+				END IF
+				SET idxCol TO idxCol + 1
+			END WHILE
+			SET idxRow TO idxRow + 1
+		END WHILE
+		RETURN outputGrid
+	END FUNCTION
+END CLASS

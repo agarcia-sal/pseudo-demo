@@ -1,0 +1,86 @@
+```
+FUNCTION get_row(two_dimensional_list, target_integer)
+	LABEL start_outer
+	SET idx_outer TO 0
+	SET collected_coords TO EMPTY LIST
+WHILE_LOOP:
+	IF NOT (idx_outer < LENGTH OF two_dimensional_list)
+		GOTO after_outer
+	END IF
+	LABEL start_inner
+	SET idx_inner TO 0
+	INNER_LOOP:
+		IF NOT (idx_inner < LENGTH OF two_dimensional_list AT idx_outer)
+			GOTO after_inner
+		END IF
+		SWITCH true
+			CASE NOT (two_dimensional_list AT idx_outer AT idx_inner = target_integer):
+				NO_OP
+			CASE (two_dimensional_list AT idx_outer AT idx_inner = target_integer):
+				APPEND TUPLE(idx_outer, idx_inner) TO collected_coords
+		END SWITCH
+		SET idx_inner TO idx_inner + 1
+		GOTO INNER_LOOP
+	after_inner:
+	SET idx_outer TO idx_outer + 1
+	GOTO WHILE_LOOP
+after_outer:
+	SET sorted_by_first TO EMPTY LIST
+	SET sorted_by_second TO EMPTY LIST
+	FOR coord_idx1 FROM 0 TO LENGTH OF collected_coords MINUS 1
+		APPEND collected_coords AT coord_idx1 TO sorted_by_first
+	END FOR
+	FOR coord_idx2 FROM 0 TO LENGTH OF collected_coords MINUS 1
+		APPEND collected_coords AT coord_idx2 TO sorted_by_second
+	END FOR
+	// Sorting by second element descending: Using selection sort variant
+	SET n TO LENGTH OF sorted_by_second
+	SET m TO 0
+	OUTER_SORT_2:
+		IF NOT (m < n -1)
+			GOTO end_sort_2
+		END IF
+		SET max_pos TO m
+		SET p TO m + 1
+	INNER_SORT_2:
+		IF NOT (p < n)
+			GOTO swap_sort_2
+		END IF
+		IF (sorted_by_second AT p SECOND_ELEMENT) > (sorted_by_second AT max_pos SECOND_ELEMENT)
+			SET max_pos TO p
+		END IF
+		SET p TO p + 1
+		GOTO INNER_SORT_2
+	swap_sort_2:
+		IF NOT (max_pos = m)
+			SET temp_coord TO sorted_by_second AT m
+			SET sorted_by_second AT m TO sorted_by_second AT max_pos
+			SET sorted_by_second AT max_pos TO temp_coord
+		END IF
+		SET m TO m + 1
+		GOTO OUTER_SORT_2
+	end_sort_2:
+	// Sorting by first element ascending: Using insertion sort variant
+	SET len_first TO LENGTH OF sorted_by_first
+	SET i TO 1
+	INS_SORT_1:
+		IF NOT (i < len_first)
+			GOTO end_sort_1
+		END IF
+		SET key TO sorted_by_first AT i
+		SET j TO i - 1
+		WHILE_CMP:
+			IF NOT (j >=0 AND (sorted_by_first AT j FIRST_ELEMENT) > (key FIRST_ELEMENT))
+				GOTO end_while_cmp
+			END IF
+			SET sorted_by_first AT (j+1) TO sorted_by_first AT j
+			SET j TO j - 1
+			GOTO WHILE_CMP
+		end_while_cmp:
+		SET sorted_by_first AT (j+1) TO key
+		SET i TO i +1
+		GOTO INS_SORT_1
+	end_sort_1:
+	RETURN sorted_by_first
+END FUNCTION
+```

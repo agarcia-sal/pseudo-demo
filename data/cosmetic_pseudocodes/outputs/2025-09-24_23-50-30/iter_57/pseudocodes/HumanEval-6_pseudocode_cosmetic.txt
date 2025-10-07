@@ -1,0 +1,52 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        SET depth_counter TO 0
+        SET max_depth_counter TO 0
+        SET index_counter TO 0
+        SET length_counter TO LENGTH OF group_string
+        WHILE index_counter < length_counter
+            SET symbol TO CHARACTER AT group_string[index_counter]
+            IF NOT (symbol <> '(')
+                SET depth_counter TO depth_counter + 1
+                IF depth_counter > max_depth_counter THEN
+                    SET max_depth_counter TO depth_counter
+                END IF
+            ELSE
+                SET depth_counter TO depth_counter - 1
+            END IF
+            SET index_counter TO index_counter + 1
+        END WHILE
+        RETURN max_depth_counter
+    END FUNCTION
+
+    SET accumulated_groups TO EMPTY LIST
+    SET temp_string TO EMPTY STRING
+    SET position_counter TO 0
+    SET total_length TO LENGTH OF parentheses_string
+    WHILE position_counter <= total_length
+        IF position_counter = total_length OR CHARACTER AT parentheses_string[position_counter] = ' '
+            IF temp_string <> ''
+                APPEND temp_string TO accumulated_groups
+            END IF
+            SET temp_string TO ''
+        ELSE
+            SET temp_string TO CONCATENATE temp_string AND CHARACTER AT parentheses_string[position_counter]
+        END IF
+        SET position_counter TO position_counter + 1
+    END WHILE
+
+    SET result_collection TO EMPTY LIST
+    SET iter_counter TO 0
+    SET acc_length TO LENGTH OF accumulated_groups
+    WHILE iter_counter < acc_length
+        SET item TO accumulated_groups[iter_counter]
+        IF NOT (item = '')
+            APPEND parse_paren_group(item) TO result_collection
+        END IF
+        SET iter_counter TO iter_counter + 1
+    END WHILE
+
+    RETURN result_collection
+END FUNCTION
+```

@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION longestSpecialPath(edges, nums)  
+        SET adjacency TO list of empty lists sized to length of nums  
+        
+        FOR EACH triple (a, b, c) IN edges DO  
+            ADD (b, c) TO adjacency[a]  
+            ADD (a, c) TO adjacency[b]  
+        END FOR  
+        
+        FUNCTION dfs(vertex, parent, boundary, depth)  
+            ACCESS maxLength FROM outer scope  
+            ACCESS minNodes FROM outer scope  
+            
+            SET previousDepth TO lastSeenDepth.get(nums[vertex], 0)  
+            lastSeenDepth[nums[vertex]] = depth  
+            
+            IF boundary < previousDepth THEN  
+                boundary = previousDepth  
+            END IF  
+            
+            SET pathLen TO prefix[-1] - prefix[boundary]  
+            SET nodeCount TO depth - boundary  
+            
+            IF pathLen > maxLength THEN  
+                maxLength = pathLen  
+                minNodes = nodeCount  
+            ELSE IF pathLen = maxLength AND nodeCount < minNodes THEN  
+                minNodes = nodeCount  
+            END IF  
+            
+            FOR EACH (neighbor, weight) IN adjacency[vertex] DO  
+                IF neighbor = parent THEN  
+                    CONTINUE  
+                END IF  
+                prefix.ADD(prefix[-1] + weight)  
+                CALL dfs(neighbor, vertex, boundary, depth + 1)  
+                prefix.REMOVE_LAST()  
+            END FOR  
+            
+            lastSeenDepth[nums[vertex]] = previousDepth  
+        END FUNCTION  
+        
+        maxLength = 0  
+        minNodes = 1  
+        prefix = [0]  
+        lastSeenDepth = EMPTY_DICTIONARY  
+        
+        PROCEDURE invoke()  
+            dfs(0, -1, 0, 1)  
+        END PROCEDURE  
+        
+        invoke()  
+        RETURN [maxLength, minNodes]  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION resultArray(nums)
+        FUNCTION insertSorted(listRef, item)
+            SET leftBound TO 0
+            SET rightBound TO LENGTH OF listRef
+            WHILE leftBound LESS THAN rightBound
+                SET midpoint TO (leftBound PLUS rightBound) DIV 2
+                IF listRef[midpoint] LESS THAN OR EQUAL TO item
+                    SET leftBound TO midpoint PLUS 1
+                ELSE
+                    SET rightBound TO midpoint
+                END IF
+            END WHILE
+            INSERT item AT POSITION leftBound INTO listRef
+        END FUNCTION
+
+        FUNCTION countGreater(elements, target)
+            SET start TO 0
+            SET end TO LENGTH OF elements
+            REPEAT
+                SET middle TO (start PLUS end) DIV 2
+                IF middle GREATER OR EQUAL TO end OR elements[middle] GREATER THAN target
+                    SET end TO middle
+                ELSE
+                    SET start TO middle PLUS 1
+                END IF
+            UNTIL start GREATER OR EQUAL TO end
+            RETURN LENGTH OF elements MINUS start
+        END FUNCTION
+
+        SET firstSegment TO LIST containing nums[0]
+        SET secondSegment TO LIST containing nums[1]
+        SET sortedFirst TO LIST containing nums[0]
+        SET sortedSecond TO LIST containing nums[1]
+
+        SET index TO 2
+        WHILE index LESS THAN LENGTH OF nums
+            SET currentVal TO nums[index]
+            SET countInFirst TO countGreater(sortedFirst, currentVal)
+            SET countInSecond TO countGreater(sortedSecond, currentVal)
+
+            IF NOT (countInFirst LESS OR EQUAL TO countInSecond)
+                APPEND currentVal TO firstSegment
+                CALL insertSorted(sortedFirst, currentVal)
+            ELSE IF NOT (countInFirst GREATER OR EQUAL TO countInSecond)
+                APPEND currentVal TO secondSegment
+                CALL insertSorted(sortedSecond, currentVal)
+            ELSE
+                IF LENGTH OF firstSegment GREATER THAN LENGTH OF secondSegment
+                    APPEND currentVal TO secondSegment
+                    CALL insertSorted(sortedSecond, currentVal)
+                ELSE
+                    APPEND currentVal TO firstSegment
+                    CALL insertSorted(sortedFirst, currentVal)
+                END IF
+            END IF
+
+            SET index TO index PLUS 1
+        END WHILE
+
+        SET combinedResult TO firstSegment
+        FOR EACH element IN secondSegment
+            APPEND element TO combinedResult
+        END FOR
+        RETURN combinedResult
+    END FUNCTION
+END CLASS

@@ -1,0 +1,60 @@
+CLASS Solution  
+    FUNCTION numberOfSubmatrices(grid)  
+        IF NOT (grid IS EMPTY) AND NOT ((grid[0]) IS EMPTY) THEN  
+        ELSE  
+            RETURN 0  
+        END IF  
+
+        LET alpha = LENGTH(grid)  
+        LET beta = LENGTH(grid[0])  
+
+        LET gamma = (alpha + 1)  
+        LET delta = (beta + 1)  
+
+        DECLARE prefix_sum AS ARRAY OF SIZE gamma  
+        FOR rho FROM 0 TO gamma - 1 DO  
+            SET prefix_sum[rho] = ARRAY OF SIZE delta  
+            FOR sigma FROM 0 TO delta - 1 DO  
+                SET prefix_sum[rho][sigma] = [0,0]  
+            END FOR  
+        END FOR  
+
+        SET k = 1  
+        WHILE k <= alpha DO  
+            LET m = 1  
+            WHILE m <= beta DO  
+                SET prefix_sum[k][m][0] = prefix_sum[k - 1][m][0] + prefix_sum[k][m - 1][0] - prefix_sum[k - 1][m - 1][0]  
+                SET prefix_sum[k][m][1] = prefix_sum[k - 1][m][1] + prefix_sum[k][m - 1][1] - prefix_sum[k - 1][m - 1][1]  
+
+                IF grid[k - 1][m - 1] = 'X' THEN  
+                    SET prefix_sum[k][m][0] = prefix_sum[k][m][0] + 1  
+                ELSE IF grid[k - 1][m - 1] = 'Y' THEN  
+                    SET prefix_sum[k][m][1] = prefix_sum[k][m][1] + 1  
+                END IF  
+
+                SET m = m + 1  
+            END WHILE  
+            SET k = k + 1  
+        END WHILE  
+
+        LET total = 0  
+
+        FOR a FROM 1 TO alpha DO  
+            DECLARE b = 1  
+            REPEAT  
+                LET xq = prefix_sum[a][b][0]  
+                LET yq = prefix_sum[a][b][1]  
+
+                IF xq > 0 THEN  
+                    IF xq = yq THEN  
+                        SET total = total + 1  
+                    END IF  
+                END IF  
+
+                SET b = b + 1  
+            UNTIL b > beta  
+        END FOR  
+
+        RETURN total  
+    END FUNCTION  
+END CLASS

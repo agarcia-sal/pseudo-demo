@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION isArraySpecial(nums, queries)
+        PROCEDURE modTwo(x)
+            RETURN x - ( (x / 2) * 2 )
+        END PROCEDURE
+
+        PROCEDURE zeroList(length)
+            SET arr TO []
+            SET counter TO 0
+            WHILE counter < length
+                APPEND 0 TO arr
+                SET counter TO counter + 1
+            END WHILE
+            RETURN arr
+        END PROCEDURE
+
+        SET parity TO []
+        SET idx1 TO 0
+        WHILE idx1 < LENGTH(nums)
+            APPEND modTwo(nums[idx1]) TO parity
+            SET idx1 TO idx1 + 1
+        END WHILE
+
+        SET prefix_special TO zeroList(LENGTH(nums))
+
+        PROCEDURE computePrefix(k)
+            IF k = LENGTH(nums)
+                RETURN
+            END IF
+            IF parity[k] != parity[k - 1]
+                SET prefix_special[k] TO prefix_special[k - 1]
+            ELSE
+                SET prefix_special[k] TO prefix_special[k - 1] + 1
+            END IF
+            CALL computePrefix(k + 1)
+        END PROCEDURE
+
+        IF LENGTH(nums) > 1
+            CALL computePrefix(1)
+        END IF
+
+        SET result TO []
+        SET qidx TO 0
+
+        PROCEDURE analyzeQueries(index)
+            IF index = LENGTH(queries)
+                RETURN
+            END IF
+            SET pair TO queries[index]
+            SET start TO pair[0]
+            SET end_ TO pair[1]
+            IF start = end_
+                APPEND True TO result
+            ELSE
+                IF start > 0 THEN numerator <- prefix_special[end_] - prefix_special[start] ELSE numerator <- prefix_special[end_] END IF
+                IF numerator = 0 THEN APPEND True TO result ELSE APPEND False TO result END IF
+            END IF
+            CALL analyzeQueries(index + 1)
+        END PROCEDURE
+
+        CALL analyzeQueries(0)
+
+        RETURN result
+    END FUNCTION
+END CLASS

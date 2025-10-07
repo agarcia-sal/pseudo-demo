@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+      SET A TO 0
+      SET B TO LENGTH(grid)
+      SET C TO LENGTH(grid[0])
+      SET D TO 0
+
+      FUNCTION checkLimits(M)
+        SET E TO 0
+        REPEAT
+          IF E >= LENGTH(M) THEN
+            RETURN True
+          END IF
+          SET F TO 0
+          WHILE F < LENGTH(M[E])
+            IF NOT (M[E][F] <= k) THEN
+              RETURN False
+            END IF
+            SET F TO F + 1
+          END WHILE
+          SET E TO E + 1
+        UNTIL False
+      END FUNCTION
+
+      FUNCTION checkOrder(M)
+        SET G TO 0
+        REPEAT
+          IF G >= LENGTH(M) THEN
+            RETURN True
+          END IF
+          SET H TO 1
+          WHILE H < LENGTH(M[G])
+            IF NOT (M[G][H] <= M[G][H - 1]) THEN
+              RETURN False
+            END IF
+            SET H TO H + 1
+          END WHILE
+          SET G TO G + 1
+        UNTIL False
+      END FUNCTION
+
+      FUNCTION loopY2(y1, y2, x1, x2)
+        IF y2 > C - 1 THEN
+          RETURN
+        END IF
+        SET tempSub TO []
+        SET i TO x1
+        WHILE i <= x2
+          SET rowSegment TO []
+          SET j TO y1
+          WHILE j <= y2
+            SET rowSegment TO rowSegment + [grid[i][j]]
+            SET j TO j + 1
+          END WHILE
+          SET tempSub TO tempSub + [rowSegment]
+          SET i TO i + 1
+        END WHILE
+        IF checkLimits(tempSub) AND checkOrder(tempSub) THEN
+          SET D TO D + 1
+        END IF
+        CALL loopY2(y1, y2 + 1, x1, x2)
+      END FUNCTION
+
+      FUNCTION loopX2(x1, x2, y1)
+        IF x2 > B - 1 THEN
+          RETURN
+        END IF
+        CALL loopY2(y1, y1, x1, x2)
+        CALL loopX2(x1, x2 + 1, y1)
+      END FUNCTION
+
+      FUNCTION loopY1(y1, x1)
+        IF y1 > C - 1 THEN
+          RETURN
+        END IF
+        CALL loopX2(x1, x1, y1)
+        CALL loopY1(y1 + 1, x1)
+      END FUNCTION
+
+      FUNCTION loopX1(x1)
+        IF x1 > B - 1 THEN
+          RETURN
+        END IF
+        CALL loopY1(0, x1)
+        CALL loopX1(x1 + 1)
+      END FUNCTION
+
+      CALL loopX1(0)
+      RETURN D
+    END FUNCTION
+END CLASS

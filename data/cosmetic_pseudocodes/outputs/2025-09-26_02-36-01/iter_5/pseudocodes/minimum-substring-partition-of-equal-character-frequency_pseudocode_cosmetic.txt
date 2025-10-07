@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION minimumSubstringsInPartition(s)
+        FUNCTION dfs(pos)
+            FUNCTION decrementFrequency(keyCount, freqMap, charKey)
+                IF charKey IN keyCount AND keyCount[charKey] != 0 THEN
+                    oldCount = keyCount[charKey]
+                    freqMap[oldCount] = freqMap[oldCount] - 1
+                    IF freqMap[oldCount] == 0 THEN
+                        REMOVE oldCount FROM freqMap
+                    END IF
+                END IF
+            END FUNCTION
+
+            FUNCTION dfsHelper(index, cntMap, freqMap, currentMin)
+                IF index >= LENGTH(s) THEN
+                    RETURN currentMin
+                END IF
+
+                cntMapLocal = COPY(cntMap)
+                freqMapLocal = COPY(freqMap)
+                minAns = currentMin
+                
+                FUNCTION recurse(j, ansSoFar)
+                    IF j >= LENGTH(s) THEN
+                        RETURN ansSoFar
+                    END IF
+                    
+                    decrementFrequency(cntMapLocal, freqMapLocal, s[j])
+                    
+                    newCount = 0
+                    IF s[j] IN cntMapLocal THEN
+                        newCount = cntMapLocal[s[j]] + 1
+                    ELSE
+                        newCount = 1
+                    END IF
+                    cntMapLocal[s[j]] = newCount
+                    
+                    IF newCount IN freqMapLocal THEN
+                        freqMapLocal[newCount] = freqMapLocal[newCount] + 1
+                    ELSE
+                        freqMapLocal[newCount] = 1
+                    END IF
+                    
+                    freqKeys = []
+                    FOR key IN freqMapLocal DO
+                        PUSH freqKeys LENGTH freqKeys, key
+                    END FOR
+                    
+                    IF LENGTH(freqKeys) == 1 THEN
+                        tempAns = 1 + dfs(j + 1)
+                        IF tempAns < ansSoFar THEN
+                            ansSoFar = tempAns
+                        END IF
+                    END IF
+                    
+                    RETURN recurse(j + 1, ansSoFar)
+                END FUNCTION
+                
+                RETURN recurse(index, minAns)
+            END FUNCTION
+
+            initialCnt = NEW empty map from elements to int default zero
+            initialFreq = NEW empty map from int to int default zero
+            defaultAnswer = LENGTH(s) - pos
+            
+            answer = dfsHelper(pos, initialCnt, initialFreq, defaultAnswer)
+            
+            RETURN answer
+        END FUNCTION
+
+        totalLength = LENGTH(s)
+        result = dfs(0)
+        RETURN result
+    END FUNCTION
+END CLASS

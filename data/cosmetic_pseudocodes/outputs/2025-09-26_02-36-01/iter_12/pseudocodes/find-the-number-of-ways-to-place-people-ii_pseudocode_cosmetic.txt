@@ -1,0 +1,118 @@
+CLASS Solution
+
+    FUNCTION numberOfPairs(points)
+    
+        PROCEDURE customSort(array)
+            PROCEDURE compare(a, b)
+                IF a.x < b.x THEN
+                    RETURN -1
+                ELSE IF a.x > b.x THEN
+                    RETURN 1
+                ELSE
+                    IF a.y > b.y THEN
+                        RETURN -1
+                    ELSE IF a.y < b.y THEN
+                        RETURN 1
+                    ELSE
+                        RETURN 0
+                    END IF
+                END IF
+            END PROCEDURE
+            
+            DECLARE idx1 = 1
+            DECLARE idx2 = LENGTH(array)
+            
+            PROCEDURE swap(p, q)
+                DECLARE tmp = array[p]
+                array[p] = array[q]
+                array[q] = tmp
+            END PROCEDURE
+            
+            PROCEDURE partition(low, high)
+                DECLARE pivot = array[high]
+                DECLARE i = low - 1
+                DECLARE j = low
+                WHILE j <= high - 1
+                    IF compare(array[j], pivot) <= 0 THEN
+                        i = i + 1
+                        swap(i, j)
+                    END IF
+                    j = j + 1
+                END WHILE
+                swap(i + 1, high)
+                RETURN i + 1
+            END PROCEDURE
+            
+            DECLARE stack = EMPTY LIST
+            stack.PUSH((1, LENGTH(array)))
+            
+            WHILE stack IS NOT EMPTY
+                DECLARE (start, end_) = stack.POP()
+                IF start < end_ THEN
+                    DECLARE pivotIndex = partition(start, end_)
+                    stack.PUSH((start, pivotIndex - 1))
+                    stack.PUSH((pivotIndex + 1, end_))
+                END IF
+            END WHILE
+        END PROCEDURE
+        
+        customSort(points)
+        
+        DECLARE totalPoints = 0
+        DECLARE accumulator = 0
+        DECLARE cursor1 = 0
+        
+        PROCEDURE retrieveX(point)
+            RETURN point.x
+        END PROCEDURE
+        
+        PROCEDURE retrieveY(point)
+            RETURN point.y
+        END PROCEDURE
+        
+        DECLARE lenPoints = LENGTH(points)
+        
+        cursor1 = 0
+        WHILE cursor1 < lenPoints
+            DECLARE cursor2 = cursor1 + 1
+            WHILE cursor2 < lenPoints
+                DECLARE firstX = retrieveX(points[cursor1])
+                DECLARE firstY = retrieveY(points[cursor1])
+                DECLARE secondX = retrieveX(points[cursor2])
+                DECLARE secondY = retrieveY(points[cursor2])
+                
+                DECLARE conditionCheck = (firstX <= secondX) AND (firstY >= secondY)
+                
+                IF NOT conditionCheck THEN
+                    cursor2 = cursor2 + 1
+                    CONTINUE
+                END IF
+                
+                DECLARE stateFlag = TRUE
+                DECLARE cursor3 = cursor1 + 1
+                
+                WHILE cursor3 < cursor2 AND stateFlag = TRUE
+                    DECLARE midX = retrieveX(points[cursor3])
+                    DECLARE midY = retrieveY(points[cursor3])
+                    
+                    IF (firstX <= midX) AND (midX <= secondX) AND (secondY <= midY) AND (midY <= firstY) THEN
+                        stateFlag = FALSE
+                    END IF
+                    
+                    cursor3 = cursor3 + 1
+                END WHILE
+                
+                IF stateFlag = TRUE THEN
+                    accumulator = accumulator + 1
+                END IF
+                
+                cursor2 = cursor2 + 1
+            END WHILE
+            cursor1 = cursor1 + 1
+        END WHILE
+        
+        RETURN accumulator
+    
+    END FUNCTION
+
+END CLASS

@@ -1,0 +1,49 @@
+CLASS Solution  
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer  
+        DECLARE fac AS list = [1]  
+        DECLARE i AS integer = 1  
+        WHILE i <= n  
+            APPEND fac[i-1] * i TO fac  
+            INCREMENT i BY 1  
+        END WHILE  
+
+        DECLARE ans AS integer = 0  
+        DECLARE visited AS set of string = {}  
+        DECLARE half_len AS integer = (n - 1) DIV 2  
+        DECLARE start_num AS integer = 10 ^ half_len  
+        DECLARE end_num AS integer = start_num * 10  
+
+        FOR num FROM start_num TO end_num - 1  
+            DECLARE str_num AS string = TO_STRING(num)  
+            DECLARE rev_part AS string = REVERSE(str_num).SUBSTRING(n MOD 2, LENGTH(str_num))  
+            DECLARE candidate AS string = CONCATENATE(str_num, rev_part)  
+            
+            IF (TO_INTEGER(candidate) MOD k) != 0 THEN  
+                CONTINUE  
+            END IF  
+
+            DECLARE sorted_candidate AS string = SORT_CHARACTERS_ASC(candidate)  
+            IF sorted_candidate IN visited THEN  
+                CONTINUE  
+            END IF  
+            ADD sorted_candidate TO visited  
+
+            DECLARE count_map AS dictionary<char, integer> = COUNT_FREQUENCIES(sorted_candidate)  
+            
+            DECLARE res AS integer  
+            IF count_map.CONTAINS_KEY('0') AND count_map['0'] > 0 THEN  
+                res = (n - count_map['0']) * fac[n - 1]  
+            ELSE  
+                res = fac[n]  
+            END IF  
+
+            FOR EACH freq IN count_map.VALUES() DO  
+                res = res DIV fac[freq]  
+            END FOR  
+
+            ans = ans + res  
+        END FOR  
+
+        RETURN ans  
+    END FUNCTION  
+END CLASS

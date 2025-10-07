@@ -1,0 +1,56 @@
+CLASS Solution  
+    FUNCTION maximumLength(nums)  
+        SET frequency TO an empty dictionary  
+        FOR each element IN nums  
+            IF element IN frequency THEN  
+                frequency[element] = frequency[element] + 1  
+            ELSE  
+                frequency[element] = 1  
+            END IF  
+        END FOR
+
+        SET memo TO empty dictionary
+
+        FUNCTION helper(value)  
+            IF NOT (value IN frequency AND frequency[value] >= 2) THEN  
+                IF (value IN frequency AND frequency[value] >= 1) THEN  
+                    RETURN 1  
+                ELSE  
+                    RETURN 0  
+                END IF  
+            END IF
+
+            IF value IN memo THEN  
+                RETURN memo[value]  
+            END IF
+
+            LET squaredVal BE value * value  
+            LET result BE helper(squaredVal) + 2  
+            memo[value] = result  
+            RETURN result  
+        END FUNCTION
+
+        SET maxLen TO 1  
+        LET keysList BE list of keys in frequency
+        SET idx TO 0  
+        WHILE idx < LENGTH(keysList)  
+            LET key BE keysList[idx]  
+            IF key == 1 THEN  
+                LET occ BE frequency[key]  
+                LET evenCount BE occ - (occ % 2)  
+                LET candidate BE evenCount - 1  
+                IF candidate > maxLen THEN  
+                    maxLen = candidate  
+                END IF  
+            ELSE  
+                LET candidate BE helper(key)  
+                IF candidate > maxLen THEN  
+                    maxLen = candidate  
+                END IF  
+            END IF  
+            idx = idx + 1  
+        END WHILE
+
+        RETURN maxLen  
+    END FUNCTION  
+END CLASS

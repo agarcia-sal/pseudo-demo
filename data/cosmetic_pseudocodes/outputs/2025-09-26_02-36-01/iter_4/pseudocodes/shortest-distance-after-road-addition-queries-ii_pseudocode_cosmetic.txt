@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION shortestDistanceAfterQueries(n, queries)  
+        DECLARE adjacency AS a mapping from integer keys in the range zero TO (n minus 1) EACH mapped TO an empty sequence  
+        
+        INITIALIZE counter TO zero  
+        WHILE counter IS LESS THAN (n minus one)  
+            SET next_node TO counter plus one  
+            SET edge_tuple TO (next_node, one)  
+            APPEND edge_tuple TO adjacency[counter]  
+            INCREMENT counter BY one  
+        END WHILE  
+        
+        FUNCTION dijkstra()  
+            DECLARE distances AS a list of length n WITH every element assigned positive infinity  
+            ASSIGN zero TO distances[0]  
+            
+            DECLARE priority_queue AS a list containing one tuple: (zero, zero)  
+            
+            WHILE LENGTH OF priority_queue IS GREATER THAN zero  
+                EXTRACT the tuple with the least first element FROM priority_queue INTO current_distance AND current_vertex  
+                
+                IF current_distance IS NOT LESS THAN distances[current_vertex] THEN  
+                    SKIP to next loop iteration  
+                ENDIF  
+                
+                DECLARE iterator AS 0  
+                WHILE iterator IS LESS THAN THE LENGTH OF adjacency[current_vertex]  
+                    SET neighbor_pair TO adjacency[current_vertex][iterator]  
+                    DESTRUCTURE neighbor_pair INTO neighbor_vertex AND edge_weight  
+                    DECLARE tentative_distance AS current_distance plus edge_weight  
+                    
+                    IF tentative_distance IS STRICTLY LESS THAN distances[neighbor_vertex] THEN  
+                        ASSIGN tentative_distance TO distances[neighbor_vertex]  
+                        INSERT (tentative_distance, neighbor_vertex) INTO priority_queue MAINTAINING min-heap ORDER  
+                    ENDIF  
+                    
+                    INCREMENT iterator BY one  
+                END WHILE  
+            END WHILE  
+            
+            RETURN distances[n minus one]  
+        END FUNCTION  
+        
+        DECLARE answers AS empty list  
+        
+        FOR EACH edge_pair IN queries  
+            DECOMPOSE edge_pair INTO start_node AND weight_value  
+            APPEND (weight_value, one) TO adjacency[start_node]  
+            SET shortest_path_length TO dijkstra()  
+            ADD shortest_path_length TO answers  
+        END FOR  
+        
+        RETURN answers  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,55 @@
+```
+FUNCTION sort_even(list_of_elements)
+	RETURN (FUNCTION recur_merge(pair_A, pair_B, accum)
+		IF (pair_A IS EMPTY) AND (pair_B IS EMPTY)
+			RETURN accum
+		ELSE IF (pair_A IS NOT EMPTY) AND (pair_B IS NOT EMPTY)
+			LET head_A <- FIRST(pair_A)
+			LET head_B <- FIRST(pair_B)
+			LET tail_A <- REST(pair_A)
+			LET tail_B <- REST(pair_B)
+			RETURN recur_merge(tail_A, tail_B, accum + [head_A, head_B])
+		ELSE IF (pair_A IS NOT EMPTY) AND (pair_B IS EMPTY)
+			RETURN accum + pair_A
+		END IF
+	)( (FUNCTION extract(list, idx, result)
+		IF idx >= LENGTH(list)
+			RETURN result
+		ELSE
+			RETURN extract(list, idx + 2, result + [list[idx]])
+		END IF
+	)(list_of_elements,0, []), (FUNCTION extract(list, idx, result)
+		IF idx >= LENGTH(list)
+			RETURN result
+		ELSE
+			RETURN extract(list, idx + 2, result + [list[idx]])
+		END IF
+	)(list_of_elements,1, []), [] )
+	|> (FUNCTION sort_and_merge(A,B)
+		LET sorted_A <- (FUNCTION rec_sort(arr)
+			IF LENGTH(arr) <= 1
+				RETURN arr
+			ELSE
+				LET mid <- LENGTH(arr) / 2
+				LET left <- rec_sort(arr[0:mid])
+				LET right <- rec_sort(arr[mid:LENGTH(arr)])
+				LET merge <- FUNCTION(x,y,acc)
+					IF x IS EMPTY
+						RETURN acc + y
+					ELSE IF y IS EMPTY
+						RETURN acc + x
+					ELSE
+						IF x[0] <= y[0]
+							RETURN merge(x[1:], y, acc + [x[0]])
+						ELSE
+							RETURN merge(x, y[1:], acc + [y[0]])
+						END IF
+					END IF
+				END FUNCTION
+				RETURN merge(left,right,[])
+			END IF
+		)(A)
+		RETURN recur_merge(sorted_A,B,[])
+	END FUNCTION)
+END FUNCTION
+```

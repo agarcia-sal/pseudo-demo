@@ -1,0 +1,30 @@
+```
+FUNCTION separate_paren_groups(string_of_parentheses)
+    DEFINE FUNCTION unwind(idx, acc_groups, acc_chars, depth)
+        IF idx = LENGTH(string_of_parentheses)
+            RETURN acc_groups
+        ELSE
+            LET c = string_of_parentheses[idx]
+            IF NOT(c = '(' OR c = ')')
+                RETURN unwind(idx + 1, acc_groups, acc_chars, depth)
+            ELSE
+                IF c = '('
+                    LET new_depth = depth + 1
+                    RETURN unwind(idx + 1, acc_groups, APPEND(acc_chars, c), new_depth)
+                ELSE  # c = ')'
+                    LET new_depth = depth - 1
+                    LET new_acc_chars = APPEND(acc_chars, c)
+                    IF new_depth = 0
+                        LET group = CONCAT(new_acc_chars)
+                        RETURN unwind(idx + 1, APPEND(acc_groups, group), [], new_depth)
+                    ELSE
+                        RETURN unwind(idx + 1, acc_groups, new_acc_chars, new_depth)
+                    END IF
+                END IF
+            END IF
+        END IF
+    END FUNCTION
+
+    RETURN unwind(0, [], [], 0)
+END FUNCTION
+```

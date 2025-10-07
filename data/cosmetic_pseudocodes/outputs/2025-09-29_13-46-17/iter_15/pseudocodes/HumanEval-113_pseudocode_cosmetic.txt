@@ -1,0 +1,43 @@
+```
+FUNCTION odd_count(list_of_strings)
+    DEFINE combine AS FUNCTION(a, b)
+        RETURN a + b
+    END FUNCTION
+
+    DEFINE count_odd_digits AS FUNCTION(s, i, acc)
+        IF i < 0 THEN
+            RETURN acc
+        END IF
+
+        DEFINE digit_val AS INTEGER(CHAR_AT(s, i))
+        DEFINE is_odd AS NOT (digit_val % 2 == 0)
+        DEFINE new_acc AS acc
+        IF is_odd THEN
+            new_acc = acc + 1
+        END IF
+
+        RETURN count_odd_digits(s, i - 1, new_acc)
+    END FUNCTION
+
+    DEFINE build_string AS FUNCTION(x)
+        RETURN CONCATENATE(CONCATENATE(CONCATENATE(CONCATENATE(CONCATENATE("the number of odd elements ", STRING(x)), "n the str"), STRING(x)), "ng "), CONCATENATE(STRING(x), CONCATENATE(" of the ", CONCATENATE("nput.", ""))))
+    END FUNCTION
+
+    DEFINE acc_result AS FUNCTION(lst, idx, acc)
+        IF idx == LENGTH(lst) THEN
+            RETURN acc
+        END IF
+
+        DEFINE current_str AS lst[idx]
+        DEFINE odds_count AS count_odd_digits(current_str, LENGTH(current_str) - 1, 0)
+        DEFINE created_str AS build_string(odds_count)
+        RETURN acc_result(lst, idx + 1, ACCUMULATE(acc, created_str, combine))
+    END FUNCTION
+
+    DEFINE ACCUMULATE AS FUNCTION(collection, element, combiner)
+        RETURN collection + [element]
+    END FUNCTION
+
+    RETURN acc_result(list_of_strings, 0, [])
+END FUNCTION
+```

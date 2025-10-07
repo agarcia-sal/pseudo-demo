@@ -1,0 +1,34 @@
+CLASS Solution
+    FUNCTION countSubarrays(nums PARAMETER LIST OF INTEGER, k PARAMETER INTEGER) RETURNS INTEGER
+        FUNCTION andAccumulator(index1 INTEGER, index2 INTEGER, accum INTEGER) RETURNS INTEGER
+            IF index2 GREATER THAN LENGTH OF nums MINUS 1 THEN
+                RETURN accum
+            ELSE
+                LET updatedAccum INTEGER = accum BITWISE AND nums[index2]
+                RETURN andAccumulator(index1, index2 + 1, updatedAccum)
+            END IF
+        END FUNCTION
+
+        FUNCTION countRec(startIndex INTEGER, total INTEGER) RETURNS INTEGER
+            IF startIndex GREATER THAN LENGTH OF nums MINUS 1 THEN
+                RETURN total
+            ELSE
+                FUNCTION innerCount(currentIndex INTEGER, runningAnd INTEGER, localCount INTEGER) RETURNS INTEGER
+                    IF currentIndex GREATER THAN LENGTH OF nums MINUS 1 OR runningAnd LESS THAN k THEN
+                        RETURN localCount
+                    ELSE
+                        LET newRunningAnd INTEGER = runningAnd BITWISE AND nums[currentIndex]
+                        LET updatedLocalCount INTEGER = localCount + (IF newRunningAnd EQUALS k THEN 1 ELSE 0)
+                        RETURN innerCount(currentIndex + 1, newRunningAnd, updatedLocalCount)
+                    END IF
+                END FUNCTION
+
+                LET startAnd INTEGER = nums[startIndex]
+                LET innerResult INTEGER = innerCount(startIndex, startAnd, 0)
+                RETURN countRec(startIndex + 1, total + innerResult)
+            END IF
+        END FUNCTION
+
+        RETURN countRec(0, 0)
+    END FUNCTION
+END CLASS

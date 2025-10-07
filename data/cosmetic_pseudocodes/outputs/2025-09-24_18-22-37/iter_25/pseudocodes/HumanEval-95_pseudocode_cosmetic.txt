@@ -1,0 +1,101 @@
+```
+FUNCTION check_dict_case(input_map)
+  
+  DECLARE marker
+  DECLARE item
+  
+  IF NOT (0 <> COUNT_KEYS(input_map)) THEN
+    RETURN false
+  END IF
+
+  marker ← "start"
+
+  DECLARE iterator ← GET_KEYS(input_map)
+  DECLARE index ← 0
+  DECLARE length ← COUNT_KEYS(input_map)
+
+  WHILE index < length DO
+    item ← iterator.at(index)
+    
+    IF NOT (TYPEOF(item) = "string") THEN
+      marker ← "mixed"
+      BREAK
+    END IF
+
+    IF marker = "start" THEN
+      DECLARE isAllUpper ← true
+      DECLARE isAllLower ← true
+      DECLARE pos ← 0
+      WHILE pos < LENGTH(item) DO
+        DECLARE ch ← item.at(pos)
+        DECLARE isUpperChar ← (ch >= "A") AND (ch <= "Z")
+        DECLARE isLowerChar ← (ch >= "a") AND (ch <= "z")
+        IF NOT isUpperChar THEN
+          isAllUpper ← false
+        END IF
+        IF NOT isLowerChar THEN
+          isAllLower ← false
+        END IF
+        pos ← pos + 1
+      END WHILE
+
+      IF isAllUpper THEN
+        marker ← "upper"
+      ELSE IF isAllLower THEN
+        marker ← "lower"
+      ELSE
+        BREAK
+      END IF
+
+    ELSE
+      IF (marker = "upper") THEN
+        DECLARE validUpper ← true
+        DECLARE pos2 ← 0
+        WHILE pos2 < LENGTH(item) DO
+          DECLARE ch2 ← item.at(pos2)
+          IF NOT (ch2 >= "A" AND ch2 <= "Z") THEN
+            validUpper ← false
+            BREAK
+          END IF
+          pos2 ← pos2 + 1
+        END WHILE
+        IF NOT validUpper THEN
+          marker ← "mixed"
+          BREAK
+        END IF
+
+      ELSE IF (marker = "lower") THEN
+        DECLARE validLower ← true
+        DECLARE pos3 ← 0
+        WHILE pos3 < LENGTH(item) DO
+          DECLARE ch3 ← item.at(pos3)
+          IF NOT (ch3 >= "a" AND ch3 <= "z") THEN
+            validLower ← false
+            BREAK
+          END IF
+          pos3 ← pos3 + 1
+        END WHILE
+        IF NOT validLower THEN
+          marker ← "mixed"
+          BREAK
+        END IF
+
+      ELSE
+        BREAK
+      END IF
+
+    END IF
+
+    index ← index + 1
+  END WHILE
+
+  DECLARE result ← false
+  IF (marker = "upper") THEN
+    result ← true
+  ELSE IF (marker = "lower") THEN
+    result ← true
+  END IF
+
+  RETURN result
+END FUNCTION
+```

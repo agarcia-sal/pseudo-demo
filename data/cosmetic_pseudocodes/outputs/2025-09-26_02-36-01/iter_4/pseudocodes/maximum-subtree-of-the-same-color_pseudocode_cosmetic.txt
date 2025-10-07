@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+        DECLARE adjacency AS empty map defaulting to empty array
+        DECLARE idx TO zero
+        WHILE idx LESS THAN the length of edges
+            LET firstNode ASSIGN the element at idx, zero index in edges
+            LET secondNode ASSIGN the element at idx, first index in edges
+            INSERT secondNode INTO adjacency[firstNode]
+            INSERT firstNode INTO adjacency[secondNode]
+            INCREMENT idx BY one
+        END WHILE
+
+        DECLARE maxResult ASSIGN one
+
+        FUNCTION dfs WITH PARAMETERS currentNode parentNode
+            LET countOfSameColor ASSIGN one
+            LET allChildMatch ASSIGN true
+            DECLARE neighborsList ASSIGN adjacency[currentNode]
+            DECLARE i ASSIGN zero
+            WHILE i LESS THAN the length of neighborsList
+                LET adjNode ASSIGN neighborsList[i]
+                IF NOT (adjNode EQUALS parentNode) THEN
+                    LET subtreeSize ASSIGN dfs(adjNode, currentNode)
+                    IF subtreeSize EQUALS zero THEN
+                        ASSIGN allChildMatch TO false
+                    ELSE
+                        LET colorsEqual ASSIGN (colors[adjNode] EQUALS colors[currentNode])
+                        IF colorsEqual THEN
+                            LET tempSum ASSIGN countOfSameColor PLUS subtreeSize
+                            ASSIGN countOfSameColor TO tempSum
+                        ELSE
+                            ASSIGN allChildMatch TO false
+                        END IF
+                    END IF
+                END IF
+                INCREMENT i BY one
+            END WHILE
+
+            IF allChildMatch THEN
+                LET candidate ASSIGN maxResult
+                IF candidate LESS THAN countOfSameColor THEN
+                    ASSIGN maxResult TO countOfSameColor
+                END IF
+                RETURN countOfSameColor
+            ELSE
+                RETURN zero
+            END IF
+        END FUNCTION
+
+        CALL dfs WITH arguments zero, negative one
+        RETURN maxResult
+    END FUNCTION
+END CLASS

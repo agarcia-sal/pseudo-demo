@@ -1,0 +1,49 @@
+```
+FUNCTION encode(input_text)
+    DECLARE vowels_map AS MAP
+    DECLARE vowels_collection AS LIST
+    DECLARE output_builder AS LIST
+    DECLARE idx AS INTEGER
+
+    vowels_collection ← ["a", "e", "i", "o", "u", "A", "E", "I", "O", "U"]
+
+    FOR idx FROM 1 TO LENGTH(vowels_collection) DO
+        DECLARE ch AS CHARACTER
+        ch ← vowels_collection[idx]
+        vowels_map[ch] ← CHARACTER(ASCII_VALUE(ch) + 2)
+    END FOR
+
+    FUNCTION swap_cases_recursive(text, position, length)
+        IF position > length THEN
+            RETURN ""
+        ELSE
+            DECLARE current_char AS CHARACTER
+            current_char ← text[position]
+            DECLARE swapped_char AS CHARACTER
+            IF current_char >= "a" AND current_char <= "z" THEN
+                swapped_char ← CHARACTER(ASCII_VALUE(current_char) - 32)
+            ELSE IF current_char >= "A" AND current_char <= "Z" THEN
+                swapped_char ← CHARACTER(ASCII_VALUE(current_char) + 32)
+            ELSE
+                swapped_char ← current_char
+            END IF
+            RETURN swapped_char + swap_cases_recursive(text, position + 1, length)
+        END IF
+    END FUNCTION
+
+    DECLARE swapped_text AS STRING
+    swapped_text ← swap_cases_recursive(input_text, 1, LENGTH(input_text))
+
+    FOR idx FROM 1 TO LENGTH(swapped_text) DO
+        DECLARE current_char AS CHARACTER
+        current_char ← swapped_text[idx]
+        IF vowels_map CONTAINS KEY current_char THEN
+            APPEND vowels_map[current_char] TO output_builder
+        ELSE
+            APPEND current_char TO output_builder
+        END IF
+    END FOR
+
+    RETURN JOIN(output_builder, "")
+END FUNCTION
+```

@@ -1,0 +1,37 @@
+```
+FUNCTION poly(list_of_coefficients, point)
+	RETURN (FUNCTION foldFun(acc, pair)
+		LET (coeff, idx) = pair
+		IN acc + coeff * (FUNCTION expPow(base, power, acc)
+			IF power < 1 THEN RETURN acc
+			ELSE RETURN expPow(base, power - 1, acc * base)
+			END IF
+		END FUNCTION)(point, idx, 1)
+	END FUNCTION)(0, ZIP(list_of_coefficients, RANGE(0, LENGTH(list_of_coefficients))))
+END FUNCTION
+
+FUNCTION find_zero(list_of_coefficients)
+	FUNCTION checkSign(x, y)
+		RETURN poly(list_of_coefficients, x) * poly(list_of_coefficients, y) > 0
+	END FUNCTION
+
+	FUNCTION scaleBounds(beg, en)
+		IF checkSign(beg, en) THEN RETURN scaleBounds(beg * 2.0, en * 2.0)
+		ELSE RETURN (beg, en)
+		END IF
+	END FUNCTION
+
+	FUNCTION bisect(lo, hi)
+		IF (hi - lo) <= 0.0000000001 THEN RETURN lo
+		LET mid = (lo + hi) / 2.0
+		IF poly(list_of_coefficients, mid) * poly(list_of_coefficients, lo) > 0
+			RETURN bisect(mid, hi)
+		ELSE
+			RETURN bisect(lo, mid)
+		END IF
+	END FUNCTION
+
+	LET (startBound, endBound) = scaleBounds(-1.0, 1.0)
+	RETURN bisect(startBound, endBound)
+END FUNCTION
+```

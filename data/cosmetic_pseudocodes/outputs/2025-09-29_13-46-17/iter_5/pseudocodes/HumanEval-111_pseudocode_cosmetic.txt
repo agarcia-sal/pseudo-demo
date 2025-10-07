@@ -1,0 +1,72 @@
+```
+FUNCTION histogram(test_string)
+  frequency_map ← {}
+  words_array ← []
+  max_frequency ← 0
+
+  PROCEDURE split_and_collect(source, delimiter, target_collection, idx)
+    IF idx = LENGTH(source) THEN
+      RETURN
+    ENDIF
+    IF source[idx] = delimiter THEN
+      split_and_collect(source, delimiter, target_collection, idx + 1)
+    ELSE
+      word_start ← idx
+      PROCEDURE find_word_end(pos)
+        IF pos = LENGTH(source) OR source[pos] = delimiter THEN
+          RETURN pos
+        ELSE
+          RETURN find_word_end(pos + 1)
+        ENDIF
+      END PROCEDURE
+      word_end ← find_word_end(idx)
+      word ← SUBSTRING(source, word_start, word_end - word_start)
+      target_collection ← target_collection + [word]
+      split_and_collect(source, delimiter, target_collection, word_end)
+    ENDIF
+  END PROCEDURE
+
+  split_and_collect(test_string, " ", words_array, 0)
+
+  PROCEDURE get_count(collection, target, pos, acc)
+    IF pos = LENGTH(collection) THEN
+      RETURN acc
+    ENDIF
+    match_flag ← 1 * (collection[pos] = target)
+    RETURN get_count(collection, target, pos + 1, acc + match_flag)
+  END PROCEDURE
+
+  PROCEDURE find_maximum(items, pos, current_max)
+    IF pos = LENGTH(items) THEN
+      RETURN current_max
+    ENDIF
+    current_item ← items[pos]
+    IF current_item ≠ "" THEN
+      freq ← get_count(items, current_item, 0, 0)
+    ELSE
+      freq ← 0
+    ENDIF
+    new_max ← (freq > current_max) * freq + (freq ≤ current_max) * current_max
+    RETURN find_maximum(items, pos + 1, new_max)
+  END PROCEDURE
+
+  max_frequency ← find_maximum(words_array, 0, 0)
+
+  PROCEDURE accumulate_frequency(freq_map, items, pos, max_freq)
+    IF pos = LENGTH(items) THEN
+      RETURN freq_map
+    ENDIF
+    element ← items[pos]
+    element_count ← get_count(items, element, 0, 0)
+    updated_map ← freq_map
+    IF element_count = max_freq THEN
+      updated_map[element] ← max_freq
+    ENDIF
+    RETURN accumulate_frequency(updated_map, items, pos + 1, max_freq)
+  END PROCEDURE
+
+  frequency_map ← accumulate_frequency(frequency_map, words_array, 0, max_frequency)
+
+  RETURN frequency_map
+END FUNCTION
+```

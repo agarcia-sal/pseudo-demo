@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION minCostToEqualizeArray(nums cost1 cost2)
+        SET CONSTRAINT TO 10^9 + 7
+        SET totalCount TO 0
+        SET lengthValue TO 0
+        SET lowerBound TO 0
+        SET upperBound TO 0
+        SET aggregateSum TO 0
+
+        PROCEDURE initializeParameters()
+            SET lengthValue = LENGTH OF nums
+            SET lowerBound = nums[0]
+            SET upperBound = nums[0]
+            SET aggregateSum = 0
+            SET idx = 0
+            WHILE idx < lengthValue DO
+                BEGIN
+                    SET currentElem = nums[idx]
+                    IF currentElem < lowerBound THEN
+                        SET lowerBound = currentElem
+                    END IF
+                    IF currentElem > upperBound THEN
+                        SET upperBound = currentElem
+                    END IF
+                    SET aggregateSum = aggregateSum + currentElem
+                    SET idx = idx + 1
+                END
+        END PROCEDURE
+
+        PROCEDURE dummyInitialization()
+            SET totalCount = 0
+        END PROCEDURE
+
+        CALL initializeParameters()
+
+        IF (cost1 * 2 <= cost2) OR (lengthValue < 3) THEN
+            SET difference = upperBound * lengthValue - aggregateSum
+            SET totalCount = cost1 * difference
+            RETURN totalCount MOD CONSTRAINT
+        END IF
+
+        FUNCTION calculateCost(value)
+            SET maxDifference TO value - lowerBound
+            SET totalDifference TO value * lengthValue - aggregateSum
+            SET minimaPairs TO MINIMUM OF (totalDifference / 2) AND (totalDifference - maxDifference)
+            SET partialCost TO cost1 * totalDifference - minimaPairs * 2 * cost1 + minimaPairs * cost2
+            RETURN partialCost
+        END FUNCTION
+
+        SET candidates TO []
+        SET stepValue TO max(1, (2 * upperBound - 1) - upperBound + 1)
+        SET currentIndex TO upperBound
+
+        WHILE stepValue > 0
+            BEGIN
+                SET costCalc TO calculateCost(currentIndex)
+                APPEND costCalc TO candidates
+                SET currentIndex = currentIndex + 1
+                SET stepValue = stepValue - 1
+            END
+
+        SET totalCount = candidates[0]
+        SET idx2 = 1
+        REPEAT
+            BEGIN
+                IF candidates[idx2] < totalCount THEN
+                    SET totalCount = candidates[idx2]
+                END IF
+                SET idx2 = idx2 + 1
+            UNTIL idx2 >= LENGTH OF candidates
+
+        RETURN totalCount MOD CONSTRAINT
+    END FUNCTION
+END CLASS

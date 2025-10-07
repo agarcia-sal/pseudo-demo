@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION minimumPushes(word)
+        DECLARE tallyMap = EMPTY MAP
+        DECLARE freqEntries = EMPTY LIST
+        DECLARE accPushes = 0
+        DECLARE pressCount = 1
+        DECLARE assignedKeys = 0
+        DECLARE idx = 0
+
+        // count frequencies
+        WHILE idx < LENGTH(word) DO
+            DECLARE currentChar = word[idx]
+            IF tallyMap CONTAINS currentChar THEN
+                tallyMap[currentChar] = tallyMap[currentChar] + 1
+            ELSE
+                tallyMap[currentChar] = 1
+            END IF
+            idx = idx + 1
+        END WHILE
+
+        // extract values from map into list
+        FOR EACH val IN VALUES(tallyMap) DO
+            freqEntries APPEND val
+        END FOR
+
+        // sort descending using a simple bubble swap (descending)
+        DECLARE flag = TRUE
+        WHILE flag DO
+            SET flag = FALSE
+            DECLARE i = 0
+            WHILE i < LENGTH(freqEntries) - 1 DO
+                IF freqEntries[i] < freqEntries[i + 1] THEN
+                    DECLARE tempVar = freqEntries[i]
+                    freqEntries[i] = freqEntries[i + 1]
+                    freqEntries[i + 1] = tempVar
+                    flag = TRUE
+                END IF
+                i = i + 1
+            END WHILE
+        END WHILE
+
+        // iterate over freqEntries with repeat-until
+        DECLARE pos = 0
+        REPEAT
+            DECLARE currentFreq = freqEntries[pos]
+            accPushes = accPushes + currentFreq * pressCount
+            assignedKeys = assignedKeys + 1
+
+            IF assignedKeys = 8 THEN
+                assignedKeys = 0
+                pressCount = pressCount + 1
+            END IF
+
+            pos = pos + 1
+        UNTIL pos >= LENGTH(freqEntries)
+
+        RETURN accPushes
+    END FUNCTION
+END CLASS

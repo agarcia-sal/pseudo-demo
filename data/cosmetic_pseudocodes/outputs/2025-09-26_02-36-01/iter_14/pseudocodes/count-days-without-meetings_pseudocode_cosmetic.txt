@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION countDays(days, meetings)
+    BEGIN
+        PROCEDURE sortMeetings(arr)
+        BEGIN
+            DECLARE changed ← TRUE
+            WHILE changed ≠ FALSE DO
+                SET changed ← FALSE
+                SET idx ← 0
+                WHILE idx < LENGTH(arr) - 1 DO
+                    IF NOT (arr[idx][0] <= arr[idx + 1][0]) THEN
+                        DECLARE temp ← arr[idx]
+                        SET arr[idx] ← arr[idx + 1]
+                        SET arr[idx + 1] ← temp
+                        SET changed ← TRUE
+                    END IF
+                    SET idx ← idx + 1
+                END WHILE
+            END WHILE
+        END PROCEDURE
+
+        CALL sortMeetings(meetings)
+
+        DECLARE pointer ← 1
+        DECLARE free_days ← 0
+
+        DECLARE procedure processMeeting(i)
+            IF i >= LENGTH(meetings) THEN
+                RETURN
+            ELSE
+                DECLARE meeting ← meetings[i]
+                DECLARE startDay ← meeting[0]
+                DECLARE endDay ← meeting[1]
+
+                IF pointer < startDay THEN
+                    SET free_days ← free_days + (startDay - pointer)
+                END IF
+
+                IF endDay + 1 > pointer THEN
+                    SET pointer ← endDay + 1
+                END IF
+
+                CALL processMeeting(i + 1)
+            END IF
+        END DECLARE
+
+        CALL processMeeting(0)
+
+        IF pointer <= days THEN
+            SET free_days ← free_days + (days - pointer + 1)
+        END IF
+
+        DECLARE result ← free_days
+        RETURN result
+    END
+END CLASS

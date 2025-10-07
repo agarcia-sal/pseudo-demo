@@ -1,0 +1,162 @@
+CLASS Solution
+    FUNCTION makeAntiPalindrome(s)
+        FUNCTION innerSwap(arr, x, y)
+            tempVal ← arr[x]
+            arr[x] ← arr[y]
+            arr[y] ← tempVal
+        END FUNCTION
+
+        FUNCTION isEqual(a, b)
+            RETURN (a = b)
+        END FUNCTION
+
+        FUNCTION strJoin(charList)
+            acc ← ""
+            INDEX ← 0
+            WHILE INDEX < LENGTH(charList)
+                acc ← acc + charList[INDEX]
+                INDEX ← INDEX + 1
+            END WHILE
+            RETURN acc
+        END FUNCTION
+
+        FUNCTION lessThan(a, b)
+            RETURN (a < b)
+        END FUNCTION
+
+        FUNCTION notEqual(a, b)
+            RETURN NOT (a = b)
+        END FUNCTION
+
+        FUNCTION lengthOf(array)
+            count ← 0
+            FOR each unusedElement IN array
+                count ← count + 1
+            END FOR
+            RETURN count
+        END FUNCTION
+
+        FUNCTION floorDivide(a, b)
+            tempQ ← a / b
+            RETURN tempQ - (tempQ MOD 1)
+        END FUNCTION
+
+        FUNCTION getElement(arr, idx)
+            RETURN arr[idx]
+        END FUNCTION
+
+        FUNCTION setElement(arr, idx, val)
+            arr[idx] ← val
+        END FUNCTION
+
+        FUNCTION lessOrEqual(a, b)
+            RETURN (a ≤ b)
+        END FUNCTION
+
+        FUNCTION greaterOrEqual(a, b)
+            RETURN (a ≥ b)
+        END FUNCTION
+
+        FUNCTION createSortedList(text)
+            charsList ← []
+            FOR index FROM 0 TO (LENGTH(text) - 1)
+                charsList ← charsList + [text[index]]
+            END FOR
+            // Bubble sort for demonstration to totally rewrite sorting
+            gap ← LENGTH(charsList)
+            swappedFlag ← TRUE
+            WHILE gap > 1 OR swappedFlag = TRUE
+                IF gap > 1 THEN gap ← FLOOR(gap / 1.247)
+                swappedFlag ← FALSE
+                i ← 0
+                WHILE lessThan(i + gap, LENGTH(charsList))
+                    IF charsList[i] > charsList[i + gap]
+                        tempVal ← charsList[i]
+                        charsList[i] ← charsList[i + gap]
+                        charsList[i + gap] ← tempVal
+                        swappedFlag ← TRUE
+                    END IF
+                    i ← i + 1
+                END WHILE
+            END WHILE
+            RETURN charsList
+        END FUNCTION
+
+        characters ← createSortedList(s)
+        lengthN ← lengthOf(characters)
+
+        halfM ← floorDivide(lengthN, 2)
+
+        FUNCTION conditionCheck(arr, idx1, idx2)
+            RETURN isEqual(getElement(arr, idx1), getElement(arr, idx2))
+        END FUNCTION
+
+        IF conditionCheck(characters, halfM, halfM - 1)
+            alpha ← halfM
+
+            FUNCTION loopForwardLimit(arr, startIndex, maxIndex)
+                currentIndex ← startIndex
+                WHILE lessThan(currentIndex, maxIndex) AND conditionCheck(arr, currentIndex, currentIndex - 1)
+                    currentIndex ← currentIndex + 1
+                END WHILE
+                RETURN currentIndex
+            END FUNCTION
+
+            beta ← loopForwardLimit(characters, alpha, lengthN)
+
+            gamma ← halfM
+
+            FUNCTION loopSwapCondition(arr, idxStart, idxEnd, lengthTotal)
+                i ← idxStart
+                j ← idxEnd
+                WHILE lessThan(j, lengthTotal) AND conditionCheck(arr, j, lengthTotal - j - 1)
+                    IF greaterOrEqual(i, lengthTotal)
+                        RETURN FALSE
+                    END IF
+                    innerSwap(arr, i, j)
+                    i ← i + 1
+                    j ← j + 1
+                END WHILE
+                RETURN TRUE
+            END FUNCTION
+
+            ifSwapResult ← loopSwapCondition(characters, beta, gamma, lengthN)
+
+            IF NOT ifSwapResult
+                RETURN "-1"
+            END IF
+        END IF
+
+        FUNCTION searchAndSwap(arr, posI, half, totalLength)
+            swappedFlagInternal ← FALSE
+            kIdx ← half
+            foundSwap ← FALSE
+
+            FUNCTION mismatchCheck(val1, val2, val3, val4)
+                RETURN (notEqual(val1, val2) AND notEqual(val1, val4))
+            END FUNCTION
+
+            WHILE lessThan(kIdx, totalLength) AND NOT foundSwap
+                cond1 ← mismatchCheck(getElement(arr, kIdx), getElement(arr, posI), getElement(arr, posI), getElement(arr, totalLength - posI - 1))
+                IF cond1
+                    innerSwap(arr, kIdx, posI)
+                    swappedFlagInternal ← TRUE
+                    foundSwap ← TRUE
+                END IF
+                kIdx ← kIdx + 1
+            END WHILE
+            RETURN swappedFlagInternal
+        END FUNCTION
+
+        FOR indexI FROM 0 TO halfM - 1
+            IF conditionCheck(characters, indexI, lengthN - indexI - 1)
+                swapSuccess ← searchAndSwap(characters, indexI, halfM, lengthN)
+                IF NOT swapSuccess
+                    RETURN "-1"
+                END IF
+            END IF
+        END FOR
+
+        RETURN strJoin(characters)
+    END FUNCTION
+END CLASS

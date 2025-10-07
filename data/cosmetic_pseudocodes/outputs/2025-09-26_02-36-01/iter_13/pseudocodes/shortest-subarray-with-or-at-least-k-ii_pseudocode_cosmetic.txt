@@ -1,0 +1,66 @@
+class Solution
+	function minimumSubarrayLength(nums list of integers, k integer) returns integer
+		function modifyCounter(counter list of integers, val integer, delta integer)
+			procedure helper(bitPos integer)
+				if bitPos = 32 then return end if
+				valBit = (val bitwiseAnd (1 bitwiseShiftLeft bitPos))
+				if valBit != 0 then
+					counter[bitPos] = counter[bitPos] + delta
+				end if
+				helper(bitPos + 1)
+			end procedure
+			helper(0)
+		end function
+
+		function aggregateOr(counter list of integers) returns integer
+			accumulator = 0
+			index = 0
+			repeat
+				if counter[index] > 0 then
+					accumulator = accumulator bitwiseOr (1 bitwiseShiftLeft index)
+				end if
+				index = index + 1
+			until index > 31
+			return accumulator
+		end function
+
+		arraySize = 0
+		function getArrayLength(arr list of integers) returns integer
+			if arr = empty list then
+				return 0
+			else
+				return 1 + getArrayLength(tail(arr))
+			end if
+		end function
+		arraySize = getArrayLength(nums)
+
+		bitCount = []
+		repeat
+			bitCount = bitCount + [0]
+		until length(bitCount) = 32
+
+		windowStart = 0
+		combinedOr = 0
+		minSlice = 9999999999999
+		indexRunner = 0
+		while indexRunner < arraySize
+			modifyCounter(bitCount, nums[indexRunner], 1)
+			combinedOr = nums[indexRunner] bitwiseOr combinedOr
+			while combinedOr >= k and windowStart <= indexRunner
+				if minSlice > indexRunner - windowStart + 1 then
+					minSlice = indexRunner - windowStart + 1
+				end if
+				modifyCounter(bitCount, nums[windowStart], -1)
+				combinedOr = aggregateOr(bitCount)
+				windowStart = windowStart + 1
+			end while
+			indexRunner = indexRunner + 1
+		end while
+
+		if minSlice = 9999999999999 then
+			return -1
+		else
+			return minSlice
+		end if
+	end function
+end class

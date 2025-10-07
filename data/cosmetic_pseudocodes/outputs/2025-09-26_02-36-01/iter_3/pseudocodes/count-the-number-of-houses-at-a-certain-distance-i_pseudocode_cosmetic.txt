@@ -1,0 +1,50 @@
+CLASS Solution
+	FUNCTION countOfPairs(n parameter, x parameter, y parameter) RETURNS list of integer
+		SET tally TO array of length n filled with 0
+
+		FUNCTION bfs(source parameter)
+			SET seen TO array of n+1 elements all set to False
+			SET dist TO array of n+1 elements initialized with 0
+			SET q TO queue initialized with source as sole element
+			SET seen[source] TO True
+
+			WHILE LENGTH(q) > 0
+				SET node TO DEQUEUE(q)
+
+				FOR adj IN [node - 1, node + 1]
+					IF adj >= 1 AND adj <= n AND NOT seen[adj] THEN
+						SET seen[adj] TO True
+						SET dist[adj] TO dist[node] + 1
+						ENQUEUE(q, adj)
+					END IF
+				END FOR
+
+				IF node == x AND seen[y] == False THEN
+					SET seen[y] TO True
+					SET dist[y] TO dist[node] + 1
+					ENQUEUE(q, y)
+				END IF
+
+				IF node == y AND seen[x] == False THEN
+					SET seen[x] TO True
+					SET dist[x] TO dist[node] + 1
+					ENQUEUE(q, x)
+				END IF
+			END WHILE
+
+			FOR d IN RANGE 1 TO n INCLUSIVE
+				IF dist[d] > 0 THEN
+					SET tally[dist[d] - 1] TO tally[dist[d] - 1] + 1
+				END IF
+			END FOR
+		END FUNCTION
+
+		SET index TO 1
+		WHILE index <= n
+			CALL bfs WITH index
+			SET index TO index + 1
+		END WHILE
+
+		RETURN tally
+	END FUNCTION
+END CLASS

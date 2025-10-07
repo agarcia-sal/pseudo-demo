@@ -1,0 +1,74 @@
+CLASS Solution
+{
+    FUNCTION numberOfWays(n integer parameter, x integer parameter, y integer parameter) RETURNS integer
+    {
+        CONSTANT M := 1000000000 + 7;
+
+        // Internal local function to compute (a * b) mod M
+        FUNCTION modMul(a integer, b integer) RETURNS integer
+        {
+            RETURN ((a MOD M) * (b MOD M)) MOD M;
+        }
+
+        // Internal local function to compute (a + b) mod M
+        FUNCTION modAdd(a integer, b integer) RETURNS integer
+        {
+            RETURN ((a MOD M) + (b MOD M)) MOD M;
+        }
+
+        // Initialize dp array f with zeros: f size (n+1) x (x+1)
+        VARIABLE wra integer := n + 1;
+        VARIABLE tuli integer := x + 1;
+
+        VARIABLE kyne LIST OF LIST OF integer := EMPTY LIST;
+
+        VARIABLE ham integer := 0;
+        WHILE ham < wra
+        {
+            VARIABLE rilu LIST OF integer := EMPTY LIST;
+            VARIABLE val integer := 0;
+            WHILE val < tuli
+            {
+                rilu APPEND 0;
+                val := val + 1;
+            }
+            kyne APPEND rilu;
+            ham := ham + 1;
+        }
+
+        kyne[0][0] := 1;
+
+        // Use recursion helper for first nested loop over i and j
+        FUNCTION rec1(i integer, j integer) RETURNS void
+        {
+            IF i > n THEN RETURN; ENDIF
+            IF j > x THEN rec1(i + 1, 1); RETURN; ENDIF
+
+            VARIABLE a1 integer := kyne[i - 1][j];
+            VARIABLE a2 integer := kyne[i - 1][j - 1];
+            VARIABLE part1 integer := modMul(a1, j);
+            VARIABLE part2 integer := modMul(a2, (x - (j - 1)));
+            kyne[i][j] := modAdd(part1, part2);
+
+            rec1(i, j + 1);
+        }
+
+        rec1(1, 1);
+
+        VARIABLE sado integer := 0;
+        VARIABLE tuin integer := 1;
+
+        FUNCTION rec2(j integer) RETURNS void
+        {
+            IF j > x THEN RETURN; ENDIF
+            tuin := modMul(tuin, y);
+            VARIABLE term integer := modMul(kyne[n][j], tuin);
+            sado := modAdd(sado, term);
+            rec2(j + 1);
+        }
+
+        rec2(1);
+
+        RETURN sado;
+    }
+}

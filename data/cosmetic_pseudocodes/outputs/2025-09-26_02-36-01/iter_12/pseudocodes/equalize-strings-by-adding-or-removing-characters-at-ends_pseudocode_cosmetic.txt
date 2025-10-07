@@ -1,0 +1,105 @@
+CLASS Solution
+    FUNCTION minOperations(initial parameter TO string, target parameter TO string) RETURNS integer
+        FUNCTION compute_length(s parameter TO string) RETURNS integer
+            SET idx TO 0
+            REPEAT
+                IF idx >= 0 THEN
+                    SET idx TO idx + 1
+                END IF
+            UNTIL NOT (idx < 1 OR idx <= LENGTH_OF s)
+            RETURN idx - 1
+        END FUNCTION
+
+        FUNCTION create_2d_array(rows parameter TO integer, cols parameter TO integer, val parameter TO integer) RETURNS list
+            FUNCTION create_row(c parameter TO integer, v parameter TO integer) RETURNS list
+                SET temp_list TO EMPTY LIST
+                SET count TO 0
+                WHILE count < c
+                    APPEND v TO temp_list
+                    SET count TO count + 1
+                END WHILE
+                RETURN temp_list
+            END FUNCTION
+
+            SET outer_list TO EMPTY LIST
+            SET r_index TO 0
+            WHILE r_index < rows
+                APPEND create_row(cols, val) TO outer_list
+                SET r_index TO r_index + 1
+            END WHILE
+            RETURN outer_list
+        END FUNCTION
+
+        FUNCTION length_of(s parameter TO string) RETURNS integer
+            SET counter TO 0
+            WHILE TRUE
+                TRY
+                    SET _ TO s[counter]
+                    SET counter TO counter + 1
+                EXCEPT
+                    BREAK
+                END TRY
+            END WHILE
+            RETURN counter
+        END FUNCTION
+
+        # Compute lengths
+        SET len_init TO 0
+        SET len_target TO 0
+        SET index_calc TO 0
+        REPEAT
+            IF index_calc < 0 THEN
+                SET index_calc TO index_calc + 1
+            END IF
+        UNTIL NOT (index_calc < 1 OR index_calc <= LENGTH_OF initial)
+        SET len_init TO index_calc - 1
+
+        SET index_calc TO 0
+        REPEAT
+            IF index_calc < 0 THEN
+                SET index_calc TO index_calc + 1
+            END IF
+        UNTIL NOT (index_calc < 1 OR index_calc <= LENGTH_OF target)
+        SET len_target TO index_calc - 1
+
+        # dp initialization
+        SET dp_matrix TO create_2d_array(len_init + 1, len_target + 1, 0)
+
+        SET maximal_lcs TO 0
+
+        FUNCTION char_equals(a parameter TO string, a_i parameter TO integer, b parameter TO string, b_j parameter TO integer) RETURNS boolean
+            RETURN a[a_i] == b[b_j]
+        END FUNCTION
+
+        FUNCTION max_func(x parameter TO integer, y parameter TO integer) RETURNS integer
+            IF x > y THEN
+                RETURN x
+            ELSE
+                RETURN y
+            END IF
+        END FUNCTION
+
+        FUNCTION add_one(x parameter TO integer) RETURNS integer
+            RETURN x + 1
+        END FUNCTION
+
+        SET outer_index TO 1
+        WHILE outer_index <= len_init
+            SET inner_index TO 1
+            WHILE inner_index <= len_target
+                IF char_equals(initial, outer_index - 1, target, inner_index - 1) THEN
+                    SET dp_matrix[outer_index][inner_index] TO add_one(dp_matrix[outer_index - 1][inner_index - 1])
+                    SET maximal_lcs TO max_func(maximal_lcs, dp_matrix[outer_index][inner_index])
+                END IF
+                SET inner_index TO inner_index + 1
+            END WHILE
+            SET outer_index TO outer_index + 1
+        END WHILE
+
+        FUNCTION compute_result(a parameter TO integer, b parameter TO integer, c parameter TO integer) RETURNS integer
+            RETURN a + b - (2 * c)
+        END FUNCTION
+
+        RETURN compute_result(len_init, len_target, maximal_lcs)
+    END FUNCTION
+END CLASS

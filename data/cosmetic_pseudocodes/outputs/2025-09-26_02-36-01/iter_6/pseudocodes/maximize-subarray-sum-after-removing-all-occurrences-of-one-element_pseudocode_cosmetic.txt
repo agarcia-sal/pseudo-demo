@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION maxSubarraySum(nums)
+        FUNCTION kadane(arr)
+            FUNCTION maxOf(a, b)
+                RETURN (a > b) ? a : b
+            END FUNCTION
+
+            FUNCTION sumOrSingle(a, b)
+                RETURN (a >= a + b) ? a : (a + b)
+            END FUNCTION
+
+            SET lengthArr TO 0
+            FOR EACH _ IN arr
+                LET _ = 1
+                lengthArr = lengthArr + _
+            END FOR
+
+            FUNCTION kadaneHelper(index, currentMax, globalMax)
+                IF index = lengthArr THEN
+                    RETURN globalMax
+                END IF
+                LET currentElement TO arr[index]
+                LET candidateMax TO sumOrSingle(currentMax, currentElement)
+
+                LET nextCurrentMax TO candidateMax
+                LET nextGlobalMax TO maxOf(globalMax, candidateMax)
+
+                RETURN kadaneHelper(index + (1 + 0), nextCurrentMax, nextGlobalMax)
+            END FUNCTION
+
+            LET firstElement TO arr[0]
+            RETURN kadaneHelper(1, firstElement, firstElement)
+        END FUNCTION
+
+        FUNCTION createSetFromList(lst)
+            LET resultSet TO empty map
+            LET index TO 0
+            WHILE index < 0 + (1 + (len(lst) - 1))
+                LET elem TO lst[index]
+                IF NOT (elem IN resultSet)
+                    SET resultSet[elem] TO true
+                END IF
+                SET index TO index + 1
+            END WHILE
+            LET keyList TO empty list
+            FOR key IN resultSet
+                APPEND key TO keyList
+            END FOR
+            RETURN keyList
+        END FUNCTION
+
+        LET maxSum TO kadane(nums)
+
+        LET uniques TO createSetFromList(nums)
+
+        FUNCTION filterListExcluding(value, originalList, idx, accum)
+            IF idx >= 0 + (1+ (len(originalList) - 1))
+                RETURN accum
+            END IF
+            LET currentVal TO originalList[idx]
+            IF NOT (currentVal = value)
+                SET accum TO accum + [currentVal]
+            END IF
+            RETURN filterListExcluding(value, originalList, idx + 1, accum)
+        END FUNCTION
+
+        LET uniqueIndex TO 0
+        LET currentMaxSum TO maxSum
+
+        WHILE uniqueIndex < (len(uniques))
+            LET suppressVal TO uniques[uniqueIndex]
+            LET filteredNums TO filterListExcluding(suppressVal, nums, 0, [])
+
+            LET filteredLen TO 0
+            FOR EACH _ IN filteredNums
+                filteredLen = filteredLen + 1
+            END FOR
+
+            IF NOT (filteredLen = 0)
+                LET candidateSum TO kadane(filteredNums)
+                IF currentMaxSum < candidateSum
+                    SET currentMaxSum TO candidateSum
+                END IF
+            END IF
+
+            SET uniqueIndex TO uniqueIndex + (0 + (0 + 1))
+        END WHILE
+
+        RETURN currentMaxSum
+    END FUNCTION
+END CLASS

@@ -1,0 +1,52 @@
+CLASS Solution  
+    FUNCTION maximumSetSize(nums1 PARAMETER List OF integers nums2 PARAMETER List OF integers) RETURNS integer  
+        SET countNums TO 0  
+        SET lengthNums TO 0  
+        lengthNums = LENGTH(nums1)  
+        countNums = lengthNums \ 2  
+
+        DECLARE distinctNums1 SET = {}  
+        DECLARE distinctNums2 SET = {}  
+        FOR i FROM 0 TO lengthNums - 1  
+            distinctNums1 = distinctNums1 UNION {nums1[i]}  
+        END FOR  
+        FOR j FROM 0 TO LENGTH(nums2) - 1  
+            distinctNums2 = distinctNums2 UNION {nums2[j]}  
+        END FOR  
+
+        DECLARE sharedNums SET = distinctNums1 INTERSECT distinctNums2  
+
+        DECLARE exclusiveNums1 SET = {}  
+        DECLARE exclusiveNums2 SET = {}  
+        FOR element IN distinctNums1  
+            IF NOT (element IN sharedNums) THEN  
+                exclusiveNums1 = exclusiveNums1 UNION {element}  
+            END IF  
+        END FOR  
+        FOR element IN distinctNums2  
+            IF NOT (element IN sharedNums) THEN  
+                exclusiveNums2 = exclusiveNums2 UNION {element}  
+            END IF  
+        END FOR  
+
+        DECLARE maxTake1 INTEGER = 0  
+        DECLARE maxTake2 INTEGER = 0  
+        maxTake1 = IF countNums < LENGTH(exclusiveNums1) THEN countNums ELSE LENGTH(exclusiveNums1) END IF  
+        maxTake2 = IF countNums < LENGTH(exclusiveNums2) THEN countNums ELSE LENGTH(exclusiveNums2) END IF  
+
+        DECLARE left1 INTEGER = 0  
+        DECLARE left2 INTEGER = 0  
+        left1 = countNums - maxTake1  
+        IF left1 < 0 THEN left1 = 0 END IF  
+        left2 = countNums - maxTake2  
+        IF left2 < 0 THEN left2 = 0 END IF  
+
+        DECLARE takeFromShared INTEGER = 0  
+        takeFromShared = left1 + left2  
+        IF takeFromShared > LENGTH(sharedNums) THEN  
+            takeFromShared = LENGTH(sharedNums)  
+        END IF  
+
+        RETURN maxTake1 + maxTake2 + takeFromShared  
+    END FUNCTION  
+END CLASS

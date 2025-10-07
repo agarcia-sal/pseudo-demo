@@ -1,0 +1,41 @@
+CLASS Solution
+    FUNCTION getPermutationIndex(perm)
+        LET lengthVar = LENGTH(perm)
+        LET modulusVal = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+
+        DECLARE factorialArray AS ARRAY OF LENGTH lengthVar FILLING WITH 1
+        LET counter = 3
+        WHILE counter <= lengthVar DO
+            factorialArray[counter] = factorialArray[counter - 1] * counter
+            counter = counter + 1
+        END WHILE
+
+        DECLARE availableNums AS ARRAY OF LENGTH lengthVar
+        LET numIndex = 1
+        REPEAT
+            IF numIndex > lengthVar THEN BREAK
+            availableNums[numIndex] = numIndex
+            numIndex = numIndex + 1
+        UNTIL FALSE
+
+        LET resultIndex = 0
+        DEFINE helperIter(idx) AS
+            IF idx >= lengthVar THEN RETURN
+            LET position = 0
+            WHILE position < LENGTH(availableNums) AND availableNums[position] <> perm[idx] DO
+                position = position + 1
+            END WHILE
+
+            LET multiplier = factorialArray[lengthVar - idx - 1]
+            resultIndex = resultIndex + (position * multiplier)
+
+            REMOVE availableNums[position]
+
+            helperIter(idx + 1)
+        END DEFINE
+
+        helperIter(0)
+
+        RETURN resultIndex MOD modulusVal
+    END FUNCTION
+END CLASS

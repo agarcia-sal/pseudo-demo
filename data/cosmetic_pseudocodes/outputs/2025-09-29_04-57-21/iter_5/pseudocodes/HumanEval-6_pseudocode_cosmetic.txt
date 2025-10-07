@@ -1,0 +1,47 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        SET nesting_counter := 0
+        SET peak_nesting := 0
+
+        SET index := 1
+        WHILE index <= LENGTH(group_string)
+            SET symbol := SUBSTRING(group_string, index, index)
+            IF NOT (symbol <> '(')
+                ADD 1 TO nesting_counter
+                IF peak_nesting < nesting_counter THEN
+                    SET peak_nesting := nesting_counter
+                END IF
+            ELSE
+                SUBTRACT 1 FROM nesting_counter
+            END IF
+            ADD 1 TO index
+        END WHILE
+
+        RETURN peak_nesting
+    END FUNCTION
+
+    SET segments := []
+    SET start_pos := 1
+    SET end_pos := 1
+    WHILE end_pos <= LENGTH(parentheses_string) + 1
+        IF end_pos > LENGTH(parentheses_string) OR SUBSTRING(parentheses_string, end_pos, end_pos) = ' ' THEN
+            SET part := SUBSTRING(parentheses_string, start_pos, end_pos - 1)
+            IF part <> '' THEN
+                APPEND part TO segments
+            END IF
+            SET start_pos := end_pos + 1
+        END IF
+        ADD 1 TO end_pos
+    END WHILE
+
+    SET results := []
+    SET iterator := 1
+    WHILE iterator <= LENGTH(segments)
+        APPEND parse_paren_group(segments[iterator]) TO results
+        ADD 1 TO iterator
+    END WHILE
+
+    RETURN results
+END FUNCTION
+```

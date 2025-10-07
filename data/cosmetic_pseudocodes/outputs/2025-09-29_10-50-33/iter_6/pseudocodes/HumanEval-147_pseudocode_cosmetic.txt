@@ -1,0 +1,29 @@
+FUNCTION get_max_triples(parameter_count)
+    DECLARE series_tracker AS NEW SEQUENCE
+    PROCEDURE build_series(current_number)
+        IF current_number GREATER THAN parameter_count THEN RETURN
+        ADD ((current_number × current_number) - current_number + 1) TO series_tracker
+        INVOKE build_series WITH current_number + 1
+    END PROCEDURE
+    INVOKE build_series WITH 1
+
+    DECLARE triple_collection AS NEW SEQUENCE
+    PROCEDURE enumerate_triples(first_index, second_index, third_index)
+        IF first_index GREATER OR EQUAL TO parameter_count - 2 THEN RETURN
+        IF third_index GREATER OR EQUAL TO parameter_count THEN
+            IF second_index GREATER OR EQUAL TO parameter_count - 1 THEN
+                INVOKE enumerate_triples WITH first_index + 1, first_index + 2, first_index + 3
+            ELSE
+                INVOKE enumerate_triples WITH first_index, second_index + 1, second_index + 2
+            END IF
+            RETURN
+        END IF
+        IF ((series_tracker[first_index] + series_tracker[second_index] + series_tracker[third_index]) MOD 3) EQUALS 0 THEN
+            APPEND (series_tracker[first_index], series_tracker[second_index], series_tracker[third_index]) TO triple_collection
+        END IF
+        INVOKE enumerate_triples WITH first_index, second_index, third_index + 1
+    END PROCEDURE
+    INVOKE enumerate_triples WITH 0, 1, 2
+
+    RETURN SIZE OF triple_collection
+END FUNCTION

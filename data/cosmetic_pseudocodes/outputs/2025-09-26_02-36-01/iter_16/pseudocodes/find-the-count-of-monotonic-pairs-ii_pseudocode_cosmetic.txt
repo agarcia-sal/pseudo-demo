@@ -1,0 +1,83 @@
+CLASS Solution
+	 FUNCTION countOfPairs(nums)
+	 	  SET const_mod = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+	 	  SET size_val = LENGTH OF nums
+	 	  SET peak = nums[0]
+	 	  SET index_check = 1
+	 	  
+	 	  FOR idx FROM 1 TO size_val - 1
+	 	  	  IF nums[idx] GREATER THAN peak THEN
+	 	  	  	  SET peak = nums[idx]
+	 	  	  END IF
+	 	  END FOR
+	 	  
+	 	  DECLARE states AS array OF dimensions [size_val + 1][peak + 1][peak + 1] FILLED WITH zero
+	 	  
+	 	  SET pos0 = nums[0]
+	 	  SET counter = 0
+	 	  
+	 	  WHILE counter LESS OR EQUAL TO pos0
+	 	  	  ASSIGN states[1][counter][pos0 - counter] = 1
+	 	  	  SET counter = counter + 1
+	 	  END WHILE
+	 	  
+	 	  SET outer_idx = 2
+	 	  
+	 	  WHILE outer_idx LESS OR EQUAL TO size_val
+	 	  	  SET curr_val = nums[outer_idx - 1]
+	 	  	  SET mid_j = 0
+	 	  	  
+	 	  	  WHILE mid_j LESS OR EQUAL TO curr_val
+	 	  	  	  SET mid_k = 0
+	 	  	  	  
+	 	  	  	  WHILE mid_k LESS OR EQUAL TO curr_val
+	 	  	  	  	  IF (mid_j + mid_k) EQUALS curr_val THEN
+	 	  	  	  	  	  SET left_j = 0
+	 	  	  	  	  	  
+	 	  	  	  	  	  WHILE left_j LESS OR EQUAL TO mid_j
+	 	  	  	  	  	  	  SET left_k = mid_k
+	 	  	  	  	  	  	  
+	 	  	  	  	  	  	  WHILE left_k LESS OR EQUAL TO peak
+	 	  	  	  	  	  	  	  SET current_state = states[outer_idx][mid_j][mid_k]
+	 	  	  	  	  	  	  	  SET previous_state = states[outer_idx - 1][left_j][left_k]
+	 	  	  	  	  	  	  	  
+	 	  	  	  	  	  	  	  SET updated_value = current_state + previous_state
+	 	  	  	  	  	  	  	  SET updated_value = updated_value - (const_mod * (updated_value DIV const_mod))
+	 	  	  	  	  	  	  	  
+	 	  	  	  	  	  	  	  ASSIGN states[outer_idx][mid_j][mid_k] = updated_value
+	 	  	  	  	  	  	  	  
+	 	  	  	  	  	  	  	  SET left_k = left_k + 1
+	 	  	  	  	  	  	  END WHILE
+	 	  	  	  	  	  	  
+	 	  	  	  	  	  	  SET left_j = left_j + 1
+	 	  	  	  	  	  END WHILE
+	 	  	  	  	  END IF
+	 	  	  	  	  
+	 	  	  	  	  SET mid_k = mid_k + 1
+	 	  	  	  END WHILE
+	 	  	  	  
+	 	  	  	  SET mid_j = mid_j + 1
+	 	  	  END WHILE
+	 	  	  
+	 	  	  SET outer_idx = outer_idx + 1
+	 	  END WHILE
+	 	  
+	 	  SET acc_result = 0
+	 	  SET ind_j = 0
+	 	  
+	 	  WHILE ind_j LESS OR EQUAL TO peak
+	 	  	  SET ind_k = 0
+	 	  	  
+	 	  	  WHILE ind_k LESS OR EQUAL TO peak
+	 	  	  	  SET acc_result = acc_result + states[size_val][ind_j][ind_k]
+	 	  	  	  SET acc_result = acc_result - (const_mod * (acc_result DIV const_mod))
+	 	  	  	  
+	 	  	  	  SET ind_k = ind_k + 1
+	 	  	  END WHILE
+	 	  	  
+	 	  	  SET ind_j = ind_j + 1
+	 	  END WHILE
+	 	  
+	 	  RETURN acc_result
+	 END FUNCTION
+END CLASS

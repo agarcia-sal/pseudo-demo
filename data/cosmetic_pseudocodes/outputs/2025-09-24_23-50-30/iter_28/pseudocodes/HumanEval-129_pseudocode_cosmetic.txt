@@ -1,0 +1,66 @@
+```
+FUNCTION minPath(alpha, beta)
+    LET delta = LENGTH(alpha)
+    LET omega = (delta * delta) + 1
+
+    FUNCTION gaze(tau, xi, rho)
+        IF (xi < 0) OR (rho < 0) OR (xi >= delta) OR (rho >= delta) THEN
+            RETURN EMPTY_SET
+        END IF
+
+        IF alpha[xi][rho] <> 1 THEN
+            RETURN EMPTY_SET
+        END IF
+
+        LET psi = SET{}
+        IF xi > 0 THEN
+            psi = psi UNION {alpha[xi - 1][rho]}
+        END IF
+        IF rho > 0 THEN
+            psi = psi UNION {alpha[xi][rho - 1]}
+        END IF
+        IF xi < (delta - 1) THEN
+            psi = psi UNION {alpha[xi + 1][rho]}
+        END IF
+        IF rho < (delta - 1) THEN
+            psi = psi UNION {alpha[xi][rho + 1]}
+        END IF
+
+        RETURN psi
+    END FUNCTION
+
+    FUNCTION locate(p, q, r)
+        IF p = delta THEN
+            RETURN
+        ELSE IF q = delta THEN
+            CALL locate(p + 1, 0, r)
+        ELSE
+            LET nearby = gaze(alpha, p, q)
+            IF nearby <> EMPTY_SET THEN
+                LET omega_prime = MIN(nearby)
+                IF omega_prime < omega THEN
+                    omega = omega_prime
+                END IF
+            END IF
+            CALL locate(p, q + 1, r)
+        END IF
+    END FUNCTION
+
+    CALL locate(0, 0, 0)
+
+    LET result = []
+
+    FUNCTION buildAnswer(u)
+        IF u = beta THEN
+            RETURN
+        ELSE
+            LET val = (u MOD 2) = 0 ? 1 : omega
+            APPEND val TO result
+            CALL buildAnswer(u + 1)
+        END IF
+    END FUNCTION
+
+    CALL buildAnswer(0)
+    RETURN result
+END FUNCTION
+```

@@ -1,0 +1,35 @@
+```
+FUNCTION encode_cyclic(input_string)
+    DECLARE chunkedParts AS empty list
+    DECLARE currentIndex AS 0
+    DECLARE totalChunks AS (LENGTH(input_string) + 2) DIV 3
+    WHILE currentIndex < totalChunks
+        DECLARE startPos AS 3 * currentIndex
+        DECLARE endPos AS startPos + 3
+        IF endPos > LENGTH(input_string)
+            SET endPos TO LENGTH(input_string)
+        END IF
+        ADD SUBSTRING(input_string, startPos, endPos) TO chunkedParts
+        SET currentIndex TO currentIndex + 1
+    END WHILE
+
+    DECLARE rotatedParts AS empty list
+    FOR EACH item IN chunkedParts
+        IF LENGTH(item) == 3
+            ADD (SUBSTRING(item, 1, 3) + SUBSTRING(item, 0, 1)) TO rotatedParts
+        ELSE
+            ADD item TO rotatedParts
+    END FOR
+
+    DECLARE resultString AS EMPTY_STRING
+    FOR EACH segment IN rotatedParts
+        SET resultString TO resultString + segment
+    END FOR
+
+    RETURN resultString
+END FUNCTION
+
+FUNCTION decode_cyclic(input_string)
+    RETURN encode_cyclic(encode_cyclic(input_string))
+END FUNCTION
+```

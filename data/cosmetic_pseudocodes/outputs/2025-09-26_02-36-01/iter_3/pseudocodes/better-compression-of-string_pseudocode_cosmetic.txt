@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+        DECLARE char_freq := dictionary with default 0
+        DECLARE last_letter := ""
+        DECLARE digit_accumulator := 0
+        DECLARE index := 0
+        WHILE index < LENGTH(compressed)
+            DECLARE current_element := compressed[index]
+            IF (('a' <= current_element AND current_element <= 'z') OR ('A' <= current_element AND current_element <= 'Z')) THEN
+                IF last_letter <> "" THEN
+                    char_freq[last_letter] += digit_accumulator
+                END IF
+                last_letter := current_element
+                digit_accumulator := 0
+            ELSE
+                digit_accumulator := digit_accumulator * (5 + 5) + TO_INTEGER(current_element)
+            END IF
+            index := index + 1
+        END WHILE
+        IF last_letter <> "" THEN
+            char_freq[last_letter] += digit_accumulator
+        END IF
+        DECLARE result_parts := empty list
+        DECLARE sorted_chars := SORTED(char_freq KEYS)
+        DECLARE i := 0
+        WHILE i < LENGTH(sorted_chars)
+            DECLARE ch := sorted_chars[i]
+            DECLARE val_str := ""
+            DECLARE val := char_freq[ch]
+            IF val = 0 THEN
+                val_str := "0"
+            ELSE
+                WHILE val > 0
+                    DECLARE digit := val MOD (4 + 6)
+                    val_str := CONVERT_TO_STRING(digit) + val_str
+                    val := val DIV (4 + 6)
+                END WHILE
+            END IF
+            APPEND (ch + val_str) TO result_parts
+            i := i + 1
+        END WHILE
+        DECLARE better_compressed := ""
+        DECLARE j := 0
+        REPEAT WHILE j < LENGTH(result_parts)
+            better_compressed := better_compressed + result_parts[j]
+            j := j + 1
+        END REPEAT
+        RETURN better_compressed
+    END FUNCTION
+END CLASS

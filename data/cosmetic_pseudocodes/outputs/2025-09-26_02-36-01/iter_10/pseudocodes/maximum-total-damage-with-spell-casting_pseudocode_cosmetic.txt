@@ -1,0 +1,79 @@
+CLASS Solution
+  FUNCTION maximumTotalDamage(power)
+    FUNCTION getCount(arr)
+      PROC accumulateMap(pos, mp)
+        IF pos >= LENGTH(arr) THEN RETURN mp END IF
+        LET v = arr[pos]
+        IF v IN mp THEN
+          LET mp2 = mp
+          LET mp3 = UPDATE_MAP(mp2, v, mp2[v] + 1)
+        ELSE
+          LET mp3 = INSERT_MAP(mp, v, 1)
+        END IF
+        RETURN accumulateMap(pos + 1, mp3)
+      END PROC
+      RETURN accumulateMap(0, EMPTY_MAP)
+    END FUNCTION
+
+    FUNCTION sortKeys(mp)
+      LET ks = KEYS(mp)
+      PROC quicksort(arr)
+        IF LENGTH(arr) <= 1 THEN RETURN arr END IF
+        LET pivot = arr[0]
+        LET smaller = FILTER(arr, LAMBDA(x) -> x < pivot)
+        LET bigger = FILTER(arr, LAMBDA(x) -> x > pivot)
+        LET equals = FILTER(arr, LAMBDA(x) -> x = pivot)
+        LET sortedSmaller = quicksort(smaller)
+        LET sortedBigger = quicksort(bigger)
+        RETURN CONCAT(sortedSmaller, equals, sortedBigger)
+      END PROC
+      RETURN quicksort(ks)
+    END FUNCTION
+
+    FUNCTION maxValue(a, b)
+      IF a >= b THEN RETURN a ELSE RETURN b END IF
+    END FUNCTION
+
+    LET freqMap = getCount(power)
+    LET sortedArr = sortKeys(freqMap)
+    LET memo = EMPTY_MAP
+
+    PROC processIndex(k)
+      IF k < 0 THEN RETURN 0 END IF
+      LET curP = sortedArr[k]
+
+      LET exclVal =
+        IF k > 0 AND sortedArr[k - 1] IN memo THEN memo[sortedArr[k - 1]] ELSE 0 END
+
+      LET inclVal = curP * freqMap[curP]
+
+      PROC findJ(j)
+        IF j < 0 THEN RETURN j END IF
+        IF sortedArr[j] >= curP - 2 THEN RETURN findJ(j - 1) ELSE RETURN j END IF
+      END PROC
+      LET idxJ = findJ(k - 1)
+
+      IF idxJ >= 0 AND sortedArr[idxJ] IN memo THEN
+        inclVal = inclVal + memo[sortedArr[idxJ]]
+      END IF
+
+      LET updatedMemo = UPDATE_MAP(memo, curP, maxValue(inclVal, exclVal))
+      RETURN IF k = LENGTH(sortedArr) - 1 THEN
+               ( memo <- updatedMemo;
+                 memo[ curP ] )
+             ELSE
+               ( memo <- updatedMemo;
+                 processIndex(k + 1) )
+             END IF
+    END PROC
+
+    LET lastIndex = LENGTH(sortedArr) - 1
+    LET _ = processIndex(0)
+
+    LET res = 0
+    FOR key IN memo DO
+      IF memo[key] > res THEN res = memo[key] END IF
+    END FOR
+    RETURN res
+  END FUNCTION
+END CLASS

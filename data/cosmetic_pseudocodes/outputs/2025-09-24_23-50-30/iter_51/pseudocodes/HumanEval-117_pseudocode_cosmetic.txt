@@ -1,0 +1,24 @@
+```
+FUNCTION select_words(string_s, natural_number_n)
+    SET accumulator TO []
+    SET words_collection TO SPLIT string_s BY " "
+    FUNCTION count_consonants_recursive(array_chars, curr_pos, end_pos, tally)
+        IF curr_pos > end_pos THEN RETURN tally
+        SET letter_lower TO LOWERCASE array_chars[curr_pos]
+        SET tally_updated TO (tally + 1) * (letter_lower NOT IN ["a","e","i","o","u"]) + (tally * (letter_lower IN ["a","e","i","o","u"]))
+        RETURN count_consonants_recursive(array_chars, curr_pos + 1, end_pos, tally_updated)
+    END FUNCTION
+    FUNCTION process_words_recursive(idx, max_idx)
+        IF idx > max_idx THEN RETURN
+        SET current_word TO words_collection[idx]
+        SET consonant_num TO count_consonants_recursive(CHARACTERS_OF current_word, 0, LENGTH_OF current_word - 1, 0)
+        SELECT consonant_num
+            CASE natural_number_n: APPEND current_word TO accumulator
+            DEFAULT: NO_OP
+        END SELECT
+        process_words_recursive(idx + 1, max_idx)
+    END FUNCTION
+    process_words_recursive(0, LENGTH_OF words_collection - 1)
+    RETURN accumulator
+END FUNCTION
+```

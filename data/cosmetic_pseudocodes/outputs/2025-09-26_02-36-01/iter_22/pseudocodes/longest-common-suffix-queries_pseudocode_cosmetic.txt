@@ -1,0 +1,54 @@
+CLASS Solution  
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER  
+       
+        SET sigma TO new dictionary mapping STRING to INTEGER  
+        
+        SET h TO 0  
+        WHILE h < LENGTH(wordsContainer) DO  
+            SET current_word TO wordsContainer[h]  
+            SET p TO 0  
+            WHILE p <= LENGTH(current_word) - 1 DO  
+                SET current_suffix TO SUBSTRING(current_word, p, LENGTH(current_word) - p)  
+                IF NOT EXISTS(sigma[current_suffix]) THEN  
+                    sigma[current_suffix] <- h  
+                ELSE  
+                    IF (LENGTH(current_word) < LENGTH(wordsContainer[sigma[current_suffix]])) OR ((LENGTH(current_word) = LENGTH(wordsContainer[sigma[current_suffix]])) AND (h < sigma[current_suffix])) THEN  
+                        sigma[current_suffix] <- h  
+                    END IF  
+                END IF  
+                SET p TO p + 1  
+            END WHILE  
+            SET h TO h + 1  
+        END WHILE  
+        
+        FUNCTION get_best_match(query query TO STRING) RETURNS INTEGER  
+            SET u TO 0  
+            REPEAT  
+                IF u > LENGTH(query) - 1 THEN BREAK END IF  
+                SET trial_suffix TO SUBSTRING(query, u, LENGTH(query) - u)  
+                IF EXISTS(sigma[trial_suffix]) THEN  
+                    RETURN sigma[trial_suffix]  
+                END IF  
+                SET u TO u + 1  
+            UNTIL FALSE  
+            
+            SET min_idx_candidate TO 0  
+            SET v TO 1  
+            WHILE v < LENGTH(wordsContainer) DO  
+                IF (LENGTH(wordsContainer[v]) < LENGTH(wordsContainer[min_idx_candidate])) OR ((LENGTH(wordsContainer[v]) = LENGTH(wordsContainer[min_idx_candidate])) AND (v < min_idx_candidate)) THEN  
+                    SET min_idx_candidate TO v  
+                END IF  
+                SET v TO v + 1  
+            END WHILE  
+            RETURN min_idx_candidate  
+        END FUNCTION  
+        
+        SET output_array TO []  
+        SET w_idx TO 0  
+        WHILE w_idx < LENGTH(wordsQuery) DO  
+            APPEND get_best_match(wordsQuery[w_idx]) TO output_array  
+            SET w_idx TO w_idx + 1  
+        END WHILE  
+        RETURN output_array  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,79 @@
+CLASS Solution  
+    FUNCTION smallestNumber(num, t)  
+        SET primeCount comma isDivisible TO self._getPrimeCount(t)  
+        IF NOT isDivisible  
+            RETURN a string representing negative one  
+        END IF  
+
+        SET factorCount TO self._getFactorCount(primeCount)  
+        IF the sum of the values in factorCount IS GREATER THAN the length of num  
+            RETURN the concatenation of each factor repeated by its frequency in factorCount  
+        END IF  
+
+        SET primeCountPrefix TO the sum of FACTOR_COUNTS of the integer value of each character in num starting from an empty Counter  
+        SET firstZeroIndex TO the first position index in num where the character equals character zero OR the length of num if no such position exists  
+        IF firstZeroIndex EQUALS the length of num AND primeCount IS LESS THAN OR EQUAL TO primeCountPrefix  
+            RETURN num  
+        END IF  
+
+        FOR each index i AND character c IN num enumerated in reverse order  
+            SET d TO the integer value of c  
+            DECREMENT primeCountPrefix BY the FACTOR_COUNTS of d  
+            SET spaceAfterThisDigit TO the length of num MINUS one MINUS i  
+            IF i IS LESS THAN OR EQUAL TO firstZeroIndex  
+                FOR each biggerDigit FROM d PLUS one TO nine inclusive  
+                    SET factorsAfterReplacement TO self._getFactorCount(primeCount MINUS primeCountPrefix MINUS FACTOR_COUNTS of biggerDigit)  
+                    IF the sum of values in factorsAfterReplacement IS LESS THAN OR EQUAL TO spaceAfterThisDigit  
+                        SET fillOnes TO spaceAfterThisDigit MINUS the sum of values in factorsAfterReplacement  
+                        RETURN the concatenation of the substring of num from the start TO position i MINUS one  
+                            PLUS the string representation of biggerDigit  
+                            PLUS the string consisting of character one repeated fillOnes times  
+                            PLUS the concatenation of each factor repeated by its frequency in factorsAfterReplacement  
+                    END IF  
+                END FOR  
+            END IF  
+        END FOR  
+
+        SET factorCount TO self._getFactorCount(primeCount)  
+        RETURN the string consisting of character one repeated by the length of num PLUS one MINUS the sum of values in factorCount  
+            PLUS the concatenation of each factor repeated by its frequency in factorCount  
+    END FUNCTION  
+
+    FUNCTION _getPrimeCount(t)  
+        SET count TO an empty Counter  
+        FOR each prime IN the list containing two three five seven  
+            WHILE t MODULO prime EQUALS zero  
+                SET t TO t DIVIDED BY prime  
+                INCREMENT the value of count at prime BY one  
+            END WHILE  
+        END FOR  
+        RETURN count AND the boolean result of t EQUALS one  
+    END FUNCTION  
+
+    FUNCTION _getFactorCount(count)  
+        SET count8 AND remaining2 TO the quotient AND remainder of dividing the value of count at two BY three respectively  
+        SET count9 AND count3 TO the quotient AND remainder of dividing the value of count at three BY two respectively  
+        SET count4 AND count2 TO the quotient AND remainder of dividing remaining2 BY two respectively  
+        IF count2 EQUALS one AND count3 EQUALS one  
+            SET count2 TO zero  
+            SET count3 TO zero  
+            SET count6 TO one  
+        ELSE  
+            SET count6 TO zero  
+        END IF  
+        IF count3 EQUALS one AND count4 EQUALS one  
+            SET count2 TO one  
+            SET count6 TO one  
+            SET count3 TO zero  
+            SET count4 TO zero  
+        END IF  
+        RETURN a Counter mapping the string '2' TO count2  
+            string '3' TO count3  
+            string '4' TO count4  
+            string '5' TO the value of count at five  
+            string '6' TO count6  
+            string '7' TO the value of count at seven  
+            string '8' TO count8  
+            string '9' TO count9  
+    END FUNCTION  
+END CLASS

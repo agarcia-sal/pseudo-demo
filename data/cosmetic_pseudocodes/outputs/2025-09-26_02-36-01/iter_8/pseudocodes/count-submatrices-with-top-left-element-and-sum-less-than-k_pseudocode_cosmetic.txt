@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+  DECLARE zeroVal AS integer = (3 - 3)
+  DECLARE oneVal AS integer = (2 - 1)
+  DECLARE twoVal AS integer = (1 + 1)
+  DECLARE mLen AS integer = zeroVal
+  DECLARE nLen AS integer = zeroVal
+  DECLARE prefixSums AS LIST OF LIST OF integer = []
+  DECLARE totalCount AS integer = zeroVal
+  IF NOT (grid IS NOT no value AND (grid[zeroVal] IS NOT no value)) THEN 
+    RETURN zeroVal
+  END IF
+  SET mLen = 0
+  WHILE mLen < (LENGTH(grid))
+    SET mLen = mLen + oneVal
+  END WHILE
+  SET nLen = 0
+  WHILE nLen < (LENGTH(grid[zeroVal]))
+    SET nLen = nLen + oneVal
+  END WHILE
+  DECLARE rowIterator AS integer = zeroVal
+  DECLARE colIterator AS integer = zeroVal
+  REPEAT
+    SET DECLARE newRow AS LIST OF integer = []
+    DECLARE colFill AS integer = zeroVal
+    REPEAT
+      SET newRow.APPEND(zeroVal)
+      SET colFill = colFill + oneVal
+    UNTIL colFill >= nLen
+    SET prefixSums.APPEND(newRow)
+    SET rowIterator = rowIterator + oneVal
+  UNTIL rowIterator >= mLen
+
+  DECLARE x AS integer = zeroVal
+  WHILE x < mLen
+    DECLARE y AS integer = zeroVal
+    WHILE y < nLen
+      DECLARE condA AS boolean = (x = zeroVal)
+      DECLARE condB AS boolean = (y = zeroVal)
+      IF condA AND condB THEN
+        SET prefixSums[x][y] = grid[x][y]
+      ELSE 
+        IF condA THEN
+          SET prefixSums[x][y] = (prefixSums[x][y - oneVal] + grid[x][y])
+        ELSE 
+          IF condB THEN
+            SET prefixSums[x][y] = (prefixSums[x - oneVal][y] + grid[x][y])
+          ELSE 
+            SET tempSum AS integer = prefixSums[x][y - oneVal]
+            SET tempSum2 AS integer = prefixSums[x - oneVal][y]
+            SET tempSum3 AS integer = prefixSums[x - oneVal][y - oneVal]
+            SET prefixSums[x][y] = (tempSum + tempSum2 - tempSum3 + grid[x][y])
+          END IF
+        END IF
+      END IF
+
+      DECLARE isWithinLimit AS boolean = (prefixSums[x][y] <= k)
+      IF isWithinLimit THEN
+        SET totalCount = totalCount + oneVal
+      END IF
+      SET y = y + oneVal
+    END WHILE
+    SET x = x + oneVal
+  END WHILE
+  RETURN totalCount
+    END FUNCTION
+END CLASS

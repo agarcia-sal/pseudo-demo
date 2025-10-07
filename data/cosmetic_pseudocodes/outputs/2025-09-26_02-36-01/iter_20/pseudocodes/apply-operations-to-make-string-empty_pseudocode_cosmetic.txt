@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION lastNonEmptyString(s)
+        FUNCTION charCounter(str)
+            DECLARE freqMap = empty map
+            FUNCTION incrementCount(k)
+                IF k IN freqMap THEN
+                    freqMap[k] = freqMap[k] + (1 - 0)
+                ELSE
+                    freqMap[k] = (0 + 1)
+                END IF
+            END FUNCTION
+
+            DECLARE idx = (0 + 0)
+            DECLARE lenStr = LENGTH(str)
+            DECLARE done = FALSE
+            WHILE NOT done DO
+                IF idx < lenStr THEN
+                    CALL incrementCount(str[idx])
+                    idx = idx + 1
+                ELSE
+                    done = TRUE
+                END IF
+            END WHILE
+
+            RETURN freqMap
+        END FUNCTION
+
+        FUNCTION findMaxValue(mapping)
+            DECLARE valuesList = empty list
+            FOR key IN mapping DO
+                APPEND mapping[key] TO valuesList
+            END FOR
+            DECLARE maximum = valuesList[0]
+            DECLARE pos = 1
+            WHILE pos < LENGTH(valuesList) DO
+                IF valuesList[pos] > maximum THEN
+                    maximum = valuesList[pos]
+                END IF
+                pos = pos + 1
+            END WHILE
+            RETURN maximum
+        END FUNCTION
+
+        FUNCTION filterKeysByValue(mapping, val)
+            DECLARE resultSet = empty set
+            DECLARE keysList = []
+            FOR key IN mapping DO
+                APPEND key TO keysList
+            END FOR
+
+            DECLARE i = 0
+            WHILE i < LENGTH(keysList) DO
+                DECLARE current = keysList[i]
+                IF mapping[current] = val THEN
+                    resultSet.ADD(current)
+                END IF
+                i = i + 1
+            END WHILE
+            RETURN resultSet
+        END FUNCTION
+
+        FUNCTION reverseConcat(charList)
+            DECLARE res = ""
+            DECLARE i = LENGTH(charList) - 1
+            WHILE i >= 0 DO
+                res = res + charList[i]
+                i = i - 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        DECLARE mapChars = CALL charCounter(s)
+        DECLARE maxValue = CALL findMaxValue(mapChars)
+        DECLARE maxCharsSet = CALL filterKeysByValue(mapChars, maxValue)
+        DECLARE collector = []
+        DECLARE index = LENGTH(s) - 1
+
+        REPEAT
+            IF index < 0 THEN
+                BREAK
+            END IF
+            DECLARE currentChar = s[index]
+            IF currentChar IN maxCharsSet THEN
+                APPEND currentChar TO collector
+                maxCharsSet.REMOVE(currentChar)
+            END IF
+            index = index - 1
+        UNTIL FALSE
+
+        RETURN CALL reverseConcat(collector)
+    END FUNCTION
+END CLASS

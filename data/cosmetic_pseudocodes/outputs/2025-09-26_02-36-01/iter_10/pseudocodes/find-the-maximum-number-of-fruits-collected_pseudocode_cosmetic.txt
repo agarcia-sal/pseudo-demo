@@ -1,0 +1,65 @@
+CLASS Solution
+	FUNCTION maxCollectedFruits(fruits)
+		LET p = LENGTH fruits
+		LET m1 = [(1,1), (1,0)]
+		LET m2 = [(1,0), (1,-1), (1,1)]
+		LET m3 = [(-1,1), (0,1), (1,1)]
+		LET cache = DICTIONARY
+
+		FUNCTION compute(a,b,c,d,e,f)
+			IF a < 0 OR a >= p OR b < 0 OR b >= p OR c < 0 OR c >= p OR d < 0 OR d >= p OR e < 0 OR e >= p OR f < 0 OR f >= p THEN
+				RETURN -∞
+			END IF
+
+			IF a = b AND b = c AND c = d AND d = e AND e = f AND f = p - 1 THEN
+				RETURN fruits[p-1][p-1]
+			END IF
+
+			LET key = (a,b,c,d,e,f)
+			IF key IN cache THEN
+				RETURN cache[key]
+			END IF
+
+			LET sumValue = fruits[b][a]
+
+			IF (a = c AND b = d) OR (a = e AND b = f) THEN
+				sumValue = 0
+			END IF
+
+			IF (c = e) AND (d = f) THEN
+				sumValue = sumValue + fruits[d][c]
+			ELSE
+				sumValue = sumValue + fruits[d][c] + fruits[f][e]
+			END IF
+
+			LET best = -∞
+			FUNCTION recur(i1)
+				IF i1 = LENGTH m1 THEN RETURN END IF
+				LET dx1, dy1 = m1[i1]
+				FUNCTION recur2(i2)
+					IF i2 = LENGTH m2 THEN RETURN END IF
+					LET dx2, dy2 = m2[i2]
+					FUNCTION recur3(i3)
+						IF i3 = LENGTH m3 THEN RETURN END IF
+						LET dx3, dy3 = m3[i3]
+
+						LET val = compute(a + dx1, b + dy1, c + dx2, d + dy2, e + dx3, f + dy3)
+						IF val > best THEN best = val END IF
+
+						recur3(i3 + 1)
+					END FUNCTION
+					recur3(0)
+					recur2(i2 + 1)
+				END FUNCTION
+				recur2(0)
+				recur(i1 + 1)
+			END FUNCTION
+			recur(0)
+
+			cache[key] = sumValue + best
+			RETURN sumValue + best
+		END FUNCTION
+
+		RETURN compute(0, 0, 0, p - 1, p - 1, 0)
+	END FUNCTION
+END CLASS

@@ -1,0 +1,113 @@
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+        FUNCTION isAlpha(ch)
+            RETURN (ch >= "A" AND ch <= "Z") OR (ch >= "a" AND ch <= "z")
+        END FUNCTION
+
+        FUNCTION strToInt(s)
+            SET accum TO 0
+            SET idx TO 0
+            LOOP_WHILE idx < LENGTH(s)
+                SET accum TO (accum * (2*5)) + (ORD(s[idx]) - ORD("0"))
+                SET idx TO idx + 1
+            END LOOP_WHILE
+            RETURN accum
+        END FUNCTION
+
+        FUNCTION keySetSorted(dict)
+            SET keysList TO EMPTY LIST
+            FOR key IN dict
+                APPEND key TO keysList
+            END FOR
+            FUNCTION insertionSort(arr)
+                SET n TO LENGTH(arr)
+                SET i TO 1
+                LOOP_WHILE i < n
+                    SET j TO i
+                    LOOP_WHILE j > 0 AND arr[j] < arr[j - 1]
+                        SET temp TO arr[j]
+                        SET arr[j] TO arr[j - 1]
+                        SET arr[j - 1] TO temp
+                        SET j TO j - 1
+                    END LOOP_WHILE
+                    SET i TO i + 1
+                END LOOP_WHILE
+                RETURN arr
+            END FUNCTION
+            RETURN insertionSort(keysList)
+        END FUNCTION
+
+        FUNCTION createDefaultDict()
+            SET storage TO EMPTY LIST
+            RETURN {
+                GET: FUNCTION(k)
+                    FOR pair IN storage
+                        IF pair[0] == k THEN RETURN pair[1] END IF
+                    END FOR
+                    RETURN 0
+                END FUNCTION,
+                SET: FUNCTION(k,v)
+                    SET updated TO FALSE
+                    SET i TO 0
+                    LOOP_WHILE i < LENGTH(storage)
+                        IF storage[i][0] == k THEN
+                            SET storage[i] TO [k,v]
+                            SET updated TO TRUE
+                            EXIT LOOP
+                        END IF
+                        SET i TO i + 1
+                    END LOOP_WHILE
+                    IF NOT updated THEN
+                        APPEND [k,v] TO storage
+                    END IF
+                END FUNCTION,
+                INCR: FUNCTION(k,v)
+                    CALL this.SET(k, this.GET(k) + v)
+                END FUNCTION,
+                ITEMS: FUNCTION()
+                    RETURN storage
+                END FUNCTION
+            }
+        END FUNCTION
+
+        SET dictAlias TO createDefaultDict()
+        SET tempChar TO ""
+        SET tempCount TO 0
+
+        PROCEDURE processCharList(arr, idx)
+            IF idx >= LENGTH(arr) THEN RETURN END PROCEDURE
+            SET curr TO arr[idx]
+            IF isAlpha(curr) THEN
+                IF tempChar != "" THEN dictAlias.INCR(tempChar, tempCount) END IF
+                SET tempChar TO curr
+                SET tempCount TO 0
+            ELSE
+                SET tempCount TO (tempCount * (5 + 5)) + (ORD(curr) - ORD("0"))
+            END IF
+            CALL processCharList(arr, idx + 1)
+        END PROCEDURE
+
+        CALL processCharList(LIST_OF_CHARACTERS(compressed), 0)
+
+        IF tempChar != "" THEN dictAlias.INCR(tempChar, tempCount) END IF
+
+        SET outputSegments TO EMPTY LIST
+        FOR key IN keySetSorted(dictAlias.ITEMS())
+            // key is [char, count] pair
+            SET ch TO key[0]
+            SET val TO key[1]
+            APPEND ch + STRING(val) TO outputSegments
+        END FOR
+
+        FUNCTION concatAll(arr)
+            FUNCTION concatRec(i, n, acc)
+                IF i >= n THEN RETURN acc END IF
+                RETURN concatRec(i + 1, n, acc + arr[i])
+            END FUNCTION
+            RETURN concatRec(0, LENGTH(arr), "")
+        END FUNCTION
+
+        SET result TO concatAll(outputSegments)
+        RETURN result
+    END FUNCTION
+END CLASS

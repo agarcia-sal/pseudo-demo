@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION findPattern(board, pattern)
+        SET totalRows TO 0
+        WHILE totalRows < LENGTH(board)
+            INCREMENT totalRows BY 1
+        END WHILE
+
+        SET totalCols TO 0
+        WHILE totalCols < LENGTH(board[0])
+            totalCols = totalCols + 1
+        END WHILE
+
+        SET patternHeight TO 0
+        WHILE patternHeight < LENGTH(pattern)
+            patternHeight = patternHeight + 1
+        END WHILE
+
+        SET patternWidth TO 0
+        WHILE patternWidth < LENGTH(pattern[0])
+            INCREMENT patternWidth BY 1
+        END WHILE
+
+        FUNCTION matches(rowIndex, colIndex)
+            SET mapCharToDigit TO NEW empty mapping
+            SET mapDigitToChar TO NEW empty mapping
+
+            SET outerIndex TO 0
+            FUNCTION loopOuter(idx)
+                IF idx >= patternHeight THEN
+                    RETURN True
+                ELSE
+                    SET innerIndex TO 0
+                    FUNCTION loopInner(jdx)
+                        IF jdx >= patternWidth THEN
+                            RETURN loopOuter(idx + 1)
+                        ELSE
+                            SET currentPatternChar TO pattern[idx][jdx]
+                            SET currentBoardDigit TO board[rowIndex + idx][colIndex + jdx]
+
+                            IF (currentPatternChar >= '0' AND currentPatternChar <= '9')
+                                SET numericValue TO (currentPatternChar - '0')
+                                IF numericValue != currentBoardDigit
+                                    RETURN False
+                                END IF
+                            ELSE
+                                IF currentPatternChar IN mapCharToDigit
+                                    IF mapCharToDigit[currentPatternChar] != currentBoardDigit
+                                        RETURN False
+                                    END IF
+                                ELSE
+                                    IF currentBoardDigit IN mapDigitToChar
+                                        RETURN False
+                                    END IF
+                                    mapCharToDigit[currentPatternChar] = currentBoardDigit
+                                    mapDigitToChar[currentBoardDigit] = currentPatternChar
+                                END IF
+                            END IF
+                            RETURN loopInner(jdx + 1)
+                        END IF
+                    END FUNCTION
+                    RETURN loopInner(innerIndex)
+                END IF
+            END FUNCTION
+
+            RETURN loopOuter(outerIndex)
+        END FUNCTION
+
+        SET searchRow TO 0
+        FUNCTION searchRows(r)
+            IF r > totalRows - patternHeight
+                RETURN [-1, -1]
+            ELSE
+                SET searchCol TO 0
+                FUNCTION searchCols(c)
+                    IF c > totalCols - patternWidth
+                        RETURN searchRows(r + 1)
+                    ELSE
+                        IF matches(r, c)
+                            RETURN [r, c]
+                        ELSE
+                            RETURN searchCols(c + 1)
+                        END IF
+                    END IF
+                END FUNCTION
+                RETURN searchCols(searchCol)
+            END IF
+        END FUNCTION
+
+        SET result TO searchRows(searchRow)
+        RETURN result
+    END FUNCTION
+END CLASS

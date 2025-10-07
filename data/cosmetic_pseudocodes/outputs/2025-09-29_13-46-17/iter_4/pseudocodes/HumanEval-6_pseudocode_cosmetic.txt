@@ -1,0 +1,59 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(copy_str)
+        SET counter_depth = 0
+        SET peak_depth = 0
+
+        FUNCTION iterate_chars(index)
+            IF index >= LENGTH(copy_str)
+                RETURN peak_depth
+            END IF
+
+            SET symbol = copy_str[index]
+
+            IF symbol != '('
+                SET counter_depth = counter_depth - 1
+            ELSE
+                SET counter_depth = counter_depth + 1
+                IF peak_depth < counter_depth
+                    SET peak_depth = counter_depth
+                END IF
+            END IF
+
+            RETURN iterate_chars(index + 1)
+        END FUNCTION
+
+        RETURN iterate_chars(0)
+    END FUNCTION
+
+    SET fragments = []
+    FUNCTION split_recursive(pos, accumulator, start_index)
+        IF pos >= LENGTH(parentheses_string)
+            IF start_index < pos
+                APPEND SUBSTRING(parentheses_string, start_index, pos - start_index) TO accumulator
+            END IF
+            RETURN accumulator
+        END IF
+
+        IF parentheses_string[pos] = ' '
+            IF start_index < pos
+                APPEND SUBSTRING(parentheses_string, start_index, pos - start_index) TO accumulator
+            END IF
+            RETURN split_recursive(pos + 1, accumulator, pos + 1)
+        ELSE
+            RETURN split_recursive(pos + 1, accumulator, start_index)
+        END IF
+    END FUNCTION
+
+    SET fragments = split_recursive(0, [], 0)
+
+    SET results = []
+    FOR EACH fragment IN fragments
+        IF fragment != ""
+            APPEND parse_paren_group(fragment) TO results
+        END IF
+    END FOR
+
+    RETURN results
+END FUNCTION
+```

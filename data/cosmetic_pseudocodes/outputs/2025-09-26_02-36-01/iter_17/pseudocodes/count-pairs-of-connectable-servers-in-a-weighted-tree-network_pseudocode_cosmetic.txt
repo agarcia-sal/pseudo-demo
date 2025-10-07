@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)
+        SET adjacencyMap TO an empty mapping defaulting to empty lists
+        DEFINE PROCEDURE addEdge(a, b, w)
+            SET lst TO adjacencyMap[a]
+            SET newEntry TO (b, w)
+            SET lst TO lst + [newEntry]
+            SET adjacencyMap[a] TO lst
+        END PROCEDURE
+
+        FOR edgeIndex FROM 1 TO LENGTH(edges)
+            SET e TO edges[edgeIndex]
+            SET x TO e[1]
+            SET y TO e[2]
+            SET z TO e[3]
+            CALL addEdge(x, y, z)
+            CALL addEdge(y, x, z)
+        END FOR
+
+        SET totalNodes TO LENGTH(adjacencyMap)
+        SET outputList TO LIST OF totalNodes zeros
+
+        FUNCTION depthSearchRecursion(current, prev, distAccum, collected)
+            SET condCheck TO (distAccum MOD signalSpeed) = 0
+            IF condCheck = TRUE THEN
+                SET collected TO collected + [current]
+            END IF
+
+            SET sumFound TO 0
+            SET connections TO adjacencyMap[current]
+            SET idxConn TO 1
+            WHILE idxConn <= LENGTH(connections)
+                SET (nbr, wgt) TO connections[idxConn]
+                IF nbr ≠ prev THEN
+                    SET sumFound TO sumFound + depthSearchRecursion(nbr, current, distAccum + wgt, collected)
+                END IF
+                SET idxConn TO idxConn + 1
+            END WHILE
+
+            IF condCheck = TRUE THEN
+                RETURN sumFound + 1
+            ELSE
+                RETURN sumFound
+            END IF
+        END FUNCTION
+
+        FUNCTION countPairsViaNode(center)
+            SET collectedPaths TO []
+            SET neighborsList TO adjacencyMap[center]
+            FOR k FROM 1 TO LENGTH(neighborsList)
+                SET (nbrNode, weightEdge) TO neighborsList[k]
+                SET tempPath TO []
+                CALL depthSearchRecursion(nbrNode, center, weightEdge, tempPath)
+                SET collectedPaths TO collectedPaths + [tempPath]
+            END FOR
+
+            SET pairCount TO 0
+            SET pLen TO LENGTH(collectedPaths)
+            SET m1 TO 1
+            REPEAT UNTIL m1 >= pLen
+                SET m2 TO m1 + 1
+                WHILE m2 <= pLen
+                    SET sizeA TO LENGTH(collectedPaths[m1])
+                    SET sizeB TO LENGTH(collectedPaths[m2])
+                    SET pairCount TO pairCount + (sizeA * sizeB)
+                    SET m2 TO m2 + 1
+                END WHILE
+                SET m1 TO m1 + 1
+            END REPEAT
+
+            RETURN pairCount
+        END FUNCTION
+
+        SET nodeIndex TO 0
+        WHILE nodeIndex < totalNodes
+            SET outputList[nodeIndex+1] TO countPairsViaNode(nodeIndex)
+            SET nodeIndex TO nodeIndex + 1
+        END WHILE
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION maxPathLength(coordinates, k)
+        DECLARE alpha, bravo, charlie, delta, echo, foxtrot, golf, hotel
+        SET alpha TO coordinates[k][0]
+        SET bravo TO coordinates[k][1]
+        SET charlie TO LIST()
+        SET echo TO LIST()
+        SET delta TO 0
+
+        WHILE delta < LENGTH(coordinates)
+            SET golf TO coordinates[delta][0]
+            SET hotel TO coordinates[delta][1]
+            IF NOT (golf >= alpha OR hotel >= bravo)
+                charlie.APPEND((golf, hotel))
+            END IF
+            SET delta TO delta + 1
+        END WHILE
+
+        SET delta TO 0
+        WHILE delta < LENGTH(coordinates)
+            SET golf TO coordinates[delta][0]
+            SET hotel TO coordinates[delta][1]
+            IF golf > alpha AND hotel > bravo
+                echo.APPEND((golf, hotel))
+            END IF
+            SET delta TO delta + 1
+        END WHILE
+
+        RETURN 1 + self._lengthOfLIS(charlie) + self._lengthOfLIS(echo)
+    END FUNCTION
+
+    FUNCTION _lengthOfLIS(coordinates)
+        FUNCTION bisectLeft(array, target)
+            DECLARE left, right, mid
+            SET left TO 0
+            SET right TO LENGTH(array)
+            REPEAT
+                IF left >= right
+                    BREAK
+                END IF
+                SET mid TO left + ((right - left) / 2)
+                IF array[mid] < target
+                    SET left TO mid + 1
+                ELSE
+                    SET right TO mid
+                END IF
+            UNTIL FALSE
+            RETURN left
+        END FUNCTION
+
+        DECLARE tempCoordinates, i, tail, pos, currentY
+
+        SET tempCoordinates TO SORT(coordinates, BY=[(0, ascending), (1, descending)])
+        SET i TO 0
+        SET tail TO LIST()
+
+        WHILE i < LENGTH(tempCoordinates)
+            SET currentY TO tempCoordinates[i][1]
+            IF LENGTH(tail) = 0 OR tail[LENGTH(tail) - 1] < currentY
+                tail.APPEND(currentY)
+            ELSE
+                SET pos TO bisectLeft(tail, currentY)
+                SET tail[pos] TO currentY
+            END IF
+            SET i TO i + 1
+        END WHILE
+
+        RETURN LENGTH(tail)
+    END FUNCTION
+END CLASS

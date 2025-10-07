@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION getPermutationIndex(perm)
+        LET lengthVar = 0
+        LET modulusVal = 0
+        LET factorialArray = []
+        LET numberPool = []
+        LET resultIndex = 0
+        LET recursionCounter = 1
+
+        lengthVar = 0
+        WHILE lengthVar <> (LEN(perm))
+            lengthVar = lengthVar + (1 * 1)
+        END WHILE
+
+        modulusVal = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + (1)
+
+        factorialArray = CREATE_LIST(lengthVar, 1)
+
+        LET factorIterator = 2
+        WHILE factorIterator < lengthVar
+            LET prevValue = factorialArray[factorIterator - 1]
+            factorialArray[factorIterator] = prevValue * factorIterator
+            factorIterator = factorIterator + 1
+        END WHILE
+
+        numberPool = []
+        LET fillCounter = lengthVar
+        WHILE fillCounter > 0
+            numberPool.INSERT_AT_START(fillCounter)
+            fillCounter = fillCounter - 1
+        END WHILE
+        numberPool.REVERSE()
+
+        resultIndex = 0
+        LET posIterator = 0
+
+        FUNCTION findPosition(value, listRef)
+            LET scanPos = 0
+            FUNCTION recursiveScan(indexVal)
+                IF indexVal >= LEN(listRef)
+                    RETURN -1
+                END IF
+
+                IF listRef[indexVal] = value
+                    RETURN indexVal
+                ELSE
+                    RETURN recursiveScan(indexVal + 1)
+                END IF
+            END FUNCTION
+            RETURN recursiveScan(0)
+        END FUNCTION
+
+        FUNCTION removeAtIndex(idx, listRef)
+            LET resultList = []
+            LET skipIndex = idx
+            LET positionTracker = 0
+            WHILE positionTracker < LEN(listRef)
+                IF NOT (positionTracker = skipIndex)
+                    resultList.APPEND(listRef[positionTracker])
+                END IF
+                positionTracker = positionTracker + 1
+            END WHILE
+            RETURN resultList
+        END FUNCTION
+
+        WHILE posIterator < lengthVar
+            LET currentVal = perm[posIterator]
+            LET foundPosition = findPosition(currentVal, numberPool)
+
+            LET factorIndex = (lengthVar - posIterator) - 1
+            LET factorMultiplier = factorialArray[factorIndex]
+
+            LET addition = foundPosition * factorMultiplier
+            resultIndex = resultIndex + addition
+
+            numberPool = removeAtIndex(foundPosition, numberPool)
+
+            posIterator = posIterator + 1
+        END WHILE
+
+        LET finalResult = 0
+        IF resultIndex >= modulusVal
+            finalResult = resultIndex % modulusVal
+        ELSE
+            finalResult = resultIndex
+        END IF
+
+        RETURN finalResult
+    END FUNCTION
+END CLASS

@@ -1,0 +1,115 @@
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+        FUNCTION isAlpha(ch)
+            RETURN ( (ch >= "A") AND (ch <= "Z") ) OR ( (ch >= "a") AND (ch <= "z") )
+        END FUNCTION
+
+        FUNCTION toInt(ch)
+            RETURN (ASC(ch) - ASC("0"))
+        END FUNCTION
+
+        FUNCTION dictGetOrZero(d, key)
+            IF key IN d THEN
+                RETURN d[key]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        FUNCTION dictKeys(d)
+            CREATE keysList = []
+            FOR k IN d
+                APPEND k TO keysList
+            END FOR
+            RETURN keysList
+        END FUNCTION
+
+        FUNCTION listSortAlpha(arr)
+            FOR i FROM 0 TO LENGTH(arr) - 2
+                FOR j FROM i + 1 TO LENGTH(arr) - 1
+                    IF arr[j] < arr[i] THEN
+                        SET tempChar = arr[i]
+                        SET arr[i] = arr[j]
+                        SET arr[j] = tempChar
+                    END IF
+                END FOR
+            END FOR
+            RETURN arr
+        END FUNCTION
+
+        FUNCTION intToStr(n)
+            IF n = 0 THEN
+                RETURN "0"
+            END IF
+            
+            CREATE digitsArr = []
+            FUNCTION helper(x)
+                IF x = 0 THEN RETURN END IF
+                CALL helper(x / 10)
+                APPEND CHR( (x % 10) + ASC("0") ) TO digitsArr
+            END FUNCTION
+
+            CALL helper(n)
+            CREATE res = ""
+            FOR c IN digitsArr
+                SET res = res + c
+            END FOR
+            RETURN res
+        END FUNCTION
+
+        FUNCTION strConcat(strList)
+            SET result = ""
+            FOR elem IN strList
+                SET result = result + elem
+            END FOR
+            RETURN result
+        END FUNCTION
+
+        FUNCTION appendToList(lst, val)
+            lst[length(lst)] = val
+        END FUNCTION
+
+        FUNCTION forCharsRec(index, charsList, fn)
+            IF index >= LENGTH(charsList) THEN RETURN END IF
+            CALL fn(charsList[index])
+            CALL forCharsRec(index+1, charsList, fn)
+        END FUNCTION
+
+        SET dc = {}
+        SET cc = ""
+        SET ccount = 0
+
+        FUNCTION processChar(ch)
+            IF isAlpha(ch) THEN
+                IF cc <> "" THEN
+                    dc[cc] = dictGetOrZero(dc, cc) + ccount
+                END IF
+                SET cc = ch
+                SET ccount = 0
+            ELSE
+                SET ccount = (ccount * 10) + toInt(ch)
+            END IF
+        END FUNCTION
+
+        CALL forCharsRec(0, compressed, processChar)
+
+        IF cc <> "" THEN
+            dc[cc] = dictGetOrZero(dc, cc) + ccount
+        END IF
+
+        SET keysArr = dictKeys(dc)
+        SET sortedKeys = listSortAlpha(keysArr)
+
+        SET parts = []
+
+        FUNCTION buildPart(ch)
+            appendToList(parts, ch + intToStr(dc[ch]))
+        END FUNCTION
+
+        CALL forCharsRec(0, sortedKeys, buildPart)
+
+        SET better_compressed = strConcat(parts)
+
+        RETURN better_compressed
+    END FUNCTION
+END CLASS

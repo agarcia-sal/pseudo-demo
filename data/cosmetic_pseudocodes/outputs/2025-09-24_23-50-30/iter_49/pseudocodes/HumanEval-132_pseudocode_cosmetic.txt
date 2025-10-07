@@ -1,0 +1,38 @@
+```
+FUNCTION is_nested(input_string)
+  FUNCTION fold_indices(accumulator_opp, accumulator_clp, cursor)
+    IF cursor >= LENGTH(input_string)
+    THEN 
+      RETURN (accumulator_opp, accumulator_clp)
+    ELSE
+      CASE input_string[cursor] OF
+        '[': RETURN fold_indices(accumulator_opp + [cursor], accumulator_clp, cursor + 1)
+        _:   RETURN fold_indices(accumulator_opp, accumulator_clp + [cursor], cursor + 1)
+      END
+    END
+  END
+
+  (openings, closings) ← fold_indices([], [], 0)
+
+  FUNCTION reverse_list(orig_list, rev_list)
+    IF orig_list = []
+    THEN rev_list
+    ELSE reverse_list(TAIL(orig_list), [HEAD(orig_list)] + rev_list)
+  END
+
+  reversed_closings ← reverse_list(closings, [])
+
+  FUNCTION walk_lists(idx_open, idx_close, match_count)
+    IF idx_open >= LENGTH(openings) OR idx_close >= LENGTH(reversed_closings)
+    THEN match_count
+    ELSE
+      IF (openings[idx_open] < reversed_closings[idx_close])
+      THEN walk_lists(idx_open + 1, idx_close + 1, match_count + 1)
+      ELSE walk_lists(idx_open + 1, idx_close, match_count)
+    END
+  END
+
+  matched_count ← walk_lists(0, 0, 0)
+  RETURN matched_count >= 2
+END FUNCTION
+```

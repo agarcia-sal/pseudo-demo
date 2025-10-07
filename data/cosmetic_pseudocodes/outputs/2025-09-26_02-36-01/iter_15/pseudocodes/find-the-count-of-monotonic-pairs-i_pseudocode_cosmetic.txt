@@ -1,0 +1,81 @@
+```pseudocode
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        DEFINE CONST_X = 1000000000 + 7
+        DEFINE LEN_A = LENGTH(nums)
+        DEFINE MAX_B = -∞
+        INDEX P = 0
+        WHILE P < LEN_A
+            IF nums[P] > MAX_B THEN
+                MAX_B = nums[P]
+            END IF
+            P = P + 1
+        END WHILE
+        
+        DEFINE DP_TAB = []
+        INDEX M1 = 0
+        WHILE M1 < LEN_A
+            DEFINE ROW = []
+            INDEX M2 = 0
+            WHILE M2 < (MAX_B + 1)
+                DEFINE INNER = []
+                INDEX M3 = 0
+                WHILE M3 < (MAX_B + 1)
+                    INNER = INNER + [0]
+                    M3 = M3 + 1
+                END WHILE
+                ROW = ROW + [INNER]
+                M2 = M2 + 1
+            END WHILE
+            DP_TAB = DP_TAB + [ROW]
+            M1 = M1 + 1
+        END WHILE
+        
+        DEFINE A0 = nums[0]
+        INDEX Q = 0
+        WHILE Q <= A0
+            DEFINE R = A0 - Q
+            DP_TAB[0][Q][R] = 0 + 1
+            Q = Q + 1
+        END WHILE
+        
+        INDEX I_IDX = 1
+        WHILE I_IDX < LEN_A
+            DEFINE CUR_V = nums[I_IDX]
+            INDEX J_IDX = 0
+            WHILE J_IDX <= CUR_V
+                DEFINE K_IDX = CUR_V - J_IDX
+                INDEX J_PREV = 0
+                WHILE J_PREV <= J_IDX
+                    INDEX K_PREV = K_IDX
+                    WHILE K_PREV <= MAX_B
+                        DP_TAB[I_IDX][J_IDX][K_IDX] =
+                            (DP_TAB[I_IDX][J_IDX][K_IDX] + DP_TAB[I_IDX - 1][J_PREV][K_PREV])
+                            - ((DP_TAB[I_IDX][J_IDX][K_IDX] + DP_TAB[I_IDX - 1][J_PREV][K_PREV]) \ CONST_X) * CONST_X
+                        K_PREV = K_PREV + 1
+                    END WHILE
+                    J_PREV = J_PREV + 1
+                END WHILE
+                J_IDX = J_IDX + 1
+            END WHILE
+            I_IDX = I_IDX + 1
+        END WHILE
+        
+        DEFINE FINAL_RESULT = 0
+        INDEX X_IDX = 0
+        WHILE X_IDX <= MAX_B
+            INDEX Y_IDX = 0
+            WHILE Y_IDX <= MAX_B
+                IF (X_IDX + Y_IDX) == nums[LEN_A - 1] THEN
+                    FINAL_RESULT = FINAL_RESULT + DP_TAB[LEN_A - 1][X_IDX][Y_IDX]
+                    FINAL_RESULT = FINAL_RESULT - ((FINAL_RESULT) \ CONST_X) * CONST_X
+                END IF
+                Y_IDX = Y_IDX + 1
+            END WHILE
+            X_IDX = X_IDX + 1
+        END WHILE
+        
+        RETURN FINAL_RESULT
+    END FUNCTION
+END CLASS
+```

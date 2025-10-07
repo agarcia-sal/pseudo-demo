@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION minimumAddedInteger(nums1 RETURNS List OF integer, nums2 RETURNS List OF integer) RETURNS integer
+      CALL sort ON nums1
+      CALL sort ON nums2
+      SET flag TO FALSE
+      SET offset TO 0
+      SET alpha TO 0
+      FUNCTION checkOffset(delta RETURNS integer, baseNums RETURNS List OF integer, testNums RETURNS List OF integer) RETURNS boolean
+        SET idx TO 0
+        SET valid TO TRUE
+        WHILE idx < LENGTH(testNums) AND valid
+          IF testNums[idx] NOT EQUAL (baseNums[idx] + delta)
+            SET valid TO FALSE
+          END IF
+          SET idx TO idx + 1
+        END WHILE
+        RETURN valid
+      END FUNCTION
+      SET startOuter TO 0
+      WHILE startOuter <= LENGTH(nums1) - 2 AND NOT flag
+        SET endInner TO startOuter + 1
+        WHILE endInner <= LENGTH(nums1) - 1 AND NOT flag
+          SET tempList TO empty list
+          SET pos TO 0
+          WHILE pos < startOuter
+            APPEND nums1[pos] TO tempList
+            SET pos TO pos + 1
+          END WHILE
+          SET pos TO startOuter + 1
+          WHILE pos < endInner
+            APPEND nums1[pos] TO tempList
+            SET pos TO pos + 1
+          END WHILE
+          SET pos TO endInner + 1
+          WHILE pos < LENGTH(nums1)
+            APPEND nums1[pos] TO tempList
+            SET pos TO pos + 1
+          END WHILE
+          SET offset TO nums2[0] - tempList[0]
+          IF checkOffset(offset, tempList, nums2)
+            SET alpha TO offset
+            SET flag TO TRUE
+          END IF
+          SET endInner TO endInner + 1
+        END WHILE
+        SET startOuter TO startOuter + 1
+      END WHILE
+      IF flag
+        RETURN alpha
+      ELSE
+        RETURN None
+      END IF
+    END FUNCTION
+END CLASS

@@ -1,0 +1,96 @@
+CLASS Solution
+    FUNCTION minimumAddedInteger(nums1 RETURNS List OF integer, nums2 RETURNS List OF integer) RETURNS integer
+        PROCEDURE ascSort(arr)
+            VARIABLE idx1 := 0
+            WHILE idx1 < LENGTH(arr) - 1
+                VARIABLE idx2 := 0
+                WHILE idx2 < LENGTH(arr) - 1 - idx1
+                    IF arr[idx2] > arr[idx2+1]
+                        VARIABLE tmp := arr[idx2]
+                        arr[idx2] := arr[idx2+1]
+                        arr[idx2+1] := tmp
+                    END IF
+                    idx2 := idx2 + 1
+                END WHILE
+                idx1 := idx1 + 1
+            END WHILE
+        END PROCEDURE
+
+        CALL ascSort(nums1)
+        CALL ascSort(nums2)
+
+        VARIABLE a := 0
+        LABEL outer_loop_start:
+            IF NOT (a < LENGTH(nums1) - 1)
+                GOTO end_outer_loop
+            END IF
+            VARIABLE b := a + 1
+            LABEL inner_loop_start:
+                IF NOT (b < LENGTH(nums1))
+                    a := a + 1
+                    GOTO outer_loop_start
+                END IF
+
+                VARIABLE newList := []
+
+                VARIABLE idx := 0
+                LABEL copy_until_a:
+                    IF NOT (idx < a)
+                        idx := a + 1
+                        GOTO copy_between_a_b
+                    ELSE
+                        CALL append_to_list(newList, nums1[idx])
+                        idx := idx + 1
+                        GOTO copy_until_a
+                    END IF
+                LABEL copy_between_a_b:
+                    IF NOT (idx < b)
+                        idx := b + 1
+                        GOTO copy_after_b
+                    ELSE
+                        CALL append_to_list(newList, nums1[idx])
+                        idx := idx + 1
+                        GOTO copy_between_a_b
+                    END IF
+                LABEL copy_after_b:
+                    IF NOT (idx < LENGTH(nums1))
+                        ; continue after copying
+                    ELSE
+                        CALL append_to_list(newList, nums1[idx])
+                        idx := idx + 1
+                        GOTO copy_after_b
+                    END IF
+
+                VARIABLE offset := nums2[0] - newList[0]
+
+                VARIABLE conditionFlag := TRUE
+                VARIABLE cnt := 0
+                LABEL verify_loop:
+                    IF NOT (cnt < LENGTH(nums2))
+                        GOTO verify_done
+                    END IF
+                    IF newList[cnt] + offset != nums2[cnt]
+                        conditionFlag := FALSE
+                        GOTO verify_done
+                    END IF
+                    cnt := cnt + 1
+                    GOTO verify_loop
+                LABEL verify_done:
+
+                IF conditionFlag == TRUE
+                    RETURN offset
+                END IF
+
+                b := b + 1
+                GOTO inner_loop_start
+        LABEL end_outer_loop:
+
+        RETURN None
+
+    END FUNCTION
+
+    PROCEDURE append_to_list(lst, val)
+        lst[LENGTH(lst)] := val
+    END PROCEDURE
+
+END CLASS

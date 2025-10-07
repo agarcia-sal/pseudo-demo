@@ -1,0 +1,86 @@
+```
+FUNCTION split_words(text)
+  DEFINE recurse(idx, acc) =
+    IF idx >= LENGTH(text) THEN acc
+    ELSE
+      LET c = text[idx]
+      LET cond1 = (c >= 'a') AND (c <= 'z')
+      LET cond2 = ((ASCII(c) MOD 2) == 0)
+      LET newAcc = IF cond1 AND cond2 THEN acc + 1 ELSE acc
+      CALL recurse(idx + 1, newAcc)
+  END
+
+  LET containsSpace = FALSE
+  LET containsComma = FALSE
+  LET loopIndex = 0
+
+  label_check_chars:
+    IF loopIndex >= LENGTH(text) THEN GOTO label_check_done ELSE
+      LET current_char = text[loopIndex]
+      containsSpace = containsSpace OR (current_char == ' ')
+      containsComma = containsComma OR (current_char == ',')
+      loopIndex = loopIndex + 1
+      GOTO label_check_chars
+  label_check_done:
+
+  IF (NOT containsSpace) AND (NOT containsComma) THEN
+    RETURN recurse(0, 0)
+
+  IF containsSpace THEN
+    DEFINE whitespace_splitter(seq, startIndex, resultList) =
+      IF startIndex >= LENGTH(seq) THEN resultList
+      ELSE
+        LET endIndex = startIndex
+        LOOP
+          IF endIndex >= LENGTH(seq) OR seq[endIndex] == ' ' THEN BREAK
+          endIndex = endIndex + 1
+        END
+        LET word = SUBSTRING(seq, startIndex, endIndex)
+        LET newResultList = resultList + [word]
+        LET nextIndex = endIndex + 1
+        WHILE nextIndex < LENGTH(seq) AND seq[nextIndex] == ' ' DO
+          nextIndex = nextIndex + 1
+        END
+        RETURN whitespace_splitter(seq, nextIndex, newResultList)
+    END
+
+    RETURN whitespace_splitter(text, 0, [])
+  ELSE
+    LET map_chars = {}
+    LET i = 0
+
+    label_replace_commas:
+      IF i >= LENGTH(text) THEN GOTO label_replacement_done ELSE
+        LET ch = text[i]
+        LET mapped_char = IF ch == ',' THEN ' ' ELSE ch
+        map_chars[i] = mapped_char
+        i = i + 1
+        GOTO label_replace_commas
+    label_replacement_done:
+
+    LET rebuilt_text_parts = []
+    FOR idxKey IN 0 TO LENGTH(text) - 1 DO
+      rebuilt_text_parts = rebuilt_text_parts + [map_chars[idxKey]]
+    END
+    LET rebuilt_text = CONCATENATE(rebuilt_text_parts)
+
+    DEFINE split_on_space(string_ref) =
+      LET idx0 = 0
+      LET acc_words = []
+
+      label_split_loop:
+        IF idx0 >= LENGTH(string_ref) THEN RETURN acc_words ELSE
+          LET idx1 = idx0
+          WHILE idx1 < LENGTH(string_ref) AND string_ref[idx1] != ' ' DO idx1 = idx1 + 1 END
+          LET segment = SUBSTRING(string_ref, idx0, idx1)
+          LET new_acc_words = acc_words + [segment]
+          LET next_start = idx1
+          WHILE next_start < LENGTH(string_ref) AND string_ref[next_start] == ' ' DO next_start = next_start + 1 END
+          idx0 = next_start
+          acc_words = new_acc_words
+          GOTO label_split_loop
+    END
+
+    RETURN split_on_space(rebuilt_text)
+END FUNCTION
+```

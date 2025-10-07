@@ -1,0 +1,32 @@
+CLASS Solution
+    FUNCTION queryResults(limit argA, queries argB)
+        DEFINE FUNCTION processQueries(idx, endIdx, mapping, uniques, accumulator)
+            IF idx EQUALS endIdx THEN
+                RETURN accumulator
+            ELSE
+                SET currentPair TO argB[idx]
+                SET keyElem TO currentPair[1 - 1]  // access first element
+                SET valElem TO currentPair[1]
+
+                IF mapping CONTAINS keyElem THEN
+                    SET prevVal TO mapping[keyElem]
+                    IF uniques CONTAINS prevVal THEN
+                        SET uniques TO uniques DIFFERENCE {prevVal}
+                    END IF
+                END IF
+
+                SET mapping TO mapping UNION {keyElem: valElem}
+                SET uniques TO uniques UNION {valElem}
+                SET newCount TO LENGTH(uniques)
+                SET newAccumulator TO accumulator CONCATENATED WITH [newCount]
+                RETURN processQueries(idx + 1, endIdx, mapping, uniques, newAccumulator)
+            END IF
+        END FUNCTION
+
+        SET initialMapping TO DICTIONARY()
+        SET initialUniques TO SET()
+        SET initialResult TO []
+        SET finalOutput TO processQueries(0, LENGTH(argB), initialMapping, initialUniques, initialResult)
+        RETURN finalOutput
+    END FUNCTION
+END CLASS

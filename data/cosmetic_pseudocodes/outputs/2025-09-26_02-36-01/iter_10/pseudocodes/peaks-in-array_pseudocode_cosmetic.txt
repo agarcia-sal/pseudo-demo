@@ -1,0 +1,154 @@
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+
+        FUNCTION check_if_peak(pos INTEGER) RETURNS BOOLEAN
+            RETURN (nums[pos] > nums[pos - 1]) AND (nums[pos] > nums[pos + 1])
+        END FUNCTION
+
+        PROCEDURE insert_into_sorted(lst LIST OF INTEGER, val INTEGER)
+            SET low TO 0
+            SET high TO LENGTH OF lst
+            WHILE low < high
+                SET mid TO (low + high) DIV 2
+                IF lst[mid] < val
+                    SET low TO mid + 1
+                ELSE
+                    SET high TO mid
+                END IF
+            END WHILE
+            INSERT val INTO lst AT POSITION low
+        END PROCEDURE
+
+        FUNCTION left_bound(lst LIST OF INTEGER, target INTEGER) RETURNS INTEGER
+            SET start TO 0
+            SET end TO LENGTH OF lst
+            WHILE start < end
+                SET center TO (start + end) DIV 2
+                IF lst[center] < target
+                    SET start TO center + 1
+                ELSE
+                    SET end TO center
+                END IF
+            END WHILE
+            RETURN start
+        END FUNCTION
+
+        FUNCTION right_bound(lst LIST OF INTEGER, target INTEGER) RETURNS INTEGER
+            SET beg TO 0
+            SET en TO LENGTH OF lst
+            WHILE beg < en
+                SET c TO (beg + en) DIV 2
+                IF lst[c] <= target
+                    SET beg TO c + 1
+                ELSE
+                    SET en TO c
+                END IF
+            END WHILE
+            RETURN beg
+        END FUNCTION
+
+        SET peak_positions TO empty list
+
+        # Recursively collect all peaks between positions 1 and LENGTH(nums)-2
+        PROCEDURE collect_peaks(start_index INTEGER, end_index INTEGER)
+            IF start_index > end_index
+                RETURN
+            END IF
+            IF check_if_peak(start_index)
+                APPEND start_index TO peak_positions
+            END IF
+            collect_peaks(start_index + 1, end_index)
+        END PROCEDURE
+
+        collect_peaks(1, LENGTH OF nums - 2)
+
+        SET collected_results TO empty list
+
+        FUNCTION process_all_queries(idx INTEGER)
+            IF idx >= LENGTH OF queries
+                RETURN
+            END IF
+
+            SET current_query TO queries[idx]
+
+            IF current_query[0] = 1 THEN
+                SET left_v TO current_query[1]
+                SET right_v TO current_query[2]
+
+                SET left_pos TO left_bound(peak_positions, left_v + 1)
+                SET right_pos TO right_bound(peak_positions, right_v - 1) - 1
+
+                IF right_pos < left_pos
+                    APPEND 0 TO collected_results
+                ELSE
+                    APPEND (right_pos - left_pos + 1) TO collected_results
+                END IF
+
+            ELSE
+                SET upd_index TO current_query[1]
+                SET upd_value TO current_query[2]
+
+                IF nums[upd_index] = upd_value
+                    # Skip to next query without changes
+                    process_all_queries(idx + 1)
+                    RETURN
+                END IF
+
+                SET nums[upd_index] TO upd_value
+
+                FUNCTION update_peak_at(pos INTEGER)
+                    IF pos < 1 OR pos > LENGTH OF nums - 2
+                        RETURN
+                    END IF
+                    SET currently_peak TO check_if_peak(pos)
+                    SET exists_index TO -1
+
+                    # Binary search for pos in peak_positions
+                    SET lowi TO 0
+                    SET highi TO LENGTH OF peak_positions - 1
+                    WHILE lowi <= highi
+                        SET midx TO (lowi + highi) DIV 2
+                        IF peak_positions[midx] = pos
+                            SET exists_index TO midx
+                            BREAK
+                        ELSEIF peak_positions[midx] < pos
+                            SET lowi TO midx + 1
+                        ELSE
+                            SET highi TO midx - 1
+                        END IF
+                    END WHILE
+
+                    IF currently_peak
+                        IF exists_index = -1
+                            # Insert pos into peak_positions preserving order
+                            insert_into_sorted(peak_positions, pos)
+                        END IF
+                    ELSE
+                        IF exists_index <> -1
+                            REMOVE peak_positions[exists_index]
+                        END IF
+                    END IF
+                END FUNCTION
+
+                SET start_scan TO MAX(1, upd_index - 1)
+                SET end_scan TO MIN(LENGTH OF nums - 2, upd_index + 1)
+
+                PROCEDURE loop_update(position INTEGER)
+                    IF position > end_scan
+                        RETURN
+                    END IF
+                    update_peak_at(position)
+                    loop_update(position + 1)
+                END PROCEDURE
+
+                loop_update(start_scan)
+            END IF
+
+            process_all_queries(idx + 1)
+        END FUNCTION
+
+        process_all_queries(0)
+
+        RETURN collected_results
+    END FUNCTION
+END CLASS

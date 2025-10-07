@@ -1,0 +1,106 @@
+CLASS Solution  
+    FUNCTION maximumTotalDamage(power)  
+        FUNCTION customMax(x, y)  
+            IF (x >= y) THEN  
+                RETURN x  
+            ELSE  
+                RETURN y  
+            END IF  
+        END FUNCTION
+
+        FUNCTION createCountMap(arr)  
+            SET mapVar TO empty mapping  
+            FUNCTION incrementMap(key)  
+                IF key EXISTS IN mapVar THEN  
+                    SET mapVar[key] TO mapVar[key] + 1  
+                ELSE  
+                    SET mapVar[key] TO 1  
+                END IF  
+            END FUNCTION
+
+            SET idx TO 0  
+            REPEAT  
+                IF idx >= LENGTH(arr) THEN BREAK END IF  
+                CALL incrementMap(arr[idx])  
+                SET idx TO idx + 1  
+            UNTIL FALSE  
+            RETURN mapVar  
+        END FUNCTION
+
+        SET mapAlpha TO createCountMap(power)  
+        SET listOmega TO []  
+        FOR keyVar IN mapAlpha DO  
+            APPEND keyVar TO listOmega  
+        END FOR
+
+        FUNCTION ascendingSort(arr)  
+            FUNCTION swap(i, j)  
+                SET tempVal TO arr[i]  
+                SET arr[i] TO arr[j]  
+                SET arr[j] TO tempVal  
+            END FUNCTION
+
+            SET n TO LENGTH(arr)  
+            SET outerI TO 0
+            REPEAT  
+                IF outerI >= n - 1 THEN BREAK END IF  
+                SET innerJ TO 0  
+                REPEAT  
+                    IF innerJ >= n - outerI - 1 THEN BREAK END IF  
+                    IF arr[innerJ] > arr[innerJ + 1] THEN  
+                        CALL swap(innerJ, innerJ + 1)  
+                    END IF  
+                    SET innerJ TO innerJ + 1  
+                UNTIL FALSE  
+                SET outerI TO outerI + 1  
+            UNTIL FALSE  
+            RETURN arr  
+        END FUNCTION
+
+        SET sortedKeys TO ascendingSort(listOmega)  
+        SET dictBeta TO empty mapping  
+        SET posI TO 0  
+        REPEAT  
+            IF posI >= LENGTH(sortedKeys) THEN BREAK END IF  
+
+            SET currentK TO sortedKeys[posI]  
+
+            IF posI > 0 THEN  
+                IF (sortedKeys[posI - 1]) EXISTS IN dictBeta THEN  
+                    SET valExc TO dictBeta[sortedKeys[posI - 1]]  
+                ELSE  
+                    SET valExc TO 0  
+                END IF  
+            ELSE  
+                SET valExc TO 0  
+            END IF  
+
+            SET valInc TO currentK * mapAlpha[currentK]  
+            SET posJ TO posI - 1  
+
+            WHILE posJ >= 0 AND sortedKeys[posJ] >= currentK - 2 DO  
+                SET posJ TO posJ - 1  
+            END WHILE  
+
+            IF posJ >= 0 THEN  
+                SET valInc TO valInc + dictBeta[sortedKeys[posJ]]  
+            END IF  
+
+            SET dictBeta[currentK] TO customMax(valInc, valExc)  
+
+            SET posI TO posI + 1  
+        UNTIL FALSE  
+
+        SET maxVal TO 0  
+        SET keyIter TO 0  
+        REPEAT  
+            IF keyIter >= LENGTH(sortedKeys) THEN BREAK END IF  
+            IF dictBeta[sortedKeys[keyIter]] > maxVal THEN  
+                SET maxVal TO dictBeta[sortedKeys[keyIter]]  
+            END IF  
+            SET keyIter TO keyIter + 1  
+        UNTIL FALSE  
+
+        RETURN maxVal  
+    END FUNCTION  
+END CLASS

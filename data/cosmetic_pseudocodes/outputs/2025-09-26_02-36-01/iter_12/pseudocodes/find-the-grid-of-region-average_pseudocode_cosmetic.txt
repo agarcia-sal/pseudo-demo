@@ -1,0 +1,145 @@
+CLASS Solution
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+        FUNCTION addVals(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE integer
+            RETURN a + b
+        END FUNCTION
+
+        FUNCTION absVal(x WITH TYPE integer) WITH RETURN TYPE integer
+            IF x LESS THAN zero THEN
+                RETURN 0 - x
+            ELSE
+                RETURN x
+            END IF
+        END FUNCTION
+
+        FUNCTION divInt(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE integer
+            RETURN a / b
+        END FUNCTION
+
+        FUNCTION lengthList(lst WITH TYPE List OF ANY) WITH RETURN TYPE integer
+            VARIABLE countIndex IS 0
+            WHILE TRUE
+                TRY
+                    SET dummy TO lst[countIndex]
+                    SET countIndex TO countIndex + 1
+                CATCH IndexOutOfRangeException
+                    BREAK
+                END TRY
+            END WHILE
+            RETURN countIndex
+        END FUNCTION
+
+        VARIABLE alpha TO lengthList(image)
+        VARIABLE beta TO lengthList(image[0])
+        VARIABLE omega TO EMPTY LIST
+
+        VARIABLE phi TO 0
+        WHILE phi LESS THAN alpha
+            VARIABLE tmpList TO EMPTY LIST
+            VARIABLE psi TO 0
+            WHILE psi LESS THAN beta
+                tmpList = tmpList PLUS [0]
+                SET psi TO psi + 1
+            END WHILE
+            omega = omega PLUS [tmpList]
+            SET phi TO phi + 1
+        END WHILE
+
+        VARIABLE gamma TO EMPTY LIST
+        VARIABLE delta TO 0
+        WHILE delta LESS THAN alpha
+            VARIABLE sigma TO EMPTY LIST
+            VARIABLE tau TO 0
+            WHILE tau LESS THAN beta
+                sigma = sigma PLUS [0]
+                SET tau TO tau + 1
+            END WHILE
+            gamma = gamma PLUS [sigma]
+            SET delta TO delta + 1
+        END WHILE
+
+        FUNCTION checkRegion(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE boolean
+            FUNCTION adjPairs() WITH RETURN TYPE List OF (integer, integer)
+                RETURN [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            END FUNCTION
+
+            VARIABLE outerX IS a
+            WHILE outerX LESS THAN a + 3
+                VARIABLE outerY IS b
+                WHILE outerY LESS THAN b + 3
+                    VARIABLE adjIndex IS 0
+                    VARIABLE adjList IS adjPairs()
+                    WHILE adjIndex LESS THAN lengthList(adjList)
+                        VARIABLE dx IS adjList[adjIndex][0]
+                        VARIABLE dy IS adjList[adjIndex][1]
+                        VARIABLE nx IS outerX + dx
+                        VARIABLE ny IS outerY + dy
+                        IF nx GREATER THAN OR EQUAL TO 0 AND nx LESS THAN a + 3 AND ny GREATER THAN OR EQUAL TO 0 AND ny LESS THAN b + 3 THEN
+                            VARIABLE diff IS image[outerX][outerY] - image[nx][ny]
+                            IF absVal(diff) GREATER THAN threshold THEN
+                                RETURN False
+                            END IF
+                        END IF
+                        SET adjIndex TO adjIndex + 1
+                    END WHILE
+                    SET outerY TO outerY + 1
+                END WHILE
+                SET outerX TO outerX + 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        FUNCTION avgCalc(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE integer
+            VARIABLE totalSum IS 0
+            VARIABLE idxX IS a
+            WHILE idxX LESS THAN a + 3
+                VARIABLE idxY IS b
+                WHILE idxY LESS THAN b + 3
+                    SET totalSum TO addVals(totalSum, image[idxX][idxY])
+                    SET idxY TO idxY + 1
+                END WHILE
+                SET idxX TO idxX + 1
+            END WHILE
+            RETURN divInt(totalSum, 9)
+        END FUNCTION
+
+        VARIABLE outerLoop TO 0
+        WHILE outerLoop LESS THAN alpha - 2
+            VARIABLE innerLoop TO 0
+            WHILE innerLoop LESS THAN beta - 2
+                VARIABLE regionCheck TO checkRegion(outerLoop, innerLoop)
+                IF regionCheck EQUALS True THEN
+                    VARIABLE averageVal TO avgCalc(outerLoop, innerLoop)
+                    VARIABLE xx TO outerLoop
+                    WHILE xx LESS THAN outerLoop + 3
+                        VARIABLE yy TO innerLoop
+                        WHILE yy LESS THAN innerLoop + 3
+                            SET omega[xx][yy] TO omega[xx][yy] + averageVal
+                            SET gamma[xx][yy] TO gamma[xx][yy] + 1
+                            SET yy TO yy + 1
+                        END WHILE
+                        SET xx TO xx + 1
+                    END WHILE
+                END IF
+                SET innerLoop TO innerLoop + 1
+            END WHILE
+            SET outerLoop TO outerLoop + 1
+        END WHILE
+
+        VARIABLE p IS 0
+        WHILE p LESS THAN alpha
+            VARIABLE q IS 0
+            WHILE q LESS THAN beta
+                IF gamma[p][q] GREATER THAN 0 THEN
+                    SET omega[p][q] TO omega[p][q] / gamma[p][q]
+                ELSE
+                    SET omega[p][q] TO image[p][q]
+                END IF
+                SET q TO q + 1
+            END WHILE
+            SET p TO p + 1
+        END WHILE
+
+        RETURN omega
+    END FUNCTION
+END CLASS

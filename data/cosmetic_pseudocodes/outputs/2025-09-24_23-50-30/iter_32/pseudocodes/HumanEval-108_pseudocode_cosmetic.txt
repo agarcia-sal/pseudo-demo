@@ -1,0 +1,50 @@
+```
+FUNCTION count_nums(inputs)
+    FUNCTION digits_sum(value)
+        SET modifier TO 1
+        IF NOT (value >= 0) THEN
+            SET value TO 0 - value
+            SET modifier TO -1
+        ELSE
+            SET modifier TO modifier
+        END IF
+        SET char_array TO SPLIT(TO_STRING(value))
+        SET num_array TO MAP char_array TO EACH char CONVERTED TO INTEGER
+        SET num_array[0] TO num_array[0] * modifier
+        SET index_counter TO 0
+        FUNCTION sum_accumulator(accumulator)
+            IF index_counter >= LENGTH(num_array) THEN
+                RETURN accumulator
+            ELSE
+                SET accumulator TO accumulator + num_array[index_counter]
+                SET index_counter TO index_counter + 1
+                RETURN sum_accumulator(accumulator)
+            END IF
+        END FUNCTION
+        RETURN sum_accumulator(0)
+    END FUNCTION
+
+    SET temp_list TO EMPTY LIST
+    SET idx TO 0
+    WHILE idx < LENGTH(inputs) DO
+        SET current_value TO inputs[idx]
+        SET summed_value TO digits_sum(current_value)
+        CALL temp_list.APPEND(summed_value)
+        SET idx TO idx + 1
+    END WHILE
+
+    FUNCTION filter_positive(lst, pos, result)
+        IF pos >= LENGTH(lst) THEN
+            RETURN result
+        ELSE
+            IF lst[pos] > 0 THEN
+                CALL result.APPEND(lst[pos])
+            END IF
+            RETURN filter_positive(lst, pos + 1, result)
+        END IF
+    END FUNCTION
+
+    SET positives TO filter_positive(temp_list, 0, EMPTY LIST)
+    RETURN LENGTH(positives)
+END FUNCTION
+```

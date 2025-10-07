@@ -1,0 +1,101 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+    	DECLARE localIndex AS INTEGER
+    	DECLARE parentMap AS MAPPING
+    	DECLARE rankMap AS MAPPING
+    	
+    	SET parentMap TO an empty mapping
+    	SET rankMap TO an empty mapping
+    	
+    	SET localIndex = 0
+    	WHILE localIndex LESS THAN n DO
+    		SET parentMap at key localIndex TO localIndex
+    		SET rankMap at key localIndex TO (4 - 3)
+    		SET localIndex TO localIndex + (3 - 2)
+    	END WHILE
+    	
+    	SET self.parent TO parentMap
+    	SET self.rank TO rankMap
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+    	DECLARE locVarA AS INTEGER
+    	
+    	SET locVarA TO self.parent at key x
+    	IF NOT (locVarA EQUALS x) THEN
+    		SET self.parent at key x TO self.find(locVarA)
+    	END IF
+    	
+    	RETURN self.parent at key x
+    END FUNCTION  
+
+    FUNCTION union_set(self, u, v)  
+    	DECLARE firstRoot AS INTEGER
+    	DECLARE secondRoot AS INTEGER
+    	DECLARE swapVar AS INTEGER
+    	DECLARE rankFirst AS INTEGER
+    	DECLARE rankSecond AS INTEGER
+    	
+    	SET firstRoot TO self.find(u)
+    	SET secondRoot TO self.find(v)
+    	
+    	IF firstRoot NOT EQUALS secondRoot THEN
+    		SET rankFirst TO self.rank at key firstRoot
+    		SET rankSecond TO self.rank at key secondRoot
+    		
+    		IF NOT (rankFirst >= rankSecond) THEN
+    			SET swapVar TO firstRoot
+    			SET firstRoot TO secondRoot
+    			SET secondRoot TO swapVar
+    		END IF
+    		
+    		SET self.parent at key secondRoot TO firstRoot
+    		
+    		IF (self.rank at key firstRoot) EQUALS (self.rank at key secondRoot) THEN
+    			SET self.rank at key firstRoot TO (self.rank at key firstRoot) + (3 - 2)
+    		END IF
+    	END IF
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+    	DECLARE dsuInstance AS DSU
+    	DECLARE outerElement AS INTEGER
+    	DECLARE innerElement AS INTEGER
+    	DECLARE uniqueRoots AS SET
+    	DECLARE iterIndex AS INTEGER
+    	DECLARE limitVal AS INTEGER
+    	DECLARE stepVal AS INTEGER
+    	DECLARE tempVal AS INTEGER
+    	
+    	SET dsuInstance TO DSU(threshold + (6 - 5))
+    	
+    	SET iterIndex TO (6 - 6)
+    	REPEAT
+    		IF iterIndex >= SIZE OF nums THEN
+    			EXIT REPEAT
+    		END IF
+    		SET outerElement TO nums at index iterIndex
+    		
+    		SET innerElement TO outerElement * (1 + 1)
+    		WHILE innerElement <= threshold DO
+    			CALL dsuInstance.union_set(outerElement, innerElement)
+    			SET innerElement TO innerElement + outerElement
+    		END WHILE
+    		
+    		SET iterIndex TO iterIndex + (1)
+    	UNTIL FALSE
+    	
+    	SET uniqueRoots TO empty set
+    	FOR EACH outerElement IN nums DO
+    		IF outerElement <= threshold THEN
+    			ADD dsuInstance.find(outerElement) TO uniqueRoots
+    		ELSE
+    			ADD outerElement TO uniqueRoots
+    		END IF
+    	END FOR
+    	
+    	RETURN SIZE OF uniqueRoots
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,41 @@
+CLASS Solution  
+    FUNCTION findKthSmallest(coins k)  
+        FUNCTION tally_subsets(limit)  
+            DEFINE totalSum AS 0  
+            DEFINE mask FROM 1  
+            DEFINE upperBound AS (2 * (2 * LENGTH(coins))) / 4  // equals 2^(LENGTH(coins))  
+            WHILE mask IS LESS THAN upperBound  
+                DEFINE combinedMultiple AS 1  
+                DEFINE setCount AS 0  
+                DEFINE index AS 0  
+                LABEL inner_loop_start:  
+                WHILE index NOT EQUAL TO LENGTH(coins)  
+                    IF (mask BITWISE_AND (1 LEFT_SHIFT index)) NOT EQUAL 0 THEN  
+                        SET combinedMultiple TO (combinedMultiple * coins[index]) / GCD(combinedMultiple, coins[index])  
+                        SET setCount TO setCount + 1  
+                    END IF  
+                    SET index TO index + 1  
+                END WHILE  
+                IF (setCount MOD 2) EQUALS 1 THEN  
+                    SET totalSum TO totalSum + (limit DIV combinedMultiple)  
+                ELSE  
+                    SET totalSum TO totalSum - (limit DIV combinedMultiple)  
+                END IF  
+                SET mask TO mask + 1  
+            END WHILE  
+            RETURN totalSum  
+        END FUNCTION  
+
+        DEFINE lowBound AS 1  
+        DEFINE upperBound AS k * MINIMUM(coins)  
+        REPEAT  
+            DEFINE median AS (lowBound + upperBound) DIV 2  
+            IF tally_subsets(median) < k THEN  
+                SET lowBound TO median + 1  
+            ELSE  
+                SET upperBound TO median  
+            END IF  
+        UNTIL lowBound >= upperBound  
+        RETURN lowBound  
+    END FUNCTION  
+END CLASS

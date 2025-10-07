@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION maximumProcessableQueries(nums parameters as list of integers, queries parameters as list of integers) RETURNS integer
+        FUNCTION process_queries(subseq parameters as list of integers, queries parameters as list of integers) RETURNS integer
+            SET result_index TO 0
+            DEFINE FUNCTION iterate_queries_recursive(j parameters as integer) RETURNS integer
+                IF j GREATER THAN OR EQUAL TO LENGTH OF queries OR result_index GREATER THAN OR EQUAL TO LENGTH OF subseq THEN
+                    RETURN result_index
+                ELSE
+                    IF subseq[result_index] GREATER THAN OR EQUAL TO queries[j] THEN
+                        SET result_index TO result_index + 1
+                    END IF
+                    RETURN iterate_queries_recursive(j + 1)
+                END IF
+            END FUNCTION
+            RETURN iterate_queries_recursive(0)
+        END FUNCTION
+
+        SET length_nums TO LENGTH OF nums
+        SET length_queries TO LENGTH OF queries
+        SET max_count TO process_queries(nums, queries)
+
+        SET idx TO 0
+        REPEAT
+            IF idx GREATER THAN OR EQUAL TO length_nums THEN
+                BREAK
+            END IF
+
+            SET temp_prefix TO EMPTY LIST
+            SET temp_suffix TO EMPTY LIST
+
+            FOR k FROM 0 TO idx - 1
+                APPEND nums[k] TO temp_prefix
+            END FOR
+
+            SET pos TO length_nums - 1
+            WHILE pos GREATER THAN OR EQUAL TO idx
+                APPEND nums[pos] TO temp_suffix
+                SET pos TO pos - 1
+            END WHILE
+
+            SET combined_subseq TO EMPTY LIST
+            FOR elem IN temp_prefix
+                APPEND elem TO combined_subseq
+            END FOR
+            FOR elem IN temp_suffix
+                APPEND elem TO combined_subseq
+            END FOR
+
+            DEFINE FUNCTION sort_list(input_list parameters as list of integers) RETURNS list of integers
+                SET sorted_list TO COPY OF input_list
+                SET changed TO TRUE
+                WHILE changed
+                    SET changed TO FALSE
+                    FOR m FROM 0 TO LENGTH OF sorted_list - 2
+                        IF sorted_list[m] GREATER THAN sorted_list[m + 1] THEN
+                            SET temp_swap TO sorted_list[m]
+                            SET sorted_list[m] TO sorted_list[m + 1]
+                            SET sorted_list[m + 1] TO temp_swap
+                            SET changed TO TRUE
+                        END IF
+                    END FOR
+                END WHILE
+                RETURN sorted_list
+            END FUNCTION
+
+            SET sorted_subseq TO sort_list(combined_subseq)
+            SET current_count TO process_queries(sorted_subseq, queries)
+            IF current_count GREATER THAN max_count THEN
+                SET max_count TO current_count
+            END IF
+            SET idx TO idx + 1
+        UNTIL FALSE
+
+        RETURN max_count
+    END FUNCTION
+END CLASS

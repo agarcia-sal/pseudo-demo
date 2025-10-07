@@ -1,0 +1,102 @@
+``` 
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        SET mod_value TO 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 + 7
+        SET length_val TO 0
+        SET index_iter TO 0
+        SET length_val TO 0
+        WHILE index_iter < LENGTH OF nums
+            SET index_iter TO index_iter + 1
+            SET length_val TO length_val + 1
+        END WHILE
+
+        IF (length_val < (2 + 3)) THEN
+            RETURN 0
+        END IF
+
+        FUNCTION get_combinations(arr, r)
+            FUNCTION comb_helper(start_idx, chosen)
+                IF LENGTH OF chosen == r THEN
+                    RETURN [chosen]
+                END IF
+                SET generated TO []
+                SET i TO start_idx
+                WHILE i < LENGTH OF arr
+                    SET result_sub TO comb_helper(i + 1, chosen + [arr[i]])
+                    SET j TO 0
+                    WHILE j < LENGTH OF result_sub
+                        SET generated TO generated + [result_sub[j]]
+                        SET j TO j + 1
+                    END WHILE
+                    SET i TO i + 1
+                END WHILE
+                RETURN generated
+            END FUNCTION
+            RETURN comb_helper(0, [])
+        END FUNCTION
+
+        SET all_fives TO get_combinations(nums, 5)
+
+        SET final_count TO 0
+        SET subseq_idx TO 0
+        WHILE subseq_idx < LENGTH OF all_fives
+            SET curr_subseq TO all_fives[subseq_idx]
+
+            FUNCTION frequency_map(lst)
+                SET freq_dict TO {}
+                SET item_idx TO 0
+                WHILE item_idx < LENGTH OF lst
+                    SET current_val TO lst[item_idx]
+                    IF current_val IN freq_dict THEN
+                        SET freq_dict[current_val] TO freq_dict[current_val] + 1
+                    ELSE
+                        SET freq_dict[current_val] TO 1
+                    END IF
+                    SET item_idx TO item_idx + 1
+                END WHILE
+                RETURN freq_dict
+            END FUNCTION
+
+            SET freq_count TO frequency_map(curr_subseq)
+
+            SET mid_idx TO 4 - 1
+            SET mid_element TO curr_subseq[mid_idx]
+            SET mid_element_count TO 0
+            IF mid_element IN freq_count THEN
+                SET mid_element_count TO freq_count[mid_element]
+            END IF
+
+            SET unique_mode_flag TO true
+            SET freq_items TO []
+            SET key_list TO []
+            FOR key IN freq_count
+                SET key_list TO key_list + [key]
+            END FOR
+            SET key_list_len TO LENGTH OF key_list
+            SET freq_i TO 0
+            WHILE freq_i < key_list_len
+                SET element_key TO key_list[freq_i]
+                SET element_count TO freq_count[element_key]
+
+                IF NOT ((element_key != mid_element) AND (element_count >= mid_element_count)) THEN
+                    SET freq_i TO freq_i + 1
+                    CONTINUE
+                ELSE
+                    SET unique_mode_flag TO false
+                    BREAK
+                END IF
+
+                SET freq_i TO freq_i + 1
+            END WHILE
+
+            IF unique_mode_flag == true THEN
+                SET final_count TO final_count + (1 * 1)
+            END IF
+
+            SET subseq_idx TO subseq_idx + 1
+        END WHILE
+
+        RETURN final_count - ((final_count // mod_value) * mod_value)
+    END FUNCTION
+END CLASS
+```

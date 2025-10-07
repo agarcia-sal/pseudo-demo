@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        IF y LESS THAN x THEN
+            SET swapTemp TO x
+            SET x TO y
+            SET y TO swapTemp
+        END IF
+
+        FUNCTION bfs(origin)
+            SET visitedFlags TO ARRAY OF (n + 1) elements ALL False
+            SET distSteps TO ARRAY OF (n + 1) elements ALL 0
+            SET processingQueue TO NEW DEQUE WITH origin
+            SET visitedFlags[origin] TO True
+
+            WHILE NOT processingQueue IS EMPTY
+                SET currentNode TO POP FRONT processingQueue
+                SET neighborsList TO [currentNode - 1, currentNode + 1]
+
+                FOR each adjacentNode IN neighborsList
+                    IF adjacentNode >= 1 AND adjacentNode <= n THEN
+                        IF visitedFlags[adjacentNode] IS False THEN
+                            visitedFlags[adjacentNode] = True
+                            distSteps[adjacentNode] = distSteps[currentNode] PLUS 1
+                            APPEND adjacentNode TO processingQueue
+                        END IF
+                    END IF
+                END FOR
+
+                IF currentNode IS x AND visitedFlags[y] IS False THEN
+                    visitedFlags[y] = True
+                    distSteps[y] = distSteps[currentNode] PLUS 1
+                    APPEND y TO processingQueue
+                ELSE IF currentNode IS y AND visitedFlags[x] IS False THEN
+                    visitedFlags[x] = True
+                    distSteps[x] = distSteps[currentNode] PLUS 1
+                    APPEND x TO processingQueue
+                END IF
+            END WHILE
+
+            RETURN SLICE distSteps FROM 1 TO END
+        END FUNCTION
+
+        SET countArray TO ARRAY OF n elements ALL 0
+        SET counterIndex TO 1
+        WHILE counterIndex <= n
+            SET bfsDistances TO bfs(counterIndex)
+
+            FOR each distValue IN bfsDistances
+                IF distValue NOT EQUAL TO 0 THEN
+                    SET targetPos TO distValue - 1
+                    countArray[targetPos] += 1
+                END IF
+            END FOR
+
+            SET counterIndex TO counterIndex + 1
+        END WHILE
+
+        RETURN countArray
+    END FUNCTION
+END CLASS

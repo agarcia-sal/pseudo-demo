@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer
+        FUNCTION nxt(x x AS integer y y AS integer) RETURNS integer
+            IF NOT ((x AND 1) XOR y) = 0 THEN
+                RETURN ((x + 1) + 0)
+            ELSE
+                RETURN ((x + 2) + 0)
+            END IF
+        END FUNCTION
+
+        SET lenA TO LENGTH OF nums1
+        SET lenB TO LENGTH OF nums2
+
+        FUNCTION create2DList(rows rows AS integer cols cols AS integer) RETURNS list OF list OF integers
+            FUNCTION buildRow(count count AS integer) RETURNS list OF integers
+                IF count = 0 THEN
+                    RETURN []
+                ELSE
+                    RETURN [0] + buildRow(count - 1)
+                END IF
+            END FUNCTION
+            FUNCTION buildMatrix(r r AS integer) RETURNS list OF list OF integers
+                IF r = 0 THEN
+                    RETURN []
+                ELSE
+                    RETURN [buildRow(cols)] + buildMatrix(r - 1)
+                END IF
+            END FUNCTION
+            RETURN buildMatrix(rows)
+        END FUNCTION
+
+        SET dp TO create2DList(lenA + 1, lenB + 1)
+
+        FUNCTION fillFirstColumn(i i AS integer)
+            IF i > lenA THEN
+                RETURN
+            ELSE
+                SET valX TO nums1[i]
+                SET prevVal TO dp[i - 1][0]
+                SET dp[i][0] TO nxt(prevVal, valX)
+                CALL fillFirstColumn(i + 1)
+            END IF
+        END FUNCTION
+        CALL fillFirstColumn(1)
+
+        FUNCTION fillFirstRow(j j AS integer)
+            IF j > lenB THEN
+                RETURN
+            ELSE
+                SET valY TO nums2[j]
+                SET prevVal TO dp[0][j - 1]
+                SET dp[0][j] TO nxt(prevVal, valY)
+                CALL fillFirstRow(j + 1)
+            END IF
+        END FUNCTION
+        CALL fillFirstRow(1)
+
+        FUNCTION fillRemaining(i i AS integer j j AS integer)
+            IF i > lenA THEN
+                RETURN
+            ELSE
+                IF j > lenB THEN
+                    CALL fillRemaining(i + 1, 1)
+                ELSE
+                    SET valX TO nums1[i]
+                    SET valY TO nums2[j]
+                    SET leftVal TO nxt(dp[i - 1][j], valX)
+                    SET upVal TO nxt(dp[i][j - 1], valY)
+                    IF leftVal < upVal THEN
+                        SET dp[i][j] TO leftVal
+                    ELSE
+                        SET dp[i][j] TO upVal
+                    END IF
+                    CALL fillRemaining(i, j + 1)
+                END IF
+            END IF
+        END FUNCTION
+        CALL fillRemaining(1,1)
+
+        RETURN dp[lenA][lenB]
+    END FUNCTION
+END CLASS

@@ -1,0 +1,64 @@
+CLASS Solution
+    FUNCTION maximumStrength(nums k)
+        SET totalCount TO LENGTH OF nums
+        FUNCTION maximum(a b)
+            IF a GREATER THAN b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+        FUNCTION negate(x)
+            RETURN 0 MINUS x
+        END FUNCTION
+
+        SET table TO CREATE list OF (totalCount PLUS 1) elements EACH BEING A list OF (k PLUS 1) elements INITIALIZED TO (0 MINUS 999999999)
+        SET table at 0 AND 0 TO 0
+
+        FUNCTION processColumns(columnIndex)
+            IF columnIndex GREATER THAN k THEN
+                RETURN
+            END IF
+
+            FUNCTION processRows(rowIndex)
+                IF rowIndex GREATER THAN totalCount THEN
+                    RETURN
+                END IF
+
+                SET segmentSum TO 0
+                FUNCTION descendingPositions(pos)
+                    IF pos LESS THAN 1 THEN
+                        RETURN
+                    END IF
+
+                    SET segmentSum TO segmentSum PLUS nums at (pos MINUS 1)
+
+                    IF (columnIndex MODULO 2) EQUALS 1 THEN
+                        SET multiplier TO 1 PLUS (k MINUS 1 MINUS columnIndex)
+                    ELSE
+                        SET multiplier TO negate(1 PLUS (k MINUS 1 MINUS columnIndex))
+                    END IF
+
+                    SET currentVal TO maximum(table at rowIndex AND columnIndex, table at (pos MINUS 1) AND (columnIndex MINUS 1) PLUS multiplier MULTIPLIED BY segmentSum)
+
+                    SET table at rowIndex AND columnIndex TO currentVal
+
+                    descendingPositions(pos MINUS 1)
+                END FUNCTION
+
+                descendingPositions(rowIndex)
+
+                SET table at rowIndex AND columnIndex TO maximum(table at rowIndex AND columnIndex, table at (rowIndex MINUS 1) AND columnIndex)
+
+                processRows(rowIndex PLUS 1)
+            END FUNCTION
+
+            processRows(1)
+            processColumns(columnIndex PLUS 1)
+        END FUNCTION
+
+        processColumns(1)
+
+        RETURN table at totalCount AND k
+    END FUNCTION
+END CLASS

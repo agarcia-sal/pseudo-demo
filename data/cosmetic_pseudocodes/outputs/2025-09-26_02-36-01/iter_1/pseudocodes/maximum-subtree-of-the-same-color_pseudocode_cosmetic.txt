@@ -1,0 +1,44 @@
+CLASS Solution  
+    FUNCTION maximumSubtreeSize(edges, colors)  
+        DECLARE adjacency AS an empty dictionary mapping keys to lists  
+        FOR each edge IN edges DO  
+            u, v = edge[0], edge[1]  
+            IF u NOT IN adjacency THEN  
+                adjacency[u] = empty list  
+            END IF  
+            IF v NOT IN adjacency THEN  
+                adjacency[v] = empty list  
+            END IF  
+            APPEND v TO adjacency[u]  
+            APPEND u TO adjacency[v]  
+        END FOR  
+
+        SET result TO 1  
+
+        FUNCTION dfs(node, parent)  
+            DECLARE subtree_size AS 1  
+            DECLARE uniform_colors AS true  
+            FOR neighbor IN adjacency[node] DO  
+                IF neighbor != parent THEN  
+                    descendant_size = dfs(neighbor, node)  
+                    IF descendant_size == 0 THEN  
+                        uniform_colors = false  
+                    ELSE IF colors[neighbor] == colors[node] THEN  
+                        subtree_size = subtree_size + descendant_size  
+                    ELSE  
+                        uniform_colors = false  
+                    END IF  
+                END IF  
+            END FOR  
+            IF uniform_colors THEN  
+                result = MAX(result, subtree_size)  
+                RETURN subtree_size  
+            ELSE  
+                RETURN 0  
+            END IF  
+        END FUNCTION  
+
+        CALL dfs(0, -1)  
+        RETURN result  
+    END FUNCTION  
+END CLASS

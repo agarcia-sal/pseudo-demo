@@ -1,0 +1,59 @@
+CLASS Solution  
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER  
+        SET alpha TO 10  
+        SET beta TO 9  
+        SET delta TO 7  
+        SET MOD TO ((alpha ^ beta) + delta)  
+        SET omega TO 0  
+
+        FUNCTION AbsVal(x parameter INTEGER) RETURNS INTEGER  
+            IF x < 0 THEN  
+                RETURN 0 - x  
+            ELSE  
+                RETURN x  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION GenerateCombos(arr parameter LIST OF INTEGERS size parameter INTEGER) RETURNS LIST OF LIST OF INTEGERS  
+            SET results TO empty LIST  
+            FUNCTION Helper(start parameter INTEGER currentCombo parameter LIST OF INTEGERS) RETURNS VOID  
+                IF LENGTH(currentCombo) = size THEN  
+                    APPEND currentCombo TO results  
+                    RETURN  
+                END IF  
+                SET counter TO start  
+                WHILE counter < LENGTH(arr) DO  
+                    CALL Helper(counter + 1, currentCombo + [arr[counter]])  
+                    SET counter TO counter + 1  
+                END WHILE  
+            END FUNCTION  
+            CALL Helper(0, empty LIST)  
+            RETURN results  
+        END FUNCTION  
+
+        SET allCombos TO GenerateCombos(nums, k)  
+
+        SET idxCombo TO 0  
+        WHILE idxCombo < LENGTH(allCombos) DO  
+            SET comboInstance TO allCombos[idxCombo]  
+            SET minDiff TO 9223372036854775807  
+            SET a TO 0  
+            WHILE a < k DO  
+                SET b TO a + 1  
+                WHILE b < k DO  
+                    SET diff TO AbsVal(comboInstance[a] - comboInstance[b])  
+                    IF diff < minDiff THEN  
+                        SET minDiff TO diff  
+                    END IF  
+                    SET b TO b + 1  
+                END WHILE  
+                SET a TO a + 1  
+            END WHILE  
+            SET omega TO omega + minDiff  
+            SET omega TO omega % MOD  
+            SET idxCombo TO idxCombo + 1  
+        END WHILE  
+
+        RETURN omega  
+    END FUNCTION  
+END CLASS

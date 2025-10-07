@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION minOrAfterOperations(nums k)
+        
+        FUNCTION verifyFeasibility(testVal k)
+            SET active_accumulator TO -1
+            SET ops_count TO 0
+
+            SET index TO 0
+            WHILE index < LENGTH(nums)
+                SET element TO nums[index]
+                IF active_accumulator = -1 THEN
+                    SET active_accumulator TO element
+                ELSE
+                    SET active_accumulator TO (active_accumulator BITWISE_AND element)
+                END IF
+
+                IF (active_accumulator BITWISE_AND testVal) = 0 THEN
+                    SET active_accumulator TO -1
+                ELSE
+                    SET ops_count TO ops_count + 1
+                    IF ops_count > k THEN
+                        RETURN false
+                    END IF
+                END IF
+
+                SET index TO index + 1
+            END WHILE
+
+            RETURN true
+        END FUNCTION
+
+        FUNCTION powerTwo(exp)
+            SET resultVal TO 1
+            FOR counter FROM 0 TO exp - 1
+                SET resultVal TO resultVal * 2
+            END FOR
+            RETURN resultVal
+        END FUNCTION
+
+        SET maxInt TO (powerTwo(30)) - 1
+        SET accumulatorVar TO maxInt
+
+        SET positionVar TO 0
+        WHILE positionVar < 30
+            SET maskVal TO powerTwo(positionVar)
+
+            IF (accumulatorVar BITWISE_AND maskVal) = 0 THEN
+                SET positionVar TO positionVar + 1
+                CONTINUE
+            END IF
+
+            SET test_condition TO (NOT accumulatorVar) BITWISE_XOR maskVal
+
+            IF verifyFeasibility(test_condition k) THEN
+                SET accumulatorVar TO accumulatorVar BITWISE_AND (NOT maskVal)
+            END IF
+
+            SET positionVar TO positionVar + 1
+        END WHILE
+
+        RETURN accumulatorVar
+    END FUNCTION
+END CLASS

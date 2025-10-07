@@ -1,0 +1,45 @@
+```
+FUNCTION sort_third(list_input)
+	TYPE altered_list := NEW LIST FROM list_input
+	TYPE extracted_elements := NEW LIST {}
+	
+	FUNCTION collect(index, accum)
+		CASE TRUE OF
+			(index >= LENGTH altered_list):
+				RETURN accum
+			TRUE:
+				RETURN collect(index + 3, accum + [altered_list[index]])
+		END CASE
+	END FUNCTION
+
+	extracted_elements = collect(0, [])
+
+	// sort extracted_elements ascending by insertion sort (iterative)
+	TYPE n := LENGTH extracted_elements
+	TYPE i := 1
+	WHILE i < n DO
+		TYPE key := extracted_elements[i]
+		TYPE j := i - 1
+		WHILE (j >= 0) AND (extracted_elements[j] > key) DO
+			extracted_elements[j + 1] := extracted_elements[j]
+			j := j - 1
+		END WHILE
+		extracted_elements[j + 1] := key
+		i := i + 1
+	END WHILE
+
+	FUNCTION replace(index, elems)
+		CASE TRUE OF
+			(index >= LENGTH altered_list):
+				RETURN altered_list
+			TRUE:
+				altered_list[index] := elems[0]
+				RETURN replace(index + 3, SUBLIST elems 1 LENGTH(elems))
+		END CASE
+	END FUNCTION
+
+	replace(0, extracted_elements)
+
+	RETURN altered_list
+END FUNCTION
+```

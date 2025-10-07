@@ -1,0 +1,52 @@
+CLASS Solution  
+    FUNCTION minimumOperationsToWriteY(grid)  
+        DEFINE size AS LENGTH(grid)  
+        DEFINE mid AS size DIVIDED_BY 2  
+        DEFINE y_positions AS NEW SET()  
+        
+        INITIALIZE idx TO 0  
+        WHILE idx <= mid  
+            y_positions.ADD((idx, idx))  
+            idx = idx + 1  
+        END WHILE  
+        
+        idx = 0  
+        WHILE idx <= mid  
+            y_positions.ADD((idx, size - idx - 1))  
+            idx = idx + 1  
+        END WHILE  
+        
+        idx = mid  
+        WHILE idx < size  
+            y_positions.ADD((idx, mid))  
+            idx = idx + 1  
+        END WHILE  
+        
+        DEFINE y_counts AS DICTIONARY with keys 0, 1, 2 and initial values 0  
+        DEFINE other_counts AS DICTIONARY with keys 0, 1, 2 and initial values 0  
+        
+        FOR row FROM 0 TO size - 1  
+            FOR col FROM 0 TO size - 1  
+                IF (row, col) IN y_positions  
+                    INCREMENT y_counts[grid[row][col]] BY 1  
+                ELSE  
+                    INCREMENT other_counts[grid[row][col]] BY 1  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        DEFINE best_result AS LARGE_NUMBER  
+        FOR val_in_y IN [0, 1, 2]  
+            FOR val_in_other IN [0, 1, 2]  
+                IF val_in_y != val_in_other  
+                    CALCULATE total_ops AS (SUM(y_counts.VALUES()) - y_counts[val_in_y]) + (SUM(other_counts.VALUES()) - other_counts[val_in_other])  
+                    IF total_ops < best_result  
+                        best_result = total_ops  
+                    END IF  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        RETURN best_result  
+    END FUNCTION  
+END CLASS

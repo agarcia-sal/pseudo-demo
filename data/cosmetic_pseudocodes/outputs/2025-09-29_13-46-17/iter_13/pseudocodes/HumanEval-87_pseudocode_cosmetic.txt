@@ -1,0 +1,45 @@
+FUNCTION get_row(two_dimensional_list, target_integer)
+  DEFINE ζx₉ = EMPTY LIST
+
+  DEFINE explore_column(row_pos, col_pos, acc_coords) =
+    IF NOT (col_pos < LENGTH(two_dimensional_list[row_pos]))
+      RETURN acc_coords
+    ELSE
+      DEFINE updated_coords =
+        IF (two_dimensional_list[row_pos][col_pos] = target_integer)
+          CONCAT(acc_coords, [(row_pos, col_pos)])
+        ELSE
+          acc_coords
+      RETURN explore_column(row_pos, col_pos + 1, updated_coords)
+
+  DEFINE explore_row(r_pos, acc_coords) =
+    IF NOT (r_pos < LENGTH(two_dimensional_list))
+      RETURN acc_coords
+    ELSE
+      DEFINE after_columns = explore_column(r_pos, 0, acc_coords)
+      RETURN explore_row(r_pos + 1, after_columns)
+
+  DEFINE coords_unsorted = explore_row(0, ζx₉)
+
+  DEFINE sort_desc_sec(xs, i, j) =
+    IF NOT (j < LENGTH(xs)) THEN xs
+    ELSE IF (i < LENGTH(xs))
+      THEN IF xs[i][1] < xs[j][1]
+          THEN sort_desc_sec(SWAP(xs, i, j), i + 1, j)
+          ELSE sort_desc_sec(xs, i + 1, j)
+    ELSE sort_desc_sec(xs, 0, j + 1)
+
+  DEFINE sort_asc_first(xs, k, l) =
+    IF l < LENGTH(xs)
+      THEN IF k < l
+          THEN IF xs[k][0] > xs[l][0]
+              THEN sort_asc_first(SWAP(xs, k, l), k + 1, l)
+              ELSE sort_asc_first(xs, k + 1, l)
+          ELSE sort_asc_first(xs, 0, l + 1)
+      ELSE xs
+
+  DEFINE coords_after_second_sort = sort_desc_sec(coords_unsorted, 0, 0)
+  DEFINE coords_after_first_sort = sort_asc_first(coords_after_second_sort, 0, 0)
+
+  RETURN coords_after_first_sort
+END FUNCTION

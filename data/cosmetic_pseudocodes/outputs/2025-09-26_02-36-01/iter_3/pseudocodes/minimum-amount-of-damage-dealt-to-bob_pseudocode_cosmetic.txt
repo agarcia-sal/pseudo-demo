@@ -1,0 +1,48 @@
+CLASS Enemy
+    FUNCTION __init__(self, damage, timeTakenDown)
+        SET self.damage TO damage
+        SET self.timeTakenDown TO timeTakenDown
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION minDamage(self, power, damage, health)
+        SET result_accumulator TO 0
+        SET total_damage_sum TO 0
+        SET iterator_index TO 0
+        WHILE iterator_index < (LENGTH OF damage)
+            SET total_damage_sum TO total_damage_sum + damage[iterator_index]
+            SET iterator_index TO iterator_index + 1
+        END WHILE
+
+        SET enemy_collection TO []
+
+        SET loop_counter TO 0
+        WHILE loop_counter < LENGTH OF damage
+            SET dmg_var TO damage[loop_counter]
+            SET hp_var TO health[loop_counter]
+            SET time_down_value TO ( (hp_var + (power - 1)) DIV power )
+
+            SET enemy_instance TO Enemy(dmg_var, time_down_value)
+            APPEND enemy_instance TO enemy_collection
+            SET loop_counter TO loop_counter + 1
+        END WHILE
+
+        DEFINE FUNCTION ratio_compare(enemy_obj)
+            RETURN (enemy_obj.damage * 1.0) / enemy_obj.timeTakenDown
+        END FUNCTION
+
+        SET enemy_collection TO SORTED(enemy_collection, key=ratio_compare, descending=TRUE)
+
+        SET index_var TO 0
+        WHILE index_var < LENGTH OF enemy_collection
+            SET current_enemy TO enemy_collection[index_var]
+            SET increment_value TO total_damage_sum * current_enemy.timeTakenDown
+            SET result_accumulator TO result_accumulator + increment_value
+            SET total_damage_sum TO total_damage_sum - current_enemy.damage
+            SET index_var TO index_var + 1
+        END WHILE
+
+        RETURN result_accumulator
+    END FUNCTION
+END CLASS

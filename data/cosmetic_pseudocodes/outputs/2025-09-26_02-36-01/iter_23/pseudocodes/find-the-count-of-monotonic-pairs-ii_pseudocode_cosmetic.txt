@@ -1,0 +1,131 @@
+```pseudocode
+CLASS Solution  
+    FUNCTION countOfPairs(nums)  
+        SET modVal TO (1000000000 + 7)  
+        SET countNums TO LENGTH(nums)  
+        SET highestNum TO 0  
+        SET idxL TO 0  
+        WHILE idxL < countNums  
+            IF highestNum < nums[idxL] THEN  
+                SET highestNum TO nums[idxL]  
+            END IF  
+            SET idxL TO idxL + 1  
+        END WHILE  
+
+        FUNCTION allocateDP(size1, size2, size3)  
+            FUNCTION allocate2D(x, y)  
+                IF x = 0 THEN  
+                    RETURN []  
+                END IF  
+                SET list2D TO []  
+                SET iterX TO 0  
+                WHILE iterX < x  
+                    APPEND allocate1D(y) TO list2D  
+                    SET iterX TO iterX + 1  
+                END WHILE  
+                RETURN list2D  
+            END FUNCTION  
+
+            FUNCTION allocate1D(z)  
+                IF z = 0 THEN  
+                    RETURN []  
+                END IF  
+                SET list1D TO []  
+                SET iterZ TO 0  
+                WHILE iterZ < z  
+                    APPEND 0 TO list1D  
+                    SET iterZ TO iterZ + 1  
+                END WHILE  
+                RETURN list1D  
+            END FUNCTION  
+
+            IF size1 = 0 THEN  
+                RETURN []  
+            END IF  
+            SET list3D TO []  
+            SET iter1 TO 0  
+            WHILE iter1 < size1  
+                APPEND allocate2D(size2, size3) TO list3D  
+                SET iter1 TO iter1 + 1  
+            END WHILE  
+            RETURN list3D  
+        END FUNCTION  
+
+        SET dpStructure TO allocateDP(countNums + 1, highestNum + 1, highestNum + 1)  
+
+        FUNCTION initFirstLevel(currentIdx, limit)  
+            IF currentIdx > limit THEN  
+                RETURN  
+            END IF  
+            SET dpStructure[1][currentIdx][nums[0] - currentIdx] TO 1  
+            CALL initFirstLevel(currentIdx + 1, limit)  
+        END FUNCTION  
+
+        CALL initFirstLevel(0, nums[0])  
+
+        FUNCTION loopI(iVal)  
+            IF iVal > countNums THEN  
+                RETURN  
+            END IF  
+            FUNCTION loopJ(jVal)  
+                IF jVal > nums[iVal - 1] THEN  
+                    RETURN  
+                END IF  
+                FUNCTION loopK(kVal)  
+                    IF kVal > nums[iVal - 1] THEN  
+                        RETURN  
+                    END IF  
+                    IF (jVal + kVal) = nums[iVal - 1] THEN  
+                        FUNCTION loopPrevJ(pjVal)  
+                            IF pjVal > jVal THEN  
+                                RETURN  
+                            END IF  
+                            FUNCTION loopPrevK(pkVal)  
+                                IF pkVal > highestNum THEN  
+                                    RETURN  
+                                END IF  
+                                SET oldValue TO dpStructure[iVal][jVal][kVal]  
+                                SET addValue TO dpStructure[iVal - 1][pjVal][pkVal]  
+                                SET dpStructure[iVal][jVal][kVal] TO (oldValue + addValue) MOD modVal  
+                                CALL loopPrevK(pkVal + 1)  
+                            END FUNCTION  
+                            CALL loopPrevK(kVal)  
+                            CALL loopPrevJ(pjVal + 1)  
+                        END FUNCTION  
+                        CALL loopPrevJ(0)  
+                    END IF  
+                    CALL loopK(kVal + 1)  
+                END FUNCTION  
+                CALL loopK(0)  
+                CALL loopJ(jVal + 1)  
+            END FUNCTION  
+            CALL loopJ(0)  
+            CALL loopI(iVal + 1)  
+        END FUNCTION  
+
+        CALL loopI(2)  
+
+        SET finalResult TO 0  
+
+        FUNCTION sumJ(jVal)  
+            IF jVal > highestNum THEN  
+                RETURN  
+            END IF  
+            FUNCTION sumK(kVal)  
+                IF kVal > highestNum THEN  
+                    RETURN  
+                END IF  
+                SET tmpSum TO dpStructure[countNums][jVal][kVal]  
+                SET finalResult TO (finalResult + tmpSum) MOD modVal  
+                CALL sumK(kVal + 1)  
+            END FUNCTION  
+            CALL sumK(0)  
+            CALL sumJ(jVal + 1)  
+        END FUNCTION  
+
+        CALL sumJ(0)  
+
+        RETURN finalResult  
+    END FUNCTION  
+END CLASS  
+```

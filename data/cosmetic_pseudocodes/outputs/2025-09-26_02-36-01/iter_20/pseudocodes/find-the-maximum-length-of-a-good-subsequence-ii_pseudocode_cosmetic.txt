@@ -1,0 +1,125 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+        FUNCTION initialize2DArray(rows PARAMETER, cols PARAMETER)
+            SET result TO an empty list
+            SET idx1 TO 0
+            REPEAT
+                IF idx1 IS GREATER THAN OR EQUAL TO rows THEN
+                    BREAK
+                END IF
+                SET tempRow TO an empty list
+                SET idx2 TO 0
+                REPEAT
+                    IF idx2 IS GREATER THAN OR EQUAL TO cols THEN
+                        BREAK
+                    END IF
+                    APPEND 0 TO tempRow
+                    SET idx2 TO idx2 PLUS 1
+                UNTIL FALSE
+                APPEND tempRow TO result
+                SET idx1 TO idx1 PLUS 1
+            UNTIL FALSE
+            RETURN result
+        END FUNCTION
+
+        FUNCTION createListOfDictionaries(length PARAMETER)
+            SET output TO an empty list
+            SET counter TO 0
+            REPEAT
+                IF counter IS GREATER THAN OR EQUAL TO length THEN
+                    BREAK
+                END IF
+                APPEND an empty dictionary TO output
+                SET counter TO counter PLUS 1
+            UNTIL FALSE
+            RETURN output
+        END FUNCTION
+
+        FUNCTION maxValue(a PARAMETER, b PARAMETER)
+            IF a IS GREATER THAN b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        SET totalCount TO 0
+        SET totalCount TO LENGTH OF nums
+        SET limit TO k PLUS 1
+
+        SET matrixF TO initialize2DArray(totalCount, limit)
+
+        SET mapMp TO createListOfDictionaries(limit)
+
+        SET matrixG TO initialize2DArray(limit, 3)
+
+        SET maxAnswer TO 0
+
+        SET outerIndex TO 0
+        REPEAT
+            IF outerIndex IS GREATER THAN OR EQUAL TO totalCount THEN
+                BREAK
+            END IF
+            SET currentElem TO nums[outerIndex]
+
+            SET innerIndex TO 0
+            REPEAT
+                IF innerIndex IS GREATER THAN OR EQUAL TO limit THEN
+                    BREAK
+                END IF
+
+                SET dictAtInner TO mapMp[innerIndex]
+                IF currentElem IN dictAtInner THEN
+                    SET matrixF[outerIndex][innerIndex] TO dictAtInner[currentElem]
+                ELSE
+                    SET matrixF[outerIndex][innerIndex] TO 0
+                END IF
+
+                IF innerIndex IS GREATER THAN 0 THEN
+                    SET prevGFirst TO matrixG[innerIndex - 1][0]
+                    SET prevGSecond TO matrixG[innerIndex - 1][1]
+                    SET prevGThird TO matrixG[innerIndex - 1][2]
+
+                    IF prevGFirst IS NOT EQUAL TO nums[outerIndex] THEN
+                        SET matrixF[outerIndex][innerIndex] TO maxValue(matrixF[outerIndex][innerIndex], prevGSecond)
+                    ELSE
+                        SET matrixF[outerIndex][innerIndex] TO maxValue(matrixF[outerIndex][innerIndex], prevGThird)
+                    END IF
+                END IF
+
+                SET matrixF[outerIndex][innerIndex] TO matrixF[outerIndex][innerIndex] PLUS 1
+
+                IF nums[outerIndex] IN mapMp[innerIndex] THEN
+                    SET mapMp[innerIndex][nums[outerIndex]] TO maxValue(mapMp[innerIndex][nums[outerIndex]], matrixF[outerIndex][innerIndex])
+                ELSE
+                    SET mapMp[innerIndex][nums[outerIndex]] TO matrixF[outerIndex][innerIndex]
+                END IF
+
+                SET gFirst TO matrixG[innerIndex][0]
+                SET gSecond TO matrixG[innerIndex][1]
+                SET gThird TO matrixG[innerIndex][2]
+                SET curFVal TO matrixF[outerIndex][innerIndex]
+
+                IF gFirst IS NOT EQUAL TO currentElem THEN
+                    IF curFVal IS GREATER THAN OR EQUAL TO gSecond THEN
+                        SET matrixG[innerIndex][2] TO gSecond
+                        SET matrixG[innerIndex][1] TO curFVal
+                        SET matrixG[innerIndex][0] TO currentElem
+                    ELSE
+                        SET matrixG[innerIndex][2] TO maxValue(gThird, curFVal)
+                    END IF
+                ELSE
+                    SET matrixG[innerIndex][1] TO maxValue(gSecond, curFVal)
+                END IF
+
+                SET maxAnswer TO maxValue(maxAnswer, curFVal)
+
+                SET innerIndex TO innerIndex PLUS 1
+            UNTIL FALSE
+
+            SET outerIndex TO outerIndex PLUS 1
+        UNTIL FALSE
+
+        RETURN maxAnswer
+    END FUNCTION
+END CLASS

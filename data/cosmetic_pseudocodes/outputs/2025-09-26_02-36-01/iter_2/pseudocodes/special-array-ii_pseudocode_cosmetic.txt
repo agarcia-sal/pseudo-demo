@@ -1,0 +1,40 @@
+CLASS Solution  
+    FUNCTION isArraySpecial(numbers, intervals)  
+        DEFINE parityList AS empty array  
+        SET idx TO 0  
+        WHILE idx < LENGTH(numbers)  
+            let val = numbers[idx]  
+            let modVal = val - 2 * FLOOR(val / 2)  
+            APPEND modVal TO parityList  
+            idx = idx + 1  
+        END WHILE  
+        
+        LET prefixSpecial = ARRAY OF LENGTH(numbers) FILLED WITH 0  
+        LET position = 1  
+        WHILE position < LENGTH(numbers)  
+            IF NOT (parityList[position] != parityList[position - 1])  
+                prefixSpecial[position] = prefixSpecial[position - 1] + 1  
+            ELSE  
+                prefixSpecial[position] = prefixSpecial[position - 1]  
+            END IF  
+            position = position + 1  
+        END WHILE  
+        
+        DECLARE outputResults AS empty collection  
+        LET c = 0  
+        WHILE c < LENGTH(intervals)  
+            LET first = intervals[c][0]  
+            LET second = intervals[c][1]  
+            IF first == second THEN  
+                APPEND True TO outputResults  
+            ELSE  
+                LET baseIdx = (first > 0) ? prefixSpecial[first] : 0  
+                LET diffVal = prefixSpecial[second] - baseIdx  
+                APPEND (diffVal == 0) TO outputResults  
+            END IF  
+            c = c + 1  
+        END WHILE  
+        
+        RETURN outputResults  
+    END FUNCTION  
+END CLASS

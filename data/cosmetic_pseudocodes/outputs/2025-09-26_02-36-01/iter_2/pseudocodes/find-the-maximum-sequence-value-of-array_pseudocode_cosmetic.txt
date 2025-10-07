@@ -1,0 +1,65 @@
+CLASS Solution  
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER  
+        LET limit BE 1 LEFT-SHIFTED BY 7  
+        LET length BE LENGTH OF nums  
+        INITIALIZE dp FORWARD AS A 3D ARRAY OF BOOLEAN WITH DIMENSIONS (length + 1) BY (k + 2) BY limit, ALL SET TO FALSE  
+        dp[0][0][0] <- TRUE  
+        
+        SET idx1 TO 0  
+        WHILE idx1 < length  
+            SET idx2 TO 0  
+            WHILE idx2 <= k  
+                SET idx3 TO 0  
+                WHILE idx3 < limit  
+                    dp[idx1 + 1][idx2][idx3] <- dp[idx1 + 1][idx2][idx3] OR dp[idx1][idx2][idx3]  
+                    bitmask_next <- idx3 BITWISE-OR nums[idx1]  
+                    dp[idx1 + 1][idx2 + 1][bitmask_next] <- dp[idx1 + 1][idx2 + 1][bitmask_next] OR dp[idx1][idx2][idx3]  
+                    idx3 <- idx3 + 1  
+                END WHILE  
+                idx2 <- idx2 + 1  
+            END WHILE  
+            idx1 <- idx1 + 1  
+        END WHILE  
+        
+        INITIALIZE dp_backward AS A 3D ARRAY OF BOOLEAN WITH DIMENSIONS (length + 1) BY (k + 2) BY limit, ALL SET TO FALSE  
+        dp_backward[length][0][0] <- TRUE  
+        
+        SET i_down TO length  
+        WHILE i_down > 0  
+            SET j_idx TO 0  
+            WHILE j_idx <= k  
+                SET y_idx TO 0  
+                WHILE y_idx < limit  
+                    dp_backward[i_down - 1][j_idx][y_idx] <- dp_backward[i_down - 1][j_idx][y_idx] OR dp_backward[i_down][j_idx][y_idx]  
+                    combined_mask <- y_idx BITWISE-OR nums[i_down - 1]  
+                    dp_backward[i_down - 1][j_idx + 1][combined_mask] <- dp_backward[i_down - 1][j_idx + 1][combined_mask] OR dp_backward[i_down][j_idx][y_idx]  
+                    y_idx <- y_idx + 1  
+                END WHILE  
+                j_idx <- j_idx + 1  
+            END WHILE  
+            i_down <- i_down - 1  
+        END WHILE  
+        
+        max_result <- 0  
+        SET position TO k  
+        WHILE position <= length - k  
+            mask_x <- 0  
+            WHILE mask_x < limit  
+                IF dp[position][k][mask_x] THEN  
+                    mask_y <- 0  
+                    WHILE mask_y < limit  
+                        IF dp_backward[position][k][mask_y] THEN  
+                            xor_val <- mask_x XOR mask_y  
+                            max_result <- IF xor_val > max_result THEN xor_val ELSE max_result  
+                        END IF  
+                        mask_y <- mask_y + 1  
+                    END WHILE  
+                END IF  
+                mask_x <- mask_x + 1  
+            END WHILE  
+            position <- position + 1  
+        END WHILE  
+        
+        RETURN max_result  
+    END FUNCTION  
+END CLASS

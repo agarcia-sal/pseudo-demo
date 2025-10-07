@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION maximumLength(nums k)
+        FUNCTION customMax(a b)
+            IF a GREATER THAN b
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        SET defVal TO 1
+        SET lengthNums TO LENGTH OF nums
+        SET dp TO a 2D list OF size lengthNums BY (k PLUS 1) FILLED WITH defVal
+
+        SET maxResult TO 0
+
+        PROCEDURE loopOuter(indexOuter)
+            IF indexOuter GREATER THAN (lengthNums MINUS 1)
+                RETURN
+            END IF
+
+            SET currentNum TO nums AT indexOuter
+
+            PROCEDURE loopMiddle(counterMiddle)
+                IF counterMiddle GREATER THAN k
+                    RETURN
+                END IF
+
+                PROCEDURE loopInner(indexInner)
+                    IF indexInner EQUALS indexOuter
+                        RETURN
+                    END IF
+
+                    IF indexInner GREATER THAN (indexOuter MINUS 1)
+                        RETURN
+                    END IF
+
+                    SET compareNum TO nums AT indexInner
+
+                    IF currentNum EQUALS compareNum
+                        SET dp AT [indexOuter][counterMiddle] TO customMax(dp AT [indexOuter][counterMiddle], dp AT [indexInner][counterMiddle] PLUS 1)
+                    ELSE
+                        IF counterMiddle GREATER THAN 0
+                            SET tempVal TO dp AT [indexInner][counterMiddle]
+                            SET dp AT [indexOuter][counterMiddle] TO customMax(dp AT [indexOuter][counterMiddle], (tempVal MINUS 1) PLUS 1)
+                        END IF
+                    END IF
+
+                    CALL loopInner(indexInner PLUS 1)
+                END PROCEDURE
+
+                CALL loopInner(0)
+
+                CALL loopMiddle(counterMiddle PLUS 1)
+            END PROCEDURE
+
+            CALL loopMiddle(0)
+
+            SET maxResult TO customMax(maxResult, dp AT [indexOuter][k])
+
+            CALL loopOuter(indexOuter PLUS 1)
+        END PROCEDURE
+
+        CALL loopOuter(0)
+
+        RETURN maxResult
+    END FUNCTION
+END CLASS

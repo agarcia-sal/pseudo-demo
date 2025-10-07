@@ -1,0 +1,130 @@
+CLASS Solution
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)
+        DEFINE procedure buildAdjacency(srcList destList map)
+            SET idxA TO 0
+            WHILE idxA LESS THAN LENGTH(srcList)
+                SET keyX TO srcList[idxA]
+                SET valY TO destList[idxA]
+                IF keyX NOT IN map
+                    SET map[keyX] TO empty list
+                END IF
+                IF valY NOT IN map
+                    SET map[valY] TO empty list
+                END IF
+                APPEND valY TO map[keyX]
+                SET idxA TO idxA + 1
+            END WHILE
+        END PROCEDURE
+
+        SET graph TO empty dictionary
+        SET reverse_graph TO empty dictionary
+        CALL buildAdjacency(flowFrom flowTo graph)
+        CALL buildAdjacency(flowTo flowFrom reverse_graph)
+
+        SET indices TO list FILL WITH -1 SIZE n
+        SET low_links TO list FILL WITH 0 SIZE n
+        SET on_stack TO list FILL WITH False SIZE n
+        SET stack TO empty list
+        SET current_index TO 0
+        SET sccs TO empty list
+
+        DEFINE FUNCTION tarjan(node)
+            SET indices[node] TO current_index
+            SET low_links[node] TO current_index
+            SET current_index TO current_index + 1
+            APPEND node TO stack
+            SET on_stack[node] TO True
+
+            SET iterNeighbor TO 0
+            WHILE iterNeighbor LESS THAN LENGTH(graph[node])
+                SET neighbor TO graph[node][iterNeighbor]
+                IF indices[neighbor] EQUALS -1
+                    CALL tarjan(neighbor)
+                    SET low_links[node] TO (low_links[node] IF low_links[node] < low_links[neighbor] ELSE low_links[neighbor])
+                ELSE 
+                    IF on_stack[neighbor]
+                        SET low_links[node] TO (low_links[node] IF low_links[node] < indices[neighbor] ELSE indices[neighbor])
+                    END IF
+                END IF
+                SET iterNeighbor TO iterNeighbor + 1
+            END WHILE
+
+            IF low_links[node] EQUALS indices[node]
+                SET component TO empty list
+                REPEAT
+                    SET w TO stack[-1]
+                    REMOVE last element FROM stack
+                    SET on_stack[w] TO False
+                    APPEND w TO component
+                    IF w EQUALS node
+                        BREAK
+                    END IF
+                UNTIL False
+                APPEND component TO sccs
+            END IF
+        END FUNCTION
+
+        SET i TO 0
+        WHILE i LESS THAN n
+            IF indices[i] EQUALS -1
+                CALL tarjan(i)
+            END IF
+            SET i TO i + 1
+        END WHILE
+
+        SET scc_graph TO empty dictionary
+        SET scc_index TO list FILL WITH -1 SIZE n
+        SET scc_has_crystal TO list FILL WITH False SIZE LENGTH(sccs)
+
+        SET countSCC TO 0
+        FOR idx IN 0 TO LENGTH(sccs) - 1 STEP 1
+            FOR each node IN sccs[idx]
+                SET scc_index[node] TO countSCC
+                IF node IN crystals
+                    SET scc_has_crystal[idx] TO True
+                END IF
+            END FOR
+            SET countSCC TO countSCC + 1
+        END FOR
+
+        SET j TO 0
+        WHILE j LESS THAN LENGTH(flowFrom)
+            SET u_k TO flowFrom[j]
+            SET v_k TO flowTo[j]
+            SET u_scc TO scc_index[u_k]
+            SET v_scc TO scc_index[v_k]
+
+            IF u_scc NOT EQUAL v_scc
+                IF NOT u_scc IN scc_graph
+                    SET scc_graph[u_scc] TO empty list
+                END IF
+                APPEND v_scc TO scc_graph[u_scc]
+            END IF
+            SET j TO j + 1
+        END WHILE
+
+        SET in_degree TO list FILL WITH 0 SIZE LENGTH(sccs)
+        SET scc_iter TO 0
+        WHILE scc_iter LESS THAN LENGTH(sccs)
+            IF scc_iter IN scc_graph
+                FOR each nbr IN scc_graph[scc_iter]
+                    SET in_degree[nbr] TO in_degree[nbr] + 1
+                END FOR
+            END IF
+            SET scc_iter TO scc_iter + 1
+        END WHILE
+
+        SET additions TO 0
+        SET idxC TO 0
+        WHILE idxC LESS THAN LENGTH(sccs)
+            IF in_degree[idxC] EQUALS 0
+                IF scc_has_crystal[idxC] EQUALS False
+                    SET additions TO additions + 1
+                END IF
+            END IF
+            SET idxC TO idxC + 1
+        END WHILE
+
+        RETURN additions
+    END FUNCTION
+END CLASS

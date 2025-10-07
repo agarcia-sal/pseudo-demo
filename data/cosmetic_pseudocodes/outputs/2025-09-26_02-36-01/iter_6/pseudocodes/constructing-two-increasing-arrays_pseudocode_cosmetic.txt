@@ -1,0 +1,71 @@
+CLASS Solution  
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer  
+        FUNCTION nxt(x x AS integer y y AS integer) RETURNS integer  
+            SET bitCheck TO (x BITWISE_AND (1 BITWISE_XOR y))  
+            IF NOT (bitCheck EQUALS 0) THEN  
+                RETURN (x PLUS 1)  
+            ELSE  
+                RETURN (x PLUS 1 PLUS 1)  
+            END IF  
+        END FUNCTION  
+
+        SET lenA TO 0  
+        SET lenB TO 0  
+        lenB = 0  
+        WHILE (lenA LESS_THAN LENGTH(nums1))  
+            lenA = lenA PLUS 1  
+        END WHILE  
+        WHILE (lenB LESS_THAN LENGTH(nums2))  
+            lenB = lenB PLUS 1  
+        END WHILE  
+
+        SET dp TO a list  
+        SET rowCount TO lenA PLUS 1  
+        SET colCount TO lenB PLUS 1  
+        FOR idx1 FROM 0 TO (rowCount MINUS 1)  
+            SET tempRow TO a list  
+            FOR  idx2 FROM 0 TO  (colCount MINUS 1)  
+                APPEND 0 TO tempRow  
+            END FOR  
+            APPEND tempRow TO dp  
+        END FOR  
+
+        PROCEDURE fillRow(posA posA AS integer)  
+            IF posA GREATER_THAN lenA THEN RETURN END PROCEDURE  
+            SET valA TO nums1 AT (posA MINUS 1)  
+            SET currentVal TO nxt(dp AT (posA MINUS 1) AT 0,valA)  
+            dp AT posA AT 0 = currentVal  
+            CALL fillRow(posA PLUS 1)  
+        END PROCEDURE  
+        CALL fillRow(1)  
+
+        PROCEDURE fillCol(posB posB AS integer)  
+            IF posB GREATER_THAN lenB THEN RETURN END PROCEDURE  
+            SET valB TO nums2 AT (posB MINUS 1)  
+            SET currentVal TO nxt(dp AT 0 AT (posB MINUS 1),valB)  
+            dp AT 0 AT posB = currentVal  
+            CALL fillCol(posB PLUS 1)  
+        END PROCEDURE  
+        CALL fillCol(1)  
+
+        SET iIdx TO 1  
+        WHILE iIdx LESS_OR_EQUAL lenA  
+            SET valNumA TO nums1 AT (iIdx MINUS 1)  
+            SET jIdx TO 1  
+            WHILE jIdx LESS_OR_EQUAL lenB  
+                SET valNumB TO nums2 AT (jIdx MINUS 1)  
+                SET option1 TO nxt(dp AT (iIdx MINUS 1) AT jIdx,valNumA)  
+                SET option2 TO nxt(dp AT iIdx AT (jIdx MINUS 1),valNumB)  
+                IF option1 LESS_THAN option2 THEN  
+                    dp AT iIdx AT jIdx = option1  
+                ELSE  
+                    dp AT iIdx AT jIdx = option2  
+                END IF  
+                jIdx = jIdx PLUS 1  
+            END WHILE  
+            iIdx = iIdx PLUS 1  
+        END WHILE  
+
+        RETURN dp AT lenA AT lenB  
+    END FUNCTION  
+END CLASS

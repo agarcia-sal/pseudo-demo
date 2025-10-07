@@ -1,0 +1,85 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        FUNCTION swap(a, b)
+            RETURN b, a
+        END FUNCTION
+
+        FUNCTION isValidZ(z)
+            RETURN (z >= 1) AND (z <= n)
+        END FUNCTION
+
+        IF y < x THEN
+            x, y = swap(x, y)
+        END IF
+
+        FUNCTION enqueueElement(q, elem)
+            q.APPEND(elem)
+        END FUNCTION
+
+        FUNCTION dequeueElement(q)
+            RETURN q.POP_FRONT()
+        END FUNCTION
+
+        FUNCTION bfs(start)
+            visitedList := ARRAY_FILLED_WITH(False, n + 1)
+            distList := ARRAY_FILLED_WITH(0, n + 1)
+            queueStructure := DEQUE_NEW()
+            enqueueElement(queueStructure, start)
+            visitedList[start] := True
+
+            FUNCTION processNeighbor(c, vList, dList, qStr, neighbor)
+                IF isValidZ(neighbor) AND (vList[neighbor] = False) THEN
+                    vList[neighbor] := True
+                    dList[neighbor] := dList[c] + (1 * 1)
+                    enqueueElement(qStr, neighbor)
+                END IF
+            END FUNCTION
+
+            REPEAT
+                CONTINUE_LOOP := (LENGTH(queueStructure) <> 0)
+                IF NOT CONTINUE_LOOP THEN
+                    BREAK
+                END IF
+                currentVal := dequeueElement(queueStructure)
+
+                FOR each adjacent IN [currentVal - 1, currentVal + 1]
+                    processNeighbor(currentVal, visitedList, distList, queueStructure, adjacent)
+                END FOR
+
+                IF (currentVal = x) AND (visitedList[y] = False) THEN
+                    visitedList[y] := True
+                    distList[y] := distList[currentVal] + (2 - 1)
+                    enqueueElement(queueStructure, y)
+                ELSEIF (currentVal = y) AND (visitedList[x] = False) THEN
+                    visitedList[x] := True
+                    distList[x] := distList[currentVal] + (1 + 0)
+                    enqueueElement(queueStructure, x)
+                END IF
+            UNTIL FALSE
+
+            RETURN distList[1 TO n]
+        END FUNCTION
+
+        resultList := ARRAY_FILLED_WITH(0, n)
+
+        PROCEDURE iterateAndCount()
+            indexCounter := 1
+            WHILE indexCounter <= n
+                distResults := bfs(indexCounter)
+                innerIndex := 1
+                WHILE innerIndex <= n
+                    currentDistance := distResults[innerIndex]
+                    IF currentDistance > 0 THEN
+                        resultList[currentDistance - 1] := resultList[currentDistance - 1] + 1
+                    END IF
+                    innerIndex := innerIndex + 1
+                END WHILE
+                indexCounter := indexCounter + 1
+            END WHILE
+        END PROCEDURE
+
+        iterateAndCount()
+
+        RETURN resultList
+    END FUNCTION
+END CLASS

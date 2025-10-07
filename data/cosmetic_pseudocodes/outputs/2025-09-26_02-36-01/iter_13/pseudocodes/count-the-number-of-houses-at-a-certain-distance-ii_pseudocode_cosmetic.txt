@@ -1,0 +1,114 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        PROCEDURE swapIfNeeded()
+            IF NOT (x LESS OR EQUAL y) THEN
+                SET alpha TO x
+                SET x TO y
+                SET y TO alpha
+            END IF
+        END PROCEDURE
+
+        CALL swapIfNeeded()
+
+        FUNCTION bfs(start)
+            SET visitedList TO []
+            REPEAT n PLUS 1 TIMES
+                APPEND False TO visitedList
+            END REPEAT
+
+            SET distList TO []
+            REPEAT n PLUS 1 TIMES
+                APPEND 0 TO distList
+            END REPEAT
+
+            FUNCTION enqueue(queueStruct, val)
+                APPEND val TO queueStruct
+            END FUNCTION
+
+            FUNCTION dequeue(queueStruct)
+                SET frontElement TO queueStruct[0]
+                REMOVE element at index 0 FROM queueStruct
+                RETURN frontElement
+            END FUNCTION
+
+            SET queueStruct TO [start]
+            SET visitedList[start] TO True
+
+            FUNCTION processNeighbor(currentVal, neighborVal)
+                IF (neighborVal GREATER OR EQUAL 1) AND (neighborVal LESS OR EQUAL n) AND (visitedList[neighborVal] EQUALS False) THEN
+                    SET visitedList[neighborVal] TO True
+                    SET distList[neighborVal] TO distList[currentVal] PLUS 1
+                    CALL enqueue(queueStruct, neighborVal)
+                END IF
+            END FUNCTION
+
+            WHILE LENGTH(queueStruct) GREATER THAN 0 DO
+                SET currentVal TO dequeue(queueStruct)
+
+                CALL processNeighbor(currentVal, currentVal MINUS 1)
+                CALL processNeighbor(currentVal, currentVal PLUS 1)
+
+                IF currentVal EQUALS x THEN
+                    IF visitedList[y] EQUALS False THEN
+                        SET visitedList[y] TO True
+                        SET distList[y] TO distList[currentVal] PLUS 1
+                        CALL enqueue(queueStruct, y)
+                    END IF
+                ELSE IF currentVal EQUALS y THEN
+                    IF visitedList[x] EQUALS False THEN
+                        SET visitedList[x] TO True
+                        SET distList[x] TO distList[currentVal] PLUS 1
+                        CALL enqueue(queueStruct, x)
+                    END IF
+                END IF
+
+            END WHILE
+
+            FUNCTION sliceList(listVar, startIndex)
+                SET sliced TO []
+                SET idx TO startIndex
+                WHILE idx LESS THAN LENGTH(listVar) DO
+                    APPEND listVar[idx] TO sliced
+                    SET idx TO idx PLUS 1
+                END WHILE
+                RETURN sliced
+            END FUNCTION
+
+            RETURN sliceList(distList, 1)
+        END FUNCTION
+
+        FUNCTION forEach(collection, action)
+            SET idx TO 0
+            WHILE idx LESS THAN LENGTH(collection) DO
+                CALL action(collection[idx])
+                SET idx TO idx PLUS 1
+            END WHILE
+        END FUNCTION
+
+        SET finalResult TO []
+        REPEAT n TIMES
+            APPEND 0 TO finalResult
+        END REPEAT
+
+        FUNCTION incrementAtIndex(idx)
+            SET finalResult[idx] TO finalResult[idx] PLUS 1
+        END FUNCTION
+
+        SET outerIdx TO 1
+        WHILE outerIdx LESS OR EQUAL n DO
+            SET tempDistances TO bfs(outerIdx)
+
+            FUNCTION processD(value)
+                IF value GREATER THAN 0 THEN
+                    CALL incrementAtIndex(value MINUS 1)
+                END IF
+            END FUNCTION
+
+            CALL forEach(tempDistances, processD)
+
+            SET outerIdx TO outerIdx PLUS 1
+        END WHILE
+
+        RETURN finalResult
+    END FUNCTION
+END CLASS

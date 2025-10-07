@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER
+  SET D TO 1 << 7
+SET L TO LENGTH OF nums
+DEFINE f AS 3D ARRAY OF BOOLEAN WITH DIMENSIONS L + 1, k + 2, D INITIALIZED TO FALSE
+SET f[0][0][0] TO TRUE
+
+DEFINE PROCEDURE updateF(a INTEGER, b INTEGER, c INTEGER, d INTEGER)
+    SET f[a][b][c] TO f[a][b][c] OR f[d][b][c]
+END PROCEDURE
+
+DEFINE PROCEDURE updateFBitwise(a INTEGER, b INTEGER, c INTEGER, d INTEGER, e INTEGER)
+      SET tempBit TO c OR e
+      SET f[a][b][tempBit] TO TRUE
+END PROCEDURE
+
+DEFINE PROCEDURE forward()
+      SET p TO 0
+      WHILE p < L
+          SET q TO 0
+          WHILE q <= k
+              SET r TO 0
+              WHILE r < D
+                  call updateF(p + 1, q, r, p)
+                  call updateFBitwise(p + 1, q + 1, r, p, nums[p])
+                  SET r TO r + 1
+              END WHILE
+              SET q TO q + 1
+          END WHILE
+          SET p TO p + 1
+      END WHILE
+END PROCEDURE
+
+call forward()
+
+DEFINE g AS 3D ARRAY OF BOOLEAN WITH DIMENSIONS L + 1, k + 2, D INITIALIZED TO FALSE
+SET g[L][0][0] TO TRUE
+
+DEFINE PROCEDURE updateG(a INTEGER, b INTEGER, c INTEGER, d INTEGER)
+    SET g[a][b][c] TO g[a][b][c] OR g[d][b][c]
+END PROCEDURE
+
+DEFINE PROCEDURE updateGBitwise(a INTEGER, b INTEGER, c INTEGER, d INTEGER, e INTEGER)
+      SET tempBit TO c OR e
+      SET g[a][b][tempBit] TO TRUE
+END PROCEDURE
+
+DEFINE PROCEDURE backward()
+    SET u TO L
+    repeat
+        SET v TO 0
+        repeat
+            SET w TO 0
+            repeat
+                call updateG(u - 1, v, w, u)
+                call updateGBitwise(u - 1, v + 1, w, u, nums[u - 1])
+                SET w TO w + 1
+            until w >= D
+            SET v TO v + 1
+        until v > k
+        SET u TO u - 1
+    until u = 0
+END PROCEDURE
+
+call backward()
+
+SET ans TO 0
+
+DEFINE FUNCTION BoolIsTrue(flag BOOLEAN) RETURNS BOOLEAN
+    IF flag = TRUE THEN
+        RETURN TRUE
+    ELSE
+        RETURN FALSE
+    END IF
+END FUNCTION
+
+SET idx TO k
+WHILE idx <= L - k
+    SET bitX TO 0
+    WHILE bitX < D
+        IF BoolIsTrue(f[idx][k][bitX]) = TRUE THEN
+            SET bitY TO 0
+            WHILE bitY < D
+                IF NOT (NOT BoolIsTrue(g[idx][k][bitY])) THEN
+                    SET candidate TO bitX XOR bitY
+                    IF candidate > ans THEN
+                        SET ans TO candidate
+                    END IF
+                END IF
+                SET bitY TO bitY + 1
+            END WHILE
+        END IF
+        SET bitX TO bitX + 1
+    END WHILE
+    SET idx TO idx + 1
+END WHILE
+
+RETURN ans
+    END FUNCTION
+END CLASS

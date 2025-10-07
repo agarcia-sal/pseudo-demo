@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION minValidStrings(words, target)
+        DECLARE accPrefixes SET TO EMPTY SET
+        DECLARE idxA INTEGER
+        DECLARE idxB INTEGER
+        DECLARE w STRING
+        FOR EACH w IN words DO
+            SET idxB TO 1
+            WHILE idxB <= LENGTH(w) DO
+                accPrefixes.ADD(SUBSTRING(w, 1, idxB))
+                SET idxB TO idxB + 1
+            END WHILE
+        END FOR
+
+        DECLARE lengthTarget INTEGER
+        SET lengthTarget TO LENGTH(target)
+        DECLARE cache ARRAY OF SIZE (lengthTarget + 1)
+        FOR idxA FROM 0 TO lengthTarget DO
+            SET cache[idxA] TO +∞
+        END FOR
+        SET cache[0] TO 0
+
+        DECLARE outerIndex INTEGER
+        DECLARE innerIndex INTEGER
+
+        SET outerIndex TO 1
+        WHILE outerIndex <= lengthTarget DO
+            SET innerIndex TO 1
+            WHILE innerIndex <= outerIndex DO
+                IF accPrefixes.CONTAINS(SUBSTRING(target, innerIndex, outerIndex)) THEN
+                    SET cache[outerIndex] TO MIN(cache[outerIndex], (cache[innerIndex - 1] + 1))
+                END IF
+                SET innerIndex TO innerIndex + 1
+            END WHILE
+            SET outerIndex TO outerIndex + 1
+        END WHILE
+
+        IF cache[lengthTarget] != +∞ THEN
+            RETURN cache[lengthTarget]
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

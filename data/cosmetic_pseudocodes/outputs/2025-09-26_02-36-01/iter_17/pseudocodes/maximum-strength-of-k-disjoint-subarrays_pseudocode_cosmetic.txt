@@ -1,0 +1,41 @@
+CLASS Solution
+    FUNCTION maximumStrength(nums k)
+        SET lengthVar TO LENGTH OF nums
+        SET storageTable TO A LIST OF lengthVar PLUS 1 ROWS EACH CONTAINING A LIST OF k PLUS 1 COLUMNS FILLED WITH NEGATIVE_INFINITY
+        SET storageTable[0][0] TO 0
+
+        SET outerIndex TO 1
+        WHILE outerIndex <= lengthVar
+            SET innerIndex TO 1
+            WHILE innerIndex <= k
+                SET accumulator TO 0
+                SET reverseIndex TO outerIndex
+                REPEAT
+                    SET accumulator TO accumulator + nums[reverseIndex - 1]
+
+                    IF (innerIndex MOD 2) = 1 THEN
+                        SET factor TO (k - innerIndex - 1 + 1)
+                    ELSE
+                        SET factor TO - (k - innerIndex - 1 + 1)
+                    END IF
+
+                    SET prevVal TO storageTable[reverseIndex - 1][innerIndex - 1] + factor * accumulator
+                    IF storageTable[outerIndex][innerIndex] < prevVal THEN
+                        SET storageTable[outerIndex][innerIndex] TO prevVal
+                    END IF
+
+                    SET reverseIndex TO reverseIndex - 1
+                UNTIL reverseIndex = 0
+
+                IF storageTable[outerIndex][innerIndex] < storageTable[outerIndex - 1][innerIndex] THEN
+                    SET storageTable[outerIndex][innerIndex] TO storageTable[outerIndex - 1][innerIndex]
+                END IF
+
+                SET innerIndex TO innerIndex + 1
+            END WHILE
+            SET outerIndex TO outerIndex + 1
+        END WHILE
+
+        RETURN storageTable[lengthVar][k]
+    END FUNCTION
+END CLASS

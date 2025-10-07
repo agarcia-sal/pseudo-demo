@@ -1,0 +1,57 @@
+CLASS Solution  
+    FUNCTION findPattern(board, pattern)  
+        DECLARE totalRows AS LENGTH(board)  
+        DECLARE totalCols AS LENGTH(board[0])  
+        DECLARE patternRows AS LENGTH(pattern)  
+        DECLARE patternCols AS LENGTH(pattern[0])  
+        
+        FUNCTION matches(rowIdx, colIdx)  
+            DECLARE charToDigitMap AS empty dictionary  
+            DECLARE digitToCharMap AS empty dictionary  
+            
+            LET rowCounter TO 0  
+            WHILE rowCounter < patternRows  
+                LET colCounter TO 0  
+                WHILE colCounter < patternCols  
+                    LET patternChar TO pattern[rowCounter][colCounter]  
+                    LET boardDigit TO board[rowIdx + rowCounter][colIdx + colCounter]  
+                    
+                    IF NOT (patternChar NOT a digit) THEN  
+                        IF TO_INTEGER(patternChar) IS NOT EQUAL TO boardDigit THEN  
+                            RETURN False  
+                        END IF  
+                    ELSE  
+                        IF patternChar EXISTS IN charToDigitMap THEN  
+                            IF charToDigitMap[patternChar] IS NOT boardDigit THEN  
+                                RETURN False  
+                            END IF  
+                        ELSE  
+                            IF boardDigit EXISTS IN digitToCharMap THEN  
+                                RETURN False  
+                            END IF  
+                            SET charToDigitMap[patternChar] TO boardDigit  
+                            SET digitToCharMap[boardDigit] TO patternChar  
+                        END IF  
+                    END IF  
+                    ADD one TO colCounter  
+                END WHILE  
+                ADD one TO rowCounter  
+            END WHILE  
+            RETURN True  
+        END FUNCTION  
+        
+        LET r TO 0  
+        WHILE r <= totalRows - patternRows  
+            LET c TO 0  
+            WHILE c <= totalCols - patternCols  
+                IF matches(r, c) THEN  
+                    RETURN [r, c]  
+                END IF  
+                INCREMENT c BY 1  
+            END WHILE  
+            INCREMENT r BY 1  
+        END WHILE  
+        
+        RETURN [-1, -1]  
+    END FUNCTION  
+END CLASS

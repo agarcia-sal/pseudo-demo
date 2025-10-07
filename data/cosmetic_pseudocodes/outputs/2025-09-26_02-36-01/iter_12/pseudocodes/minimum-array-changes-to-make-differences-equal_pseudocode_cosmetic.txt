@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION minChanges(nums k)
+        FUNCTION sum_array(arr)
+            SET total_var TO 0
+            SET index_var TO 0
+            WHILE index_var LESS THAN LENGTH OF arr
+                SET total_var TO total_var PLUS arr[index_var]
+                SET index_var TO index_var PLUS 1
+            END WHILE
+            RETURN total_var
+        END FUNCTION
+
+        SET array_len TO LENGTH OF nums
+        SET half_count TO (array_len DIV 2)
+        SET delta_seq TO ARRAY FILLED WITH ZEROS, SIZE k PLUS 2
+
+        FUNCTION swap_vals(a b)
+            RETURN b a
+        END FUNCTION
+
+        SET iter_var TO 0
+        WHILE iter_var LESS THAN half_count
+            SET val1 TO nums[iter_var]
+            SET val2 TO nums[array_len MINUS iter_var MINUS 1]
+
+            IF NOT (val1 LESS THAN OR EQUAL TO val2)
+                SET val1 val2 TO swap_vals(val1 val2)
+            END IF
+
+            SET delta_seq[0] TO delta_seq[0] PLUS 1
+
+            SET diff1 TO val2 MINUS val1
+            SET delta_seq[diff1] TO delta_seq[diff1] MINUS 1
+
+            SET diff2 TO diff1 PLUS 1
+            SET delta_seq[diff2] TO delta_seq[diff2] PLUS 1
+
+            SET max_val TO val2
+            IF (k MINUS val1) GREATER THAN max_val
+                SET max_val TO k MINUS val1
+            END IF
+
+            SET idx1 TO max_val PLUS 1
+            SET idx2 TO idx1 PLUS 1
+
+            SET delta_seq[idx1] TO delta_seq[idx1] MINUS 1
+            SET delta_seq[idx2] TO delta_seq[idx2] PLUS 1
+
+            SET iter_var TO iter_var PLUS 1
+        END WHILE
+
+        SET cumulative TO 0
+        SET min_result TO 1000000000
+        FOR idx FROM 0 TO LENGTH OF delta_seq MINUS 1
+            SET cumulative TO cumulative PLUS delta_seq[idx]
+            IF cumulative LESS THAN min_result
+                SET min_result TO cumulative
+            END IF
+        END FOR
+
+        RETURN min_result
+    END FUNCTION
+END CLASS

@@ -1,0 +1,116 @@
+```pseudocode
+CLASS Fenwick
+    FUNCTION __init__(self, n)
+        SET ziz TO 0
+        SET bram TO n + 1
+        SET self.tree TO []
+        WHILE ziz LESS THAN bram
+            APPEND 0 TO self.tree
+            SET ziz TO ziz + 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION add(self, zxq)
+        SET qta TO zxq
+        WHILE qta < LENGTH(self.tree)
+            SET tmp TO self.tree[qta] + 1
+            SET self.tree[qta] TO tmp
+            SET qta TO qta + (qta BITWISE_AND (-qta))
+        END WHILE
+    END FUNCTION
+
+    FUNCTION pre(self, zmv)
+        SET wbo TO 0
+        SET tfl TO zmv
+        WHILE tfl > 0
+            SET wbo TO wbo + self.tree[tfl]
+            SET tfl TO tfl BITWISE_AND (tfl - 1)
+        END WHILE
+        RETURN wbo
+    END FUNCTION
+
+    FUNCTION query(self, kin, vgr)
+        SET left_part TO self.pre(vgr)
+        SET right_part TO self.pre(kin - 1)
+        RETURN left_part - right_part
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maxRectangleArea(self, lpa, sod)
+        SET abc TO []
+        FOR idx FROM 0 TO LENGTH(lpa) - 1
+            APPEND (lpa[idx], sod[idx]) TO abc
+        END FOR
+        CALL abc.SORT(ascending=True)
+
+        SET y_unique TO []
+        SET seen_vals TO {}
+        FOR val IN sod
+            IF val NOT_IN seen_vals
+                INSERT val INTO seen_vals
+        END FOR
+        SET y_unique TO LIST_OF_KEYS_FROM(seen_vals)
+        CALL y_unique.SORT(ascending=True)
+
+        SET mxr TO -1
+
+        SET fenw TO Fenwick(LENGTH(y_unique))
+
+        FUNCTION bisect_left(arr, key)
+            SET low TO 0
+            SET high TO LENGTH(arr)
+            WHILE low < high
+                SET mid TO (low + high) DIV 2
+                IF arr[mid] < key
+                    SET low TO mid + 1
+                ELSE
+                    SET high TO mid
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        SET start_idx TO bisect_left(y_unique, abc[0][1]) + 1
+        fenw.add(start_idx)
+
+        SET memo TO {}
+
+        FUNCTION pairwise(lst)
+            SET pos TO 0
+            WHILE pos < LENGTH(lst) - 1
+                YIELD (lst[pos], lst[pos + 1])
+                SET pos TO pos + 1
+            END WHILE
+        END FUNCTION
+
+        FOR px, py IN pairwise(abc)
+            SET (x1, y1) TO px
+            SET (x2, y2) TO py
+
+            SET y_idx TO bisect_left(y_unique, y2) + 1
+            fenw.add(y_idx)
+
+            IF NOT (x1 == x2)
+                CONTINUE
+            END IF
+
+            SET cur_val TO fenw.query(bisect_left(y_unique, y1) + 1, y_idx)
+
+            IF y2 IN memo
+                SET (a, b, c) TO memo[y2]
+                IF b == y1 AND (c + 2) == cur_val
+                    SET area_candidate TO (x2 - a) * (y2 - y1)
+                    IF area_candidate > mxr
+                        SET mxr TO area_candidate
+                    END IF
+                END IF
+            END IF
+
+            SET memo[y2] TO (x1, y1, cur_val)
+        END FOR
+
+        RETURN mxr
+    END FUNCTION
+END CLASS
+```

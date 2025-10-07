@@ -1,0 +1,113 @@
+CLASS Solution  
+    FUNCTION minimumDeletions(word, k)  
+        FUNCTION tallyCharacters(seq, pos, tally)  
+            IF pos EQUALS LENGTH(seq) THEN  
+                RETURN tally  
+            ELSE  
+                LET ch BE seq[pos]  
+                IF ch IN tally THEN  
+                    SET updatedCount TO tally[ch] PLUS 1  
+                ELSE  
+                    SET updatedCount TO 1  
+                END IF  
+                SET newTally TO COPY(tally)  
+                SET newTally[ch] TO updatedCount  
+                RETURN tallyCharacters(seq, pos PLUS 1, newTally)  
+            END IF  
+        END FUNCTION  
+
+        LET charCountsMap BE tallyCharacters(word, 0, EMPTY_MAP)  
+
+        FUNCTION extractValues(map, keys, idx, vals)  
+            IF idx EQUALS LENGTH(keys) THEN  
+                RETURN vals  
+            ELSE  
+                LET key BE keys[idx]  
+                LET val BE map[key]  
+                RETURN extractValues(map, keys, idx PLUS 1, vals CONCAT [val])  
+            END IF  
+        END FUNCTION  
+
+        LET keyList BE KEYS(charCountsMap)  
+        LET freqListUnsorted BE extractValues(charCountsMap, keyList, 0, EMPTY_LIST)  
+
+        FUNCTION sortAscending(arr)  
+            IF LENGTH(arr) LESS THAN OR EQUALS 1 THEN  
+                RETURN arr  
+            ELSE  
+                LET pivot BE arr[0]  
+                LET smaller BE []  
+                LET greaterOrEqual BE []  
+                FUNCTION partition(i, sm, gr)  
+                    IF i EQUALS LENGTH(arr) THEN  
+                        RETURN (sm, gr)  
+                    ELSE IF arr[i] LESS THAN pivot THEN  
+                        RETURN partition(i PLUS 1, sm CONCAT [arr[i]], gr)  
+                    ELSE  
+                        RETURN partition(i PLUS 1, sm, gr CONCAT [arr[i]])  
+                    END IF  
+                END FUNCTION  
+                SET (lesserList, greaterList) TO partition(1, [], [])  
+                RETURN sortAscending(lesserList) CONCAT [pivot] CONCAT sortAscending(greaterList)  
+            END IF  
+        END FUNCTION  
+
+        LET freqList BE sortAscending(freqListUnsorted)  
+
+        LET INF BE (10 TIMES 100 TIMES 1000)  # large enough positive number  
+        LET minimalRemoveCount BE INF  
+
+        FUNCTION rangeLoop(startIdx, endIdx, fn)  
+            IF startIdx GREATER THAN endIdx THEN  
+                RETURN  
+            ELSE  
+                fn(startIdx)  
+                rangeLoop(startIdx PLUS 1, endIdx, fn)  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION sumDeletionsAfter(index, maxAllowed, freqs, pos, accum)  
+            IF pos GREATER THAN LENGTH(freqs) MINUS 1 THEN  
+                RETURN accum  
+            ELSE IF pos GREATER THAN index THEN  
+                LET diff BE (freqs[pos] MINUS maxAllowed)  
+                IF diff GREATER THAN 0 THEN  
+                    RETURN sumDeletionsAfter(index, maxAllowed, freqs, pos PLUS 1, accum PLUS diff)  
+                ELSE  
+                    RETURN sumDeletionsAfter(index, maxAllowed, freqs, pos PLUS 1, accum)  
+                END IF  
+            ELSE  
+                RETURN sumDeletionsAfter(index, maxAllowed, freqs, pos PLUS 1, accum)  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION sumDeletionsBefore(index, freqs, pos, accum)  
+            IF pos GREATER OR EQUAL index THEN  
+                RETURN accum  
+            ELSE  
+                RETURN sumDeletionsBefore(index, freqs, pos PLUS 1, accum PLUS freqs[pos])  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION processIndex(i, limit, freqs, currentMin)  
+            IF i GREATER THAN limit THEN  
+                RETURN currentMin  
+            ELSE  
+                LET allowedMaxFreq BE freqs[i] PLUS k  
+                LET deletionsAfter BE sumDeletionsAfter(i, allowedMaxFreq, freqs, 0, 0)  
+                LET deletionsBefore BE sumDeletionsBefore(i, freqs, 0, 0)  
+                LET totalDel AS deletionsAfter PLUS deletionsBefore  
+                LET newMin BE totalDel  
+                IF currentMin LESS THAN newMin THEN  
+                    SET newMin TO currentMin  
+                END IF  
+                RETURN processIndex(i PLUS 1, limit, freqs, newMin)  
+            END IF  
+        END FUNCTION  
+
+        LET maximalIndex BE LENGTH(freqList) MINUS 1  
+        LET answer BE processIndex(0, maximalIndex, freqList, minimalRemoveCount)  
+
+        RETURN answer  
+    END FUNCTION  
+END CLASS

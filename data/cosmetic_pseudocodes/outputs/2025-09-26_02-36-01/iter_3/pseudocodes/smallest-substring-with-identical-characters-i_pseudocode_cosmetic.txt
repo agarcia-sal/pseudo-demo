@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION minLength(s parameter, numOps parameter)
+        FUNCTION longest_uniform_substring(s parameter)
+            SET peak TO 0
+            SET streak TO 1
+            SET idx TO 2
+            WHILE idx LESS THAN OR EQUAL TO LENGTH OF s
+                IF idx LESS THAN OR EQUAL TO LENGTH OF s AND s AT (idx MINUS 1) EQUALS s AT (idx MINUS 2)
+                    ADD 1 TO streak
+                ELSE
+                    IF peak LESS THAN streak
+                        SET peak TO streak
+                    END IF
+                    SET streak TO 1
+                END IF
+                ADD 1 TO idx
+            END WHILE
+            RETURN peak IF peak GREATER THAN streak ELSE streak
+        END FUNCTION
+
+        SET result TO LENGTH OF s
+        SET max_mask TO 1 LEFT-SHIFTED BY LENGTH OF s
+        SET mask TO 0
+        WHILE mask LESS THAN max_mask
+            SET bitcount TO 0
+            SET checker TO mask
+            WHILE checker GREATER THAN 0
+                SET bitcount TO bitcount PLUS (checker BITWISE-AND 1)
+                SHIFT checker RIGHT BY 1
+            END WHILE
+            IF bitcount GREATER THAN numOps
+                ADD 1 TO mask
+                CONTINUE
+            END IF
+
+            SET mutable_s TO ARRAY FORM OF s
+            SET pos TO 0
+            WHILE pos LESS THAN LENGTH OF s
+                SET bit_check TO (mask BITWISE-AND (1 LEFT-SHIFTED BY pos))
+                IF bit_check NOT EQUAL TO 0
+                    IF mutable_s AT pos EQUALS '0'
+                        SET mutable_s AT pos TO '1'
+                    ELSE
+                        SET mutable_s AT pos TO '0'
+                    END IF
+                END IF
+                ADD 1 TO pos
+            END WHILE
+
+            SET candidate TO longest_uniform_substring(mutable_s)
+            IF result GREATER THAN candidate
+                SET result TO candidate
+            END IF
+
+            ADD 1 TO mask
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

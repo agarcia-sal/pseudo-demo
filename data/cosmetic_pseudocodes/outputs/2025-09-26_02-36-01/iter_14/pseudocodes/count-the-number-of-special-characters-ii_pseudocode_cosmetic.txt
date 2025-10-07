@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION numberOfSpecialChars(word)
+        SET omega TO empty collection of key value pairs
+        SET sigma TO empty collection of key value pairs
+
+        DEFINE PROCEDURE insertIfAbsent(key, idx)
+            IF NOT (key IN omega)
+                SET omega[key] TO idx
+            END IF
+        END PROCEDURE
+
+        DEFINE PROCEDURE updateLast(key, idx)
+            SET sigma[key] TO idx
+        END PROCEDURE
+
+        DEFINE FUNCTION zippedPairs(seq1, seq2)
+            SET result TO empty list
+            SET pos TO 0
+            WHILE pos LESS THAN (LENGTH(seq1) + LENGTH(seq2)) / 2
+                APPEND (seq1[pos], seq2[pos]) TO result
+                SET pos TO pos + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        DEFINE CONSTANT lowercaseLetters TO 'abcdefghijklmnopqrstuvwxyz'
+        DEFINE CONSTANT uppercaseLetters TO 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+        SET iteratorIdx TO 0
+        WHILE iteratorIdx < LENGTH(word)
+            SET character TO word[iteratorIdx]
+            CALL insertIfAbsent(character, iteratorIdx)
+            CALL updateLast(character, iteratorIdx)
+            SET iteratorIdx TO iteratorIdx + 1
+        END WHILE
+
+        SET accumulator TO 0
+
+        SET pairList TO zippedPairs(lowercaseLetters, uppercaseLetters)
+
+        DEFINE FUNCTION conditionCheck(aKey, bKey)
+            RETURN (aKey IN sigma) AND (bKey IN omega) AND (sigma[aKey] LESS THAN omega[bKey])
+        END FUNCTION
+
+        SET cursor TO 0
+        WHILE cursor < LENGTH(pairList)
+            SET pairItem TO pairList[cursor]
+            SET firstElem TO pairItem[0]
+            SET secondElem TO pairItem[1]
+
+            IF NOT conditionCheck(firstElem, secondElem)
+                NULL
+            ELSE
+                SET accumulator TO accumulator + 1
+            END IF
+
+            SET cursor TO cursor + 1
+        END WHILE
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

@@ -1,0 +1,44 @@
+```
+FUNCTION check_dict_case(dictionary)
+	dictionaryKeys = iterator(dictionary keys)
+	IF dictionaryKeys HAS NO NEXT
+		RETURN False
+	END IF
+
+	_state := "start"
+
+	PROCEDURE inner_loop()
+		IF NOT(dictionaryKeys HAS NEXT)
+			RETURN
+		END IF
+
+		currentKey = dictionaryKeys NEXT
+
+		IF NOT (currentKey INSTANCEOF STRING)
+			_state = "mixed"
+			RETURN
+		END IF
+
+		IF _state = "start" THEN
+			IF currentKey TO_UPPERCASE = currentKey THEN
+				_state = "upper"
+			ELSE IF currentKey TO_LOWERCASE = currentKey THEN
+				_state = "lower"
+			ELSE
+				RETURN
+			END IF
+		ELSE IF ((_state = "upper" AND NOT (currentKey TO_UPPERCASE = currentKey)) OR (_state = "lower" AND NOT (currentKey TO_LOWERCASE = currentKey))) THEN
+			_state = "mixed"
+			RETURN
+		ELSE
+			RETURN
+		END IF
+
+		inner_loop()
+	END PROCEDURE
+
+	inner_loop()
+
+	RETURN (_state = "upper") OR (_state = "lower")
+END FUNCTION
+```

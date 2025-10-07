@@ -1,0 +1,62 @@
+CLASS Solution  
+    FUNCTION numberOfPermutations(n, requirements)  
+        DECLARE CONSTANT MODULO AS ((1000000000) + 7)  
+        DECLARE requirementMap AS NEW empty_map  
+        SET idx TO 0  
+        WHILE idx LESS THAN LENGTH OF requirements DO  
+            LET pair = requirements[idx]  
+            LET key = pair[0]  
+            LET value = pair[1]  
+            ASSIGN requirementMap[key] = value  
+            INCREMENT idx BY one  
+        END WHILE  
+  
+        FUNCTION count_permutations(prefixLen, inversionCount, usedMask)  
+            IF prefixLen IS EQUAL TO n THEN  
+                LET requiredInversion = 0  
+                IF requirementMap CONTAINS KEY (n - 1) THEN  
+                    ASSIGN requiredInversion = requirementMap[n - 1]  
+                END IF  
+                IF inversionCount IS EQUAL TO requiredInversion THEN  
+                    RETURN 1  
+                ELSE  
+                    RETURN 0  
+                END IF  
+            END IF  
+  
+            IF prefixLen IS GREATER THAN zero THEN  
+                LET expectedInv = inversionCount  
+                IF requirementMap CONTAINS KEY (prefixLen - 1) THEN  
+                    ASSIGN expectedInv = requirementMap[prefixLen - 1]  
+                END IF  
+                IF inversionCount IS NOT EQUAL TO expectedInv THEN  
+                    RETURN 0  
+                END IF  
+            END IF  
+  
+            LET totalCount = 0  
+            LET candidate = 0  
+            WHILE candidate LESS THAN n DO  
+                LET bit_at_candidate = 1 LEFT SHIFTED BY candidate  
+                IF (usedMask BITWISE_AND bit_at_candidate) IS EQUAL TO zero THEN  
+                    LET inversionNext = inversionCount  
+                    LET j = candidate + 1  
+                    WHILE j LESS THAN n DO  
+                        LET bit_at_j = 1 LEFT SHIFTED BY j  
+                        IF (usedMask BITWISE_AND bit_at_j) IS NOT EQUAL TO zero THEN  
+                            ASSIGN inversionNext = inversionNext + 1  
+                        END IF  
+                        INCREMENT j BY one  
+                    END WHILE  
+                    LET newUsedMask = usedMask BITWISE_OR bit_at_candidate  
+                    LET recursiveResult = count_permutations(prefixLen + 1, inversionNext, newUsedMask)  
+                    totalCount = (totalCount + recursiveResult) MODULO MODULO  
+                END IF  
+                INCREMENT candidate BY one  
+            END WHILE  
+            RETURN totalCount  
+        END FUNCTION  
+  
+        RETURN count_permutations(0, 0, 0)  
+    END FUNCTION  
+END CLASS

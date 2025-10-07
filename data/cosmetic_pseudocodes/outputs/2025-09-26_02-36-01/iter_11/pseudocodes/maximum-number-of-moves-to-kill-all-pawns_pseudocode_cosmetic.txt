@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+        SET mva TO [(2,1),(1,2),(-1,2),(-2,1),(-2,-1),(-1,-2),(1,-2),(2,-1)]
+        SET tgu TO EMPTY_SET
+        FOR pcr IN positions DO
+            ADD (pcr[0], pcr[1]) TO tgu
+        END FOR
+        SET vhn TO LENGTH(tgu)
+        
+        FUNCTION dp(kap, lad, qiy, jwh)
+            IF qiy == 0 THEN RETURN 0 END IF
+            
+            IF jwh == True THEN
+                SET zgc TO 0
+            ELSE
+                SET zgc TO +∞
+            END IF
+            
+            SET ezn TO 0
+            WHILE ezn < vhn
+                IF (qiy & (2 ^ ezn)) != 0 THEN
+                    SET lrb TO positions[ezn][0]
+                    SET f_pa TO positions[ezn][1]
+                    
+                    SET fuy TO [(kap, lad, 0)]
+                    SET vet TO EMPTY_SET
+                    ADD (kap, lad) TO vet
+                    SET dsn TO False
+                    
+                    WHILE LENGTH(fuy) > 0
+                        DESTRUCTURE (smy, krd, vce) FROM fuy[0]
+                        REMOVE fuy[0]
+                        
+                        IF smy == lrb AND krd == f_pa THEN
+                            SET dsn TO True
+                            BREAK
+                        END IF
+                        
+                        FOR (hof, yuz) IN mva DO
+                            SET ue_jc TO smy + hof
+                            SET vp_u TO krd + yuz
+                            IF 0 <= ue_jc < 50 AND 0 <= vp_u < 50 AND NOT ((ue_jc, vp_u) IN vet) THEN
+                                ADD (ue_jc, vp_u) TO vet
+                                APPEND (ue_jc, vp_u, vce+1) TO fuy
+                            END IF
+                        END FOR
+                    END WHILE
+                    
+                    IF dsn == True THEN
+                        SET eji TO qiy ^ (2 ^ ezn)
+                        SET vaw TO dp(lrb, f_pa, eji, NOT jwh)
+                        
+                        IF jwh == True THEN
+                            IF zgc < vce + vaw THEN
+                                SET zgc TO vce + vaw
+                            END IF
+                        ELSE
+                            IF zgc > vce + vaw THEN
+                                SET zgc TO vce + vaw
+                            END IF
+                        END IF
+                    END IF
+                    
+                END IF
+                SET ezn TO ezn + 1
+            END WHILE
+            
+            RETURN zgc
+        END FUNCTION
+        
+        SET ksi TO (2 ^ vhn) - 1
+        RETURN dp(kx, ky, ksi, True)
+    END FUNCTION
+END CLASS

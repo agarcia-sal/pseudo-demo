@@ -1,0 +1,41 @@
+CLASS Solution
+     FUNCTION getPermutationIndex(perm)
+      LET lengthVal ← LENGTH(perm)
+      LET modulusVal ← (10 ^ 9) + 1
+      LET factorials ← ARRAY FILLED WITH 1 OF SIZE lengthVal
+      PROCEDURE computeFactorials(idx)
+        IF idx = lengthVal THEN RETURN
+        factorials[idx] ← factorials[idx - 1] * idx
+        computeFactorials(idx + 1)
+      END PROCEDURE
+      CALL computeFactorials(1)
+      LET numberPool ← []
+      PROCEDURE fillNumberPool(current)
+        IF current > lengthVal THEN RETURN
+        numberPool.APPEND(current)
+        fillNumberPool(current + 1)
+      END PROCEDURE
+      fillNumberPool(1)
+      LET resultIndex ← 0
+      PROCEDURE processPosition(pos)
+        IF pos = lengthVal THEN RETURN
+        LET currentVal ← perm[pos]
+        LET positionInPool ← 0
+        PROCEDURE findPositionInPool(i)
+          IF numberPool[i] = currentVal THEN
+            positionInPool ← i
+            RETURN
+          END IF
+          findPositionInPool(i + 1)
+        END PROCEDURE
+        findPositionInPool(0)
+        LET factorialMultiplier ← factorials[lengthVal - pos - 1]
+        LET addedVal ← positionInPool * factorialMultiplier
+        resultIndex ← resultIndex + addedVal
+        numberPool.REMOVE_AT(positionInPool)
+        processPosition(pos + 1)
+      END PROCEDURE
+      processPosition(0)
+      RETURN (resultIndex) MOD modulusVal
+     END FUNCTION
+END CLASS

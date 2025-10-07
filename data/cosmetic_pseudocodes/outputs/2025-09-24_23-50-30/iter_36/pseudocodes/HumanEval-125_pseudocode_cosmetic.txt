@@ -1,0 +1,65 @@
+```
+FUNCTION split_words(text)
+    DEFINE FUNCTION contains_char(str, ch)
+        FOR idx FROM 0 TO LENGTH(str) - 1
+            IF str[idx] = ch THEN RETURN TRUE
+        RETURN FALSE
+    END FUNCTION
+
+    IF contains_char(text, ' ')
+        LET tokens = []
+        LET start_index = 0
+
+        DEFINE FUNCTION extract_tokens(s, pos)
+            IF pos = LENGTH(s) THEN
+                LET segment = SUBSTRING(s, start_index, pos)
+                IF LENGTH(segment) > 0
+                    APPEND segment TO tokens
+                RETURN tokens
+
+            IF s[pos] = ' '
+                LET segment = SUBSTRING(s, start_index, pos)
+                IF LENGTH(segment) > 0
+                    APPEND segment TO tokens
+                start_index = pos + 1
+            RETURN extract_tokens(s, pos + 1)
+        END FUNCTION
+
+        RETURN extract_tokens(text, 0)
+
+    ELSE IF contains_char(text, ',')
+        LET buffer = []
+        FOR pos FROM 0 TO LENGTH(text) - 1
+            IF text[pos] = ','
+                APPEND ' ' TO buffer
+            ELSE
+                APPEND text[pos] TO buffer
+
+        LET replaced = ''
+        FOR ch IN buffer
+            replaced = replaced + ch
+
+        LET parts = []
+        LET segment_start = 0
+
+        FOR pos FROM 0 TO LENGTH(replaced)
+            IF pos = LENGTH(replaced) OR replaced[pos] = ' '
+                LET segment = SUBSTRING(replaced, segment_start, pos)
+                IF LENGTH(segment) > 0
+                    APPEND segment TO parts
+                segment_start = pos + 1
+
+        RETURN parts
+
+    ELSE
+        LET counter = 0
+        FOR index FROM 0 TO LENGTH(text) - 1
+            LET char = text[index]
+            LET ascii_code = ASCII_VALUE(char)
+
+            IF char >= 'a' AND char <= 'z' AND (ascii_code - 0 * 2) MOD 2 = 0
+                counter = counter + 1
+
+        RETURN counter
+END FUNCTION
+```

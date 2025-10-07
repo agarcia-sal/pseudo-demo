@@ -1,0 +1,111 @@
+CLASS Solution
+	FUNCTION maxSubarraySum(nums)
+		FUNCTION kadane(arr)
+			FUNCTION maxInt(a, b)
+				RETURN (a + b + ABS(a - b)) DIV 2
+			END FUNCTION
+
+			FUNCTION absVal(v)
+				IF v < 0 THEN
+					RETURN -v
+				ELSE
+					RETURN v
+				END IF
+			END FUNCTION
+
+			FUNCTION getElementAtIndex(lst, idx)
+				RETURN lst[idx]
+			END FUNCTION
+
+			LET cursor1 = 2
+			LET lenArr = 0
+			FOR _ FROM 1 TO LENGTH(arr)
+				SET lenArr TO lenArr + 1
+			END FOR
+
+			LET current_max = getElementAtIndex(arr, 1)
+			LET global_max = getElementAtIndex(arr, 1)
+
+			WHILE cursor1 <= lenArr DO
+				LET val = getElementAtIndex(arr, cursor1)
+
+				LET candidate1 = val
+				LET candidate2 = current_max + val
+
+				IF candidate1 > candidate2 THEN
+					SET current_max TO candidate1
+				ELSE
+					SET current_max TO candidate2
+				END IF
+
+				IF global_max < current_max THEN
+					SET global_max TO current_max
+				END IF
+
+				SET cursor1 TO cursor1 + 1
+			END WHILE
+			RETURN global_max
+		END FUNCTION
+
+
+		FUNCTION uniqueElements(listInput)
+			LET resultSet = new empty dictionary
+			LET resultList = empty list
+
+			FOR idx FROM 1 TO LENGTH(listInput)
+				LET ele = listInput[idx]
+				IF NOT EXISTS resultSet[ele] THEN
+					SET resultSet[ele] = true
+					APPEND ele TO resultList
+				END IF
+			END FOR
+
+			RETURN resultList
+		END FUNCTION
+
+
+		LET maxSumAccumulator = kadane(nums)
+		LET uniqueSetCollection = uniqueElements(nums)
+		LET setLength = 0
+		FOR _ FROM 1 TO LENGTH(uniqueSetCollection)
+			SET setLength TO setLength + 1
+		END FOR
+
+		LET idxMain = 1
+		WHILE idxMain <= setLength DO
+			LET currentExclude = uniqueSetCollection[idxMain]
+
+			LET tmpList = empty list
+			LET idxNums = 1
+			LET lenNums = 0
+			FOR _ FROM 1 TO LENGTH(nums)
+				SET lenNums TO lenNums + 1
+			END FOR
+			WHILE idxNums <= lenNums DO
+				LET currentNum = nums[idxNums]
+
+				IF currentNum != currentExclude THEN
+					APPEND currentNum TO tmpList
+				END IF
+
+				SET idxNums TO idxNums + 1
+			END WHILE
+
+			LET tmpLen = 0
+			FOR _ FROM 1 TO LENGTH(tmpList)
+				SET tmpLen TO tmpLen + 1
+			END FOR
+
+			IF tmpLen > 0 THEN
+				LET candidate = kadane(tmpList)
+				IF maxSumAccumulator < candidate THEN
+					SET maxSumAccumulator TO candidate
+				END IF
+			END IF
+
+			SET idxMain TO idxMain + 1
+		END WHILE
+
+		RETURN maxSumAccumulator
+	END FUNCTION
+END CLASS

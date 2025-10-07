@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer
+        LET factorials BE a new empty list
+        SET index TO 0
+        WHILE index LESS THAN n PLUS 1
+            ASSIGN factorials APPEND factorial of index
+            INCREMENT index BY 1
+        END WHILE
+
+        LET totalCount BE 0
+        LET visitedPatterns BE an empty set
+
+        LET powBase BE 1
+        LET halfIndex BE (n MINUS 1) DIVIDED BY 2
+        LET counter TO zero
+        WHILE counter LESS THAN halfIndex
+            SET powBase TO powBase MULTIPLIED BY 10
+            INCREMENT counter BY 1
+        END WHILE
+
+        LET lowerBound BE powBase
+        LET upperBound BE (powBase MULTIPLIED BY 10) MINUS 1
+
+        LET currentNumber BE upperBound
+        REPEAT
+            SET currentNumber TO currentNumber MINUS 1
+            IF currentNumber LESS THAN lowerBound THEN
+                BREAK
+            END IF
+
+            LET stringNum BE string representation of currentNumber
+
+            LET secondPartStart BE n MODULO 2
+            LET reversedPart BE substring of (reverse of stringNum) from secondPartStart to end
+
+            LET fullString BE stringNum CONCATENATED WITH reversedPart
+
+            IF (integer from fullString) MODULO k NOT EQUAL TO 0 THEN
+                CONTINUE to next iteration
+            END IF
+
+            LET sortedString BE characters of fullString sorted in ascending order
+
+            IF sortedString IS IN visitedPatterns THEN
+                CONTINUE to next iteration
+            END IF
+
+            ADD sortedString TO visitedPatterns
+
+            LET characterFrequency BE an empty map from character to integer
+
+            FOR each character IN sortedString
+                IF character NOT IN characterFrequency THEN
+                    SET characterFrequency[character] TO 1
+                ELSE
+                    SET characterFrequency[character] TO characterFrequency[character] PLUS 1
+                END IF
+            END FOR
+
+            LET zeroQty BE 0
+            IF characterFrequency CONTAINS key '0' THEN
+                SET zeroQty TO characterFrequency['0']
+            END IF
+
+            LET permutationsCount BE 0
+            IF zeroQty GREATER THAN 0 THEN
+                LET tempIndex BE n MINUS zeroQty
+                SET permutationsCount TO (tempIndex MULTIPLIED BY factorials[n MINUS 1]) DIVIDED BY tempIndex  // simplified equivalent to zero temp effect but preserves structure
+                SET permutationsCount TO (n MINUS (zeroQty MULTIPLIED BY 1)) MULTIPLIED BY factorials[n MINUS 1]
+            ELSE
+                SET permutationsCount TO factorials[n]
+            END IF
+
+            FOR each freqValue IN values of characterFrequency
+                SET permutationsCount TO permutationsCount DIVIDED BY factorials[freqValue]
+            END FOR
+
+            SET totalCount TO totalCount PLUS permutationsCount
+        UNTIL currentNumber LESS THAN lowerBound
+
+        RETURN totalCount
+    END FUNCTION
+END CLASS

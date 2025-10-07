@@ -1,0 +1,131 @@
+CLASS Solution
+    FUNCTION maxPathLength(coordinates, k)
+        SET alpha TO (element 0 of element k of coordinates)
+        SET beta TO (element 1 of element k of coordinates)
+        SET setA TO []
+        SET idxA TO 0
+
+        WHILE idxA < length of coordinates
+            SET vx TO element 0 of element idxA of coordinates
+            SET vy TO element 1 of element idxA of coordinates
+
+            IF (NOT (vx >= alpha)) AND (NOT (vy >= beta))
+                CALL append_element(setA, (vx, vy))
+            END IF
+
+            SET idxA TO idxA + 1
+        END WHILE
+
+        SET setB TO []
+        SET idxB TO 0
+        REPEAT
+            IF idxB >= length of coordinates
+                BREAK
+            END IF
+
+            SET px TO element 0 of element idxB of coordinates
+            SET py TO element 1 of element idxB of coordinates
+
+            IF (px > alpha) AND (py > beta)
+                CALL append_element(setB, (px, py))
+            END IF
+
+            SET idxB TO idxB + 1
+        UNTIL FALSE
+
+        RETURN (1 + SELF._lengthOfLIS(setA) + SELF._lengthOfLIS(setB))
+    END FUNCTION
+
+    FUNCTION _lengthOfLIS(coordinates)
+        SET sorted_coords TO sort_custom(coordinates)
+        SET seq TO []
+        SET i TO 0
+
+        FUNCTION binary_search_left(arr, target)
+            SET left TO 0
+            SET right TO length of arr
+            WHILE left < right
+                SET mid TO left + ((right - left) / 2)
+                IF arr[mid] >= target
+                    SET right TO mid
+                ELSE
+                    SET left TO mid + 1
+                END IF
+            END WHILE
+            RETURN left
+        END FUNCTION
+
+        FUNCTION sort_custom(list_coords)
+            FUNCTION compare(a, b)
+                IF element 0 of a < element 0 of b
+                    RETURN -1
+                ELSE IF element 0 of a > element 0 of b
+                    RETURN 1
+                ELSE
+                    IF element 1 of a > element 1 of b
+                        RETURN -1
+                    ELSE IF element 1 of a < element 1 of b
+                        RETURN 1
+                    ELSE
+                        RETURN 0
+                    END IF
+                END IF
+            END FUNCTION
+
+            SET merged_list TO merge_sort(list_coords, compare)
+            RETURN merged_list
+        END FUNCTION
+
+        FUNCTION merge_sort(arr, cmp)
+            IF length of arr <= 1
+                RETURN arr
+            END IF
+            SET mid_idx TO length of arr / 2
+            SET left_part TO merge_sort(slice arr from 0 to mid_idx), cmp)
+            SET right_part TO merge_sort(slice arr from mid_idx to end), cmp)
+            RETURN merge(left_part, right_part, cmp)
+        END FUNCTION
+
+        FUNCTION merge(l_arr, r_arr, cmp)
+            SET merged TO []
+            SET l_i TO 0
+            SET r_i TO 0
+            WHILE l_i < length of l_arr AND r_i < length of r_arr
+                IF cmp(l_arr[l_i], r_arr[r_i]) <= 0
+                    CALL append_element(merged, l_arr[l_i])
+                    SET l_i TO l_i + 1
+                ELSE
+                    CALL append_element(merged, r_arr[r_i])
+                    SET r_i TO r_i + 1
+                END IF
+            END WHILE
+            WHILE l_i < length of l_arr
+                CALL append_element(merged, l_arr[l_i])
+                SET l_i TO l_i + 1
+            END WHILE
+            WHILE r_i < length of r_arr
+                CALL append_element(merged, r_arr[r_i])
+                SET r_i TO r_i + 1
+            END WHILE
+            RETURN merged
+        END FUNCTION
+
+        FUNCTION append_element(list_ref, val)
+            SET idx_append TO length of list_ref
+            SET list_ref[idx_append] TO val
+        END FUNCTION
+
+        WHILE i < length of sorted_coords
+            SET elem TO element 1 of sorted_coords[i]
+            IF length of seq = 0 OR elem > seq[length of seq - 1]
+                CALL append_element(seq, elem)
+            ELSE
+                SET pos TO binary_search_left(seq, elem)
+                SET seq[pos] TO elem
+            END IF
+            SET i TO i + 1
+        END WHILE
+
+        RETURN length of seq
+    END FUNCTION
+END CLASS

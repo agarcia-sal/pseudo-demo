@@ -1,0 +1,119 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+      SET self.mod TO mod  
+      SET lengthVar TO LENGTH(s)  
+      SET self.h TO array filled with 0, total elements: lengthVar + (1 * 1)  
+      SET self.p TO array filled with 1, total elements: lengthVar + (1 * 1)  
+      
+      FUNCTION computeIndex(counter)  
+        RETURN counter  
+      END FUNCTION  
+      
+      SET counterVar TO 1  
+      WHILE counterVar <= lengthVar  
+        SET prevIndex TO computeIndex(counterVar - 1)  
+        SET currIndex TO computeIndex(counterVar)  
+        
+        SET tempSum TO (self.h[prevIndex] * base) + UNICODE_CODE_POINT(s[prevIndex])  
+        SET tempMod TO tempSum - (self.mod * FLOOR(tempSum / self.mod))  
+        self.h[currIndex] = tempMod  
+        
+        SET tempProd TO self.p[prevIndex] * base  
+        SET prodMod TO tempProd - (self.mod * FLOOR(tempProd / self.mod))  
+        self.p[currIndex] = prodMod  
+        
+        SET counterVar TO counterVar + 1  
+      END WHILE  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+      
+      SET diffVal TO self.h[r] - (self.h[l - (1 * 1)] * self.p[r - l + (1 * 1)])  
+      SET adjustedDiff TO diffVal - (self.mod * FLOOR(diffVal / self.mod))  
+      RETURN adjustedDiff  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+      
+      SET nVal TO LENGTH(s)  
+      SET graph TO array containing nVal empty arrays  
+      
+      FUNCTION generateDFS(indexVal)  
+        SET leftPos TO LENGTH(dfsStrList) + (1 * 1)  
+        SET childIndex TO 0  
+        WHILE childIndex < LENGTH(graph[indexVal])  
+          SET currentChild TO graph[indexVal][childIndex]  
+          CALL generateDFS(currentChild)  
+          SET childIndex TO childIndex + 1  
+        END WHILE  
+        APPEND s[indexVal] TO dfsStrList  
+        SET rightPos TO LENGTH(dfsStrList)  
+        posDict[indexVal] = PAIR(leftPos, rightPos)  
+      END FUNCTION  
+      
+      SET iterationIndex TO 1  
+      WHILE iterationIndex < nVal  
+        SET parIndex TO parent[iterationIndex]  
+        APPEND iterationIndex TO graph[parIndex]  
+        SET iterationIndex TO iterationIndex + 1  
+      END WHILE  
+      
+      SET dfsStrList TO empty LIST  
+      SET posDict TO empty DICTIONARY  
+      CALL generateDFS(0)  
+      
+      SET baseConst TO 33000 + 331  
+      SET modVal TO 998000000 + 244353  
+      
+      SET hashForward TO NEW Hashing(dfsStrList, baseConst, modVal)  
+      
+      FUNCTION reverseList(origList)  
+        SET resultList TO empty LIST  
+        SET revIdx TO LENGTH(origList) - 1  
+        WHILE revIdx >= 0  
+          APPEND origList[revIdx] TO resultList  
+          SET revIdx TO revIdx - 1  
+        END WHILE  
+        RETURN resultList  
+      END FUNCTION  
+      
+      SET reversedDFS TO reverseList(dfsStrList)  
+      SET hashBackward TO NEW Hashing(reversedDFS, baseConst, modVal)  
+      
+      SET answerList TO empty LIST  
+      
+      FUNCTION isEven(num)  
+        RETURN NOT (num MOD 2)  
+      END FUNCTION  
+      
+      SET indexIter TO 0  
+      WHILE indexIter < nVal  
+        SET pairLeft TO posDict[indexIter].first  
+        SET pairRight TO posDict[indexIter].second  
+        SET segmentLength TO (pairRight - pairLeft) + (1 * 1)  
+        
+        IF isEven(segmentLength) = TRUE THEN  
+          SET firstHalfEnd TO pairLeft + (segmentLength / 2) - (1 * 1)  
+          SET vA TO hashForward.query(pairLeft, firstHalfEnd)  
+          SET revStart TO nVal - pairRight + (1 * 1)  
+          SET revEnd TO revStart + (segmentLength / 2) - (1 * 1)  
+          SET vB TO hashBackward.query(revStart, revEnd)  
+        ELSE  
+          SET firstHalfEnd TO pairLeft + FLOOR(segmentLength / 2) - (1 * 1)  
+          SET vA TO hashForward.query(pairLeft, firstHalfEnd)  
+          SET revStart := nVal - pairRight + (1 * 1)  
+          SET revEnd := revStart + FLOOR(segmentLength / 2) - (1 * 1)  
+          SET vB := hashBackward.query(revStart, revEnd)  
+        END IF  
+        
+        SET isEqual := (vA = vB)  
+        APPEND isEqual TO answerList  
+        
+        SET indexIter := indexIter + 1  
+      END WHILE  
+      
+      RETURN answerList  
+    END FUNCTION  
+END CLASS

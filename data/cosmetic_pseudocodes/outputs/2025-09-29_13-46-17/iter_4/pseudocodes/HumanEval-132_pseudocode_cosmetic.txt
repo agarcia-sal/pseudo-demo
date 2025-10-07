@@ -1,0 +1,45 @@
+```
+FUNCTION is_nested(string)
+    DEFINE helper_open_close_pairs(ops, cps, pos, cnt) RETURNS INTEGER
+        IF ops IS EMPTY OR pos >= LENGTH(cps)
+            RETURN cnt
+        LET head = ops[0]
+        LET tail = ops[1:]
+        IF head < cps[pos]
+            RETURN helper_open_close_pairs(tail, cps, pos + 1, cnt + 1)
+        ELSE
+            RETURN helper_open_close_pairs(tail, cps, pos, cnt)
+    END FUNCTION
+
+    LET open_brackets = []
+    LET close_brackets = []
+
+    FUNCTION split_brackets_at(i)
+        IF i >= LENGTH(string)
+            RETURN
+        LET ch = string[i]
+        IF ch = '['
+            open_brackets = open_brackets + [i]
+        ELSE
+            close_brackets = close_brackets + [i]
+        split_brackets_at(i + 1)
+    END FUNCTION
+
+    split_brackets_at(0)
+
+    FUNCTION reverse_list(lst, idx, result)
+        IF idx < 0
+            RETURN result
+        RETURN reverse_list(lst, idx - 1, result + [lst[idx]])
+    END FUNCTION
+
+    LET reversed_close = reverse_list(close_brackets, LENGTH(close_brackets) - 1, [])
+
+    LET total_pairs = helper_open_close_pairs(open_brackets, reversed_close, 0, 0)
+
+    IF total_pairs >= 2 THEN
+        RETURN TRUE
+    ELSE
+        RETURN FALSE
+END FUNCTION
+```

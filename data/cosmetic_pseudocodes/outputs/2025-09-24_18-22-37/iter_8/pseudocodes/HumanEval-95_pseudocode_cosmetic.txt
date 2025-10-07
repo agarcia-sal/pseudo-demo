@@ -1,0 +1,52 @@
+FUNCTION check_dict_case(mapping)
+    
+    IF mapping.keys().length() <= 0 THEN
+        RETURN False
+    END IF
+
+    VAR mode <-- "start"
+    
+    VAR indexer <-- 0
+    VAR keys_list <-- mapping.keys()
+    VAR total_keys <-- keys_list.length()
+    
+    WHILE indexer < total_keys DO
+        VAR current_key <-- keys_list.at(indexer)
+        indexer  <- indexer plus 1
+
+        IF current_key IS NOT INSTANCEOF STRING THEN
+            mode <- "mixed"
+            BREAK
+        END IF
+        
+        IF mode IS "start" THEN
+            IF current_key IS ALL_UPPERCASE THEN
+                mode <- "upper"
+            ELSE
+                IF current_key IS ALL_LOWERCASE THEN
+                    mode <- "lower"
+                ELSE
+                    BREAK
+                END IF
+            END IF
+        ELSE
+            
+            VAR is_upper_mode_error <-- (mode IS "upper") AND (current_key IS NOT ALL_UPPERCASE)
+            VAR is_lower_mode_error <-- (mode IS "lower") AND (current_key IS NOT ALL_LOWERCASE)
+            
+            SWITCH
+                CASE is_upper_mode_error:
+                    mode <- "mixed"
+                    BREAK
+                CASE is_lower_mode_error:
+                    mode <- "mixed"
+                    BREAK
+                DEFAULT:
+                    BREAK
+            END SWITCH
+            
+        END IF
+    END WHILE
+    
+    RETURN (mode IS "upper") OR (mode IS "lower")
+END FUNCTION

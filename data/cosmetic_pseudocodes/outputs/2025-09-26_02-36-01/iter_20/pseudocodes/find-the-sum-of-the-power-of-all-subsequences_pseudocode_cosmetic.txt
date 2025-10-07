@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION sumOfPower(nums parameter, k parameter)
+        FUNCTION modAdd(x parameter, y parameter) RETURNS integer
+            SET z TO (x PLUS y) MINUS (MOD TIMES ((x PLUS y) DIV MOD))
+            IF z LESS THAN zero
+                RETURN z PLUS MOD
+            ELSE
+                RETURN z
+            END IF
+        END FUNCTION
+
+        FUNCTION powTwo(e parameter) RETURNS integer
+            IF e EQUALS zero
+                RETURN 1
+            ELSE
+                SET r TO 1
+                SET c TO 0
+                WHILE c NOT EQUAL TO e
+                    SET r TO modAdd(r, r)
+                    SET c TO c PLUS 1
+                END WHILE
+                RETURN r
+            END IF
+        END FUNCTION
+
+        SET MOD TO ((((1 TIMES 10) TIMES 10) TIMES 10) TIMES 10000000) PLUS 7
+        SET lengthNums TO 0
+        SET someFlag TO -1
+        SET indexCounter TO 0
+        SET lengthNums TO LENGTH OF nums
+        SET dp TO A NEW LIST CONTAINING (lengthNums PLUS 1) ELEMENTS EACH INITIALIZED WITH A LIST OF K PLUS 1 ZEROES
+        SET dp0 TO GET element at 0 of dp
+        SET element at 0 of dp0 TO 1
+        SET outerIter TO 1
+        WHILE outerIter LESS THAN OR EQUAL TO lengthNums
+            SET innerIter TO 0
+            WHILE innerIter LESS THAN OR EQUAL TO k
+                SET currentDpRow TO element at outerIter of dp
+                SET prevDpRow TO element at (outerIter MINUS 1) of dp
+                SET valueBefore TO element at innerIter of prevDpRow
+                SET element at innerIter of currentDpRow TO valueBefore
+                IF innerIter GREATER THAN OR EQUAL TO element at (outerIter MINUS 1) of nums
+                    SET element at innerIter of currentDpRow TO modAdd(element at innerIter of currentDpRow, element at (innerIter MINUS element at (outerIter MINUS 1) of nums) of prevDpRow)
+                END IF
+                SET element at innerIter of currentDpRow TO element at innerIter of currentDpRow MODULO MOD
+                SET innerIter TO innerIter PLUS 1
+            END WHILE
+            SET outerIter TO outerIter PLUS 1
+        END WHILE
+
+        SET accPower TO 0
+
+        FUNCTION getBit(x parameter, pos parameter) RETURNS integer
+            RETURN (x DIV (powTwo(pos))) MOD 2
+        END FUNCTION
+
+        SET totalCombinations TO powTwo(lengthNums) MINUS 1
+        SET combinIndex TO 1
+        WHILE combinIndex LESS THAN OR EQUAL TO totalCombinations
+            SET sumVal TO 0
+            SET elemsCount TO 0
+            SET posIter TO 0
+            REPEAT
+                IF posIter GREATER THAN EQUAL TO (lengthNums MINUS 1)
+                    LEAVE
+                END IF
+                IF getBit(combinIndex, posIter) EQUALS 1
+                    SET sumVal TO sumVal PLUS element at posIter of nums
+                    SET elemsCount TO elemsCount PLUS 1
+                END IF
+                SET posIter TO posIter PLUS 1
+            UNTIL FALSE
+
+            IF sumVal EQUALS k
+                SET accPower TO accPower PLUS powTwo(lengthNums MINUS elemsCount)
+                SET accPower TO accPower MODULO MOD
+            END IF
+            SET combinIndex TO combinIndex PLUS 1
+        END WHILE
+
+        RETURN accPower
+    END FUNCTION
+END CLASS

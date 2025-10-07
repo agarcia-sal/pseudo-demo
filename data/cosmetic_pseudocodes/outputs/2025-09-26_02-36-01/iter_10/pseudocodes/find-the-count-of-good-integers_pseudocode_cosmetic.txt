@@ -1,0 +1,155 @@
+CLASS Solution
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer
+      FUNCTION calcFactorial(m integer) RETURNS integer
+        IF m <= 1 THEN
+          RETURN 1
+        ELSE
+          RETURN m * calcFactorial(m - 1)
+        END IF
+      END FUNCTION
+
+      FUNCTION toString(val integer) RETURNS string
+        DECLARE digits list
+        DECLARE temp integer := val
+        WHILE temp > 0 DO
+          APPEND character((temp MOD 10) + 48) TO digits
+          SET temp TO temp DIV 10
+        END WHILE
+        IF LENGTH OF digits = 0 THEN
+          RETURN "0"
+        END IF
+        DECLARE reversed list
+        WHILE LENGTH OF digits > 0 DO
+          PREPEND LAST ELEMENT OF digits TO reversed
+          REMOVE LAST ELEMENT FROM digits
+        END WHILE
+        RETURN JOIN reversed TO STRING
+      END FUNCTION
+
+      FUNCTION reverseString(str string) RETURNS string
+        DECLARE len integer := LENGTH OF str
+        DECLARE result string := ""
+        DECLARE idx integer := len - 1
+        WHILE idx >= 0 DO
+          SET result := result CONCATENATE CHARACTER AT str[idx]
+          SET idx := idx - 1
+        END WHILE
+        RETURN result
+      END FUNCTION
+
+      FUNCTION substringFrom(str string, startIdx integer) RETURNS string
+        DECLARE result string := ""
+        DECLARE idx integer := startIdx
+        WHILE idx < LENGTH OF str DO
+          SET result := result CONCATENATE CHARACTER AT str[idx]
+          SET idx := idx + 1
+        END WHILE
+        RETURN result
+      END FUNCTION
+
+      FUNCTION sortStringAsc(str string) RETURNS string
+        DECLARE chars list
+        DECLARE pos integer := 0
+        WHILE pos < LENGTH OF str DO
+          APPEND CHARACTER AT str[pos] TO chars
+          SET pos := pos + 1
+        END WHILE
+
+        FUNCTION insertionSort(arr list) RETURNS list
+          DECLARE i integer := 1
+          WHILE i < LENGTH OF arr DO
+            DECLARE key char := arr[i]
+            DECLARE j integer := i - 1
+            WHILE j >= 0 AND arr[j] > key DO
+              SET arr[j + 1] := arr[j]
+              SET j := j - 1
+            END WHILE
+            SET arr[j + 1] := key
+            SET i := i + 1
+          END WHILE
+          RETURN arr
+        END FUNCTION
+
+        SET chars := insertionSort(chars)
+        DECLARE sortedStr string := ""
+        SET pos := 0
+        WHILE pos < LENGTH OF chars DO
+          SET sortedStr := sortedStr CONCATENATE chars[pos]
+          SET pos := pos + 1
+        END WHILE
+        RETURN sortedStr
+      END FUNCTION
+
+      FUNCTION frequencyMap(str string) RETURNS map
+        DECLARE freq map := EMPTY MAP
+        DECLARE p integer := 0
+        WHILE p < LENGTH OF str DO
+          DECLARE c char := CHARACTER AT str[p]
+          IF freq HAS c THEN
+            SET freq[c] := freq[c] + 1
+          ELSE
+            SET freq[c] := 1
+          END IF
+          SET p := p + 1
+        END WHILE
+        RETURN freq
+      END FUNCTION
+
+      DECLARE tempList list := []
+      DECLARE idx integer := 0
+      WHILE idx < n + 1 DO
+        APPEND calcFactorial(idx) TO tempList
+        SET idx := idx + 1
+      END WHILE
+
+      DECLARE resultSum integer := 0
+      DECLARE visitedSet set := EMPTY SET
+
+      DECLARE expBase integer := 10 ^ ((n - 1) DIV 2)
+      DECLARE current integer := expBase
+
+      WHILE current < (expBase * 10) DO
+        DECLARE baseStr string := toString(current)
+        DECLARE restPart string := substringFrom(reverseString(baseStr), n MOD 2)
+        SET baseStr := baseStr CONCATENATE restPart
+
+        DECLARE value integer := 0
+        DECLARE pos integer := 0
+        WHILE pos < LENGTH OF baseStr DO
+          SET value := value * 10 + (ORDINARY(baseStr[pos]) - 48)
+          SET pos := pos + 1
+        END WHILE
+
+        IF (value MOD k) != 0 THEN
+          SET current := current + 1
+          CONTINUE
+        END IF
+
+        DECLARE ordered string := sortStringAsc(baseStr)
+
+        IF visitedSet CONTAINS ordered THEN
+          SET current := current + 1
+          CONTINUE
+        END IF
+
+        visitedSet ADD ordered
+        DECLARE freqDict map := frequencyMap(ordered)
+
+        DECLARE resValue integer
+        IF freqDict HAS '0' AND freqDict['0'] > 0 THEN
+          SET resValue := (n - freqDict['0']) * tempList[n - 1]
+        ELSE
+          SET resValue := tempList[n]
+        END IF
+
+        FOR EACH v IN VALUES OF freqDict DO
+          SET resValue := resValue DIV tempList[v]
+        END FOR
+
+        SET resultSum := resultSum + resValue
+        SET current := current + 1
+      END WHILE
+
+      RETURN resultSum
+    END FUNCTION
+END CLASS

@@ -1,0 +1,81 @@
+CLASS Hashing  
+	FUNCTION __init__(self, s, base, mod)  
+		SET self.mod TO mod  
+		SET self.h TO a new list containing (LENGTH OF s + (1 * 1)) zeros  
+		SET self.p TO a new list containing (1 + LENGTH OF s) ones  
+		SET index TO 1  
+		WHILE index <= LENGTH OF s  
+			SET temp1 TO (self.h[index - 1] * base) + TO_UNICODE(s[index - 1])  
+			SET self.h[index] TO temp1 - (temp1 / mod) * mod  
+			SET self.p[index] TO (self.p[index - 1] * base) - ((self.p[index - 1] * base) / mod) * mod  
+			SET index TO index + 1  
+		END WHILE  
+	END FUNCTION  
+
+	FUNCTION query(self, l, r)  
+		SET subhash TO self.h[r] - (self.h[l - 1] * self.p[r - l + 1])  
+		RETURN subhash - (subhash / self.mod) * self.mod  
+	END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+	FUNCTION findAnswer(self, parent, s)  
+		SET length_s TO LENGTH OF s  
+		SET graph TO a new list with length length_s of empty lists  
+		SET iterator TO 1  
+		WHILE iterator < length_s  
+			SET child_index TO parent[iterator]  
+			APPEND iterator TO graph[child_index]  
+			SET iterator TO iterator + 1  
+		END WHILE  
+
+		SET traversal_string TO empty list  
+		SET position_map TO empty dictionary  
+
+		FUNCTION recursive_search(current_node)  
+			SET start_pos TO LENGTH OF traversal_string + 1  
+			FOR each neighbor IN graph[current_node]  
+				CALL recursive_search(neighbor)  
+			END FOR  
+			APPEND s[current_node] TO traversal_string  
+			SET end_pos TO LENGTH OF traversal_string  
+			SET position_map[current_node] TO (start_pos, end_pos)  
+		END FUNCTION  
+
+		CALL recursive_search(0)  
+
+		SET constant_base TO 33331  
+		SET constant_mod TO 998244353  
+
+		SET hash_object1 TO new Hashing(traversal_string, constant_base, constant_mod)  
+		SET reversed_traversal TO empty list  
+		SET rev_index TO LENGTH OF traversal_string - 1  
+		WHILE rev_index >= 0  
+			APPEND traversal_string[rev_index] TO reversed_traversal  
+			SET rev_index TO rev_index - 1  
+		END WHILE  
+		SET hash_object2 TO new Hashing(reversed_traversal, constant_base, constant_mod)  
+
+		SET result_list TO empty list  
+		FOR idx FROM 0 TO length_s - 1  
+			SET left_bound TO position_map[idx][0]  
+			SET right_bound TO position_map[idx][1]  
+			SET segment_length TO right_bound - left_bound + 1  
+			IF (segment_length / 2) * 2 == segment_length  
+				SET half_query1 TO hash_object1.query(left_bound, left_bound + (segment_length / 2) - 1)  
+				SET rev_start TO length_s - right_bound + 1  
+				SET rev_end TO rev_start + (segment_length / 2) - 1  
+				SET half_query2 TO hash_object2.query(rev_start, rev_end)  
+			ELSE  
+				SET half_query1 TO hash_object1.query(left_bound, left_bound + (segment_length / 2) - 1)  
+				SET rev_start TO length_s - right_bound + 1  
+				SET rev_end TO rev_start + (segment_length / 2) - 1  
+				SET half_query2 TO hash_object2.query(rev_start, rev_end)  
+			END IF  
+			SET is_palindrome_half TO (half_query1 == half_query2)  
+			APPEND is_palindrome_half TO result_list  
+		END FOR  
+
+		RETURN result_list  
+	END FUNCTION  
+END CLASS

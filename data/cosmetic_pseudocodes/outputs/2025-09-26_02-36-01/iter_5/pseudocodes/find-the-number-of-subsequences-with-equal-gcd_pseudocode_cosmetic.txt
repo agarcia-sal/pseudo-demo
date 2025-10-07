@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION subsequencePairCount(nums)
+        LET moduloVal BE 10^9 + 7
+        LET upperBound BE nums[0]
+        LET idx1 BE 1
+        WHILE idx1 < LENGTH(nums) DO
+            IF nums[idx1] > upperBound THEN
+                SET upperBound TO nums[idx1]
+            END IF
+            SET idx1 TO idx1 + 1
+        END WHILE
+
+        LET dpArray BE NEW 2D ARRAY OF SIZE (upperBound + 1) x (upperBound + 1) FILLED WITH 0
+        SET dpArray[0][0] TO 1
+
+        FUNCTION gcdHelper(a, b)
+            IF b == 0 THEN
+                RETURN a
+            ELSE
+                RETURN gcdHelper(b, a MOD b)
+            END IF
+        END FUNCTION
+
+        FUNCTION processIndex(i)
+            IF i == LENGTH(nums) THEN
+                RETURN
+            END IF
+
+            LET currentNum BE nums[i]
+            LET updatedDp BE NEW 2D ARRAY OF SIZE (upperBound + 1) x (upperBound + 1) FILLED WITH 0
+
+            LET idxX BE 0
+            WHILE idxX <= upperBound DO
+                LET idxY BE 0
+                WHILE idxY <= upperBound DO
+                    LET baseVal BE dpArray[idxX][idxY]
+
+                    LET sumVal1 BE updatedDp[idxX][idxY] + baseVal
+                    SET updatedDp[idxX][idxY] TO sumVal1 MOD moduloVal
+
+                    LET gX BE gcdHelper(idxX, currentNum)
+                    LET sumVal2 BE updatedDp[gX][idxY] + baseVal
+                    SET updatedDp[gX][idxY] TO sumVal2 MOD moduloVal
+
+                    LET gY BE gcdHelper(idxY, currentNum)
+                    LET sumVal3 BE updatedDp[idxX][gY] + baseVal
+                    SET updatedDp[idxX][gY] TO sumVal3 MOD moduloVal
+
+                    SET idxY TO idxY + 1
+                END WHILE
+                SET idxX TO idxX + 1
+            END WHILE
+
+            SET dpArray TO updatedDp
+            CALL processIndex(i + 1)
+        END FUNCTION
+
+        CALL processIndex(0)
+
+        LET accumulator BE 0
+        LET counter BE 1
+        WHILE counter <= upperBound DO
+            SET accumulator TO (accumulator + dpArray[counter][counter]) MOD moduloVal
+            SET counter TO counter + 1
+        END WHILE
+
+        LET finalResult BE accumulator
+        RETURN finalResult
+    END FUNCTION
+END CLASS

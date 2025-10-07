@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        DEFINE m AS 1000000000 + 7
+        DEFINE lengthVar AS LENGTH(nums)
+        IF lengthVar < 5 THEN
+            RETURN 0
+        END IF
+        DEFINE allCombos AS []
+        DEFINE idxList AS [0,1,2,3,4]
+        CALL generateCombos(0, 0)
+        FUNCTION generateCombos(startIndex, depth)
+            IF depth = 5 THEN
+                DEFINE currentCombo AS []
+                FOR pos FROM 0 TO 4 WHILE pos <= 4
+                    APPEND nums[idxList[pos]] TO currentCombo
+                END FOR
+                APPEND currentCombo TO allCombos
+                RETURN
+            END IF
+            IF startIndex >= lengthVar THEN
+                RETURN
+            END IF
+            CALL generateCombos(startIndex + 1, depth)
+            idxList[depth] = startIndex
+            CALL generateCombos(startIndex + 1, depth + 1)
+        END FUNCTION
+        DEFINE resultCounter AS 0
+        FOR i FROM 0 TO LENGTH(allCombos) - 1
+            DEFINE comboItem AS allCombos[i]
+            DEFINE frequencyMap AS EMPTY MAP
+            FOR j FROM 0 TO 4
+                IF comboItem[j] IN frequencyMap THEN
+                    SET frequencyMap[comboItem[j]] = frequencyMap[comboItem[j]] + 1
+                ELSE
+                    SET frequencyMap[comboItem[j]] = 1
+                END IF
+            END FOR
+            DEFINE midElement AS comboItem[2]
+            DEFINE midCount AS frequencyMap[midElement]
+            DEFINE uniqueModeFlag AS TRUE
+            FOR EACH key IN frequencyMap KEYS
+                IF (key != midElement) AND (frequencyMap[key] >= midCount) THEN
+                    uniqueModeFlag = FALSE
+                    BREAK
+                END IF
+            END FOR
+            IF uniqueModeFlag = TRUE THEN
+                resultCounter = resultCounter + 1
+            END IF
+        END FOR
+        RETURN resultCounter % m
+    END FUNCTION
+END CLASS

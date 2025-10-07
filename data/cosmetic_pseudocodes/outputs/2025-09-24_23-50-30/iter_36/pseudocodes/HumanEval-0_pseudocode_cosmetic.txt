@@ -1,0 +1,33 @@
+```
+FUNCTION has_close_elements(list_of_numbers, threshold_value)
+    DEFINE FUNCTION check_pairs(idx_a, val_a, idx_b, val_b) 
+        RETURN (idx_a != idx_b) AND (ABS(val_a - val_b) < threshold_value)
+    END FUNCTION
+
+    DEFINE FUNCTION iterate_j(idx_i, val_i, arr_j)
+        IF arr_j IS EMPTY THEN RETURN False END IF
+        LET current_j = FIRST ELEMENT OF arr_j
+        LET rest_j = ALL ELEMENTS OF arr_j EXCEPT FIRST
+        IF check_pairs(idx_i, val_i, current_j.index, current_j.value) THEN
+            RETURN True
+        ELSE
+            RETURN iterate_j(idx_i, val_i, rest_j)
+        END IF
+    END FUNCTION
+
+    DEFINE FUNCTION iterate_i(arr_i, arr_j)
+        IF arr_i IS EMPTY THEN RETURN False END IF
+        LET pair = FIRST ELEMENT OF arr_i
+        LET rest_i = ALL ELEMENTS OF arr_i EXCEPT FIRST
+        IF iterate_j(pair.index, pair.value, arr_j) THEN
+            RETURN True
+        ELSE
+            RETURN iterate_i(rest_i, arr_j)
+        END IF
+    END FUNCTION
+
+    LET indexed_pairs = MAP EACH element WITH index i IN list_of_numbers TO RECORD {index: i, value: element}
+
+    RETURN iterate_i(indexed_pairs, indexed_pairs)
+END FUNCTION
+```

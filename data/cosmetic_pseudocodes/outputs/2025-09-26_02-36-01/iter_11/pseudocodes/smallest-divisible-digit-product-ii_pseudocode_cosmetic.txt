@@ -1,0 +1,200 @@
+CLASS Solution
+	FUNCTION smallestNumber(num, t)
+		FUNCTION helperIsDivisible(dividend, divisor)
+			WHILE dividend MOD divisor EQUALS 0
+				SET dividend TO dividend DIV divisor
+			RETURN dividend EQUALS 1
+		END FUNCTION
+
+		FUNCTION helperGetPrimeCount(value)
+			SET tally TO empty Counter
+			DEFINE primeArray TO [2, 3, 5, 7]
+			SET tempVal TO value
+			SET idx TO 0
+			REPEAT
+				IF idx >= LENGTH(primeArray)
+					EXIT LOOP
+				END IF
+				SET currentPrime TO primeArray[idx]
+				WHILE tempVal MOD currentPrime EQUALS 0
+					SET tempVal TO tempVal DIV currentPrime
+					INCREMENT tally[currentPrime] BY 1
+				END WHILE
+				SET idx TO idx + 1
+			UNTIL false
+			RETURN tally, (tempVal EQUALS 1)
+		END FUNCTION
+
+		FUNCTION helperGetFactorCount(inputCounter)
+			SET div2_quot, div2_rem TO DIVMOD(inputCounter[2], 3)
+			SET div3_quot, div3_rem TO DIVMOD(inputCounter[3], 2)
+			SET div4_quot, div2_val TO DIVMOD(div2_rem, 2)
+			SET valCount2 TO div2_val
+			SET valCount3 TO div3_rem
+			SET valCount4 TO div4_quot
+			SET valCount8 TO div2_quot
+			SET valCount9 TO div3_quot
+			IF valCount2 EQUALS 1 AND valCount3 EQUALS 1
+				SET valCount2 TO 0
+				SET valCount3 TO 0
+				SET valCount6 TO 1
+			ELSE
+				SET valCount6 TO 0
+			END IF
+			IF valCount3 EQUALS 1 AND valCount4 EQUALS 1
+				SET valCount2 TO 1
+				SET valCount6 TO 1
+				SET valCount3 TO 0
+				SET valCount4 TO 0
+			END IF
+			RETURN Counter({
+				"2": valCount2,
+				"3": valCount3,
+				"4": valCount4,
+				"5": inputCounter[5],
+				"6": valCount6,
+				"7": inputCounter[7],
+				"8": valCount8,
+				"9": valCount9
+			})
+		END FUNCTION
+
+		SET primeCountInternal, flagDivisible TO helperGetPrimeCount(t)
+		IF NOT flagDivisible
+			RETURN "-1"
+		END IF
+
+		SET factorCountLocal TO helperGetFactorCount(primeCountInternal)
+		SET sumFactors TO 0
+		FOR keyVal IN factorCountLocal
+			SET sumFactors TO sumFactors + factorCountLocal[keyVal]
+		END FOR
+		IF sumFactors > LENGTH(num)
+			SET resultStr TO ""
+			FOR keyIndex IN factorCountLocal
+				SET resultStr TO resultStr + keyIndex REPEATED factorCountLocal[keyIndex] TIMES
+			END FOR
+			RETURN resultStr
+		END IF
+
+		SET prefixCounter TO Counter()
+		FOR charItem IN num
+			SET prefixCounter TO prefixCounter + helperGetFactorCount(self._getPrimeCount(INT(charItem))[0])
+		END FOR
+		SET posFirstZero TO LENGTH(num)
+		FOR idxP FROM 0 TO LENGTH(num) - 1
+			IF num[idxP] EQUALS '0'
+				SET posFirstZero TO idxP
+				BREAK
+			END IF
+		END FOR
+
+		IF posFirstZero EQUALS LENGTH(num) AND primeCountInternal <= prefixCounter
+			RETURN num
+		END IF
+
+		FUNCTION recurIterate(idxR)
+			IF idxR < 0
+				RETURN null
+			END IF
+
+			SET digitVal TO INT(num[idxR])
+			SET prefixCounter TO prefixCounter - helperGetFactorCount(self._getPrimeCount(digitVal)[0])
+			SET remSpace TO LENGTH(num) - 1 - idxR
+			IF idxR <= posFirstZero
+				FUNCTION tryBiggerDigit(testDigit)
+					IF testDigit > 9
+						RETURN null
+					END IF
+					SET remainFactors TO helperGetFactorCount(primeCountInternal - prefixCounter - helperGetFactorCount(self._getPrimeCount(testDigit)[0]))
+					SET sumRemain TO 0
+					FOR k IN remainFactors
+						SET sumRemain TO sumRemain + remainFactors[k]
+					END FOR
+					IF sumRemain <= remSpace
+						SET extraOnes TO remSpace - sumRemain
+						SET frontPart TO ""
+						FOR partIdx FROM 0 TO idxR - 1
+							SET frontPart TO frontPart + num[partIdx]
+						END FOR
+						SET midPart TO STRING(testDigit)
+						SET onesPart TO REPEAT("1", extraOnes)
+						SET backPart TO ""
+						FOR keyK IN remainFactors
+							SET backPart TO backPart + keyK REPEATED remainFactors[keyK] TIMES
+						END FOR
+						RETURN frontPart + midPart + onesPart + backPart
+					END IF
+					RETURN tryBiggerDigit(testDigit + 1)
+				END FUNCTION
+				RETURN tryBiggerDigit(digitVal + 1)
+			END IF
+			RETURN recurIterate(idxR - 1)
+		END FUNCTION
+
+		SET valResult TO recurIterate(LENGTH(num) - 1)
+		IF valResult IS NOT null
+			RETURN valResult
+		END IF
+
+		SET factorCountLocal TO helperGetFactorCount(primeCountInternal)
+		SET sumF TO 0
+		FOR keyZ IN factorCountLocal
+			SET sumF TO sumF + factorCountLocal[keyZ]
+		END FOR
+		RETURN REPEAT("1", LENGTH(num) + 1 - sumF) + (
+			FUNCTION buildKeyString()
+				SET outStr TO ""
+				FOR kPart IN factorCountLocal
+					SET outStr TO outStr + kPart REPEATED factorCountLocal[kPart]
+				END FOR
+				RETURN outStr
+			END FUNCTION
+		)()
+	END FUNCTION
+
+	FUNCTION _getPrimeCount(t)
+		SET cnt TO Counter()
+		FOR p IN [2, 3, 5, 7]
+			WHILE t MOD p EQUALS 0
+				SET t TO t DIV p
+				INC cnt[p]
+			END WHILE
+		END FOR
+		RETURN cnt, (t EQUALS 1)
+	END FUNCTION
+
+	FUNCTION _getFactorCount(count)
+		SET a1, a2 TO DIVMOD(count[2], 3)
+		SET b1, b2 TO DIVMOD(count[3], 2)
+		SET c1, c2 TO DIVMOD(a2, 2)
+		SET valTwo TO c2
+		SET valThree TO b2
+		SET valFour TO c1
+		SET valEight TO a1
+		SET valNine TO b1
+		IF valTwo EQUALS 1 AND valThree EQUALS 1
+			SET valTwo TO 0
+			SET valThree TO 0
+			SET valSix TO 1
+		ELSE
+			SET valSix TO 0
+		END IF
+		IF valThree EQUALS 1 AND valFour EQUALS 1
+			SET valTwo TO 1
+			SET valSix TO 1
+			SET valThree TO 0
+			SET valFour TO 0
+		END IF
+		RETURN Counter({
+			"2": valTwo,
+			"3": valThree,
+			"4": valFour,
+			"5": count[5],
+			"6": valSix,
+			"7": count[7],
+			"8": valEight,
+			"9": valNine
+		})
+	END FUNCTION
+END CLASS

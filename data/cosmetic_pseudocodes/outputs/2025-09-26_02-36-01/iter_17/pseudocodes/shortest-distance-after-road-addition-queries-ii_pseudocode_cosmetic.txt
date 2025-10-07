@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION shortestDistanceAfterQueries(n, queries)
+        DECLARE connectionMap AS map FROM int TO list
+        FOR index FROM 0 TO n - 1
+            SET connectionMap[index] TO empty list
+        END FOR
+
+        DECLARE edgeIndex AS 0
+        WHILE edgeIndex < (n - 1)
+            ADD (edgeIndex + 1, 1) TO connectionMap[edgeIndex]
+            SET edgeIndex TO edgeIndex + 1
+        END WHILE
+
+        FUNCTION dijkstra()
+            DECLARE distances AS list WITH n elements ALL set TO +∞
+            SET distances[0] TO 0
+            DECLARE heapQueue AS list CONTAINING (0, 0)
+
+            FUNCTION heapPopMin(queue)
+                DECLARE minIdx AS 0
+                FOR idx FROM 1 TO LENGTH(queue) - 1
+                    IF queue[idx][0] < queue[minIdx][0] THEN
+                        SET minIdx TO idx
+                    END IF
+                END FOR
+                DECLARE minElement AS queue[minIdx]
+                REMOVE ELEMENT AT minIdx FROM queue
+                RETURN minElement
+            END FUNCTION
+
+            FUNCTION heapPush(queue, element)
+                ADD element TO queue
+            END FUNCTION
+
+            WHILE LENGTH(heapQueue) > 0
+                DECLARE currentPair AS heapPopMin(heapQueue)
+                DECLARE currentDistance AS currentPair[0]
+                DECLARE currentVertex AS currentPair[1]
+
+                IF distances[currentVertex] < currentDistance THEN
+                    CONTINUE
+                END IF
+
+                DECLARE neighborElem AS 0
+                WHILE neighborElem < LENGTH(connectionMap[currentVertex])
+                    DECLARE neighborWeightTuple AS connectionMap[currentVertex][neighborElem]
+                    DECLARE adjNode AS neighborWeightTuple[0]
+                    DECLARE edgeCost AS neighborWeightTuple[1]
+                    DECLARE candidateDistance AS currentDistance + edgeCost
+
+                    IF candidateDistance < distances[adjNode] THEN
+                        SET distances[adjNode] TO candidateDistance
+                        heapPush(heapQueue, (candidateDistance, adjNode))
+                    END IF
+                    SET neighborElem TO neighborElem + 1
+                END WHILE
+            END WHILE
+
+            RETURN distances[n - 1]
+        END FUNCTION
+
+        DECLARE answerList AS empty list
+        DECLARE queryIdx AS 0
+        REPEAT
+            IF queryIdx >= LENGTH(queries) THEN BREAK
+            END IF
+
+            DECLARE queryPair AS queries[queryIdx]
+            DECLARE fromNode AS queryPair[0]
+            DECLARE toNode AS queryPair[1]
+            ADD (toNode, 1) TO connectionMap[fromNode]
+            ADD dijkstra() TO answerList
+
+            SET queryIdx TO queryIdx + 1
+        UNTIL FALSE
+
+        RETURN answerList
+    END FUNCTION
+END CLASS

@@ -1,0 +1,69 @@
+CLASS Solution  
+    FUNCTION maxCollectedFruits(fruits)  
+        SET length TO 0  
+        WHILE TRUE  
+            IF length EQUALS LENGTH OF fruits THEN BREAK END IF  
+            SET length TO length PLUS 1  
+        END WHILE  
+        
+        SET directionsA TO LIST OF PAIR(1,1), PAIR(1,0)  
+        SET directionsB TO LIST OF PAIR(1,-1), PAIR(1,0), PAIR(1,1)  
+        SET directionsC TO LIST OF PAIR(-1,1), PAIR(0,1), PAIR(1,1)  
+        
+        SET cache TO EMPTY DICTIONARY  
+        
+        FUNCTION dp(a1, b1, a2, b2, a3, b3)  
+            IF (a1 LESS THAN 0 OR a1 GREATER THAN OR EQUAL TO length) OR (b1 LESS THAN 0 OR b1 GREATER THAN OR EQUAL TO length) OR (a2 LESS THAN 0 OR a2 GREATER THAN OR EQUAL TO length) OR (b2 LESS THAN 0 OR b2 GREATER THAN OR EQUAL TO length) OR (a3 LESS THAN 0 OR a3 GREATER THAN OR EQUAL TO length) OR (b3 LESS THAN 0 OR b3 GREATER THAN OR EQUAL TO length) THEN  
+                RETURN negative infinity  
+            END IF  
+            
+            IF a1 EQUALS b1 AND b1 EQUALS a2 AND a2 EQUALS b2 AND b2 EQUALS a3 AND a3 EQUALS b3 AND b3 EQUALS length MINUS 1 THEN  
+                RETURN fruits AT POSITION (length MINUS 1) AT POSITION (length MINUS 1)  
+            END IF  
+            
+            SET keyTuple TO TUPLE(a1, b1, a2, b2, a3, b3)  
+            IF keyTuple EXISTS IN cache THEN  
+                RETURN cache AT keyTuple  
+            END IF  
+            
+            SET accumulator TO fruits AT POSITION a1 AT POSITION b1  
+            
+            IF (a1 EQUALS a2 AND b1 EQUALS b2) OR (a1 EQUALS a3 AND b1 EQUALS b3) THEN  
+                SET accumulator TO 0  
+            END IF  
+            
+            IF a2 EQUALS a3 AND b2 EQUALS b3 THEN  
+                SET accumulator TO accumulator PLUS fruits AT POSITION a2 AT POSITION b2  
+            ELSE  
+                SET accumulator TO accumulator PLUS fruits AT POSITION a2 AT POSITION b2  
+                SET accumulator TO accumulator PLUS fruits AT POSITION a3 AT POSITION b3  
+            END IF  
+            
+            SET highest TO negative infinity  
+            SET outer_i TO 0  
+            WHILE outer_i LESS THAN LENGTH OF directionsA  
+                SET deltaA TO directionsA AT outer_i  
+                SET outer_j TO 0  
+                WHILE outer_j LESS THAN LENGTH OF directionsB  
+                    SET deltaB TO directionsB AT outer_j  
+                    SET outer_k TO 0  
+                    WHILE outer_k LESS THAN LENGTH OF directionsC  
+                        SET deltaC TO directionsC AT outer_k  
+                        SET recCall TO dp(a1 PLUS deltaA FIRST ELEMENT, b1 PLUS deltaA SECOND ELEMENT, a2 PLUS deltaB FIRST ELEMENT, b2 PLUS deltaB SECOND ELEMENT, a3 PLUS deltaC FIRST ELEMENT, b3 PLUS deltaC SECOND ELEMENT)  
+                        IF recCall GREATER THAN highest THEN  
+                            SET highest TO recCall  
+                        END IF  
+                        SET outer_k TO outer_k PLUS 1  
+                    END WHILE  
+                    SET outer_j TO outer_j PLUS 1  
+                END WHILE  
+                SET outer_i TO outer_i PLUS 1  
+            END WHILE  
+            
+            SET cache AT keyTuple TO accumulator PLUS highest  
+            RETURN accumulator PLUS highest  
+        END FUNCTION  
+        
+        RETURN dp(0, 0, 0, length MINUS 1, length MINUS 1, 0)  
+    END FUNCTION  
+END CLASS

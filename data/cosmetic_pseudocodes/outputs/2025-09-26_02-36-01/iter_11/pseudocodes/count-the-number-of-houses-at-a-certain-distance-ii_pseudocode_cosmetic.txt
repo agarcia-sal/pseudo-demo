@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        IF y LESS THAN x THEN
+            SET alpha TO x
+            SET x TO y
+            SET y TO alpha
+        END IF
+
+        FUNCTION bfs(start)
+            SET marked TO array of size n + 1 FILLED WITH False
+            SET dist TO array of size n + 1 FILLED WITH 0
+            SET q TO new deque
+            ADD start TO q
+            SET marked[start] TO True
+
+            FUNCTION dequeueElement()
+                SET elem TO FIRST element of q
+                REMOVE FIRST element from q
+                RETURN elem
+            END FUNCTION
+
+            FUNCTION isValid(position)
+                RETURN position GREATER THAN OR EQUAL TO 1 AND position LESS THAN OR EQUAL TO n
+            END FUNCTION
+
+            PROCEDURE enqueueNeighbor(curr, neighbor)
+                SET marked[neighbor] TO True
+                SET dist[neighbor] TO dist[curr] + (1 * 1)
+                ADD neighbor TO q
+            END PROCEDURE
+
+            REPEAT
+                IF LENGTH OF q EQUALS 0 THEN
+                    BREAK
+                END IF
+                SET node TO dequeueElement()
+                FOR pos IN [node - (1 * 1), node + 1]
+                    IF isValid(pos) AND NOT marked[pos] THEN
+                        enqueueNeighbor(node, pos)
+                    END IF
+                END FOR
+                IF node EQUALS x AND marked[y] EQUALS False THEN
+                    enqueueNeighbor(node, y)
+                ELSE IF node EQUALS y AND marked[x] EQUALS False THEN
+                    enqueueNeighbor(node, x)
+                END IF
+            UNTIL False
+
+            RETURN dist[1 TO n + 1]
+        END FUNCTION
+
+        SET tally TO array of size n FILLED WITH 0
+        PROCEDURE processDistances(index)
+            SET vals TO bfs(index)
+            SET idx TO 1
+            WHILE idx LESS THAN OR EQUAL TO n DO
+                IF vals[idx] GREATER THAN 0 THEN
+                    SET p IN vals[idx] - 1
+                    INCREMENT tally[p] BY 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+        END PROCEDURE
+
+        SET cursor TO 1
+        WHILE cursor LESS THAN OR EQUAL TO n DO
+            processDistances(cursor)
+            SET cursor TO cursor + 1
+        END WHILE
+
+        RETURN tally
+    END FUNCTION
+END CLASS

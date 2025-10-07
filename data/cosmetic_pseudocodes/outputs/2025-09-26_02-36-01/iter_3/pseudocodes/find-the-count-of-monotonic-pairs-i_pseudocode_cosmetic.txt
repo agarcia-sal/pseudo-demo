@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        SET remainder TO (1000000000) + 7
+        SET length_nums TO LENGTH OF nums
+        SET peak TO MAXIMUM ELEMENT IN nums
+
+        SET dp TO EMPTY LIST
+        SET index_i TO 0
+        WHILE index_i < length_nums
+            SET row_dp TO EMPTY LIST
+            SET index_j TO 0
+            WHILE index_j <= peak
+                SET col_dp TO EMPTY LIST
+                SET index_k TO 0
+                WHILE index_k <= peak
+                    APPEND 0 TO col_dp
+                    SET index_k TO index_k PLUS 1
+                END WHILE
+                APPEND col_dp TO row_dp
+                SET index_j TO index_j PLUS 1
+            END WHILE
+            APPEND row_dp TO dp
+            SET index_i TO index_i PLUS 1
+        END WHILE
+
+        SET start_value TO nums[0]
+        SET iterator_j TO 0
+        WHILE iterator_j <= start_value
+            SET iterator_k TO start_value - iterator_j
+            ASSIGN 1 TO dp[0][iterator_j][iterator_k]
+            SET iterator_j TO iterator_j PLUS 1
+        END WHILE
+
+        SET position_i TO 1
+        WHILE position_i < length_nums
+            SET val_at_i TO nums[position_i]
+            SET index_j2 TO 0
+            WHILE index_j2 <= val_at_i
+                SET index_k2 TO val_at_i - index_j2
+
+                SET previous_j TO 0
+                WHILE previous_j <= index_j2
+
+                    SET previous_k TO index_k2
+                    WHILE previous_k <= peak
+                        dp[position_i][index_j2][index_k2] = dp[position_i][index_j2][index_k2] + dp[position_i - 1][previous_j][previous_k]
+                        dp[position_i][index_j2][index_k2] = dp[position_i][index_j2][index_k2] - ((dp[position_i][index_j2][index_k2] / remainder) * remainder)
+                        SET previous_k TO previous_k + 1
+                    END WHILE
+
+                    SET previous_j TO previous_j + 1
+                END WHILE
+
+                SET index_j2 TO index_j2 + 1
+            END WHILE
+            SET position_i TO position_i + 1
+        END WHILE
+
+        SET acc TO 0
+        SET idx_j_final TO 0
+        WHILE idx_j_final <= peak
+            SET idx_k_final TO 0
+            WHILE idx_k_final <= peak
+                SET sum_jk TO idx_j_final + idx_k_final
+                IF sum_jk == nums[length_nums - 1] THEN
+                    acc = acc + dp[length_nums - 1][idx_j_final][idx_k_final]
+                    acc = acc - ((acc / remainder) * remainder)
+                END IF
+                SET idx_k_final TO idx_k_final + 1
+            END WHILE
+            SET idx_j_final TO idx_j_final + 1
+        END WHILE
+
+        RETURN acc
+    END FUNCTION
+END CLASS

@@ -1,0 +1,42 @@
+```
+FUNCTION count_nums(array_of_integers)
+    FUNCTION digits_sum(integer_input)
+        SET multiplier_sign TO 1
+        IF integer_input < 0 THEN
+            SET integer_input TO 0 - integer_input
+            SET multiplier_sign TO -1
+        END IF
+        SET digits_list TO CONVERT TO LIST(STRING(integer_input))
+        SET digits_list[0] TO digits_list[0] * multiplier_sign
+        SET total_sum TO 0
+        FOR index FROM 0 TO LENGTH(digits_list) - 1
+            SET total_sum TO total_sum + digits_list[index]
+        END FOR
+        RETURN total_sum
+    END FUNCTION
+
+    FUNCTION map_to_sums(input_array, index, acc)
+        IF index >= LENGTH(input_array) THEN
+            RETURN acc
+        END IF
+        RETURN map_to_sums(index + 1, acc + [digits_sum(input_array[index])], input_array)  -- reordered parameters to preserve logic
+    END FUNCTION
+    
+    SET digit_sums_list TO map_to_sums(0, [], array_of_integers)
+
+    FUNCTION filter_positive(list_to_filter, idx, collector)
+        IF idx >= LENGTH(list_to_filter) THEN
+            RETURN collector
+        END IF
+        IF list_to_filter[idx] > 0 THEN
+            RETURN filter_positive(list_to_filter, idx + 1, collector + [list_to_filter[idx]])
+        ELSE
+            RETURN filter_positive(list_to_filter, idx + 1, collector)
+        END IF
+    END FUNCTION
+    
+    SET positives_list TO filter_positive(digit_sums_list, 0, [])
+
+    RETURN LENGTH(positives_list)
+END FUNCTION
+```

@@ -1,0 +1,87 @@
+``` 
+CLASS Solution
+	FUNCTION maximumTotalCost(nums)
+		SET lengthVar TO 0
+		FUNCTION getLength(inputList)
+			IF inputList EQUALS empty list
+				RETURN 0
+			ELSE
+				RETURN 1 PLUS getLength(sublist of inputList starting from second element)
+			END IF
+		END FUNCTION
+		SET lengthVar TO getLength(nums)
+
+		FUNCTION fetchAtIndex(collection, idx)
+			IF idx EQUALS 0
+				RETURN first element of collection
+			ELSE
+				RETURN fetchAtIndex(sublist of collection starting from second element , idx MINUS 1)
+			END IF
+		END FUNCTION
+
+		IF lengthVar EQUALS (0 PLUS 1)
+			RETURN fetchAtIndex(nums, (0 PLUS 0))
+		END IF
+
+		FUNCTION zeroList(len, accum)
+			IF len EQUALS 0
+				RETURN accum
+			ELSE
+				RETURN zeroList(len MINUS 1, accum APPEND 0)
+			END IF
+		END FUNCTION
+
+		SET dpList TO zeroList(lengthVar, empty list)
+
+		FUNCTION replaceAt(pos, val, arr)
+			IF pos EQUALS 0
+				RETURN list with val CONCATENATED WITH sublist of arr starting from second element
+			ELSE
+				RETURN first element of arr CONCATENATED WITH replaceAt(pos MINUS 1, val, sublist of arr starting from second element)
+			END IF
+		END FUNCTION
+
+		SET dpList TO replaceAt(lengthVar MINUS (1 PLUS 0), fetchAtIndex(nums, lengthVar MINUS (1 PLUS 0)), dpList)
+
+		FUNCTION indexDescending(counter)
+			IF counter LESS THAN 0
+				RETURN dpList
+			ELSE
+				SET tmpCurrent TO fetchAtIndex(nums, counter)
+				IF tmpCurrent GREATER THAN fetchAtIndex(dpList, counter PLUS (1 PLUS 0))
+					SET dpList TO replaceAt(counter, tmpCurrent, dpList)
+				ELSE
+					SET dpList TO replaceAt(counter, fetchAtIndex(dpList, counter PLUS (1 PLUS 0)) PLUS tmpCurrent, dpList)
+				END IF
+
+				FUNCTION innerIndexAscending(innerCounter, curCost, dpLocal)
+					IF innerCounter GREATER THAN lengthVar MINUS (1 PLUS 0)
+						RETURN dpLocal
+					ELSE
+						SET signValue TO (NEGATIVE (1)) RAISED TO THE POWER (innerCounter MINUS counter)
+						SET updatedCost TO curCost PLUS (fetchAtIndex(nums, innerCounter) MULTIPLIED BY signValue)
+
+						IF innerCounter PLUS (1 PLUS 0) LESS THAN lengthVar
+							IF fetchAtIndex(dpLocal, counter) LESS THAN updatedCost PLUS fetchAtIndex(dpLocal, innerCounter PLUS (1 PLUS 0))
+								SET dpLocal TO replaceAt(counter, updatedCost PLUS fetchAtIndex(dpLocal, innerCounter PLUS (1 PLUS 0)), dpLocal)
+							END IF
+						ELSE
+							IF fetchAtIndex(dpLocal, counter) LESS THAN updatedCost
+								SET dpLocal TO replaceAt(counter, updatedCost, dpLocal)
+							END IF
+						END IF
+						RETURN innerIndexAscending(innerCounter PLUS (1 PLUS 0), updatedCost, dpLocal)
+					END IF
+				END FUNCTION
+				
+				SET dpList TO innerIndexAscending(counter PLUS (1 PLUS 0), tmpCurrent, dpList)
+
+				RETURN indexDescending(counter MINUS (1 PLUS 0))
+			END IF
+		END FUNCTION
+
+		SET dpList TO indexDescending(lengthVar MINUS (2 PLUS 0))
+		RETURN fetchAtIndex(dpList, 0)
+	END FUNCTION
+END CLASS
+```

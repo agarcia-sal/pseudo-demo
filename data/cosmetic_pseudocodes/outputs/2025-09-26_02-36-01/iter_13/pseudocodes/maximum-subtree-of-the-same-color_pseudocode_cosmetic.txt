@@ -1,0 +1,51 @@
+CLASS Solution
+	FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+		SET tree TO an empty mapping from keys to empty lists
+		FUNCTION buildGraph WITH PARAMETERS index
+			IF index GREATER OR EQUAL TO length of edges THEN
+				RETURN
+			END IF
+			SET src TO the first element of edges at index
+			SET dst TO the second element of edges at index
+			APPEND dst TO tree at key src
+			APPEND src TO tree at key dst
+			CALL buildGraph WITH index plus one
+		END FUNCTION
+		CALL buildGraph WITH zero
+
+		SET result TO 1
+
+		FUNCTION dfs WITH PARAMETERS current parent
+			SET aux_count TO 1
+			SET all_same TO true
+			DEFINE FUNCTION iterateNeighbors WITH PARAMETERS pos neighbors
+				IF pos GREATER OR EQUAL TO length of neighbors THEN
+					RETURN
+				END IF
+				SET neighbor TO neighbors at position pos
+				IF neighbor NOT EQUALS parent THEN
+					SET returned_count TO dfs called WITH arguments neighbor current
+					IF returned_count EQUALS 0 THEN
+						SET all_same TO false
+					ELSE
+						IF colors at position neighbor EQUALS colors at position current THEN
+							SET aux_count TO aux_count plus returned_count
+						ELSE
+							SET all_same TO false
+						END IF
+					END IF
+				END IF
+				CALL iterateNeighbors WITH pos plus 1 and neighbors
+			END FUNCTION
+			CALL iterateNeighbors WITH zero and tree at key current
+			IF all_same EQUALS true THEN
+				SET result TO (IF result GREATER THAN aux_count THEN result ELSE aux_count ENDIF)
+				RETURN aux_count
+			ELSE
+				RETURN 0
+			END IF
+		END FUNCTION
+
+		RETURN dfs called WITH zero and negative 1
+	END FUNCTION
+END CLASS

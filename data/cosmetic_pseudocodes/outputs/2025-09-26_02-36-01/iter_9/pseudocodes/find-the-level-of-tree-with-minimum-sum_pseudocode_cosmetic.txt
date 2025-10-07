@@ -1,0 +1,198 @@
+CLASS TreeNode
+    FUNCTION __init__(self, alpha = 0, beta = None, gamma = None)
+        SET self.val TO alpha
+        SET self.left TO beta
+        SET self.right TO gamma
+    END FUNCTION
+END CLASS
+
+FUNCTION tree_node(omega)
+    IF NOT has_elements(omega) THEN
+        RETURN None
+    END IF
+
+    SET delta TO create_node(value_at(omega, 0))
+    SET tau TO 1
+    SET sigma TO deque_create()
+    deque_append(sigma, delta)
+
+    REPEAT
+        IF deque_is_empty(sigma) THEN
+            BREAK
+        END IF
+
+        SET mu TO deque_popleft(sigma)
+
+        IF less_than(tau, collection_length(omega)) THEN
+            SET epsilon TO get_element(omega, tau)
+            IF not_equal(epsilon, None) THEN
+                SET mu.left TO create_node(epsilon)
+                deque_append(sigma, mu.left)
+            END IF
+        END IF
+        SET tau TO tau + 1
+
+        IF less_than(tau, collection_length(omega)) THEN
+            SET epsilon TO get_element(omega, tau)
+            IF not_equal(epsilon, None) THEN
+                SET mu.right TO create_node(epsilon)
+                deque_append(sigma, mu.right)
+            END IF
+        END IF
+        SET tau TO tau + 1
+    UNTIL False
+
+    RETURN delta
+END FUNCTION
+
+FUNCTION is_same_tree(xi, upsilon)
+    IF both_none(xi, upsilon) THEN
+        RETURN True
+    END IF
+
+    IF either_none(xi, upsilon) THEN
+        RETURN False
+    END IF
+
+    IF not_equal(xi.val, upsilon.val) THEN
+        RETURN False
+    END IF
+
+    RETURN and_bool(is_same_tree(xi.left, upsilon.left), is_same_tree(xi.right, upsilon.right))
+END FUNCTION
+
+
+CLASS Solution
+    FUNCTION minimumLevel(self, phi)
+        IF equal_none(phi) THEN
+            RETURN 0
+        END IF
+
+        SET kappa_queue TO deque_create()
+        deque_append(kappa_queue, phi)
+
+        SET zeta_level TO 1
+        SET theta_min_sum TO positive_infinity()
+        SET rho_level TO 1
+
+        WHILE not deque_is_empty(kappa_queue)
+            SET eta_sum TO 0
+            SET xi_counter TO 0
+            SET chi_limit TO deque_length(kappa_queue)
+
+            CALL count_loop(chi_limit, xi_counter, kappa_queue, eta_sum)
+
+            IF less_than(eta_sum, theta_min_sum) THEN
+                SET theta_min_sum TO eta_sum
+                SET zeta_level TO rho_level
+            END IF
+            SET rho_level TO rho_level + 1
+        END WHILE
+
+        RETURN zeta_level
+    END FUNCTION
+END CLASS
+
+
+
+FUNCTION count_loop(limit, index_ref, q, acc_sum_ref)
+    RECURSIVE_HELPER(limit, index_ref, q, acc_sum_ref)
+END FUNCTION
+
+FUNCTION RECURSIVE_HELPER(lim, idx, queue_ref, sum_ref)
+    IF idx >= lim THEN
+        RETURN
+    END IF
+
+    SET current_node TO deque_popleft(queue_ref)
+    SET sum_ref TO sum_ref + current_node.val
+
+    IF not_equal(current_node.left, None) THEN
+        deque_append(queue_ref, current_node.left)
+    END IF
+
+    IF not_equal(current_node.right, None) THEN
+        deque_append(queue_ref, current_node.right)
+    END IF
+
+    SET idx TO idx + 1
+    CALL RECURSIVE_HELPER(lim, idx, queue_ref, sum_ref)
+END FUNCTION
+
+
+
+FUNCTION both_none(a, b)
+    RETURN equal_none(a) AND equal_none(b)
+END FUNCTION
+
+FUNCTION either_none(a, b)
+    RETURN equal_none(a) OR equal_none(b)
+END FUNCTION
+
+FUNCTION equal_none(x)
+    RETURN x == None
+END FUNCTION
+
+FUNCTION not_equal(a, b)
+    RETURN NOT (a == b)
+END FUNCTION
+
+FUNCTION less_than(a, b)
+    RETURN (a - b) < 0
+END FUNCTION
+
+FUNCTION create_node(value)
+    RETURN NEW TreeNode(value)
+END FUNCTION
+
+FUNCTION has_elements(coll)
+    RETURN NOT (collection_length(coll) == 0)
+END FUNCTION
+
+FUNCTION value_at(coll, pos)
+    RETURN get_element(coll, pos)
+END FUNCTION
+
+FUNCTION collection_length(coll)
+    RETURN length(coll)
+END FUNCTION
+
+FUNCTION get_element(coll, idx)
+    RETURN coll[idx]
+END FUNCTION
+
+FUNCTION deque_create()
+    RETURN NEW deque()
+END FUNCTION
+
+FUNCTION deque_append(dq, element)
+    CALL dq.append(element)
+END FUNCTION
+
+FUNCTION deque_popleft(dq)
+    RETURN dq.popleft()
+END FUNCTION
+
+FUNCTION deque_is_empty(dq)
+    RETURN length(dq) == 0
+END FUNCTION
+
+FUNCTION deque_length(dq)
+    RETURN length(dq)
+END FUNCTION
+
+FUNCTION and_bool(a, b)
+    IF a THEN
+        IF b THEN
+            RETURN True
+        ELSE
+            RETURN False
+        END IF
+    ELSE
+        RETURN False
+    END IF
+END FUNCTION
+
+FUNCTION positive_infinity()
+    RETURN 1.0 / 0.0
+END FUNCTION

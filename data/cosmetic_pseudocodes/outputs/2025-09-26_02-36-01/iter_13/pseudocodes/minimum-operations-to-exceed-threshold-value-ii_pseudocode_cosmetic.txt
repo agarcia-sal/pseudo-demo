@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION minOperations(nums parameter k parameter)
+        SET m TO LENGTH OF nums
+        DEFINE FUNCTION heapify_local(arr)
+            SET n TO LENGTH OF arr
+            SET i TO (n DIV 2) MINUS 1
+            REPEAT
+                CALL sift_down(arr, i, n)
+                SET i TO i MINUS 1
+            UNTIL i LESS THAN 0
+        END FUNCTION
+        DEFINE FUNCTION sift_down(arr, start, end_)
+            SET root TO start
+            REPEAT
+                SET child TO (2 TIMES root) PLUS 1
+                IF child GREATER OR EQUAL TO end_ THEN
+                    BREAK
+                END IF
+                IF child PLUS 1 LESS THAN end_ AND arr[child PLUS 1] LESS THAN arr[child] THEN
+                    SET child TO child PLUS 1
+                END IF
+                IF arr[root] LESS THAN OR EQUAL TO arr[child] THEN
+                    BREAK
+                ELSE
+                    SET temp TO arr[root]
+                    SET arr[root] TO arr[child]
+                    SET arr[child] TO temp
+                    SET root TO child
+                END IF
+            UNTIL FALSE
+        END FUNCTION
+        DEFINE FUNCTION heappop_local(heap)
+            IF LENGTH OF heap EQUALS 0 THEN
+                RETURN NULL
+            END IF
+            SET last_elem TO heap[ LENGTH OF heap MINUS 1 ]
+            SET result TO heap[0]
+            SET heap[0] TO last_elem
+            REMOVE last element from heap
+            CALL sift_down(heap, 0, LENGTH OF heap)
+            RETURN result
+        END FUNCTION
+        DEFINE FUNCTION heappush_local(heap, val)
+            APPEND val TO heap
+            SET idx TO LENGTH OF heap MINUS 1
+            REPEAT
+                IF idx EQUALS 0 THEN
+                    BREAK
+                END IF
+                SET parent_idx TO (idx MINUS 1) DIV 2
+                IF heap[parent_idx] GREATER THAN heap[idx] THEN
+                    SET temp TO heap[parent_idx]
+                    SET heap[parent_idx] TO heap[idx]
+                    SET heap[idx] TO temp
+                    SET idx TO parent_idx
+                ELSE
+                    BREAK
+                END IF
+            UNTIL FALSE
+        END FUNCTION
+
+        CALL heapify_local(nums)
+        SET count_operations TO 0
+        WHILE TRUE
+            IF LENGTH OF nums LESS THAN OR EQUAL TO 1 THEN
+                BREAK
+            END IF
+            IF NOT (nums[0] LESS THAN k) THEN
+                BREAK
+            END IF
+            SET first_min TO heappop_local(nums)
+            SET second_min TO heappop_local(nums)
+            SET val_one TO first_min
+            SET val_two TO second_min
+            IF val_one GREATER THAN val_two THEN
+                SET temp_val TO val_one
+                SET val_one TO val_two
+                SET val_two TO temp_val
+            END IF
+            SET computed_val TO (val_one TIMES 2) PLUS val_two
+            CALL heappush_local(nums, computed_val)
+            SET count_operations TO count_operations PLUS 1
+        END WHILE
+        RETURN count_operations
+    END FUNCTION
+END CLASS

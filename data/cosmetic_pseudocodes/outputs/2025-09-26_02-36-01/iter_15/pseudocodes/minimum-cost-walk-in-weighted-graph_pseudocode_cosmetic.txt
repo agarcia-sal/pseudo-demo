@@ -1,0 +1,94 @@
+```pseudocode
+CLASS UnionFind
+    FUNCTION __init__(self, n)
+        SET k TO 0
+        SET self.parent TO empty list
+        WHILE k LESS THAN n DO
+            APPEND k TO self.parent
+            SET k TO k PLUS 1
+        END WHILE
+        SET self.rank TO empty list
+        SET x TO 0
+        WHILE x LESS THAN n DO
+            APPEND 1 TO self.rank
+            SET x TO x PLUS 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION find(self, o)
+        IF NOT (self.parent[o] EQUALS o) THEN
+            SET tempVal TO self.find(self.parent[o])
+            SET self.parent[o] TO tempVal
+        END IF
+        RETURN self.parent[o]
+    END FUNCTION
+
+    FUNCTION union(self, p, q)
+        SET aRoot TO self.find(p)
+        SET bRoot TO self.find(q)
+        IF NOT (aRoot EQUALS bRoot) THEN
+            IF self.rank[aRoot] GREATER THAN self.rank[bRoot] THEN
+                SET self.parent[bRoot] TO aRoot
+            ELSE
+                IF self.rank[aRoot] LESS THAN self.rank[bRoot] THEN
+                    SET self.parent[aRoot] TO bRoot
+                ELSE
+                    SET self.parent[bRoot] TO aRoot
+                    SET self.rank[aRoot] TO self.rank[aRoot] PLUS 1
+                END IF
+            END IF
+        END IF
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION minimumCost(self, n, edges, query)
+        SET uf TO UnionFind(n)
+        SET limitVal TO 2
+        SET limitVal TO (limitVal * limitVal) * (limitVal * limitVal * limitVal)
+        SET compBits TO empty list
+        SET idx TO 0
+        WHILE idx LESS THAN n DO
+            APPEND limitVal MINUS 1 TO compBits
+            SET idx TO idx PLUS 1
+        END WHILE
+
+        FOR EACH triple (x, y, z) IN edges DO
+            CALL uf.union(x, y)
+            SET repX TO uf.find(x)
+            SET compBits[repX] TO compBits[repX] BITWISE AND z
+        END FOR
+
+        SET costMap TO empty dictionary
+        SET i TO 0
+        WHILE i LESS THAN n DO
+            SET repI TO uf.find(i)
+            IF NOT (repI IN costMap) THEN
+                SET costMap[repI] TO compBits[repI]
+            END IF
+            SET i TO i PLUS 1
+        END WHILE
+
+        SET retList TO empty list
+        SET j TO 0
+        WHILE j LESS THAN LENGTH OF query DO
+            SET aVal TO query[j][0]
+            SET bVal TO query[j][1]
+            IF aVal EQUALS bVal THEN
+                APPEND 0 TO retList
+            ELSE
+                SET aRoot TO uf.find(aVal)
+                SET bRoot TO uf.find(bVal)
+                IF aRoot EQUALS bRoot THEN
+                    APPEND costMap[aRoot] TO retList
+                ELSE
+                    APPEND -1 TO retList
+                END IF
+            END IF
+            SET j TO j PLUS 1
+        END WHILE
+
+        RETURN retList
+    END FUNCTION
+END CLASS
+```

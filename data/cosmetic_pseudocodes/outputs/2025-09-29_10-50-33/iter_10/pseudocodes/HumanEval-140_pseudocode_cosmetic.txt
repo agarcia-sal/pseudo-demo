@@ -1,0 +1,43 @@
+FUNCTION fix_spaces(text)
+	INVOKE fix_spaces_recursive(index = 0, stretch_start = 0, stretch_end = 0, accumulator = "") 
+
+	DEFINE fix_spaces_recursive(index, stretch_start, stretch_end, accumulator)
+		IF NOT (index < LENGTH(text)) THEN RETURN
+		EXECUTE
+			char_element := text[index]
+			is_space := (char_element = " ")
+			update_accumulator := ""
+			stretch_len := stretch_end - stretch_start
+
+			EXECUTE
+				WHEN is_space IS TRUE
+					stretch_end := stretch_end + 1
+				WHEN is_space IS FALSE
+					VAL condition_map := {
+						TRUE: FUNCTION() RETURN accumulator & "-" & char_element END,
+						FALSE: FUNCTION()
+							IF stretch_len > 0 AND stretch_len <= 2 THEN
+								RETURN accumulator & (REPEAT("_", stretch_len)) & char_element
+							ELSE
+								RETURN accumulator & char_element
+							END IF
+						END
+					}
+					update_accumulator := condition_map[stretch_len > 2]()
+					stretch_start, stretch_end := index + 1, index + 1
+					accumulator := update_accumulator
+			END EXECUTE
+		END EXECUTE
+
+		fix_spaces_recursive(index + 1, stretch_start, stretch_end, accumulator)
+	END DEFINE
+
+	result := ""
+	EXECUTE
+		remaining := stretch_end - stretch_start
+		IF remaining > 2 THEN result := "-" & result
+		ELSE IF remaining > 0 THEN result := "_" & result END IF
+	END EXECUTE
+
+	RETURN fix_spaces_recursive(0, 0, 0, result)
+END FUNCTION

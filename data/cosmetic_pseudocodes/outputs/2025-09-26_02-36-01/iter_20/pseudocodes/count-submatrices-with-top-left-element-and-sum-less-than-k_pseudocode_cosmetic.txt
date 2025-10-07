@@ -1,0 +1,64 @@
+CLASS Solution  
+    FUNCTION countSubmatrices(grid, k)  
+        FUNCTION accumulate2D(arr)  
+            SET X TO LENGTH(arr)  
+            SET Y TO LENGTH(arr[0])  
+            SET res TO NEW LIST OF SIZE X EACH CONTAINING A LIST OF SIZE Y FILLED WITH 0  
+            SET alpha TO 0  
+            SET beta TO 0  
+            SET gamma TO 0  
+            SET delta TO 0  
+            FOR p FROM 0 TO X - 1  
+                SET q TO 0  
+                WHILE q < Y  
+                    IF p = 0 AND q = 0 THEN  
+                        SET res[p][q] TO arr[p][q]  
+                    ELSE  
+                        IF p = 0 THEN  
+                            SET res[p][q] TO res[p][q-1] + arr[p][q]  
+                        ELSE  
+                            IF q = 0 THEN  
+                                SET res[p][q] TO res[p-1][q] + arr[p][q]  
+                            ELSE  
+                                SET alpha TO res[p-1][q]  
+                                SET beta TO res[p][q-1]  
+                                SET gamma TO res[p-1][q-1]  
+                                SET delta TO arr[p][q]  
+                                SET res[p][q] TO (alpha + beta - gamma) + delta  
+                            END IF  
+                        END IF  
+                    END IF  
+                    SET q TO q + 1  
+                END WHILE  
+            END FOR  
+            RETURN res  
+        END FUNCTION  
+  
+        IF grid = NIL OR (LENGTH(grid) = 0) OR (LENGTH(grid[0]) = 0) THEN  
+            RETURN 0  
+        END IF  
+  
+        SET m TO LENGTH(grid)  
+        SET n TO LENGTH(grid[0])  
+        SET totalCount TO 0  
+        SET prefix TO accumulate2D(grid)  
+  
+        FUNCTION lessOrEqual(x, y)  
+            RETURN NOT (x > y)  
+        END FUNCTION  
+  
+        SET s TO 0  
+        WHILE s < m  
+            SET t TO 0  
+            WHILE t < n  
+                IF lessOrEqual(prefix[s][t], k) THEN  
+                    SET totalCount TO totalCount + 1  
+                END IF  
+                SET t TO t + 1  
+            END WHILE  
+            SET s TO s + 1  
+        END WHILE  
+  
+        RETURN totalCount  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,37 @@
+```
+FUNCTION encode(input_string)
+    DEFINE swap_case_map AS FUNCTION(char)
+        IF char IS BETWEEN 'a' AND 'z' THEN
+            RETURN CHAR(ASCII(char) - 32)
+        ELSE IF char IS BETWEEN 'A' AND 'Z' THEN
+            RETURN CHAR(ASCII(char) + 32)
+        ELSE
+            RETURN char
+    END FUNCTION
+
+    SET key_collection TO "aeiouAEIOU"
+    SET substitute_pairs TO EMPTY MAP
+    FOR EACH elem IN key_collection DO
+        SET substitute_pairs[elem] TO CHAR(ASCII(elem) + 2)
+    END FOR
+
+    DEFINE transform_case AS FUNCTION(str, index)
+        IF index >= LENGTH(str) THEN
+            RETURN ""
+        ELSE
+            RETURN swap_case_map(str[index]) + transform_case(str, index + 1)
+    END FUNCTION
+
+    SET swapped_string TO transform_case(input_string, 0)
+
+    DEFINE build_result AS FUNCTION(str, curr_index)
+        IF curr_index = LENGTH(str) THEN
+            RETURN ""
+        ELSE
+            SET current_char TO str[curr_index]
+            RETURN (IF current_char IN substitute_pairs THEN substitute_pairs[current_char] ELSE current_char) + build_result(str, curr_index + 1)
+    END FUNCTION
+
+    RETURN build_result(swapped_string, 0)
+END FUNCTION
+```

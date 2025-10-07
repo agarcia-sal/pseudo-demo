@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+        SET adjacencyMap TO new mapping from keys to empty lists
+        DEFINE PROCEDURE addEdge(a b)
+            APPEND b TO adjacencyMap[a]
+            APPEND a TO adjacencyMap[b]
+        END PROCEDURE
+
+        SET i TO 0
+        WHILE i < LENGTH(edges)
+            SET edgePair TO edges[i]
+            CALL addEdge WITH edgePair[0] edgePair[1]
+            SET i TO i + 1
+        END WHILE
+
+        SET maxSize TO 1
+
+        FUNCTION traverseTree WITH PARAMETERS current prev
+            SET totalSameColor TO 1
+            SET isUniform TO true
+
+            FUNCTION processNeighbor(idx)
+                IF idx >= LENGTH(adjacencyMap[current]) THEN
+                    RETURN
+                END IF
+
+                SET neighborNode TO adjacencyMap[current][idx]
+
+                IF neighborNode != prev THEN
+                    SET subtreeSize TO traverseTree(neighborNode current)
+                    IF subtreeSize == 0 THEN
+                        SET isUniform TO false
+                    ELSE
+                        IF colors[neighborNode] == colors[current] THEN
+                            SET totalSameColor TO totalSameColor + subtreeSize
+                        ELSE
+                            SET isUniform TO false
+                        END IF
+                    END IF
+                END IF
+
+                CALL processNeighbor(idx + 1)
+            END FUNCTION
+
+            CALL processNeighbor(0)
+
+            IF isUniform THEN
+                IF maxSize < totalSameColor THEN
+                    SET maxSize TO totalSameColor
+                END IF
+                RETURN totalSameColor
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        RETURN traverseTree(0 -1)
+    END FUNCTION
+END CLASS

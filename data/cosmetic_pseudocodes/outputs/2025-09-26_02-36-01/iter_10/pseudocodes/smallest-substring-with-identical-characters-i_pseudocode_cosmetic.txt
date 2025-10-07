@@ -1,0 +1,80 @@
+CLASS Solution
+    FUNCTION minLength(s parameter, numOps parameter)
+        
+        FUNCTION longest_uniform_substring(s parameter)
+      
+            DEFINE FUNCTION internal_max(a, b)
+                IF a >= b THEN RETURN a ELSE RETURN b END IF
+            END FUNCTION
+            
+            SET alpha TO 0
+            SET beta TO 1
+            SET gamma TO 1
+            SET delta TO LEN(s) - 1
+            
+            WHILE beta <= delta
+                IF s[beta] = s[beta - 1] THEN
+                    SET gamma TO gamma + 1
+                ELSE
+                    SET alpha TO internal_max(alpha, gamma)
+                    SET gamma TO 1
+                END IF
+                SET beta TO beta + 1
+            END WHILE
+            
+            RETURN internal_max(alpha, gamma)
+        END FUNCTION
+        
+        FUNCTION bit_count(x)
+            SET c TO 0
+            SET z TO x
+            REPEAT
+                IF (z & 1) = 1 THEN
+                    SET c TO c + 1
+                END IF
+                SET z TO z >> 1
+            UNTIL z = 0
+            RETURN c
+        END FUNCTION
+        
+        SET epsilon TO LEN(s)
+        SET zeta TO (1 << LEN(s)) - 1
+        SET eta TO 0
+        
+        REPEAT
+            IF bit_count(eta) > numOps THEN
+                SET eta TO eta + 1
+                CONTINUE
+            END IF
+            
+            DEFINE FUNCTION apply_flips(original_list, mask)
+                SET flipped_list TO []
+                SET idx TO 0
+                WHILE idx < LEN(original_list)
+                    IF (mask & (1 << idx)) != 0 THEN
+                        IF original_list[idx] = '0' THEN
+                            APPEND '1' TO flipped_list
+                        ELSE
+                            APPEND '0' TO flipped_list
+                        END IF
+                    ELSE
+                        APPEND original_list[idx] TO flipped_list
+                    END IF
+                    SET idx TO idx + 1
+                END WHILE
+                RETURN flipped_list
+            END FUNCTION
+            
+            SET omega TO apply_flips(CONVERT_TO_LIST(s), eta)
+            SET psi TO longest_uniform_substring(omega)
+            
+            IF epsilon > psi THEN
+                SET epsilon TO psi
+            END IF
+            
+            SET eta TO eta + 1
+        UNTIL eta > zeta
+        
+        RETURN epsilon
+    END FUNCTION
+END CLASS

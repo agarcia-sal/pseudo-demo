@@ -1,0 +1,34 @@
+FUNCTION valid_date(input_string)
+  TRY
+    SET trimmed_value TO input_string TRIM_WHITESPACE
+    SPLIT trimmed_value BY '-' INTO part_a, part_b, part_c
+
+    SET val_a TO TO_INTEGER(part_a)
+    SET val_b TO TO_INTEGER(part_b)
+    SET val_c TO TO_INTEGER(part_c)
+
+    IF (val_a < 0x1) OR (val_a > (6 * 2))
+      RETURN False
+    END IF
+
+    SWITCH TRUE
+      CASE val_a = 1 OR val_a = 3 OR val_a = 5 OR val_a = 7 OR val_a = 8 OR val_a = 0xA OR val_a = 0xC:
+        IF (val_b < 1) OR (val_b > 0x1F)
+          RETURN False
+        END IF
+      CASE val_a = 4 OR val_a = 6 OR val_a = 9 OR val_a = 11:
+        IF NOT ((val_b >= 1) AND (val_b <= 30))
+          RETURN False
+        END IF
+      CASE val_a = 2:
+        IF (val_b < 1) OR (val_b > 29)
+          RETURN False
+        END IF
+    END SWITCH
+
+  EXCEPT ANY
+    RETURN False
+  END TRY
+
+  RETURN True
+END FUNCTION

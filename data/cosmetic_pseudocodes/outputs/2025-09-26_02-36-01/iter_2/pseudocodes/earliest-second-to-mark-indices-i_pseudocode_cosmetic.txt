@@ -1,0 +1,67 @@
+CLASS Solution  
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)  
+        SET length_nums TO SIZE OF nums  
+        SET length_changes TO SIZE OF changeIndices  
+        
+        FUNCTION can_mark_by_second(limit)  
+            SET last_seen TO ARRAY OF length_nums FILLED WITH -1  
+            SET index_counter TO 0  
+            WHILE index_counter < limit  
+                SET pos TO changeIndices[index_counter] - 1  
+                last_seen[pos] = index_counter  
+                index_counter = index_counter + 1  
+            END WHILE  
+            
+            SET sum_values TO 0  
+            FOR EACH val IN nums  
+                sum_values = sum_values + val  
+            END FOR  
+            
+            SET decrement_pool TO 0  
+            SET marked TO EMPTY SET  
+            
+            SET idx TO 0  
+            WHILE idx < limit  
+                SET position TO changeIndices[idx] - 1  
+                IF position NOT IN marked THEN
+                    IF last_seen[position] == idx THEN
+                        IF nums[position] <= decrement_pool THEN
+                            decrement_pool = decrement_pool - nums[position]
+                            ADD position TO marked
+                        ELSE
+                            RETURN False
+                        END IF
+                    ELSE
+                        decrement_pool = decrement_pool + 1
+                    END IF
+                ELSE
+                    decrement_pool = decrement_pool + 1
+                END IF
+                idx = idx + 1
+            END WHILE  
+            
+            IF SIZE OF marked == length_nums THEN
+                RETURN True
+            ELSE
+                RETURN False
+            END IF
+        END FUNCTION  
+        
+        SET start TO 0  
+        SET end TO length_changes + 1  
+        WHILE start < end  
+            SET mid_point TO (start + end) DIV 2  
+            IF can_mark_by_second(mid_point) THEN
+                end = mid_point
+            ELSE
+                start = start + 1
+            END IF
+        END WHILE  
+        
+        IF start <= length_changes THEN
+            RETURN start
+        ELSE
+            RETURN -1
+        END IF  
+    END FUNCTION  
+END CLASS

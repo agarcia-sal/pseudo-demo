@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION maxPointsInsideSquare(points s)
+        DECLARE FUNCTION absVal(num)
+            IF num < 0 THEN
+                RETURN 0 - num
+            ELSE
+                RETURN num
+            END IF
+        END FUNCTION
+
+        DECLARE FUNCTION maxVal(a, b)
+            IF a > b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        DECLARE FUNCTION lengthOfList(lst)
+            DECLARE countTemp ← 0
+            DECLARE idxTemp ← 0
+            WHILE TRUE DO
+                IF idxTemp ≥ lst LENGTH THEN
+                    RETURN countTemp
+                END IF
+                SET countTemp ← countTemp + 1
+                SET idxTemp ← idxTemp + 1
+            END WHILE
+        END FUNCTION
+
+        DECLARE FUNCTION elemAt(listRef, pos)
+            RETURN listRef[pos]
+        END FUNCTION
+
+        DECLARE VAR outerCounter ← 0
+        DECLARE VAR totalPoints ← lengthOfList(s)
+        DECLARE VAR maximumCount ← 0
+
+        DECLARE FUNCTION innerLoop(loopIndex, maxLoop, sideLen, tagMapRef) RETURNS BOOLEAN
+            IF loopIndex ≥ maxLoop THEN
+                RETURN TRUE
+            END IF
+
+            VAR currentX ← elemAt(elemAt(s, loopIndex), 0)
+            VAR currentY ← elemAt(elemAt(s, loopIndex), 1)
+
+            IF (absVal(currentX) ≤ sideLen) AND (absVal(currentY) ≤ sideLen) THEN
+
+                VAR currentTag ← elemAt(s, loopIndex)
+
+                IF currentTag IN tagMapRef THEN
+                    RETURN FALSE
+                ELSE
+                    SET tagMapRef[currentTag] ← TRUE
+                END IF
+
+            END IF
+
+            RETURN innerLoop(loopIndex + 1, maxLoop, sideLen, tagMapRef)
+        END FUNCTION
+
+        DECLARE FUNCTION outerLoop(loopIndx)
+            IF loopIndx ≥ totalPoints THEN
+                RETURN
+            END IF
+
+            VAR xElem ← elemAt(elemAt(s, loopIndx), 0)
+            VAR yElem ← elemAt(elemAt(s, loopIndx), 1)
+
+            VAR currentSide ← maxVal(absVal(xElem), absVal(yElem))
+
+            VAR encounteredTags ← EMPTY DICTIONARY
+
+            VAR isValid ← innerLoop(0, totalPoints, currentSide, encounteredTags)
+
+            IF isValid THEN
+                DECLARE VAR tagCountLen ← 0
+                FOR EACH _tag IN encounteredTags KEYS DO
+                    SET tagCountLen ← tagCountLen + 1
+                END FOR
+                IF tagCountLen > maximumCount THEN
+                    SET maximumCount ← tagCountLen
+                END IF
+            END IF
+
+            outerLoop(loopIndx + 1)
+        END FUNCTION
+
+        CALL outerLoop(0)
+        RETURN maximumCount
+    END FUNCTION
+END CLASS

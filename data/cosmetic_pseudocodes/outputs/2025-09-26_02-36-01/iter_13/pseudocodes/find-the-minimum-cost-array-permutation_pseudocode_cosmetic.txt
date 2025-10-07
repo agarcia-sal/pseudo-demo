@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION findPermutation(nums)
+        FUNCTION dfs(current_mask, last_index)
+            FUNCTION absolute_difference(x, y)
+                RETURN (x - y) * SIGN(x - y)
+            END FUNCTION
+
+            FUNCTION SIGN(val)
+                IF val < 0 THEN
+                    RETURN -1
+                ELSE
+                    RETURN 1
+                END IF
+            END FUNCTION
+
+            IF current_mask = (SHIFT_LEFT(1, LENGTH(nums)) - 1) THEN
+                RETURN absolute_difference(nums[0], nums[last_index])
+            END IF
+
+            SET temporary_result TO POSITIVE_INFINITY
+            SET i TO 0
+
+            FUNCTION recurse_loop(i, accumulated_res)
+                IF i = LENGTH(nums) THEN
+                    RETURN accumulated_res
+                ELSE
+                    IF ((SHIFT_RIGHT(current_mask, i) AND 1) = 0) THEN
+                        SET new_mask TO (current_mask OR SHIFT_LEFT(1, i))
+                        SET candidate TO absolute_difference(nums[last_index], nums[i]) + dfs(new_mask, i)
+                        IF candidate < accumulated_res THEN
+                            RETURN recurse_loop(i + 1, candidate)
+                        ELSE
+                            RETURN recurse_loop(i + 1, accumulated_res)
+                        END IF
+                    ELSE
+                        RETURN recurse_loop(i + 1, accumulated_res)
+                    END IF
+                END IF
+            END FUNCTION
+
+            RETURN recurse_loop(i, temporary_result)
+        END FUNCTION
+
+        FUNCTION g(current_mask, prev_index)
+            PROCEDURE append_to_list(lst, val)
+                lst[LENGTH(lst)] = val
+            END PROCEDURE
+
+            append_to_list(ans, prev_index)
+
+            IF current_mask = (SHIFT_LEFT(1, LENGTH(nums)) - 1) THEN
+                RETURN
+            END IF
+
+            SET minimum_cost TO dfs(current_mask, prev_index)
+            SET index_iterator TO 0
+
+            WHILE index_iterator < LENGTH(nums)
+                IF ((SHIFT_RIGHT(current_mask, index_iterator) AND 1) = 0) THEN
+                    SET next_mask TO (current_mask OR SHIFT_LEFT(1, index_iterator))
+                    SET candidate_cost TO absolute_value(nums[prev_index], nums[index_iterator]) + dfs(next_mask, index_iterator)
+                    IF candidate_cost = minimum_cost THEN
+                        CALL g(next_mask, index_iterator)
+                        EXIT WHILE
+                    END IF
+                END IF
+                SET index_iterator TO index_iterator + 1
+            END WHILE
+        END FUNCTION
+
+        FUNCTION absolute_value(a, b)
+            IF a < b THEN
+                RETURN b - a
+            ELSE
+                RETURN a - b
+            END IF
+        END FUNCTION
+
+        FUNCTION SHIFT_LEFT(value, places)
+            RETURN value * (2 ^ places)
+        END FUNCTION
+
+        FUNCTION SHIFT_RIGHT(value, places)
+            RETURN FLOOR(value / (2 ^ places))
+        END FUNCTION
+
+        SET total_length TO LENGTH(nums)
+        SET ans TO []
+        CALL g(SHIFT_LEFT(1, 0), 0)
+        RETURN ans
+    END FUNCTION
+END CLASS

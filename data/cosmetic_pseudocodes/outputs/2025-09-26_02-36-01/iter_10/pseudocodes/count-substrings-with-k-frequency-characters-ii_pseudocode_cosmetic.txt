@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION numberOfSubstrings(s parameter, k parameter)
+        FUNCTION countMapIncrement(map parameter, key parameter)
+            IF key NOT IN map THEN
+                map[key] ← 1
+            ELSE
+                map[key] ← map[key] + 1
+            END IF
+        END FUNCTION
+
+        FUNCTION countMapDecrement(map parameter, key parameter)
+            map[key] ← map[key] - 1
+            IF map[key] = 0 THEN
+                REMOVE key FROM map
+            END IF
+        END FUNCTION
+
+        FUNCTION hasAnyKeyWithCountGE(map parameter, threshold parameter)
+            FUNCTION helper(keys parameter, index parameter)
+                IF index ≥ LENGTH(keys) THEN
+                    RETURN FALSE
+                ELSE
+                    IF map[keys[index]] ≥ threshold THEN
+                        RETURN TRUE
+                    ELSE
+                        RETURN helper(keys, index + 1)
+                    END IF
+                END IF
+            END FUNCTION
+            RETURN helper(LIST_OF_KEYS(map), 0)
+        END FUNCTION
+
+        VARIABLE alphaPos ← 0
+        VARIABLE accumAns ← 0
+        VARIABLE counter ← EMPTY_MAPPING
+        VARIABLE rightIndex ← 0
+
+        FUNCTION loopRight(index parameter)
+            IF index = LENGTH(s) THEN
+                RETURN
+            ELSE
+                VARIABLE charAtRight ← s[index]
+                countMapIncrement(counter, charAtRight)
+                FUNCTION contractLeft()
+                    IF hasAnyKeyWithCountGE(counter, k) = TRUE THEN
+                        VARIABLE charAtLeft ← s[alphaPos]
+                        countMapDecrement(counter, charAtLeft)
+                        alphaPos ← alphaPos + 1
+                        contractLeft()
+                    END IF
+                END FUNCTION
+                contractLeft()
+                accumAns ← accumAns + alphaPos
+                loopRight(index + 1)
+            END IF
+        END FUNCTION
+
+        loopRight(0)
+        RETURN accumAns
+    END FUNCTION
+END CLASS

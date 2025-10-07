@@ -1,0 +1,75 @@
+CLASS Solution 
+    FUNCTION maxCollectedFruits(fruits) 
+        LET lengthVar BE LENGTH OF fruits
+        
+        LET vectorSetA BE [(1,1),(1,0),(0,1)]
+        LET vectorSetB BE [(1,-1),(1,0),(1,1)]
+        LET vectorSetC BE [(-1,1),(0,1),(1,1)]
+        
+        LET cacheMap BE EMPTY DICTIONARY
+        
+        FUNCTION recursiveSearch(a1, b1, a2, b2, a3, b3)
+            
+            IF a1 < 0 OR a1 >= lengthVar OR b1 < 0 OR b1 >= lengthVar THEN
+                RETURN -∞
+            END IF
+            
+            IF a2 < 0 OR a2 >= lengthVar OR b2 < 0 OR b2 >= lengthVar THEN
+                RETURN -∞
+            END IF
+            
+            IF a3 < 0 OR a3 >= lengthVar OR b3 < 0 OR b3 >= lengthVar THEN
+                RETURN -∞
+            END IF
+            
+            IF a1 == b1 AND b1 == a2 AND a2 == b2 AND b2 == a3 AND a3 == b3 AND b3 == lengthVar - 1 THEN
+                RETURN fruits[lengthVar - 1][lengthVar - 1]
+            END IF
+            
+            LET keyTuple BE (a1, b1, a2, b2, a3, b3)
+            IF keyTuple IN cacheMap THEN 
+                RETURN cacheMap[keyTuple]
+            END IF
+            
+            LET sumCollected BE fruits[a1][b1]
+            
+            IF (a1 == a2 AND b1 == b2) OR (a1 == a3 AND b1 == b3) THEN
+                LET sumCollected BE 0
+            END IF
+            
+            IF a2 == a3 AND b2 == b3 THEN
+                LET sumCollected BE sumCollected + fruits[a2][b2]
+            ELSE 
+                LET sumCollected BE sumCollected + fruits[a2][b2] + fruits[a3][b3]
+            END IF
+            
+            LET maxValue BE -∞
+            LET i1 BE 0
+            WHILE i1 < LENGTH(vectorSetA)
+                LET (dxA, dyA) BE vectorSetA[i1]
+                LET i2 BE 0
+                WHILE i2 < LENGTH(vectorSetB)
+                    LET (dxB, dyB) BE vectorSetB[i2]
+                    LET i3 BE 0
+                    WHILE i3 < LENGTH(vectorSetC)
+                        LET (dxC, dyC) BE vectorSetC[i3]
+                        
+                        LET nextCandidate BE recursiveSearch(a1 + dxA, b1 + dyA, a2 + dxB, b2 + dyB, a3 + dxC, b3 + dyC)
+                        IF nextCandidate > maxValue THEN
+                            LET maxValue BE nextCandidate
+                        END IF
+                        
+                        LET i3 BE i3 + 1
+                    END WHILE
+                    LET i2 BE i2 + 1
+                END WHILE
+                LET i1 BE i1 + 1
+            END WHILE
+            
+            LET cacheMap[keyTuple] BE sumCollected + maxValue
+            RETURN sumCollected + maxValue
+        END FUNCTION
+        
+        RETURN recursiveSearch(0, 0, 0, lengthVar - 1, lengthVar - 1, 0)
+    END FUNCTION
+END CLASS

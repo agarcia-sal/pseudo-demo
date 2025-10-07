@@ -1,0 +1,89 @@
+CLASS Solution
+    FUNCTION maxValue(nums LIST OF INTEGER k INTEGER) RETURNS INTEGER
+        LET power_val BE 1
+        LET bit_limit BE 7
+        LET index_counter BE 0
+        WHILE index_counter < bit_limit
+            SET power_val *= 2
+            SET index_counter += 1
+        END WHILE
+        LET length_nums BE LENGTH(nums)
+        LET dimension_one BE length_nums + 1
+        LET dimension_two BE k + 2
+        LET dimension_three BE power_val
+        DECLARE state_array AS 3D ARRAY OF BOOLEAN WITH SIZE dimension_one BY dimension_two BY dimension_three
+        FOR idx1 FROM 0 TO dimension_one - 1
+            FOR idx2 FROM 0 TO dimension_two - 1
+                FOR idx3 FROM 0 TO dimension_three - 1
+                    SET state_array[idx1][idx2][idx3] TO FALSE
+                END FOR
+            END FOR
+        END FOR
+        SET state_array[0][0][0] TO TRUE
+        LET outer_idx BE 0
+        WHILE outer_idx < length_nums
+            LET middle_idx BE 0
+            WHILE middle_idx <= k
+                LET inner_idx BE 0
+                WHILE inner_idx < power_val
+                    SET carry_over TO state_array[outer_idx][middle_idx][inner_idx]
+                    SET state_array[outer_idx + 1][middle_idx][inner_idx] TO state_array[outer_idx + 1][middle_idx][inner_idx] OR carry_over
+                    LET updated_bitset BE inner_idx OR nums[outer_idx]
+                    SET state_array[outer_idx + 1][middle_idx + 1][updated_bitset] TO state_array[outer_idx + 1][middle_idx + 1][updated_bitset] OR carry_over
+                    SET inner_idx += 1
+                END WHILE
+                SET middle_idx += 1
+            END WHILE
+            SET outer_idx += 1
+        END WHILE
+        DECLARE rev_state_array AS 3D ARRAY OF BOOLEAN WITH SIZE dimension_one BY dimension_two BY dimension_three
+        FOR i1 FROM 0 TO dimension_one - 1
+            FOR i2 FROM 0 TO dimension_two - 1
+                FOR i3 FROM 0 TO dimension_three - 1
+                    SET rev_state_array[i1][i2][i3] TO FALSE
+                END FOR
+            END FOR
+        END FOR
+        SET rev_state_array[length_nums][0][0] TO TRUE
+        LET rev_outer BE length_nums
+        WHILE rev_outer > 0
+            LET rev_middle BE 0
+            WHILE rev_middle <= k
+                LET rev_inner BE 0
+                WHILE rev_inner < power_val
+                    LET previous_rev_state TO rev_state_array[rev_outer][rev_middle][rev_inner]
+                    SET rev_state_array[rev_outer - 1][rev_middle][rev_inner] TO rev_state_array[rev_outer - 1][rev_middle][rev_inner] OR previous_rev_state
+                    LET combined_bits BE rev_inner OR nums[rev_outer - 1]
+                    SET rev_state_array[rev_outer - 1][rev_middle + 1][combined_bits] TO rev_state_array[rev_outer - 1][rev_middle + 1][combined_bits] OR previous_rev_state
+                    SET rev_inner += 1
+                END WHILE
+                SET rev_middle += 1
+            END WHILE
+            SET rev_outer -= 1
+        END WHILE
+        LET maximum_result BE 0
+        LET mid_point_start BE k
+        LET mid_point_end BE length_nums - k
+        LET mid_pos BE mid_point_start
+        WHILE mid_pos < mid_point_end
+            LET val_x BE 0
+            WHILE val_x < power_val
+                IF state_array[mid_pos][k][val_x] == TRUE THEN
+                    LET val_y BE 0
+                    WHILE val_y < power_val
+                        IF rev_state_array[mid_pos][k][val_y] == TRUE THEN
+                            LET candidate_val BE val_x XOR val_y
+                            IF candidate_val > maximum_result THEN
+                                SET maximum_result TO candidate_val
+                            END IF
+                        END IF
+                        SET val_y += 1
+                    END WHILE
+                END IF
+                SET val_x += 1
+            END WHILE
+            SET mid_pos += 1
+        END WHILE
+        RETURN maximum_result
+    END FUNCTION
+END CLASS

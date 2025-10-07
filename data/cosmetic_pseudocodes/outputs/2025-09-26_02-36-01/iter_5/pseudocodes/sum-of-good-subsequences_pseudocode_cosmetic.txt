@@ -1,0 +1,64 @@
+CLASS Solution
+    FUNCTION sumOfGoodSubsequences(nums)
+        LET modulus_value BE 1000000000 + 7
+        DEFINE f_map AS a dictionary with default value 0
+        DEFINE g_map AS a dictionary with default value 0
+
+        LET index_cursor BE 0
+        LET length_nums BE length of nums
+
+        FUNCTION process_element(idx)
+            IF idx EQUALS length_nums THEN
+                RETURN
+            END IF
+
+            LET current_num BE nums[idx]
+
+            LET updated_g_val BE (g_map[current_num] + 1) MOD modulus_value
+            LET updated_f_val BE (f_map[current_num] + current_num) MOD modulus_value
+
+            LET left_f_val BE f_map.get(current_num - 1, 0)
+            LET left_g_val BE g_map.get(current_num - 1, 0)
+
+            LET step1_f_val BE left_f_val + (left_g_val * current_num)
+            LET step1_f_val_mod BE (updated_f_val + step1_f_val) MOD modulus_value
+
+            LET step1_g_val_mod BE (updated_g_val + left_g_val) MOD modulus_value
+
+            LET right_f_val BE f_map.get(current_num + 1, 0)
+            LET right_g_val BE g_map.get(current_num + 1, 0)
+
+            LET step2_f_val BE right_f_val + (right_g_val * current_num)
+            LET step2_f_val_mod BE (step1_f_val_mod + step2_f_val) MOD modulus_value
+
+            LET step2_g_val_mod BE (step1_g_val_mod + right_g_val) MOD modulus_value
+
+            f_map[current_num] = step2_f_val_mod
+            g_map[current_num] = step2_g_val_mod
+
+            process_element(idx + 1)
+            RETURN
+        END FUNCTION
+
+        CALL process_element(index_cursor)
+
+        LET accumulated_sum BE 0
+        LET f_values_list BE list of all values in f_map
+        LET length_f_values BE length of f_values_list
+
+        FUNCTION sum_values(i)
+            IF i EQUALS length_f_values THEN
+                RETURN 0
+            ELSE
+                LET current_value BE f_values_list[i]
+                LET recursive_sum BE sum_values(i + 1)
+                RETURN current_value + recursive_sum
+            END IF
+        END FUNCTION
+
+        LET total_sum_values BE sum_values(0)
+        LET final_answer BE total_sum_values MOD modulus_value
+
+        RETURN final_answer
+    END FUNCTION
+END CLASS

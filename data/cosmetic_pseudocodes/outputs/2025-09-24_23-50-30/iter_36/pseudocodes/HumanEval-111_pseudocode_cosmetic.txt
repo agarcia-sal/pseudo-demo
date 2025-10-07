@@ -1,0 +1,48 @@
+```
+FUNCTION histogram(test_string)
+    DEFINE FUNCTION countOccurrences(collection, target, index, accumulator)
+        IF index >= LENGTH(collection) THEN
+            RETURN accumulator
+        ELSE
+            RETURN countOccurrences(collection, target, index + 1, accumulator + (collection[index] == target ? 1 : 0))
+    END FUNCTION
+
+    SET temp_dict TO DICTIONARY()
+    SET split_letters TO SPLIT test_string BY ' '
+    SET max_frequency TO -1
+
+    DEFINE FUNCTION findMaxFrequency(index, current_max)
+        IF index >= LENGTH(split_letters) THEN
+            RETURN current_max
+        ELSE
+            SET current_item TO split_letters[index]
+            IF current_item != "" THEN
+                SET freq TO countOccurrences(split_letters, current_item, 0, 0)
+                IF freq > current_max THEN
+                    RETURN findMaxFrequency(index + 1, freq)
+                ELSE
+                    RETURN findMaxFrequency(index + 1, current_max)
+            ELSE
+                RETURN findMaxFrequency(index + 1, current_max)
+    END FUNCTION
+
+    SET max_frequency TO findMaxFrequency(0, max_frequency)
+
+    IF max_frequency > 0 THEN
+        DEFINE FUNCTION populateDictionary(index)
+            IF index >= LENGTH(split_letters) THEN
+                RETURN
+            ELSE
+                SET current_item TO split_letters[index]
+                IF current_item != "" THEN
+                    SET freq TO countOccurrences(split_letters, current_item, 0, 0)
+                    IF freq == max_frequency THEN
+                        temp_dict[current_item] = max_frequency
+                populateDictionary(index + 1)
+        END FUNCTION
+        populateDictionary(0)
+    END IF
+
+    RETURN temp_dict
+END FUNCTION
+```

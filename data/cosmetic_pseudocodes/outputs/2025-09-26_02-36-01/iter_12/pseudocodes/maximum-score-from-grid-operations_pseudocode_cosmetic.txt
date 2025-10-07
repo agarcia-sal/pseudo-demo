@@ -1,0 +1,106 @@
+CLASS Solution
+    FUNCTION maximumScore(grid)
+        SET m TO LENGTH(grid)
+        DEFINE FUNCTION zeroFilledMatrix(rows, cols)
+            SET result TO EMPTY LIST
+            SET rowCounter TO 0
+            WHILE rowCounter < rows
+                SET innerList TO EMPTY LIST
+                SET colCounter TO 0
+                LOOP_WHILE colCounter < cols
+                    APPEND 0 TO innerList
+                    SET colCounter TO colCounter + 1
+                END LOOP_WHILE
+                APPEND innerList TO result
+                SET rowCounter TO rowCounter + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        SET acc TO zeroFilledMatrix(m + 1, m + 1)
+        SET storedAccepted TO []
+        SET storedRejected TO []
+        PERFORM
+            SET kx TO 0
+            LOOP UNTIL kx > m
+                APPEND 0 TO storedAccepted
+                APPEND 0 TO storedRejected
+                SET kx TO kx + 1
+            END LOOP
+        END PERFORM
+
+        SET indexA TO 0
+        WHILE indexA < m
+            SET indexB TO 0
+            WHILE indexB < m
+                LET acc[indexB][indexA + 1] = acc[indexB][indexA] + grid[indexA][indexB]
+                SET indexB TO indexB + 1
+            END WHILE
+            SET indexA TO indexA + 1
+        END WHILE
+
+        SET rowNum TO 1
+        WHILE rowNum < m
+            SET holdAccepted TO []
+            SET holdRejected TO []
+            SET cntAccepted TO 0
+            LOOP_WHILE cntAccepted <= m
+                APPEND 0 TO holdAccepted
+                APPEND 0 TO holdRejected
+                SET cntAccepted TO cntAccepted + 1
+            END LOOP_WHILE
+
+            SET currentPosition TO 0
+            LOOP FOREVER
+                IF currentPosition > m THEN
+                    BREAK
+                END IF
+
+                SET priorPosition TO 0
+                LOOP_FOREVER
+                    IF priorPosition > m THEN
+                        BREAK
+                    END IF
+
+                    IF currentPosition > priorPosition THEN
+                        SET val TO acc[rowNum - 1][currentPosition] - acc[rowNum - 1][priorPosition]
+                        IF holdAccepted[currentPosition] < storedRejected[priorPosition] + val THEN
+                            SET holdAccepted[currentPosition] = storedRejected[priorPosition] + val
+                        END IF
+                        IF holdRejected[currentPosition] < storedRejected[priorPosition] + val THEN
+                            SET holdRejected[currentPosition] = storedRejected[priorPosition] + val
+                        END IF
+                    ELSE
+                        SET val TO acc[rowNum][priorPosition] - acc[rowNum][currentPosition]
+                        IF holdAccepted[currentPosition] < storedAccepted[priorPosition] + val THEN
+                            SET holdAccepted[currentPosition] = storedAccepted[priorPosition] + val
+                        END IF
+                        IF holdRejected[currentPosition] < storedAccepted[priorPosition] THEN
+                            SET holdRejected[currentPosition] = storedAccepted[priorPosition]
+                        END IF
+                    END IF
+
+                    SET priorPosition TO priorPosition + 1
+                END LOOP_FOREVER
+
+                SET currentPosition TO currentPosition + 1
+            END LOOP_FOREVER
+
+            SET storedAccepted = holdAccepted
+            SET storedRejected = holdRejected
+
+            SET rowNum TO rowNum + 1
+        END WHILE
+
+        SET maximumValue TO storedAccepted[0]
+        SET iteratorX TO 1
+        WHILE iteratorX < LENGTH(storedAccepted)
+            IF storedAccepted[iteratorX] > maximumValue THEN
+                SET maximumValue = storedAccepted[iteratorX]
+            END IF
+            SET iteratorX TO iteratorX + 1
+        END WHILE
+
+        RETURN maximumValue
+    END FUNCTION
+END CLASS

@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION maximumScore(grid)
+        SET lengthVal TO 0
+        SET bMatrix TO [[]]
+        SET oldChoose TO []
+        SET oldAvoid TO []
+
+        PROCEDURE maxOf(x, y)
+            IF (x GREATER OR EQUAL TO y)
+                RETURN x
+            ELSE
+                RETURN y
+            END IF
+        END PROCEDURE
+
+        lengthVal <- LENGTH OF grid
+
+        bMatrix <- new 2D list with (lengthVal + 1) rows and (lengthVal + 1) columns FILLED WITH 0
+        oldChoose <- new list of size (lengthVal + 1) FILLED WITH 0
+        oldAvoid <- new list of size (lengthVal + 1) FILLED WITH 0
+
+        SET rowIdx TO 0
+        WHILE rowIdx LESS THAN lengthVal
+            SET colIdx TO 0
+            WHILE colIdx LESS THAN lengthVal
+                bMatrix[rowIdx][colIdx + 1] <- bMatrix[rowIdx][colIdx] + grid[rowIdx][colIdx]
+                colIdx <- colIdx + 1
+            END WHILE
+            rowIdx <- rowIdx + 1
+        END WHILE
+
+        SET levelIdx TO 1
+        WHILE levelIdx LESS THAN lengthVal
+            SET newChoose TO list of size (lengthVal + 1) FILLED WITH 0
+            SET newAvoid TO list of size (lengthVal + 1) FILLED WITH 0
+
+            SET cIdx TO 0
+            WHILE cIdx LESS THAN lengthVal + 1
+                SET pIdx TO 0
+                WHILE pIdx LESS THAN lengthVal + 1
+                    IF cIdx GREATER THAN pIdx
+                        SET segSum TO bMatrix[levelIdx - 1][cIdx] - bMatrix[levelIdx - 1][pIdx]
+                        newChoose[cIdx] <- maxOf(newChoose[cIdx], oldAvoid[pIdx] + segSum)
+                        newAvoid[cIdx] <- maxOf(newAvoid[cIdx], oldAvoid[pIdx] + segSum)
+                    ELSE
+                        SET segSum TO bMatrix[levelIdx][pIdx] - bMatrix[levelIdx][cIdx]
+                        newChoose[cIdx] <- maxOf(newChoose[cIdx], oldChoose[pIdx] + segSum)
+                        newAvoid[cIdx] <- maxOf(newAvoid[cIdx], oldChoose[pIdx])
+                    END IF
+                    pIdx <- pIdx + 1
+                END WHILE
+                cIdx <- cIdx + 1
+            END WHILE
+
+            oldChoose <- newChoose
+            oldAvoid <- newAvoid
+
+            levelIdx <- levelIdx + 1
+        END WHILE
+
+        SET maxVal TO 0
+        SET iterIdx TO 0
+        WHILE iterIdx LESS THAN lengthVal + 1
+            IF oldChoose[iterIdx] GREATER THAN maxVal
+                maxVal <- oldChoose[iterIdx]
+            END IF
+            iterIdx <- iterIdx + 1
+        END WHILE
+
+        RETURN maxVal
+    END FUNCTION
+END CLASS

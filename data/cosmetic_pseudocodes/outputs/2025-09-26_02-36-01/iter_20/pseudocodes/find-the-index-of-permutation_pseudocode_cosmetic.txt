@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION getPermutationIndex(perm)
+        SET Δ1 TO LENGTH OF perm
+        SET Δ2 TO 1_000_000_000 + 1
+
+        FUNCTION auxMultiply(a, b)
+            RETURN a * b
+        END FUNCTION
+
+        FUNCTION auxModulo(x, m)
+            WHILE x >= m DO
+                SET x TO x - m
+            END WHILE
+            RETURN x
+        END FUNCTION
+
+        PROCEDURE fillFactorials(arr, size)
+            SET arr[0] TO 1
+            SET idx TO 1
+            REPEAT
+                IF idx >= size THEN
+                    EXIT
+                END IF
+                SET arr[idx] TO auxMultiply(arr[idx - 1], idx)
+                SET idx TO idx + 1
+            UNTIL FALSE
+        END PROCEDURE
+
+        PROCEDURE removeAt(lst, pos)
+            PROCEDURE shiftLeft(start)
+                IF start >= LENGTH OF lst - 1 THEN
+                    RETURN
+                END IF
+                SET lst[start] TO lst[start + 1]
+                CALL shiftLeft(start + 1)
+            END PROCEDURE
+            CALL shiftLeft(pos)
+            DELETE LAST ELEMENT OF lst
+        END PROCEDURE
+
+        FUNCTION findPosition(lst, val)
+            SET accumulator TO 0
+            WHILE accumulator < LENGTH OF lst DO
+                IF lst[accumulator] = val THEN
+                    RETURN accumulator
+                END IF
+                SET accumulator TO accumulator + 1
+            END WHILE
+            RETURN -1
+        END FUNCTION
+
+        SET Omega TO LIST FILLED WITH 1 OF LENGTH Δ1
+        CALL fillFactorials(Omega, Δ1)
+
+        SET Sigma TO EMPTY LIST
+        PROCEDURE populateSigma(counter)
+            IF counter > Δ1 THEN
+                RETURN
+            END IF
+            APPEND counter TO Sigma
+            CALL populateSigma(counter + 1)
+        END PROCEDURE
+        CALL populateSigma(1)
+
+        SET Rho TO 0
+        PROCEDURE processIndex(zeta)
+            IF zeta >= Δ1 THEN
+                RETURN
+            END IF
+            SET Eta TO findPosition(Sigma, perm[zeta])
+            SET Rho TO Rho + Eta * Omega[Δ1 - zeta - 1]
+            CALL removeAt(Sigma, Eta)
+            CALL processIndex(zeta + 1)
+        END PROCEDURE
+        CALL processIndex(0)
+
+        RETURN auxModulo(Rho, Δ2)
+    END FUNCTION
+END CLASS

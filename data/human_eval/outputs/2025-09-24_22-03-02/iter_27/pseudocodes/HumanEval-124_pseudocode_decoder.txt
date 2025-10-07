@@ -1,0 +1,39 @@
+FUNCTION valid_date WITH PARAMETER date
+    TRY
+        SET date TO CALL strip ON date
+        SET temp_list TO CALL split ON date WITH ARGUMENT '-'
+        SET month TO CALL int WITH ARGUMENT temp_list AT INDEX 0
+        SET day TO CALL int WITH ARGUMENT temp_list AT INDEX 1
+        SET year TO CALL int WITH ARGUMENT temp_list AT INDEX 2
+        IF month LESS THAN 1 OR month GREATER THAN 12 THEN
+            RETURN False
+        END IF
+        SET allowed_months_31 TO LIST WITH ELEMENTS 1, 3, 5, 7, 8, 10, 12
+        SET allowed_months_30 TO LIST WITH ELEMENTS 4, 6, 9, 11
+        SET index_31 TO 0
+        WHILE index_31 LESS THAN LENGTH OF allowed_months_31
+            IF month EQUALS allowed_months_31 AT INDEX index_31 THEN
+                IF day LESS THAN 1 OR day GREATER THAN 31 THEN
+                    RETURN False
+                END IF
+            END IF
+            INCREMENT index_31 BY 1
+        END WHILE
+        SET index_30 TO 0
+        WHILE index_30 LESS THAN LENGTH OF allowed_months_30
+            IF month EQUALS allowed_months_30 AT INDEX index_30 THEN
+                IF day LESS THAN 1 OR day GREATER THAN 30 THEN
+                    RETURN False
+                END IF
+            END IF
+            INCREMENT index_30 BY 1
+        END WHILE
+        IF month EQUALS 2 THEN
+            IF day LESS THAN 1 OR day GREATER THAN 29 THEN
+                RETURN False
+            END IF
+        END IF
+    EXCEPT
+        RETURN False
+    END TRY
+    RETURN True

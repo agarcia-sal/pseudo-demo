@@ -1,0 +1,42 @@
+FUNCTION check_dict_case(map)
+  SET count TO LENGTH OF KEYS OF map
+  IF count IS 0 THEN
+    RETURN False
+  END IF
+
+  state := "start"
+  SET idx TO 0
+  SET keys_collection TO KEYS OF map
+
+  WHILE idx < count
+    current_key := keys_collection[idx]
+
+    IF current_key IS NOT INSTANCE OF STRING THEN
+      state := "mixed"
+      EXIT WHILE
+    END IF
+
+    IF state IS "start" THEN
+      IF TO_UPPER(current_key) = current_key THEN
+        state := "upper"
+      ELSE
+        IF TO_LOWER(current_key) = current_key THEN
+          state := "lower"
+        ELSE
+          EXIT WHILE
+        END IF
+      END IF
+
+    ELSE
+      IF (state IS "upper" AND TO_UPPER(current_key) ≠ current_key) OR (state IS "lower" AND TO_LOWER(current_key) ≠ current_key) THEN
+        state := "mixed"
+        EXIT WHILE
+      ELSE
+        EXIT WHILE
+      END IF
+    END IF
+    idx := idx + 1
+  END WHILE
+
+  RETURN (state = "upper") OR (state = "lower")
+END FUNCTION

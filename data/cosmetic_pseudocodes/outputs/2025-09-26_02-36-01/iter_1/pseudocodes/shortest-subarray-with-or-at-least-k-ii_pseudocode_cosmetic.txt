@@ -1,0 +1,49 @@
+CLASS Solution  
+    FUNCTION minimumSubarrayLength(nums LIST OF integers, k integer) RETURNS integer  
+        FUNCTION adjust_count(bit_counts LIST OF integers, number integer, delta integer)  
+            DECLARE bit_flag AS integer = 1  
+            FOR position FROM 0 TO 31 DO  
+                IF (number BITWISE_AND bit_flag) NOT_EQUALS 0 THEN  
+                    bit_counts[position] = bit_counts[position] + delta  
+                END IF  
+                bit_flag = bit_flag SHIFT_LEFT 1  
+            END FOR  
+        END FUNCTION  
+
+        FUNCTION calculate_or(bits_count LIST OF integers) RETURNS integer  
+            DECLARE combined_or AS integer = 0  
+            FOR index FROM 0 TO 31 DO  
+                IF bits_count[index] > 0 THEN  
+                    combined_or = combined_or BITWISE_OR (1 SHIFT_LEFT index)  
+                END IF  
+            END FOR  
+            RETURN combined_or  
+        END FUNCTION  
+
+        DECLARE length AS integer = LENGTH(nums)  
+        DECLARE bit_frequency AS LIST OF integer = [0 REPEATED 32 TIMES]  
+        DECLARE current_or_value AS integer = 0  
+        DECLARE window_start AS integer = 0  
+        DECLARE shortest_subarray AS integer = INFINITY  
+
+        FOR window_end FROM 0 TO length - 1 DO  
+            CALL adjust_count(bit_frequency, nums[window_end], 1)  
+            current_or_value = current_or_value BITWISE_OR nums[window_end]  
+
+            WHILE current_or_value >= k AND window_start <= window_end DO  
+                IF shortest_subarray > (window_end - window_start + 1) THEN  
+                    shortest_subarray = window_end - window_start + 1  
+                END IF  
+                CALL adjust_count(bit_frequency, nums[window_start], -1)  
+                current_or_value = CALL calculate_or(bit_frequency)  
+                window_start = window_start + 1  
+            END WHILE  
+        END FOR  
+
+        IF shortest_subarray IS INFINITY THEN  
+            RETURN -1  
+        ELSE  
+            RETURN shortest_subarray  
+        END IF  
+    END FUNCTION  
+END CLASS

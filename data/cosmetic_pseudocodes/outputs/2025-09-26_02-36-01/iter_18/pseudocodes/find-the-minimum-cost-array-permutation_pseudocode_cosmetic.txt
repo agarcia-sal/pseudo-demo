@@ -1,0 +1,60 @@
+```pseudocode
+CLASS Solution
+    FUNCTION findPermutation(nums)
+        FUNCTION dfs(mask, val)
+            SET limit TO (1 LEFT-SHIFT LENGTH(nums)) - 1
+            IF NOT (mask XOR limit) THEN
+                RETURN ABS(val - nums[0])
+            END IF
+
+            SET minimum TO +∞
+
+            SET index TO 0
+            WHILE index < LENGTH(nums)
+                IF ((mask RIGHT-SHIFT index) BIT-AND 1) = 0 THEN
+                    SET nextMask TO mask BIT-OR (1 LEFT-SHIFT index)
+                    SET attempt TO ABS(val - nums[index]) + dfs(nextMask, index)
+                    IF attempt < minimum THEN
+                        minimum = attempt
+                    END IF
+                END IF
+                SET index TO index + 1
+            END WHILE
+
+            RETURN minimum
+        END FUNCTION
+
+        FUNCTION g(mask, position)
+            APPEND position TO ans
+
+            IF mask = ((1 LEFT-SHIFT LENGTH(nums)) - 1) THEN
+                RETURN
+            END IF
+
+            SET target TO dfs(mask, position)
+            SET i TO 0
+            REPEAT
+                IF i >= LENGTH(nums) THEN
+                    BREAK
+                END IF
+
+                IF ((mask RIGHT-SHIFT i) BIT-AND 1) = 0 THEN
+                    SET tempVal TO ABS(position - nums[i]) + dfs(mask BIT-OR (1 LEFT-SHIFT i), i)
+                    IF tempVal = target THEN
+                        CALL g(mask BIT-OR (1 LEFT-SHIFT i), i)
+                        EXIT
+                    END IF
+                END IF
+                SET i TO i + 1
+            UNTIL FALSE
+        END FUNCTION
+
+        SET total TO LENGTH(nums)
+        SET ans TO []
+        SET startMask TO 1 LEFT-SHIFT 0
+        CALL g(startMask, 0)
+
+        RETURN ans
+    END FUNCTION
+END CLASS
+```

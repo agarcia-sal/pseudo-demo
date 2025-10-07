@@ -1,0 +1,93 @@
+CLASS Solution
+    FUNCTION canReachCorner(xCorner yCorner circles)
+        FUNCTION in_circle(px py cx cy r)
+            LET dx BE px - cx
+            LET dy BE py - cy
+            LET dist_sq BE dx * dx + dy * dy
+            LET radius_sq BE r * r
+            RETURN dist_sq <= radius_sq
+        END FUNCTION
+
+        FUNCTION cross_left_top(cx cy r)
+            LET cond_1 BE (ABS(cx) <= r) AND (0 <= cy) AND (cy <= yCorner)
+            LET cond_2 BE (ABS(cy - yCorner) <= r) AND (0 <= cx) AND (cx <= xCorner)
+            RETURN cond_1 OR cond_2
+        END FUNCTION
+
+        FUNCTION cross_right_bottom(cx cy r)
+            LET cond_1 BE (ABS(cx - xCorner) <= r) AND (0 <= cy) AND (cy <= yCorner)
+            LET cond_2 BE (ABS(cy) <= r) AND (0 <= cx) AND (cx <= xCorner)
+            RETURN cond_1 OR cond_2
+        END FUNCTION
+
+        FUNCTION dfs(index)
+            LET circle_i BE circles[index]
+            LET cx1 BE circle_i[0]
+            LET cy1 BE circle_i[1]
+            LET radius1 BE circle_i[2]
+
+            IF cross_right_bottom(cx1 cy1 radius1) THEN
+                RETURN True
+            END IF
+
+            SET vis[index] TO True
+            LET j BE 0
+            WHILE j < LENGTH(circles)
+                IF vis[j] THEN
+                    SET j TO j + 1
+                    CONTINUE
+                END IF
+
+                LET circle_j BE circles[j]
+                LET cx2 BE circle_j[0]
+                LET cy2 BE circle_j[1]
+                LET radius2 BE circle_j[2]
+
+                LET dx BE cx1 - cx2
+                LET dy BE cy1 - cy2
+                LET dist_sq BE dx * dx + dy * dy
+                LET combined_r BE radius1 + radius2
+                LET combined_r_sq BE combined_r * combined_r
+
+                IF dist_sq > combined_r_sq THEN
+                    SET j TO j + 1
+                    CONTINUE
+                END IF
+
+                LET left_expr_x BE (cx1 * radius2 + cx2 * radius1)
+                LET right_expr_x BE combined_r * xCorner
+                LET left_expr_y BE (cy1 * radius2 + cy2 * radius1)
+                LET right_expr_y BE combined_r * yCorner
+
+                IF left_expr_x < right_expr_x AND left_expr_y < right_expr_y AND dfs(j) THEN
+                    RETURN True
+                END IF
+
+                SET j TO j + 1
+            END WHILE
+
+            RETURN False
+        END FUNCTION
+
+        LET vis BE A LIST with LENGTH(circles) elements all set to False
+
+        LET idx BE 0
+        WHILE idx < LENGTH(circles)
+            LET cx BE circles[idx][0]
+            LET cy BE circles[idx][1]
+            LET radius BE circles[idx][2]
+
+            IF in_circle(0 0 cx cy radius) OR in_circle(xCorner yCorner cx cy radius) THEN
+                RETURN False
+            END IF
+
+            IF NOT vis[idx] AND cross_left_top(cx cy radius) AND dfs(idx) THEN
+                RETURN False
+            END IF
+
+            SET idx TO idx + 1
+        END WHILE
+
+        RETURN True
+    END FUNCTION
+END CLASS

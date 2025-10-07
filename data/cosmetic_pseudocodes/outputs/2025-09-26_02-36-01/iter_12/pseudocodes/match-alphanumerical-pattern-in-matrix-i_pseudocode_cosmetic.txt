@@ -1,0 +1,160 @@
+CLASS Solution
+	FUNCTION findPattern(board, pattern)
+		SET totalRows TO 0
+		SET totalCols TO 0
+		SET patRows TO 0
+		SET patCols TO 0
+		
+		PROCEDURE getLength(sequence, OUT length)
+			SET counter TO 0
+			WHILE TRUE
+				IF counter EQUALS LENGTH OF sequence
+					EXIT WHILE
+				END IF
+				SET counter TO counter PLUS 1
+			END WHILE
+			SET length TO counter
+		END PROCEDURE
+
+		CALL getLength(board, totalRows)
+		IF totalRows GREATER THAN 0
+			CALL getLength(board[0], totalCols)
+		END IF
+		CALL getLength(pattern, patRows)
+		IF patRows GREATER THAN 0
+			CALL getLength(pattern[0], patCols)
+		END IF
+
+		FUNCTION verifyMatch(rowIndex, colIndex)
+			DEFINE mapCharToNum AS empty mapping
+			DEFINE mapNumToChar AS empty mapping
+
+			FUNCTION checkIndexes(idx1, idx2)
+				IF idx1 LESS THAN 0 OR idx1 GREATER OR EQUAL patRows
+					RETURN False
+				END IF
+				IF idx2 LESS THAN 0 OR idx2 GREATER OR EQUAL patCols
+					RETURN False
+				END IF
+				RETURN True
+			END FUNCTION
+
+			PROCEDURE cycleThrough(i, j, OUT result)
+				SET positionValid TO checkIndexes(i, j)
+				IF NOT positionValid
+					SET result TO False
+					RETURN
+				END IF
+
+				SET patternChar TO pattern[i][j]
+				SET boardEntry TO board[rowIndex + i][colIndex + j]
+
+				PROCEDURE isDigitChar(c, OUT digitFlag)
+					LET ordVal TO convertCharToCode(c)
+					IF ordVal GREATER OR EQUAL TO convertCharToCode("0") AND ordVal LESS OR EQUAL TO convertCharToCode("9")
+						SET digitFlag TO True
+					ELSE
+						SET digitFlag TO False
+					END IF
+				END PROCEDURE
+
+				FUNCTION convertCharToCode(character)
+					RETURN ASCII integer value of character
+				END FUNCTION
+
+				PROCEDURE stringToInt(s, OUT intResult)
+					SET intResult TO 0
+					FOR eachCharIndex FROM 0 TO LENGTH OF s MINUS 1
+						SET intResult TO intResult TIMES 10 PLUS (convertCharToCode(s[eachCharIndex]) MINUS convertCharToCode("0"))
+					END FOR
+				END PROCEDURE
+
+				DECLARE isDigit BOOLEAN
+				CALL isDigitChar(patternChar, isDigit)
+
+				IF isDigit
+					DECLARED numVal AS INTEGER
+					CALL stringToInt(patternChar, numVal)
+					IF numVal NOT EQUALS boardEntry
+						SET result TO False
+						RETURN
+					END IF
+				ELSE
+					IF mapCharToNum CONTAINS patternChar
+						IF mapCharToNum[patternChar] NOT EQUALS boardEntry
+							SET result TO False
+							RETURN
+						END IF
+					ELSE
+						IF mapNumToChar CONTAINS boardEntry
+							SET result TO False
+							RETURN
+						END IF
+						SET mapCharToNum[patternChar] TO boardEntry
+						SET mapNumToChar[boardEntry] TO patternChar
+					END IF
+				END IF
+				SET result TO True
+			END PROCEDURE
+
+			PROCEDURE iterateAll(OUT finalVal)
+				SET counterA TO 0
+				SET counterB TO 0
+				SET finished AS BOOLEAN TO False
+
+				WHILE NOT finished
+					DECLARE tempResult BOOLEAN
+					CALL cycleThrough(counterA, counterB, tempResult)
+					IF NOT tempResult
+						SET finalVal TO False
+						RETURN
+					END IF
+
+					IF counterB LESS THAN patCols MINUS 1
+						SET counterB TO counterB PLUS 1
+					ELSE IF counterA LESS THAN patRows MINUS 1
+						SET counterB TO 0
+						SET counterA TO counterA PLUS 1
+					ELSE
+						SET finished TO True
+					END IF
+				END WHILE
+				SET finalVal TO True
+			END PROCEDURE
+
+			DECLARE overallMatch BOOLEAN
+			CALL iterateAll(overallMatch)
+			RETURN overallMatch
+		END FUNCTION
+
+
+		PROCEDURE traverseBoard(OUT posFound)
+			SET iRow TO 0
+			SET iCol TO 0
+			SET foundFlag TO False
+
+			WHILE iRow LESS OR EQUAL TO totalRows MINUS patRows AND NOT foundFlag
+				SET iCol TO 0
+				WHILE iCol LESS OR EQUAL TO totalCols MINUS patCols AND NOT foundFlag
+					IF verifyMatch(iRow,iCol)
+						SET posFound TO LIST OF [iRow, iCol]
+						SET foundFlag TO True
+					ELSE
+						SET iCol TO iCol PLUS 1
+					END IF
+				END WHILE
+				IF NOT foundFlag
+					SET iRow TO iRow PLUS 1
+				END IF
+			END WHILE
+
+			IF NOT foundFlag
+				SET posFound TO LIST OF [-1, -1]
+			END IF
+		END PROCEDURE
+
+		DECLARE answer AS LIST
+		CALL traverseBoard(answer)
+		RETURN answer
+	END FUNCTION
+END CLASS

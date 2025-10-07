@@ -1,0 +1,9 @@
+def is_nested(s):
+    o = [i for i, ch in enumerate(s) if ch == '[']
+    c = [i for i, ch in enumerate(s) if ch == ']'][::-1]
+    cnt, i, l = 0, 0, len(c)
+    for idx in o:
+        if i < l and idx < c[i]:
+            cnt += 1
+            i += 1
+    return cnt >= 2

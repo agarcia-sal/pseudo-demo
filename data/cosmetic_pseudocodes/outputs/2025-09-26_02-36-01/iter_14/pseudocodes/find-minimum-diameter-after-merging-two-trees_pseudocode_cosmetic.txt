@@ -1,0 +1,115 @@
+```pseudocode
+CLASS Solution
+	FUNCTION bfs(graph, start)
+		SET total_nodes TO LENGTH OF graph
+		SET status_flags TO ARRAY of total_nodes elements all false
+		DEFINE dequeue_structure AS new deque
+		CALL dequeue_structure.APPEND WITH (start,0)
+		SET status_flags[start] TO true
+		SET current_farthest TO start
+		SET greatest_distance TO 0
+
+		WHILE dequeue_structure IS NOT empty DO
+			REMOVE leftmost_element FROM dequeue_structure AND ASSIGN TO current_node, current_distance
+			IF current_distance > greatest_distance THEN
+				SET greatest_distance TO current_distance
+				SET current_farthest TO current_node
+			END IF
+			FOR each adjacent_node IN graph[current_node] DO
+				IF status_flags[adjacent_node] == false THEN
+					SET status_flags[adjacent_node] TO true
+					CALL dequeue_structure.APPEND WITH (adjacent_node, current_distance + 1)
+				END IF
+			END FOR
+		END WHILE
+
+		RETURN current_farthest, greatest_distance
+	END FUNCTION
+
+	FUNCTION tree_diameter(graph)
+		SET initial_node TO 0
+		SET far_node, dummy_var_a TO CALL bfs WITH graph, initial_node
+		SET dummy_var_b, max_diameter TO CALL bfs WITH graph, far_node
+		RETURN max_diameter
+	END FUNCTION
+
+	FUNCTION maximum_path_length_from_node(graph, node)
+		SET total_length TO LENGTH OF graph
+		SET visited_marks TO ARRAY of total_length elements all false
+		SET node_queue TO new deque
+		APPEND (node,0) TO node_queue
+		SET visited_marks[node] TO true
+		SET max_dist_found TO 0
+
+		WHILE node_queue IS NOT empty DO
+			REMOVE front_element FROM node_queue AND ASSIGN TO current_node, current_dist
+			IF current_dist > max_dist_found THEN
+				SET max_dist_found TO current_dist
+			END IF
+			FOR each neighbor_node IN graph[current_node] DO
+				IF visited_marks[neighbor_node] == false THEN
+					SET visited_marks[neighbor_node] TO true
+					APPEND (neighbor_node, current_dist + 1) TO node_queue
+				END IF
+			END FOR
+		END WHILE
+
+		RETURN max_dist_found
+	END FUNCTION
+
+	FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+		SET len_edges1_plus TO LENGTH OF edges1 + 1
+		SET len_edges2_plus TO LENGTH OF edges2 + 1
+
+		SET g1 TO ARRAY of empty lists size len_edges1_plus
+		SET g2 TO ARRAY of empty lists size len_edges2_plus
+
+		FOR EACH element_x, element_y IN edges1 DO
+			APPEND element_y TO g1[element_x]
+			APPEND element_x TO g1[element_y]
+		END FOR
+
+		FOR EACH element_p, element_q IN edges2 DO
+			APPEND element_q TO g2[element_p]
+			APPEND element_p TO g2[element_q]
+		END FOR
+
+		SET diam1 TO CALL tree_diameter WITH g1
+		SET diam2 TO CALL tree_diameter WITH g2
+
+		SET longest_paths_1 TO EMPTY list
+		SET index_i TO 0
+		REPEAT WHILE index_i < len_edges1_plus
+			APPEND CALL maximum_path_length_from_node WITH g1, index_i TO longest_paths_1
+			SET index_i TO index_i + 1
+		END REPEAT
+
+		SET longest_paths_2 TO EMPTY list
+		SET index_j TO 0
+		REPEAT WHILE index_j < len_edges2_plus
+			APPEND CALL maximum_path_length_from_node WITH g2, index_j TO longest_paths_2
+			SET index_j TO index_j + 1
+		END REPEAT
+
+		SET minimal_possible_diameter TO positive infinity
+
+		FOR u_index FROM 0 TO len_edges1_plus - 1 DO
+			FOR v_index FROM 0 TO len_edges2_plus - 1 DO
+				SET candidate_diameter TO diam1
+				IF diam2 > candidate_diameter THEN
+					SET candidate_diameter TO diam2
+				END IF
+				SET combined_path TO longest_paths_1[u_index] + longest_paths_2[v_index] + 1
+				IF combined_path > candidate_diameter THEN
+					SET candidate_diameter TO combined_path
+				END IF
+				IF candidate_diameter < minimal_possible_diameter THEN
+					SET minimal_possible_diameter TO candidate_diameter
+				END IF
+			END FOR
+		END FOR
+
+		RETURN minimal_possible_diameter
+	END FUNCTION
+END CLASS
+```

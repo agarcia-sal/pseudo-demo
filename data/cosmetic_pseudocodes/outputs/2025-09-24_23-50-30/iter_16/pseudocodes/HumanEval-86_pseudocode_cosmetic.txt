@@ -1,0 +1,54 @@
+```
+FUNCTION anti_shuffle(input_string)
+  DEFINE FUNCTION process_words(words_map, index, acc)
+    IF NOT (index < LENGTH(words_map)) THEN
+      RETURN acc
+    ELSE
+      LET word_chars BE TO_ARRAY(words_map[index])
+      LET ordered_chars BE []
+      LET i BE 0
+      WHILE i < LENGTH(word_chars) DO
+        LET j BE i + 1
+        WHILE j < LENGTH(word_chars) DO
+          IF NOT (word_chars[i] <= word_chars[j]) THEN
+            LET temp_char BE word_chars[i]
+            SET word_chars[i] = word_chars[j]
+            SET word_chars[j] = temp_char
+          END IF
+          SET j = j + 1
+        END WHILE
+        SET i = i + 1
+      END WHILE
+      LET reconstructed_word BE ""
+      LET k BE 0
+      WHILE k < LENGTH(word_chars) DO
+        SET reconstructed_word = reconstructed_word + word_chars[k]
+        SET k = k + 1
+      END WHILE
+      CALL process_words(words_map, index + (1 * 1), acc + [reconstructed_word])
+    END IF
+  END FUNCTION
+
+  LET words_sequence BE []
+  LET pos BE 0
+  WHILE pos < LENGTH(input_string) DO
+    LET start_pos BE pos
+    WHILE pos < LENGTH(input_string) AND input_string[pos] != ' ' DO
+      SET pos = pos + 1
+    END WHILE
+    LET segment BE SUBSTRING(input_string, start_pos, pos)
+    SET words_sequence = words_sequence + [segment]
+    SET pos = pos + 1
+  END WHILE
+
+  LET result_words BE process_words(words_sequence, 0, [])
+  LET result_output BE ""
+  LET idx BE 0
+  WHILE idx < LENGTH(result_words) DO
+    LET sep BE (idx = LENGTH(result_words) - 1) ? "" : " "
+    SET result_output = result_output + result_words[idx] + sep
+    SET idx = idx + 1
+  END WHILE
+  RETURN result_output
+END FUNCTION
+```

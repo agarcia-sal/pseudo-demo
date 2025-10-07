@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION maxTotalReward(rewardValues)
+        FUNCTION dfs(accumulator)
+            LET insertionIndex BE 0
+            LET lowBound BE 0
+            LET highBound BE LENGTH(rewardValues)
+            WHILE lowBound < highBound
+                LET midPoint BE (lowBound + highBound) DIV 2
+                IF rewardValues[midPoint] <= accumulator
+                    lowBound = midPoint + 1
+                ELSE
+                    highBound = midPoint
+                END IF
+            END WHILE
+            insertionIndex = lowBound
+
+            LET resultSoFar BE 0
+            LET currentPosition BE insertionIndex
+            WHILE currentPosition < LENGTH(rewardValues)
+                LET currentValue BE rewardValues[currentPosition]
+                LET sumValue BE accumulator + currentValue
+                IF sumValue > accumulator
+                    LET candidate BE currentValue + dfs(sumValue)
+                    IF candidate > resultSoFar
+                        resultSoFar = candidate
+                    END IF
+                END IF
+                currentPosition = currentPosition + 1
+            END WHILE
+            RETURN resultSoFar
+        END FUNCTION
+
+        LET idx BE 1
+        WHILE idx < LENGTH(rewardValues)
+            LET j BE idx
+            WHILE j > 0 AND rewardValues[j-1] > rewardValues[j]
+                LET temp BE rewardValues[j]
+                rewardValues[j] = rewardValues[j-1]
+                rewardValues[j-1] = temp
+                j = j - 1
+            END WHILE
+            idx = idx + 1
+        END WHILE
+
+        RETURN dfs(0)
+    END FUNCTION
+END CLASS

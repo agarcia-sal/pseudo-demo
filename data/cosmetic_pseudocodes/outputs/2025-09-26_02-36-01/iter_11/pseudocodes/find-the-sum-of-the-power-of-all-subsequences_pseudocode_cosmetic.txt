@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION sumOfPower(nums parameter, k parameter)
+        SET MODULO TO 1000000007
+        SET LENGTH TO LENGTH OF nums
+        SET matrix TO list containing LENGTH + 1 lists each with k + 1 zeroes
+        SET element at position 0 of element at position 0 in matrix TO 1
+
+        DEFINE PROCEDURE addModulo(x parameter, y parameter)
+            RETURN (x + y) - MODULO * ((x + y) DIV MODULO)
+        END PROCEDURE
+
+        DEFINE PROCEDURE isGE(a parameter, b parameter)
+            IF a >= b THEN RETURN TRUE ELSE RETURN FALSE END IF
+        END PROCEDURE
+
+        DEFINE PROCEDURE modValue(x parameter)
+            RETURN x - MODULO * (x DIV MODULO)
+        END PROCEDURE
+
+        SET i_counter TO 1
+        WHILE i_counter <= LENGTH DO
+            SET j_index TO 0
+            WHILE j_index <= k DO
+                SET matrix[i_counter][j_index] TO matrix[i_counter - 1][j_index]
+                IF isGE(j_index, nums[i_counter - 1]) THEN
+                    SET matrix[i_counter][j_index] TO addModulo(matrix[i_counter][j_index], matrix[i_counter - 1][j_index - nums[i_counter - 1]])
+                END IF
+                SET matrix[i_counter][j_index] TO modValue(matrix[i_counter][j_index])
+                SET j_index TO j_index + 1
+            END WHILE
+            SET i_counter TO i_counter + 1
+        END WHILE
+
+        SET accumulator TO 0
+        SET bitmask TO 1
+        WHILE bitmask < (2 ^ LENGTH) DO
+            SET partial_sum TO 0
+            SET ones_count TO 0
+            SET idx TO 0
+            WHILE idx < LENGTH DO
+                IF ((bitmask DIV (2 ^ idx)) MOD 2) = 1 THEN
+                    SET partial_sum TO partial_sum + nums[idx]
+                    SET ones_count TO ones_count + 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            IF partial_sum = k THEN
+                SET accumulator TO (accumulator + (2 ^ (LENGTH - ones_count))) MODULO
+            END IF
+            SET bitmask TO bitmask + 1
+        END WHILE
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

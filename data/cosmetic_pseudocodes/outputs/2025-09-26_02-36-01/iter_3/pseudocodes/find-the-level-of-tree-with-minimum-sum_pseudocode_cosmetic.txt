@@ -1,0 +1,85 @@
+CLASS TreeNode  
+ PROCEDURE __init__(self COMMA val EQUALS 0 COMMA left EQUALS None COMMA right EQUALS None)  
+  DO begin  
+   self.val := val  
+   self.left := left  
+   self.right := right  
+  end  
+ END PROCEDURE  
+END CLASS  
+
+FUNCTION tree_node(vals)  
+ LET n BE LENGTH(vals)  
+ IF n EQUALS 0 THEN  
+  RETURN None  
+ END IF  
+ LET root_node BE TreeNode(vals[0])  
+ LET idx BE 1  
+ LET queue_ds BE deque()  
+ queue_ds.append(root_node)  
+ WHILE LENGTH(queue_ds) > 0 DO  
+  LET current_ele BE queue_ds.popleft()  
+  IF idx < n THEN  
+   LET left_val BE vals[idx]  
+   IF NOT (left_val IS None) THEN  
+    current_ele.left := TreeNode(left_val)  
+    queue_ds.append(current_ele.left)  
+   END IF  
+   idx := idx + 1  
+  END IF  
+  IF idx < n THEN  
+   LET right_val BE vals[idx]  
+   IF NOT (right_val IS None) THEN  
+    current_ele.right := TreeNode(right_val)  
+    queue_ds.append(current_ele.right)  
+   END IF  
+   idx := idx + 1  
+  END IF  
+ END WHILE  
+ RETURN root_node  
+END FUNCTION  
+
+FUNCTION is_same_tree(node1 COMMA node2)  
+ IF (node1 IS None AND node2 IS None) THEN  
+  RETURN True  
+ ELSIF (node1 IS None OR node2 IS None) THEN  
+  RETURN False  
+ ELSIF NOT (node1.val = node2.val) THEN  
+  RETURN False  
+ ELSE  
+  RETURN (is_same_tree(node1.left COMMA node2.left) AND is_same_tree(node1.right COMMA node2.right))  
+ END IF  
+END FUNCTION  
+
+CLASS Solution  
+ PROCEDURE minimumLevel(self COMMA root)  
+  IF root IS None THEN  
+   RETURN 0  
+  END IF  
+  LET que BE deque([root])  
+  LET minimum_level BE 1  
+  LET minimum_sum BE +∞  
+  LET current_level BE 1  
+  WHILE LENGTH(que) > 0 DO  
+   LET level_total BE 0  
+   LET count BE LENGTH(que)  
+   WHILE count > 0 DO  
+    LET curr_node BE que.popleft()  
+    level_total := level_total + curr_node.val  
+    IF curr_node.left IS NOT None THEN  
+     que.append(curr_node.left)  
+    END IF  
+    IF curr_node.right IS NOT None THEN  
+     que.append(curr_node.right)  
+    END IF  
+    count := count - 1  
+   END WHILE  
+   IF level_total < minimum_sum THEN  
+    minimum_sum := level_total  
+    minimum_level := current_level  
+   END IF  
+   current_level := current_level + 1  
+  END WHILE  
+  RETURN minimum_level  
+ END PROCEDURE  
+END CLASS

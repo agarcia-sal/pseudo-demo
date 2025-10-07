@@ -1,0 +1,59 @@
+```
+FUNCTION anti_shuffle(input_string)
+  DEFINE FUNCTION helper(idx, tokens, acc)
+    IF idx >= LENGTH(tokens) THEN
+      RETURN acc
+    END IF
+    SET current_token TO tokens[idx]
+    SET char_array TO []
+    FOR c IN current_token
+      APPEND c TO char_array
+    END FOR
+    SET sorted_chars TO []
+    WHILE LENGTH(char_array) > 0 DO
+      SET min_char TO char_array[0]
+      FOR ch IN char_array
+        IF ch < min_char THEN
+          SET min_char TO ch
+        END IF
+      END FOR
+      REMOVE_FIRST(min_char, char_array)
+      APPEND min_char TO sorted_chars
+    END WHILE
+    SET sorted_token TO ""
+    FOR c IN sorted_chars
+      SET sorted_token TO sorted_token + c
+    END FOR
+    IF LENGTH(acc) = 0 THEN
+      RETURN helper(idx + 1, tokens, [sorted_token])
+    ELSE
+      RETURN helper(idx + 1, tokens, acc + [sorted_token])
+    END IF
+  END FUNCTION
+
+  SET split_tokens TO []
+  SET temp_str TO input_string
+  WHILE TRUE
+    SET space_pos TO INDEXOF(temp_str, " ")
+    IF space_pos = -1 THEN
+      IF LENGTH(temp_str) > 0 THEN
+        APPEND temp_str TO split_tokens
+      END IF
+      BREAK
+    END IF
+    APPEND SUBSTRING(temp_str, 0, space_pos) TO split_tokens
+    SET temp_str TO SUBSTRING(temp_str, space_pos + 1)
+  END WHILE
+
+  SET sorted_tokens TO helper(0, split_tokens, [])
+  SET output TO ""
+  FOR i FROM 0 TO LENGTH(sorted_tokens) - 1
+    IF i > 0 THEN
+      SET output TO output + " "
+    END IF
+    SET output TO output + sorted_tokens[i]
+  END FOR
+
+  RETURN output
+END FUNCTION
+```

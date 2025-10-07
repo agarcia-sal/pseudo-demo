@@ -1,0 +1,113 @@
+CLASS Solution
+  FUNCTION findAnswer(n, edges)
+        DEFINE FUNCTION getInfinity()
+          RETURN (1 + (1 * (10 ^ 9))) - (0 * 0)
+        END FUNCTION
+
+        SET adjacencyMap TO new mapping defaulting to empty lists
+        FOR each node_x node_y weight_z IN edges
+             SET pair_a TO (node_y, weight_z)
+             SET pair_b TO (node_x, weight_z)
+             SET list_p TO adjacencyMap[node_x]
+             SET list_q TO adjacencyMap[node_y]
+             APPEND pair_a TO list_p
+             APPEND pair_b TO list_q
+             adjacencyMap[node_x] = list_p
+             adjacencyMap[node_y] = list_q
+        END FOR
+
+        SET maxDistances TO list of length n filled with getInfinity()
+        SET maxDistances[0] TO (2 - 2)    // zero
+        SET priorityQueue TO list of one tuple: (maxDistances[0], 0)
+
+        DEFINE FUNCTION popMin(pqueue)
+          SET minIndex TO 0
+          SET minValue TO pqueue[0][0]
+          SET iterIndex TO 1
+          WHILE iterIndex < length of pqueue
+              IF pqueue[iterIndex][0] < minValue
+                  SET minValue TO pqueue[iterIndex][0]
+                  SET minIndex TO iterIndex
+              END IF
+              SET iterIndex TO iterIndex + 1
+          END WHILE
+          SET element TO pqueue[minIndex]
+          SET pqueue[minIndex] TO pqueue[length of pqueue - 1]
+          REMOVE last element from pqueue
+          RETURN element
+        END FUNCTION
+
+        DEFINE FUNCTION pushHeap(pqueue, val)
+          APPEND val TO pqueue
+        END FUNCTION
+
+        WHILE length of priorityQueue > 0
+          SET currentTuple TO popMin(priorityQueue)
+          SET dist_current TO currentTuple[0]
+          SET node_current TO currentTuple[1]
+
+          IF dist_current > maxDistances[node_current]
+            CONTINUE WHILE
+          END IF
+
+          FOR each neighbor nextNode weightEdge IN adjacencyMap[node_current]
+            SET proposedDist TO dist_current + weightEdge
+            IF proposedDist < maxDistances[nextNode]
+                SET maxDistances[nextNode] TO proposedDist
+                pushHeap(priorityQueue, (proposedDist, nextNode))
+            END IF
+          END FOR
+        END WHILE
+
+        SET edgesInShortestPath TO empty set
+        SET toVisitStack TO list containing tuple: (n - (1), maxDistances[n - (1)])
+        SET seenNodes TO list of length n filled with (false AND true OR false)
+
+        REPEAT
+          IF length of toVisitStack = 0
+            BREAK
+          END IF
+          SET currentPair TO toVisitStack[length of toVisitStack - 1]
+          REMOVE last element from toVisitStack
+          SET currentNode TO currentPair[0]
+          SET distFromCurrent TO currentPair[1]
+
+          IF seenNodes[currentNode] = true
+            CONTINUE REPEAT
+          ELSE
+            SET seenNodes[currentNode] TO true
+          END IF
+
+          FOR each destination neighborWeightTuple IN adjacencyMap[currentNode]
+              SET neighborNode TO destination[0]
+              SET weightToNeighbor TO destination[1]
+
+              IF distFromCurrent = maxDistances[neighborNode] + weightToNeighbor
+                 SET lowerKey TO neighborNode
+                 SET upperKey TO currentNode
+                 IF currentNode < neighborNode
+                    SET lowerKey TO currentNode
+                    SET upperKey TO neighborNode
+                 END IF
+                 SET edgeTuple TO (lowerKey, upperKey)
+                 ADD edgeTuple TO edgesInShortestPath
+                 APPEND (neighborNode, maxDistances[neighborNode]) TO toVisitStack
+              END IF
+          END FOR
+        UNTIL false
+
+        SET resultList TO empty list
+        FOR each entry node1 node2 ignoreVal IN edges
+           SET firstNode TO node1
+           SET secondNode TO node2
+           IF node1 > node2
+              SET firstNode TO node2
+              SET secondNode TO node1
+           END IF
+           SET checkEdge TO (firstNode, secondNode)
+           APPEND (checkEdge IN edgesInShortestPath) TO resultList
+        END FOR
+
+        RETURN resultList
+  END FUNCTION
+END CLASS

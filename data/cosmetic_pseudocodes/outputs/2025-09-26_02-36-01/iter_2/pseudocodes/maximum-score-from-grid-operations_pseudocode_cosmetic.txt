@@ -1,0 +1,59 @@
+CLASS Solution  
+    FUNCTION maximumScore(grid)  
+        LET lengthVal BE LENGTH(grid)  
+        LET cumSum BE A 2D array OF SIZE (lengthVal + 1) BY (lengthVal + 1) FILLED WITH 0  
+        LET lastChoose BE ARRAY OF SIZE (lengthVal + 1) FILLED WITH 0  
+        LET lastIgnore BE ARRAY OF SIZE (lengthVal + 1) FILLED WITH 0  
+
+        LET colIndex BE 0  
+        WHILE colIndex < lengthVal  
+            LET rowIndex BE 0  
+            WHILE rowIndex < lengthVal  
+                LET cumIndex1 BE rowIndex + 1  
+                LET cumIndex2 BE colIndex  
+                cumSum[cumIndex2][cumIndex1] = cumSum[cumIndex2][rowIndex] + grid[rowIndex][colIndex]  
+                rowIndex = rowIndex + 1  
+            END WHILE  
+            colIndex = colIndex + 1  
+        END WHILE  
+
+        LET colPointer BE 1  
+        WHILE colPointer < lengthVal  
+            LET currentChoose BE ARRAY OF SIZE (lengthVal + 1) FILLED WITH 0  
+            LET currentIgnore BE ARRAY OF SIZE (lengthVal + 1) FILLED WITH 0  
+
+            LET currIndex BE 0  
+            WHILE currIndex <= lengthVal  
+                LET prevIndex BE 0  
+                WHILE prevIndex <= lengthVal  
+                    IF currIndex > prevIndex THEN  
+                        LET diffCalc BE (cumSum[colPointer - 1][currIndex]) - (cumSum[colPointer - 1][prevIndex])  
+                        currentChoose[currIndex] = MAX(currentChoose[currIndex], lastIgnore[prevIndex] + diffCalc)  
+                        currentIgnore[currIndex] = MAX(currentIgnore[currIndex], lastIgnore[prevIndex] + diffCalc)  
+                    ELSE  
+                        LET diffAlt BE (cumSum[colPointer][prevIndex]) - (cumSum[colPointer][currIndex])  
+                        currentChoose[currIndex] = MAX(currentChoose[currIndex], lastChoose[prevIndex] + diffAlt)  
+                        currentIgnore[currIndex] = MAX(currentIgnore[currIndex], lastChoose[prevIndex])  
+                    END IF  
+                    prevIndex = prevIndex + 1  
+                END WHILE  
+                currIndex = currIndex + 1  
+            END WHILE  
+
+            lastChoose = currentChoose  
+            lastIgnore = currentIgnore  
+            colPointer = colPointer + 1  
+        END WHILE  
+
+        LET maxResult BE lastChoose[0]  
+        LET idx BE 1  
+        WHILE idx <= lengthVal  
+            IF lastChoose[idx] > maxResult THEN  
+                maxResult = lastChoose[idx]  
+            END IF  
+            idx = idx + 1  
+        END WHILE  
+
+        RETURN maxResult  
+    END FUNCTION  
+END CLASS

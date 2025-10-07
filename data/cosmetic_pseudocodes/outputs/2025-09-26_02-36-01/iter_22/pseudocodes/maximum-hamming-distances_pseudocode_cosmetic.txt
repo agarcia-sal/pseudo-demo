@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER m INTEGER) RETURNS LIST OF INTEGER
+        PROCEDURE ToBinaryString(value INTEGER length INTEGER RETURNS STRING)
+            SET result TO ""
+            SET counter TO length
+            WHILE counter GREATER THAN zero
+                SET bitVal TO value MOD 2
+                SET value TO value DIV 2
+                SET result TO CONCAT(string_of(bitVal), result)
+                SET counter TO counter MINUS one
+            END WHILE
+            WHILE LENGTH(result) LESS THAN length
+                SET result TO CONCAT("0", result)
+            END WHILE
+            RETURN result
+        END PROCEDURE
+
+        SET tempList TO []
+        FOR idx INTEGER FROM zero TO LENGTH(nums) MINUS one
+            SET tempList TO APPEND(tempList, ToBinaryString(nums[idx], m))
+        END FOR
+
+        SET output TO []
+        FUNCTION hamming_distance(bin1 STRING bin2 STRING) RETURNS INTEGER
+            SET distVal TO 0
+            SET pos INTEGER TO zero
+            WHILE pos LESS THAN LENGTH(bin1)
+                IF NOT (bin1[pos] EQUALS bin2[pos])
+                    SET distVal TO distVal PLUS 1
+                END IF
+                SET pos TO pos PLUS 1
+            END WHILE
+            RETURN distVal
+        END FUNCTION
+
+        SET outerIndex TO zero
+        WHILE outerIndex LESS THAN LENGTH(nums)
+            SET currMax TO 0
+            SET innerIndex TO zero
+            WHILE innerIndex LESS THAN LENGTH(nums)
+                IF outerIndex NOT EQUALS innerIndex
+                    SET d INTEGER TO hamming_distance(tempList[outerIndex], tempList[innerIndex])
+                    IF d GREATER THAN currMax
+                        SET currMax TO d
+                    END IF
+                END IF
+                SET innerIndex TO innerIndex PLUS 1
+            END WHILE
+            SET output TO APPEND(output, currMax)
+            SET outerIndex TO outerIndex PLUS 1
+        END WHILE
+
+        RETURN output
+    END FUNCTION
+END CLASS

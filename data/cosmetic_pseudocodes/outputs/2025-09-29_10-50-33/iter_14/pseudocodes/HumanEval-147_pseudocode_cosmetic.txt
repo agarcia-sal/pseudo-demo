@@ -1,0 +1,31 @@
+FUNCTION get_max_triples(quantity)
+  DECLARE squares AS SET<NUMBER> ← {}
+  PROCEDURE build_sequence(counter, limit)
+    IF counter > limit THEN HALT
+    INSERT INTO squares ELEMENT (counter × counter − counter + 1)
+    EXECUTE build_sequence(counter + 1, limit)
+  END PROCEDURE
+
+  EXECUTE build_sequence(1, quantity)
+
+  DECLARE triples AS TUPLE[] ← ()
+  DECLARE p AS INTEGER ← 0
+
+  WHILE p < (quantity − 1) DO
+    DECLARE q AS INTEGER ← p + 1
+    WHILE q < (quantity − 1) DO
+      DECLARE r AS INTEGER ← q + 1
+      WHILE r < (quantity − 1) DO
+        DECLARE sum_val AS INTEGER ← squares[p] + squares[q] + squares[r]
+        IF NOT (sum_val ÷ 3) * 3 ≠ sum_val THEN
+          triples ← triples + ((squares[p], squares[q], squares[r]),)
+        END IF
+        r ← r + 1
+      END WHILE
+      q ← q + 1
+    END WHILE
+    p ← p + 1
+  END WHILE
+
+  INVOKE OUTPUT LENGTH(triples)
+END FUNCTION

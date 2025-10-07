@@ -1,0 +1,118 @@
+CLASS Solution
+    FUNCTION minimumCost(target, words, costs)
+        FUNCTION custom_strlen(seq)
+            SET length_accumulator TO 0
+            WHILE TRUE
+                IF length_accumulator EQUALS seq COUNT
+                    BREAK
+                END IF
+                SET length_accumulator TO length_accumulator PLUS 1
+            END WHILE
+            RETURN length_accumulator
+        END FUNCTION
+
+        FUNCTION custom_slice(source_list, begin_idx, end_idx)
+            SET sliced_list TO an empty list
+            SET idx TO begin_idx
+            REPEAT
+                IF idx GREATER OR EQUAL TO end_idx
+                    BREAK
+                END IF
+                CALL sliced_list APPEND source_list AT idx
+                SET idx TO idx PLUS 1
+            UNTIL false
+            RETURN sliced_list
+        END FUNCTION
+
+        FUNCTION custom_eq(list1, list2)
+            IF custom_strlen(list1) NOT EQUALS custom_strlen(list2)
+                RETURN false
+            END IF
+            SET position TO 0
+            WHILE position LESS THAN custom_strlen(list1)
+                IF list1 AT position NOT EQUALS list2 AT position
+                    RETURN false
+                END IF
+                SET position TO position PLUS 1
+            END WHILE
+            RETURN true
+        END FUNCTION
+
+        SET dict_for_costs TO an empty dictionary
+        SET idx_word_cost TO 0
+        WHILE idx_word_cost LESS THAN words COUNT
+            SET current_word TO words AT idx_word_cost
+            SET current_cost TO costs AT idx_word_cost
+            IF current_word NOT IN dict_for_costs
+                SET dict_for_costs AT current_word TO current_cost
+            ELSE
+                IF current_cost LESS THAN dict_for_costs AT current_word
+                    SET dict_for_costs AT current_word TO current_cost
+                END IF
+            END IF
+            SET idx_word_cost TO idx_word_cost PLUS 1
+        END WHILE
+
+        SET target_chars TO an empty list
+        SET idx_char TO 0
+        WHILE idx_char LESS THAN custom_strlen(target)
+            CALL target_chars APPEND target AT idx_char
+            SET idx_char TO idx_char PLUS 1
+        END WHILE
+
+        FUNCTION min_cost_to_form_target(position)
+            IF position EQUALS custom_strlen(target_chars)
+                RETURN 0
+            END IF
+
+            SET minimum_cost_tracker TO (1 PLUS 1) MULTIPLIED BY (1 PLUS 1) MULTIPLIED BY (1 PLUS 1) MULTIPLIED BY 1000
+            SET dict_items_list TO an empty list
+            FOR EACH key_val_pair IN dict_for_costs
+                CALL dict_items_list APPEND key_val_pair
+            END FOR
+
+            SET idx_dict TO 0
+            WHILE idx_dict LESS THAN dict_items_list COUNT
+                SET single_word TO dict_items_list AT idx_dict KEY
+                SET single_cost TO dict_items_list AT idx_dict VALUE
+
+                SET pos_plus_len_word TO position PLUS custom_strlen(single_word)
+                IF pos_plus_len_word LESS OR EQUAL TO custom_strlen(target_chars)
+                    SET slice_sublist TO custom_slice(target_chars, position, pos_plus_len_word)
+                    SET word_char_list TO an empty list
+
+                    SET idx_wchar TO 0
+                    WHILE idx_wchar LESS THAN custom_strlen(single_word)
+                        CALL word_char_list APPEND single_word AT idx_wchar
+                        SET idx_wchar TO idx_wchar PLUS 1
+                    END WHILE
+
+                    IF custom_eq(slice_sublist, word_char_list)
+                        SET call_result TO min_cost_to_form_target(pos_plus_len_word)
+                        IF call_result NOT EQUALS minimum_cost_tracker
+                            SET combined_cost TO single_cost PLUS call_result
+                            IF combined_cost LESS THAN minimum_cost_tracker
+                                SET minimum_cost_tracker TO combined_cost
+                            END IF
+                        END IF
+                    END IF
+                END IF
+
+                SET idx_dict TO idx_dict PLUS 1
+            END WHILE
+
+            IF minimum_cost_tracker NOT EQUALS (1 PLUS 1) MULTIPLIED BY (1 PLUS 1) MULTIPLIED BY (1 PLUS 1) MULTIPLIED BY 1000
+                RETURN minimum_cost_tracker
+            ELSE
+                RETURN (1 PLUS 1) MULTIPLIED BY (1 PLUS 1) MULTIPLIED BY (1 PLUS 1) MULTIPLIED BY 1000
+            END IF
+        END FUNCTION
+
+        SET answer_storage TO min_cost_to_form_target(0)
+        IF answer_storage NOT EQUALS (1 PLUS 1) MULTIPLIED BY (1 PLUS 1) MULTIPLIED BY (1 PLUS 1) MULTIPLIED BY 1000
+            RETURN answer_storage
+        ELSE
+            RETURN 0 MINUS 1
+        END IF
+    END FUNCTION
+END CLASS

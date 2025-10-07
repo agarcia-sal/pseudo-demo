@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION getPermutationIndex(perm)
+        LET lengthVal = (perm LENGTH)
+        LET modulusVal = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1 
+
+        LET factorialArray BE AN ARRAY OF size lengthVal WITH ALL ELEMENTS SET TO 1
+        LET counter = 1
+        WHILE counter < lengthVal
+            factorialArray[counter] = factorialArray[counter - 1] * counter
+            counter = counter + 1
+        END WHILE
+
+        LET availableNums = []
+        LET fillIndex = 0
+        WHILE fillIndex < lengthVal
+            availableNums APPEND (fillIndex + 1)
+            fillIndex = fillIndex + 1
+        END WHILE
+
+        LET resultIndex = 0
+        LET currentIndex = 0
+
+        FUNCTION processPosition(idx)
+            IF idx >= lengthVal THEN
+                RETURN
+            END IF
+
+            LET currentVal = perm[idx]
+            LET positionInList = 0
+            WHILE positionInList < (availableNums LENGTH)
+                IF availableNums[positionInList] == currentVal THEN
+                    BREAK
+                END IF
+                positionInList = positionInList + 1
+            END WHILE
+
+            LET decrementFactorPosition = lengthVal - idx - 1
+            LET additionValue = positionInList * factorialArray[decrementFactorPosition]
+            resultIndex = resultIndex + additionValue
+
+            availableNums REMOVE AT positionInList
+
+            processPosition(idx + 1)
+        END FUNCTION
+
+        processPosition(0)
+
+        LET finalResult = resultIndex MOD modulusVal
+        RETURN finalResult
+    END FUNCTION
+END CLASS

@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION maximumLength(nums k)
+        SET count TO LENGTH OF nums
+        IF count == 1 THEN RETURN 1 END IF
+
+        SET table TO empty list
+        SET idx TO 0
+        WHILE idx < count DO
+            APPEND empty mapping TO table
+            SET idx TO idx + 1
+        END WHILE
+
+        SET greatest TO 1
+
+        DEFINE PROCEDURE computeSumMod(a b c)
+            RETURN (a + b) MOD c
+        END PROCEDURE
+
+        SET outerIndex TO 0
+        PERFORM_LOOP:
+        IF outerIndex >= count THEN GOTO END_LOOP1 END IF
+
+            SET innerIndex TO 0
+            INNER_LOOP:
+            IF innerIndex >= outerIndex THEN GOTO END_LOOP2 END IF
+
+                SET modVal TO computeSumMod(nums[outerIndex], nums[innerIndex], k)
+                IF modVal IN table[innerIndex] THEN
+                    SET currentCount TO table[innerIndex][modVal] + 1
+                ELSE
+                    SET currentCount TO 2
+                END IF
+                SET table[outerIndex][modVal] TO currentCount
+
+                IF currentCount > greatest THEN
+                    SET greatest TO currentCount
+                END IF
+
+                SET innerIndex TO innerIndex + 1
+                GOTO INNER_LOOP
+            END_LOOP2:
+
+            SET outerIndex TO outerIndex + 1
+            GOTO PERFORM_LOOP
+        END_LOOP1:
+
+        RETURN greatest
+    END FUNCTION
+END CLASS

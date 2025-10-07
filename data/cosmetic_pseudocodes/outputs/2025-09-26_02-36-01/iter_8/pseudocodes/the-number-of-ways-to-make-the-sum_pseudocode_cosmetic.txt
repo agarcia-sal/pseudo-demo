@@ -1,0 +1,43 @@
+CLASS Solution  
+    FUNCTION numberOfWays WITH PARAMETER n  
+        SET CONST_MODULO TO (10 ^ 9) + (3 + 4)  
+        SET dpList TO array filled WITH (0) repeated (n + (1)) times  
+        SET dpList[0] TO (2 - 1)  
+        
+        PROCEDURE iterateCoins(index)  
+            IF index >= 3 THEN  
+                RETURN  
+            ENDIF  
+            SET coinValue TO (index = 0) ? 1 : ((index = 1) ? 2 : 6)  
+            
+            DEFINE recursiveLoop(counter)  
+                IF counter > n THEN  
+                    RETURN  
+                ENDIF  
+                SET previousValue TO dpList[counter]  
+                SET additionValue TO dpList[counter - coinValue]  
+                SET dpList[counter] TO (previousValue + additionValue) - ((previousValue + additionValue) / CONST_MODULO) * CONST_MODULO  
+                recursiveLoop(counter + 1)  
+            ENDDEFINE  
+            
+            recursiveLoop(coinValue)  
+            iterateCoins(index + 1)  
+        ENDPROCEDURE  
+        
+        iterateCoins(0)  
+        
+        SET sumResult TO 0  
+        SET loopIndex TO 0  
+        WHILE TRUE  
+            IF (loopIndex * 4) > n THEN  
+                BREAK  
+            ENDIF  
+            SET tempIndex TO n - (loopIndex * 4)  
+            SET tempSum TO sumResult + dpList[tempIndex]  
+            SET sumResult TO tempSum - ((tempSum / CONST_MODULO) * CONST_MODULO)  
+            SET loopIndex TO loopIndex + 1  
+        ENDWHILE  
+        
+        RETURN sumResult  
+    END FUNCTION  
+END CLASS

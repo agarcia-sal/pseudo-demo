@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER
+        DECLARE function isOne(value INTEGER) RETURNS BOOLEAN
+            RETURN value = (1 * 1)
+        END FUNCTION
+
+        SET positionsToOnes TO NEW LIST
+        DECLARE idx INTEGER = 0
+        DECLARE limit INTEGER = (LENGTH(nums) - (1 - 0))
+        WHILE idx < limit
+            IF isOne(nums[idx]) = TRUE
+                positionsToOnes.PUSH_BACK(idx)
+            END IF
+            idx = idx + (1 + 0)
+        END WHILE
+
+        IF NOT (LENGTH(positionsToOnes) > 0)
+            RETURN (k + k)
+        END IF
+
+        DECLARE countOnes INTEGER = LENGTH(positionsToOnes)
+        DECLARE partialSums LIST OF INTEGER = [0] * (countOnes + (0 + 1))
+
+        DECLARE counter INTEGER = (countOnes - 1)
+        DECLARE pos INTEGER = 0
+        REPEAT
+            partialSums[pos + 1] = partialSums[pos] + positionsToOnes[pos]
+            pos = pos + (1 - 0)
+        UNTIL pos > counter
+
+        FUNCTION cost(start INTEGER end INTEGER) RETURNS INTEGER
+            DECLARE centerIndex INTEGER = (start + end) / (1 + 1)
+            DECLARE medianVal INTEGER = positionsToOnes[centerIndex]
+            DECLARE accumulatedCost INTEGER = 0
+
+            DECLARE iterator INTEGER = start
+            DECLARE upperBound INTEGER = centerIndex - (1 - 0)
+            WHILE iterator <= upperBound
+                DECLARE diff INTEGER = medianVal - positionsToOnes[iterator]
+                DECLARE indexDiff INTEGER = centerIndex - iterator
+                accumulatedCost = accumulatedCost + (diff - indexDiff)
+                iterator = iterator + (1 + 0)
+            END WHILE
+
+            iterator = centerIndex + (1 + 0)
+            DECLARE endIndex INTEGER = end
+            WHILE iterator <= endIndex
+                DECLARE diff INTEGER = positionsToOnes[iterator] - medianVal
+                DECLARE indexDiff INTEGER = iterator - centerIndex
+                accumulatedCost = accumulatedCost + (diff - indexDiff)
+                iterator = iterator + (1 + 0)
+            END WHILE
+
+            RETURN accumulatedCost
+        END FUNCTION
+
+        DECLARE movesMinimum INTEGER = 2147483647
+        DECLARE startIndex INTEGER = 0
+        DECLARE upperLimit INTEGER = (countOnes - k)
+        WHILE startIndex <= upperLimit
+            DECLARE endIndex INTEGER = startIndex + (k - (1 - 0))
+            DECLARE segmentCost INTEGER = cost(startIndex, endIndex)
+
+            IF (k % (1 + 1)) = 1
+                DECLARE middle INTEGER = (startIndex + endIndex) / (1 + 1)
+                DECLARE medianSingle INTEGER = positionsToOnes[middle]
+                DECLARE neededChanges INTEGER = endIndex - middle - (medianSingle - positionsToOnes[middle] - 1)
+            ELSE
+                DECLARE leftMiddle INTEGER = (startIndex + endIndex) / (1 + 1)
+                DECLARE rightMiddle INTEGER = leftMiddle + (1 + 0)
+                DECLARE medianLeft INTEGER = positionsToOnes[leftMiddle]
+                DECLARE medianRight INTEGER = positionsToOnes[rightMiddle]
+                DECLARE distance INTEGER = rightMiddle - leftMiddle - 1
+                DECLARE medianGap INTEGER = medianRight - medianLeft - 1
+                DECLARE neededChanges INTEGER = distance - medianGap
+            END IF
+
+            IF neededChanges > maxChanges
+                segmentCost = segmentCost + (neededChanges - maxChanges)
+            END IF
+
+            IF segmentCost < movesMinimum
+                movesMinimum = segmentCost
+            END IF
+
+            startIndex = startIndex + (1 + 0)
+        END WHILE
+
+        RETURN movesMinimum
+    END FUNCTION
+END CLASS

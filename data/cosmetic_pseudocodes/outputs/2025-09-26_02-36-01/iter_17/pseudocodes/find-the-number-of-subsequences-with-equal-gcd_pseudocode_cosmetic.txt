@@ -1,0 +1,72 @@
+CLASS Solution  
+    FUNCTION subsequencePairCount(nums)  
+        SET modValue TO 1000000007  
+        SET topVal TO maximum element of nums  
+        SET countMatrix TO list of lists filled with 0, dimensions (topVal + 1) by (topVal + 1)  
+        SET countMatrix[0][0] TO 1  
+
+        SET iIndex TO 0  
+        WHILE iIndex < length of nums DO  
+            SET currentVal TO nums[iIndex]  
+            SET tempMatrix TO list of lists filled with 0, dimensions (topVal + 1) by (topVal + 1)  
+
+            SET outerIndex TO 0  
+            REPEAT  
+                IF outerIndex > topVal THEN  
+                    BREAK  
+                END IF  
+                SET innerIndex TO 0  
+                REPEAT  
+                    IF innerIndex > topVal THEN  
+                        BREAK  
+                    END IF  
+
+                    SET prevCount TO countMatrix[outerIndex][innerIndex]  
+                    SET tempMatrix[outerIndex][innerIndex] TO tempMatrix[outerIndex][innerIndex] + prevCount  
+                    SET tempMatrix[outerIndex][innerIndex] TO tempMatrix[outerIndex][innerIndex] MOD modValue  
+
+                    SET gcdX TO FUNCTION gcd(a,b)  
+                        WHILE b ≠ 0 DO  
+                            SET tmp TO b  
+                            SET b TO a MOD b  
+                            SET a TO tmp  
+                        END WHILE  
+                        RETURN a  
+                    END FUNCTION APPLY TO outerIndex, currentVal  
+
+                    SET tempMatrix[gcdX][innerIndex] TO tempMatrix[gcdX][innerIndex] + prevCount  
+                    SET tempMatrix[gcdX][innerIndex] TO tempMatrix[gcdX][innerIndex] MOD modValue  
+
+                    SET gcdY TO FUNCTION gcd(a,b)  
+                        WHILE b ≠ 0 DO  
+                            SET tmpVal TO b  
+                            SET b TO a MOD b  
+                            SET a TO tmpVal  
+                        END WHILE  
+                        RETURN a  
+                    END FUNCTION APPLY TO innerIndex, currentVal  
+
+                    SET tempMatrix[outerIndex][gcdY] TO tempMatrix[outerIndex][gcdY] + prevCount  
+                    SET tempMatrix[outerIndex][gcdY] TO tempMatrix[outerIndex][gcdY] MOD modValue  
+
+                    SET innerIndex TO innerIndex + 1  
+                UNTIL FALSE  
+
+                SET outerIndex TO outerIndex + 1  
+            UNTIL FALSE  
+
+            SET countMatrix TO tempMatrix  
+            SET iIndex TO iIndex + 1  
+        END WHILE  
+
+        SET aggregate TO 0  
+        SET gIndex TO 1  
+        WHILE gIndex <= topVal DO  
+            SET aggregate TO aggregate + countMatrix[gIndex][gIndex]  
+            SET gIndex TO gIndex + 1  
+        END WHILE  
+        SET aggregate TO aggregate MOD modValue  
+
+        RETURN aggregate  
+    END FUNCTION  
+END CLASS

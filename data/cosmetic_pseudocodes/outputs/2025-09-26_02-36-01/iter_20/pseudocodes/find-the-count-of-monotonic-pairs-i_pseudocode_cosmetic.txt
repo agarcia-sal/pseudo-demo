@@ -1,0 +1,68 @@
+CLASS Solution
+	FUNCTION countOfPairs(nums)
+		CONSTANT Q = 1000000000 + 7
+		VAR alpha = LENGTH OF nums
+		VAR omega = 0
+		VAR queue = []
+		
+		PROC getMax(arr)
+			FUNCTION innerFindMax(arr, indx, mx)
+				IF indx > LENGTH OF arr - 1 THEN RETURN mx END IF
+				RETURN innerFindMax(arr, indx + 1, IF arr[indx] > mx THEN arr[indx] ELSE mx END IF)
+			END FUNCTION
+			RETURN innerFindMax(arr, 0, 0)
+		END PROC
+		
+		omega = getMax(nums)
+		
+		VAR matrix_dp = []
+		VAR idx = 0
+		WHILE idx < alpha DO
+			matrix_dp[idx] = []
+			VAR subIdx = 0
+			WHILE subIdx < omega + 1 DO
+				matrix_dp[idx][subIdx] = []
+				VAR subSubIdx = 0
+				WHILE subSubIdx < omega + 1 DO
+					matrix_dp[idx][subIdx][subSubIdx] = 0
+					subSubIdx = subSubIdx + 1
+				END WHILE
+				subIdx = subIdx + 1
+			END WHILE
+			idx = idx + 1
+		END WHILE
+		
+		VAR m = 0
+		FOR jz FROM 0 TO nums[0] DO
+			m = nums[0] - jz
+			matrix_dp[0][jz][m] = 1
+		END FOR
+		
+		FOR i FROM 1 TO alpha - 1 DO
+			FOR j1 FROM 0 TO nums[i] DO
+				VAR k1 = nums[i] - j1
+				FOR j2 FROM 0 TO j1 DO
+					VAR k2 = k1
+					WHILE k2 <= omega DO
+						matrix_dp[i][j1][k1] = matrix_dp[i][j1][k1] + matrix_dp[i - 1][j2][k2]
+						matrix_dp[i][j1][k1] = matrix_dp[i][j1][k1] MODULO Q
+						k2 = k2 + 1
+					END WHILE
+				END FOR
+			END FOR
+		END FOR
+		
+		VAR ans = 0
+		
+		FOR u FROM 0 TO omega DO
+			FOR v FROM 0 TO omega DO
+				IF u + v = nums[alpha - 1] THEN
+					ans = ans + matrix_dp[alpha - 1][u][v]
+					ans = ans MODULO Q
+				END IF
+			END FOR
+		END FOR
+		
+		RETURN ans
+	END FUNCTION
+END CLASS

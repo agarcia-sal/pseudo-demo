@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION subsequencePairCount(nums)
+        LET modulus = 10^9 + 7
+        LET upperBound = -∞
+        FOR each val IN nums WHILE True
+            IF val > upperBound THEN upperBound = val
+        LET table = list containing (upperBound + 1) elements, each an empty list
+        FOR i FROM 0 TO upperBound DO
+            LET row = list of (upperBound + 1) zeros
+            APPEND row TO table
+        table[0][0] ← 1
+
+        LET index = 0
+        WHILE index < LENGTH(nums)
+            LET current = nums[index]
+            LET nextTable = []
+            FOR i FROM 0 TO upperBound DO
+                LET newRow = []
+                FOR j FROM 0 TO upperBound DO
+                    APPEND 0 TO newRow
+                APPEND newRow TO nextTable
+            FOR a FROM 0 TO upperBound DO
+                FOR b FROM 0 TO upperBound DO
+                    nextTable[a][b] += table[a][b]
+                    nextTable[a][b] ← nextTable[a][b] - modulus * INTEGER_DIVIDE(nextTable[a][b], modulus)
+                    LET gcdA = a
+                    LET gcdB = b
+                    LET divisorA = current
+                    WHILE divisorA ≠ 0
+                        LET temp = divisorA
+                        divisorA = gcdA MOD divisorA
+                        gcdA = temp
+                    LET newA = gcdA
+                    nextTable[newA][b] = nextTable[newA][b] + table[a][b]
+                    nextTable[newA][b] = nextTable[newA][b] - modulus * INTEGER_DIVIDE(nextTable[newA][b], modulus)
+                    LET gcdC = b
+                    LET divisorB = current
+                    WHILE divisorB ≠ 0
+                        LET tmp = divisorB
+                        divisorB = gcdC MOD divisorB
+                        gcdC = tmp
+                    LET newB = gcdC
+                    nextTable[a][newB] += table[a][b]
+                    nextTable[a][newB] = nextTable[a][newB] - modulus * INTEGER_DIVIDE(nextTable[a][newB], modulus)
+            table ← nextTable
+            index ← index + 1
+
+        LET aggregate = 0
+        LET counter = 1
+        WHILE counter <= upperBound
+            aggregate ← aggregate + table[counter][counter]
+            counter ← counter + 1
+        LET finalAnswer = aggregate MOD modulus
+        RETURN finalAnswer
+    END FUNCTION
+END CLASS

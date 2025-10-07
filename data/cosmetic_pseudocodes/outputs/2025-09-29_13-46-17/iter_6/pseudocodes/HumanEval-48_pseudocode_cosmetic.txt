@@ -1,0 +1,77 @@
+```
+FUNCTION is_palindrome(text)
+	return _verify_palindrome(0, LENGTH(text), text)
+END FUNCTION
+
+FUNCTION _verify_palindrome(pos_A, length_of_input, string_input)
+	IF NOT (pos_A < length_of_input / 2) THEN
+		RETURN True
+	ELSE
+		VAR leftChar = GET_CHAR(string_input, pos_A)
+		VAR rightCharPosition = (length_of_input - 1) - pos_A
+		VAR rightChar = GET_CHAR(string_input, rightCharPosition)
+		IF NOT (leftChar = rightChar) THEN RETURN False
+		RETURN _verify_palindrome(pos_A + 1, length_of_input, string_input)
+	END IF
+END FUNCTION
+
+FUNCTION LENGTH(seq)
+	VAR count_accumulator = 0
+	VAR iterator = SEQ_ITER(seq)
+	WHILE TRUE
+		IF NOT HAS_NEXT(iterator) THEN BREAK
+		GET_NEXT(iterator)
+		count_accumulator = count_accumulator + 1
+	END WHILE
+	RETURN count_accumulator
+END FUNCTION
+
+FUNCTION GET_CHAR(s, idx)
+	VAR a = 0
+	VAR ch = NULL
+	VAR iter = SEQ_ITER(s)
+	WHILE TRUE
+		IF NOT HAS_NEXT(iter) THEN BREAK
+		ch = GET_NEXT(iter)
+		IF a = idx THEN
+			RETURN ch
+		END IF
+		a = a + 1
+	END WHILE
+	RETURN NULL
+END FUNCTION
+
+FUNCTION SEQ_ITER(sequence)
+	VAR position = 0
+	RETURN FUNCTION()
+		IF position < LENGTH(sequence) THEN
+			VAR current = sequence[position]
+			position = position + 1
+			RETURN (True, current)
+		ELSE
+			RETURN (False, NULL)
+		END IF
+	END FUNCTION
+END FUNCTION
+
+FUNCTION HAS_NEXT(iterator)
+	VAR result = iterator()
+	IF result[0] = True THEN
+		iterator._saved = result[1]
+		RETURN True
+	ELSE
+		RETURN False
+	END IF
+END FUNCTION
+
+FUNCTION GET_NEXT(iterator)
+	IF IS_DEFINED(iterator._saved) THEN
+		VAR temp = iterator._saved
+		iterator._saved = NULL
+		RETURN temp
+	ELSE
+		VAR result = iterator()
+		RETURN result[1]
+	END IF
+END FUNCTION
+```

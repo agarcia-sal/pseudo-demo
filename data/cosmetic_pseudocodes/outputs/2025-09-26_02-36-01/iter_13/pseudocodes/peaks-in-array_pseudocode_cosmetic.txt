@@ -1,0 +1,130 @@
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION check_peak(pos INTEGER) RETURNS BOOLEAN
+            RETURN (nums[pos] > nums[pos - 1]) AND (nums[pos] > nums[pos + 1])
+        END FUNCTION
+
+        SET peak_positions TO empty list
+        SET idx TO 1
+        WHILE idx <= LENGTH of nums - 2
+            IF check_peak(idx)
+                APPEND idx TO peak_positions
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+
+        FUNCTION binary_left_insert(value INTEGER) RETURNS INTEGER
+            SET low TO 0
+            SET high TO LENGTH of peak_positions
+            REPEAT
+                IF low >= high
+                    RETURN low
+                END IF
+                SET mid TO (low + high) / 2
+                IF peak_positions[mid] < value
+                    SET low TO mid + 1
+                ELSE
+                    SET high TO mid
+                END IF
+            UNTIL false
+        END FUNCTION
+
+        FUNCTION binary_right_insert(value INTEGER) RETURNS INTEGER
+            SET low TO 0
+            SET high TO LENGTH of peak_positions
+            REPEAT
+                IF low >= high
+                    RETURN low
+                END IF
+                SET mid TO (low + high) / 2
+                IF peak_positions[mid] <= value
+                    SET low TO mid + 1
+                ELSE
+                    SET high TO mid
+                END IF
+            UNTIL false
+        END FUNCTION
+
+        FUNCTION exists_in_peaks(target INTEGER) RETURNS BOOLEAN
+            SET left TO 0
+            SET right TO LENGTH of peak_positions - 1
+            WHILE left <= right
+                SET mid TO (left + right) / 2
+                IF peak_positions[mid] = target
+                    RETURN true
+                ELSEIF peak_positions[mid] < target
+                    SET left TO mid + 1
+                ELSE
+                    SET right TO mid - 1
+                END IF
+            END WHILE
+            RETURN false
+        END FUNCTION
+
+        FUNCTION insert_sorted(value INTEGER)
+            SET pos TO binary_left_insert(value)
+            INSERT value INTO peak_positions AT pos
+        END FUNCTION
+
+        FUNCTION remove_sorted(value INTEGER)
+            SET pos TO binary_left_insert(value)
+            IF pos < LENGTH of peak_positions AND peak_positions[pos] = value
+                REMOVE element AT pos FROM peak_positions
+            END IF
+        END FUNCTION
+
+        SET answers TO empty list
+        CALL process_queries(0)
+
+        FUNCTION process_queries(j INTEGER)
+            IF j >= LENGTH of queries
+                RETURN
+            END IF
+            SET current_query TO queries[j]
+            IF current_query[0] = 1
+                SET l_val TO current_query[1]
+                SET r_val TO current_query[2]
+                SET left_pos TO binary_left_insert(l_val + 1)
+                SET right_pos TO binary_right_insert(r_val) - 1
+                IF right_pos < left_pos
+                    APPEND 0 TO answers
+                ELSE
+                    APPEND right_pos - left_pos + 1 TO answers
+                END IF
+            ELSE
+                SET update_idx TO current_query[1]
+                SET new_val TO current_query[2]
+                IF nums[update_idx] = new_val
+                    CALL process_queries(j + 1)
+                    RETURN
+                END IF
+                SET nums[update_idx] TO new_val
+                SET start_pos TO update_idx - 1
+                IF start_pos < 1 SET start_pos TO 1
+                SET end_pos TO update_idx + 1
+                IF end_pos > LENGTH of nums - 2 SET end_pos TO LENGTH of nums - 2
+                RECURSIVE_ITERATE(start_pos, end_pos)
+            END IF
+            CALL process_queries(j + 1)
+        END FUNCTION
+
+        FUNCTION RECURSIVE_ITERATE(current INTEGER, limit INTEGER)
+            IF current > limit
+                RETURN
+            END IF
+            SET peak_check TO check_peak(current)
+            IF peak_check
+                IF NOT exists_in_peaks(current)
+                    insert_sorted(current)
+                END IF
+            ELSE
+                IF exists_in_peaks(current)
+                    remove_sorted(current)
+                END IF
+            END IF
+            CALL RECURSIVE_ITERATE(current + 1, limit)
+        END FUNCTION
+
+        RETURN answers
+    END FUNCTION
+END CLASS

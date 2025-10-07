@@ -1,0 +1,121 @@
+CLASS Solution
+    FUNCTION betterCompression(compressed)
+        FUNCTION isLetter(c)
+            RETURN ( ( ( (c >= 'a') AND (c <= 'z') ) OR ( (c >= 'A') AND (c <= 'Z') ) ) )
+        END FUNCTION
+
+        FUNCTION toInt(ch)
+            RETURN (ASC(ch) - ASC('0'))
+        END FUNCTION
+
+        FUNCTION sortKeys(alpha_dict)
+            CREATE empty list tmp_keys
+            FOR k IN alpha_dict
+                APPEND k TO tmp_keys
+            END FOR
+
+            FUNCTION quicksort(arr)
+                IF LENGTH(arr) < 2 THEN
+                    RETURN arr
+                END IF
+                SET pivot TO arr[0]
+                CREATE empty list less
+                CREATE empty list greater
+                FOR i FROM 1 TO LENGTH(arr)-1
+                    IF arr[i] < pivot THEN
+                        APPEND arr[i] TO less
+                    ELSE
+                        APPEND arr[i] TO greater
+                    END IF
+                END FOR
+                RETURN quicksort(less) + [pivot] + quicksort(greater)
+            END FUNCTION
+
+            RETURN quicksort(tmp_keys)
+        END FUNCTION
+
+        FUNCTION toString(n)
+            IF n == 0 THEN
+                RETURN "0"
+            END IF
+            CREATE empty list digits
+            SET num TO n
+            WHILE num > 0
+                SET dig TO num MOD 10
+                INSERT CHR(ASC('0') + dig) AT THE BEGINNING of digits
+                SET num TO (num - dig) / 10
+            END WHILE
+            SET res TO EMPTY STRING
+            FOR ch IN digits
+                res = CONCAT(res, ch)
+            END FOR
+            RETURN res
+        END FUNCTION
+
+        FUNCTION concatStrings(list_str)
+            SET resultStr TO ""
+            FOR s IN list_str
+                resultStr = resultStr + s
+            END FOR
+            RETURN resultStr
+        END FUNCTION
+
+        CREATE dictionary char_count WITH DEFAULT VALUE 0
+
+        SET holder_char TO ""
+        SET tally_num TO 0
+
+        FUNCTION incrementCharCount(key, val)
+            IF key IN char_count THEN
+                char_count[key] = char_count[key] + val
+            ELSE
+                char_count[key] = val
+            END IF
+        END FUNCTION
+
+        FUNCTION processChar(ch)
+            IF isLetter(ch) THEN
+                IF holder_char != "" THEN
+                    incrementCharCount(holder_char, tally_num)
+                END IF
+                SET holder_char TO ch
+                SET tally_num TO 0
+            ELSE
+                SET tally_num = (tally_num * 10) + toInt(ch)
+            END IF
+        END FUNCTION
+
+        FUNCTION iterateChars(index, length)
+            IF index >= length THEN
+                RETURN
+            END IF
+            CALL processChar(compressed[index])
+            CALL iterateChars(index + 1, length)
+        END FUNCTION
+
+        CALL iterateChars(0, LENGTH(compressed))
+
+        IF holder_char != "" THEN
+            incrementCharCount(holder_char, tally_num)
+        END IF
+
+        CREATE empty list parts_list
+
+        SET sorted_keys TO sortKeys(char_count)
+
+        FUNCTION buildParts(idx, length)
+            IF idx >= length THEN
+                RETURN
+            END IF
+            SET key_char TO sorted_keys[idx]
+            SET val_num TO char_count[key_char]
+            SET part_str TO CONCAT(key_char, toString(val_num))
+            APPEND part_str TO parts_list
+            CALL buildParts(idx + 1, length)
+        END FUNCTION
+
+        CALL buildParts(0, LENGTH(sorted_keys))
+
+        RETURN concatStrings(parts_list)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+  SET l TO 0
+  SET m TO LENGTH(nums)
+  SET q TO ARRAY WITH m ELEMENTS EACH BEING ARRAY OF k + 1 ZEROS
+  SET s TO ARRAY OF (k + 1) DICTIONARIES WITH DEFAULT 0
+  SET t TO ARRAY OF (k + 1) ELEMENTS EACH BEING ARRAY OF 3 ZEROS
+  WHILE l < m
+      SET v TO nums[l]
+      SET u TO 0
+      WHILE u <= k
+          SET q[l][u] TO s[u].GET(v, 0)
+          IF u > 0 THEN
+              IF t[u - 1][0] ≠ nums[l] THEN
+                  SET w TO t[u - 1][1]
+                  IF w > q[l][u] THEN q[l][u] = w END IF
+              ELSE
+                  SET w TO t[u - 1][2]
+                  IF w > q[l][u] THEN q[l][u] = w END IF
+              END IF
+          END IF
+          SET q[l][u] TO q[l][u] + 1
+          SET s[u][nums[l]] TO MAX(s[u].GET(nums[l],0), q[l][u])
+          IF t[u][0] ≠ v THEN
+              IF q[l][u] >= t[u][1] THEN
+                  t[u][2] = t[u][1]
+                  t[u][1] = q[l][u]
+                  t[u][0] = v
+              ELSE
+                  IF q[l][u] > t[u][2] THEN t[u][2] = q[l][u] END IF
+              END IF
+          ELSE
+              IF q[l][u] > t[u][1] THEN t[u][1] = q[l][u] END IF
+          END IF
+          u = u + 1
+      END WHILE
+      l = l + 1
+  END WHILE
+  SET p TO 0
+  SET x TO 0
+  WHILE x < m
+      SET y TO 0
+      WHILE y <= k
+          IF q[x][y] > p THEN p = q[x][y] END IF
+          y = y + 1
+      END WHILE
+      x = x + 1
+  END WHILE
+  RETURN p
+    END FUNCTION
+END CLASS

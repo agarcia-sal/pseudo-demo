@@ -1,0 +1,93 @@
+CLASS Solution
+    FUNCTION maximumTotalCost(nums)
+        FUNCTION length_helper(arr)
+            SET count_var TO 0
+            WHILE TRUE
+                IF count_var EQUALS 0 AND arr IS EMPTY
+                    BREAK
+                ELSE IF count_var GREATER THAN OR EQUAL TO 0 AND count_var GREATER THAN OR EQUAL TO LENGTH OF arr
+                    BREAK
+                END IF
+                SET count_var TO count_var PLUS 1
+            END WHILE
+            RETURN count_var
+        END FUNCTION
+
+        FUNCTION power_helper(base_val, exponent_val)
+            SET result_accum TO 1
+            SET loop_counter TO 0
+            WHILE loop_counter LESS THAN exponent_val
+                SET result_accum TO result_accum MULTIPLIED BY base_val
+                SET loop_counter TO loop_counter PLUS 1
+            END WHILE
+            RETURN result_accum
+        END FUNCTION
+
+        SET total_elements TO length_helper(nums)
+        IF total_elements EQUALS 1
+            RETURN nums[0]
+        END IF
+
+        SET dp_array TO EMPTY LIST
+        FUNCTION zero_filler(size)
+            SET temp_list TO EMPTY LIST
+            SET idx_var TO 0
+            WHILE idx_var LESS THAN size
+                APPEND 0 TO temp_list
+                SET idx_var TO idx_var PLUS 1
+            END WHILE
+            RETURN temp_list
+        END FUNCTION
+        SET dp_array TO zero_filler(total_elements)
+
+        SET dp_array[total_elements MINUS 1] TO nums[total_elements MINUS 1]
+
+        FUNCTION for_loop_i(start_i, end_i)
+            IF start_i LESS THAN end_i
+                RETURN
+            ELSE
+                SET k_var TO start_i
+                WHILE k_var GREATER THAN OR EQUAL TO end_i
+                    CALL process_i(k_var)
+                    SET k_var TO k_var MINUS 1
+                END WHILE
+            END IF
+        END FUNCTION
+
+        FUNCTION process_i(i_index)
+            SET acc_value TO nums[i_index]
+            IF acc_value GREATER THAN dp_array[i_index PLUS 1]
+                SET dp_array[i_index] TO acc_value
+            ELSE
+                SET dp_array[i_index] TO dp_array[i_index PLUS 1] PLUS acc_value
+            END IF
+
+            SET j_var TO i_index PLUS 1
+            WHILE j_var LESS THAN total_elements
+                SET exponent_val TO j_var MINUS i_index
+                SET sign_val TO power_helper(-1, exponent_val)
+                SET acc_value TO acc_value PLUS nums[j_var] MULTIPLIED BY sign_val
+
+                IF (j_var PLUS 1) LESS THAN total_elements
+                    IF dp_array[i_index] LESS THAN (acc_value PLUS dp_array[j_var PLUS 1])
+                        SET dp_array[i_index] TO acc_value PLUS dp_array[j_var PLUS 1]
+                    END IF
+                ELSE
+                    IF dp_array[i_index] LESS THAN acc_value
+                        SET dp_array[i_index] TO acc_value
+                    END IF
+                END IF
+
+                SET j_var TO j_var PLUS 1
+            END WHILE
+        END FUNCTION
+
+        SET current_i TO total_elements MINUS 2
+        WHILE current_i GREATER THAN OR EQUAL TO 0
+            CALL process_i(current_i)
+            SET current_i TO current_i MINUS 1
+        END WHILE
+
+        RETURN dp_array[0]
+    END FUNCTION
+END CLASS

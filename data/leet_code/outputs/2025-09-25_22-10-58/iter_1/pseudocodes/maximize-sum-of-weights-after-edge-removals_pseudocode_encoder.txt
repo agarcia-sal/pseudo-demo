@@ -1,0 +1,54 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, size)  
+        SET self.parent TO list of numbers from zero TO size MINUS one  
+        SET self.rank TO list of zeros of length size  
+    END FUNCTION  
+  
+    FUNCTION find(self, u)  
+        IF element at position u of self.parent NOT EQUALS u  
+            SET element at position u of self.parent TO result of self.find with argument element at position u of self.parent  
+        END IF  
+        RETURN element at position u of self.parent  
+    END FUNCTION  
+  
+    FUNCTION union(self, u, v)  
+        SET rootU TO result of self.find with argument u  
+        SET rootV TO result of self.find with argument v  
+        IF rootU NOT EQUALS rootV  
+            IF element at position rootU of self.rank GREATER THAN element at position rootV of self.rank  
+                SET element at position rootV of self.parent TO rootU  
+            ELSE IF element at position rootU of self.rank LESS THAN element at position rootV of self.rank  
+                SET element at position rootU of self.parent TO rootV  
+            ELSE  
+                SET element at position rootV of self.parent TO rootU  
+                INCREMENT element at position rootU of self.rank BY one  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION maximizeSumOfWeights(self, edges, k)  
+        SET n TO the length of edges PLUS one  
+        SET degree TO list of zeros of length n  
+        ASSIGN uf TO new UnionFind object with argument n  
+        
+        SORT edges in descending order by element at position two of each edge  
+        
+        SET max_sum TO zero  
+        
+        FOR each edge in edges  
+            SET u TO element at position zero of edge  
+            SET v TO element at position one of edge  
+            SET w TO element at position two of edge  
+            IF element at position u of degree LESS THAN k AND element at position v of degree LESS THAN k AND result of uf.find with argument u NOT EQUALS result of uf.find with argument v  
+                CALL uf.union with arguments u, v  
+                INCREMENT element at position u of degree BY one  
+                INCREMENT element at position v of degree BY one  
+                INCREMENT max_sum BY w  
+            END IF  
+        END FOR  
+        
+        RETURN max_sum  
+    END FUNCTION  
+END CLASS

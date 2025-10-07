@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION minimumTime(n, edges, disappear)
+        FUNCTION custom_push(heap_list, item)
+            SET index_var TO LENGTH OF heap_list
+            ADD item TO END OF heap_list
+            WHILE index_var GREATER THAN zero
+                SET parent_var TO (index_var MINUS 1) DIVIDED BY 2
+                IF heap_list[parent_var][0] LESS THAN OR EQUAL TO heap_list[index_var][0]
+                    BREAK
+                END IF
+                SWAP heap_list[parent_var] WITH heap_list[index_var]
+                SET index_var TO parent_var
+            END WHILE
+        END FUNCTION
+
+        FUNCTION custom_pop(heap_list)
+            SET return_item TO heap_list[0]
+            SET last_item TO REMOVE LAST ELEMENT FROM heap_list
+            IF LENGTH OF heap_list EQUALS zero
+                RETURN return_item
+            END IF
+            SET heap_list[0] TO last_item
+            SET current_index TO 0
+            SET heap_size TO LENGTH OF heap_list
+            LOOP
+                SET left_child TO (2 TIMES current_index) PLUS 1
+                SET right_child TO (2 TIMES current_index) PLUS 2
+                SET smallest_index TO current_index
+
+                IF left_child LESS THAN heap_size AND heap_list[left_child][0] LESS THAN heap_list[smallest_index][0]
+                    SET smallest_index TO left_child
+                END IF
+                IF right_child LESS THAN heap_size AND heap_list[right_child][0] LESS THAN heap_list[smallest_index][0]
+                    SET smallest_index TO right_child
+                END IF
+                IF smallest_index EQUALS current_index
+                    BREAK
+                END IF
+                SWAP heap_list[current_index] WITH heap_list[smallest_index]
+                SET current_index TO smallest_index
+            END LOOP
+
+            RETURN return_item
+        END FUNCTION
+
+        FUNCTION create_graph(edge_list)
+            SET map_var TO empty mapping WITH DEFAULT empty list
+            FOR each first_val second_val third_val IN edge_list
+                ADD tuple (second_val, third_val) TO map_var[first_val]
+                ADD tuple (first_val, third_val) TO map_var[second_val]
+            END FOR
+            RETURN map_var
+        END FUNCTION
+
+        FUNCTION init_array(length_val, init_val)
+            SET arr_var TO empty list
+            SET counter_var TO 0
+            WHILE counter_var LESS THAN length_val
+                ADD init_val TO arr_var
+                SET counter_var TO counter_var PLUS 1
+            END WHILE
+            RETURN arr_var
+        END FUNCTION
+
+        SET graph_data TO create_graph(edges)
+        SET dist_array TO init_array(n, (1 DIVIDED BY 0))  # infinity substitute
+        SET dist_array[0] TO 0
+        SET heap_store TO list containing tuple (0, 0)
+
+        WHILE LENGTH OF heap_store GREATER THAN 0
+            SET curr_dist, curr_node TO custom_pop(heap_store)
+            IF curr_dist GREATER THAN OR EQUAL TO disappear[curr_node]
+                CONTINUE
+            END IF
+            IF curr_dist GREATER THAN dist_array[curr_node]
+                CONTINUE
+            END IF
+
+            FOR each nbr, len_val IN graph_data[curr_node]
+                SET tentative_dist TO curr_dist PLUS len_val
+                IF tentative_dist LESS THAN dist_array[nbr] AND tentative_dist LESS THAN disappear[nbr]
+                    SET dist_array[nbr] TO tentative_dist
+                    CALL custom_push(heap_store, (tentative_dist, nbr))
+                END IF
+            END FOR
+        END WHILE
+
+        SET outcome_array TO init_array(n, (0 MINUS 1))
+
+        SET idx_var TO 0
+        WHILE idx_var LESS THAN n
+            IF dist_array[idx_var] LESS THAN disappear[idx_var]
+                SET outcome_array[idx_var] TO dist_array[idx_var]
+            END IF
+            SET idx_var TO idx_var PLUS 1
+        END WHILE
+
+        RETURN outcome_array
+    END FUNCTION
+END CLASS

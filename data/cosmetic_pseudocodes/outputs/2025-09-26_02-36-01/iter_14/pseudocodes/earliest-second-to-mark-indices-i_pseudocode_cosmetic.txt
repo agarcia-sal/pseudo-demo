@@ -1,0 +1,63 @@
+```
+CLASS Solution  
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)  
+        FUNCTION helper_can_mark_by_second(x)  
+            SET marker_times TO array FILLED WITH (NEGATIVE 1) OF LENGTH LENGTH OF nums  
+            SET idx_counter TO 0  
+            LOOP_WHILE idx_counter < x  
+                SET cur_idx TO (changeIndices at idx_counter) MINUS 1  
+                ASSIGN marker_times[cur_idx] TO idx_counter  
+                INCREMENT idx_counter BY 1  
+            END LOOP_WHILE  
+            
+            SET total_needed TO 0  
+            FOR each val IN nums  
+                SET total_needed TO total_needed PLUS val  
+            END FOR  
+            
+            SET decrements_available TO 0  
+            SET marked_set TO empty set  
+            
+            SET scan_pos TO 0  
+            REPEAT UNTIL scan_pos >= x  
+                SET current_pos TO (changeIndices at scan_pos) MINUS 1  
+                IF current_pos NOT IN marked_set THEN  
+                    IF marker_times[current_pos] == scan_pos THEN  
+                        IF nums[current_pos] <= decrements_available THEN  
+                            SET decrements_available TO decrements_available - nums[current_pos]  
+                            ADD current_pos TO marked_set  
+                        ELSE  
+                            RETURN False  
+                        END IF  
+                    ELSE  
+                        SET decrements_available TO decrements_available + 1  
+                    END IF  
+                ELSE  
+                    SET decrements_available TO decrements_available + 1  
+                END IF  
+                INCREMENT scan_pos BY 1  
+            END REPEAT UNTIL  
+            
+            RETURN (SIZE OF marked_set == LENGTH OF nums)  
+        END FUNCTION  
+        
+        SET low_bound TO 0  
+        SET high_bound TO LENGTH OF changeIndices + 1  
+        
+        WHILE low_bound < high_bound  
+            SET midpoint TO (low_bound + high_bound) DIV 2  
+            IF helper_can_mark_by_second(midpoint) THEN  
+                SET high_bound TO midpoint  
+            ELSE  
+                SET low_bound TO low_bound + 1  
+            END IF  
+        END WHILE  
+        
+        IF low_bound <= LENGTH OF changeIndices THEN  
+            RETURN low_bound  
+        ELSE  
+            RETURN -1  
+        END IF  
+    END FUNCTION  
+END CLASS  
+```

@@ -1,0 +1,71 @@
+```
+FUNCTION sort_numbers(string_of_number_words)
+    DICT_ALPHA = {
+        'nine': 9,
+        'eight': 8,
+        'seven': 7,
+        'six': 6,
+        'five': 5,
+        'four': 4,
+        'three': 3,
+        'two': 2,
+        'one': 1,
+        'zero': 0
+    }
+    
+    FUNCTION filter_non_empty(charred_list, idx, accum)
+        IF idx == LENGTH(charred_list) THEN
+            RETURN accum
+        ELSE
+            CURRENT = charred_list[idx]
+            IF CURRENT != ''
+                CALL filter_non_empty(charred_list, idx + 1, accum + [CURRENT])
+            ELSE
+                CALL filter_non_empty(charred_list, idx + 1, accum)
+            END IF
+        END IF
+    END FUNCTION
+
+    SPLIT_LIST = SPLIT(string_of_number_words, ' ')
+    CLEANED_WORDS = filter_non_empty(SPLIT_LIST, 0, [])
+
+    FUNCTION compare_words(a, b)
+        IF DICT_ALPHA[a] < DICT_ALPHA[b]
+            RETURN true
+        ELSE
+            RETURN false
+        END IF
+    END FUNCTION
+
+    FUNCTION insert_sorted(wrd, sorted_arr)
+        INDEX = 0
+        WHILE INDEX < LENGTH(sorted_arr) AND DICT_ALPHA[sorted_arr[INDEX]] <= DICT_ALPHA[wrd]
+            INDEX = INDEX + 1
+        END WHILE
+        RETURN sorted_arr[:INDEX] + [wrd] + sorted_arr[INDEX:]
+    END FUNCTION
+
+    FUNCTION sort_list_rec(lst, acc)
+        IF LENGTH(lst) == 0 THEN RETURN acc
+        HEAD = lst[0]
+        TAIL = lst[1:]
+        NEW_ACC = insert_sorted(HEAD, acc)
+        RETURN sort_list_rec(TAIL, NEW_ACC)
+    END FUNCTION
+
+    ORDERED_WORDS = sort_list_rec(CLEANED_WORDS, [])
+
+    RESULT_STR = ''
+    INDEXER = 0
+    WHILE INDEXER < LENGTH(ORDERED_WORDS)
+        IF INDEXER == 0
+            RESULT_STR = ORDERED_WORDS[INDEXER]
+        ELSE
+            RESULT_STR = RESULT_STR + ' ' + ORDERED_WORDS[INDEXER]
+        END IF
+        INDEXER = INDEXER + 1
+    END WHILE
+
+    RETURN RESULT_STR
+END FUNCTION
+```

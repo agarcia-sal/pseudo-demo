@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION maximumTotalCost(nums)
+        LET length = 0
+        LET idx = 0
+        LET accumulator = 0
+        LET seqPos = 0
+        LET dpList = []
+        LET signVal = 0
+        LET compVal = 0
+
+        length <- 0
+        WHILE length < LENGTH(nums)
+            length <- length + 1
+        END WHILE
+        
+        IF NOT (length <> 1)
+            RETURN nums[1]
+        END IF
+
+        LET dpList <- []
+        idx <- 0
+        WHILE idx < length
+            dpList[idx] <- 0
+            idx <- idx + 1
+        END WHILE
+
+        dpList[length - 1] <- nums[length - 1]
+
+        seqPos <- length - 2
+        WHILE seqPos >= 0
+            accumulator <- nums[seqPos]
+            IF NOT (accumulator <= dpList[seqPos + 1])
+                dpList[seqPos] <- accumulator
+            ELSE
+                dpList[seqPos] <- dpList[seqPos + 1] + accumulator
+            END IF
+
+            idx <- seqPos + 1
+            WHILE idx <= length - 1
+                signVal <- 1
+                LET powerCounter = 0
+                powerCounter <- idx - seqPos
+                IF (powerCounter MOD 2) <> 0
+                    signVal <- -1
+                END IF
+
+                accumulator <- accumulator + nums[idx] * signVal
+
+                IF idx + 1 < length
+                    compVal <- accumulator + dpList[idx + 1]
+                    IF dpList[seqPos] < compVal
+                        dpList[seqPos] <- compVal
+                    END IF
+                ELSE
+                    IF dpList[seqPos] < accumulator
+                        dpList[seqPos] <- accumulator
+                    END IF
+                END IF
+
+                idx <- idx + 1
+            END WHILE
+
+            seqPos <- seqPos - 1
+        END WHILE
+
+        RETURN dpList[0]
+    END FUNCTION
+END CLASS

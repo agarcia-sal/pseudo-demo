@@ -1,0 +1,11 @@
+def digits(n: int) -> int:
+    product = 1
+    odd_count = 0
+
+    for digit_char in str(n):
+        int_digit = int(digit_char)
+        if int_digit % 2 == 1:
+            product *= int_digit
+            odd_count += 1
+
+    return product if odd_count > 0 else 0

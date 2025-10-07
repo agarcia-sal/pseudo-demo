@@ -1,0 +1,69 @@
+CLASS Solution
+    FUNCTION maximumTotalDamage(power)
+        FUNCTION maxVal(a, b)
+          IF a GREATER THAN b THEN RETURN a ELSE RETURN b END IF
+        END FUNCTION
+
+        FUNCTION getAt(m, k)
+          IF k IN m THEN RETURN m[k] ELSE RETURN 0 END IF
+        END FUNCTION
+
+        SET countMap TO {}
+        SET idx TO 0
+        WHILE idx LESS THAN LENGTH(power)
+            SET curr TO power[idx]
+            IF curr IN countMap THEN
+                SET countMap[curr] TO countMap[curr] PLUS 1
+            ELSE
+                SET countMap[curr] TO 1
+            END IF
+            SET idx TO idx PLUS 1
+        END WHILE
+
+        SET keysList TO []
+        FOR key IN countMap
+            SET keysList TO keysList PLUS [key]
+        END FOR
+        SET keysList TO keysList SORTED ASCENDING
+
+        SET dpMap TO {}
+        SET n TO LENGTH(keysList)
+
+        FUNCTION loop(i)
+            IF i EQUALS n THEN RETURN END IF
+            SET currKey TO keysList[i]
+
+            IF i GREATER THAN 0 THEN
+                SET excVal TO getAt(dpMap, keysList[i MINUS 1])
+            ELSE
+                SET excVal TO 0
+            END IF
+
+            SET incVal TO currKey TIMES getAt(countMap, currKey)
+
+            SET j2 TO i MINUS 1
+            WHILE j2 GREATER OR EQUAL TO 0 AND keysList[j2] GREATER OR EQUAL TO currKey MINUS 2
+                SET j2 TO j2 MINUS 1
+            END WHILE
+
+            IF j2 GREATER OR EQUAL TO 0 THEN
+                SET incVal TO incVal PLUS getAt(dpMap, keysList[j2])
+            END IF
+
+            SET dpMap[currKey] TO maxVal(incVal, excVal)
+
+            CALL loop(i PLUS 1)
+        END FUNCTION
+
+        CALL loop(0)
+
+        SET maxDmg TO 0
+        FOR v IN dpMap
+            IF dpMap[v] GREATER THAN maxDmg THEN
+                SET maxDmg TO dpMap[v]
+            END IF
+        END FOR
+
+        RETURN maxDmg
+    END FUNCTION
+END CLASS

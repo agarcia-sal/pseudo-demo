@@ -1,0 +1,95 @@
+```pseudocode
+CLASS Solution
+    FUNCTION canReachCorner(xCorner yCorner circles)
+        FUNCTION in_circle(p q a b s)
+            SET u TO (p - a)
+            SET v TO (p - a)
+            SET w TO (q - b)
+            SET z TO (q - b)
+            SET lhs TO (u * v) + (w * z)
+            SET rhs TO s * s
+            RETURN lhs <= rhs
+        END FUNCTION
+
+        FUNCTION cross_left_top(d e f)
+            SET m TO abs(d) <= f AND 0 <= e AND e <= yCorner
+            SET n TO abs(e - yCorner) <= f AND 0 <= d AND d <= xCorner
+            RETURN m OR n
+        END FUNCTION
+
+        FUNCTION cross_right_bottom(g h i)
+            SET p1 TO abs(g - xCorner) <= i AND 0 <= h AND h <= yCorner
+            SET p2 TO abs(h) <= i AND 0 <= g AND g <= xCorner
+            RETURN p1 OR p2
+        END FUNCTION
+
+        FUNCTION dfs(qr)
+            SET s1 TO circles[qr][0]
+            SET t2 TO circles[qr][1]
+            SET u3 TO circles[qr][2]
+
+            IF cross_right_bottom(s1 t2 u3)
+                RETURN TRUE
+            END IF
+
+            SET vis[qr] TO TRUE
+
+            SET k TO 0
+            WHILE k < LENGTH(circles)
+                SET r4 TO circles[k][0]
+                SET s5 TO circles[k][1]
+                SET t6 TO circles[k][2]
+
+                IF vis[k] = TRUE OR ((s1 - r4) * (s1 - r4) + (t2 - s5) * (t2 - s5)) > (u3 + t6)*(u3 + t6)
+                    SET k TO k + 1
+                    CONTINUE
+                END IF
+
+                SET cond1 TO (s1 * t6 + r4 * u3) < (u3 + t6) * xCorner
+                SET cond2 TO (t2 * t6 + s5 * u3) < (u3 + t6) * yCorner
+
+                IF cond1 AND cond2 AND dfs(k)
+                    RETURN TRUE
+                END IF
+
+                SET k TO k + 1
+            END WHILE
+
+            RETURN FALSE
+        END FUNCTION
+
+        SET vis TO []
+        SET idx TO 0
+        REPEAT
+            IF idx = LENGTH(circles)
+                BREAK
+            END IF
+            APPEND FALSE TO vis
+            SET idx TO idx + 1
+        UNTIL FALSE
+
+        SET index1 TO 0
+        REPEAT
+            IF index1 = LENGTH(circles)
+                BREAK
+            END IF
+
+            SET aa TO circles[index1][0]
+            SET bb TO circles[index1][1]
+            SET cc TO circles[index1][2]
+
+            IF in_circle(0 0 aa bb cc) OR in_circle(xCorner yCorner aa bb cc)
+                RETURN FALSE
+            END IF
+
+            IF vis[index1] = FALSE AND cross_left_top(aa bb cc) AND dfs(index1)
+                RETURN FALSE
+            END IF
+
+            SET index1 TO index1 + 1
+        UNTIL FALSE
+
+        RETURN TRUE
+    END FUNCTION
+END CLASS
+```

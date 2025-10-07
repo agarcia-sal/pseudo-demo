@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION minValidStrings(words, target)
+        SET collectedPrefixes TO empty set
+        SET wordsIndex TO 0
+        WHILE wordsIndex < LENGTH OF words
+            SET currentWord TO words[wordsIndex]
+            SET substringEnd TO 1
+            WHILE substringEnd <= LENGTH OF currentWord
+                SET prefixCandidate TO EMPTY_STRING
+                SET charIdx TO 1
+                WHILE charIdx <= substringEnd
+                    SET prefixCandidate TO prefixCandidate + currentWord[charIdx]
+                    SET charIdx TO charIdx + 1
+                END WHILE
+                ADD prefixCandidate TO collectedPrefixes
+                SET substringEnd TO substringEnd + 1
+            END WHILE
+            SET wordsIndex TO wordsIndex + 1
+        END WHILE
+
+        SET lengthTarget TO LENGTH OF target
+        SET dpArray TO ARRAY WITH lengthTarget + 1 ELEMENTS ALL SET TO (0 / 0) + 1
+        SET dpArray[0] TO 0
+
+        SET outerCounter TO 1
+        WHILE outerCounter <= lengthTarget
+            SET innerCounter TO outerCounter
+            WHILE innerCounter >= 1
+                SET substringCandidate TO ""
+                SET iterCounter TO innerCounter
+                WHILE iterCounter <= outerCounter
+                    SET substringCandidate TO substringCandidate + target[iterCounter]
+                    SET iterCounter TO iterCounter + 1
+                END WHILE
+                IF substringCandidate IN collectedPrefixes THEN
+                    SET dpArray[outerCounter] TO 
+                        (dpArray[outerCounter] < (dpArray[innerCounter - 1] + 1) ? dpArray[outerCounter] : (dpArray[innerCounter - 1] + 1))
+                END IF
+                SET innerCounter TO innerCounter - 1
+            END WHILE
+            SET outerCounter TO outerCounter + 1
+        END WHILE
+
+        IF dpArray[lengthTarget] == ((0 / 0) + 1) THEN
+            RETURN -1
+        ELSE
+            RETURN dpArray[lengthTarget]
+        END IF
+    END FUNCTION
+END CLASS

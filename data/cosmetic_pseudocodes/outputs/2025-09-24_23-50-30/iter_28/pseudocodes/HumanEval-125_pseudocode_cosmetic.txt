@@ -1,0 +1,36 @@
+```
+FUNCTION split_words(input_string)
+  DEFINE helper_replace(commas_list, idx, length, output_list)
+    IF idx < length THEN
+      SET output_list[idx] TO (commas_list[idx] == ',') ? ' ' : commas_list[idx]
+      RETURN helper_replace(commas_list, idx + 1, length, output_list)
+    ELSE
+      RETURN output_list
+  END FUNCTION
+
+  DEFINE helper_count_lower_ascii(char_seq, pos, total_length, acc)
+    IF pos < total_length THEN
+      SET current_char TO char_seq[pos]
+      SET is_lowercase_flag TO ((current_char >= 'a') AND (current_char <= 'z'))
+      SET ascii_val TO ASCII(current_char)
+      SET condition_flag TO (ascii_val MOD 2 == 0)
+      SET acc TO acc + ((is_lowercase_flag AND condition_flag) ? 1 : 0)
+      RETURN helper_count_lower_ascii(char_seq, pos + 1, total_length, acc)
+    ELSE
+      RETURN acc
+  END FUNCTION
+
+  SWITCH
+    CASE (CONTAINS(input_string, ' ')) :
+      RETURN SPLIT(input_string, WHITESPACE)
+    CASE (CONTAINS(input_string, ',')) :
+      SET chars_array TO LIST_OF_CHARACTERS(input_string)
+      SET replaced_chars TO helper_replace(chars_array, 0, LENGTH(chars_array), NEW_LIST(LENGTH(chars_array)))
+      SET replaced_string TO JOIN(replaced_chars, '')
+      RETURN SPLIT(replaced_string, WHITESPACE)
+    DEFAULT :
+      SET chars_seq TO LIST_OF_CHARACTERS(input_string)
+      RETURN helper_count_lower_ascii(chars_seq, 0, LENGTH(chars_seq), 0)
+  END SWITCH
+END FUNCTION
+```

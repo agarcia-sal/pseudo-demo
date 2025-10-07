@@ -1,0 +1,31 @@
+```
+FUNCTION rescale_to_unit(list_of_numbers)
+  FUNCTION aux_recurse(remaining_collection, min_val, max_val, acc)
+    IF remaining_collection IS EMPTY THEN
+      RETURN REVERSE(acc)
+    ELSE
+      LET current_element BE HEAD OF remaining_collection
+      LET normalized BE (current_element + (-1 * min_val)) * (1 / (max_val + (-1 * min_val)))
+      RETURN aux_recurse(TAIL OF remaining_collection, min_val, max_val, CONS(normalized, acc))
+    END IF
+  END FUNCTION
+
+  LET min_raw BE list_of_numbers[0]
+  LET max_raw BE list_of_numbers[0]
+
+  FUNCTION find_minmax(data, current_min, current_max)
+    IF data IS EMPTY THEN
+      RETURN (current_min, current_max)
+    ELSE
+      LET hd BE HEAD OF data
+      LET new_min BE (hd < current_min) * hd + (NOT (hd < current_min)) * current_min
+      LET new_max BE (hd > current_max) * hd + (NOT (hd > current_max)) * current_max
+      RETURN find_minmax(TAIL OF data, new_min, new_max)
+    END IF
+  END FUNCTION
+
+  LET (min_raw, max_raw) BE find_minmax(list_of_numbers, min_raw, max_raw)
+
+  RETURN aux_recurse(list_of_numbers, min_raw, max_raw, EMPTY_LIST)
+END FUNCTION
+```

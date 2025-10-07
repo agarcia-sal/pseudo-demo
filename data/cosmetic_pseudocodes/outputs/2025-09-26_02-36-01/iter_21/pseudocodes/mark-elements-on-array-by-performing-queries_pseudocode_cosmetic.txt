@@ -1,0 +1,123 @@
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        PROCEDURE buildHeap(arr)
+          PROCEDURE siftDown(i, n)
+            SET l = 2 * i + 1
+            SET r = 2 * i + 2
+            SET smallest = i
+            IF l < n AND arr[l][0] < arr[smallest][0] THEN
+              SET smallest = l
+            END IF
+            IF r < n AND arr[r][0] < arr[smallest][0] THEN
+              SET smallest = r
+            END IF
+            IF smallest != i THEN
+              SET temp_1 = arr[i]
+              SET arr[i] = arr[smallest]
+              SET arr[smallest] = temp_1
+              CALL siftDown(smallest, n)
+            END IF
+          END PROCEDURE
+          SET lengthVar = LENGTH(arr)
+          SET j = (lengthVar - 2) DIV 2
+          WHILE j >= 0
+            CALL siftDown(j, lengthVar)
+            SET j = j - 1
+          END WHILE
+        END PROCEDURE
+
+        PROCEDURE popHeap(arr)
+          SET lastIndex = LENGTH(arr) - 1
+          SET rootElement = arr[0]
+          SET arr[0] = arr[lastIndex]
+          REMOVE arr[lastIndex]
+          CALL siftDownHelper(arr, 0)
+          RETURN rootElement
+        END PROCEDURE
+
+        PROCEDURE siftDownHelper(h, idx)
+          SET leftChild = idx * 2 + 1
+          SET rightChild = leftChild + 1
+          SET smallestIndex = idx
+          IF leftChild < LENGTH(h) AND h[leftChild][0] < h[smallestIndex][0] THEN
+            SET smallestIndex = leftChild
+          END IF
+          IF rightChild < LENGTH(h) AND h[rightChild][0] < h[smallestIndex][0] THEN
+            SET smallestIndex = rightChild
+          END IF
+          IF smallestIndex != idx THEN
+            SET tempVar2 = h[idx]
+            SET h[idx] = h[smallestIndex]
+            SET h[smallestIndex] = tempVar2
+            CALL siftDownHelper(h, smallestIndex)
+          END IF
+        END PROCEDURE
+
+        SET arrHeap = EMPTY LIST
+        SET counterX = 0
+        REPEAT
+            IF counterX >= LENGTH(nums) THEN
+                BREAK
+            END IF
+            SET element = nums[counterX]
+            SET pairVal = [element, counterX]
+            APPEND pairVal TO arrHeap
+            SET counterX = counterX + 1
+        UNTIL FALSE
+
+        CALL buildHeap(arrHeap)
+
+        SET setMarked = EMPTY SET
+        SET totalSumVal = 0
+        SET idxY = 0
+        REPEAT
+            IF idxY >= LENGTH(nums) THEN
+                BREAK
+            END IF
+            SET tempValX = nums[idxY]
+            SET totalSumVal = totalSumVal + tempValX
+            SET idxY = idxY + 1
+        UNTIL FALSE
+
+        SET listResult = EMPTY LIST
+        SET idxQ = 0
+        REPEAT
+            IF idxQ >= LENGTH(queries) THEN
+                BREAK
+            END IF
+
+            SET singleQuery = queries[idxQ]
+            SET varP = singleQuery[0]
+            SET varQ = singleQuery[1]
+
+            IF NOT (varP IN setMarked) THEN
+                ADD varP TO setMarked
+                SET totalSumVal = totalSumVal + (0 - nums[varP])
+            END IF
+
+            SET countVal = 0
+            WHILE countVal < varQ AND LENGTH(arrHeap) > 0
+                SET itemPopped = arrHeap[0]
+                SET itemValue = itemPopped[0]
+                SET itemIndex = itemPopped[1]
+
+                SET poppedElem = arrHeap[0]
+                SET lastIndex = LENGTH(arrHeap) - 1
+                SET arrHeap[0] = arrHeap[lastIndex]
+                REMOVE arrHeap[lastIndex]
+                CALL siftDownHelper(arrHeap, 0)
+
+                IF NOT (itemIndex IN setMarked) THEN
+                    ADD itemIndex TO setMarked
+                    SET totalSumVal = totalSumVal + (0 - itemValue)
+                    SET countVal = countVal + 1
+                END IF
+            END WHILE
+
+            APPEND totalSumVal TO listResult
+            SET idxQ = idxQ + 1
+        UNTIL FALSE
+
+        RETURN listResult
+    END FUNCTION
+END CLASS

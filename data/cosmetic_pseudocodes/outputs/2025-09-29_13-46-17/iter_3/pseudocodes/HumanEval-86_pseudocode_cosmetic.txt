@@ -1,0 +1,54 @@
+```
+FUNCTION anti_shuffle(inputString)
+    FUNCTION processWordsRecursively(wordSequence, accumulator)
+        IF NOT (wordSequence != []) THEN
+            RETURN JOIN accumulator WITH " "
+        END IF
+
+        LET singleWord BE wordSequence[0]
+        LET remainingWords BE wordSequence[1 TO END]
+
+        LET charactersArray BE []
+        FOR EACH char IN singleWord
+            ADD char TO charactersArray
+        END FOR
+
+        LET sortedChars BE SORT charactersArray BY ASCENDING
+
+        LET reconstructedWord BE ""
+        WHILE LENGTH(sortedChars) > 0 DO
+            LET nextChar BE sortedChars[0]
+            LET tempList BE sortedChars[1 TO END]
+            sortedChars = tempList
+            reconstructedWord = reconstructedWord + nextChar
+        END WHILE
+
+        RETURN processWordsRecursively(remainingWords, accumulator + [reconstructedWord])
+    END FUNCTION
+
+    LET words = []
+    LET currentIndex = 0
+    LET wordStart = 0
+    WHILE currentIndex < LENGTH(inputString) DO
+        IF inputString[currentIndex] = " " THEN
+            LET currentWord BE ""
+            FOR i IN RANGE(wordStart, currentIndex - 1)
+                currentWord = currentWord + inputString[i]
+            END FOR
+            words = words + [currentWord]
+            wordStart = currentIndex + 1
+        END IF
+        currentIndex = currentIndex + 1
+    END WHILE
+
+    IF wordStart < LENGTH(inputString) THEN
+        LET lastWord BE ""
+        FOR j IN RANGE(wordStart, LENGTH(inputString) - 1)
+            lastWord = lastWord + inputString[j]
+        END FOR
+        words = words + [lastWord]
+    END IF
+
+    RETURN processWordsRecursively(words, [])
+END FUNCTION
+```

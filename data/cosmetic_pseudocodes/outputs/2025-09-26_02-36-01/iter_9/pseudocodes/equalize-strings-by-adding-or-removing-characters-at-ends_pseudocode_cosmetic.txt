@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION minOperations(pivotString TO string, anchorString TO string) RETURNS integer
+        LET lengthPivot BE 0
+        LET lengthAnchor BE 0
+        LET matrixDP BE null
+        LET highestCommon BE 0
+        LET indexOuter BE 1
+        LET indexInner BE 1
+
+        PROCEDURE createZeroMatrix(rows TO integer, cols TO integer) RETURNS 2D list
+            LET resultMatrix BE empty list
+            LET currentRowIndex BE 0
+            WHILE currentRowIndex < rows DO
+                LET rowList BE empty list
+                LET currentColIndex BE 0
+                WHILE currentColIndex < cols DO
+                    APPEND 0 TO rowList
+                    SET currentColIndex TO currentColIndex + 1
+                END WHILE
+                APPEND rowList TO resultMatrix
+                SET currentRowIndex TO currentRowIndex + 1
+            END WHILE
+            RETURN resultMatrix
+        END PROCEDURE
+
+        PROCEDURE characterMatch(a TO string, indexA TO integer, b TO string, indexB TO integer) RETURNS boolean
+            IF (a[indexA] = b[indexB]) THEN
+                RETURN true
+            ELSE
+                RETURN false
+            END IF
+        END PROCEDURE
+
+        SET lengthPivot TO 0
+        WHILE lengthPivot < LENGTH(pivotString) DO
+            SET lengthPivot TO lengthPivot + 1
+        END WHILE
+
+        SET lengthAnchor TO 0
+        WHILE lengthAnchor < LENGTH(anchorString) DO
+            SET lengthAnchor TO lengthAnchor + 1
+        END WHILE
+
+        SET matrixDP TO createZeroMatrix(lengthPivot + 1, lengthAnchor + 1)
+
+        WHILE indexOuter <= lengthPivot DO
+            LET indexInnerTemp BE 1
+            REPEAT
+                IF characterMatch(pivotString, indexOuter - 1, anchorString, indexInnerTemp - 1) THEN
+                    LET newValue BE matrixDP[indexOuter - 1][indexInnerTemp - 1] + (1 * 1)
+                    IF highestCommon < newValue THEN
+                        SET highestCommon TO newValue
+                    END IF
+                    SET matrixDP[indexOuter][indexInnerTemp] TO newValue
+                END IF
+                SET indexInnerTemp TO indexInnerTemp + 1
+            UNTIL indexInnerTemp > lengthAnchor
+            SET indexOuter TO indexOuter + 1
+        END WHILE
+
+        LET sumLengths BE lengthPivot + lengthAnchor
+        LET adjustment BE (2 * highestCommon)
+
+        RETURN sumLengths - adjustment
+    END FUNCTION
+END CLASS

@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION numberOfWays WITH PARAMETER alpha
+        CONST beta = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+
+        PROCEDURE initArray WITH PARAMETER length RETURNS arr
+            SET arr TO empty list
+            SET idx TO 0
+            REPEAT
+                IF idx >= length THEN
+                    RETURN arr
+                END IF
+                APPEND 0 TO arr
+                SET idx TO idx + 1
+            UNTIL FALSE
+        END PROCEDURE
+
+        SET charlie TO initArray(alpha + (1))
+        SET delta TO 0
+        SET charlie[0] TO 1
+
+        PROCEDURE modAdd WITH PARAMETERS x, y RETURNS z
+            SET tempSum TO x + y
+            IF tempSum >= beta THEN
+                SET tempSum TO tempSum - beta
+            END IF
+            RETURN tempSum
+        END PROCEDURE
+
+        FUNCTION traverseCoins WITH PARAMETERS coinsList, limit, dpArray
+            FUNCTION recur WITH PARAMETERS index
+                IF index >= length(coinsList) THEN
+                    RETURN
+                END IF
+                SET currentCoin TO coinsList[index]
+
+                PROCEDURE innerLoop WITH PARAMETERS startVal
+                    IF startVal > limit THEN
+                        RETURN
+                    END IF
+                    SET dpArray[startVal] TO modAdd(dpArray[startVal], dpArray[startVal - currentCoin])
+                    innerLoop(startVal + 1)
+                END PROCEDURE
+
+                innerLoop(currentCoin)
+                recur(index + 1)
+            END FUNCTION
+
+            CALL recur(0)
+        END FUNCTION
+
+        CALL traverseCoins([1, 2, 6], alpha, charlie)
+
+        SET echo TO 0
+
+        FUNCTION processK WITH PARAMETER lambdaK
+            IF (lambdaK * 4) <= alpha THEN
+                SET echo TO modAdd(echo, charlie[alpha - (lambdaK * 4)])
+            END IF
+        END FUNCTION
+
+        SET foxtrot TO 0
+
+        WHILE foxtrot <= 2
+            CALL processK(foxtrot)
+            SET foxtrot TO foxtrot + 1
+        END WHILE
+
+        RETURN echo
+    END FUNCTION
+END CLASS

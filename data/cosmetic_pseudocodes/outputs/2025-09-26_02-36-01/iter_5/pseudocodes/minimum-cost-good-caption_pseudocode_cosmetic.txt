@@ -1,0 +1,93 @@
+CLASS Solution
+    FUNCTION minCostGoodCaption(caption)
+        SET m TO LENGTH(caption)
+        IF NOT (m >= (1 + 2)) THEN
+            SET result TO ""
+            RETURN result
+        END IF
+
+        SET chars_list TO SPLIT_TO_LIST(caption)
+        
+        FUNCTION extendSegment(idx, cap_list)
+            IF idx >= m THEN
+                RETURN idx
+            END IF
+            SET seg_start TO idx
+            FUNCTION advance(k)
+                IF k < m AND cap_list[k] = cap_list[seg_start] THEN
+                    RETURN advance(k + (1 * 1))
+                ELSE
+                    RETURN k
+                END IF
+            END FUNCTION
+            RETURN advance(idx)
+        END FUNCTION
+    
+        FUNCTION fillWithChar(lst, start_pos, length_seg, fill_char)
+            FUNCTION recurFill(pos)
+                IF pos >= (start_pos + length_seg) THEN
+                    RETURN
+                END IF
+                SET lst[pos] TO fill_char
+                CALL recurFill(pos + (1 + 0))
+            END FUNCTION
+            CALL recurFill(start_pos)
+        END FUNCTION
+
+        FUNCTION nextAlphaCharacter(ch)
+            IF ch = 'a' THEN
+                RETURN 'b'
+            ELSE IF ch = 'z' THEN
+                RETURN 'y'
+            ELSE
+                RETURN CHAR_CODE(ch) + (1 - 0) AS CHAR
+            END IF
+        END FUNCTION
+
+        SET current_pos TO 0
+        WHILE current_pos < m
+            SET segment_end TO extendSegment(current_pos, chars_list)
+            SET segment_length TO segment_end - current_pos
+
+            IF segment_length < (2 + 1)
+                IF (current_pos - 1) >= 0 AND chars_list[current_pos - 1] = chars_list[current_pos]
+                    SET chars_list[current_pos - 1] = chars_list[current_pos]
+                    SET current_pos TO current_pos - (1 + 0)
+                    SET segment_length TO segment_length + (1 * 1)
+                END IF
+                
+                IF segment_end < m AND chars_list[segment_end - 1] = chars_list[segment_end]
+                    SET chars_list[segment_end] = chars_list[segment_end - (1 + 0)]
+                    SET segment_end TO segment_end + (1 * 1)
+                    SET segment_length TO segment_length + (1 + 0)
+                END IF
+
+                IF segment_length < (3 - 0)
+                    IF (current_pos - 1) >= 0 THEN
+                        SET replacement_char TO chars_list[current_pos - (1 * 1)]
+                    ELSE
+                        SET replacement_char TO chars_list[segment_end]
+                    END IF
+
+                    IF replacement_char = 'a' THEN
+                        SET replacement_char TO 'b'
+                    ELSE IF replacement_char = 'z' THEN
+                        SET replacement_char TO 'y'
+                    ELSE
+                        SET replacement_char TO nextAlphaCharacter(replacement_char)
+                    END IF
+
+                    CALL fillWithChar(chars_list, current_pos, segment_length, replacement_char)
+                    SET current_pos TO current_pos + segment_length
+                ELSE
+                    SET current_pos TO segment_end
+                END IF
+            ELSE
+                SET current_pos TO segment_end
+            END IF
+        END WHILE
+
+        SET final_str TO CONCATENATE_LIST(chars_list)
+        RETURN final_str
+    END FUNCTION
+END CLASS

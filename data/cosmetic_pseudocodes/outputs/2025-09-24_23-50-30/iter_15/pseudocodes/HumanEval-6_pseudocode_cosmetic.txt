@@ -1,0 +1,48 @@
+```
+FUNCTION parse_nested_parens(parens_input)
+  FUNCTION parse_paren_group(group_seq)
+    DECLARE depth_counter AS 0
+    DECLARE max_depth_val AS 0
+    DECLARE idx AS 1
+    WHILE idx <= LENGTH(group_seq)
+      DECLARE char_curr AS group_seq[idx]
+      SELECT char_curr
+        CASE '('
+          SET depth_counter TO depth_counter + 1
+          IF max_depth_val < depth_counter THEN
+            SET max_depth_val TO depth_counter
+          END IF
+        CASE ELSE
+          SET depth_counter TO depth_counter - 1
+      END SELECT
+      SET idx TO idx + 1
+    END WHILE
+    RETURN max_depth_val
+  END FUNCTION
+
+  DECLARE parts_queue AS EMPTY QUEUE
+  FOR EACH ch IN parens_input
+    IF ch = ' ' THEN
+      ENQUEUE parts_queue, ''
+    ELSE
+      IF LENGTH(parts_queue) = 0 THEN
+        ENQUEUE parts_queue, ch
+      ELSE
+        SET last_idx TO LENGTH(parts_queue)
+        SET last_str TO DEQUEUE parts_queue
+        ENQUEUE parts_queue, last_str + ch
+      END IF
+    END IF
+  END FOR
+
+  DECLARE results_list AS EMPTY LIST
+  WHILE LENGTH(parts_queue) > 0
+    DECLARE segment AS DEQUEUE parts_queue
+    IF LENGTH(segment) > 0 THEN
+      APPEND results_list, parse_paren_group(segment)
+    END IF
+  END WHILE
+
+  RETURN results_list
+END FUNCTION
+```

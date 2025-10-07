@@ -1,0 +1,55 @@
+```
+FUNCTION count_nums(array_of_integers)
+  FUNCTION digits_sum(integer_value)
+    sign = 1
+    IF NOT (integer_value >= 0) THEN
+      integer_value = 0 - integer_value
+      sign = -1
+    END IF
+
+    digits_str = STRING(integer_value)
+    digits_list = []
+    INDEX = 0
+
+    RECURSIVE FUNCTION convert_chars_to_ints(idx, digit_chars)
+      IF idx = LENGTH(digit_chars) THEN RETURN END
+      digits_list.APPEND(INT(digit_chars[idx]))
+      convert_chars_to_ints(idx + 1, digit_chars)
+    END FUNCTION
+    convert_chars_to_ints(0, digits_str)
+
+    digits_list[0] = digits_list[0] * sign
+
+    FUNCTION sum_recursive(items, pos)
+      IF pos >= LENGTH(items) THEN RETURN 0
+      ELSE RETURN items[pos] + sum_recursive(items, pos+1)
+      END IF
+    END FUNCTION
+
+    RETURN sum_recursive(digits_list, 0)
+  END FUNCTION
+
+  FUNCTION build_digit_sums_list(numbers, idx, result)
+    IF idx >= LENGTH(numbers) THEN RETURN result
+    ELSE 
+      result.APPEND(digits_sum(numbers[idx]))
+      RETURN build_digit_sums_list(numbers, idx + 1, result)
+    END IF
+  END FUNCTION
+
+  all_sums = build_digit_sums_list(array_of_integers, 0, [])
+
+  FUNCTION count_positives(arr, index, count)
+    IF index >= LENGTH(arr) THEN RETURN count
+    ELSE
+      IF arr[index] > 0 THEN
+        RETURN count_positives(arr, index +1, count +1)
+      ELSE
+        RETURN count_positives(arr, index +1, count)
+      END IF
+    END IF
+  END FUNCTION
+
+  RETURN count_positives(all_sums, 0, 0)
+END FUNCTION
+```

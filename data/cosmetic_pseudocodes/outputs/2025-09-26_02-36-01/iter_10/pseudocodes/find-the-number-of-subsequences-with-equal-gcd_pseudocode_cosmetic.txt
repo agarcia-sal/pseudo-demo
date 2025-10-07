@@ -1,0 +1,97 @@
+CLASS Solution
+	FUNCTION subsequencePairCount(nums)
+		CONSTANT MaxModulo := 1000_000_007
+
+		FUNCTION ComputeGCD(a, b)
+			IF b = 0 THEN RETURN a
+			RETURN ComputeGCD(b, a mod b)
+		END FUNCTION
+
+		VARIABLE highestValue := nums[0]
+		WHILE TRUE
+			IF highestValue >= nums.LENGTH - 1
+				BREAK
+			END IF
+			IF nums[highestValue + 1] > highestValue
+				highestValue := nums[highestValue + 1]
+			ELSE
+				highestValue := highestValue + 1
+			END IF
+		END WHILE
+		FOR each element IN nums
+			IF element > highestValue THEN highestValue := element
+		END FOR
+
+		VARIABLE grid := []
+		FUNCTION CreateGrid(width, height)
+			VARIABLE matrix := []
+			FUNCTION BuildRow(c, length, accu)
+				IF c = length THEN RETURN accu END IF
+				RETURN BuildRow(c + 1, length, accu + [0])
+			END FUNCTION
+			RETURN BuildRow(0, height, [])
+		END FUNCTION
+
+		FUNCTION BuildGridRows(x, y, gridAcc)
+			IF x = width THEN RETURN gridAcc END IF
+			VARIABLE row := CreateGrid(width, y)
+			RETURN BuildGridRows(x + 1, y, gridAcc + [row])
+		END FUNCTION
+
+		VARIABLE width := highestValue + 1
+		VARIABLE height := width
+		FUNCTION Build2DArray(width, height)
+			VARIABLE gridArr := []
+			VARIABLE i := 0
+			REPEAT
+				VARIABLE newRow := []
+				VARIABLE j := 0
+				REPEAT
+					newRow.ADD(0)
+					j := j + 1
+				UNTIL j = height
+				gridArr.ADD(newRow)
+				i := i + 1
+			UNTIL i = width
+			RETURN gridArr
+		END FUNCTION
+
+		grid := Build2DArray(width, height)
+		grid[0][0] := 1
+
+		FUNCTION HelperProcess(currGrid, numList, idx)
+			IF idx = numList.LENGTH THEN RETURN currGrid END IF
+
+			VARIABLE replicant := Build2DArray(width, height)
+			VARIABLE p := 0
+			REPEAT
+				VARIABLE q := 0
+				REPEAT
+					VARIABLE val := currGrid[p][q]
+					replicant[p][q] := (replicant[p][q] + val) mod MaxModulo
+
+					VARIABLE computedX := ComputeGCD(p, numList[idx])
+					replicant[computedX][q] := (replicant[computedX][q] + val) mod MaxModulo
+
+					VARIABLE computedY := ComputeGCD(q, numList[idx])
+					replicant[p][computedY] := (replicant[p][computedY] + val) mod MaxModulo
+
+					q := q + 1
+				UNTIL q = height
+				p := p + 1
+			UNTIL p = width
+			RETURN HelperProcess(replicant, numList, idx + 1)
+		END FUNCTION
+
+		grid := HelperProcess(grid, nums, 0)
+
+		VARIABLE sumResult := 0
+		VARIABLE gidx := 1
+		REPEAT
+			sumResult := (sumResult + grid[gidx][gidx]) mod MaxModulo
+			gidx := gidx + 1
+		UNTIL gidx > highestValue
+
+		RETURN sumResult
+	END FUNCTION
+END CLASS

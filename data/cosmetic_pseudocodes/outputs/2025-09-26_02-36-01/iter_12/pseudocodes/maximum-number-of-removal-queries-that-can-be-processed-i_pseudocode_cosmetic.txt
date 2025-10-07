@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION maximumProcessableQueries(nums parameters as list of integers, queries parameters as list of integers) RETURNS integer
+
+        FUNCTION process_queries(subseq parameters as list of integers, queries parameters as list of integers) RETURNS integer
+            SET countTracker TO 0
+            SET pointer TO 0
+            WHILE pointer < LENGTH(subseq)
+                SET currentQueryIndex TO 0
+                WHILE currentQueryIndex < LENGTH(queries)
+                    IF pointer == LENGTH(subseq) THEN
+                        BREAK
+                    END IF
+                    IF subseq[pointer] >= queries[currentQueryIndex]
+                        SET countTracker TO countTracker + 1
+                        SET pointer TO pointer + 1
+                    END IF
+                    SET currentQueryIndex TO currentQueryIndex + 1
+                END WHILE
+                BREAK
+            END WHILE
+            RETURN countTracker
+        END FUNCTION
+
+        SET totalNums TO 0
+        SET totalQueries TO 0
+        SET maxResult TO 0
+        SET tempIndex TO 0
+
+        SET totalNums TO LENGTH(nums)
+        SET totalQueries TO LENGTH(queries)
+        SET maxResult TO process_queries(nums, queries)
+
+        SET iterator TO 0
+        REPEAT
+            IF iterator >= totalNums THEN
+                EXIT
+            END IF
+
+            SET leftPart TO EMPTY LIST
+            SET rightPart TO EMPTY LIST
+
+            SET j TO 0
+            WHILE j < iterator
+                APPEND nums[j] TO leftPart
+                SET j TO j + 1
+            END WHILE
+
+            SET k TO totalNums - 1
+            WHILE k >= iterator
+                APPEND nums[k] TO rightPart
+                SET k TO k - 1
+            END WHILE
+
+            SET combinedList TO CONCAT(leftPart, rightPart)
+
+            CALL subsortAscending(combinedList)
+
+            SET candidate TO process_queries(combinedList, queries)
+
+            IF candidate > maxResult THEN
+                SET maxResult TO candidate
+            END IF
+
+            SET iterator TO iterator + 1
+        UNTIL FALSE
+
+        RETURN maxResult
+    END FUNCTION
+
+    FUNCTION subsortAscending(arr parameters as list of integers)
+        SET lengthArr TO LENGTH(arr)
+        SET idx1 TO 0
+        WHILE idx1 < lengthArr - 1
+            SET idx2 TO 0
+            WHILE idx2 < lengthArr - idx1 - 1
+                IF arr[idx2] > arr[idx2 + 1]
+                    SET tmpHolder TO arr[idx2]
+                    SET arr[idx2] TO arr[idx2 + 1]
+                    SET arr[idx2 + 1] TO tmpHolder
+                END IF
+                SET idx2 TO idx2 + 1
+            END WHILE
+            SET idx1 TO idx1 + 1
+        END WHILE
+    END FUNCTION
+END CLASS

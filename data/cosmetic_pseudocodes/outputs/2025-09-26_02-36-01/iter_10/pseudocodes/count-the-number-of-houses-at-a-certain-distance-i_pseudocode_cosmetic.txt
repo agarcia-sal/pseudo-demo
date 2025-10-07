@@ -1,0 +1,70 @@
+CLASS Solution
+    FUNCTION countOfPairs(n parameter, x parameter, y parameter) RETURNS list of integer
+
+        FUNCTION enqueue_if_valid(z parameter, visitedRef parameter, distanceRef parameter, queueRef parameter, currentRef parameter)
+            IF (z >= 1) AND (z <= n) AND (visitedRef[z] = False) THEN
+                visitedRef[z] := True
+                distanceRef[z] := distanceRef[currentRef] + 1
+                APPEND z TO queueRef
+            END IF
+        END FUNCTION
+
+        FUNCTION breadthFirstSearch(start parameter)
+            DECLARE markedList AS list of boolean := []
+            DECLARE distList AS list of integer := []
+            DECLARE deque as list of integer := []
+
+            FOR idx FROM 1 TO (n + 1)
+                APPEND False TO markedList
+                APPEND 0 TO distList
+            END FOR
+
+            APPEND start TO deque
+            markedList[start] := True
+
+            FUNCTION loopProcess()
+                IF LENGTH(deque) = 0 THEN RETURN END IF
+
+                DECLARE currentNode AS integer := REMOVE_FIRST_ELEMENT OF deque
+
+                CALL enqueue_if_valid(currentNode - 1, markedList, distList, deque, currentNode)
+                CALL enqueue_if_valid(currentNode + 1, markedList, distList, deque, currentNode)
+
+                IF (currentNode = x) AND (markedList[y] = False) THEN
+                    markedList[y] := True
+                    distList[y] := distList[currentNode] + 1
+                    APPEND y TO deque
+                END IF
+
+                IF (currentNode = y) AND (markedList[x] = False) THEN
+                    markedList[x] := True
+                    distList[x] := distList[currentNode] + 1
+                    APPEND x TO deque
+                END IF
+
+                CALL loopProcess()
+            END FUNCTION
+
+            CALL loopProcess()
+
+            FOR distVal FROM 1 TO n
+                IF distList[distVal] > 0 THEN
+                    result[distList[distVal] - 1] := result[distList[distVal] - 1] + 1
+                END IF
+            END FOR
+        END FUNCTION
+
+        DECLARE result AS list of integer := []
+        FOR zeroIdx FROM 1 TO n
+            APPEND 0 TO result
+        END FOR
+
+        DECLARE outerCounter AS integer := 1
+        WHILE outerCounter <= n
+            CALL breadthFirstSearch(outerCounter)
+            outerCounter := outerCounter + 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

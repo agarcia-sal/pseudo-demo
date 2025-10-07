@@ -1,0 +1,64 @@
+CLASS Solution
+    FUNCTION resultArray(numbers)
+        SET firstGroup TO new list(numbers[0])
+        SET secondGroup TO new list(numbers[1])
+        SET sortedFirstGroup TO new list(numbers[0])
+        SET sortedSecondGroup TO new list(numbers[1])
+
+        FUNCTION countGreater(sortedList, element)
+            FUNCTION binarySearchRightBoundary(array, target)
+                SET leftBound TO 0
+                SET rightBound TO LENGTH OF array
+                WHILE leftBound < rightBound
+                    SET middleIndex TO leftBound + ((rightBound - leftBound) DIV 2)
+                    IF NOT (array[middleIndex] <= target)
+                        SET rightBound TO middleIndex
+                    ELSE
+                        SET leftBound TO middleIndex + 1
+                    END IF
+                END WHILE
+                RETURN leftBound
+            END FUNCTION
+
+            SET insertionPoint TO binarySearchRightBoundary(sortedList, element)
+            RETURN (LENGTH OF sortedList) - insertionPoint
+        END FUNCTION
+
+        SET indexVar TO 2
+        WHILE indexVar <= (LENGTH OF numbers) - 1
+            SET currentVal TO numbers[indexVar]
+            SET cntFirst TO countGreater(sortedFirstGroup, currentVal)
+            SET cntSecond TO countGreater(sortedSecondGroup, currentVal)
+
+            IF cntFirst > cntSecond
+                APPEND currentVal TO firstGroup
+                CALL insertValueSorted(sortedFirstGroup, currentVal)
+            ELSE
+                IF cntFirst < cntSecond
+                    APPEND currentVal TO secondGroup
+                    CALL insertValueSorted(sortedSecondGroup, currentVal)
+                ELSE
+                    IF LENGTH OF firstGroup <= LENGTH OF secondGroup
+                        APPEND currentVal TO firstGroup
+                        CALL insertValueSorted(sortedFirstGroup, currentVal)
+                    ELSE
+                        APPEND currentVal TO secondGroup
+                        CALL insertValueSorted(sortedSecondGroup, currentVal)
+                    END IF
+                END IF
+            END IF
+
+            SET indexVar TO indexVar + 1
+        END WHILE
+
+        FUNCTION insertValueSorted(array, val)
+            SET position TO 0
+            WHILE position < LENGTH OF array AND array[position] < val
+                SET position TO position + 1
+            END WHILE
+            INSERT val INTO array AT position
+        END FUNCTION
+
+        RETURN firstGroup + secondGroup
+    END FUNCTION
+END CLASS

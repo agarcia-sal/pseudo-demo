@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION minLength(s parameter representing a string, numOps parameter representing an integer) RETURNS integer
+
+        FUNCTION check(m parameter representing an integer) RETURNS boolean
+            SET accumulator TO 0
+            SET tracker TO 0
+
+            FUNCTION exceedsLimit(value parameter representing integer, limit parameter representing integer) RETURNS boolean
+                IF value > limit THEN
+                    RETURN true
+                ELSE
+                    RETURN false
+                END IF
+            END FUNCTION
+
+            FUNCTION conditionTrue(i parameter representing integer, length parameter representing integer, currChar parameter representing character, nextChar parameter representing character) RETURNS boolean
+                IF i = length - 1 THEN
+                    RETURN true
+                ELSE
+                    IF currChar != nextChar THEN
+                        RETURN true
+                    ELSE
+                        RETURN false
+                    END IF
+                END IF
+            END FUNCTION
+
+            FUNCTION integerDivide(dividend parameter representing integer, divisor parameter representing integer) RETURNS integer
+                RETURN (dividend - (dividend MOD divisor)) / divisor
+            END FUNCTION
+
+            FUNCTION iteratePosition(pos parameter representing integer) RETURNS void
+                SET tracker TO tracker + 1
+                IF conditionTrue(pos, LENGTHOF(s), s[pos], s[pos + 1]) THEN
+                    SET accumulator TO accumulator + integerDivide(tracker, m) + 1
+                    IF exceedsLimit(accumulator, numOps) THEN
+                        SET check_over TO true
+                    END IF
+                    SET tracker TO 0
+                END IF
+            END FUNCTION
+
+            PROCEDURE repeatCheck(currentIndex parameter representing integer)
+                IF currentIndex >= LENGTHOF(s) THEN
+                    RETURN
+                ELSE
+                    iteratePosition(currentIndex)
+                    CALL repeatCheck(currentIndex + 1)
+                END IF
+            END PROCEDURE
+
+            SET check_over TO false
+            CALL repeatCheck(0)
+
+            IF check_over THEN
+                RETURN false
+            ELSE
+                RETURN (accumulator <= numOps)
+            END IF
+        END FUNCTION
+
+        FUNCTION integerHalf(value parameter representing integer) RETURNS integer
+            RETURN (value - (value MOD 2)) / 2
+        END FUNCTION
+
+        PROCEDURE binarySearchRange(minimum parameter representing integer, maximum parameter representing integer, result parameter representing integer)
+            IF minimum >= maximum THEN
+                SET result TO minimum
+                RETURN
+            END IF
+
+            SET midpoint TO minimum + integerHalf((maximum - minimum))
+
+            IF check(midpoint) THEN
+                CALL binarySearchRange(minimum, midpoint, result)
+            ELSE
+                CALL binarySearchRange(midpoint + 1, maximum, result)
+            END IF
+        END PROCEDURE
+
+        SET lengthOfString TO LENGTHOF(s)
+        SET start TO 1
+        SET end TO lengthOfString
+        SET answer TO 0
+
+        CALL binarySearchRange(start, end, answer)
+
+        RETURN answer
+
+    END FUNCTION
+END CLASS

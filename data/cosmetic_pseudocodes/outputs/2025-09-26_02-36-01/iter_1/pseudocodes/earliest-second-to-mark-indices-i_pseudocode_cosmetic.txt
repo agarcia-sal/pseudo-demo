@@ -1,0 +1,56 @@
+CLASS Solution  
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)  
+        SET length_nums TO LENGTH(nums)  
+        SET length_changes TO LENGTH(changeIndices)  
+        
+        FUNCTION can_mark_by_second(k)  
+            CREATE last_seen ARRAY OF SIZE length_nums INITIALIZED WITH -1  
+            FOR index FROM 0 TO k - 1  
+                SET pos TO changeIndices[index] - 1  
+                SET last_seen[pos] TO index  
+            END FOR  
+            
+            SET sum_needed TO SUM(nums)  
+            SET surplus TO 0  
+            INITIALIZE marked AS EMPTY SET  
+            
+            FOR time FROM 0 TO k - 1  
+                SET idx TO changeIndices[time] - 1  
+                IF idx NOT IN marked THEN  
+                    IF last_seen[idx] == time THEN  
+                        IF nums[idx] <= surplus THEN  
+                            SET surplus TO surplus - nums[idx]  
+                            ADD idx TO marked  
+                        ELSE  
+                            RETURN False  
+                        END IF  
+                    ELSE  
+                        SET surplus TO surplus + 1  
+                    END IF  
+                ELSE  
+                    SET surplus TO surplus + 1  
+                END IF  
+            END FOR  
+            
+            RETURN SIZE(marked) == length_nums  
+        END FUNCTION  
+        
+        SET low TO 0  
+        SET high TO length_changes + 1  
+        
+        WHILE low < high  
+            SET mid_point TO (low + high) // 2  
+            IF can_mark_by_second(mid_point) THEN  
+                SET high TO mid_point  
+            ELSE  
+                SET low TO low + 1  
+            END IF  
+        END WHILE  
+        
+        IF low <= length_changes THEN  
+            RETURN low  
+        ELSE  
+            RETURN -1  
+        END IF  
+    END FUNCTION  
+END CLASS

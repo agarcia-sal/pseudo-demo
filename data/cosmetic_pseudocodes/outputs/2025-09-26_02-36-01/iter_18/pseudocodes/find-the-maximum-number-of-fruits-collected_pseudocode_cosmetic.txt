@@ -1,0 +1,76 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+        SET lengthVar TO LENGTH(fruits)
+
+        SET directionsAlpha TO LIST([1, 1], [1, 0], [0, 1])
+        SET directionsBeta TO LIST([1, -1], [1, 0], [1, 1])
+        SET directionsGamma TO LIST([-1, 1], [0, 1], [1, 1])
+
+        SET cacheMap TO EMPTY DICTIONARY
+
+        FUNCTION recur(a1, b1, a2, b2, a3, b3)
+            IF NOT (0 <= a1 < lengthVar AND 0 <= b1 < lengthVar AND 0 <= a2 < lengthVar AND 0 <= b2 < lengthVar AND 0 <= a3 < lengthVar AND 0 <= b3 < lengthVar) THEN
+                RETURN -∞
+            END IF
+
+            IF a1 = b1 AND b1 = a2 AND a2 = b2 AND b2 = a3 AND a3 = b3 AND b3 = lengthVar - 1 THEN
+                RETURN fruits[lengthVar - 1][lengthVar - 1]
+            END IF
+
+            IF (a1, b1, a2, b2, a3, b3) IN cacheMap THEN
+                RETURN cacheMap[(a1, b1, a2, b2, a3, b3)]
+            END IF
+
+            SET gatherCount TO fruits[a1][b1]
+
+            IF (a1 = a2 AND b1 = b2) OR (a1 = a3 AND b1 = b3) THEN
+                SET gatherCount TO 0
+            END IF
+
+            IF a2 = a3 AND b2 = b3 THEN
+                SET gatherCount TO gatherCount + fruits[a2][b2]
+            ELSE
+                gatherCount = gatherCount + fruits[a2][b2]
+                gatherCount = gatherCount + fruits[a3][b3]
+            END IF
+
+            SET maxVal TO -∞
+
+            SET indexOuter TO 0
+            LOOP_WHILE indexOuter < LENGTH(directionsAlpha)
+                SET dx1 TO directionsAlpha[indexOuter][0]
+                SET dy1 TO directionsAlpha[indexOuter][1]
+
+                SET indexMid TO 0
+                LOOP_WHILE indexMid < LENGTH(directionsBeta)
+                    SET dx2 TO directionsBeta[indexMid][0]
+                    SET dy2 TO directionsBeta[indexMid][1]
+
+                    SET indexInner TO 0
+                    LOOP_WHILE indexInner < LENGTH(directionsGamma)
+                        SET dx3 TO directionsGamma[indexInner][0]
+                        SET dy3 TO directionsGamma[indexInner][1]
+
+                        SET tempVal TO recur(a1 + dx1, b1 + dy1, a2 + dx2, b2 + dy2, a3 + dx3, b3 + dy3)
+
+                        IF tempVal > maxVal THEN
+                            maxVal = tempVal
+                        END IF
+
+                        indexInner = indexInner + 1
+                    END LOOP
+                    indexMid = indexMid + 1
+                END LOOP
+                indexOuter = indexOuter + 1
+            END LOOP
+
+            SET cacheMap[(a1, b1, a2, b2, a3, b3)] TO gatherCount + maxVal
+
+            RETURN gatherCount + maxVal
+        END FUNCTION
+
+        RETURN recur(0, 0, 0, lengthVar - 1, lengthVar - 1, 0)
+    END FUNCTION
+END CLASS
+```

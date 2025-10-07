@@ -1,0 +1,171 @@
+CLASS Solution
+    FUNCTION getSmallestString(s parameter of type string k parameter of type integer) RETURNS string
+        FUNCTION cyclic_distance(c1 parameter of type character c2 parameter of type character) RETURNS integer
+            DEFINE diff AS INTEGER
+            SET diff TO (CHAR_CODE(c1) - CHAR_CODE(c2))
+            IF diff < 0 THEN
+                SET diff TO (-diff)
+            ELSE
+                SET diff TO diff
+            END IF
+            DEFINE complement AS INTEGER
+            SET complement TO (TWENTY_SIX() - diff)
+            IF diff <= complement THEN
+                RETURN diff
+            ELSE
+                RETURN complement
+            END IF
+        END FUNCTION
+
+        DEFINE char_list AS LIST OF CHARACTER
+        SET char_list TO SPLIT_STRING_TO_CHARS(s)
+        DEFINE index_ptr AS INTEGER
+        SET index_ptr TO ZERO()
+        DEFINE length_val AS INTEGER
+        SET length_val TO STRING_LENGTH(s)
+
+        FUNCTION process_position(pos parameter of type integer remaining parameter of type integer) RETURNS VOID
+            IF NOT (remaining > 0 AND pos < length_val) THEN
+                RETURN
+            END IF
+
+            DEFINE current_char AS CHARACTER
+            SET current_char TO char_list[pos]
+            DEFINE is_a AS BOOLEAN
+            SET is_a TO (current_char == 'a')
+            IF is_a THEN
+                CALL process_position(pos + 1, remaining)
+                RETURN
+            END IF
+
+            DEFINE dist AS INTEGER
+            SET dist TO cyclic_distance(current_char, 'a')
+
+            IF dist <= remaining THEN
+                SET char_list[pos] TO 'a'
+                SET remaining TO remaining - dist
+            ELSE
+                DEFINE new_char_code AS INTEGER
+                SET new_char_code TO (CHAR_CODE(char_list[pos]) - remaining)
+                SET char_list[pos] TO CHAR_FROM_CODE(new_char_code)
+                SET remaining TO 0
+            END IF
+
+            CALL process_position(pos + 1, remaining)
+        END FUNCTION
+
+        CALL process_position(index_ptr, k)
+
+        DEFINE result_string AS STRING
+        SET result_string TO CONCAT_CHARS(char_list)
+        RETURN result_string
+
+    END FUNCTION
+
+    FUNCTION TWENTY_SIX() RETURNS INTEGER
+        RETURN (THIRTEEN() + THIRTEEN())
+    END FUNCTION
+
+    FUNCTION THIRTEEN() RETURNS INTEGER
+        RETURN (TEN() + THREE())
+    END FUNCTION
+
+    FUNCTION TEN() RETURNS INTEGER
+        RETURN (FIVE() + FIVE())
+    END FUNCTION
+
+    FUNCTION FIVE() RETURNS INTEGER
+        RETURN (TWO() + THREE())
+    END FUNCTION
+
+    FUNCTION THREE() RETURNS INTEGER
+        RETURN (ONE() + TWO())
+    END FUNCTION
+
+    FUNCTION TWO() RETURNS INTEGER
+        RETURN (ONE() + ONE())
+    END FUNCTION
+
+    FUNCTION ONE() RETURNS INTEGER
+        RETURN 1
+    END FUNCTION
+
+    FUNCTION ZERO() RETURNS INTEGER
+        RETURN 0
+    END FUNCTION
+
+    FUNCTION STRING_LENGTH(str parameter of type string) RETURNS INTEGER
+        DEFINE count AS INTEGER
+        SET count TO ZERO()
+        DEFINE idx AS INTEGER
+        SET idx TO ZERO()
+        WHILE TRUE
+            IF CHAR_AT(str, idx) == NULL_CHARACTER() THEN
+                RETURN count
+            END IF
+            SET count TO count + ONE()
+            SET idx TO idx + ONE()
+        END WHILE
+    END FUNCTION
+
+    FUNCTION SPLIT_STRING_TO_CHARS(input_str parameter of type string) RETURNS LIST OF CHARACTER
+        DEFINE arr AS LIST OF CHARACTER
+        DEFINE pos AS INTEGER
+        SET pos TO ZERO()
+        DEFINE length_str AS INTEGER
+        SET length_str TO STRING_LENGTH(input_str)
+        WHILE pos < length_str
+            APPEND arr, CHAR_AT(input_str, pos)
+            SET pos TO pos + ONE()
+        END WHILE
+        RETURN arr
+    END FUNCTION
+
+    FUNCTION CONCAT_CHARS(characters parameter of type LIST OF CHARACTER) RETURNS string
+        DEFINE out AS STRING
+        SET out TO EMPTY_STRING()
+        DEFINE pos AS INTEGER
+        SET pos TO ZERO()
+        DEFINE size AS INTEGER
+        SET size TO LENGTH_OF_LIST(characters)
+        WHILE pos < size
+            SET out TO CONCATENATE(out, characters[pos])
+            SET pos TO pos + ONE()
+        END WHILE
+        RETURN out
+    END FUNCTION
+
+    FUNCTION CHAR_AT(str parameter of type string index parameter of type integer) RETURNS CHARACTER
+        /* Assuming zero-based indexing */
+        RETURN str[index]
+    END FUNCTION
+
+    FUNCTION CHAR_CODE(ch parameter of type character) RETURNS INTEGER
+        RETURN INTEGER_REPRESENTATION_OF(ch)
+    END FUNCTION
+
+    FUNCTION CHAR_FROM_CODE(code parameter of type integer) RETURNS CHARACTER
+        RETURN CHARACTER_REPRESENTATION_OF(code)
+    END FUNCTION
+
+    FUNCTION NULL_CHARACTER() RETURNS CHARACTER
+        RETURN '\0'
+    END FUNCTION
+
+    FUNCTION LENGTH_OF_LIST(lst parameter of type LIST OF CHARACTER) RETURNS INTEGER
+        DEFINE cnt AS INTEGER
+        SET cnt TO ZERO()
+        FOR EACH element IN lst DO
+            SET cnt TO cnt + ONE()
+        END FOR
+        RETURN cnt
+    END FUNCTION
+
+    FUNCTION EMPTY_STRING() RETURNS string
+        RETURN ""
+    END FUNCTION
+
+    FUNCTION CONCATENATE(a parameter of type string b parameter of type string) RETURNS string
+        RETURN a + b
+    END FUNCTION
+END CLASS

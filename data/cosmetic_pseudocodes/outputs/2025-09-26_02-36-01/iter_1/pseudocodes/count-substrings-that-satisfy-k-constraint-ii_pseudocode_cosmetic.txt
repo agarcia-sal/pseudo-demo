@@ -1,0 +1,47 @@
+CLASS Solution  
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER  
+        LET length BE LENGTH OF s  
+        INITIALIZE zeroPrefixCounts AS ARRAY OF SIZE length PLUS ONE FILLED WITH 0  
+        INITIALIZE onePrefixCounts AS ARRAY OF SIZE length PLUS ONE FILLED WITH 0  
+
+        INDEX i FROM 0 TO length MINUS 1 DO  
+            zeroPrefixCounts[i PLUS 1] = zeroPrefixCounts[i]  
+            onePrefixCounts[i PLUS 1] = onePrefixCounts[i]  
+            IF s[i] EQUALS '0' THEN  
+                zeroPrefixCounts[i PLUS 1] = zeroPrefixCounts[i PLUS 1] PLUS 1  
+            ELSE IF s[i] EQUALS '1' THEN  
+                onePrefixCounts[i PLUS 1] = onePrefixCounts[i PLUS 1] PLUS 1  
+            END IF  
+        END FOR  
+
+        FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER  
+            LET totalCount BE 0  
+            FOR index FROM l TO r DO  
+                SET low TO index  
+                SET high TO r PLUS 1  
+                WHILE low LESS THAN high DO  
+                    SET middle TO FLOOR((low PLUS high) DIVIDED BY 2)  
+                    LET zeroInSubstr BE zeroPrefixCounts[middle PLUS 1] MINUS zeroPrefixCounts[index]  
+                    LET oneInSubstr BE onePrefixCounts[middle PLUS 1] MINUS onePrefixCounts[index]  
+                    IF zeroInSubstr <= k OR oneInSubstr <= k THEN  
+                        low = middle PLUS 1  
+                    ELSE  
+                        high = middle  
+                    END IF  
+                END WHILE  
+                LET maxEnd BE low MINUS 1  
+                IF maxEnd >= index THEN  
+                    totalCount = totalCount PLUS (maxEnd MINUS index PLUS 1)  
+                END IF  
+            END FOR  
+            RETURN totalCount  
+        END FUNCTION  
+
+        INITIALIZE answers AS EMPTY LIST  
+        FOR EACH (leftBound, rightBound) IN queries DO  
+            APPEND count_valid_substrings(leftBound, rightBound) TO answers  
+        END FOR  
+
+        RETURN answers  
+    END FUNCTION  
+END CLASS

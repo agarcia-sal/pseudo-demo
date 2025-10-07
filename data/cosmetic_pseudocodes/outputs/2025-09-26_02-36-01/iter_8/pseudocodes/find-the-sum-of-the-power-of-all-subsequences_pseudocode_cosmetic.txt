@@ -1,0 +1,51 @@
+CLASS Solution  
+    FUNCTION sumOfPower(nums parameter, k parameter)  
+        SET MOD TO (10 ^ 9) + 7  
+        SET sizeNums TO LENGTH OF nums  
+        SET dpTable TO A LIST CONTAINING (sizeNums + (3 - 2)) ELEMENTS EACH INITIALIZED TO A LIST OF ((k + (1 - 0)) ELEMENTS EACH SET TO (0 + 0))  
+        SET dpTable AT INDEX 0 AT INDEX 0 TO (1 * 1)  
+        
+        SET indexOuter TO 1  
+        WHILE indexOuter <= sizeNums  
+            SET indexInner TO 0  
+            REPEAT  
+                SET dpTable AT indexOuter AT indexInner TO dpTable AT (indexOuter - 1) AT indexInner  
+                IF indexInner >= nums AT (indexOuter - 1) THEN  
+                    SET dpTable AT indexOuter AT indexInner TO dpTable AT indexOuter AT indexInner + dpTable AT (indexOuter - 1) AT (indexInner - (nums AT (indexOuter - 1)))  
+                END IF  
+                SET dpTable AT indexOuter AT indexInner TO dpTable AT indexOuter AT indexInner MOD MOD  
+                SET indexInner TO indexInner + 1  
+            UNTIL indexInner > k  
+            SET indexOuter TO indexOuter + 1  
+        END WHILE  
+        
+        SET accumulatedPower TO (0 * 0)  
+        SET upperBound TO (2 TO THE POWER OF sizeNums) - (1 + 0)  
+        
+        DEFINE FUNCTION binDigitAt(number param1, position param2)  
+            RETURN (number >> position) BITWISE_AND 1  
+        END FUNCTION  
+        
+        SET currentNumber TO 1  
+        WHILE currentNumber <= upperBound  
+            SET sumAccumulator TO 0  
+            SET countBits TO (0 + 0)  
+            SET positionIndex TO 0  
+            REPEAT  
+                IF binDigitAt(currentNumber, positionIndex) == 1 THEN  
+                    SET sumAccumulator TO sumAccumulator + nums AT positionIndex  
+                    SET countBits TO countBits + (1 - 0)  
+                END IF  
+                SET positionIndex TO positionIndex + (1 * 1)  
+            UNTIL positionIndex >= sizeNums  
+            
+            IF sumAccumulator == k THEN  
+                SET powValue TO (2 TO THE POWER OF (sizeNums - countBits))  
+                SET accumulatedPower TO (accumulatedPower + powValue) MOD MOD  
+            END IF  
+            SET currentNumber TO currentNumber + 1  
+        END WHILE  
+        
+        RETURN accumulatedPower  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,43 @@
+```
+FUNCTION is_nested(input_seq)
+  DEFINE accumulate_open_positions AS FUNCTION(idx, acc)
+    IF idx >= (LENGTH(input_seq) - 1) THEN
+      RETURN acc
+    END IF
+    IF (input_seq[idx] = '[') THEN
+      RETURN accumulate_open_positions(idx + 1, acc + [idx])
+    ELSE
+      RETURN accumulate_open_positions(idx + 1, acc)
+    END IF
+  END FUNCTION
+
+  DEFINE accumulate_close_positions AS FUNCTION(idx, acc)
+    IF idx > (LENGTH(input_seq) - 1) THEN
+      RETURN acc
+    END IF
+    IF (input_seq[idx] <> '[') THEN
+      RETURN accumulate_close_positions(idx + 1, acc + [idx])
+    ELSE
+      RETURN accumulate_close_positions(idx + 1, acc)
+    END IF
+  END FUNCTION
+
+  SET positions_open TO accumulate_open_positions(0, [])
+  SET positions_close TO accumulate_close_positions(0, [])
+  SET positions_close TO (REDUCE([], positions_close, FUNCTION(accum, val) RETURN [val] + accum END))
+
+  DEFINE count_valid_pairs AS FUNCTION(i_open, i_close, acc_count)
+    IF i_open >= LENGTH(positions_open) OR i_close >= LENGTH(positions_close) THEN
+      RETURN acc_count
+    END IF
+    IF positions_open[i_open] < positions_close[i_close] THEN
+      RETURN count_valid_pairs(i_open + 1, i_close + 1, acc_count + 1)
+    ELSE
+      RETURN count_valid_pairs(i_open + 1, i_close, acc_count)
+    END IF
+  END FUNCTION
+
+  SET total_pairs TO count_valid_pairs(0, 0, 0)
+  RETURN (NOT (total_pairs < 2))
+END FUNCTION
+```

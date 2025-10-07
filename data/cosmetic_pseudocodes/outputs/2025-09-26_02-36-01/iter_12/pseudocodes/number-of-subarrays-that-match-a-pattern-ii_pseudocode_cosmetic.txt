@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION countMatchingSubarrays(nums, pattern)
+        FUNCTION derive_relation(x, y)
+            IF NOT (x >= y) THEN
+                RETURN 1
+            ELSE
+                IF (x = y) THEN
+                    RETURN 0
+                ELSE
+                    RETURN -1
+                END IF
+            END IF
+        END FUNCTION
+
+        LET totalNums BE LENGTH_OF(nums)
+        LET totalPattern BE LENGTH_OF(pattern)
+        LET tally BE 0
+
+        LET relationVector BE []
+        LET posTracker BE 0
+
+        WHILE posTracker < totalNums - 1 DO
+            LET tempRel BE derive_relation(nums[posTracker], nums[posTracker + 1])
+            APPEND tempRel TO relationVector
+            posTracker = posTracker + 1
+        END WHILE
+
+        LET scanIdx BE 0
+        REPEAT
+            IF scanIdx > (totalNums - totalPattern - 1) THEN
+                EXIT
+            END IF
+
+            LET section BE []
+            LET offset BE 0
+            WHILE offset < totalPattern DO
+                APPEND relationVector[scanIdx + offset] TO section
+                offset = offset + 1
+            END WHILE
+
+            LET isEqual BE TRUE
+            LET cmpIndex BE 0
+            WHILE cmpIndex < totalPattern DO
+                IF section[cmpIndex] <> pattern[cmpIndex] THEN
+                    isEqual = FALSE
+                    BREAK
+                END IF
+                cmpIndex = cmpIndex + 1
+            END WHILE
+
+            IF isEqual THEN
+                tally = tally + 1
+            END IF
+
+            scanIdx = scanIdx + 1
+        UNTIL FALSE
+
+        RETURN tally
+    END FUNCTION
+END CLASS

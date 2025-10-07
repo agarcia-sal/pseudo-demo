@@ -1,0 +1,39 @@
+CLASS Solution  
+    FUNCTION validSubstringCount(word1, word2)  
+        FROM collections IMPORT Counter as FrequencyMap  
+        
+        SET freq_word2 TO FrequencyMap(word2)  
+        SET freq_window TO FrequencyMap()  
+        SET needed_types TO LENGTH(freq_word2)  
+        SET matched_types TO 0  
+        SET start_index TO 0  
+        SET total_valid TO 0  
+        
+        SET idx TO 0  
+        WHILE idx < LENGTH(word1)  
+            SET current_char TO word1[idx]  
+            freq_window[current_char] = freq_window.get(current_char, 0) + 1  
+            
+            IF current_char IN freq_word2 AND freq_window[current_char] == freq_word2[current_char] THEN  
+                matched_types = matched_types + 1  
+            END IF  
+            
+            WHILE matched_types == needed_types AND (idx + 1 - start_index) >= LENGTH(word2) DO  
+                SET total_valid = total_valid + (LENGTH(word1) - idx)  
+                
+                SET left_char TO word1[start_index]  
+                freq_window[left_char] = freq_window[left_char] - 1  
+                
+                IF left_char IN freq_word2 AND freq_window[left_char] < freq_word2[left_char] THEN  
+                    matched_types = matched_types - 1  
+                END IF  
+                
+                start_index = start_index + 1  
+            END WHILE  
+            
+            idx = idx + 1  
+        END WHILE  
+        
+        RETURN total_valid  
+    END FUNCTION  
+END CLASS

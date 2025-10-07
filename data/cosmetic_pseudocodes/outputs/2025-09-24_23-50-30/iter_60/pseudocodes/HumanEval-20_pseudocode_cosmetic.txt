@@ -1,0 +1,43 @@
+```
+FUNCTION find_closest_elements(sequence_numbers)
+  BEGIN
+    SET pair_closest TO None
+    SET dist_minimum TO None
+
+    FUNCTION aux_i(i, acc_pair, acc_dist)
+      BEGIN
+        IF i EQUALS LENGTH(sequence_numbers)
+          THEN RETURN acc_pair
+          ELSE RETURN aux_j(i, 0, acc_pair, acc_dist, acc_pair, acc_dist)
+      END
+
+    FUNCTION aux_j(i, j, best_pair, best_dist, current_pair, current_dist)
+      BEGIN
+        IF j EQUALS LENGTH(sequence_numbers)
+          THEN RETURN aux_i(i+1, best_pair, best_dist)
+          ELSE
+            LET x = sequence_numbers[i]
+            LET y = sequence_numbers[j]
+            LET cond_neq = (i IS NOT EQUAL TO j)
+            LET dist_current = ABS(x MINUS y)
+            IF cond_neq
+              THEN
+                IF best_dist IS None
+                  THEN
+                    LET best_dist = dist_current
+                    LET sorted_pair = IF x LESS THAN y THEN (x, y) ELSE (y, x)
+                    LET best_pair = sorted_pair
+                ELSE
+                  IF dist_current LESS THAN best_dist
+                    THEN
+                      LET best_dist = dist_current
+                      LET sorted_pair = IF x LESS THAN y THEN (x, y) ELSE (y, x)
+                      LET best_pair = sorted_pair
+                  ELSE
+                    NOOP
+            RETURN aux_j(i, j+1, best_pair, best_dist, current_pair, current_dist)
+      END
+
+    RETURN aux_i(0, pair_closest, dist_minimum)
+  END
+```

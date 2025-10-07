@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+      SET T0 TO LENGTH OF image
+      SET U1 TO LENGTH OF image AT INDEX 0
+      SET V2 TO NEW LIST OF SIZE T0 EACH CONTAINING NEW LIST OF SIZE U1 EACH WITH VALUE 0
+      SET W3 TO NEW LIST OF SIZE T0 EACH CONTAINING NEW LIST OF SIZE U1 EACH WITH VALUE 0
+
+      FUNCTION is_valid_region(P4 WITH TYPE integer Q5 WITH TYPE integer) WITH RETURN TYPE boolean
+        SET R6 TO P4
+        WHILE R6 < P4 + 3 DO
+          SET S7 TO Q5
+          WHILE S7 < Q5 + 3 DO
+            SET D8 TO -1
+            WHILE D8 <= 1 DO
+              SET E9 TO 0
+              IF (D8 = 0) OR (D8 <> 0) THEN  // dummy branching to vary style
+                IF D8 = 0 THEN
+                  SET E9 TO -1
+                ELSE
+                  IF D8 = 1 THEN
+                    SET E9 TO 0
+                  ELSE
+                    SET E9 TO 1
+                  ENDIF
+                ENDIF
+              ENDIF
+
+              SET F10 TO R6 + D8
+              SET G11 TO S7 + E9
+
+              IF (F10 >= 0) AND (F10 < P4 + 3) AND (G11 >= 0) AND (G11 < Q5 + 3) THEN
+                SET H12 TO image AT INDEX R6 AT INDEX S7
+                SET I13 TO image AT INDEX F10 AT INDEX G11
+                SET J14 TO H12 - I13
+                IF (J14 < 0) THEN SET J14 TO -J14 ENDIF
+                IF J14 > threshold THEN RETURN False ENDIF
+              ENDIF
+
+              SET D8 TO D8 + 1
+            ENDWHILE
+            SET S7 TO S7 + 1
+          ENDWHILE
+          SET R6 TO R6 + 1
+        ENDWHILE
+        RETURN True
+      END FUNCTION
+
+      FUNCTION calculate_average(X15 WITH TYPE integer Y16 WITH TYPE integer) WITH RETURN TYPE integer
+        SET Z17 TO 0
+        SET A18 TO X15
+        WHILE A18 < X15 + 3 DO
+          SET B19 TO Y16
+          WHILE B19 < Y16 + 3 DO
+            SET Z17 TO Z17 + image AT INDEX A18 AT INDEX B19
+            SET B19 TO B19 + 1
+          ENDWHILE
+          SET A18 TO A18 + 1
+        ENDWHILE
+        SET C20 TO Z17 / 9
+        RETURN C20
+      END FUNCTION
+
+      SET D21 TO 0
+      WHILE D21 <= (T0 - 3)
+        SET E22 TO 0
+        WHILE E22 <= (U1 - 3)
+          IF is_valid_region(D21 E22) = True THEN
+            SET F23 TO calculate_average(D21 E22)
+            SET G24 TO D21
+            WHILE G24 < D21 + 3 DO
+              SET H25 TO E22
+              WHILE H25 < E22 + 3 DO
+                SET V2 AT INDEX G24 AT INDEX H25 TO V2 AT INDEX G24 AT INDEX H25 + F23
+                SET W3 AT INDEX G24 AT INDEX H25 TO W3 AT INDEX G24 AT INDEX H25 + 1
+                SET H25 TO H25 + 1
+              ENDWHILE
+              SET G24 TO G24 + 1
+            ENDWHILE
+          ENDIF
+          SET E22 TO E22 + 1
+        ENDWHILE
+        SET D21 TO D21 + 1
+      ENDWHILE
+
+      SET I26 TO 0
+      WHILE I26 < T0
+        SET J27 TO 0
+        WHILE J27 < U1
+          IF W3 AT INDEX I26 AT INDEX J27 > 0 THEN
+            SET V2 AT INDEX I26 AT INDEX J27 TO V2 AT INDEX I26 AT INDEX J27 / W3 AT INDEX I26 AT INDEX J27
+          ELSE
+            SET V2 AT INDEX I26 AT INDEX J27 TO image AT INDEX I26 AT INDEX J27
+          ENDIF
+          SET J27 TO J27 + 1
+        ENDWHILE
+        SET I26 TO I26 + 1
+      ENDWHILE
+
+      RETURN V2
+    END FUNCTION
+END CLASS

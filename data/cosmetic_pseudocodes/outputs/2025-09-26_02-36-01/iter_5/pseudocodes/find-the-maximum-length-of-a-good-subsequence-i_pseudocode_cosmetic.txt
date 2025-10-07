@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION maximumLength(nums k)
+        SET lengthNums TO 0
+        WHILE lengthNums < LENGTH OF nums
+            lengthNums ← lengthNums + 1
+        END WHILE
+
+        FUNCTION initMatrix(rows, cols)
+            IF rows == 0 THEN
+                RETURN []
+            ELSE
+                SET firstRow TO []
+                SET colIndex TO 0
+                WHILE colIndex < cols
+                    firstRow ← firstRow + [1]
+                    colIndex ← colIndex + 1
+                END WHILE
+                RETURN [firstRow] + initMatrix(rows - 1, cols)
+            END IF
+        END FUNCTION
+
+        SET matrixF TO initMatrix(lengthNums, k + (1))
+
+        FUNCTION maxValue(a, b)
+            IF a > b THEN RETURN a ELSE RETURN b END IF
+        END FUNCTION
+
+        FUNCTION innerLoop(currentI, currentH, currentJ)
+            IF currentJ < 0 THEN RETURN END IF
+            SET currentX TO nums at currentI
+            SET currentY TO nums at currentJ
+            IF currentX == currentY THEN
+                SET matrixF[currentI][currentH] TO maxValue(matrixF[currentI][currentH], matrixF[currentJ][currentH] + 1)
+            ELSE
+                IF NOT (currentH == 0) THEN
+                    SET matrixF[currentI][currentH] TO maxValue(matrixF[currentI][currentH], matrixF[currentJ][currentH - 1] + 1)
+                END IF
+            END IF
+            innerLoop(currentI, currentH, currentJ - 1)
+        END FUNCTION
+
+        FUNCTION middleLoop(currentI, currentH)
+            IF currentH > k THEN RETURN END IF
+            innerLoop(currentI, currentH, currentI - 1)
+            middleLoop(currentI, currentH + 1)
+        END FUNCTION
+
+        SET answer TO 0
+
+        FUNCTION outerLoop(iIndex)
+            IF iIndex >= lengthNums THEN RETURN END IF
+            middleLoop(iIndex, 0)
+            IF matrixF[iIndex][k] > answer THEN
+                answer ← matrixF[iIndex][k]
+            END IF
+            outerLoop(iIndex + 1)
+        END FUNCTION
+
+        outerLoop(0)
+
+        RETURN answer
+    END FUNCTION
+END CLASS

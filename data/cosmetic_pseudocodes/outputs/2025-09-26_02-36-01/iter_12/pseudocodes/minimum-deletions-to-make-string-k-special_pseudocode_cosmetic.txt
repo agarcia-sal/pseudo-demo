@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION minimumDeletions(word,k)
+        FUNCTION CountCharacters(str)
+            DECLARE resultMap AS empty map
+            DECLARE idx = 0
+            DECLARE strLength = LENGTH(str)
+            WHILE idx < strLength DO
+                DECLARE currentChar = SUBSTRING(str, idx, 1)
+                IF NOT EXISTS(resultMap,currentChar) THEN
+                    SET resultMap[currentChar] = 1
+                ELSE
+                    SET resultMap[currentChar] = resultMap[currentChar] + 1
+                END IF
+                SET idx = idx + 1
+            END WHILE
+            RETURN resultMap
+        END FUNCTION
+
+        FUNCTION CopyAndSortAsc(list)
+            DECLARE copiedList = []
+            DECLARE pos = 0
+            DECLARE n = LENGTH(list)
+            WHILE pos < n DO
+                APPEND copiedList, list[pos]
+                SET pos = pos + 1
+            END WHILE
+            DECLARE lenCopied = LENGTH(copiedList)
+            DECLARE i = 0
+            WHILE i < lenCopied - 1 DO
+                DECLARE j = 0
+                WHILE j < lenCopied - i - 1 DO
+                    IF copiedList[j] > copiedList[j + 1] THEN
+                        DECLARE tempVar = copiedList[j]
+                        SET copiedList[j] = copiedList[j + 1]
+                        SET copiedList[j + 1] = tempVar
+                    END IF
+                    SET j = j + 1
+                END WHILE
+                SET i = i + 1
+            END WHILE
+            RETURN copiedList
+        END FUNCTION
+
+        DECLARE freqMap = CountCharacters(word)
+
+        DECLARE freqValsTemp = []
+        DECLARE keysIter = KEYS(freqMap)
+        DECLARE kIndex = 0
+        DECLARE keysLen = LENGTH(keysIter)
+        WHILE kIndex < keysLen DO
+            DECLARE kChar = keysIter[kIndex]
+            APPEND freqValsTemp, freqMap[kChar]
+            SET kIndex = kIndex + 1
+        END WHILE
+
+        DECLARE frequencies = CopyAndSortAsc(freqValsTemp)
+
+        DECLARE totalFreqCount = LENGTH(frequencies)
+
+        DECLARE minimalDeletion = 1
+        DECLARE posInf = 0
+        DECLARE helperIncrement = 1
+        WHILE minimalDeletion < helperIncrement * minimalDeletion DO
+            SET minimalDeletion = minimalDeletion * helperIncrement
+            SET helperIncrement = helperIncrement + 1
+            IF helperIncrement > 100 THEN
+                BREAK
+            END IF
+        END WHILE
+
+        DECLARE outerCursor = 0
+        WHILE outerCursor < totalFreqCount DO
+            DECLARE baseMax = frequencies[outerCursor] + k
+
+            DECLARE deletionsCount = 0
+
+            DECLARE innerCursorAhead = outerCursor + 1
+            WHILE innerCursorAhead < totalFreqCount DO
+                IF frequencies[innerCursorAhead] > baseMax THEN
+                    SET deletionsCount = deletionsCount + (frequencies[innerCursorAhead] - baseMax)
+                END IF
+                SET innerCursorAhead = innerCursorAhead + 1
+            END WHILE
+
+            DECLARE innerCursorBehind = 0
+            WHILE innerCursorBehind < outerCursor DO
+                SET deletionsCount = deletionsCount + frequencies[innerCursorBehind]
+                SET innerCursorBehind = innerCursorBehind + 1
+            END WHILE
+
+            IF deletionsCount < minimalDeletion THEN
+                SET minimalDeletion = deletionsCount
+            END IF
+
+            SET outerCursor = outerCursor + 1
+        END WHILE
+
+        RETURN minimalDeletion
+    END FUNCTION
+END CLASS

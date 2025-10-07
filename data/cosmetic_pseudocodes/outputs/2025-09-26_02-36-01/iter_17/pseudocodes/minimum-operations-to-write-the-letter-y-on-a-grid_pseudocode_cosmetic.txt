@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        LET p ← LENGTH(grid)
+        LET q ← FLOOR(p / 2)
+        LET w ← SET EMPTY()
+
+        LET a ← 0
+        WHILE a ≤ q
+            w.ADD((a, a))
+            a ← a + 1
+        END WHILE
+
+        LET b ← 0
+        WHILE b ≤ q
+            w.ADD((b, (p - b - 1)))
+            b ← b + 1
+        END WHILE
+
+        LET c ← q
+        REPEAT
+            w.ADD((c, q))
+            c ← c + 1
+        UNTIL c > (p - 1)
+
+        LET d_map ← EMPTY MAP WITH DEFAULT 0
+        LET e_map ← EMPTY MAP WITH DEFAULT 0
+
+        FOR EACH (r, s) IN w DO
+            d_map[grid[r][s]] ← d_map[grid[r][s]] + 1
+        END FOR
+
+        FOR x FROM 0 TO p - 1 DO
+            FOR y FROM 0 TO p - 1 DO
+                LET t ← (x, y)
+                IF t NOT IN w THEN
+                    e_map[grid[x][y]] ← e_map[grid[x][y]] + 1
+                END IF
+            END FOR
+        END FOR
+
+        LET v ← ∞
+
+        LET y_idx ← 0
+        WHILE y_idx ≤ 2
+            LET n_idx ← 0
+            WHILE n_idx ≤ 2
+                IF NOT (y_idx = n_idx) THEN
+                    LET op_total ← 0
+
+                    LET s1 ← 0
+                    FOR EACH val IN d_map.VALUES() DO
+                        s1 ← s1 + val
+                    END FOR
+                    s1 ← s1 - d_map.GET(y_idx, 0)
+
+                    LET s2 ← 0
+                    FOR EACH val IN e_map.VALUES() DO
+                        s2 ← s2 + val
+                    END FOR
+                    s2 ← s2 - e_map.GET(n_idx, 0)
+
+                    op_total ← s1 + s2
+
+                    IF op_total < v THEN
+                        v ← op_total
+                    END IF
+                END IF
+                n_idx ← n_idx + 1
+            END WHILE
+            y_idx ← y_idx + 1
+        END WHILE
+
+        RETURN v
+    END FUNCTION
+END CLASS

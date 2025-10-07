@@ -1,0 +1,106 @@
+CLASS Solution  
+
+    FUNCTION bfs(graph, start)  
+        LET count_nodes = SIZE(graph)  
+        LET visited_nodes = ARRAY of count_nodes elements initialized to false  
+        LET bfs_queue = deque initialized with (start, 0)  
+        visited_nodes[start] = true  
+        LET far_node = start  
+        LET greatest_dist = 0  
+        
+        LOOP WHILE bfs_queue NOT EMPTY  
+            EXTRACT (current_node, dist) FROM LEFT bfs_queue  
+            
+            IF dist > greatest_dist THEN  
+                greatest_dist = dist  
+                far_node = current_node  
+            END IF  
+            
+            FOR EACH adj_node IN graph[current_node] DO  
+                IF visited_nodes[adj_node] IS false THEN  
+                    visited_nodes[adj_node] = true  
+                    ADD (adj_node, dist + 1) TO bfs_queue  
+                END IF  
+            END FOR  
+        END LOOP  
+        
+        RETURN (far_node, greatest_dist)  
+    END FUNCTION  
+
+    FUNCTION tree_diameter(graph)  
+        LET initial_node = 0  
+        LET (farthest_node, _) = bfs(graph, initial_node)  
+        LET (_, diameter_length) = bfs(graph, farthest_node)  
+        RETURN diameter_length  
+    END FUNCTION  
+
+    FUNCTION maximum_path_length_from_node(graph, start_node)  
+        LET size = SIZE(graph)  
+        LET visited_flags = ARRAY of size elements all false  
+        LET exploration_queue = deque with (start_node, 0)  
+        visited_flags[start_node] = true  
+        LET max_dist = 0  
+        
+        WHILE exploration_queue NOT EMPTY  
+            TAKE (node, dist) FROM LEFT exploration_queue  
+            
+            IF dist > max_dist THEN  
+                max_dist = dist  
+            END IF  
+            
+            FOR EACH neighbor_node IN graph[node] DO  
+                IF visited_flags[neighbor_node] IS false THEN  
+                    visited_flags[neighbor_node] = true  
+                    ADD (neighbor_node, dist + 1) TO exploration_queue  
+                END IF  
+            END FOR  
+        END WHILE  
+        
+        RETURN max_dist  
+    END FUNCTION  
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)  
+        LET size1 = LENGTH(edges1) + 1  
+        LET size2 = LENGTH(edges2) + 1  
+        
+        LET graph_one = ARRAY of size1 empty lists  
+        LET graph_two = ARRAY of size2 empty lists  
+        
+        FOR EACH (u, v) IN edges1 DO  
+            APPEND v TO graph_one[u]  
+            APPEND u TO graph_one[v]  
+        END FOR  
+        
+        FOR EACH (u, v) IN edges2 DO  
+            APPEND v TO graph_two[u]  
+            APPEND u TO graph_two[v]  
+        END FOR  
+        
+        LET diam1 = tree_diameter(graph_one)  
+        LET diam2 = tree_diameter(graph_two)  
+        
+        LET longest_paths_1 = EMPTY LIST  
+        FOR i FROM 0 TO size1 - 1 DO  
+            APPEND maximum_path_length_from_node(graph_one, i) TO longest_paths_1  
+        END FOR  
+        
+        LET longest_paths_2 = EMPTY LIST  
+        FOR j FROM 0 TO size2 - 1 DO  
+            APPEND maximum_path_length_from_node(graph_two, j) TO longest_paths_2  
+        END FOR  
+        
+        LET minimal_diameter = INFINITY  
+        
+        FOR u FROM 0 TO size1 - 1 DO  
+            FOR v FROM 0 TO size2 - 1 DO  
+                LET combined_length = MAX(diam1, diam2, longest_paths_1[u] + longest_paths_2[v] + 1)  
+                IF combined_length < minimal_diameter THEN  
+                    minimal_diameter = combined_length  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        RETURN minimal_diameter  
+    END FUNCTION  
+
+END CLASS

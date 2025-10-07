@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        CONSTANT BigMod CONSTANT= 1000000000 + 7
+        VAR lengthN = 0
+        VAR highest = 0
+
+        PROCEDURE findMax(list)
+            VAR idx = 0
+            VAR tempMax = list[0]
+            WHILE idx < LENGTH(list)
+                IF list[idx] > tempMax THEN
+                    tempMax = list[idx]
+                ENDIF
+                idx = idx + 1
+            ENDWHILE
+            RETURN tempMax
+        ENDPROCEDURE
+
+        lengthN = LENGTH(nums)
+        highest = findMax(nums)
+
+        VAR table  = []
+        VAR iOuter = 0
+        WHILE iOuter < lengthN
+            VAR innerList1 = []
+            VAR jInner = 0
+            WHILE jInner <= highest
+                VAR innerList2 = []
+                VAR kInner = 0
+                WHILE kInner <= highest
+                    innerList2[kInner] = 0
+                    kInner = kInner + 1
+                ENDWHILE
+                innerList1[jInner] = innerList2
+                jInner = jInner + 1
+            ENDWHILE
+            table[iOuter] = innerList1
+            iOuter = iOuter + 1
+        ENDWHILE
+
+        VAR x = 0
+        WHILE TRUE
+            IF x > nums[0] THEN BREAK ENDIF
+            VAR y = nums[0] - x
+            table[0][x][y] = 1
+            x = x + 1
+        ENDWHILE
+
+        VAR iRow = 1
+        WHILE iRow < lengthN
+            VAR jRow = 0
+            WHILE TRUE
+                IF jRow > nums[iRow] THEN BREAK ENDIF
+                VAR kRow = nums[iRow] - jRow
+                VAR jPrev = 0
+                WHILE jPrev <= jRow
+                    VAR kPrev = kRow
+                    WHILE kPrev <= highest
+                        VAR addVal = table[iRow - 1][jPrev][kPrev]
+                        table[iRow][jRow][kRow] = table[iRow][jRow][kRow] + addVal
+                        IF table[iRow][jRow][kRow] >= BigMod THEN
+                            table[iRow][jRow][kRow] = table[iRow][jRow][kRow] % BigMod
+                        ENDIF
+                        kPrev = kPrev + 1
+                    ENDWHILE
+                    jPrev = jPrev + 1
+                ENDWHILE
+                jRow = jRow + 1
+            ENDWHILE
+            iRow = iRow + 1
+        ENDWHILE
+
+        VAR sumResult = 0
+        VAR jSum = 0
+        WHILE jSum <= highest
+            VAR kSum = 0
+            WHILE kSum <= highest
+                IF (jSum + kSum) = nums[lengthN - 1] THEN
+                    sumResult = sumResult + table[lengthN - 1][jSum][kSum]
+                    IF sumResult >= BigMod THEN
+                        sumResult = sumResult % BigMod
+                    ENDIF
+                ENDIF
+                kSum = kSum + 1
+            ENDWHILE
+            jSum = jSum + 1
+        ENDWHILE
+
+        RETURN sumResult
+    END FUNCTION
+END CLASS

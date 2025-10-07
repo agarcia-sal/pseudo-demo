@@ -1,0 +1,8 @@
+def intersperse(nums, d) -> list:
+    if not nums:
+        return []
+    res = []
+    for n in nums[:-1]:
+        res += [n, d]
+    res += [nums[-1]]
+    return res

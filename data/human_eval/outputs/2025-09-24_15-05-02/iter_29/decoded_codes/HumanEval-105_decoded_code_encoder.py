@@ -1,0 +1,22 @@
+from typing import List
+
+def by_length(array_of_integers: List[int]) -> List[str]:
+    dictionary_of_digit_names = {
+        1: "One",
+        2: "Two",
+        3: "Three",
+        4: "Four",
+        5: "Five",
+        6: "Six",
+        7: "Seven",
+        8: "Eight",
+        9: "Nine",
+    }
+    sorted_array = sorted(array_of_integers, reverse=True)
+    new_array: List[str] = []
+    for value in sorted_array:
+        try:
+            new_array.append(dictionary_of_digit_names[value])
+        except KeyError:
+            continue
+    return new_array

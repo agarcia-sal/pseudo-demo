@@ -1,0 +1,114 @@
+CLASS Solution
+    FUNCTION maxValue(numbers LIST OF INTEGER count INTEGER) RETURNS INTEGER
+        DEFINE BASE AS 1 SHIFT_LEFT_BY 7
+        DEFINE length AS 0
+        length <- 0
+        PROCEDURE DetermineLength()
+            SET tempIndex TO 0
+            WHILE tempIndex LESS_THAN LENGTH_OF(numbers)
+                length <- length + 1
+                tempIndex <- tempIndex + 1
+            END_WHILE
+        END_PROCEDURE
+        CALL DetermineLength()
+
+        DEFINE reachable AS 3_DIMENSIONAL_ARRAY OF BOOLEAN WITH SIZE (length PLUS 1, count PLUS 2, BASE)
+        DEFINE reachableTemp AS 3_DIMENSIONAL_ARRAY OF BOOLEAN WITH SIZE (length PLUS 1, count PLUS 2, BASE)
+        PROCEDURE InitializeBooleanGrid(grid)
+            DECLARE a_var, b_var, c_var AS INTEGER
+            a_var <- 0
+            WHILE a_var LESS_THAN (length PLUS 1)
+                b_var <- 0
+                WHILE b_var LESS_THAN (count PLUS 2)
+                    c_var <- 0
+                    WHILE c_var LESS_THAN BASE
+                        grid[a_var][b_var][c_var] <- FALSE
+                        c_var <- c_var + 1
+                    END_WHILE
+                    b_var <- b_var + 1
+                END_WHILE
+                a_var <- a_var + 1
+            END_WHILE
+        END_PROCEDURE
+        CALL InitializeBooleanGrid(reachable)
+        CALL InitializeBooleanGrid(reachableTemp)
+        reachable[0][0][0] <- TRUE
+
+        PROCEDURE UpdateReachable()
+            DECLARE outerIndex, innerIndex, stateIndex AS INTEGER
+            outerIndex <- 0
+            WHILE outerIndex LESS_THAN length
+                innerIndex <- 0
+                WHILE innerIndex LESS_OR_EQUAL count
+                    stateIndex <- 0
+                    WHILE stateIndex LESS_THAN BASE
+                        reachable[outerIndex + 1][innerIndex][stateIndex] <- reachable[outerIndex + 1][innerIndex][stateIndex]
+                                                            OR reachable[outerIndex][innerIndex][stateIndex]
+                        DEFINE alteredIndex AS stateIndex OR numbers[outerIndex]
+                        IF alteredIndex LESS_THAN BASE THEN
+                            reachable[outerIndex + 1][innerIndex + 1][alteredIndex] <- reachable[outerIndex][innerIndex][stateIndex] OR reachable[outerIndex + 1][innerIndex + 1][alteredIndex]
+                        END_IF
+                        stateIndex <- stateIndex + 1
+                    END_WHILE
+                    innerIndex <- innerIndex + 1
+                END_WHILE
+                outerIndex <- outerIndex + 1
+            END_WHILE
+        END_PROCEDURE
+        CALL UpdateReachable()
+
+        reachableTemp[length][0][0] <- TRUE
+
+        PROCEDURE UpdateReachableTemp()
+            DECLARE outerIndex, innerIndex, stateIndex AS INTEGER
+            outerIndex <- length
+            WHILE outerIndex GREATER_THAN 0
+                innerIndex <- 0
+                WHILE innerIndex LESS_OR_EQUAL count
+                    stateIndex <- 0
+                    WHILE stateIndex LESS_THAN BASE
+                        reachableTemp[outerIndex - 1][innerIndex][stateIndex] <- reachableTemp[outerIndex - 1][innerIndex][stateIndex] OR reachableTemp[outerIndex][innerIndex][stateIndex]
+                        DEFINE alteredIndex AS stateIndex OR numbers[outerIndex - 1]
+                        IF alteredIndex LESS_THAN BASE THEN
+                            reachableTemp[outerIndex - 1][innerIndex + 1][alteredIndex] <- reachableTemp[outerIndex][innerIndex][stateIndex] OR reachableTemp[outerIndex - 1][innerIndex + 1][alteredIndex]
+                        END_IF
+                        stateIndex <- stateIndex + 1
+                    END_WHILE
+                    innerIndex <- innerIndex + 1
+                END_WHILE
+                outerIndex <- outerIndex - 1
+            END_WHILE
+        END_PROCEDURE
+        CALL UpdateReachableTemp()
+
+        DEFINE answer AS INTEGER
+        answer <- 0
+
+        PROCEDURE ComputeAnswer()
+            DECLARE midIndex, valX, valY AS INTEGER
+            midIndex <- count
+            WHILE midIndex LESS_OR_EQUAL (length - count)
+                valX <- 0
+                WHILE valX LESS_THAN BASE
+                    IF reachable[midIndex][count][valX] EQUALS TRUE THEN
+                        valY <- 0
+                        WHILE valY LESS_THAN BASE
+                            IF reachableTemp[midIndex][count][valY] EQUALS TRUE THEN
+                                DEFINE trialValue AS (valX XOR valY)
+                                IF trialValue GREATER_THAN answer THEN
+                                    answer <- trialValue
+                                END_IF
+                            END_IF
+                            valY <- valY + 1
+                        END_WHILE
+                    END_IF
+                    valX <- valX + 1
+                END_WHILE
+                midIndex <- midIndex + 1
+            END_WHILE
+        END_PROCEDURE
+        CALL ComputeAnswer()
+
+        RETURN answer
+    END_FUNCTION
+END_CLASS

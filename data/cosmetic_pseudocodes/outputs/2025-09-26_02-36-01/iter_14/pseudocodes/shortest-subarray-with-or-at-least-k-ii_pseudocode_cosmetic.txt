@@ -1,0 +1,55 @@
+CLASS Solution  
+    FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer  
+        FUNCTION adjust_frequency(freq LIST OF integers val integer delta integer)  
+            SET bitmask TO integer 1  
+            SET index TO integer 0  
+            WHILE index LESS THAN integer 32  
+                IF (val BITWISE_AND bitmask) NOT_EQUALS integer 0  
+                    SET freq AT position index TO freq AT position index PLUS delta  
+                END IF  
+                SET bitmask TO bitmask MULTIPLY integer 2  
+                SET index TO index PLUS integer 1  
+            END WHILE  
+        END FUNCTION  
+
+        FUNCTION calculate_or(freq LIST OF integers) RETURNS integer  
+            SET accumulator TO integer 0  
+            SET position TO integer 0  
+            WHILE position LESS_THAN integer 32  
+                IF freq AT position GREATER_THAN integer 0  
+                    SET accumulator TO accumulator BITWISE_OR (integer 1 LEFT_SHIFT position)  
+                END IF  
+                INCREMENT position BY integer 1  
+            END WHILE  
+            RETURN accumulator  
+        END FUNCTION  
+
+        SET length_nums TO LENGTH OF nums  
+        SET frequencies TO a list containing integer 0 repeated 32 times  
+        SET combined_or TO integer 0  
+        SET start_pointer TO integer 0  
+        SET smallest_len TO positive infinity  
+
+        SET end_pointer TO integer 0  
+        WHILE end_pointer LESS_THAN length_nums  
+            CALL adjust_frequency WITH frequencies nums AT end_pointer integer 1  
+            SET combined_or TO combined_or BITWISE_OR nums AT end_pointer  
+
+            WHILE combined_or GREATER_OR_EQUAL k AND start_pointer LESS_OR_EQUAL end_pointer  
+                IF smallest_len GREATER_THAN (end_pointer MINUS start_pointer PLUS integer 1)  
+                    SET smallest_len TO end_pointer MINUS start_pointer PLUS integer 1  
+                END IF  
+                CALL adjust_frequency WITH frequencies nums AT start_pointer MINUS integer 1  
+                SET combined_or TO CALL calculate_or WITH frequencies  
+                SET start_pointer TO start_pointer PLUS integer 1  
+            END WHILE  
+            SET end_pointer TO end_pointer PLUS integer 1  
+        END WHILE  
+
+        IF smallest_len EQUALS positive infinity  
+            RETURN integer NEGATIVE 1  
+        ELSE  
+            RETURN smallest_len  
+        END IF  
+    END FUNCTION  
+END CLASS

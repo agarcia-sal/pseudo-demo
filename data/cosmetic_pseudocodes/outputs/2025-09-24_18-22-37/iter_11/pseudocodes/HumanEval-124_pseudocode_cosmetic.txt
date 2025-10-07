@@ -1,0 +1,54 @@
+FUNCTION valid_date(date_string_param)
+    DECLARE trimmed_string
+    DECLARE parts_array
+    DECLARE month_num
+    DECLARE day_num
+    DECLARE year_num
+    DECLARE part_index
+
+    TRY
+        SET trimmed_string TO date_string_param WITH LEADING WHITESPACE REMOVED
+        SET trimmed_string TO trimmed_string WITH TRAILING WHITESPACE REMOVED
+
+        SET parts_array TO SPLIT trimmed_string BY '-'
+
+        SET part_index TO 0
+        SET month_num TO CONVERT parts_array[part_index] TO INTEGER
+        SET part_index TO part_index + 1
+        SET day_num TO CONVERT parts_array[part_index] TO INTEGER
+        SET part_index TO part_index + 1
+        SET year_num TO CONVERT parts_array[part_index] TO INTEGER
+
+        IF month_num < 1 THEN GOTO invalid_date
+        IF month_num > 0 THEN
+            IF month_num > 12 THEN GOTO invalid_date
+        END IF
+
+        SWITCH month_num
+            CASE 1, 3, 5, 7, 8, 10, 12:
+                IF day_num < 1 THEN GOTO invalid_date
+                IF day_num > 31 THEN GOTO invalid_date
+                BREAK
+
+            CASE 4, 6, 9, 11:
+                IF day_num < 1 THEN GOTO invalid_date
+                IF day_num > 30 THEN GOTO invalid_date
+                BREAK
+
+            CASE 2:
+                IF day_num < 1 THEN GOTO invalid_date
+                IF day_num > 29 THEN GOTO invalid_date
+                BREAK
+
+            DEFAULT:
+                GOTO invalid_date
+        END SWITCH
+
+        RETURN True
+
+    CATCH ANY ERROR
+        RETURN False
+
+    invalid_date:
+        RETURN False
+END FUNCTION

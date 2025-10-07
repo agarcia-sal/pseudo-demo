@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION findKthSmallest(coins k)
+        FUNCTION count_smaller_or_equal(bound)
+            SET aggregate_count TO 0
+            SET limit TO (2 ^ LENGTH(coins)) - 1
+            SET index TO 1
+            WHILE index <= limit
+                SET combined_lcm TO 1
+                SET subset_size TO 0
+                SET bit_position TO 0
+                WHILE bit_position < LENGTH(coins)
+                    IF (index & (1 << bit_position)) != 0
+                        SET prev_lcm TO combined_lcm
+                        SET current_coin TO coins[bit_position]
+                        SET gcd_value TO 0
+                        FUNCTION gcd_internal(a b)
+                            IF b == 0 THEN RETURN a
+                            RETURN gcd_internal(b, a % b)
+                        END FUNCTION
+                        SET gcd_value TO gcd_internal(prev_lcm current_coin)
+                        SET combined_lcm TO (prev_lcm * current_coin) / gcd_value
+                        SET subset_size TO subset_size + 1
+                    END IF
+                    SET bit_position TO bit_position + 1
+                END WHILE
+                IF (subset_size % 2) == 1
+                    SET aggregate_count TO aggregate_count + (bound // combined_lcm)
+                ELSE
+                    SET aggregate_count TO aggregate_count - (bound // combined_lcm)
+                END IF
+                SET index TO index + 1
+            END WHILE
+            RETURN aggregate_count
+        END FUNCTION
+
+        SET start TO 1
+        SET minimum_coin TO coins[0]
+        SET idx_min TO 1
+        WHILE idx_min < LENGTH(coins)
+            IF coins[idx_min] < minimum_coin THEN SET minimum_coin TO coins[idx_min]
+            SET idx_min TO idx_min + 1
+        END WHILE
+        SET end_val TO k * minimum_coin
+
+        WHILE start < end_val
+            SET half_gap TO (start + end_val) // 2
+            SET compare_count TO count_smaller_or_equal(half_gap)
+            IF compare_count < k THEN
+                SET start TO half_gap + 1
+            ELSE
+                SET end_val TO half_gap
+            END IF
+        END WHILE
+
+        RETURN start
+    END FUNCTION
+END CLASS

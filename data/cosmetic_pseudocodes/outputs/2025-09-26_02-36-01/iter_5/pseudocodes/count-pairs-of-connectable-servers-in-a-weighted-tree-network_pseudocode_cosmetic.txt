@@ -1,0 +1,112 @@
+CLASS Solution
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)
+        SET adjacencyMap TO a new mapping defaulting to empty list
+        FUNCTION addEdge(a, b, cost)
+            LET adjacencyMap_a = adjacencyMap[a]
+            LET adjacencyMap_b = adjacencyMap[b]
+            ADD (b, cost) TO adjacencyMap_a
+            ADD (a, cost) TO adjacencyMap_b
+        END FUNCTION
+
+        FUNCTION buildGraphRec(idx)
+            IF idx EQUALS LENGTH(edges) THEN
+                RETURN
+            END IF
+            LET edgeTriple = edges[idx]
+            LET x = edgeTriple[0]
+            LET y = edgeTriple[1]
+            LET z = edgeTriple[2]
+            CALL addEdge(x, y, z)
+            CALL buildGraphRec(idx + 1)
+        END FUNCTION
+        CALL buildGraphRec(0)
+
+        LET nodeCount = SIZE(adjacencyMap)
+
+        LET outputList TO list of zeros repeated nodeCount times
+
+        FUNCTION explore(currentNode, prevNode, dist, collectedPath)
+            LET modValue = dist - ((dist / signalSpeed) * signalSpeed)
+            IF modValue EQUALS 0 THEN
+                APPEND currentNode TO collectedPath
+            END IF
+
+            FUNCTION exploreNeighbors(idx)
+                IF idx EQUALS LENGTH(adjacencyMap[currentNode]) THEN
+                    RETURN 0
+                END IF
+                LET neighborPair = adjacencyMap[currentNode][idx]
+                LET nextNode = neighborPair[0]
+                LET edgeWeight = neighborPair[1]
+                LET sumCounts = 0
+                IF NOT(nextNode EQUALS prevNode) THEN
+                    LET recurseCount = explore(nextNode, currentNode, dist + edgeWeight, collectedPath)
+                    LET afterCount = exploreNeighbors(idx + 1)
+                    sumCounts = recurseCount + afterCount
+                ELSE
+                    LET skipCount = exploreNeighbors(idx + 1)
+                    sumCounts = skipCount
+                END IF
+                RETURN sumCounts
+            END FUNCTION
+
+            LET neighborTotals = exploreNeighbors(0)
+            IF modValue EQUALS 0 THEN
+                RETURN neighborTotals + 1
+            ELSE
+                RETURN neighborTotals
+            END IF
+        END FUNCTION
+
+        FUNCTION pairsCountForNode(centerNode)
+            LET allPaths AS empty list
+
+            FUNCTION collectPaths(idx)
+                IF idx EQUALS LENGTH(adjacencyMap[centerNode]) THEN
+                    RETURN
+                END IF
+                LET currentNeighbor = adjacencyMap[centerNode][idx]
+                LET adjNode = currentNeighbor[0]
+                LET weight = currentNeighbor[1]
+                LET pathContainer TO empty list
+                CALL explore(adjNode, centerNode, weight, pathContainer)
+                APPEND pathContainer TO allPaths
+                CALL collectPaths(idx + 1)
+            END FUNCTION
+            CALL collectPaths(0)
+
+            LET pairsTotal = 0
+
+            FUNCTION computePairs(i)
+                IF i EQUALS LENGTH(allPaths) THEN
+                    RETURN
+                END IF
+                FUNCTION innerLoop(j)
+                    IF j EQUALS LENGTH(allPaths) THEN
+                        RETURN
+                    END IF
+                    LET lengthsProduct = LENGTH(allPaths[i]) * LENGTH(allPaths[j])
+                    pairsTotal = pairsTotal + lengthsProduct
+                    CALL innerLoop(j + 1)
+                END FUNCTION
+                CALL innerLoop(i + 1)
+                CALL computePairs(i + 1)
+            END FUNCTION
+            CALL computePairs(0)
+
+            RETURN pairsTotal
+        END FUNCTION
+
+        FUNCTION fillResult(k)
+            IF k EQUALS nodeCount THEN
+                RETURN
+            END IF
+            LET pairCount = pairsCountForNode(k)
+            SET outputList[k] TO pairCount
+            CALL fillResult(k + 1)
+        END FUNCTION
+        CALL fillResult(0)
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

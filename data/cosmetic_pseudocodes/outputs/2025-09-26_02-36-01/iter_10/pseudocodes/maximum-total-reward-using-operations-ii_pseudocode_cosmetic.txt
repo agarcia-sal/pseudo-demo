@@ -1,0 +1,85 @@
+CLASS Solution
+    FUNCTION maxTotalReward(rewardValues)
+        FUNCTION bit_length_helper(n)
+            SET count_var TO 0
+            WHILE n > 0 DO
+                SET n TO n DIV 2
+                SET count_var TO count_var + 1
+            END WHILE
+            RETURN count_var
+        END FUNCTION
+        
+        FUNCTION bitwise_and_helper(a, b)
+            RETURN a AND b
+        END FUNCTION
+        
+        FUNCTION bitwise_or_helper(a, b)
+            RETURN a OR b
+        END FUNCTION
+        
+        FUNCTION bit_shift_left_helper(value, shift_amt)
+            RETURN value * (2 ^ shift_amt)
+        END FUNCTION
+        
+        FUNCTION sort_set_helper(collection)
+            SET temp_list TO []
+            FOR each elem IN collection
+                SET inserted TO FALSE
+                FOR index FROM 0 TO LENGTH(temp_list) - 1
+                    IF elem < temp_list[index] THEN
+                        temp_list = temp_list[0:index] + [elem] + temp_list[index:]
+                        SET inserted TO TRUE
+                        BREAK
+                    END IF
+                END FOR
+                IF NOT inserted THEN
+                    temp_list = temp_list + [elem]
+                END IF
+            END FOR
+            RETURN temp_list
+        END FUNCTION
+
+        FUNCTION unique_elements_helper(coll)
+            SET unique_list TO []
+            FOR each el IN coll
+                SET is_found TO FALSE
+                FOR each uel IN unique_list
+                    IF uel = el THEN
+                        SET is_found TO TRUE
+                        BREAK
+                    END IF
+                END FOR
+                IF NOT is_found THEN
+                    unique_list = unique_list + [el]
+                END IF
+            END FOR
+            RETURN unique_list
+        END FUNCTION
+        
+        SET temporarySet TO unique_elements_helper(rewardValues)
+        SET sortedNums TO sort_set_helper(temporarySet)
+        
+        SET accumulator_var TO 1
+        SET recursion_index TO 0
+        
+        FUNCTION process_elements(seq, idx, accum)
+            IF idx = LENGTH(seq) THEN
+                RETURN accum
+            ELSE
+                SET current_val TO seq[idx]
+                SET left_shifted_val TO bit_shift_left_helper(1, current_val)
+                SET mask_val TO bit_shift_left_helper(1, current_val) - 1
+                SET and_result TO bitwise_and_helper(accum, mask_val)
+                SET or_inner TO bitwise_or_helper(and_result, left_shifted_val)
+                SET new_accum TO bitwise_or_helper(accum, or_inner)
+                RETURN process_elements(seq, idx + 1, new_accum)
+            END IF
+        END FUNCTION
+        
+        SET accumulator_var TO process_elements(sortedNums, recursion_index, accumulator_var)
+        
+        SET bit_length_val TO bit_length_helper(accumulator_var)
+        
+        RETURN bit_length_val - 1
+    END FUNCTION
+END CLASS

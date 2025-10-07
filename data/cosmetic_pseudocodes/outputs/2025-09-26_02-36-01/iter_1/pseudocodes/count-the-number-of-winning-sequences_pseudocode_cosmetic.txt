@@ -1,0 +1,48 @@
+CLASS Solution  
+    FUNCTION countWinningSequences(s)  
+        SET mod TO 1000000007  
+        CREATE d AS a dictionary: F -> 0, W -> 1, E -> 2  
+  
+        FUNCTION calc(a, b)  
+            IF a == b THEN  
+                RETURN 0  
+            ELSE IF a < b THEN  
+                IF a == 0 AND b == 2 THEN  
+                    RETURN 1  
+                ELSE  
+                    RETURN -1  
+                END IF  
+            ELSE  
+                IF a == 2 AND b == 0 THEN  
+                    RETURN -1  
+                ELSE  
+                    RETURN 1  
+                END IF  
+            END IF  
+        END FUNCTION  
+  
+        FUNCTION dfs(index, balance, last_move)  
+            IF (LENGTH(s) - index) <= balance THEN  
+                RETURN 0  
+            END IF  
+            IF index >= LENGTH(s) THEN  
+                RETURN 1 IF balance < 0 ELSE 0  
+            END IF  
+  
+            SET total TO 0  
+            FOR move FROM 0 TO 2 DO  
+                IF move == last_move THEN  
+                    CONTINUE  
+                END IF  
+                SET updated_balance TO balance + calc(d[s[index]], move)  
+                SET total TO (total + dfs(index + 1, updated_balance, move)) MOD mod  
+            END FOR  
+  
+            RETURN total  
+        END FUNCTION  
+  
+        SET result TO dfs(0, 0, -1)  
+        CALL dfs.cache_clear()  
+        RETURN result  
+    END FUNCTION  
+END CLASS

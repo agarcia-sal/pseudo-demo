@@ -1,0 +1,21 @@
+FUNCTION order_by_points(collection_of_values)
+    FUNCTION digits_sum(value)
+        SET polarity TO 1
+        WHEN NOT (value >= 0)
+            SET value TO 0 - value
+            SET polarity TO 0 - polarity
+        END WHEN
+        LET fragment_array <- ARRAY_FROM_STRING(CONVERT_TO_STRING(value))
+        fragment_array[0] <- fragment_array[0] * polarity
+        LET accumulator <- 0
+        FUNCTION recursive_accumulate(index)
+            IF index = LENGTH(fragment_array)
+                RETURN accumulator
+            END IF
+            accumulator <- accumulator + fragment_array[index]
+            RETURN recursive_accumulate(index + 1)
+        END FUNCTION
+        RETURN recursive_accumulate(0)
+    END FUNCTION
+    RETURN SORT(collection_of_values, BY digits_sum)
+END FUNCTION

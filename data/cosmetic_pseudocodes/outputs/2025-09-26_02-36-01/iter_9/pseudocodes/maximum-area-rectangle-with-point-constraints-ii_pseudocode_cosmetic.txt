@@ -1,0 +1,167 @@
+CLASS Fenwick  
+    FUNCTION __init__(self, alpha)  
+        LET beta BE []  
+        LET gamma BE 0  
+        WHILE gamma LESS THAN (alpha + 1)  
+            APPEND 0 TO beta  
+            SET gamma TO gamma + 1  
+        END WHILE  
+        SET self.tree TO beta  
+    END FUNCTION  
+
+    FUNCTION add(self, epsilon)  
+        LET zeta BE self.tree  
+        LET eta BE epsilon  
+        WHILE eta < LENGTH(zeta)  
+            SET zeta[eta] TO zeta[eta] + 1  
+            SET eta TO eta + (eta BITWISE_AND (-eta))  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION pre(self, iota)  
+        LET kappa BE 0  
+        LET lambda BE iota  
+        WHILE lambda > 0  
+            SET kappa TO kappa + self.tree[lambda]  
+            SET lambda TO lambda BITWISE_AND (lambda - 1)  
+        END WHILE  
+        RETURN kappa  
+    END FUNCTION  
+
+    FUNCTION query(self, mu, nu)  
+        RETURN self.pre(nu) - self.pre(mu - 1)  
+    END FUNCTION  
+END CLASS  
+
+
+CLASS Solution  
+    FUNCTION maxRectangleArea(self, varphi, chi)  
+        LET psi BE []  
+        LET omega BE 0  
+        WHILE omega < LENGTH(varphi)  
+            APPEND [varphi[omega], chi[omega]] TO psi  
+            SET omega TO omega + 1  
+        END WHILE  
+        
+        CALL helperSortPairs(psi)  
+
+        LET delta BE helperUniqueSorted(chi)  
+
+        LET sigma BE -1  
+
+        LET tree BE Fenwick(LENGTH(delta))  
+
+        LET initialIndex BE helperBisectLeft(delta, psi[0][1]) + 1  
+        CALL tree.add(initialIndex)  
+
+        LET preMap BE {}  
+
+        LET pi BE 0  
+        LET rho BE 1  
+        WHILE rho < LENGTH(psi)  
+            LET x1, y1 BE psi[pi][0], psi[pi][1]  
+            LET x2, y2 BE psi[rho][0], psi[rho][1]  
+
+            LET s BE helperBisectLeft(delta, y2) + 1  
+            CALL tree.add(s)  
+
+            IF NOT (x1 == x2)  
+                SET pi TO pi + 1  
+                SET rho TO rho + 1  
+                CONTINUE  
+            END IF  
+
+            LET leftBound BE helperBisectLeft(delta, y1) + 1  
+            LET curVal BE tree.query(leftBound, s)  
+
+            IF (y2 IN preMap) AND (preMap[y2][1] == y1) AND (preMap[y2][2] + 2 == curVal)  
+                LET candidate BE (x2 - preMap[y2][0]) * (y2 - y1)  
+                IF candidate > sigma  
+                    SET sigma TO candidate  
+                END IF  
+            END IF  
+
+            SET preMap[y2] TO [x1, y1, curVal]  
+
+            SET pi TO pi + 1  
+            SET rho TO rho + 1  
+        END WHILE  
+
+        RETURN sigma  
+    END FUNCTION  
+
+    FUNCTION helperSortPairs(arr)  
+        FOR i FROM 0 TO LENGTH(arr) - 2  
+            LET j BE i + 1  
+            WHILE j > 0 AND helperPairCompare(arr[j - 1], arr[j]) == 1  
+                LET temp BE arr[j - 1]  
+                SET arr[j - 1] TO arr[j]  
+                SET arr[j] TO temp  
+                SET j TO j - 1  
+            END WHILE  
+        END FOR  
+    END FUNCTION  
+
+    FUNCTION helperPairCompare(a, b)  
+        IF a[0] < b[0]  
+            RETURN -1  
+        ELSEIF a[0] > b[0]  
+            RETURN 1  
+        ELSE  
+            IF a[1] < b[1]  
+                RETURN -1  
+            ELSEIF a[1] > b[1]  
+                RETURN 1  
+            ELSE  
+                RETURN 0  
+            END IF  
+        END IF  
+    END FUNCTION  
+
+    FUNCTION helperUniqueSorted(lst)  
+        LET result BE []  
+        LET seen BE {}  
+        LET idx BE 0  
+        WHILE idx < LENGTH(lst)  
+            LET val BE lst[idx]  
+            IF NOT (val IN seen)  
+                APPEND val TO result  
+                SET seen[val] TO TRUE  
+            END IF  
+            SET idx TO idx + 1  
+        END WHILE  
+        CALL helperSortInPlace(result)  
+        RETURN result  
+    END FUNCTION  
+
+    FUNCTION helperSortInPlace(arr)  
+        LET n BE LENGTH(arr)  
+        LET i BE 0  
+        WHILE i < n - 1  
+            LET j BE 0  
+            WHILE j < n - i - 1  
+                IF arr[j] > arr[j + 1]  
+                    LET tmp BE arr[j]  
+                    SET arr[j] TO arr[j + 1]  
+                    SET arr[j + 1] TO tmp  
+                END IF  
+                SET j TO j + 1  
+            END WHILE  
+            SET i TO i + 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION helperBisectLeft(arr, val)  
+        LET left BE 0  
+        LET right BE LENGTH(arr)  
+        WHILE left < right  
+            LET mid BE (left + right) // 2  
+            IF NOT (arr[mid] < val)  
+                SET right TO mid  
+            ELSE  
+                SET left TO mid + 1  
+            END IF  
+        END WHILE  
+        RETURN left  
+    END FUNCTION  
+END CLASS

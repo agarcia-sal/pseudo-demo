@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION minimumCost(target, words, costs)
+        DEFINE FUNCTION helper_equal_lists(listA, listB)
+            SET indexX TO 0
+            SET lenA TO LENGTH(listA)
+            SET lenB TO LENGTH(listB)
+            IF lenA NOT EQUAL TO lenB THEN RETURN FALSE END IF
+            WHILE indexX < lenA
+                IF NOT (listA[indexX] EQUALS listB[indexX])
+                    RETURN FALSE
+                END IF
+                SET indexX TO indexX + 1
+            END WHILE
+            RETURN TRUE
+        END FUNCTION
+
+        DEFINE FUNCTION build_dict(keys, vals)
+            SET dictZ TO {}
+            SET idxP TO 0
+            WHILE idxP LESS THAN LENGTH(keys)
+                SET keyCurr TO keys[idxP]
+                SET valCurr TO vals[idxP]
+                IF keyCurr NOT IN dictZ THEN
+                    SET dictZ[keyCurr] = valCurr
+                ELSE IF valCurr < dictZ[keyCurr]
+                    SET dictZ[keyCurr] = valCurr
+                END IF
+                SET idxP TO idxP + 1
+            END WHILE
+            RETURN dictZ
+        END FUNCTION
+
+        SET map_value TO build_dict(words, costs)
+        SET target_array TO []
+        SET counterM TO 0
+        WHILE counterM < LENGTH(target)
+            APPEND target[counterM] TO target_array
+            SET counterM TO counterM + 1
+        END WHILE
+
+        DEFINE FUNCTION recur_calc(position)
+            IF position EQUALS LENGTH(target_array)
+                RETURN 0
+            END IF
+
+            SET minimal_price TO 1 / 0
+            SET items_list TO []
+            FOR EACH keyK IN map_value
+                APPEND (keyK, map_value[keyK]) TO items_list
+            END FOR
+
+            SET idxN TO 0
+            WHILE idxN < LENGTH(items_list)
+                SET (checkWord, checkCost) TO items_list[idxN]
+                SET endPos TO position + LENGTH(checkWord)
+                IF (endPos <= LENGTH(target_array)) THEN
+                    SET segment TO []
+                    SET sIndex TO position
+                    WHILE sIndex < endPos
+                        APPEND target_array[sIndex] TO segment
+                        SET sIndex TO sIndex + 1
+                    END WHILE
+
+                    IF helper_equal_lists(segment, [c FOR c IN checkWord])
+                        SET next_call_result TO recur_calc(endPos)
+                        IF next_call_result NOT EQUAL TO (1 / 0)
+                            IF (checkCost + next_call_result) < minimal_price
+                                SET minimal_price TO checkCost + next_call_result
+                            END IF
+                        END IF
+                    END IF
+                END IF
+                SET idxN TO idxN + 1
+            END WHILE
+
+            IF minimal_price NOT EQUAL TO (1 / 0)
+                RETURN minimal_price
+            ELSE
+                RETURN 1 / 0
+            END IF
+        END FUNCTION
+
+        SET outcome TO recur_calc(0)
+        IF outcome NOT EQUAL TO (1 / 0)
+            RETURN outcome
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

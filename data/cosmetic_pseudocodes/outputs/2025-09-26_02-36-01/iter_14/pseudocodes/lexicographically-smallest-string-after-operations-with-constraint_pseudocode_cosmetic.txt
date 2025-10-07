@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION getSmallestString(s parameter of type string k parameter of type integer) RETURNS string
+        FUNCTION cyclic_distance(c1 parameter of type character c2 parameter of type character) RETURNS integer
+            DEFINE FUNCTION abs_val(x parameter of type integer) RETURNS integer
+                IF x LESS THAN zero THEN
+                    RETURN 0 - x
+                ELSE
+                    RETURN x
+                END IF
+            END FUNCTION
+
+            SET diff TO abs_val( (CAST_TO_INT c1) - (CAST_TO_INT c2) )
+            SET twenty_six_minus_diff TO 26 - diff
+
+            IF twenty_six_minus_diff LESS THAN diff THEN
+                RETURN twenty_six_minus_diff
+            ELSE
+                RETURN diff
+            END IF
+        END FUNCTION
+
+        SET char_list TO []
+        FOR pos FROM 0 TO (LENGTH s) - 1 STEP 1
+            APPEND s[pos] TO char_list
+        END FOR
+
+        SET iter_index TO 0
+        SET str_len TO LENGTH s
+
+        LABEL loop_start:
+            IF NOT (k GREATER THAN 0 AND iter_index LESS THAN str_len) THEN
+                GOTO loop_end
+            END IF
+
+            IF char_list[iter_index] EQUALS 'a' THEN
+                SET iter_index TO iter_index + 1
+                GOTO loop_start
+            ELSE
+                SET current_char TO char_list[iter_index]
+                SET dist_to_a TO cyclic_distance(current_char, 'a')
+
+                IF dist_to_a GREATER THAN k THEN
+                    SET new_char_code TO (CAST_TO_INT current_char) - k
+                    SET char_list[iter_index] TO CAST_TO_CHAR(new_char_code)
+                    SET k TO 0
+                ELSE
+                    SET char_list[iter_index] TO 'a'
+                    SET k TO k - dist_to_a
+                END IF
+
+                SET iter_index TO iter_index + 1
+                GOTO loop_start
+            END IF
+        LABEL loop_end:
+
+        SET result_string TO ""
+        FOR idx FROM 0 TO (LENGTH char_list) - 1 STEP 1
+            SET result_string TO result_string + char_list[idx]
+        END FOR
+
+        RETURN result_string
+    END FUNCTION
+END CLASS

@@ -1,0 +1,85 @@
+```
+FUNCTION sort_numbers(magnitude_ciphertext)
+    DEFINE numeral_indexing AS
+        'zero' => 0,
+        'one' => 1,
+        'two' => 2,
+        'three' => 3,
+        'four' => 4,
+        'five' => 5,
+        'six' => 6,
+        'seven' => 7,
+        'eight' => 8,
+        'nine' => 9
+
+    FUNCTION parse_and_clean(input_str, accumulator, cursor)
+        IF cursor == LENGTH(input_str) THEN
+            RETURN accumulator
+        ELSE
+            SET start_pos TO cursor
+            WHILE cursor < LENGTH(input_str) AND input_str[cursor] != ' ' DO
+                SET cursor TO cursor + 1
+            END WHILE
+            SET extracted TO SUBSTRING(input_str, start_pos, cursor)
+            IF LENGTH(extracted) > 0 THEN
+                APPEND extracted TO accumulator
+            END IF
+            WHILE cursor < LENGTH(input_str) AND input_str[cursor] == ' ' DO
+                SET cursor TO cursor + 1
+            END WHILE
+            RETURN parse_and_clean(input_str, accumulator, cursor)
+        END IF
+    END FUNCTION
+
+    SET cleaned_tokens TO parse_and_clean(magnitude_ciphertext, [], 0)
+
+    FUNCTION order_tokens(tokens_list, position)
+        IF position >= LENGTH(tokens_list) THEN
+            RETURN []
+        ELSE
+            DEFINE pivot_word AS tokens_list[position]
+            FUNCTION less_than_pivot(index, collected)
+                IF index >= LENGTH(tokens_list) THEN
+                    RETURN collected
+                ELSE
+                    IF numeral_indexing[tokens_list[index]] < numeral_indexing[pivot_word] THEN
+                        RETURN less_than_pivot(index + 1, collected + [tokens_list[index]])
+                    ELSE
+                        RETURN less_than_pivot(index + 1, collected)
+                    END IF
+                END IF
+            END FUNCTION
+
+            FUNCTION not_less_than_pivot(index, collected)
+                IF index >= LENGTH(tokens_list) THEN
+                    RETURN collected
+                ELSE
+                    IF numeral_indexing[tokens_list[index]] >= numeral_indexing[pivot_word] THEN
+                        RETURN not_less_than_pivot(index + 1, collected + [tokens_list[index]])
+                    ELSE
+                        RETURN not_less_than_pivot(index + 1, collected)
+                    END IF
+                END IF
+            END FUNCTION
+
+            SET left_side TO less_than_pivot(0, [])
+            SET right_side TO not_less_than_pivot(0, [])
+            RETURN order_tokens(left_side + right_side, position + 1)
+        END IF
+    END FUNCTION
+
+    FUNCTION quicksort(arr)
+        IF LENGTH(arr) <= 1 THEN
+            RETURN arr
+        ELSE
+            SET pivot TO arr[0]
+            SET less_equal TO [x FOR x IN arr[1:] WHERE numeral_indexing[x] <= numeral_indexing[pivot]]
+            SET greater TO [x FOR x IN arr[1:] WHERE numeral_indexing[x] > numeral_indexing[pivot]]
+            RETURN quicksort(less_equal) + [pivot] + quicksort(greater)
+        END IF
+    END FUNCTION
+
+    SET ordered_words TO quicksort(cleaned_tokens)
+    RETURN CONCATENATE_WITH_SPACES(ordered_words)
+END FUNCTION
+```

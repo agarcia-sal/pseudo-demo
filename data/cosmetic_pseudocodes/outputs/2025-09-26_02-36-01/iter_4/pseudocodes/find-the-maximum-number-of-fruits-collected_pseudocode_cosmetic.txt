@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+        DECLARE lengthGrid AS LENGTH OF fruits
+
+        DECLARE directionsOne AS LIST OF PAIRS: (1,1), (1,0)
+        DECLARE directionsTwo AS LIST OF PAIRS: (1,-1), (1,0), (1,1)
+        DECLARE directionsThree AS LIST OF PAIRS: (-1,1), (0,1), (1,1)
+
+        DECLARE memoizationMap AS EMPTY MAP
+
+        FUNCTION dp(xA, yA, xB, yB, xC, yC)
+            LET outOfBoundsCondition BE (xA < 0 OR xA >= lengthGrid OR yA < 0 OR yA >= lengthGrid OR xB < 0 OR xB >= lengthGrid OR yB < 0 OR yB >= lengthGrid OR xC < 0 OR xC >= lengthGrid OR yC < 0 OR yC >= lengthGrid)
+            IF outOfBoundsCondition IS TRUE THEN
+                RETURN -∞
+            ENDIF
+
+            LET terminalPosition BE (xA = yA AND yA = xB AND xB = yB AND yB = xC AND xC = yC AND yC = lengthGrid - 1)
+            IF terminalPosition IS TRUE THEN
+                RETURN fruits[lengthGrid - 1][lengthGrid - 1]
+            ENDIF
+
+            LET stateKey BE TUPLE(xA, yA, xB, yB, xC, yC)
+            IF stateKey EXISTS IN memoizationMap THEN
+                RETURN memoizationMap[stateKey]
+            ENDIF
+
+            LET sumCollected BE fruits[xA][yA]
+
+            IF (xA = xB AND yA = yB) OR (xA = xC AND yA = yC) THEN
+                SET sumCollected AS 0
+            ENDIF
+
+            IF xB = xC AND yB = yC THEN
+                SET sumCollected AS sumCollected + fruits[xB][yB]
+            ELSE
+                SET incrementB AS fruits[xB][yB]
+                SET incrementC AS fruits[xC][yC]
+                SET sumCollected AS sumCollected + incrementB + incrementC
+            ENDIF
+
+            LET maxNextFruits AS -∞
+
+            FOR EACH (deltaXA, deltaYA) IN directionsOne DO
+                FOR EACH (deltaXB, deltaYB) IN directionsTwo DO
+                    FOR EACH (deltaXC, deltaYC) IN directionsThree DO
+                        LET nextCandidate BE dp(xA + deltaXA, yA + deltaYA, xB + deltaXB, yB + deltaYB, xC + deltaXC, yC + deltaYC)
+                        IF nextCandidate > maxNextFruits THEN
+                            SET maxNextFruits TO nextCandidate
+                        ENDIF
+                    ENDFOR
+                ENDFOR
+            ENDFOR
+
+            LET totalCollected BE sumCollected + maxNextFruits
+            STORE totalCollected INTO memoizationMap[stateKey]
+            RETURN totalCollected
+
+        END FUNCTION
+
+        RETURN dp(0, 0, 0, lengthGrid - 1, lengthGrid - 1, 0)
+    END FUNCTION
+END CLASS

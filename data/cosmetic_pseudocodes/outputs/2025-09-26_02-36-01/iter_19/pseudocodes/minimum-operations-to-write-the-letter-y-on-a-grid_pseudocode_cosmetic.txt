@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        SET delta TO LENGTH(grid)
+        SET midpoint TO delta DIV 2
+        SET alpha TO EMPTY SET
+
+        SET j TO 0
+        WHILE j <= midpoint
+        BEGIN
+            ADD (j, j) TO alpha
+            SET j TO j + 1
+        END
+
+        SET k TO 0
+        REPEAT
+            ADD (k, delta - k - 1) TO alpha
+            SET k TO k + 1
+        UNTIL k > midpoint
+
+        SET z TO midpoint
+        WHILE z <= delta - 1
+            ADD (z, midpoint) TO alpha
+            SET z TO z + 1
+        END
+
+        FUNCTION compute_frequency(coords, matrix)
+            SET freq_map TO EMPTY MAP WITH DEFAULT 0
+            FOR EACH pair IN coords
+                LET x_val BE pair[0]
+                LET y_val BE pair[1]
+                LET element BE matrix[x_val][y_val]
+                SET freq_map[element] TO freq_map[element] + 1
+            END FOR
+            RETURN freq_map
+        END FUNCTION
+
+        SET letter_y_counts TO compute_frequency(alpha, grid)
+
+        FUNCTION compute_non_counters(coords, matrix, size)
+            SET freq_map TO EMPTY MAP WITH DEFAULT 0
+            FOR m FROM 0 TO size - 1
+                FOR n FROM 0 TO size - 1
+                    IF (m, n) NOT IN coords
+                        LET val BE matrix[m][n]
+                        SET freq_map[val] TO freq_map[val] + 1
+                    END IF
+                END FOR
+            END FOR
+            RETURN freq_map
+        END FUNCTION
+
+        SET non_letter_y_counts TO compute_non_counters(alpha, grid, delta)
+
+        SET smallest_ops TO +∞
+
+        FUNCTION sum_map_values(m)
+            SET total TO 0
+            FOR EACH key IN m
+                SET total TO total + m[key]
+            END FOR
+            RETURN total
+        END FUNCTION
+
+        SET a TO 0
+        WHILE a <= 2
+            SET b TO 0
+            WHILE b <= 2
+                IF NOT (a = b)
+                    LET sum_y_values BE sum_map_values(letter_y_counts)
+                    LET removals_y BE letter_y_counts[a] IF a IN letter_y_counts ELSE 0
+                    LET sum_non_y_values BE sum_map_values(non_letter_y_counts)
+                    LET removals_non_y BE non_letter_y_counts[b] IF b IN non_letter_y_counts ELSE 0
+                    SET candidate TO (sum_y_values - removals_y) + (sum_non_y_values - removals_non_y)
+                    IF candidate < smallest_ops THEN SET smallest_ops TO candidate
+                END IF
+                SET b TO b + 1
+            END
+            SET a TO a + 1
+        END
+
+        RETURN smallest_ops
+    END FUNCTION
+END CLASS

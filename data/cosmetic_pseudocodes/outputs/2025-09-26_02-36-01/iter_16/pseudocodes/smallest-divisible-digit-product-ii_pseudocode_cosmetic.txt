@@ -1,0 +1,122 @@
+CLASS Solution
+	FUNCTION smallestNumber(originalString, factorParam)
+		SET alphaCounts, divisionFlag TO self._getPrimeCount(factorParam)
+		IF divisionFlag = FALSE
+			RETURN "-" + "1"
+		END IF
+
+		SET betaCounts TO self._getFactorCount(alphaCounts)
+		IF SUM OF ALL VALUES IN betaCounts > LENGTH(originalString)
+			SET resultString TO ""
+			FOR EACH key IN betaCounts KEYS
+				SET times TO betaCounts[key]
+				FOR repeatIndex FROM 0 TO times - 1
+					resultString = resultString + key
+				END FOR
+			END FOR
+			RETURN resultString
+		END IF
+
+		SET prefixSum TO EMPTY_COUNTER
+		FOR charIndex FROM 0 TO LENGTH(originalString) - 1
+			SET digitVal TO ASCII_VALUE_OF(originalString[charIndex]) - ASCII_VALUE_OF('0')
+			prefixSum = prefixSum + FACTOR_COUNTS[digitVal]
+		END FOR
+
+		SET zeroPos TO LENGTH(originalString)
+		FOR posIndex FROM 0 TO LENGTH(originalString) - 1
+			IF originalString[posIndex] = "0"
+				zeroPos = posIndex
+				BREAK
+			END IF
+		END FOR
+
+		IF zeroPos = LENGTH(originalString) AND alphaCounts <= prefixSum
+			RETURN originalString
+		END IF
+
+		SET lengthStr TO LENGTH(originalString)
+		SET revIndex TO lengthStr - 1
+		WHILE revIndex >= 0
+			SET currentDigit TO ASCII_VALUE_OF(originalString[revIndex]) - ASCII_VALUE_OF('0')
+			prefixSum = prefixSum - FACTOR_COUNTS[currentDigit]
+			SET availableSpaces TO lengthStr - 1 - revIndex
+
+			IF revIndex <= zeroPos
+				SET testDigit TO currentDigit + 1
+				WHILE testDigit <= 9
+					SET updatedCounts TO self._getFactorCount(alphaCounts - prefixSum - FACTOR_COUNTS[testDigit])
+					IF SUM OF ALL VALUES IN updatedCounts <= availableSpaces
+						SET fillCount TO availableSpaces - SUM OF ALL VALUES IN updatedCounts
+						SET answerString TO SUBSTRING(originalString, 0, revIndex) + STRING(testDigit) + REPEAT_CHARACTER("1", fillCount)
+						FOR each key IN updatedCounts KEYS
+							FOR countLoop FROM 0 TO updatedCounts[key] - 1
+								answerString = answerString + key
+							END FOR
+						END FOR
+						RETURN answerString
+					END IF
+					testDigit = testDigit + 1
+				END WHILE
+			END IF
+
+			revIndex = revIndex - 1
+		END WHILE
+
+		SET betaCountsFinal TO self._getFactorCount(alphaCounts)
+		SET totalFill TO LENGTH(originalString) + 1 - SUM OF ALL VALUES IN betaCountsFinal
+		SET outputString TO REPEAT_CHARACTER("1", totalFill)
+		FOR EACH key IN betaCountsFinal KEYS
+			FOR loopIndex FROM 0 TO betaCountsFinal[key] - 1
+				outputString = outputString + key
+			END FOR
+		END FOR
+		RETURN outputString
+	END FUNCTION
+
+	FUNCTION _getPrimeCount(inputVal)
+		SET countMap TO EMPTY_COUNTER
+		SET primes TO [2, 3, 5, 7]
+		FOR EACH primeVal IN primes
+			WHILE (inputVal MOD primeVal) = 0
+				inputVal = inputVal / primeVal
+				countMap[primeVal] = IF EXISTS countMap[primeVal] THEN countMap[primeVal] + 1 ELSE 1
+			END WHILE
+		END FOR
+		RETURN countMap, (inputVal = 1)
+	END FUNCTION
+
+	FUNCTION _getFactorCount(factors)
+		SET div2 TO FLOOR_DIVIDE(factors[2], 3)
+		SET rem2 TO factors[2] MOD 3
+		SET div3 TO FLOOR_DIVIDE(factors[3], 2)
+		SET rem3 TO factors[3] MOD 2
+		SET countFour TO FLOOR_DIVIDE(rem2, 2)
+		SET countTwo TO rem2 MOD 2
+		SET countSix TO 0
+
+		IF countTwo = 1 AND rem3 = 1
+			countTwo = 0
+			rem3 = 0
+			countSix = 1
+		END IF
+
+		IF rem3 = 1 AND countFour = 1
+			countTwo = 1
+			countSix = 1
+			rem3 = 0
+			countFour = 0
+		END IF
+
+		RETURN {
+			"2": countTwo,
+			"3": rem3,
+			"4": countFour,
+			"5": factors[5],
+			"6": countSix,
+			"7": factors[7],
+			"8": div2,
+			"9": div3
+		}
+	END FUNCTION
+END CLASS

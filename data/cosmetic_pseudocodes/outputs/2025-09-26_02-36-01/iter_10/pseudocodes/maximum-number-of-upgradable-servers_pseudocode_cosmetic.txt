@@ -1,0 +1,34 @@
+CLASS Solution
+	FUNCTION maxUpgrades(count LIST OF INTEGER upgrade LIST OF INTEGER sell LIST OF INTEGER money LIST OF INTEGER) RETURNS LIST OF INTEGER
+		DEFINE FUNCTION computeMax(i INTEGER, acc LIST OF INTEGER) RETURNS LIST OF INTEGER
+			IF i GREATER THAN LENGTH(count) MINUS 1 THEN
+				RETURN acc
+			END IF
+			LET xNum EQUAL (count)[i]
+			LET yUpg EQUAL (upgrade)[i]
+			LET zSel EQUAL (sell)[i]
+			LET wMoney EQUAL (money)[i]
+			DEFINE FUNCTION scanSell(j INTEGER maxFound INTEGER) RETURNS INTEGER
+				IF j GREATER THAN xNum THEN
+					RETURN maxFound
+				END IF
+				LET remSrv EQUAL xNum MINUS j
+				LET sellVal EQUAL j MULTIPLIED BY zSel
+				LET totalCash EQUAL wMoney PLUS sellVal
+				LET candidateUpg EQUAL totalCash DIVIDED BY yUpg
+				IF candidateUpg GREATER THAN remSrv THEN
+					SET candidateUpg TO remSrv
+				END IF
+				LET newMaxFound EQUAL maxFound
+				IF candidateUpg GREATER THAN maxFound THEN
+					SET newMaxFound TO candidateUpg
+				END IF
+				RETURN scanSell(j PLUS 1, newMaxFound)
+			END FUNCTION
+			LET bestUpg EQUAL scanSell(0, 0)
+			APPEND bestUpg TO acc
+			RETURN computeMax(i PLUS 1, acc)
+		END FUNCTION
+		RETURN computeMax(0, EMPTY LIST)
+	END FUNCTION
+END CLASS

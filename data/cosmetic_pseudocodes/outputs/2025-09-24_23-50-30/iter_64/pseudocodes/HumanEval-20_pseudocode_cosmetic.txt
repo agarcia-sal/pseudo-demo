@@ -1,0 +1,40 @@
+```
+FUNCTION find_closest_elements(p_sequence)
+  INITIALIZE a_min_distance AS None
+  INITIALIZE a_best_pair AS None
+
+  DEFINE FUNCTION iterate_outer(o_idx)
+    IF o_idx >= LENGTH(p_sequence) THEN
+      RETURN
+    ELSE
+      DEFINE FUNCTION iterate_inner(i_idx)
+        IF i_idx >= LENGTH(p_sequence) THEN
+          RETURN
+        ELSE
+          IF NOT (o_idx = i_idx) THEN
+            LET d_val = ABS(p_sequence[o_idx] - p_sequence[i_idx])
+            SELECT CASE TRUE
+              CASE a_min_distance IS None
+                ASSIGN a_min_distance := d_val
+                ASSIGN a_best_pair := SORTED_PAIR(p_sequence[o_idx], p_sequence[i_idx])
+              CASE d_val < a_min_distance
+                ASSIGN a_min_distance := d_val
+                ASSIGN a_best_pair := SORTED_PAIR(p_sequence[o_idx], p_sequence[i_idx])
+              CASE ELSE
+                NO_OP
+            END SELECT
+          END IF
+          CALL iterate_inner(i_idx + 1)
+        END IF
+      END FUNCTION
+
+      CALL iterate_inner(0)
+      CALL iterate_outer(o_idx + 1)
+    END IF
+  END FUNCTION
+
+  CALL iterate_outer(0)
+
+  RETURN a_best_pair
+END FUNCTION
+```

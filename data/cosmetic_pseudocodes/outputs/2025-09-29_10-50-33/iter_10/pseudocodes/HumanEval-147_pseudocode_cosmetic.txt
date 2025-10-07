@@ -1,0 +1,30 @@
+FUNCTION get_max_triples(integer_n)
+  SET accumulation TO []
+  SET recursion_index TO 1
+  FUNCTION populate_accumulation(recursion_index)
+    IF recursion_index GREATER integer_n THEN RETURN
+    SET element TO ((recursion_index * recursion_index) - recursion_index + 1)
+    EXECUTE accumulation APPEND element
+    INVOKE populate_accumulation(recursion_index + 1)
+  END FUNCTION
+  INVOKE populate_accumulation(1)
+
+  SET result_collection TO []
+
+  FUNCTION iterate_k(h_index, j_index)
+    IF h_index GREATER_EQ integer_n - 1 THEN RETURN
+    IF j_index GREATER_EQ integer_n - 1 THEN 
+      INVOKE iterate_k(h_index + 1, h_index + 2)
+      RETURN
+    END IF
+    SET sum_mod TO (accumulation[h_index] + accumulation[j_index] + accumulation[j_index + 1]) MOD 3
+    IF NOT (sum_mod NOT_EQUALS 0) THEN
+      EXECUTE result_collection APPEND (accumulation[h_index], accumulation[j_index], accumulation[j_index + 1])
+    END IF
+    INVOKE iterate_k(h_index, j_index + 1)
+  END FUNCTION
+
+  INVOKE iterate_k(0, 1)
+
+  RETURN LENGTH(result_collection)
+END FUNCTION

@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION makeAntiPalindrome(s)
+        FUNCTION exchange(arr, x, y)
+            SET tempVal TO arr[y]
+            SET arr[y] TO arr[x]
+            SET arr[x] TO tempVal
+        END FUNCTION
+
+        SET charList TO []
+        FOR idx FROM 0 TO (LEN(s) - 1)
+            INSERT s[idx] INTO charList
+        END FOR
+
+        SET idxLen TO LEN(charList)
+        FOR pass FROM 0 TO (idxLen - 2)
+            SET inner TO 0
+            WHILE inner < (idxLen - pass - 1)
+                IF charList[inner] > charList[inner + 1]
+                    CALL exchange(charList, inner, inner + 1)
+                END IF
+                SET inner TO inner + 1
+            END WHILE
+        END FOR
+
+        SET halfIdx TO idxLen / 2
+        SET halfFloor TO INTEGER(halfIdx)
+
+        IF charList[halfFloor] = charList[halfFloor - 1] THEN
+            SET posA TO halfFloor
+            WHILE (posA < idxLen) AND (charList[posA] = charList[posA - 1])
+                SET posA TO posA + 1
+            END WHILE
+
+            SET posB TO halfFloor
+            WHILE (posB < idxLen) AND (charList[posB] = charList[idxLen - posB - 1])
+                IF posA >= idxLen THEN
+                    RETURN "-1"
+                END IF
+                CALL exchange(charList, posA, posB)
+                SET posA TO posA + 1
+                SET posB TO posB + 1
+            END WHILE
+        END IF
+
+        SET counter TO 0
+        LOOP WHILE counter <= (halfFloor - 1)
+            IF charList[counter] = charList[idxLen - counter - 1] THEN
+                SET flagSwap TO false
+                FOR scan FROM halfFloor TO (idxLen - 1)
+                    IF (charList[scan] <> charList[counter]) AND (charList[scan] <> charList[idxLen - counter - 1]) THEN
+                        CALL exchange(charList, scan, counter)
+                        SET flagSwap TO true
+                        EXIT FOR
+                    END IF
+                END FOR
+                IF NOT flagSwap THEN
+                    RETURN "-1"
+                END IF
+            END IF
+            SET counter TO counter + 1
+        END LOOP
+
+        SET outputStr TO ""
+        SET iterIdx TO 0
+        WHILE iterIdx < idxLen
+            SET outputStr TO outputStr + charList[iterIdx]
+            SET iterIdx TO iterIdx + 1
+        END WHILE
+
+        RETURN outputStr
+    END FUNCTION
+END CLASS

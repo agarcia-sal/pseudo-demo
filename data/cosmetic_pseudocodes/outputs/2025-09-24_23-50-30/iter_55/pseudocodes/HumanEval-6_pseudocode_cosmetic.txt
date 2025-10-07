@@ -1,0 +1,54 @@
+```
+FUNCTION parse_nested_parens(parens_str)
+    FUNCTION parse_paren_group_inner(seq_str)
+        SET depth_accumulator TO 0
+        SET max_record TO 0
+        SET idx TO 0
+        WHILE idx < LENGTH(seq_str)
+            SET char_ch TO seq_str[idx]
+            SWITCH char_ch
+                CASE '(':
+                    SET depth_accumulator TO depth_accumulator + 1
+                    IF max_record < depth_accumulator THEN
+                        SET max_record TO depth_accumulator
+                    END IF
+                    BREAK
+                DEFAULT:
+                    SET depth_accumulator TO depth_accumulator - 1
+            END SWITCH
+            SET idx TO idx + 1
+        END WHILE
+        RETURN max_record
+    END FUNCTION
+
+    SET parts TO []
+    SET start_pos TO 0
+    SET i TO 0
+    WHILE i <= LENGTH(parens_str)
+        IF i = LENGTH(parens_str) OR parens_str[i] = ' ' THEN
+            SET substr TO ""
+            IF start_pos < i THEN
+                SET j TO start_pos
+                WHILE j < i
+                    SET substr TO substr + parens_str[j]
+                    SET j TO j + 1
+                END WHILE
+            END IF
+            IF LENGTH(substr) > 0 THEN
+                APPEND substr TO parts
+            END IF
+            SET start_pos TO i + 1
+        END IF
+        SET i TO i + 1
+    END WHILE
+
+    SET result_list TO []
+    SET k TO 0
+    WHILE k < LENGTH(parts)
+        SET elem TO parts[k]
+        APPEND parse_paren_group_inner(elem) TO result_list
+        SET k TO k + 1
+    END WHILE
+    RETURN result_list
+END FUNCTION
+```

@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        PROCEDURE splitAtFullStop(input STRING) RETURNS LIST OF STRING
+            DECLARE results LIST OF STRING ← empty list
+            DECLARE start INTEGER ← 0
+            DECLARE index INTEGER ← 0
+            WHILE index < LENGTH(input) DO
+                IF input[index] = '.' THEN
+                    ADD SUBSTRING(input, start, index - start) TO results
+                    SET start ← index + 1
+                END IF
+                SET index ← index + 1
+            END WHILE
+            IF start ≤ LENGTH(input) THEN
+                ADD SUBSTRING(input, start, LENGTH(input) - start) TO results
+            END IF
+            RETURN results
+        END PROCEDURE
+
+        DECLARE segments LIST OF STRING ← splitAtFullStop(road)
+
+        PROCEDURE ascendingLengthSort(arr LIST OF STRING) RETURNS LIST OF STRING
+            DECLARE changed BOOLEAN ← TRUE
+            WHILE changed DO
+                SET changed ← FALSE
+                DECLARE i INTEGER ← 0
+                WHILE i < LENGTH(arr) - 1 DO
+                    IF LENGTH(arr[i]) > LENGTH(arr[i + 1]) THEN
+                        DECLARE temp STRING ← arr[i]
+                        SET arr[i] ← arr[i + 1]
+                        SET arr[i + 1] ← temp
+                        SET changed ← TRUE
+                    END IF
+                    INCREMENT i BY 1
+                END WHILE
+            END WHILE
+            RETURN arr
+        END PROCEDURE
+
+        DECLARE sortedSegments LIST OF STRING ← ascendingLengthSort(segments)
+
+        DECLARE totalFixed INTEGER ← 0
+        DECLARE segmentIndex INTEGER ← 0
+
+        WHILE segmentIndex < LENGTH(sortedSegments) DO
+            DECLARE fragment STRING ← sortedSegments[segmentIndex]
+            DECLARE fragmentLength INTEGER ← LENGTH(fragment)
+
+            IF NOT (fragmentLength = 0) THEN
+
+                DECLARE requiredCost INTEGER ← fragmentLength + 1
+
+                IF budget ≥ requiredCost THEN
+                    SET totalFixed ← totalFixed + fragmentLength
+                    SET budget ← budget - requiredCost
+                ELSE
+                    DECLARE lengthTracker INTEGER ← fragmentLength
+                    DECLARE continueLoop BOOLEAN ← TRUE
+
+                    WHILE continueLoop AND lengthTracker > 0 AND budget > 0 DO
+                        SET requiredCost ← lengthTracker + 1
+
+                        IF budget ≥ requiredCost THEN
+                            SET totalFixed ← totalFixed + lengthTracker
+                            SET budget ← budget - requiredCost
+                            SET continueLoop ← FALSE
+                        ELSE
+                            SET lengthTracker ← lengthTracker - 1
+                        END IF
+                    END WHILE
+
+                END IF
+
+            END IF
+
+            SET segmentIndex ← segmentIndex + 1
+        END WHILE
+
+        RETURN totalFixed
+
+    END FUNCTION
+END CLASS

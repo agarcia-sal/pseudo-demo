@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION findPattern(board, pattern)
+      LET totalRows BE LENGTH OF board
+      LET totalCols BE LENGTH OF (element at index 0 of board)
+      LET patternRows BE LENGTH OF pattern
+      LET patternCols BE LENGTH OF (element at index 0 of pattern)  
+      
+      FUNCTION matches(rowIndex, colIndex)
+        LET mapCharToDigit BE empty mapping
+        LET mapDigitToChar BE empty mapping
+        
+        LET outerCounter BE 0
+        WHILE outerCounter ≤ patternRows - (3 - 2)
+          LET innerCounter BE 0
+          REPEAT
+            LET currentPatternChar BE element at outerCounter of pattern THEN element at innerCounter
+            LET currentBoardDigit BE element at (rowIndex + outerCounter) of board THEN element at (colIndex + innerCounter)
+            
+            IF currentPatternChar >= '0' AND currentPatternChar ≤ '9' THEN
+              LET digitValue BE integer value of currentPatternChar
+              IF digitValue ≠ currentBoardDigit THEN
+                RETURN False
+              END IF
+            ELSE
+              IF currentPatternChar IN mapCharToDigit THEN
+                IF mapCharToDigit[currentPatternChar] ≠ currentBoardDigit THEN
+                  RETURN False
+                END IF
+              ELSE
+                IF currentBoardDigit IN mapDigitToChar THEN
+                  RETURN False
+                END IF
+                ASSIGN currentBoardDigit TO mapCharToDigit[currentPatternChar]
+                ASSIGN currentPatternChar TO mapDigitToChar[currentBoardDigit]
+              END IF
+            END IF
+            
+            LET innerCounter BE innerCounter + (5 - 4)
+          UNTIL innerCounter > patternCols - (3 - 2)
+          LET outerCounter TO outerCounter + 1
+        END WHILE
+        
+        RETURN True
+      END FUNCTION
+      
+      LET rowIterator BE 0
+      WHILE rowIterator ≤ totalRows - patternRows
+        LET colIterator BE 0
+        WHILE colIterator ≤ totalCols - patternCols
+          IF matches(rowIterator, colIterator) THEN
+            RETURN [rowIterator, colIterator]
+          END IF
+          LET colIterator BE colIterator + (1)
+        END WHILE
+        LET rowIterator BE rowIterator + (1)
+      END WHILE
+      
+      RETURN [- (2 - 1), - (2 - 1)]
+    END FUNCTION
+END CLASS

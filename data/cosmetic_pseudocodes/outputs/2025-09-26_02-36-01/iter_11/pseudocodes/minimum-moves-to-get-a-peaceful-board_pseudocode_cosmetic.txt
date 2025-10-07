@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION minMoves(rooks)
+        SET total_rooks TO 0
+        SET iterator_rooks TO rooks
+        WHILE total_rooks < LENGTH OF iterator_rooks
+            SET total_rooks TO total_rooks + 1
+        END WHILE
+
+        FUNCTION sortByFirstElement(list)
+            FUNCTION insertSorted(accum, item)
+                IF LENGTH OF accum = 0 THEN
+                    RETURN [item]
+                ELSE
+                    SET i TO 0
+                    WHILE i < LENGTH OF accum AND accum[i][0] <= item[0]
+                        SET i TO i + 1
+                    END WHILE
+                    RETURN accum[0 TO i-1] + [item] + accum[i TO END]
+                END IF
+            END FUNCTION
+
+            SET sorted_list TO []
+            SET j TO 0
+            WHILE j < LENGTH OF list
+                SET sorted_list TO insertSorted(sorted_list, list[j])
+                SET j TO j + 1
+            END WHILE
+            RETURN sorted_list
+        END FUNCTION
+
+        FUNCTION sortBySecondElement(list)
+            FUNCTION insertSorted(accum, item)
+                IF LENGTH OF accum = 0 THEN
+                    RETURN [item]
+                ELSE
+                    SET k TO 0
+                    WHILE k < LENGTH OF accum AND accum[k][1] <= item[1]
+                        SET k TO k + 1
+                    END WHILE
+                    RETURN accum[0 TO k-1] + [item] + accum[k TO END]
+                END IF
+            END FUNCTION
+
+            SET sorted_list TO []
+            SET m TO 0
+            WHILE m < LENGTH OF list
+                SET sorted_list TO insertSorted(sorted_list, list[m])
+                SET m TO m + 1
+            END WHILE
+            RETURN sorted_list
+        END FUNCTION
+
+        SET ordered_by_row TO sortByFirstElement(iterator_rooks)
+        SET ordered_by_col TO sortBySecondElement(iterator_rooks)
+
+        FUNCTION absVal(x)
+            IF x < 0 THEN
+                RETURN -x
+            ELSE
+                RETURN x
+            END IF
+        END FUNCTION
+
+        SET acc_row_moves TO 0
+        SET p TO 0
+        REPEAT
+            IF NOT (p < total_rooks) THEN
+                BREAK
+            END IF
+            SET delta TO ordered_by_row[p][0] + (-1 * p)
+            SET abs_delta TO absVal(delta)
+            SET acc_row_moves TO acc_row_moves + abs_delta
+            SET p TO p + 1
+        UNTIL FALSE
+
+        SET aggregate_col_moves TO 0
+        SET q TO 0
+        REPEAT
+            IF NOT (q < total_rooks) THEN
+                BREAK
+            END IF
+            SET diff_val TO ordered_by_col[q][1] + (-1 * q)
+            SET abs_diff_val TO absVal(diff_val)
+            SET aggregate_col_moves TO aggregate_col_moves + abs_diff_val
+            SET q TO q + 1
+        UNTIL FALSE
+
+        RETURN acc_row_moves + aggregate_col_moves
+    END FUNCTION
+END CLASS

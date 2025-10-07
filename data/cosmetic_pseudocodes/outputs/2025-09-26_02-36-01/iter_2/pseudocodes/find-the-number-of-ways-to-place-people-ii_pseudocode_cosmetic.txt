@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION numberOfPairs(points)
+        DEFINE sortByXAscYDesc(a, b)
+            IF a.x IS b.x
+                RETURN b.y MINUS a.y
+            ELSE
+                RETURN a.x MINUS b.x
+            END IF
+        END DEFINE
+
+        CALL points.SORT_USING(sortByXAscYDesc)
+        LET lengthPoints BE LENGTH(points)
+        LET totalPairs BE 0
+        LET outerIndex BE 0
+
+        WHILE outerIndex LESS THAN lengthPoints MINUS 1
+            LET innerIndex BE outerIndex PLUS 1
+
+            WHILE innerIndex LESS THAN lengthPoints
+                LET px1 BE points[outerIndex]["x"]
+                LET py1 BE points[outerIndex]["y"]
+                LET px2 BE points[innerIndex].x
+                LET py2 BE points[innerIndex].y
+
+                IF (px1 LEQ px2) AND (py1 GEQ py2)
+                    LET isValidPair BE TRUE
+                    LET midIndex BE outerIndex PLUS 1
+
+                    WHILE midIndex LESS THAN innerIndex
+                        LET midX BE points[midIndex]["x"]
+                        LET midY BE points[midIndex]["y"]
+                        LET cond1 BE (px1 LEQ midX) AND (midX LEQ px2)
+                        LET cond2 BE (py2 LEQ midY) AND (midY LEQ py1)
+
+                        IF cond1 AND cond2
+                            SET isValidPair TO FALSE
+                            BREAK
+                        END IF
+
+                        INCREMENT midIndex BY 1
+                    END WHILE
+
+                    IF isValidPair EQUALS TRUE
+                        totalPairs <- totalPairs PLUS 1
+                    END IF
+                END IF
+
+                innerIndex <- innerIndex PLUS 1
+            END WHILE
+
+            outerIndex <- outerIndex PLUS 1
+        END WHILE
+
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

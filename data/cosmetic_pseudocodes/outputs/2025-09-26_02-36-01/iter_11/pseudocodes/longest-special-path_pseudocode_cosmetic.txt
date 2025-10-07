@@ -1,0 +1,80 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+      SET adjacency TO list_of_size(length(nums)) WHERE each_element IS empty_list
+
+      DEFINE procedure insertEdge(a, b, c)
+        DO addToAdjacency(a, b, c)
+        DO addToAdjacency(b, a, c)
+      END PROCEDURE
+
+      DEFINE procedure addToAdjacency(x, y, z)
+        LET nodeEntry BE pair(y, z)
+        CALL appendToList(adjacency[x], nodeEntry)
+      END PROCEDURE
+
+      DEFINE procedure appendToList(lst, val)
+        SET index TO length(lst)
+        SET lst[index] TO val
+      END PROCEDURE
+
+      FOR EACH triple uNode, vNode, edgeWeight IN edges
+        DO insertEdge(uNode, vNode, edgeWeight)
+      END FOR
+
+      DEFINE FUNCTION dfs(current, predecessor, leftBound, depthCount)
+        ACCESS outerMax FROM enclosing_scope
+        ACCESS outerMin FROM enclosing_scope
+
+        LET previousDepthValue BE getFromDictOrDefault(lastSeenDepth, nums[current], 0)
+        SET lastSeenDepth[nums[current]] TO depthCount
+
+        IF leftBound < previousDepthValue THEN
+            SET leftBound TO previousDepthValue
+        END IF
+
+        LET segmentLen BE prefix[length(prefix) - 1] - prefix[leftBound]
+        LET nodeCount BE depthCount - leftBound
+
+        IF segmentLen > outerMax OR (segmentLen == outerMax AND nodeCount < outerMin) THEN
+            SET outerMax TO segmentLen
+            SET outerMin TO nodeCount
+        END IF
+
+        DEFINE indexPairIterator(i)
+          RETURN adjacency[current][i]
+        END DEFINE
+
+        SET i TO 0
+        WHILE i < length(adjacency[current])
+          LET neighborPair BE indexPairIterator(i)
+          LET vNeighbor BE neighborPair.first
+          LET wWeight BE neighborPair.second
+
+          IF vNeighbor != predecessor THEN
+            CALL appendToList(prefix, prefix[length(prefix) - 1] + wWeight)
+            LET recDepth BE depthCount + 1
+            DO dfs(vNeighbor, current, leftBound, recDepth)
+            SET lengthPrefix TO length(prefix)
+            CALL removeLastElement(prefix, lengthPrefix)
+          END IF
+
+          SET i TO i + 1
+        END WHILE
+
+        SET lastSeenDepth[nums[current]] TO previousDepthValue
+      END FUNCTION
+
+      DEFINE PROCEDURE removeLastElement(lst, lenList)
+        SET lst[lenList - 1] TO null
+      END PROCEDURE
+
+      SET outerMax TO 0
+      SET outerMin TO 1
+      SET prefix TO list_containing(0)
+      SET lastSeenDepth TO empty_dictionary
+
+      CALL dfs(0, -1, 0, 1)
+
+      RETURN list_containing(outerMax, outerMin)
+    END FUNCTION
+END CLASS

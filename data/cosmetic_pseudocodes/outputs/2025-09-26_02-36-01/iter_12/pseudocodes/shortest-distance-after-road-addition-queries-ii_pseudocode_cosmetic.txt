@@ -1,0 +1,126 @@
+CLASS Solution
+    FUNCTION shortestDistanceAfterQueries(n, queries)
+        DECLARE adjacencyMap AS map OF int TO list OF tuple(int, int)
+        SET adjacencyMap TO empty map
+        
+        DECLARE idx AS int
+        SET idx TO 0
+        WHILE idx <= n - 2 DO
+            IF NOT adjacencyMap CONTAINS KEY idx THEN
+                SET adjacencyMap[idx] TO empty list
+            END IF
+            DECLARE edge AS tuple(int, int)
+            SET edge TO (idx + (1 * 1), (1 * 1))
+            APPEND edge TO adjacencyMap[idx]
+            SET idx TO idx + 1
+        END WHILE
+        
+        FUNCTION computeDijkstra()
+            DECLARE distances AS list OF real
+            SET distances TO empty list
+            DECLARE fillCounter AS int
+            SET fillCounter TO 0
+            WHILE fillCounter < n DO
+                APPEND (1.0 / 0.0) TO distances  // positive infinity
+                SET fillCounter TO fillCounter + 1
+            END WHILE
+            
+            SET distances[0] TO (0 * 0)
+            
+            DECLARE priorityStorage AS list OF tuple(real, int)
+            SET priorityStorage TO list containing single element (0, 0)
+            
+            FUNCTION popMinFromQueue(queue)
+                DECLARE minimalIndex AS int
+                SET minimalIndex TO 0
+                DECLARE iteratorIndex AS int
+                SET iteratorIndex TO 1
+                WHILE iteratorIndex < LENGTH(queue) DO
+                    IF queue[iteratorIndex].0 < queue[minimalIndex].0 THEN
+                        SET minimalIndex TO iteratorIndex
+                    END IF
+                    SET iteratorIndex TO iteratorIndex + 1
+                END WHILE
+                DECLARE element AS tuple(real, int)
+                SET element TO queue[minimalIndex]
+                SET queue[minimalIndex] TO queue[LENGTH(queue) - 1]
+                REMOVE last element from queue
+                RETURN element
+            END FUNCTION
+            
+            FUNCTION addToQueue(queue, newElem)
+                APPEND newElem TO queue
+            END FUNCTION
+            
+            WHILE LENGTH(priorityStorage) > 0 DO
+                DECLARE currentPair AS tuple(real, int)
+                SET currentPair TO popMinFromQueue(priorityStorage)
+                DECLARE currDist AS real
+                SET currDist TO currentPair.0
+                DECLARE currNode AS int
+                SET currNode TO currentPair.1
+                
+                IF currDist > distances[currNode] THEN
+                    CONTINUE  // next iteration of WHILE
+                END IF
+                
+                IF NOT adjacencyMap CONTAINS KEY currNode THEN
+                    CONTINUE
+                END IF
+                
+                DECLARE neighborIdx AS int
+                SET neighborIdx TO 0
+                WHILE neighborIdx < LENGTH(adjacencyMap[currNode]) DO
+                    DECLARE neighborTuple AS tuple(int, int)
+                    SET neighborTuple TO adjacencyMap[currNode][neighborIdx]
+                    DECLARE neighborNode AS int
+                    SET neighborNode TO neighborTuple.0
+                    DECLARE edgeWeight AS int
+                    SET edgeWeight TO neighborTuple.1
+                    DECLARE newDist AS real
+                    SET newDist TO currDist + edgeWeight
+                    
+                    IF newDist < distances[neighborNode] THEN
+                        SET distances[neighborNode] TO newDist
+                        addToQueue(priorityStorage, (newDist, neighborNode))
+                    END IF
+                    
+                    SET neighborIdx TO neighborIdx + 1
+                END WHILE
+            END WHILE
+            
+            RETURN distances[n - 1]
+        END FUNCTION
+        
+        DECLARE answerList AS list OF real
+        SET answerList TO empty list
+        
+        DECLARE queryIdx AS int
+        SET queryIdx TO 0
+        
+        WHILE queryIdx < LENGTH(queries) DO
+            DECLARE queryPair AS tuple(int, int)
+            SET queryPair TO queries[queryIdx]
+            DECLARE firstNode AS int
+            SET firstNode TO queryPair.0
+            DECLARE secondNode AS int
+            SET secondNode TO queryPair.1
+            
+            IF NOT adjacencyMap CONTAINS KEY firstNode THEN
+                SET adjacencyMap[firstNode] TO empty list
+            END IF
+            
+            DECLARE addEdge AS tuple(int, int)
+            SET addEdge TO (secondNode, 1)
+            APPEND addEdge TO adjacencyMap[firstNode]
+            
+            DECLARE currentResult AS real
+            SET currentResult TO computeDijkstra()
+            APPEND currentResult TO answerList
+            
+            SET queryIdx TO queryIdx + 1
+        END WHILE
+        
+        RETURN answerList
+    END FUNCTION
+END CLASS

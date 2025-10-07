@@ -1,0 +1,61 @@
+CLASS Solution  
+    FUNCTION findPermutation(nums)  
+        DECLARE FUNCTION dfs(mask, previous)  
+            IF NOT (mask XOR ((1 LEFT_SHIFT LENGTH(nums)) - 1)) THEN  
+                DECLARE diff = previous - nums[0]  
+                IF diff < 0 THEN  
+                    SET diff TO (-diff)  
+                END IF  
+                RETURN diff  
+            END IF  
+
+            SET minimal TO infinity  
+            SET index TO 0  
+            WHILE index < LENGTH(nums) DO  
+                DECLARE testBit = (mask RIGHT_SHIFT index) BITWISE_AND 1  
+                IF testBit EQUALS 0 THEN  
+                    DECLARE absDiff = previous - nums[index]  
+                    IF absDiff < 0 THEN absDiff = -absDiff END IF  
+                    DECLARE nextMask = mask BITWISE_OR (1 LEFT_SHIFT index)  
+                    DECLARE candidate = absDiff + dfs(nextMask, index)  
+                    IF candidate < minimal THEN  
+                        SET minimal = candidate  
+                    END IF  
+                END IF  
+                SET index = index + 1  
+            END WHILE  
+
+            RETURN minimal  
+        END FUNCTION  
+
+        DECLARE FUNCTION g(mask, previous)  
+            APPEND previous TO ans  
+            IF (mask XOR ((1 LEFT_SHIFT LENGTH(nums)) - 1)) EQUALS 0 THEN  
+                RETURN  
+            END IF  
+
+            DECLARE bestScore = dfs(mask, previous)  
+            DECLARE pointer = 0  
+
+            WHILE pointer < LENGTH(nums) DO  
+                DECLARE bitCheck = (mask RIGHT_SHIFT pointer) BITWISE_AND 1  
+                IF bitCheck EQUALS 0 THEN  
+                    DECLARE diffVal = previous - nums[pointer]  
+                    IF diffVal < 0 THEN diffVal = -diffVal END IF  
+                    DECLARE nextState = mask BITWISE_OR (1 LEFT_SHIFT pointer)  
+                    DECLARE testVal = diffVal + dfs(nextState, pointer)  
+                    IF testVal EQUALS bestScore THEN  
+                        CALL g(nextState, pointer)  
+                        EXIT WHILE  
+                    END IF  
+                END IF  
+                SET pointer = pointer + 1  
+            END WHILE  
+        END FUNCTION  
+
+        DECLARE lengthNums = LENGTH(nums)  
+        SET ans TO an empty list  
+        CALL g( (1 LEFT_SHIFT 0), 0)  
+        RETURN ans  
+    END FUNCTION  
+END CLASS

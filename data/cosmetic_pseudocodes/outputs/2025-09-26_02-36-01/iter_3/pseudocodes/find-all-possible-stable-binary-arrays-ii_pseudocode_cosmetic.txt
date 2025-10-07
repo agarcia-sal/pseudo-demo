@@ -1,0 +1,36 @@
+CLASS Solution
+    FUNCTION numberOfStableArrays(zero zero, one one, limit limit) RETURNS integer
+        SET modulus TO 1000000000 + 7
+
+        FUNCTION dp(zCount z, oCount o, lastDigit last, runLength run) RETURNS integer
+            IF zCount == 0 AND oCount == 0 THEN
+                RETURN 1
+            ELSE IF zCount < 0 OR oCount < 0 THEN
+                RETURN 0
+            END IF
+
+            SET aggregate TO 0
+
+            WHILE TRUE
+                IF last == 0 THEN
+                    IF run < limit THEN
+                        SET aggregate TO aggregate + dp(zCount - 1, o, 0, run + 1)
+                    END IF
+                    SET aggregate TO aggregate + dp(zCount, o - 1, 1, 1)
+                ELSE
+                    IF zCount > 0 THEN
+                        SET aggregate TO aggregate + dp(zCount - 1, o, 0, 1)
+                    END IF
+                    IF run < limit THEN
+                        SET aggregate TO aggregate + dp(zCount, o - 1, 1, run + 1)
+                    END IF
+                END IF
+                BREAK
+            END WHILE
+
+            RETURN aggregate % modulus
+        END FUNCTION
+
+        RETURN dp(zero, one - 1, 0, 1)
+    END FUNCTION
+END CLASS

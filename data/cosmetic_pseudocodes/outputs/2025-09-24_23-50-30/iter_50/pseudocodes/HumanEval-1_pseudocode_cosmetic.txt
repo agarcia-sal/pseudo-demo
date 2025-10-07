@@ -1,0 +1,37 @@
+```
+FUNCTION separate_paren_groups(string_of_parentheses)
+    SET results_accumulator TO []
+    SET buffer_accumulator TO []
+    SET depth_counter TO 0
+
+    DEFINE FUNCTION process_chars(index)
+        IF index >= LENGTH(string_of_parentheses)
+            RETURN
+        ELSE
+            SET current_char TO string_of_parentheses[index]
+
+            SWITCH current_char
+                CASE '(':
+                    SET depth_counter TO depth_counter + 1
+                    CALL buffer_accumulator.APPEND(current_char)
+                CASE ')':
+                    SET depth_counter TO depth_counter - 1
+                    CALL buffer_accumulator.APPEND(current_char)
+
+                    IF NOT (depth_counter <> 0)
+                        SET combined_string TO JOIN(buffer_accumulator, "")
+                        CALL results_accumulator.APPEND(combined_string)
+                        SET buffer_accumulator TO []
+                    END IF
+                DEFAULT:
+                    # Do nothing for any other characters
+            END SWITCH
+
+            CALL process_chars(index + 1)
+        END IF
+    END FUNCTION
+
+    CALL process_chars(0)
+    RETURN results_accumulator
+END FUNCTION
+```

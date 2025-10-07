@@ -1,0 +1,114 @@
+CLASS Solution
+    FUNCTION minimumTime(n, edges, disappear)
+        FUNCTION enqueue(heap, item)
+            DEFINE idx TO length of heap
+            APPEND item TO heap
+            WHILE idx > 0
+                SET parent TO (idx - 1) DIV 2
+                IF heap[parent][0] <= heap[idx][0]
+                    BREAK
+                END IF
+                SWAP heap[parent], heap[idx]
+                SET idx TO parent
+            END WHILE
+        END FUNCTION
+
+        FUNCTION dequeue(heap)
+            IF length of heap = 0
+                RETURN NULL
+            END IF
+            SET result TO heap[0]
+            SET last TO heap[length of heap - 1]
+            REMOVE last element from heap
+            IF length of heap = 0
+                RETURN result
+            END IF
+            SET heap[0] TO last
+            SET idx TO 0
+            WHILE TRUE
+                SET left TO 2 * idx + 1
+                SET right TO 2 * idx + 2
+                SET smallest TO idx
+                IF left < length of heap AND heap[left][0] < heap[smallest][0]
+                    SET smallest TO left
+                END IF
+                IF right < length of heap AND heap[right][0] < heap[smallest][0]
+                    SET smallest TO right
+                END IF
+                IF smallest = idx
+                    BREAK
+                END IF
+                SWAP heap[idx], heap[smallest]
+                SET idx TO smallest
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        FUNCTION makeGraph(edgeList)
+            DEFINE graphMap TO empty mapping with default []
+            FOR EACH edge IN edgeList
+                LET fromNode TO edge[0]
+                LET toNode TO edge[1]
+                LET edgeLength TO edge[2]
+                APPEND (toNode, edgeLength) TO graphMap[fromNode]
+                APPEND (fromNode, edgeLength) TO graphMap[toNode]
+            END FOR
+            RETURN graphMap
+        END FUNCTION
+
+        FUNCTION recursiveProcess(queue, distArray, graphObj, disappearArr)
+            IF length of queue = 0
+                RETURN
+            END IF
+            LET currEntry TO dequeue(queue)
+            IF currEntry = NULL
+                RETURN
+            END IF
+            LET distCurr TO currEntry[0]
+            LET nodeCurr TO currEntry[1]
+            IF distCurr >= disappearArr[nodeCurr]
+                CALL recursiveProcess(queue, distArray, graphObj, disappearArr)
+                RETURN
+            END IF
+            IF distCurr > distArray[nodeCurr]
+                CALL recursiveProcess(queue, distArray, graphObj, disappearArr)
+                RETURN
+            END IF
+            LET neighbors TO graphObj[nodeCurr]
+            DEFINE helperLoop(idx)
+                IF idx >= length of neighbors
+                    RETURN
+                END IF
+                LET neighborNode TO neighbors[idx][0]
+                LET lengthEdge TO neighbors[idx][1]
+                LET newDist TO distCurr + lengthEdge
+                IF newDist < distArray[neighborNode] AND newDist < disappearArr[neighborNode]
+                    SET distArray[neighborNode] TO newDist
+                    CALL enqueue(queue, (newDist, neighborNode))
+                END IF
+                CALL helperLoop(idx + 1)
+            END FUNCTION
+            CALL helperLoop(0)
+            CALL recursiveProcess(queue, distArray, graphObj, disappearArr)
+        END FUNCTION
+
+        LET alphaGraph TO makeGraph(edges)
+        DEFINE INF TO 1 DIV 0
+        DEFINE dist TO an array of size n where each element is INF
+        SET dist[0] TO 0
+        LET heap TO empty list
+        CALL enqueue(heap, (0,0))
+        CALL recursiveProcess(heap, dist, alphaGraph, disappear)
+        DEFINE answer TO an array size n filled with -1
+        DEFINE idx TO 0
+
+        WHILE idx < n
+            IF dist[idx] < disappear[idx]
+                SET answer[idx] TO dist[idx]
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+
+        RETURN answer
+    END FUNCTION
+END CLASS

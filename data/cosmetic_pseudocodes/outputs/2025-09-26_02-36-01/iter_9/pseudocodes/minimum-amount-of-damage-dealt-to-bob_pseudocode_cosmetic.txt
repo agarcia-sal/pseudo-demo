@@ -1,0 +1,72 @@
+CLASS Enemy
+    FUNCTION __init__(self, alpha, beta)
+        SET self.damage TO alpha
+        SET self.timeTakenDown TO beta
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION minDamage(self, omega, theta, sigma)
+        PROCEDURE computeCeilDiv(x, y)
+            SET result TO (x + y - 1) DIV y
+            RETURN result
+        END PROCEDURE
+
+        PROCEDURE cmpRatio(left, right)
+            RETURN (left.damage * right.timeTakenDown) > (right.damage * left.timeTakenDown)
+        END PROCEDURE
+
+        SET totalSum TO 0
+        SET outputAccum TO 0
+        SET container TO new empty sequence
+        SET idxTemp TO 0
+
+        WHILE idxTemp < LENGTH(theta) DO
+            SET totalSum TO totalSum + theta[idxTemp]
+            SET idxTemp TO idxTemp + 1
+        END WHILE
+
+        SET cursor TO 0
+        REPEAT
+            IF cursor >= LENGTH(theta) THEN
+                LEAVE
+            END IF
+            SET tmpDamage TO theta[cursor]
+            SET tmpHealth TO sigma[cursor]
+            SET tmpTime TO computeCeilDiv(tmpHealth + omega - 1, omega)
+            SET newEnemy TO Enemy(tmpDamage, tmpTime)
+            APPEND newEnemy TO container
+            SET cursor TO cursor + 1
+        UNTIL FALSE
+
+        PROCEDURE bubbleSort(seq)
+            SET lengthSeq TO LENGTH(seq)
+            SET swapped TO TRUE
+            WHILE swapped DO
+                SET swapped TO FALSE
+                SET iVar TO 1
+                WHILE iVar < lengthSeq DO
+                    IF NOT cmpRatio(seq[iVar - 1], seq[iVar]) THEN
+                        SET tempVar TO seq[iVar - 1]
+                        SET seq[iVar - 1] TO seq[iVar]
+                        SET seq[iVar] TO tempVar
+                        SET swapped TO TRUE
+                    END IF
+                    SET iVar TO iVar + 1
+                END WHILE
+                SET lengthSeq TO lengthSeq - 1
+            END WHILE
+        END PROCEDURE
+
+        CALL bubbleSort(container)
+
+        SET iterVar TO 0
+        WHILE iterVar < LENGTH(container) DO
+            SET outputAccum TO outputAccum + (totalSum * container[iterVar].timeTakenDown)
+            SET totalSum TO totalSum - container[iterVar].damage
+            SET iterVar TO iterVar + 1
+        END WHILE
+
+        RETURN outputAccum
+    END FUNCTION
+END CLASS

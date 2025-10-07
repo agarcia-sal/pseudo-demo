@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION numberOfPermutations(n, requirements)
+        CONST P = 10 ^ 9 + 7
+        SET R = empty dictionary
+        FOR key_val IN requirements
+          LET a = key_val[0]
+          LET b = key_val[1]
+          R[a] <- b
+        END FOR
+
+        FUNCTION recursive_count(a1, a2, a3)
+            IF a1 = n THEN
+                LET kk = IF (a1 - 1) EXISTS IN R THEN R[a1 - 1] ELSE 0
+                RETURN IF a2 = kk THEN 1 ELSE 0
+            END IF
+
+            IF a1 > 0 THEN
+                LET vv = IF (a1 - 1) EXISTS IN R THEN R[a1 - 1] ELSE a2
+                IF a2 <> vv THEN RETURN 0 END IF
+            END IF
+
+            LET s = 0
+            FUNCTION loop_index(i)
+                IF i >= n THEN RETURN END END IF
+                IF (a3 & (1 << i)) = 0 THEN
+                    LET inv = a2
+                    FUNCTION inner_loop(j)
+                        IF j >= n THEN RETURN END END IF
+                        IF (a3 & (1 << j)) <> 0 THEN 
+                            inv <- inv + 1
+                        END IF
+                        CALL inner_loop(j + 1)
+                    END FUNCTION
+                    CALL inner_loop(i + 1)
+
+                    s <- (s + recursive_count(a1 + 1, inv, a3 | (1 << i))) % P
+                END IF
+                CALL loop_index(i + 1)
+            END FUNCTION
+            CALL loop_index(0)
+            RETURN s
+        END FUNCTION
+
+        RETURN recursive_count(0, 0, 0)
+    END FUNCTION
+END CLASS

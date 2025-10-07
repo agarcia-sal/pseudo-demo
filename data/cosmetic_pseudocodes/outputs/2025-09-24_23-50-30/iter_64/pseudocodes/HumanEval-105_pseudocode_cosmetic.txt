@@ -1,0 +1,42 @@
+```
+FUNCTION by_length(parameter_one)
+    SET mapping_temp TO {
+        9: "Nine",
+        8: "Eight",
+        7: "Seven",
+        6: "Six",
+        5: "Five",
+        4: "Four",
+        3: "Three",
+        2: "Two",
+        1: "One"
+    }
+    SET unordered_collection TO parameter_one
+    SET descending_ordered TO EMPTY LIST
+
+    FUNCTION recurse_index(counter, limit, acc)
+        IF counter > limit THEN
+            RETURN acc
+        ELSE
+            SET current_max TO MAX(unordered_collection)
+            SET unordered_collection TO FILTER(unordered_collection, x -> x != current_max)
+            SET acc TO acc + [current_max]
+            RETURN recurse_index(counter + 1, limit, acc)
+        END IF
+    END FUNCTION
+
+    SET descending_ordered TO recurse_index(1, LENGTH(unordered_collection), [])
+    SET output_list TO []
+    FOR index FROM 0 TO LENGTH(descending_ordered) - 1
+        SET item_to_lookup TO descending_ordered[index]
+        SWITCH mapping_temp HAS KEY item_to_lookup
+            CASE TRUE:
+                APPEND mapping_temp[item_to_lookup] TO output_list
+            CASE FALSE:
+                NO OPERATION
+        END SWITCH
+    END FOR
+
+    RETURN output_list
+END FUNCTION
+```

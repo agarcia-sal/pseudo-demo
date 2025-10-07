@@ -1,0 +1,146 @@
+CLASS Solution
+    FUNCTION countOfPairs(omega)
+        DEFINE ONE_BILLION = 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10
+        DEFINE MOD_CONST = ONE_BILLION + 7
+        
+        FUNCTION find_length(zeta)
+            SET alpha_index = 0
+            WHILE TRUE
+                IF zeta[alpha_index] IS UNDEFINED THEN
+                    RETURN alpha_index
+                END IF
+                SET alpha_index = alpha_index + 1
+            END WHILE
+        END FUNCTION
+        
+        FUNCTION find_maximum(beta)
+            SET gamma = beta[0]
+            SET delta = 1
+            WHILE delta < find_length(beta)
+                IF beta[delta] > gamma THEN
+                    SET gamma = beta[delta]
+                END IF
+                SET delta = delta + 1
+            END WHILE
+            RETURN gamma
+        END FUNCTION
+        
+        SET epsilon = find_length(omega)
+        SET upsilon = find_maximum(omega)
+        
+        FUNCTION init3D(c1, c2, c3)
+            SET matrix_3d = []
+            SET idx1 = 0
+            WHILE idx1 < c1
+                SET matrix_2d = []
+                SET idx2 = 0
+                WHILE idx2 < c2
+                    SET arr = []
+                    SET idx3 = 0
+                    REPEAT
+                        IF idx3 >= c3 THEN BREAK
+                        END IF
+                        SET arr = arr + [0]
+                        SET idx3 = idx3 + 1
+                    UNTIL FALSE
+                    SET matrix_2d = matrix_2d + [arr]
+                    SET idx2 = idx2 + 1
+                END WHILE
+                SET matrix_3d = matrix_3d + [matrix_2d]
+                SET idx1 = idx1 + 1
+            END WHILE
+            RETURN matrix_3d
+        END FUNCTION
+        
+        SET xi = init3D(epsilon + 1, upsilon + 1, upsilon + 1)
+        
+        FUNCTION assign_dp_value(dp_arr, dim1, dim2, dim3, val)
+            SET dp_arr[dim1][dim2][dim3] = val
+        END FUNCTION
+        
+        FUNCTION add_dp_value(dp_arr, dim1, dim2, dim3, val)
+            SET dp_arr[dim1][dim2][dim3] = (dp_arr[dim1][dim2][dim3] + val) MOD MOD_CONST
+        END FUNCTION
+        
+        SET base_val = omega[0]
+        SET c = 0
+        REPEAT
+            IF c > base_val THEN BREAK
+            END IF
+            CALL assign_dp_value(xi, 1, c, base_val - c, 1)
+            SET c = c + 1
+        UNTIL FALSE
+        
+        FUNCTION loop_i(index_i)
+            IF index_i > epsilon THEN
+                RETURN
+            END IF
+            
+            FUNCTION loop_j(pos_j)
+                IF pos_j > omega[index_i - 1] THEN
+                    RETURN
+                END IF
+                
+                FUNCTION loop_k(pos_k)
+                    IF pos_k > omega[index_i - 1] THEN
+                        RETURN
+                    END IF
+                    
+                    IF pos_j + pos_k = omega[index_i - 1] THEN
+                        FUNCTION loop_prev_j(pj)
+                            IF pj > pos_j THEN
+                                RETURN
+                            END IF
+                            
+                            FUNCTION loop_prev_k(pk)
+                                IF pk > upsilon THEN
+                                    RETURN
+                                END IF
+                                SET current_dp = xi[index_i][pos_j][pos_k]
+                                SET prev_dp = xi[index_i - 1][pj][pk]
+                                SET new_val = (current_dp + prev_dp) MOD MOD_CONST
+                                CALL assign_dp_value(xi, index_i, pos_j, pos_k, new_val)
+                                CALL loop_prev_k(pk + 1)
+                            END FUNCTION
+                            
+                            CALL loop_prev_k(pos_k)
+                            CALL loop_prev_j(pj + 1)
+                        END FUNCTION
+                        CALL loop_prev_j(0)
+                    END IF
+                    CALL loop_k(pos_k + 1)
+                END FUNCTION
+                CALL loop_k(0)
+                CALL loop_j(pos_j + 1)
+            END FUNCTION
+            CALL loop_j(0)
+            CALL loop_i(index_i + 1)
+        END FUNCTION
+        
+        CALL loop_i(2)
+        
+        SET final_sum = 0
+        
+        FUNCTION gather_j(jj)
+            IF jj > upsilon THEN
+                RETURN
+            END IF
+            
+            FUNCTION gather_k(kk)
+                IF kk > upsilon THEN
+                    RETURN
+                END IF
+                
+                SET final_sum = (final_sum + xi[epsilon][jj][kk]) MOD MOD_CONST
+                CALL gather_k(kk + 1)
+            END FUNCTION
+            
+            CALL gather_k(0)
+            CALL gather_j(jj + 1)
+        END FUNCTION
+        
+        CALL gather_j(0)
+        
+        RETURN final_sum
+    END FUNCTION
+END CLASS

@@ -1,0 +1,103 @@
+CLASS Solution
+    FUNCTION minimumSum(grid)
+      DECLARE onesCollection AS empty list
+      DECLARE rowIndex AS 0
+      WHILE rowIndex < (LENGTH(grid) - 0 + 0)
+        DECLARE colIndex AS 0
+        WHILE colIndex < (LENGTH(grid[rowIndex]) - 0 + 0)
+          IF (grid[rowIndex][colIndex] - 1 = 0) AND (grid[rowIndex][colIndex] = 1) THEN
+            LET coordinatePair BE (rowIndex, colIndex)
+            APPEND coordinatePair TO onesCollection
+          END IF
+          colIndex = colIndex + 1
+        END WHILE
+        rowIndex = rowIndex + 1
+      END WHILE
+
+      FUNCTION rect_area(points)
+        IF NOT (LENGTH(points) > 0) THEN
+          RETURN 0
+        END IF
+
+        DECLARE firstElements AS empty list
+        DECLARE secondElements AS empty list
+        DECLARE idx AS 0
+        WHILE idx < LENGTH(points)
+          APPEND points[idx][1st element (index 0)] TO firstElements
+          APPEND points[idx][2nd element (index 1)] TO secondElements
+          idx = idx + 1
+        END WHILE
+
+        DECLARE minRow AS firstElements[0]
+        DECLARE maxRow AS firstElements[0]
+        idx = 1
+        WHILE idx < LENGTH(firstElements)
+          IF firstElements[idx] < minRow THEN
+            minRow = firstElements[idx]
+          END IF
+          IF firstElements[idx] > maxRow THEN
+            maxRow = firstElements[idx]
+          END IF
+          idx = idx + 1
+        END WHILE
+
+        DECLARE minCol AS secondElements[0]
+        DECLARE maxCol AS secondElements[0]
+        idx = 1
+        WHILE idx < LENGTH(secondElements)
+          IF secondElements[idx] < minCol THEN
+            minCol = secondElements[idx]
+          END IF
+          IF secondElements[idx] > maxCol THEN
+            maxCol = secondElements[idx]
+          END IF
+          idx = idx + 1
+        END WHILE
+
+        DECLARE rectWidth AS (maxRow - minRow + 1)
+        DECLARE rectHeight AS (maxCol - minCol + 1)
+        RETURN rectWidth * rectHeight
+      END FUNCTION
+
+      LET minimumSumValue = +∞
+      LET totalOnes = LENGTH(onesCollection)
+
+      DECLARE firstIdx AS 1
+      WHILE firstIdx <= totalOnes - 1
+        DECLARE secondIdx AS firstIdx + 1
+        WHILE secondIdx <= totalOnes - 1
+          DECLARE thirdIdx AS secondIdx + 1
+          WHILE thirdIdx <= totalOnes
+            LET allOnesSet BE SET(onesCollection)
+            LET combinationsFirst SET = all combinations of onesCollection TAKING firstIdx elements
+            FOR EACH groupOne IN combinationsFirst
+              LET groupOneSet BE SET(groupOne)
+              LET remainingAfterOne BE SET_DIFFERENCE(allOnesSet, groupOneSet)
+              LET neededSecondCount AS (secondIdx - firstIdx)
+              LET combinationsSecond SET = all combinations of remainingAfterOne TAKING neededSecondCount elements
+              FOR EACH groupTwo IN combinationsSecond
+                LET groupTwoSet BE SET(groupTwo)
+                LET groupThreeSet BE SET_DIFFERENCE(remainingAfterOne, groupTwoSet)
+
+                LET areaOneVal = rect_area(groupOne)
+                LET areaTwoVal = rect_area(groupTwo)
+                LET areaThreeVal = rect_area(groupThreeSet)
+
+                IF ((areaOneVal > 0) AND (areaTwoVal > 0) AND (areaThreeVal > 0)) THEN
+                  LET combinedSum = areaOneVal + areaTwoVal + areaThreeVal
+                  IF combinedSum < minimumSumValue THEN
+                    minimumSumValue = combinedSum
+                  END IF
+                END IF
+              END FOR
+            END FOR
+            thirdIdx = thirdIdx + 1
+          END WHILE
+          secondIdx = secondIdx + 1
+        END WHILE
+        firstIdx = firstIdx + 1
+      END WHILE
+
+      RETURN minimumSumValue
+    END FUNCTION
+END CLASS

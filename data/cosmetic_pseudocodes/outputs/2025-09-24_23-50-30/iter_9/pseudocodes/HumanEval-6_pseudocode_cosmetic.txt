@@ -1,0 +1,39 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        SET depth_counter TO 0
+        SET peak_depth TO 0
+        SET idx TO 0
+        WHILE idx < LENGTH(group_string)
+            CASE group_string[idx] OF
+                '(':
+                    depth_counter ← depth_counter + 1
+                    IF peak_depth < depth_counter THEN
+                        peak_depth ← depth_counter
+                    END IF
+                ')':
+                    depth_counter ← depth_counter - 1
+            END CASE
+            idx ← idx + 1
+        END WHILE
+        RETURN peak_depth
+    END FUNCTION
+
+    SET chunked_groups TO []
+    FOR pos FROM 0 TO LENGTH(parentheses_string)
+        IF pos = LENGTH(parentheses_string) OR parentheses_string[pos] = ' ' THEN
+            IF pos > 0 AND parentheses_string[pos - 1] ≠ ' ' THEN
+                APPEND SUBSTRING(parentheses_string, start_idx, pos) TO chunked_groups
+            END IF
+            start_idx ← pos + 1
+        END IF
+    END FOR
+
+    SET results TO []
+    FOR entry IN chunked_groups
+        IF LENGTH(entry) > 0 THEN
+            APPEND parse_paren_group(entry) TO results
+    END FOR
+    RETURN results
+END FUNCTION
+```

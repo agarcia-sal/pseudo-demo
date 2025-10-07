@@ -1,0 +1,88 @@
+CLASS Solution
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+    	DEFINE FUNCTION helper_can_mark(stepCount)
+    		DEFINE FUNCTION init_neg_ones(length)
+    			SET arr TO new list
+    			SET idx TO 0
+    			WHILE idx < length
+    				ADD -1 TO arr
+    				SET idx TO idx + 1
+    			END WHILE
+    			RETURN arr
+    		END FUNCTION
+
+    		SET tally TO 0
+    		SET limit TO stepCount
+    		SET occur_arr TO init_neg_ones(LENGTH OF nums)
+    		SET ptr TO 0
+    		REPEAT 
+    			IF ptr >= limit THEN BREAK END IF
+    			SET pos TO (changeIndices[ptr]) - 1
+    			SET occur_arr[pos] TO ptr
+    			SET ptr TO ptr + 1
+    		UNTIL FALSE
+
+    		FUNCTION total_of_list(inputList)
+    			SET acc TO 0
+    			SET idx TO 0
+    			WHILE idx < LENGTH OF inputList
+    				SET acc TO acc + inputList[idx]
+    				SET idx TO idx + 1
+    			END WHILE
+    			RETURN acc
+    		END FUNCTION
+    		
+    		SET required_decrements TO total_of_list(nums)
+    		SET free_decrements TO 0
+    		SET recorded_positions TO new empty set
+    		
+    		DEFINE FUNCTION is_element_present(setCol, val)
+    			FOREACH elt IN setCol
+    				IF elt = val THEN RETURN True END IF
+    			END FOREACH
+    			RETURN False
+    		END FUNCTION
+    		
+    		SET iter TO 0
+    		WHILE iter < stepCount
+    			SET current_pos TO (changeIndices[iter]) - 1
+    			
+    			IF NOT is_element_present(recorded_positions, current_pos)
+    				IF occur_arr[current_pos] = iter
+    					IF nums[current_pos] <= free_decrements
+    						SET free_decrements TO free_decrements - nums[current_pos]
+    						ADD current_pos TO recorded_positions
+    					ELSE
+    						RETURN False
+    					END IF
+    				ELSE
+    					SET free_decrements TO free_decrements + 1
+    				END IF
+    			ELSE
+    				SET free_decrements TO free_decrements + 1
+    			END IF
+    			
+    			SET iter TO iter + 1
+    		END WHILE
+
+    		RETURN (SIZE OF recorded_positions) = (LENGTH OF nums)
+    	END FUNCTION
+
+    	SET lbound TO 0
+    	SET ubound TO LENGTH OF changeIndices + 1
+    	WHILE lbound < ubound
+    		SET middle TO FLOOR((lbound + ubound) / 2)
+    		IF helper_can_mark(middle)
+    			SET ubound TO middle
+    		ELSE
+    			SET lbound TO lbound + 1
+    		END IF
+    	END WHILE
+
+    	IF lbound <= LENGTH OF changeIndices
+    		RETURN lbound
+    	ELSE
+    		RETURN -1
+    	END IF
+    END FUNCTION
+END CLASS

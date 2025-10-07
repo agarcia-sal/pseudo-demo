@@ -1,0 +1,104 @@
+CLASS Solution
+    FUNCTION shortestDistanceAfterQueries(n, queries)
+    graph ← map each integer x in [0 .. n - 1] TO empty list
+
+    PROCEDURE populateEdges(k)
+        IF k > n - 2 THEN RETURN
+        LET nxt = k + 1
+        graph[k].append((nxt, 1))
+        populateEdges(k + 1)
+    END PROCEDURE
+    CALL populateEdges(0)
+
+    FUNCTION dijkstra()
+        dist ← list of length n, each initialized to +∞
+        dist[0] ← 0
+
+        pq ← [(0,0)]
+
+        PROCEDURE siftDownHeap()
+            IF LENGTH(pq) = 0 THEN RETURN
+            LET smallest_idx = 0
+
+            FUNCTION leftChild(i) RETURN 2*i + 1 END FUNCTION
+            FUNCTION rightChild(i) RETURN 2*i + 2 END FUNCTION
+
+            LOOP
+                LET lc = leftChild(smallest_idx)
+                LET rc = rightChild(smallest_idx)
+                LET min_idx = smallest_idx
+
+                IF lc < LENGTH(pq) AND pq[lc][0] < pq[min_idx][0] THEN min_idx ← lc END IF
+                IF rc < LENGTH(pq) AND pq[rc][0] < pq[min_idx][0] THEN min_idx ← rc END IF
+                IF min_idx = smallest_idx THEN BREAK
+                ELSE
+                    SWAP pq[smallest_idx], pq[min_idx]
+                    smallest_idx ← min_idx
+                END IF
+            END LOOP
+        END PROCEDURE
+
+        PROCEDURE heapPush(elem)
+            pq.append(elem)
+            LET idx = LENGTH(pq) - 1
+            WHILE idx > 0
+                LET parent = (idx - 1) // 2
+                IF pq[parent][0] > pq[idx][0]
+                    SWAP pq[parent], pq[idx]
+                    idx ← parent
+                ELSE
+                    BREAK
+                END IF
+            END WHILE
+        END PROCEDURE
+
+        FUNCTION heapPop()
+            IF LENGTH(pq) = 0 THEN RETURN NULL END IF
+            LET topElem = pq[0]
+            pq[0] ← pq[-1]
+            pq.pop()
+            CALL siftDownHeap()
+            RETURN topElem
+        END FUNCTION
+
+        PROCEDURE processQueue()
+            LET t ← heapPop()
+            IF t IS NULL THEN RETURN NULL END IF
+            RETURN t
+        END PROCEDURE
+
+        FUNCTION visitNeighbors(currDist, currNode)
+            FOR each pair (nbr, wgt) IN graph[currNode]
+                LET tentative = currDist + wgt
+                IF tentative < dist[nbr]
+                    dist[nbr] ← tentative
+                    CALL heapPush((tentative, nbr))
+                END IF
+            END FOR
+        END FUNCTION
+
+        REPEAT
+            LET popped ← processQueue()
+            IF popped IS NULL THEN EXIT END IF
+            LET (currDist, currNode) = popped
+            IF currDist > dist[currNode] THEN CONTINUE END IF
+            CALL visitNeighbors(currDist, currNode)
+        UNTIL FALSE
+
+        RETURN dist[n - 1]
+    END FUNCTION
+
+    LET accum ← empty list
+    PROCEDURE processQueries(ix)
+        IF ix >= LENGTH(queries) THEN RETURN END IF
+        LET (a, b) = queries[ix]
+        graph[a].append((b, 1))
+        LET dRes = dijkstra()
+        accum.append(dRes)
+        CALL processQueries(ix + 1)
+    END PROCEDURE
+    CALL processQueries(0)
+
+    RETURN accum
+    END FUNCTION
+END CLASS

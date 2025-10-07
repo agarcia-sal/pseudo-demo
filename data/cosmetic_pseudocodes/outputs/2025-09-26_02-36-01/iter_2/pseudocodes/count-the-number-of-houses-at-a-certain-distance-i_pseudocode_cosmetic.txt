@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION countOfPairs(n parameter, x parameter, y parameter) RETURNS list of integer
+        ASSIGN answer TO an array filled with 0 repeated n times
+
+        FUNCTION bfs(root parameter)
+            ASSIGN marked TO an array of False repeated (n plus 1) times
+            ASSIGN dist TO an array of 0 repeated (n plus 1) times
+            ASSIGN dq TO a double-ended queue initialized with root
+            SET marked[root] TO True
+
+            WHILE dq IS NOT empty DO
+                ASSIGN curr TO dq.pop from front
+
+                FOR adj IN [curr minus 1, curr plus 1] DO
+                    IF adj >= 1 AND adj <= n AND NOT marked[adj] THEN
+                        marked[adj] = True
+                        dist[adj] = dist[curr] plus 1
+                        dq.append at back adj
+                    ENDIF
+                ENDFOR
+
+                IF curr == x AND NOT marked[y] THEN
+                    marked[y] = True
+                    dist[y] = dist[curr] plus 1
+                    dq.append at back y
+                ENDIF
+
+                IF curr == y AND NOT marked[x] THEN
+                    marked[x] = True
+                    dist[x] = dist[curr] plus 1
+                    dq.append at back x
+                ENDIF
+            ENDWHILE
+
+            SET index TO 1
+            WHILE index <= n DO
+                IF dist[index] > 0 THEN
+                    answer[dist[index] minus 1] = answer[dist[index] minus 1] plus 1
+                ENDIF
+                INCREMENT index BY 1
+            ENDWHILE
+        ENDFUNCTION
+
+        ASSIGN counter TO 1
+        WHILE counter <= n DO
+            CALL bfs WITH counter
+            INCREMENT counter BY 1
+        ENDWHILE
+
+        RETURN answer
+    ENDFUNCTION
+ENDCLASS

@@ -1,0 +1,100 @@
+CLASS Solution
+    FUNCTION maximumProcessableQueries(nums parameters as list of integers, queries parameters as list of integers) RETURNS integer
+        FUNCTION process_queries(subseq parameters as list of integers, queries parameters as list of integers) RETURNS integer
+            SET count TO 0
+            SET index TO 0
+            WHILE index < LENGTH(subseq)
+                IF count = LENGTH(queries)
+                    BREAK
+                END IF
+                IF NOT (subseq[index] < queries[count])
+                    SET count TO count + 1
+                END IF
+                SET index TO index + 1
+            END WHILE
+            RETURN count
+        END FUNCTION
+
+        SET length_nums TO LENGTH(nums)
+        SET length_queries TO LENGTH(queries)
+        SET max_count TO process_queries(nums, queries)
+
+        SET position TO 0
+        WHILE position < length_nums
+            FUNCTION get_prefix(input_list parameters as list of integers, end_idx parameters as integer) RETURNS list of integers
+                SET result TO []
+                SET cursor TO 0
+                WHILE cursor < end_idx
+                    APPEND input_list[cursor] TO result
+                    SET cursor TO cursor + 1
+                END WHILE
+                RETURN result
+            END FUNCTION
+
+            FUNCTION get_suffix(input_list parameters as list of integers, start_idx parameters as integer) RETURNS list of integers
+                SET temp TO []
+                SET cursor TO start_idx
+                WHILE cursor < LENGTH(input_list)
+                    APPEND input_list[cursor] TO temp
+                    SET cursor TO cursor + 1
+                END WHILE
+                RETURN temp
+            END FUNCTION
+
+            SET front_portion TO get_prefix(nums, position)
+            SET back_portion TO get_suffix(nums, position)
+            FUNCTION reverse_list(lst parameters as list of integers) RETURNS list of integers
+                SET rev_lst TO []
+                SET idx TO LENGTH(lst) - 1
+                WHILE idx >= 0
+                    APPEND lst[idx] TO rev_lst
+                    SET idx TO idx - 1
+                END WHILE
+                RETURN rev_lst
+            END FUNCTION
+
+            SET reversed_back TO reverse_list(back_portion)
+
+            FUNCTION concatenate_lists(a parameters as list of integers, b parameters as list of integers) RETURNS list of integers
+                SET combo TO []
+                SET idx_a TO 0
+                WHILE idx_a < LENGTH(a)
+                    APPEND a[idx_a] TO combo
+                    SET idx_a TO idx_a + 1
+                END WHILE
+                SET idx_b TO 0
+                WHILE idx_b < LENGTH(b)
+                    APPEND b[idx_b] TO combo
+                    SET idx_b TO idx_b + 1
+                END WHILE
+                RETURN combo
+            END FUNCTION
+
+            SET joined_list TO concatenate_lists(front_portion, reversed_back)
+
+            FUNCTION insertion_sort(arr parameters as list of integers) RETURNS list of integers
+                SET n_arr TO LENGTH(arr)
+                SET i_sort TO 1
+                WHILE i_sort < n_arr
+                    SET key_val TO arr[i_sort]
+                    SET j_sort TO i_sort - 1
+                    WHILE (j_sort >= 0) AND (arr[j_sort] > key_val)
+                        SET arr[j_sort + 1] TO arr[j_sort]
+                        SET j_sort TO j_sort - 1
+                    END WHILE
+                    SET arr[j_sort + 1] TO key_val
+                    SET i_sort TO i_sort + 1
+                END WHILE
+                RETURN arr
+            END FUNCTION
+
+            SET sorted_subseq TO insertion_sort(joined_list)
+            SET temp_max TO process_queries(sorted_subseq, queries)
+            IF temp_max > max_count
+                SET max_count TO temp_max
+            END IF
+            SET position TO position + 1
+        END WHILE
+        RETURN max_count
+    END FUNCTION
+END CLASS

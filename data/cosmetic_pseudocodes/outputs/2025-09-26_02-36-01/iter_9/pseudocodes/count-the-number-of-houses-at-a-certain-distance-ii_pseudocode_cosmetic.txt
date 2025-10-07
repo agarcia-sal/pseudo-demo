@@ -1,0 +1,81 @@
+CLASS Solution
+    FUNCTION countOfPairs(p, q, r)
+        IF q GREATER THAN r THEN
+            SET swap_tmp TO q
+            SET q TO r
+            SET r TO swap_tmp
+        END IF
+
+        FUNCTION bfs(seed)
+            SET mark TO array of size (p + 1) filled with False
+            SET dist TO array of size (p + 1) filled with 0
+            SET fifo TO deque containing element seed
+            SET mark[seed] TO True
+
+            PERFORM LOOP_WHILE_LEN_POSITIVE:
+                IF LENGTH of fifo EQUALS 0 THEN
+                    LEAVE LOOP_WHILE_LEN_POSITIVE
+                END IF
+                SET current_node TO REMOVE from FRONT of fifo
+
+                SET adjacent_nodes TO LIST containing (current_node MINUS 1) and (current_node PLUS 1)
+                SET idx TO 0
+                PERFORM LOOP_OVER_ADJACENTS:
+                    IF idx GREATER OR EQUAL TO LENGTH of adjacent_nodes THEN
+                        LEAVE LOOP_OVER_ADJACENTS
+                    END IF
+                    SET neighbor TO adjacent_nodes[idx]
+                    SET idx TO idx PLUS 1
+
+                    IF (neighbor GREATER OR EQUAL TO 1) AND (neighbor LESS OR EQUAL TO p) AND (mark[neighbor] EQUALS False) THEN
+                        SET mark[neighbor] TO True
+                        SET dist[neighbor] TO dist[current_node] PLUS 1
+                        APPEND neighbor TO fifo
+                    END IF
+                END LOOP_OVER_ADJACENTS
+
+                IF current_node EQUALS q AND mark[r] EQUALS False THEN
+                    SET mark[r] TO True
+                    SET dist[r] TO dist[current_node] PLUS 1
+                    APPEND r TO fifo
+                ELSE
+                    IF current_node EQUALS r AND mark[q] EQUALS False THEN
+                        SET mark[q] TO True
+                        SET dist[q] TO dist[current_node] PLUS 1
+                        APPEND q TO fifo
+                    END IF
+                END IF
+
+            END LOOP_WHILE_LEN_POSITIVE
+
+            RETURN SUBLIST dist FROM INDEX 1 TO END
+        END FUNCTION
+
+        SET tally TO new array of size p filled with 0
+        SET loop_index TO 1
+
+        PERFORM LOOP_FROM_1_TO_P:
+            IF loop_index GREATER THAN p THEN
+                LEAVE LOOP_FROM_1_TO_P
+            END IF
+            SET sampled_dist TO CALL bfs(loop_index)
+            SET disp_idx TO 0
+
+            PERFORM LOOP_OVER_SAMPLED_DIST:
+                IF disp_idx GREATER OR EQUAL TO LENGTH of sampled_dist THEN
+                    LEAVE LOOP_OVER_SAMPLED_DIST
+                END IF
+                SET measure TO sampled_dist[disp_idx]
+                SET disp_idx TO disp_idx PLUS 1
+
+                IF measure GREATER THAN 0 THEN
+                    SET tally[measure MINUS 1] TO tally[measure MINUS 1] PLUS 1
+                END IF
+            END LOOP_OVER_SAMPLED_DIST
+
+            SET loop_index TO loop_index PLUS 1
+        END LOOP_FROM_1_TO_P
+
+        RETURN tally
+    END FUNCTION
+END CLASS

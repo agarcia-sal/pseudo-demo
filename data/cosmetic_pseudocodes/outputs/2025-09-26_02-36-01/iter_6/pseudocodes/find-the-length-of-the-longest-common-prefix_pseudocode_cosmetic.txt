@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION longestCommonPrefix(arr1 arr1 OF integers arr2 arr2 OF integers) RETURNS integer
+        SET prefixesOne TO empty set
+        DEFINE FUNCTION toString(value) RETURNS string
+            RETURN standardToString(value)
+        END FUNCTION
+
+        SET indexA TO 1
+        DEFINE FUNCTION fillPrefixesA()
+            IF indexA > lengthOf(arr1) THEN
+                RETURN
+            END IF
+
+            SET elementStr TO toString(arr1[indexA])
+            SET lengthStr TO lengthOf(elementStr)
+            SET cursorB TO lengthStr
+
+            DEFINE FUNCTION addPrefixesB()
+                IF cursorB < 1 THEN
+                    RETURN
+                END IF
+                SET preSubstr TO substringOf(elementStr, fromPos=1, toPos=cursorB)
+                ADD preSubstr TO prefixesOne
+                SET cursorB TO cursorB - 1
+                CALL addPrefixesB()
+            END FUNCTION
+
+            CALL addPrefixesB()
+
+            SET indexA TO indexA + 1
+            CALL fillPrefixesA()
+        END FUNCTION
+
+        CALL fillPrefixesA()
+
+        SET prefixesTwo TO empty set
+        SET positionC TO 1
+        DEFINE FUNCTION processArrayTwo()
+            IF positionC > lengthOf(arr2) THEN
+                RETURN
+            END IF
+
+            SET stringVal TO toString(arr2[positionC])
+            SET lengthVal TO lengthOf(stringVal)
+            SET posD TO 1
+            WHILE posD <= lengthVal
+                SET subStringD TO substringOf(stringVal, fromPos=1, toPos=posD)
+                ADD subStringD TO prefixesTwo
+                SET posD TO posD + 1
+            END WHILE
+
+            SET positionC TO positionC + 1
+            CALL processArrayTwo()
+        END FUNCTION
+
+        CALL processArrayTwo()
+
+        SET maxCommonLen TO 0
+        SET iterE TO getElementsAsList(prefixesOne)
+        SET idxE TO 1
+        WHILE idxE <= lengthOf(iterE)
+            SET currentX TO iterE[idxE]
+            IF NOT (currentX NOT IN prefixesTwo) THEN
+                SET lenX TO lengthOf(currentX)
+                IF lenX > maxCommonLen THEN
+                    SET maxCommonLen TO lenX
+                END IF
+            END IF
+            SET idxE TO idxE + 1
+        END WHILE
+
+        RETURN maxCommonLen
+    END FUNCTION
+END CLASS

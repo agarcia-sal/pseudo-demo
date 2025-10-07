@@ -1,0 +1,69 @@
+CLASS DSU  
+    FUNCTION __init__(self, z)  
+        SET self.parent TO an empty mapping  
+        SET self.rank TO an empty mapping  
+        SET c TO 0  
+        WHILE c LESS THAN z DO  
+            SET self.parent[c] TO c  
+            SET self.rank[c] TO 0  
+            SET c TO c PLUS 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION find(self, y)  
+        SET retVal TO self.parent[y]  
+        IF NOT (retVal EQUALS y) THEN  
+            SET self.parent[y] TO self.find(self.parent[y])  
+        END IF  
+        RETURN self.parent[y]  
+    END FUNCTION  
+
+    FUNCTION union_set(self, a, b)  
+        SET x TO self.find(a)  
+        SET w TO self.find(b)  
+        IF (x NOT EQUALS w) THEN  
+            IF (self.rank[x] LESS THAN self.rank[w]) THEN  
+                SET tempVar TO x  
+                SET x TO w  
+                SET w TO tempVar  
+            END IF  
+            SET self.parent[w] TO x  
+            IF (self.rank[x] EQUALS self.rank[w]) THEN  
+                SET tmpCount TO self.rank[x] PLUS 1  
+                SET self.rank[x] TO tmpCount  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, arr, lim)  
+        SET dsuInstance TO NEW DSU(lim PLUS 1)  
+        SET outerIndex TO 0  
+        WHILE outerIndex LESS THAN LENGTH OF arr DO  
+            SET currentNum TO arr[outerIndex]  
+            SET innerVal TO currentNum MULTIPLIED BY 2  
+            WHILE innerVal LESS THAN OR EQUAL TO lim DO  
+                dsuInstance.union_set(currentNum, innerVal)  
+                SET innerVal TO innerVal PLUS currentNum  
+            END WHILE  
+            SET outerIndex TO outerIndex PLUS 1  
+        END WHILE  
+
+        SET parentsSet TO an empty set  
+        SET idx TO 0  
+        LOOP  
+            EXIT WHEN idx GREATER THAN OR EQUAL TO LENGTH OF arr  
+            SET numValue TO arr[idx]  
+            IF numValue LESS THAN OR EQUAL TO lim THEN  
+                SET parId TO dsuInstance.find(numValue)  
+                ADD parId TO parentsSet  
+            ELSE  
+                ADD numValue TO parentsSet  
+            END IF  
+            SET idx TO idx PLUS 1  
+        END LOOP  
+
+        RETURN LENGTH OF parentsSet  
+    END FUNCTION  
+END CLASS

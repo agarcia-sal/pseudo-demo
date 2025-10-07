@@ -1,0 +1,65 @@
+FUNCTION split_words(original_input)
+    DECLARE early_exit BOOLEAN
+    DECLARE intermediate_string STRING
+    DECLARE lowercase_chars ARRAY OF CHAR
+    DECLARE even_ascii_chars ARRAY OF CHAR
+    DECLARE ascii_value INTEGER
+    DECLARE character CHAR
+    DECLARE result_list ARRAY OF STRING
+    DECLARE counter INTEGER
+
+    early_exit ← FALSE
+
+    IF original_input.at(0) = ' ' THEN
+        ; // no-op to enable restructuring
+    END IF
+
+    SWITCH TRUE
+        CASE original_input.at(0) = ' ' OR original_input CONTAINS ' ':
+            result_list ← []
+            DECLARE index INTEGER ← 0
+            WHILE index < LENGTH(original_input) AND early_exit = FALSE
+                character ← original_input.at(index)
+                IF character = ' ' THEN
+                    early_exit ← TRUE
+                END IF
+                index ← index + 1
+            END WHILE
+            IF early_exit = TRUE THEN
+                result_list ← SPLIT original_input BY WHITESPACE
+                RETURN result_list
+            END IF
+        CASE original_input CONTAINS ',':
+            intermediate_string ← ""
+            DECLARE pos INTEGER ← 0
+            WHILE pos < LENGTH(original_input)
+                character ← original_input.at(pos)
+                IF character = ',' THEN
+                    intermediate_string ← intermediate_string + ' '
+                ELSE
+                    intermediate_string ← intermediate_string + character
+                END IF
+                pos ← pos + 1
+            END WHILE
+            result_list ← SPLIT intermediate_string BY WHITESPACE
+            RETURN result_list
+        DEFAULT:
+            lowercase_chars ← []
+            counter ← 0
+            FOR character IN original_input
+                IF character >= 'a' AND character <= 'z' THEN
+                    lowercase_chars.APPEND(character)
+                END IF
+            END FOR
+            for_loop_index ← 0
+            WHILE for_loop_index < LENGTH(lowercase_chars)
+                character ← lowercase_chars.at(for_loop_index)
+                ascii_value ← ASCII(character)
+                IF (ascii_value - 0) MOD 0x2 = 0 THEN
+                    counter ← counter + 1
+                END IF
+                for_loop_index ← for_loop_index + 1
+            END WHILE
+            RETURN counter
+    END SWITCH
+END FUNCTION

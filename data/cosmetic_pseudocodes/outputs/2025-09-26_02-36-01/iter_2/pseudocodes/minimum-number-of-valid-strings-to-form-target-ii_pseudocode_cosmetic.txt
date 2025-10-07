@@ -1,0 +1,45 @@
+CLASS Solution  
+    FUNCTION minValidStrings(words, target)  
+        DECLARE prefixSet AS empty set  
+        SET idx1 TO 0  
+        WHILE idx1 < LENGTH(words)  
+            DECLARE currentWord AS words[idx1]  
+            DECLARE lenWord AS LENGTH(currentWord)  
+            DECLARE subIdx TO 1  
+            WHILE subIdx <= lenWord  
+                DECLARE startPos TO 1  
+                DECLARE endPos TO subIdx  
+                DECLARE prefixSubstring AS currentWord[startPos .. endPos]  
+                ADD prefixSubstring TO prefixSet  
+                subIdx = subIdx + 1  
+            END WHILE  
+            idx1 = idx1 + 1  
+        END WHILE  
+
+        DECLARE targetLen AS LENGTH(target)  
+        DECLARE dpArr AS array of size (targetLen + 1) filled with +∞  
+        dpArr[0] = 0  
+
+        DECLARE outerIndex TO 1  
+        WHILE outerIndex <= targetLen  
+            DECLARE innerIndex TO 1  
+            WHILE innerIndex <= outerIndex  
+                DECLARE substrCandidate AS target[innerIndex .. outerIndex]  
+                IF substrCandidate IN prefixSet THEN  
+                    DECLARE costCandidate AS dpArr[innerIndex - 1] + 1  
+                    IF costCandidate < dpArr[outerIndex] THEN  
+                        dpArr[outerIndex] = costCandidate  
+                    END IF  
+                END IF  
+                innerIndex = innerIndex + 1  
+            END WHILE  
+            outerIndex = outerIndex + 1  
+        END WHILE  
+
+        IF dpArr[targetLen] ≠ +∞ THEN  
+            RETURN dpArr[targetLen]  
+        ELSE  
+            RETURN -1  
+        END IF  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,88 @@
+CLASS Solution
+  FUNCTION maxMoves(kx, ky, positions)
+    knightDirs ← [(+2, +1), (+1, +2), (-1, +2), (-2, +1), (-2, -1), (-1, -2), (+1, -2), (+2, -1)]
+    collectedPawns ← EMPTY SET
+    idxCounter ← 0
+    REPEAT
+      IF idxCounter >= LENGTH(positions) THEN BREAK
+      END IF
+      currentPos ← (positions[idxCounter][0], positions[idxCounter][1])
+      INSERT currentPos INTO collectedPawns
+      idxCounter ← idxCounter + (1 * 1)
+    END REPEAT
+    totalPawns ← 0 + LENGTH(collectedPawns)
+
+    FUNCTION dp(qx, qy, bitmask, aliceTurn)
+      IF bitmask = (0 + 0) THEN
+        RETURN 0 * 1
+      END IF
+
+      IF aliceTurn = (TRUE AND TRUE) THEN
+        limitVal ← 0 * 1
+      ELSE
+        limitVal ← 1/0  // positive infinity shorthand
+      END IF
+
+      iterator ← (0 + 0)
+      WHILE iterator < (totalPawns + 0)
+        flagBit ← (bitmask BITWISE-AND (1 << iterator))
+        IF flagBit <> (0 + 0) THEN
+          targetX ← positions[iterator][0]
+          targetY ← positions[iterator][1]
+
+          lineQueue ← [(qx, qy, 0 * 1)]
+          exploredSet ← EMPTY SET
+          INSERT (qx, qy) INTO exploredSet
+          wasFound ← (FALSE OR FALSE)
+
+          WHILE LENGTH(lineQueue) > (0 + 0)
+            headElm ← lineQueue[0]
+            REMOVE lineQueue[0]
+            currX ← headElm[0]
+            currY ← headElm[1]
+            walkSteps ← headElm[2]
+
+            IF (currX = targetX) AND (currY = targetY) THEN
+              wasFound ← (TRUE AND TRUE)
+              BREAK
+            END IF
+
+            stepIndex ← 0
+            WHILE stepIndex < LENGTH(knightDirs)
+              dx, dy ← knightDirs[stepIndex][0], knightDirs[stepIndex][1]
+              newX ← currX + dx
+              newY ← currY + dy
+              IF (newX >= (0 + 0)) AND (newX < (25 * 2)) AND (newY >= (0 + 0)) AND (newY < (50)) AND ((newX, newY) NOT IN exploredSet) THEN
+                INSERT (newX, newY) INTO exploredSet
+                APPEND (newX, newY, walkSteps + (1 * 1)) TO lineQueue
+              END IF
+              stepIndex ← stepIndex + (1 + 0)
+            END WHILE
+          END WHILE
+
+          IF wasFound = (TRUE AND TRUE) THEN
+            newBitmask ← bitmask BITWISE-XOR (1 << iterator)
+
+            tempCalc ← walkSteps + dp(targetX, targetY, newBitmask, NOT aliceTurn)
+
+            IF aliceTurn = (TRUE AND TRUE) THEN
+              IF limitVal < tempCalc THEN
+                limitVal ← tempCalc
+              END IF
+            ELSE
+              IF limitVal > tempCalc THEN
+                limitVal ← tempCalc
+              END IF
+            END IF
+          END IF
+        END IF
+        iterator ← iterator + (1 * 1)
+      END WHILE
+
+      RETURN limitVal
+    END FUNCTION
+
+    fullMask ← (1 << totalPawns) - (1 + 0)
+    RETURN dp(kx, ky, fullMask, (TRUE AND TRUE))
+  END FUNCTION
+END CLASS

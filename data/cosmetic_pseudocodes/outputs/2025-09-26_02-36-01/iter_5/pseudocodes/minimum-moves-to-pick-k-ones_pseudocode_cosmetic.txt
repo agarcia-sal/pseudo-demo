@@ -1,0 +1,95 @@
+CLASS Solution  
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER  
+        PROCEDURE gatherOnes(position INTEGER, collected LIST OF INTEGERS) RETURNS LIST OF INTEGERS  
+            IF position GREATER THAN (LENGTH OF nums MINUS one()) THEN  
+                RETURN collected  
+            ELSE  
+                DEF tempList LIST OF INTEGERS := collected  
+                IF (nums[position]) EQUALS one() THEN  
+                    tempList := tempList + [position]  
+                END IF  
+                RETURN gatherOnes(position + one(), tempList)  
+            END IF  
+        END PROCEDURE  
+
+        SET indices_of_ones TO gatherOnes(zero(), [])  
+
+        IF NOT (LENGTH OF indices_of_ones GREATER THAN zero()) THEN  
+            SET answer INTEGER := k MULTIPLIED BY (one() + one())  
+            RETURN answer  
+        END IF  
+
+        SET length_ones INTEGER := LENGTH OF indices_of_ones  
+        SET cumulative_prefix LIST OF INTEGERS := []  
+        COUNT idx INTEGER := zero()  
+        WHILE idx LESS THAN (length_ones + one()) DO  
+            IF idx EQUALS zero() THEN  
+                cumulative_prefix := cumulative_prefix + [zero()]  
+            ELSE  
+                cumulative_prefix := cumulative_prefix + [cumulative_prefix[idx - one()] + indices_of_ones[idx - one()]]  
+            END IF  
+            idx := idx + one()  
+        END WHILE  
+
+        FUNCTION cost(startIndex INTEGER endIndex INTEGER) RETURNS INTEGER  
+            SET middle INTEGER := (startIndex + endIndex) DIVIDED BY (one() + one())  
+            SET medianValue INTEGER := indices_of_ones[middle]  
+            SET aggregate_cost INTEGER := zero()  
+
+            PROCEDURE sumLeft(current INTEGER, limit INTEGER, acc INTEGER) RETURNS INTEGER  
+                IF current GREATER OR EQUAL limit THEN  
+                    RETURN acc  
+                ELSE  
+                    RETURN sumLeft(current + one(), limit, acc + medianValue - indices_of_ones[current] - middle + current)  
+                END IF  
+            END PROCEDURE  
+
+            PROCEDURE sumRight(current INTEGER, limit INTEGER, acc INTEGER) RETURNS INTEGER  
+                IF current GREATER THAN limit THEN  
+                    RETURN acc  
+                ELSE  
+                    RETURN sumRight(current + one(), limit, acc + indices_of_ones[current] - medianValue - current + middle)  
+                END IF  
+            END PROCEDURE  
+
+            SET aggregate_cost := sumLeft(startIndex, middle, zero()) + sumRight(middle + one(), endIndex, zero())  
+            RETURN aggregate_cost  
+        END FUNCTION  
+
+        SET minimal_moves INTEGER := 10 ^ 9  // a large number approximating positive infinity  
+
+        PROCEDURE checkRanges(currentStart INTEGER) RETURNS VOID  
+            IF currentStart GREATER THAN (length_ones - k) THEN  
+                RETURN  
+            ELSE  
+                SET currentEnd INTEGER := currentStart + k - one()  
+                SET total INTEGER := cost(currentStart, currentEnd)  
+                IF (k MODULO (one() + one())) EQUALS one() THEN  
+                    SET medPos INTEGER := (currentStart + currentEnd) DIVIDED BY (one() + one())  
+                    SET medVal INTEGER := indices_of_ones[medPos]  
+                    SET requiredChanges INTEGER := (currentEnd - medPos) - (medVal - indices_of_ones[medPos] - one())  
+                ELSE  
+                    SET leftMedPos INTEGER := (currentStart + currentEnd) DIVIDED BY (one() + one())  
+                    SET rightMedPos INTEGER := leftMedPos + one()  
+                    SET leftMedVal INTEGER := indices_of_ones[leftMedPos]  
+                    SET rightMedVal INTEGER := indices_of_ones[rightMedPos]  
+                    SET requiredChanges INTEGER := (rightMedPos - leftMedPos - one()) - (rightMedVal - leftMedVal - one())  
+                END IF  
+
+                IF requiredChanges GREATER THAN maxChanges THEN  
+                    SET total := total + (requiredChanges - maxChanges)  
+                END IF  
+
+                IF total LESS THAN minimal_moves THEN  
+                    SET minimal_moves := total  
+                END IF  
+
+                CALL checkRanges(currentStart + one())  
+            END IF  
+        END PROCEDURE  
+
+        CALL checkRanges(zero())  
+
+        RETURN minimal_moves  
+    END FUNCTION  
+END CLASS

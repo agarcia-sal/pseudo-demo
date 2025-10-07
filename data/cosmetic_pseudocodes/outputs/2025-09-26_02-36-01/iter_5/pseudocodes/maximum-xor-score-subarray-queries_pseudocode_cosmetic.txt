@@ -1,0 +1,89 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+        SET length_nums TO 0
+        SET temp_counter TO 0
+        WHILE TRUE
+            IF temp_counter IS EQUAL TO LENGTH OF nums THEN
+                BREAK
+            END IF
+            SET length_nums TO length_nums + 1
+            SET temp_counter TO temp_counter + 1
+        END WHILE
+
+        SET matrix_f TO []
+        SET row_index_f TO 0
+        WHILE row_index_f < length_nums
+            SET temp_row_f TO []
+            SET col_index_f TO 0
+            WHILE col_index_f < length_nums
+                SET temp_row_f TO temp_row_f + [0]
+                SET col_index_f TO col_index_f + 1
+            END WHILE
+            SET matrix_f TO matrix_f + [temp_row_f]
+            SET row_index_f TO row_index_f + 1
+        END WHILE
+
+        SET matrix_g TO []
+        SET row_ptr_g TO 0
+        WHILE row_ptr_g < length_nums
+            SET temp_row_g TO []
+            SET col_ptr_g TO 0
+            WHILE col_ptr_g < length_nums
+                SET temp_row_g TO temp_row_g + [0]
+                SET col_ptr_g TO col_ptr_g + 1
+            END WHILE
+            SET matrix_g TO matrix_g + [temp_row_g]
+            SET row_ptr_g TO row_ptr_g + 1
+        END WHILE
+
+        SET current_i TO length_nums - (1 + 0)
+        WHILE current_i >= 0
+            SET matrix_f[current_i][current_i] TO nums[current_i]
+            SET matrix_g[current_i][current_i] TO nums[current_i]
+
+            SET idx_j TO current_i + (1 + 0)
+            WHILE idx_j <= length_nums - (1 + 0)
+                SET left_element_f TO matrix_f[current_i][idx_j - (1 + 0)]
+                SET right_element_f TO matrix_f[(current_i + (1 + 0))][idx_j]
+                SET xor_result TO 0
+                SET temp_left TO left_element_f
+                SET temp_right TO right_element_f
+                SET xor_result TO temp_left XOR temp_right
+                SET matrix_f[current_i][idx_j] TO xor_result
+
+                SET candidate_1 TO matrix_f[current_i][idx_j]
+                SET candidate_2 TO matrix_g[current_i][idx_j - (1 + 0)]
+                SET candidate_3 TO matrix_g[(current_i + (1 + 0))][idx_j]
+                SET max_val_1 TO candidate_1
+                IF candidate_2 > max_val_1 THEN
+                    SET max_val_1 TO candidate_2
+                END IF
+                IF candidate_3 > max_val_1 THEN
+                    SET max_val_1 TO candidate_3
+                END IF
+                SET matrix_g[current_i][idx_j] TO max_val_1
+
+                SET idx_j TO idx_j + 1
+            END WHILE
+
+            SET current_i TO current_i - 1
+        END WHILE
+
+        FUNCTION extract_value(pair PARAMETER)
+            SET left_bound TO pair[0]
+            SET right_bound TO pair[1]
+            RETURN matrix_g[left_bound][right_bound]
+        END FUNCTION
+
+        SET result_list TO []
+        SET index_queries TO 0
+        WHILE index_queries < LENGTH OF queries
+            SET current_pair TO queries[index_queries]
+            SET value_result TO extract_value(current_pair)
+            SET result_list TO result_list + [value_result]
+            SET index_queries TO index_queries + 1
+        END WHILE
+
+        RETURN result_list
+    END FUNCTION
+END CLASS

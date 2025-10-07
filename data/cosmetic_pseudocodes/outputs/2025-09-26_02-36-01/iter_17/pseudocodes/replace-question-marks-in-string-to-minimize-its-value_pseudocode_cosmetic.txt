@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        IMPORT Counter
+
+        DECLARE q_indices TO EMPTY LIST
+        DECLARE counts_map TO Counter(s)
+        IF counts_map CONTAINS '?' THEN
+            REMOVE '?' FROM counts_map
+        END IF
+
+        DECLARE idx_var TO 0
+        WHILE idx_var < LENGTH(s) DO
+            IF s[idx_var] = '?' THEN
+                APPEND idx_var TO q_indices
+            END IF
+            SET idx_var TO idx_var + 1
+        END WHILE
+
+        DECLARE subs_list TO EMPTY LIST
+
+        DECLARE FUNCTION find_min_char():
+            DECLARE min_val TO MAXIMUM_INTEGER
+            DECLARE min_c TO NULL
+            DECLARE ch_iter TO 'a'
+            WHILE ch_iter <= 'z' DO
+                IF counts_map.GET(ch_iter, 0) < min_val THEN
+                    SET min_val TO counts_map.GET(ch_iter, 0)
+                    SET min_c TO ch_iter
+                END IF
+                SET ch_iter TO NEXT_CHAR(ch_iter)
+            END WHILE
+            RETURN min_c
+        END FUNCTION
+
+        DECLARE idx_j TO 0
+        REPEAT
+            IF idx_j >= LENGTH(q_indices) THEN
+                BREAK
+            END IF
+
+            DECLARE candidate_char TO find_min_char()
+            APPEND candidate_char TO subs_list
+            SET counts_map[candidate_char] TO counts_map.GET(candidate_char, 0) + 1
+
+            SET idx_j TO idx_j + 1
+        UNTIL FALSE
+
+        DECLARE sorted_subs TO EMPTY LIST
+        DECLARE sort_i TO 0
+        WHILE sort_i < LENGTH(subs_list) DO
+            DECLARE insert_pos TO 0
+            WHILE insert_pos < LENGTH(sorted_subs) AND sorted_subs[insert_pos] <= subs_list[sort_i] DO
+                SET insert_pos TO insert_pos + 1
+            END WHILE
+            INSERT subs_list[sort_i] AT POSITION insert_pos IN sorted_subs
+            SET sort_i TO sort_i + 1
+        END WHILE
+
+        DECLARE mutable_chars TO NEW LIST
+        DECLARE s_len TO LENGTH(s)
+        DECLARE iter_k TO 0
+        WHILE iter_k < s_len DO
+            APPEND s[iter_k] TO mutable_chars
+            SET iter_k TO iter_k + 1
+        END WHILE
+
+        DECLARE replace_idx TO 0
+        DECLARE sub_idx TO 0
+        WHILE replace_idx < LENGTH(q_indices) AND sub_idx < LENGTH(sorted_subs) DO
+            SET mutable_chars[q_indices[replace_idx]] TO sorted_subs[sub_idx]
+            SET replace_idx TO replace_idx + 1
+            SET sub_idx TO sub_idx + 1
+        END WHILE
+
+        DECLARE result_str TO ""
+        DECLARE res_i TO 0
+        WHILE res_i < LENGTH(mutable_chars) DO
+            SET result_str TO result_str + mutable_chars[res_i]
+            SET res_i TO res_i + 1
+        END WHILE
+
+        RETURN result_str
+    END FUNCTION
+END CLASS

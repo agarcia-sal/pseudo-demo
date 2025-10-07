@@ -1,0 +1,38 @@
+CLASS Solution
+    FUNCTION mostFrequentIDs(nums PARAMETER, freq PARAMETER)
+        FUNCTION computeNegKey(dictRef, k)
+            RETURN -1 * dictRef[k]
+        END FUNCTION
+
+        SET alpha TO dict() WITH DEFAULT 0
+        SET omega TO []
+        SET gamma TO []
+        SET idxOuter TO 0
+
+        WHILE idxOuter < LENGTH(nums)
+            SET keyCurr TO nums[idxOuter]
+            SET valInc TO freq[idxOuter]
+            SET priorVal TO alpha[keyCurr]
+            SET alpha[keyCurr] TO priorVal + valInc
+
+            CALL omega.APPEND([ -1 * alpha[keyCurr], keyCurr ])
+
+            FUNCTION topInvalid()
+                WHILE (LENGTH(omega) > 0) AND ( -1 * omega[0][0] != alpha[omega[0][1]] )
+                    CALL omega.POP(0)
+                END WHILE
+                RETURN LENGTH(omega) == 0
+            END FUNCTION
+
+            IF topInvalid() == false
+                CALL gamma.APPEND( -1 * omega[0][0] )
+            ELSE
+                CALL gamma.APPEND(0)
+            END IF
+
+            SET idxOuter TO idxOuter + 1
+        END WHILE
+
+        RETURN gamma
+    END FUNCTION
+END CLASS

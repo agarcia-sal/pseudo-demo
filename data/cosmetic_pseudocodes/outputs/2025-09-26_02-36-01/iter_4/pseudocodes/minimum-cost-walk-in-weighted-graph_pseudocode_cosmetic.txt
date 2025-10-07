@@ -1,0 +1,105 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, n)  
+        LET idx TO 0  
+        LET par_arr TO empty list  
+        WHILE idx LESS THAN n DO  
+            ADD idx TO par_arr  
+            INCREMENT idx BY one  
+        END WHILE  
+        SET self.parent TO par_arr  
+        
+        LET rnk_arr TO empty list  
+        LET counter TO 0  
+        WHILE counter LESS THAN n DO  
+            ADD 1 TO rnk_arr  
+            INCREMENT counter BY 1  
+        END WHILE  
+        SET self.rank TO rnk_arr  
+    END FUNCTION  
+  
+    FUNCTION find(self, u)  
+        LET p_arr TO self.parent  
+        IF p_arr[u] NOT EQUAL TO u THEN  
+            LET temp_parent TO CALL self.find with p_arr[u]  
+            SET p_arr[u] TO temp_parent  
+        END IF  
+        RETURN p_arr[u]  
+    END FUNCTION  
+  
+    FUNCTION union(self, u, v)  
+        LET root_of_u TO self.find(u)  
+        LET root_of_v TO self.find(v)  
+        IF root_of_u NOT EQUAL TO root_of_v THEN  
+            LET rank_arr TO self.rank  
+            LET parent_arr TO self.parent  
+            IF NOT (rank_arr[root_of_u] LESS THAN OR EQUAL TO rank_arr[root_of_v]) THEN  
+                SET parent_arr[root_of_v] TO root_of_u  
+            ELSE  
+                IF rank_arr[root_of_u] LESS THAN rank_arr[root_of_v] THEN  
+                    SET parent_arr[root_of_u] TO root_of_v  
+                ELSE  
+                    SET parent_arr[root_of_v] TO root_of_u  
+                    LET current_rank TO rank_arr[root_of_u]  
+                    LET incremented_rank TO current_rank + 1  
+                    SET rank_arr[root_of_u] TO incremented_rank  
+                END IF  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION minimumCost(self, n, edges, query)  
+        LET uf TO UnionFind(n)  
+        LET MAX_BITWISE AND TO (2 POWER 32) MINUS 1  
+        LET cmp_and_list TO empty list  
+        LET i TO 0  
+        WHILE i LESS THAN n DO  
+            ADD MAX_BITWISE AND TO cmp_and_list  
+            INCREMENT i BY 1  
+        END WHILE  
+        
+        FOR EACH edge IN edges DO  
+            LET u TO edge[0]  
+            LET v TO edge[1]  
+            LET w TO edge[2]  
+            CALL uf.union(u, v)  
+            LET root_idx TO uf.find(u)  
+            LET previous_val TO cmp_and_list[root_idx]  
+            LET new_val TO previous_val BITWISE_AND w  
+            SET cmp_and_list[root_idx] TO new_val  
+        END FOR  
+        
+        LET comp_cost_map TO empty dictionary  
+        LET counter TO 0  
+        WHILE counter LESS THAN n DO  
+            LET current_root TO uf.find(counter)  
+            IF NOT comp_cost_map CONTAINS_KEY current_root THEN  
+                SET comp_cost_map[current_root] TO cmp_and_list[current_root]  
+            END IF  
+            INCREMENT counter BY 1  
+        END WHILE  
+        
+        LET res_list TO empty list  
+        LET idx TO 0  
+        WHILE idx LESS THAN LENGTH_OF query DO  
+            LET curr_pair TO query[idx]  
+            LET start_node TO curr_pair[0]  
+            LET end_node TO curr_pair[1]  
+            IF start_node EQUALS end_node THEN  
+                ADD 0 TO res_list  
+            ELSE  
+                LET root_s TO uf.find(start_node)  
+                LET root_t TO uf.find(end_node)  
+                IF root_s EQUALS root_t THEN  
+                    ADD comp_cost_map[root_s] TO res_list  
+                ELSE  
+                    ADD -1 TO res_list  
+                END IF  
+            END IF  
+            INCREMENT idx BY 1  
+        END WHILE  
+        
+        RETURN res_list  
+    END FUNCTION  
+END CLASS

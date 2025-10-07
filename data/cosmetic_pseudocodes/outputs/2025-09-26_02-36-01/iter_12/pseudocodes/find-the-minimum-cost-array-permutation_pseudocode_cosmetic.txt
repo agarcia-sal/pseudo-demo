@@ -1,0 +1,68 @@
+CLASS Solution
+	FUNCTION findPermutation(nums)
+		FUNCTION depthFirstSearch(flag, previous)
+			IF flag = ((1 << LENGTH(nums)) - 1) THEN
+				RETURN ABS(previous - nums[0])
+			END IF
+
+			SET minimalResult TO +∞
+
+			DECLARE PROCEDURE convertLoop(index)
+				IF ((flag >> index) & 1) = 0 THEN
+					SET interimResult TO ABS(previous - nums[index]) + depthFirstSearch(flag | (1 << index), index)
+					IF interimResult < minimalResult THEN
+						minimalResult = interimResult
+					END IF
+				END IF
+			END PROCEDURE
+
+			SET loopCounter TO 0
+			WHILE loopCounter < LENGTH(nums)
+				convertLoop(loopCounter)
+				loopCounter = loopCounter + 1
+			END WHILE
+
+			RETURN minimalResult
+		END FUNCTION
+
+		FUNCTION graphTraverse(state, pred)
+			APPEND pred TO ans
+
+			IF state = ((1 << LENGTH(nums)) - 1) THEN
+				RETURN
+			END IF
+
+			SET threshold TO depthFirstSearch(state, pred)
+
+			DECLARE FUNCTION identifyStep(pos)
+				IF ((state >> pos) & 1) = 0 THEN
+					SET hypothetical TO ABS(pred - nums[pos]) + depthFirstSearch(state | (1 << pos), pos)
+					RETURN hypothetical
+				END IF
+				RETURN +∞
+			END FUNCTION
+
+			FUNCTION foundNextPath(counter)
+				IF counter = LENGTH(nums) THEN
+					RETURN false
+				END IF
+
+				IF identifyStep(counter) = threshold THEN
+					graphTraverse(state | (1 << counter), counter)
+					RETURN true
+				END IF
+
+				RETURN foundNextPath(counter + 1)
+			END FUNCTION
+
+			foundNextPath(0)
+		END FUNCTION
+
+		SET lengthNums TO LENGTH(nums)
+		SET ans TO []
+
+		graphTraverse(1 << 0, 0)
+
+		RETURN ans
+	END FUNCTION
+END CLASS

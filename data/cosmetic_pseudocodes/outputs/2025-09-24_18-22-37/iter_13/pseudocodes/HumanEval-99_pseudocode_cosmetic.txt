@@ -1,0 +1,52 @@
+FUNCTION closest_integer(arg)
+    IMPORT floor, ceil FROM math
+
+    DECLARE divisor_temp AS INTEGER
+    DECLARE num_tmp AS FLOAT
+    DECLARE outcome AS INTEGER
+    DECLARE str_len AS INTEGER
+    DECLARE suffix_substr AS STRING
+    DECLARE is_fractional AS BOOLEAN
+
+    SET divisor_temp TO 0
+    FOR EACH ch IN arg
+        IF ch IS '.'
+            SET divisor_temp TO divisor_temp + 1
+        END IF
+    END FOR
+
+    SET is_fractional TO (divisor_temp EQUALS 0x1)
+
+    IF is_fractional
+        REPEAT
+            IF arg.at(arg.length - 1) NOT EQUAL TO '0'
+                BREAK
+            END IF
+            SET arg TO arg.subString(0, arg.length - 1)
+        UNTIL FALSE
+    END IF
+
+    SET num_tmp TO FLOAT(arg)
+
+    SET str_len TO arg.length
+    IF str_len GREATER THAN 0
+        SET suffix_substr TO arg.subString(str_len - 2, 2)
+    ELSE
+        SET suffix_substr TO ""
+    END IF
+
+    IF suffix_substr EQUALS ".5"
+        IF num_tmp GREATER THAN 0
+            SET outcome TO ceil(num_tmp)
+        ELSE
+            SET outcome TO floor(num_tmp)
+        END IF
+    ELSE SWITCH TRUE
+        CASE str_len GREATER THAN 0:
+            SET outcome TO ROUND(num_tmp)
+        DEFAULT:
+            SET outcome TO 0
+    END SWITCH
+
+    RETURN outcome
+END FUNCTION

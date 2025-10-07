@@ -1,0 +1,54 @@
+```pseudocode
+CLASS Solution
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+        SET deltaDict TO empty dictionary mapping STRING to INTEGER
+
+        SET z TO 0
+        WHILE z < LENGTH OF wordsContainer
+            SET currentWord TO wordsContainer element at index z
+            SET y TO 0
+            REPEAT
+                SET partialSuffix TO substring from position y TO end of currentWord
+                IF NOT (partialSuffix IN deltaDict)
+                    SET deltaDict element at key partialSuffix TO z
+                ELSE
+                    IF (LENGTH OF currentWord < LENGTH OF (wordsContainer element at key (deltaDict element at key partialSuffix))) OR 
+                       ((LENGTH OF currentWord = LENGTH OF (wordsContainer element at key (deltaDict element at key partialSuffix))) AND (z < deltaDict element at key partialSuffix))
+                        SET deltaDict element at key partialSuffix TO z
+                    END IF
+                END IF
+                SET y TO y + 1
+            UNTIL y > LENGTH OF currentWord - 1
+            SET z TO z + 1
+        END WHILE
+
+        FUNCTION get_best_match(query query TO STRING) RETURNS INTEGER
+            SET c TO 0
+            WHILE c <= LENGTH OF query - 1
+                SET candidateSuffix TO substring from position c TO end of query
+                IF candidateSuffix IN deltaDict
+                    RETURN deltaDict element at key candidateSuffix
+                END IF
+                SET c TO c + 1
+            END WHILE
+
+            SET shortestIndex TO 0
+            SET x TO 1
+            WHILE x < LENGTH OF wordsContainer
+                IF (LENGTH OF wordsContainer element at index x < LENGTH OF wordsContainer element at index shortestIndex) OR 
+                   ((LENGTH OF wordsContainer element at index x = LENGTH OF wordsContainer element at index shortestIndex) AND (x < shortestIndex))
+                    SET shortestIndex TO x
+                END IF
+                SET x TO x + 1
+            END WHILE
+            RETURN shortestIndex
+        END FUNCTION
+
+        SET accumulator TO empty list of integer
+        FOR EACH candidateQuery IN wordsQuery
+            APPEND get_best_match(candidateQuery) TO accumulator
+        END FOR
+        RETURN accumulator
+    END FUNCTION
+END CLASS
+```

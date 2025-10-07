@@ -1,0 +1,56 @@
+CLASS Solution  
+    FUNCTION minimumTime(n, edges, disappear)  
+        DECLARE adjacency AS a dictionary defaulting to empty arrays  
+        FOR EACH edge_entry IN edges  
+            LET node_u TO edge_entry[0]  
+            LET node_v TO edge_entry[1]  
+            LET edge_len TO edge_entry[2]  
+            
+            APPEND (node_v, edge_len) TO adjacency[node_u]  
+            APPEND (node_u, edge_len) TO adjacency[node_v]  
+        END FOR  
+        
+        DECLARE times AS an array of size n initialized with large positive number  
+        SET times[0] TO 0  
+        
+        DECLARE heap_container AS a list containing (0, 0)  
+        
+        WHILE COUNT of heap_container IS GREATER THAN 0  
+            EXTRACT_MIN from heap_container and ASSIGN to dist_curr, node_curr  
+            
+            IF NOT (dist_curr < disappear[node_curr]) THEN  
+                SKIP to next iteration of WHILE  
+            END IF  
+            
+            IF dist_curr NOT LESS THAN times[node_curr] THEN  
+                SKIP to next iteration of WHILE  
+            END IF  
+            
+            LET neighbors_list BE adjacency[node_curr]  
+            SET index_j TO 0  
+            WHILE index_j LESS THAN LENGTH OF neighbors_list  
+                LET (nbr, len_edge) TO neighbors_list[index_j]  
+                
+                LET new_dist TO dist_curr MINUS (-len_edge)  
+                
+                IF new_dist LESS THAN times[nbr] AND new_dist LESS THAN disappear[nbr] THEN  
+                    SET times[nbr] TO new_dist  
+                    INSERT (new_dist, nbr) INTO heap_container preserving min-heap order  
+                END IF  
+                
+                INCREMENT index_j BY 1  
+            END WHILE  
+        END WHILE  
+        
+        DECLARE output_arr AS array of size n filled with (-1)  
+        LET position_p TO 0  
+        WHILE position_p LESS THAN n  
+            IF times[position_p] IS STRICTLY LESS THAN disappear[position_p] THEN  
+                SET output_arr[position_p] TO times[position_p]  
+            END IF  
+            INCREMENT position_p BY 1  
+        END WHILE  
+        
+        RETURN output_arr  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,73 @@
+CLASS Solution  
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER  
+        SET suffixIndexMap TO an empty map of STRING TO INTEGER  
+        
+        FUNCTION processWordSuffixes(currentWord STRING, currentIndex INTEGER, position INTEGER)  
+            IF position GREATER OR EQUAL TO LENGTH OF currentWord THEN  
+                RETURN  
+            END IF  
+            SET currentSuffix TO substring OF currentWord FROM position TO END  
+            IF NOT (currentSuffix IN suffixIndexMap) THEN  
+                suffixIndexMap[currentSuffix] = currentIndex  
+            ELSE  
+                SET mappedIndex TO suffixIndexMap[currentSuffix]  
+                SET mappedWord TO wordsContainer[mappedIndex]  
+                SET lenCurrWord TO LENGTH OF currentWord  
+                SET lenMappedWord TO LENGTH OF mappedWord  
+                IF (lenCurrWord < lenMappedWord) OR ((lenCurrWord = lenMappedWord) AND (currentIndex < mappedIndex)) THEN  
+                    suffixIndexMap[currentSuffix] = currentIndex  
+                END IF  
+            END IF  
+            CALL processWordSuffixes(currentWord, currentIndex, position + 1)  
+        END FUNCTION  
+        
+        FUNCTION processAllWords(position INTEGER)  
+            IF position GREATER OR EQUAL TO LENGTH OF wordsContainer THEN  
+                RETURN  
+            END IF  
+            SET runningWord TO wordsContainer[position]  
+            CALL processWordSuffixes(runningWord, position, 0)  
+            CALL processAllWords(position + 1)  
+        END FUNCTION  
+        
+        CALL processAllWords(0)  
+        
+        FUNCTION get_best_match(query STRING) RETURNS INTEGER  
+            FUNCTION searchSuffix(pos INTEGER) RETURNS INTEGER  
+                IF pos GREATER OR EQUAL TO LENGTH OF query THEN  
+                    SET candidateLengths TO map EACH word IN wordsContainer TO LENGTH OF word  
+                    SET minLength INTEGER TO candidateLengths[0]  
+                    SET minIndex INTEGER TO 0  
+                    SET idx INTEGER TO 1  
+                    WHILE idx LESS THAN LENGTH OF candidateLengths DO  
+                        IF candidateLengths[idx] < minLength THEN  
+                            minLength = candidateLengths[idx]  
+                            minIndex = idx  
+                        ELSE IF candidateLengths[idx] = minLength AND idx < minIndex THEN  
+                            minIndex = idx  
+                        END IF  
+                        idx = idx + 1  
+                    END WHILE  
+                    RETURN minIndex  
+                END IF  
+                SET suffixCheck TO substring OF query FROM pos TO END  
+                IF suffixCheck IN suffixIndexMap THEN  
+                    RETURN suffixIndexMap[suffixCheck]  
+                ELSE  
+                    RETURN searchSuffix(pos + 1)  
+                END IF  
+            END FUNCTION  
+            RETURN searchSuffix(0)  
+        END FUNCTION  
+        
+        SET resultCollection TO empty list OF INTEGER  
+        SET queryCursor TO 0  
+        WHILE queryCursor LESS THAN LENGTH OF wordsQuery DO  
+            SET currentQuery TO wordsQuery[queryCursor]  
+            SET bestIdx TO get_best_match(currentQuery)  
+            resultCollection = resultCollection + [bestIdx]  
+            queryCursor = queryCursor + 1  
+        END WHILE  
+        RETURN resultCollection  
+    END FUNCTION  
+END CLASS

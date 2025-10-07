@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION maxSubstringLength(s)
+        DEFINE FUNCTION countFrequency(str, pos, freqMap)
+            IF pos EQUALS length(str) THEN
+                RETURN freqMap
+            ELSE
+                SET updatedFreq TO freqMap
+                SET currentChar TO str[pos]
+                IF currentChar IN updatedFreq THEN
+                    SET updatedFreq[currentChar] TO updatedFreq[currentChar] + 1
+                ELSE
+                    SET updatedFreq[currentChar] TO 1
+                END IF
+                RETURN countFrequency(str, pos + 1, updatedFreq)
+            END IF
+        END FUNCTION
+
+        SET totalFreq TO countFrequency(s, 0, empty map)
+        SET resultLen TO (-1) * 1
+        DEFINE FUNCTION checkContains(currentFreq, totalFreqKeys, keyIndex)
+            IF keyIndex EQUALS length(totalFreqKeys) THEN
+                RETURN true
+            ELSE
+                SET currentKey TO totalFreqKeys[keyIndex]
+                IF currentFreq[currentKey] < totalFreq[currentKey] THEN
+                    RETURN false
+                ELSE
+                    RETURN checkContains(currentFreq, totalFreqKeys, keyIndex + 1)
+                END IF
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION explore(i, maxLen)
+            IF i EQUALS length(s) THEN
+                RETURN maxLen
+            ELSE
+                DEFINE FUNCTION innerExplore(j, currentFreq, curMax)
+                    IF j EQUALS length(s) THEN
+                        RETURN curMax
+                    ELSE
+                        SET charAtJ TO s[j]
+                        SET updatedCurrentFreq TO currentFreq
+                        IF charAtJ IN updatedCurrentFreq THEN
+                            SET tempVal TO updatedCurrentFreq[charAtJ] + 1
+                            SET updatedCurrentFreq[charAtJ] TO tempVal
+                        ELSE
+                            SET updatedCurrentFreq[charAtJ] TO 1
+                        END IF
+
+                        SET keysCurrentFreq TO keys(updatedCurrentFreq)
+                        SET keysTotalFreq TO keys(totalFreq)
+                        SET conditionHolds TO checkContains(updatedCurrentFreq, keysCurrentFreq, 0)
+
+                        IF conditionHolds EQUALS true THEN
+                            SET diffCount TO length(keysCurrentFreq) - length(keysTotalFreq)
+                            IF diffCount < 0 THEN
+                                SET diffLen TO (j - i) + 1
+                                IF diffLen > curMax THEN
+                                    SET curMax TO diffLen
+                                END IF
+                            END IF
+                        END IF
+
+                        RETURN innerExplore(j + 1, updatedCurrentFreq, curMax)
+                    END IF
+                END FUNCTION
+
+                SET updatedMaxLen TO innerExplore(i, empty map, maxLen)
+                RETURN explore(i + 1, updatedMaxLen)
+            END IF
+        END FUNCTION
+
+        SET finalResult TO explore(0, resultLen)
+        RETURN finalResult
+    END FUNCTION
+END CLASS

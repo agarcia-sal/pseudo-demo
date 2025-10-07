@@ -1,0 +1,37 @@
+FUNCTION check_dict_case(input_map)
+    SET result_flag := False
+    SET key_collection := input_map keys
+    IF LENGTH(key_collection) is equal to 0 THEN
+        SET result_flag := False
+    ELSE
+        SET status_marker := "start"
+        SET index_counter := 0
+        WHILE index_counter less than LENGTH(key_collection) AND status_marker not equal to "mixed"
+            SET present_key := key_collection at index_counter
+            IF present_key is not instance of STRING THEN
+                SET status_marker := "mixed"
+            ELSE
+                IF status_marker is equal to "start" THEN
+                    IF present_key in uppercase form is equal to present_key THEN
+                        SET status_marker := "upper"
+                    ELSE 
+                        IF present_key in lowercase form is equal to present_key THEN
+                            SET status_marker := "lower"
+                        ELSE
+                            SET index_counter := LENGTH(key_collection)  // force exit from loop
+                        END IF
+                    END IF
+                ELSE 
+                    IF (status_marker is equal to "upper" AND present_key in uppercase form not equal to present_key) OR (status_marker is equal to "lower" AND present_key in lowercase form not equal to present_key) THEN
+                        SET status_marker := "mixed"
+                    ELSE
+                        SET index_counter := LENGTH(key_collection)  // force exit from loop
+                    END IF
+                END IF
+            END IF
+            ADD 1 to index_counter
+        END WHILE
+        SET result_flag := (status_marker is equal to "upper") OR (status_marker is equal to "lower")
+    END IF
+    RETURN result_flag
+END FUNCTION

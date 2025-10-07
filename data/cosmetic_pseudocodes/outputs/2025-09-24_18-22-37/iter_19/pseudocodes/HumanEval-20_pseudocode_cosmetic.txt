@@ -1,0 +1,47 @@
+FUNCTION find_closest_elements(collection)
+    SET result_pair TO None
+    SET smallest_gap TO None
+    SET outer_idx TO 0
+
+    REPEAT WHILE outer_idx < collection.LENGTH
+        SET outer_val TO collection.at(outer_idx)
+        SET inner_idx TO 0
+
+        REPEAT WHILE inner_idx < collection.LENGTH
+            SET inner_val TO collection.at(inner_idx)
+
+            SWITCH
+                CASE outer_idx EQUALS inner_idx:
+                    BREAK
+                CASE smallest_gap IS None:
+                    SET diff_abs TO outer_val MINUS inner_val
+                    IF diff_abs < 0 THEN 
+                        SET diff_abs TO 0 - diff_abs
+                    END IF
+                    SET smallest_gap TO diff_abs
+                    SET result_pair TO (outer_val, inner_val)
+                    SET result_pair TO (IF result_pair[0] < result_pair[1] THEN result_pair ELSE (result_pair[1], result_pair[0]))
+                CASE OTHERWISE:
+                    SET difference TO outer_val MINUS inner_val
+                    IF difference < 0 THEN 
+                        SET difference TO 0 - difference
+                    END IF
+                    IF difference < smallest_gap THEN
+                        SET smallest_gap TO difference
+                        SET result_pair TO (outer_val, inner_val)
+                        IF result_pair[0] > result_pair[1] THEN
+                            SET temp1 TO result_pair[0]
+                            SET temp2 TO result_pair[1]
+                            SET result_pair TO (temp2, temp1)
+                        END IF
+                    END IF
+            END SWITCH
+
+            SET inner_idx TO inner_idx + 1
+        END REPEAT
+
+        SET outer_idx TO outer_idx + 1
+    END REPEAT
+
+    RETURN result_pair
+END FUNCTION

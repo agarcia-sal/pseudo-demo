@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+      LET size BE THE COUNT OF grid
+      LET mid BE size DIVIDED BY 2
+      LET diagonal_coords BE AN EMPTY COLLECTION
+
+      LET index BE 0
+      WHILE index <= mid
+        diagonal_coords ADD (index, index)
+        index INCREMENT BY 1
+      END WHILE
+
+      index IS 0
+      WHILE index <= mid
+        diagonal_coords ADD (index, size - index - 1)
+        index INCREMENT BY 1
+      END WHILE
+
+      LET row BE mid
+      WHILE row <= size - 1
+        diagonal_coords ADD (row, mid)
+        row INCREMENT BY 1
+      END WHILE
+
+      LET y_positions_count BE A MAPPING WITH DEFAULT 0
+      LET other_positions_count BE A MAPPING WITH DEFAULT 0
+
+      LET r BE 0
+      WHILE r < size
+        LET c BE 0
+        WHILE c < size
+          LET cell_value BE grid[r][c]
+          IF (r, c) IS IN diagonal_coords
+            y_positions_count[cell_value] INCREMENT BY 1
+          ELSE
+            other_positions_count[cell_value] INCREMENT BY 1
+          END IF
+          c INCREMENT BY 1
+        END WHILE
+        r INCREMENT BY 1
+      END WHILE
+
+      LET minimum_ops BE A VERY LARGE NUMBER
+
+      LET y_color BE 0
+      WHILE y_color <= 2
+        LET non_y_color BE 0
+        WHILE non_y_color <= 2
+          IF y_color IS NOT EQUAL TO non_y_color
+            LET sum_y BE 0
+            FOR EACH val IN y_positions_count KEYS
+              sum_y = sum_y + y_positions_count[val]
+            END FOR
+            LET y_diff BE sum_y - (y_positions_count CONTAINING y_color ? y_positions_count[y_color] : 0)
+
+            LET sum_other BE 0
+            FOR EACH val IN other_positions_count KEYS
+              sum_other = sum_other + other_positions_count[val]
+            END FOR
+            LET non_y_diff BE sum_other - (other_positions_count CONTAINING non_y_color ? other_positions_count[non_y_color] : 0)
+
+            LET current_ops BE y_diff + non_y_diff
+
+            minimum_ops = (current_ops < minimum_ops) ? current_ops : minimum_ops
+          END IF
+          non_y_color INCREMENT BY 1
+        END WHILE
+        y_color INCREMENT BY 1
+      END WHILE
+
+      RETURN minimum_ops
+    END FUNCTION
+END CLASS

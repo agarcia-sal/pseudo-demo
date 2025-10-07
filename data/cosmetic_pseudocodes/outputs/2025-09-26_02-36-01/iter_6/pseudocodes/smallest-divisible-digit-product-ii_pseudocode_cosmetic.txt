@@ -1,0 +1,220 @@
+CLASS Solution  
+    FUNCTION smallestNumber(originalStr, divisor)  
+    	DEFINE FUNCTION primeDecomposition(divde) RETURNS (freqs, isDiv)  
+    		SET mapPrimes TO self._getPrimeCount(divde)  
+    		RETURN mapPrimes  
+    	END FUNCTION  
+    	SET primeFactCounts, canDivideFlag TO primeDecomposition(divisor)  
+    	IF (canDivideFlag = false OR canDivideFlag = 0) == true THEN  
+    		RETURN "-1"  
+    	END IF  
+    	SET factorsFrequency TO self._getFactorCount(primeFactCounts)  
+    	DEFINE FUNCTION sumValues(cnt) RETURNS INT  
+    		SET total TO 0  
+    		SET keysList TO LIST(cnt.keys())  
+    		SET idx TO 0  
+    		WHILE idx < LENGTH(keysList)  
+    			SET keyName TO keysList[idx]  
+    			SET total TO total + cnt[keyName]  
+    			SET idx TO idx + 1  
+    		END WHILE  
+    		RETURN total  
+    	END FUNCTION  
+    	IF sumValues(factorsFrequency) > LENGTH(originalStr) THEN  
+    		DEFINE FUNCTION composeStr(freqMap) RETURNS STRING  
+    			SET resultStr TO ""  
+    			SET digitsList TO LIST(freqMap.keys())  
+    			SET cursor TO 0  
+    			REPEAT  
+    				IF cursor >= LENGTH(digitsList) THEN  
+    					EXIT REPEAT  
+    				END IF  
+    				SET currentDigit TO digitsList[cursor]  
+    				SET countDigit TO freqMap[currentDigit]  
+    				SET repStr TO ""  
+    				SET countIter TO 0  
+    				WHILE countIter < countDigit  
+    					SET repStr TO repStr + currentDigit  
+    					SET countIter TO countIter + 1  
+    				END WHILE  
+    				SET resultStr TO resultStr + repStr  
+    				SET cursor TO cursor + 1  
+    			UNTIL false  
+    			RETURN resultStr  
+    		END FUNCTION  
+    		RETURN composeStr(factorsFrequency)  
+    	END IF  
+    	DEFINE FUNCTION accumulateFactorCounts(s) RETURNS COUNTER  
+    		SET accCounter TO new Counter()  
+    		DEFINE FUNCTION intCharToInt(ch) RETURNS INT  
+    			RETURN (ORD(ch) - ORD('0'))  
+    		END FUNCTION  
+    		SET position TO 0  
+    		WHILE position < LENGTH(s)  
+    			SET numberVal TO intCharToInt(s[position])  
+    			SET accCounter TO accCounter + FACTOR_COUNTS[numberVal]  
+    			SET position TO position + 1  
+    		END WHILE  
+    		RETURN accCounter  
+    	END FUNCTION  
+    	SET primeFactPrefixSum TO accumulateFactorCounts(originalStr)  
+    	DEFINE FUNCTION findFirstZeroIndex(s) RETURNS INT  
+    		SET posIdx TO 0  
+    		WHILE true  
+    			IF posIdx >= LENGTH(s) THEN  
+    				RETURN LENGTH(s)  
+    			END IF  
+    			IF s[posIdx] = '0' THEN  
+    				RETURN posIdx  
+    			END IF  
+    			SET posIdx TO posIdx + 1  
+    		END WHILE  
+    	END FUNCTION  
+    	SET firstZeroPosition TO findFirstZeroIndex(originalStr)  
+    	IF (firstZeroPosition = LENGTH(originalStr)) AND (primeFactCounts <= primeFactPrefixSum) THEN  
+    		RETURN originalStr  
+    	END IF  
+    	
+    	DEFINE FUNCTION intCharVal(ch) RETURNS INT  
+    		RETURN (ORD(ch) - ORD('0'))  
+    	END FUNCTION  
+    	
+    	DEFINE FUNCTION sumCounterValues(cnt) RETURNS INT  
+    		SET valsSum TO 0  
+    		SET keysArray TO LIST(cnt.keys())  
+    		SET iCursor TO 0  
+    		WHILE iCursor < LENGTH(keysArray)  
+    			SET valsSum TO valsSum + cnt[keysArray[iCursor]]  
+    			SET iCursor TO iCursor + 1  
+    		END WHILE  
+    		RETURN valsSum  
+    	END FUNCTION  
+    	
+    	DEFINE FUNCTION strRepeat(ch, times) RETURNS STRING  
+    		SET resultStr TO ""  
+    		DEFINE FUNCTION repeatRec(c, n, acc) RETURNS STRING  
+    			IF n <= 0 THEN  
+    				RETURN acc  
+    			END IF  
+    			RETURN repeatRec(c, n - 1, acc + c)  
+    		END FUNCTION  
+    		RETURN repeatRec(ch, times, "")  
+    	END FUNCTION  
+    	
+    	SET lenNum TO LENGTH(originalStr)  
+    	
+    	DEFINE FUNCTION tryIncreasingDigit(pos, charDigit, prefixSum) RETURNS STRING OR NULL  
+    		IF pos > firstZeroPosition THEN  
+    			RETURN NULL  
+    		END IF  
+    		SET searchVal TO charDigit + 1  
+    		WHILE searchVal <= 9  
+    			SET diffCount TO primeFactCounts - prefixSum - FACTOR_COUNTS[searchVal]  
+    			SET nextFactorFreqs TO self._getFactorCount(diffCount)  
+    			IF sumCounterValues(nextFactorFreqs) <= (lenNum - 1 - pos) THEN  
+    				SET neededOnes TO (lenNum - 1 - pos) - sumCounterValues(nextFactorFreqs)  
+    				SET prefixSubstr TO SUBSTRING(originalStr, 0, pos)  
+    				RETURN prefixSubstr + STRING(searchVal) + strRepeat('1', neededOnes) + (composeFactorsRepeated(nextFactorFreqs))  
+    			END IF  
+    			SET searchVal TO searchVal + 1  
+    		END WHILE  
+    		RETURN NULL  
+    	END FUNCTION  
+    	
+    	DEFINE FUNCTION composeFactorsRepeated(freqCounts) RETURNS STRING  
+    		SET outStr TO ""  
+    		SET keysArr TO LIST(freqCounts.keys())  
+    		SET idxCtr TO 0  
+    		REPEAT  
+    			IF idxCtr >= LENGTH(keysArr) THEN  
+    				EXIT REPEAT  
+    			END IF  
+    			SET keyChar TO keysArr[idxCtr]  
+    			SET repCount TO freqCounts[keyChar]  
+    			WHILE repCount > 0  
+    				SET outStr TO outStr + keyChar  
+    				SET repCount TO repCount - 1  
+    			END WHILE  
+    			SET idxCtr TO idxCtr + 1  
+    		UNTIL false  
+    		RETURN outStr  
+    	END FUNCTION  
+    	  
+    	DEFINE FUNCTION searchLoop(idx) RETURNS STRING OR NULL  
+    		IF idx < 0 THEN  
+    			RETURN NULL  
+    		END IF  
+    		SET dNum TO intCharVal(originalStr[idx])  
+    		SET primeFactPrefixSum TO primeFactPrefixSum - FACTOR_COUNTS[dNum]  
+    		IF idx <= firstZeroPosition THEN  
+    			SET resAttempt TO tryIncreasingDigit(idx, dNum, primeFactPrefixSum)  
+    			IF resAttempt != NULL THEN  
+    				RETURN resAttempt  
+    			END IF  
+    		END IF  
+    		RETURN searchLoop(idx - 1)  
+    	END FUNCTION  
+    	
+    	SET searchStartIndex TO LENGTH(originalStr) - 1  
+    	SET finalTry TO searchLoop(searchStartIndex)  
+    	IF finalTry != NULL THEN  
+    		RETURN finalTry  
+    	END IF  
+    	
+    	SET factCountFinal TO self._getFactorCount(primeFactCounts)  
+    	SET sumFactVals TO sumCounterValues(factCountFinal)  
+    	RETURN strRepeat('1', (LENGTH(originalStr) + 1) - sumFactVals) + composeFactorsRepeated(factCountFinal)  
+    END FUNCTION  
+
+    FUNCTION _getPrimeCount(dividend)  
+    	SET countersMap TO new Counter()  
+    	DEFINE LIST primesList TO [2, 3, 5, 7]  
+    	DEFINE FUNCTION divPrimeLoop(index, val, countDict) RETURNS (countDict, BOOLEAN)  
+    		IF index >= LENGTH(primesList) THEN  
+    			RETURN (countDict, val = 1)  
+    		END IF  
+    		SET pnum TO primesList[index]  
+    		IF val MOD pnum = 0 THEN  
+    			SET newVal TO val / pnum  
+    			SET countDict[pnum] TO (countDict.get(pnum, 0) + 1)  
+    			RETURN divPrimeLoop(index, newVal, countDict)  
+    		ELSE  
+    			RETURN divPrimeLoop(index + 1, val, countDict)  
+    		END IF  
+    	END FUNCTION  
+    	RETURN divPrimeLoop(0, dividend, countersMap)  
+    END FUNCTION  
+
+    FUNCTION _getFactorCount(cnt)  
+    	SET twosCntTotal TO cnt.get(2, 0)  
+    	SET threesCntTotal TO cnt.get(3, 0)  
+    	SET count8Val TO twosCntTotal // 3  
+    	SET remain2Val TO twosCntTotal % 3  
+    	SET count9Val TO threesCntTotal // 2  
+    	SET count3Val TO threesCntTotal % 2  
+    	SET count4Val TO remain2Val // 2  
+    	SET count2Val TO remain2Val % 2  
+    	SET count6Val TO 0  
+    	IF (count2Val = 1) AND (count3Val = 1) THEN  
+    		SET count2Val TO 0  
+    		SET count3Val TO 0  
+    		SET count6Val TO 1  
+    	END IF  
+    	IF (count3Val = 1) AND (count4Val = 1) THEN  
+    		SET count2Val TO 1  
+    		SET count6Val TO 1  
+    		SET count3Val TO 0  
+    		SET count4Val TO 0  
+    	END IF  
+    	SET counterResult TO new Counter()  
+    	SET counterResult['2'] TO count2Val  
+    	SET counterResult['3'] TO count3Val  
+    	SET counterResult['4'] TO count4Val  
+    	SET counterResult['5'] TO cnt.get(5, 0)  
+    	SET counterResult['6'] TO count6Val  
+    	SET counterResult['7'] TO cnt.get(7, 0)  
+    	SET counterResult['8'] TO count8Val  
+    	SET counterResult['9'] TO count9Val  
+    	RETURN counterResult  
+    END FUNCTION  
+END CLASS

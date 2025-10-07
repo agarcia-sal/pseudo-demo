@@ -1,0 +1,88 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        IF y LESS THAN x THEN
+            SET alpha TO x
+            SET x TO y
+            SET y TO alpha
+        END IF
+
+        FUNCTION bfs(start)
+            FUNCTION initializeVisitedAndDistances(length)
+                SET boolList TO empty list
+                SET zeroList TO empty list
+                SET counter TO 0
+                REPEAT UNTI Lcounter GREATER THAN length
+                    ADD False TO boolList
+                    ADD 0 TO zeroList
+                    SET counter TO counter PLUS 1
+                END REPEAT
+                RETURN boolList, zeroList
+            END FUNCTION
+
+            SET flipflop, gap TO initializeVisitedAndDistances(n PLUS 1)
+            SET shelf TO empty list
+            ADD start TO shelf
+            SET flipflop[start] TO True
+
+            FUNCTION dequeueFirst(lst)
+                SET firstItem TO lst[0]
+                REMOVE element at index 0 FROM lst
+                RETURN firstItem
+            END FUNCTION
+
+            FUNCTION getNeighbors(value)
+                RETURN [value MINUS 1, value PLUS 1]
+            END FUNCTION
+
+            FUNCTION markNeighbor(neigh, current)
+                IF neigh GREATER OR EQUAL 1 AND neigh LESS OR EQUAL n AND flipflop[neigh] EQUALS False THEN
+                    SET flipflop[neigh] TO True
+                    SET gap[neigh] TO gap[current] PLUS 1
+                    ADD neigh TO shelf
+                END IF
+            END FUNCTION
+
+            FUNCTION checkCrossLinks(node)
+                IF node EQUALS x AND flipflop[y] EQUALS False THEN
+                    SET flipflop[y] TO True
+                    SET gap[y] TO gap[node] PLUS 1
+                    ADD y TO shelf
+                ELSE IF node EQUALS y AND flipflop[x] EQUALS False THEN
+                    SET flipflop[x] TO True
+                    SET gap[x] TO gap[node] PLUS 1
+                    ADD x TO shelf
+                END IF
+            END FUNCTION
+
+            WHILE LENGTH(shelf) GREATER THAN 0
+                SET present TO dequeueFirst(shelf)
+                FOR each pointer IN getNeighbors(present)
+                    markNeighbor(pointer, present)
+                END FOR
+                checkCrossLinks(present)
+            END WHILE
+
+            RETURN SUBLIST(gap, 1, n PLUS 1)
+        END FUNCTION
+
+        SET tally TO list of 0 repeated n times
+        FUNCTION iterateRange(startIndex, endIndex, fn)
+            IF startIndex GREATER THAN endIndex THEN RETURN END IF
+            fn(startIndex)
+            iterateRange(startIndex PLUS 1, endIndex, fn)
+        END FUNCTION
+
+        FUNCTION processIndex(idx)
+            SET lens TO bfs(idx)
+            FOR EVERY value IN lens DO
+                IF value GREATER THAN 0 THEN
+                    SET tally[value MINUS 1] TO tally[value MINUS 1] PLUS 1
+                END IF
+            END FOR
+        END FUNCTION
+
+        iterateRange(1, n, processIndex)
+
+        RETURN tally
+    END FUNCTION
+END CLASS

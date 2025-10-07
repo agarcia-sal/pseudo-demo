@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION numberOfSubarrays(nums)
+        DECLARE index_map AS mapping with default list
+
+        LET pos_counter BE 0
+        WHILE pos_counter LESS THAN LENGTH(nums)
+            DECLARE current_number AS nums[pos_counter]
+            IF current_number NOT IN index_map KEYS
+                ASSIGN index_map[current_number] TO empty list
+            ENDIF
+            APPEND pos_counter TO index_map[current_number]
+            INCREASE pos_counter BY one
+        ENDWHILE
+
+        DECLARE total_count AS 0
+        FOR EACH indices_list IN index_map VALUES
+            LET list_length BE LENGTH(indices_list)
+            DECLARE outer_idx AS 0
+            WHILE outer_idx LESS THAN list_length
+                DECLARE inner_idx AS outer_idx
+                WHILE inner_idx LESS THAN list_length
+                    DECLARE start_pos AS indices_list[outer_idx]
+                    DECLARE end_pos AS indices_list[inner_idx]
+                    DECLARE subarray_slice AS EMPTY LIST
+                    DECLARE slice_ptr AS start_pos
+                    WHILE slice_ptr LESS THAN OR EQUAL TO end_pos
+                        APPEND nums[slice_ptr] TO subarray_slice
+                        INCREMENT slice_ptr BY one
+                    ENDWHILE
+
+                    LET highest_value BE subarray_slice[0]
+                    FOR EACH element IN subarray_slice
+                        IF element GREATER THAN highest_value
+                            LET highest_value BE element
+                        ENDIF
+                    ENDFOR
+
+                    IF NOT (highest_value NOT EQUAL TO nums[start_pos])
+                        INCREASE total_count BY 1
+                    ENDIF
+
+                    INCREMENT inner_idx BY 1
+                ENDWHILE
+                SET outer_idx TO outer_idx PLUS 1
+            ENDWHILE
+        ENDFOR
+
+        RETURN total_count
+    END FUNCTION
+END CLASS

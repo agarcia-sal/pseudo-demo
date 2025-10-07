@@ -1,0 +1,43 @@
+```
+FUNCTION closest_integer(value)
+	IMPORT floor, ceil FROM math
+	DEFINE truncate_trailing_zeros(strVal, acc)
+		IF strVal IS EMPTY OR LAST CHARACTER OF strVal IS NOT '0'
+			RETURN acc + strVal
+		ELSE 
+			RETURN truncate_trailing_zeros(SUBSTRING strVal FROM 0 TO LENGTH(strVal)-1, acc)
+		END IF
+	END DEFINE
+
+	DEFINE ends_with(strX, suffix)
+		RETURN LENGTH(suffix) <= LENGTH(strX) AND SUBSTRING strX FROM LENGTH(strX)-LENGTH(suffix) TO LENGTH(strX) = suffix
+	END DEFINE
+	
+	DEFINE count_occurrences(haystack, needle, idx, cnt)
+		IF idx >= LENGTH(haystack)
+			RETURN cnt
+		ELSE
+			RETURN count_occurrences(haystack, needle, idx+1, cnt + (haystack[idx] = needle ? 1 : 0))
+		END IF
+	END DEFINE
+
+	DEFINE to_integer_round(num)
+		RETURN FLOOR(num + 0.5)
+	END DEFINE
+
+	DEFINE select_result(numVal, strVal)
+		IF ends_with(strVal, '.5')
+			RETURN (numVal > 0) ? ceil(numVal) : floor(numVal)
+		ELSE IF LENGTH(strVal) > 0
+			RETURN to_integer_round(numVal)
+		ELSE 
+			RETURN 0
+		END IF
+	END DEFINE
+
+	LET total_dots = count_occurrences(value, '.', 0, 0)
+	LET trimmed_value = (total_dots = 1) ? truncate_trailing_zeros(value, '') : value
+	LET numeric_value = FLOAT(trimmed_value)
+	RETURN select_result(numeric_value, trimmed_value)
+END FUNCTION
+```

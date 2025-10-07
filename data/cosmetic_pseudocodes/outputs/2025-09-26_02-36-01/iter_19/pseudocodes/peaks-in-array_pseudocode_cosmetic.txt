@@ -1,0 +1,94 @@
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION is_peak(h INTEGER) RETURNS BOOLEAN
+            SET a TO nums[h]
+            SET b TO nums[h - 1]
+            SET c TO nums[h + 1]
+            RETURN (b < a) AND (a > c)
+        END FUNCTION
+
+        SET peaks TO empty list
+        SET d TO 1
+        WHILE d <= LENGTH OF nums - 2
+            IF is_peak(d)
+                APPEND d TO peaks
+            END IF
+            SET d TO d + 1
+        END WHILE
+
+        SET output TO empty list
+        FOR each item IN queries
+            IF item[0] = 1 THEN
+                SET start_val TO item[1]
+                SET end_val TO item[2]
+
+                FUNCTION left_bound(val INTEGER, arr LIST OF INTEGER) RETURNS INTEGER
+                    SET low TO 0
+                    SET high TO LENGTH OF arr
+                    WHILE low < high
+                        SET mid TO (low + high) / 2
+                        IF arr[mid] < val + 1
+                            SET low TO mid + 1
+                        ELSE
+                            SET high TO mid
+                        END IF
+                    END WHILE
+                    RETURN low
+                END FUNCTION
+
+                FUNCTION right_bound(val INTEGER, arr LIST OF INTEGER) RETURNS INTEGER
+                    SET low TO 0
+                    SET high TO LENGTH OF arr
+                    WHILE low < high
+                        SET mid TO (low + high) / 2
+                        IF arr[mid] <= val - 1
+                            SET low TO mid + 1
+                        ELSE
+                            SET high TO mid
+                        END IF
+                    END WHILE
+                    RETURN low - 1
+                END FUNCTION
+
+                SET left_idx TO left_bound(start_val, peaks)
+                SET right_idx TO right_bound(end_val, peaks)
+                APPEND right_idx - left_idx TO output
+            ELSE
+                SET pos TO item[1]
+                SET val TO item[2]
+                IF nums[pos] = val THEN
+                    CONTINUE
+                END IF
+                SET nums[pos] TO val
+
+                SET from_i TO (1 > pos - 1) ? 1 : pos - 1
+                SET to_i TO (LENGTH OF nums - 2 < pos + 1) ? LENGTH OF nums - 2 : pos + 1
+                FOR j FROM from_i TO to_i
+                    IF is_peak(j)
+                        IF j NOT IN peaks
+                            FUNCTION insert_sorted(x INTEGER, list LIST OF INTEGER)
+                                SET low TO 0
+                                SET high TO LENGTH OF list
+                                WHILE low < high
+                                    SET mid TO (low + high) / 2
+                                    IF list[mid] < x
+                                        SET low TO mid + 1
+                                    ELSE
+                                        SET high TO mid
+                                    END IF
+                                END WHILE
+                                INSERT x INTO list AT POSITION low
+                            END FUNCTION
+                            CALL insert_sorted(j, peaks)
+                        END IF
+                    ELSE
+                        IF j IN peaks
+                            REMOVE j FROM peaks
+                        END IF
+                    END IF
+                END FOR
+            END IF
+        END FOR
+        RETURN output
+    END FUNCTION
+END CLASS

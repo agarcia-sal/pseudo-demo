@@ -1,0 +1,10 @@
+from typing import List
+
+def derivative(xs: List[float]) -> List[float]:
+    result = []
+    for index, coefficient in enumerate(xs):
+        product = index * coefficient
+        result.append(product)
+    if result:
+        result.pop(0)
+    return result

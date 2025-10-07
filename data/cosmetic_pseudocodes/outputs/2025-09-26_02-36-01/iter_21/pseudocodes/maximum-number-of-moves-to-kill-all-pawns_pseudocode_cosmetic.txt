@@ -1,0 +1,97 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+    
+        FUNCTION bfs(startX, startY, targetX, targetY)
+            SET openList TO list containing tuple startX, startY, 0
+            SET marked TO empty set
+            ADD tuple startX, startY TO marked
+
+            FUNCTION exploreNeighbours(cx, cy, dist)
+                IF cx < 0 OR cx >= 50 THEN RETURN empty list END IF
+                IF cy < 0 OR cy >= 50 THEN RETURN empty list END IF
+                RETURN FILTERED_LIST WHERE (nx, ny) IN
+                  MAP(knight_moves, (dx, dy) => (cx + dx, cy + dy))
+                  AND (nx, ny) NOT IN marked
+            END FUNCTION
+
+            REPEAT
+                IF openList IS empty THEN 
+                    RETURN False, 0
+                END IF
+
+                REMOVE first element from openList AND ASSIGN TO currX, currY, currDist
+                IF currX = targetX AND currY = targetY THEN
+                    RETURN True, currDist
+                END IF
+                SET adjacent TO exploreNeighbours(currX, currY, currDist)
+                FOR EACH (adjX, adjY) IN adjacent
+                    ADD tuple adjX, adjY TO marked
+                    APPEND tuple adjX, adjY, currDist + 1 TO openList
+                END FOR
+            UNTIL False
+        END FUNCTION
+        
+        SET c0 TO 2
+        SET knight_moves TO list: (c0 - 2, c0 - 1), (c0 - 2, c0 + 1), (c0 - 1, c0 + 2), (c0 + 1, c0 + 2), (c0 + 2, c0 + 1), (c0 + 2, c0 - 1), (c0 + 1, c0 - 2), (c0 - 1, c0 - 2)
+        
+        SET pawnsSet TO empty set
+        SET i0 TO 0
+        WHILE i0 < LENGTH(positions)
+            ADD tuple positions[i0][0], positions[i0][1] TO pawnsSet
+            SET i0 TO i0 + 1
+        END WHILE
+        
+        SET pLen TO LENGTH(pawnsSet)
+
+        FUNCTION dp(xA, yA, m0, aliceTurn)
+            IF m0 = 0 THEN
+                RETURN 0
+            END IF
+
+            IF aliceTurn THEN
+                SET metric TO 0
+            ELSE
+                SET metric TO +∞
+            END IF
+
+            FUNCTION toggleBool(b)
+                IF b = True THEN RETURN False ELSE RETURN True END IF
+            END FUNCTION
+            
+            SET idx0 TO 0
+            RECURSIVE LOOP_while_loop:
+                IF idx0 >= pLen THEN
+                    RETURN metric
+                END IF
+                
+                SET bitFlag TO 1 << idx0
+                IF (m0 & bitFlag) != 0 THEN
+                    SET px TO positions[idx0][0]
+                    SET py TO positions[idx0][1]
+
+                    SET reachable, distVal TO bfs(xA, yA, px, py)
+
+                    IF reachable THEN
+                        SET updatedMask TO m0 ^ bitFlag
+                        SET tempVal TO distVal + dp(px, py, updatedMask, toggleBool(aliceTurn))
+                        IF aliceTurn THEN
+                            IF tempVal > metric THEN
+                                SET metric TO tempVal
+                            END IF
+                        ELSE
+                            IF tempVal < metric THEN
+                                SET metric TO tempVal
+                            END IF
+                        END IF
+                    END IF
+                END IF
+
+                SET idx0 TO idx0 + 1
+                GOTO LOOP_while_loop
+            END LOOP_while_loop
+        END FUNCTION
+        
+        SET fullMask TO (1 << pLen) - 1
+        RETURN dp(kx, ky, fullMask, True)
+    END FUNCTION
+END CLASS

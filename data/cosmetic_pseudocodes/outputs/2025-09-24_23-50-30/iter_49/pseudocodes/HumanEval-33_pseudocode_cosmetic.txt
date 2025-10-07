@@ -1,0 +1,34 @@
+```
+FUNCTION sort_third(list_input)
+    PROCEDURE reorder_at_triples(array_data)
+        FUNCTION group_by_step(offset, collection, accumulator)
+            IF offset >= LENGTH(collection) THEN 
+                RETURN accumulator
+            ELSE 
+                RETURN group_by_step(offset + 3, collection, accumulator + [collection[offset]])
+            END IF
+        END FUNCTION
+
+        FUNCTION overwrite_by_indices(target, replacements, index, limit)
+            IF index >= limit THEN 
+                RETURN
+            ELSE 
+                target[index] := FIRST(replacements)
+                CALL overwrite_by_indices(target, REST(replacements), index + 3, limit)
+            END IF
+        END FUNCTION
+
+        DECLARE triple_indexes_elements AS group_by_step(0, array_data, [])
+        DECLARE sorted_triples AS SORT(triple_indexes_elements)
+        CALL overwrite_by_indices(array_data, sorted_triples, 0, LENGTH(array_data))
+    END PROCEDURE
+
+    DECLARE copied_sequence AS []
+    FOR EACH element_index FROM 0 TO LENGTH(list_input) - 1 DO 
+        copied_sequence := copied_sequence + [list_input[element_index]]
+    END FOR
+
+    CALL reorder_at_triples(copied_sequence)
+    RETURN copied_sequence
+END FUNCTION
+```

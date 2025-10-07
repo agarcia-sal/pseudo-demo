@@ -1,0 +1,87 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        PROCEDURE sortAscending(array LIST OF STRING)
+            DECLARE i, j, tmp STRING
+            SET i TO 0
+            WHILE i < LENGTH(array) - 1 DO
+                SET j TO i + 1
+                WHILE j < LENGTH(array) DO
+                    IF LENGTH(array[i]) > LENGTH(array[j]) THEN
+                        SET tmp TO array[i]
+                        SET array[i] TO array[j]
+                        SET array[j] TO tmp
+                    END IF
+                    SET j TO j + 1
+                END WHILE
+                SET i TO i + 1
+            END WHILE
+        END PROCEDURE
+
+        FUNCTION splitByPeriod(text STRING) RETURNS LIST OF STRING
+            DECLARE result LIST OF STRING
+            DECLARE startIndex INTEGER
+            DECLARE idx INTEGER
+            SET result TO []
+            SET startIndex TO 0
+            SET idx TO 0
+            WHILE idx < LENGTH(text) DO
+                IF text[idx] = '.' THEN
+                    APPEND SUBSTRING(text, startIndex, idx) TO result
+                    SET startIndex TO idx + 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            APPEND SUBSTRING(text, startIndex, LENGTH(text)) TO result
+            RETURN result
+        END FUNCTION
+
+        FUNCTION processSegment(index INTEGER, segments LIST OF STRING, remainingBudget INTEGER, totalFixed INTEGER) RETURNS INTEGER
+            IF index >= LENGTH(segments) THEN
+                RETURN totalFixed
+            END IF
+
+            DECLARE segment STRING
+            DECLARE lengthOfSegment INTEGER
+            DECLARE requiredCost INTEGER
+            DECLARE updatedBudget INTEGER
+            DECLARE updatedFixed INTEGER
+            DECLARE decrementCount INTEGER
+
+            SET segment TO segments[index]
+            SET lengthOfSegment TO LENGTH(segment)
+            IF lengthOfSegment = 0 THEN
+                RETURN processSegment(index + 1, segments, remainingBudget, totalFixed)
+            END IF
+
+            SET requiredCost TO lengthOfSegment + 1
+            IF requiredCost <= remainingBudget THEN
+                SET updatedFixed TO totalFixed + lengthOfSegment
+                SET updatedBudget TO remainingBudget - requiredCost
+                RETURN processSegment(index + 1, segments, updatedBudget, updatedFixed)
+            END IF
+
+            SET decrementCount TO lengthOfSegment
+            WHILE decrementCount > 0 AND remainingBudget > 0 DO
+                SET requiredCost TO decrementCount + 1
+                IF remainingBudget >= requiredCost THEN
+                    SET updatedFixed TO totalFixed + decrementCount
+                    SET updatedBudget TO remainingBudget - requiredCost
+                    RETURN processSegment(index + 1, segments, updatedBudget, updatedFixed)
+                END IF
+                SET decrementCount TO decrementCount - 1
+            END WHILE
+
+            RETURN totalFixed
+        END FUNCTION
+
+        DECLARE parts LIST OF STRING
+        DECLARE fixedCount INTEGER
+        DECLARE finalResult INTEGER
+
+        SET parts TO splitByPeriod(road)
+        CALL sortAscending(parts)
+        SET fixedCount TO 0
+        SET finalResult TO processSegment(0, parts, budget, fixedCount)
+        RETURN finalResult
+    END FUNCTION
+END CLASS

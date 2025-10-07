@@ -1,0 +1,89 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        DECLARE segments ARRAY OF STRING = []
+        DECLARE partsIndex INTEGER = 1
+        DECLARE ch STRING = ""
+        DECLARE currentSegment STRING = ""
+
+        # Manually split 'road' by '.' into 'segments'
+        WHILE partsIndex <= LENGTH(road) + 1 DO
+            IF partsIndex <= LENGTH(road) THEN
+                SET ch = road[partsIndex]
+            ELSE
+                SET ch = ""
+            END IF
+            
+            IF ch = "." OR ch = "" THEN
+                APPEND currentSegment TO segments
+                SET currentSegment = ""
+            ELSE
+                SET currentSegment = currentSegment + ch
+            END IF
+            SET partsIndex = partsIndex + 1
+        END WHILE
+
+        # Sort segments by ascending length using bubble sort
+        DECLARE i INTEGER = 0
+        DECLARE j INTEGER = 0
+        DECLARE changed BOOLEAN = TRUE
+        WHILE changed DO
+            SET changed = FALSE
+            SET i = 0
+            WHILE i < LENGTH(segments) - 1 DO
+                IF LENGTH(segments[i]) > LENGTH(segments[i + 1]) THEN
+                    DECLARE tmp STRING = segments[i]
+                    SET segments[i] = segments[i + 1]
+                    SET segments[i + 1] = tmp
+                    SET changed = TRUE
+                END IF
+                SET i = i + 1
+            END WHILE
+        END WHILE
+
+        DECLARE countFixed INTEGER = 0
+        DECLARE idx INTEGER = 0
+
+        LOOP_START:
+        IF idx >= LENGTH(segments) THEN
+            GOTO LOOP_END
+        END IF
+
+        DECLARE lengthSeg INTEGER = LENGTH(segments[idx])
+
+        IF NOT (lengthSeg = 0) THEN
+            DECLARE perCost INTEGER = lengthSeg + 1
+
+            IF budget >= perCost THEN
+                SET countFixed = countFixed + lengthSeg
+                SET budget = budget - perCost
+            ELSE
+                DECLARE subLength INTEGER = lengthSeg
+                LOOP_WHILE:
+                IF subLength <= 0 OR budget <= 0 THEN
+                    GOTO LOOP_AFTER_WHILE
+                END IF
+
+                SET perCost = subLength + 1
+
+                IF budget >= perCost THEN
+                    SET countFixed = countFixed + subLength
+                    SET budget = budget - perCost
+                    GOTO LOOP_AFTER_WHILE
+                END IF
+
+                SET subLength = subLength - 1
+                GOTO LOOP_WHILE
+
+                LOOP_AFTER_WHILE:
+            END IF
+        END IF
+
+        SET idx = idx + 1
+        GOTO LOOP_START
+
+        LOOP_END:
+        RETURN countFixed
+    END FUNCTION
+END CLASS
+```

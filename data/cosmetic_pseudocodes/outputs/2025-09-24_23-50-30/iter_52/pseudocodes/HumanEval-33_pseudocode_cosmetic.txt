@@ -1,0 +1,61 @@
+```
+FUNCTION sort_third(list_input)
+    FUNCTION replace_at_indices(input_list, indices_list, replacements_list, current_index)
+        IF current_index = LENGTH(indices_list) THEN
+            RETURN input_list
+        ELSE
+            SET pos TO indices_list[current_index]
+            SET updated_list TO input_list
+            SET updated_list[pos] TO replacements_list[current_index]
+            RETURN replace_at_indices(updated_list, indices_list, replacements_list, current_index + 1)
+        END IF
+    END FUNCTION
+
+    FUNCTION gather_indices(len_val, idx)
+        IF idx >= len_val THEN
+            RETURN []
+        ELSE
+            RETURN [idx] + gather_indices(len_val, idx + 3)
+        END IF
+    END FUNCTION
+
+    SET new_list TO []
+    FOR each_element IN list_input DO
+        SET new_list TO new_list + [each_element]
+    END FOR
+
+    SET indices TO gather_indices(LENGTH(new_list), 0)
+
+    FUNCTION gather_elements_at_indices(lst, idxs, pos)
+        IF pos >= LENGTH(idxs) THEN
+            RETURN []
+        ELSE
+            RETURN [lst[idxs[pos]]] + gather_elements_at_indices(lst, idxs, pos + 1)
+        END IF
+    END FUNCTION
+
+    SET extracted_values TO gather_elements_at_indices(new_list, indices, 0)
+
+    FUNCTION insertion_sort(arr, n)
+        IF n <= 1 THEN
+            RETURN arr
+        ELSE
+            SET sorted_arr TO insertion_sort(arr, n - 1)
+            SET key TO sorted_arr[n - 1]
+            SET j TO n - 2
+            WHILE j >= 0 AND sorted_arr[j] > key DO
+                SET sorted_arr[j + 1] TO sorted_arr[j]
+                SET j TO j - 1
+            END WHILE
+            SET sorted_arr[j + 1] TO key
+            RETURN sorted_arr
+        END IF
+    END FUNCTION
+
+    SET sorted_values TO insertion_sort(extracted_values, LENGTH(extracted_values))
+
+    SET final_list TO replace_at_indices(new_list, indices, sorted_values, 0)
+
+    RETURN final_list
+END FUNCTION
+```

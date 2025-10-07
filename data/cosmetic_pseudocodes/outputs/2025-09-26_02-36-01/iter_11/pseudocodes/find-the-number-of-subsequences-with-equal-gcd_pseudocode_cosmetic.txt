@@ -1,0 +1,108 @@
+CLASS Solution
+    FUNCTION subsequencePairCount(nums)
+        CONSTANT THRESHOLD <- 10^9 + 7
+        VARIABLE omega <- 0
+        FOR alpha IN nums DO
+            IF alpha > omega THEN
+                omega <- alpha
+            END IF
+        END FOR
+
+        PROCEDURE buildGrid(rows, cols)
+            DECLARE grid
+            DECLARE rowIndex, colIndex
+            SET grid TO empty list
+            SET rowIndex TO rows - 1
+            WHILE rowIndex >= 0 DO
+                DECLARE row <- empty list
+                SET colIndex TO cols - 1
+                REPEAT
+                    IF colIndex < 0 THEN
+                        BREAK
+                    END IF
+                    APPEND 0 TO row
+                    colIndex <- colIndex - 1
+                UNTIL FALSE
+                PREPEND row TO grid
+                rowIndex <- rowIndex - 1
+            END WHILE
+            RETURN grid
+        END PROCEDURE
+
+        DECLARE zeta <- buildGrid(omega+1, omega+1)
+        SET zeta[0][0] <- zeta[0][0] + 1
+
+        FUNCTION gcdUtil(a, b)
+            IF b = 0 THEN
+                RETURN a
+            ELSE
+                RETURN gcdUtil(b, a MOD b)
+            END IF
+        END FUNCTION
+
+        VARIABLE stateMatrix <- zeta
+
+        PROCEDURE advanceState(currMatrix, item)
+            DECLARE nextMatrix <- buildGrid(omega+1, omega+1)
+            DECLARE iIndex, jIndex
+            SET iIndex TO 0
+            REPEAT
+                IF iIndex > omega THEN
+                    BREAK
+                END IF
+                SET jIndex TO 0
+                WHILE jIndex <= omega DO
+                    nextMatrix[iIndex][jIndex] <- nextMatrix[iIndex][jIndex] + currMatrix[iIndex][jIndex]
+                    IF nextMatrix[iIndex][jIndex] >= THRESHOLD THEN
+                        nextMatrix[iIndex][jIndex] <- nextMatrix[iIndex][jIndex] - THRESHOLD
+                    END IF
+
+                    DECLARE iNew <- gcdUtil(iIndex, item)
+                    nextMatrix[iNew][jIndex] <- nextMatrix[iNew][jIndex] + currMatrix[iIndex][jIndex]
+                    IF nextMatrix[iNew][jIndex] >= THRESHOLD THEN
+                        nextMatrix[iNew][jIndex] <- nextMatrix[iNew][jIndex] - THRESHOLD
+                    END IF
+
+                    DECLARE jNew <- gcdUtil(jIndex, item)
+                    nextMatrix[iIndex][jNew] <- nextMatrix[iIndex][jNew] + currMatrix[iIndex][jIndex]
+                    IF nextMatrix[iIndex][jNew] >= THRESHOLD THEN
+                        nextMatrix[iIndex][jNew] <- nextMatrix[iIndex][jNew] - THRESHOLD
+                    END IF
+
+                    jIndex <- jIndex + 1
+                END WHILE
+                iIndex <- iIndex + 1
+            UNTIL FALSE
+            RETURN nextMatrix
+        END PROCEDURE
+
+        PROCEDURE processAll(numbers)
+            IF LENGTH(numbers) = 0 THEN
+                RETURN stateMatrix
+            ELSE
+                DECLARE firstNum <- numbers[0]
+                DECLARE suffix <- SLICE(numbers, 1, LENGTH(numbers))
+                DECLARE nextMatrix <- processAll(suffix)
+                RETURN advanceState(nextMatrix, firstNum)
+            END IF
+        END PROCEDURE
+
+        SET stateMatrix <- processAll(nums)
+
+        VARIABLE accumulator <- 0
+        VARIABLE gIndex <- 1
+        REPEAT
+            IF gIndex > omega THEN
+                BREAK
+            END IF
+            accumulator <- accumulator + stateMatrix[gIndex][gIndex]
+            gIndex <- gIndex + 1
+        UNTIL FALSE
+
+        IF accumulator >= THRESHOLD THEN
+            accumulator <- accumulator MOD THRESHOLD
+        END IF
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

@@ -1,0 +1,50 @@
+```
+FUNCTION check_dict_case(dict_param)
+    DECLARE result_flag AS BOOLEAN
+    DECLARE condition_state AS STRING
+    DECLARE iter_key AS ANY
+    DECLARE keys_collection AS LIST
+
+    keys_collection ← dict_param.keys()
+    IF keys_collection.length() = 0 THEN
+        RETURN False
+    END IF
+
+    condition_state ← "start"
+    DECLARE idx AS INTEGER
+    idx ← 0
+
+    WHILE idx < keys_collection.length()
+        iter_key ← keys_collection.at(idx)
+        idx ← idx + 1
+
+        IF NOT (iter_key INSTANCEOF STRING) THEN
+            condition_state ← "mixed"
+            BREAK
+        END IF
+
+        IF condition_state = "start" THEN
+            IF iter_key.is_all_uppercase() THEN
+                condition_state ← "upper"
+            ELSE 
+                IF iter_key.is_all_lowercase() THEN
+                    condition_state ← "lower"
+                ELSE
+                    BREAK
+                END IF
+            END IF
+        ELSE 
+            IF (condition_state = "upper" AND NOT iter_key.is_all_uppercase())
+            OR (condition_state = "lower" AND NOT iter_key.is_all_lowercase()) THEN
+                condition_state ← "mixed"
+                BREAK
+            ELSE
+                BREAK
+            END IF
+        END IF
+    END WHILE
+
+    result_flag ← (condition_state = "upper") OR (condition_state = "lower")
+    RETURN result_flag
+END FUNCTION
+```

@@ -1,0 +1,112 @@
+CLASS Solution  
+	FUNCTION minOperationsToMakeMedianK(nums k)  
+		DEFINE PROCEDURE bubbleSortAscending(A)  
+			DEFINE VARIABLE passCheck AS BOOLEAN  
+			DEFINE VARIABLE idxOuter AS INTEGER  
+			REPEAT  
+				SET passCheck TO false  
+				FOR idxOuter FROM 1 TO LENGTH(A) - 1 DO  
+					IF A[idxOuter] > A[idxOuter + 1] THEN  
+						DEFINE VARIABLE runnerTemp AS INTEGER  
+						SET runnerTemp TO A[idxOuter]  
+						SET A[idxOuter] TO A[idxOuter + 1]  
+						SET A[idxOuter + 1] TO runnerTemp  
+						SET passCheck TO true  
+					END IF  
+				END FOR  
+			UNTIL passCheck = false  
+		END PROCEDURE  
+		
+		DEFINE FUNCTION retrieveElement(B, pos)  
+			RETURN B[pos]  
+		END FUNCTION  
+		
+		DEFINE FUNCTION absoluteDifference(x, y)  
+			IF x > y THEN  
+				RETURN x - y  
+			ELSE  
+				RETURN y - x  
+			END IF  
+		END FUNCTION  
+		
+		DEFINE FUNCTION incrementBy(refValue, inc)  
+			SET refValue TO refValue + inc  
+			RETURN refValue  
+		END FUNCTION  
+		
+		CALL bubbleSortAscending(nums)  
+		DECLARE VARIABLE countElements AS INTEGER  
+		DECLARE VARIABLE midSpot AS INTEGER  
+		SET countElements TO LENGTH(nums)  
+		SET midSpot TO countElements DIV 2  
+		
+		IF retrieveElement(nums, midSpot) = k THEN  
+			RETURN 0  
+		END IF  
+		
+		DEFINE VARIABLE actionCount AS INTEGER  
+		SET actionCount TO 0  
+		
+		DEFINE FUNCTION checkLessThan(valA, valB)  
+			RETURN valA < valB  
+		END FUNCTION  
+		
+		DEFINE FUNCTION checkGreaterThan(valA, valB)  
+			RETURN valA > valB  
+		END FUNCTION  
+		
+		DEFINE FUNCTION checkGreaterEqual(valA, valB)  
+			RETURN NOT (valA < valB)  
+		END FUNCTION  
+		
+		DEFINE FUNCTION checkLessEqual(valA, valB)  
+			RETURN NOT (valA > valB)  
+		END FUNCTION  
+		
+		DEFINE FUNCTION isOutOfRange(index, upperLimit, lowerLimit)  
+			RETURN (index >= upperLimit) OR (index < lowerLimit)  
+		END FUNCTION  
+		
+		DEFINE FUNCTION addOperationIncrement(currentOps, targetVal, currentVal)  
+			RETURN currentOps + absoluteDifference(targetVal, currentVal)  
+		END FUNCTION  
+		
+		DEFINE FUNCTION isAtUpperBoundary(pos, limit)  
+			RETURN pos >= limit  
+		END FUNCTION  
+		
+		DEFINE FUNCTION isAtLowerBoundary(pos)  
+			RETURN pos < 0  
+		END FUNCTION  
+		
+		IF checkLessThan(retrieveElement(nums, midSpot), k) THEN  
+			DEFINE PROCEDURE recurForwardCheck(pos, maxPos, accumOps)  
+				IF isAtUpperBoundary(pos, maxPos) THEN  
+					RETURN accumOps  
+				END IF  
+				IF checkLessThan(retrieveElement(nums, pos), k) THEN  
+					SET accumOps TO addOperationIncrement(accumOps, k, retrieveElement(nums, pos))  
+					RETURN recurForwardCheck(pos + 1, maxPos, accumOps)  
+				ELSE  
+					RETURN accumOps  
+				END IF  
+			END PROCEDURE  
+			SET actionCount TO recurForwardCheck(midSpot, countElements, actionCount)  
+		ELSE  
+			DEFINE PROCEDURE recurBackwardCheck(pos, accumOps)  
+				IF isAtLowerBoundary(pos) THEN  
+					RETURN accumOps  
+				END IF  
+				IF checkGreaterThan(retrieveElement(nums, pos), k) THEN  
+					SET accumOps TO addOperationIncrement(accumOps, retrieveElement(nums, pos), k)  
+					RETURN recurBackwardCheck(pos - 1, accumOps)  
+				ELSE  
+					RETURN accumOps  
+				END IF  
+			END PROCEDURE  
+			SET actionCount TO recurBackwardCheck(midSpot, actionCount)  
+		END IF  
+		
+		RETURN actionCount  
+	END FUNCTION  
+END CLASS

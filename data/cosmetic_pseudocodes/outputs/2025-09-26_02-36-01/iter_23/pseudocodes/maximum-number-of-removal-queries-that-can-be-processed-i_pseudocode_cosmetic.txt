@@ -1,0 +1,105 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maximumProcessableQueries(nums parameters as list of integers queries parameters as list of integers) RETURNS integer
+        FUNCTION process_queries(subseq parameters as list of integers queries parameters as list of integers) RETURNS integer
+            FUNCTION recur_process(idx parameters as integer itr parameters as integer) RETURNS integer
+                IF itr GREATER THAN OR EQUAL TO LENGTH OF queries THEN
+                    RETURN idx
+                ELSE
+                    IF idx GREATER THAN OR EQUAL TO LENGTH OF subseq THEN
+                        RETURN idx
+                    ELSE
+                        IF subseq[idx] GREATER THAN_OR_EQUAL_TO queries[itr] THEN
+                            RETURN recur_process(idx + 1, itr + 1)
+                        ELSE
+                            RETURN recur_process(idx, itr + 1)
+                        END IF
+                    END IF
+                END IF
+            END FUNCTION
+
+            SET result_var TO recur_process(0, 0)
+            RETURN result_var
+        END FUNCTION
+
+        SET length_nums TO (0 + LENGTH OF nums)
+        SET length_queries TO (0 + LENGTH OF queries)
+        SET max_proc TO process_queries(nums, queries)
+
+        FUNCTION iterate_indices(idx parameters as integer) RETURNS void
+            IF idx GREATER_THAN_OR_EQUAL_TO length_nums THEN
+                RETURN
+            ELSE
+                SET temp_list_p TO EMPTY LIST
+                SET comp_var TO (idx - 1 + 0)
+
+                IF comp_var LESS THAN 0 THEN
+                    SET temp_list_p TO EMPTY LIST
+                ELSE
+                    FOR indx FROM 0 TO comp_var
+                        temp_list_p ADD nums[indx]
+                    END FOR
+                END IF
+
+                SET temp_list_s TO EMPTY LIST
+                FOR indx FROM idx TO (length_nums - 1)
+                    temp_list_s ADD nums[indx]
+                END FOR
+
+                SET rev_suf TO EMPTY LIST
+                FOR rev_idx FROM (LENGTH OF temp_list_s - 1) DOWNTO 0
+                    rev_suf ADD temp_list_s[rev_idx]
+                END FOR
+
+                SET combined_subseq TO EMPTY LIST
+                FOR elem IN temp_list_p
+                    combined_subseq ADD elem
+                END FOR
+                FOR elem IN rev_suf
+                    combined_subseq ADD elem
+                END FOR
+
+                FUNCTION sort_asc(list_in parameters as list of integers) RETURNS list of integers
+                    FUNCTION swap_elements(lst parameters as list of integers pos1 parameters as integer pos2 parameters as integer) RETURNS void
+                        SET temp_swap TO lst[pos1]
+                        SET lst[pos1] TO lst[pos2]
+                        SET lst[pos2] TO temp_swap
+                    END FUNCTION
+
+                    SET length_in TO LENGTH OF list_in
+                    FUNCTION bubble_sort_pass(j parameters as integer) RETURNS void
+                        IF j LESS THAN (length_in - 1) THEN
+                            IF list_in[j] GREATER THAN list_in[j+1] THEN
+                                swap_elements(list_in, j, j+1)
+                            END IF
+                            bubble_sort_pass(j + 1)
+                        END IF
+                    END FUNCTION
+
+                    FUNCTION bubble_sort_outer(i parameters as integer) RETURNS void
+                        IF i LESS THAN length_in THEN
+                            bubble_sort_pass(0)
+                            bubble_sort_outer(i + 1)
+                        END IF
+                    END FUNCTION
+
+                    bubble_sort_outer(0)
+                    RETURN list_in
+                END FUNCTION
+
+                SET sorted_subseq TO sort_asc(combined_subseq)
+
+                SET cand_proc TO process_queries(sorted_subseq, queries)
+                IF cand_proc GREATER THAN max_proc THEN
+                    SET max_proc TO cand_proc
+                END IF
+
+                iterate_indices(idx + 1)
+            END IF
+        END FUNCTION
+
+        iterate_indices(0)
+        RETURN max_proc
+    END FUNCTION
+END CLASS
+```

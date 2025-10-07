@@ -1,0 +1,78 @@
+CLASS Solution
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)
+        SET adjacency TO empty mapping with default empty lists
+        SET index TO 0
+        WHILE index < LENGTH of edges
+            LET origin, destination, weight = edges[index]
+            LET adjacency_list_origin = adjacency[origin]
+            LET adjacency_list_destination = adjacency[destination]
+            APPEND (destination, weight) TO adjacency_list_origin
+            APPEND (origin, weight) TO adjacency_list_destination
+            INCREMENT index BY 1
+        END WHILE
+
+        LET node_count = LENGTH of KEYS in adjacency
+        LET final_counts = new array of size node_count filled with 0
+
+        FUNCTION dfs(node, parent, curr_dist, acc_path)
+            LET dist_mod = curr_dist MOD signalSpeed
+            IF dist_mod == 0 THEN
+                APPEND node TO acc_path
+            END IF
+
+            LET subtree_count = 0
+            LET neighbors_list = adjacency[node]
+            LET neighbor_idx = 0
+            WHILE neighbor_idx < LENGTH of neighbors_list
+                LET (adj_node, edge_weight) = neighbors_list[neighbor_idx]
+                IF adj_node != parent THEN
+                    LET result_sub = dfs(adj_node, node, curr_dist + edge_weight, acc_path)
+                    subtree_count = subtree_count + result_sub
+                END IF
+                neighbor_idx = neighbor_idx + 1
+            END WHILE
+
+            IF dist_mod == 0 THEN
+                RETURN subtree_count + 1
+            ELSE
+                RETURN subtree_count
+            END IF
+        END FUNCTION
+
+        FUNCTION count_pairs_through_c(c)
+            LET collected_paths = []
+            LET neighbors_of_c = adjacency[c]
+            LET idx = 0
+            WHILE idx < LENGTH of neighbors_of_c
+                LET (nbr, wgt) = neighbors_of_c[idx]
+                LET current_path = []
+                CALL dfs(nbr, c, wgt, current_path)
+                APPEND current_path TO collected_paths
+                idx = idx + 1
+            END WHILE
+
+            LET pair_total = 0
+            LET outer = 0
+            WHILE outer < LENGTH of collected_paths - 1
+                LET inner = outer + 1
+                WHILE inner < LENGTH of collected_paths
+                    LET left_size = LENGTH of collected_paths[outer]
+                    LET right_size = LENGTH of collected_paths[inner]
+                    pair_total = pair_total + (left_size * right_size)
+                    inner = inner + 1
+                END WHILE
+                outer = outer + 1
+            END WHILE
+            RETURN pair_total
+        END FUNCTION
+
+        LET counter = 0
+        WHILE counter < node_count
+            LET final_value = count_pairs_through_c(counter)
+            final_counts[counter] = final_value
+            counter = counter + 1
+        END WHILE
+
+        RETURN final_counts
+    END FUNCTION
+END CLASS

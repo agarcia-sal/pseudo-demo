@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION countNonDecreasingSubarrays(nums k)
+        SET lengthVar TO LENGTH OF nums
+
+        FUNCTION verifyFeasibility(index segmentSize)
+            SET adjustmentCost TO 0
+            SET pivotValue TO nums[index]
+
+            SET iteratorCounter TO 1
+            label_loop_start:
+            IF iteratorCounter GREATER OR EQUAL segmentSize THEN
+                GOTO label_loop_end
+            END IF
+
+            SET currentElement TO nums[index + iteratorCounter]
+            IF currentElement LESS THAN pivotValue THEN
+                SET tempDiff TO pivotValue - currentElement
+                SET adjustmentCost TO adjustmentCost + tempDiff
+            END IF
+
+            IF nums[index + iteratorCounter] GREATER THAN pivotValue THEN
+                SET pivotValue TO nums[index + iteratorCounter]
+            END IF
+
+            IF adjustmentCost GREATER THAN k THEN
+                RETURN False
+            END IF
+
+            SET iteratorCounter TO iteratorCounter + 1
+            GOTO label_loop_start
+            label_loop_end:
+
+            RETURN True
+        END FUNCTION
+
+        SET totalPossibleSubarrays TO ((lengthVar * (lengthVar + 1)) / 2)
+        SET invalidCount TO 0
+
+        SET primaryIndex TO 0
+        label_outer_loop:
+        IF primaryIndex GREATER OR EQUAL lengthVar THEN
+            GOTO label_outer_loop_end
+        END IF
+
+        SET lowerBound TO 1
+        SET upperBound TO lengthVar - primaryIndex
+
+        label_binary_search:
+        IF lowerBound GREATER THAN upperBound THEN
+            GOTO label_binary_search_end
+        END IF
+
+        SET midPoint TO (lowerBound + upperBound) INTEGER DIVIDED BY 2
+
+        IF verifyFeasibility(primaryIndex midPoint) THEN
+            SET lowerBound TO midPoint + 1
+        ELSE
+            SET upperBound TO midPoint - 1
+        END IF
+
+        GOTO label_binary_search
+        label_binary_search_end:
+
+        SET invalidCount TO invalidCount + (lengthVar - primaryIndex - upperBound)
+
+        SET primaryIndex TO primaryIndex + 1
+        GOTO label_outer_loop
+        label_outer_loop_end:
+
+        RETURN totalPossibleSubarrays - invalidCount
+    END FUNCTION
+END CLASS

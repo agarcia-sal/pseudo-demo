@@ -1,0 +1,57 @@
+CLASS Solution  
+    FUNCTION maximumTotalCost(nums)  
+        SET length TO LENGTH OF nums  
+        IF NOT (length GREATER THAN 1) THEN  
+            RETURN nums[0]  
+        END IF  
+        
+        SET resultArray TO new ARRAY OF size length FILLED WITH 0  
+        SET resultArray[length - 1] TO nums[length - 1]  
+        
+        SET funcLoopForward FROM 0 TO length - 1  
+        SET funcLoopBackward FROM length - 2 DOWNTO 0  
+        
+        PROCEDURE traverseDescending(index)  
+            SET tempSum TO nums[index]  
+            IF tempSum GREATER THAN resultArray[index + 1] THEN  
+                SET resultArray[index] TO tempSum  
+            ELSE  
+                SET resultArray[index] TO resultArray[index + 1] + tempSum  
+            END IF  
+            
+            SET u TO index + 1  
+            WHILE u LESS THAN length DO  
+                SET powerDiff TO u - index  
+                SET altSign TO CALL powerWithNegOne(powerDiff)  
+                SET tempSum TO tempSum + nums[u] * altSign  
+                
+                IF u + 1 LESS THAN length THEN  
+                    IF resultArray[index] LESS THAN tempSum + resultArray[u + 1] THEN  
+                        SET resultArray[index] TO tempSum + resultArray[u + 1]  
+                    END IF  
+                ELSE  
+                    IF resultArray[index] LESS THAN tempSum THEN  
+                        SET resultArray[index] TO tempSum  
+                    END IF  
+                END IF  
+                SET u TO u + 1  
+            END WHILE  
+        END PROCEDURE
+        
+        SET currentIndex TO length - 2  
+        WHILE currentIndex GREATER THAN OR EQUAL TO 0 DO  
+            CALL traverseDescending(currentIndex)  
+            SET currentIndex TO currentIndex - 1  
+        END WHILE  
+        
+        RETURN resultArray[0]  
+    END FUNCTION  
+    
+    FUNCTION powerWithNegOne(exponent)  
+        IF exponent MOD 2 EQUALS 0 THEN  
+            RETURN 1  
+        ELSE  
+            RETURN -1  
+        END IF  
+    END FUNCTION  
+END CLASS

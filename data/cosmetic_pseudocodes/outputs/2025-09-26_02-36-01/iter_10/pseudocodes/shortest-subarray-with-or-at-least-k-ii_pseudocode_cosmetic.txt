@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+        FUNCTION adjustBits(freq LIST OF integers val integer diff integer)
+            SET bitFlag TO 1
+            SET idx TO 0
+            WHILE idx <= 31
+                IF (val BITWISE_AND bitFlag) != 0 THEN
+                    SET freq[idx] TO freq[idx] + diff
+                END IF
+                SET bitFlag TO bitFlag * 2
+                SET idx TO idx + 1
+            END WHILE
+        END FUNCTION
+
+        FUNCTION gatherOr(freq LIST OF integers) RETURNS integer
+            SET acc TO 0
+            SET pos TO 0
+            REPEAT
+                IF freq[pos] > 0 THEN
+                    SET acc TO acc BITWISE_OR (1 LEFT_SHIFT pos)
+                END IF
+                SET pos TO pos + 1
+            UNTIL pos > 31
+            RETURN acc
+        END FUNCTION
+
+        SET lengthNums TO LENGTH OF nums
+        SET bitCounts TO LIST WITH 32 ELEMENTS EACH 0
+        SET combinedOr TO 0
+        SET startPtr TO 0
+        SET minimalDist TO POSITIVE_INFINITY
+
+        LABEL outerLoop
+        SET endPtr TO 0
+        WHILE endPtr < lengthNums
+            CALL adjustBits(bitCounts nums[endPtr] 1)
+            SET combinedOr TO combinedOr BITWISE_OR nums[endPtr]
+
+            LABEL innerLoop
+            WHILE combinedOr >= k AND startPtr <= endPtr
+                IF minimalDist > (endPtr - startPtr + 1)
+                    SET minimalDist TO (endPtr - startPtr + 1)
+                END IF
+                CALL adjustBits(bitCounts nums[startPtr] -1)
+                SET combinedOr TO CALL gatherOr(bitCounts)
+                SET startPtr TO startPtr + 1
+            END WHILE
+
+            SET endPtr TO endPtr + 1
+        END WHILE
+
+        IF minimalDist == POSITIVE_INFINITY
+            RETURN -1
+        ELSE
+            RETURN minimalDist
+        END IF
+    END FUNCTION
+END CLASS

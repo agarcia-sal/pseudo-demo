@@ -1,0 +1,195 @@
+CLASS Solution
+    FUNCTION minimumSum(grid)
+        FUNCTION compute_difference(a, b)
+            RETURN a - b
+        END FUNCTION
+
+        FUNCTION add_values(x, y)
+            RETURN x + y
+        END FUNCTION
+
+        FUNCTION get_length(coll)
+            SET counter TO 0
+            WHILE TRUE
+                IF NOT (counter < len(coll)) THEN
+                    BREAK
+                END IF
+                SET counter TO counter + 1
+            END WHILE
+            RETURN counter
+        END FUNCTION
+
+        FUNCTION get_maximum(numbers)
+            IF len(numbers) = 0 THEN
+                RETURN -1 * (1/0)  // symbolic negative infinity
+            END IF
+            SET current_max TO numbers[0]
+            SET idx TO 1
+            WHILE idx < len(numbers)
+                IF numbers[idx] > current_max THEN
+                    SET current_max TO numbers[idx]
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN current_max
+        END FUNCTION
+
+        FUNCTION get_minimum(numbers)
+            IF len(numbers) = 0 THEN
+                RETURN 1/0  // symbolic positive infinity
+            END IF
+            SET current_min TO numbers[0]
+            SET idx2 TO 1
+            WHILE idx2 < len(numbers)
+                IF numbers[idx2] < current_min THEN
+                    SET current_min TO numbers[idx2]
+                END IF
+                SET idx2 TO idx2 + 1
+            END WHILE
+            RETURN current_min
+        END FUNCTION
+
+        FUNCTION is_equal(a, b)
+            IF NOT (a <> b) THEN
+                RETURN True
+            ELSE
+                RETURN False
+            END IF
+        END FUNCTION
+
+        SET list_of_ones TO []
+        SET outer_idx TO 0
+        WHILE outer_idx < get_length(grid)
+            SET inner_idx TO 0
+            WHILE inner_idx < get_length(grid[outer_idx])
+                IF is_equal(grid[outer_idx], 1) AND is_equal(grid[outer_idx][inner_idx], 1) THEN
+                    CALL list_of_ones.APPEND((outer_idx, inner_idx))
+                END IF
+                SET inner_idx TO inner_idx + 1
+            END WHILE
+            SET outer_idx TO outer_idx + 1
+        END WHILE
+
+        FUNCTION rect_area(points)
+            IF get_length(points) = 0 THEN
+                RETURN 0 * (1 + 0)
+            END IF
+
+            SET first_elements TO []
+            SET second_elements TO []
+            SET scan_idx TO 0
+            WHILE scan_idx < get_length(points)
+                CALL first_elements.APPEND(points[scan_idx][0])
+                CALL second_elements.APPEND(points[scan_idx][1])
+                SET scan_idx TO scan_idx + 1
+            END WHILE
+
+            SET min_i TO get_minimum(first_elements)
+            SET max_i TO get_maximum(first_elements)
+            SET min_j TO get_minimum(second_elements)
+            SET max_j TO get_maximum(second_elements)
+
+            SET calc_width TO add_values(compute_difference(max_i, min_i), 1)
+            SET calc_height TO add_values(compute_difference(max_j, min_j), 1)
+
+            RETURN calc_width * calc_height
+        END FUNCTION
+
+        FUNCTION all_combinations(data, r)
+            FUNCTION helper(current, start, depth)
+                IF depth = 0 THEN
+                    CALL result.APPEND(current)
+                    RETURN
+                END IF
+                SET pos TO start
+                WHILE pos < get_length(data)
+                    CALL helper(current + [data[pos]], pos + 1, depth - 1)
+                    SET pos TO pos + 1
+                END WHILE
+            END FUNCTION
+            SET result TO []
+            CALL helper([], 0, r)
+            RETURN result
+        END FUNCTION
+
+        FUNCTION to_set(items)
+            SET output_set TO {}
+            SET ix TO 0
+            WHILE ix < get_length(items)
+                SET output_set[items[ix]] TO True
+                SET ix TO ix + 1
+            END WHILE
+            RETURN output_set
+        END FUNCTION
+
+        FUNCTION set_difference(set_a, set_b)
+            SET output TO []
+            FOR key IN set_a
+                IF NOT set_b[key] THEN
+                    CALL output.APPEND(key)
+                END IF
+            END FOR
+            RETURN output
+        END FUNCTION
+
+        FUNCTION set_contains_all_positive(areas)
+            SET all_positive TO True
+            SET ptr TO 0
+            WHILE ptr < get_length(areas)
+                IF NOT (areas[ptr] > 0) THEN
+                    SET all_positive TO False
+                    BREAK
+                END IF
+                SET ptr TO ptr + 1
+            END WHILE
+            RETURN all_positive
+        END FUNCTION
+
+        SET boundary_minimum TO 1/0  // positive infinity
+        SET total_ones TO get_length(list_of_ones)
+
+        SET outer_limit1 TO 1
+        WHILE outer_limit1 < total_ones
+            SET outer_limit2 TO outer_limit1 + 1
+            WHILE outer_limit2 < total_ones
+                SET outer_limit3 TO outer_limit2 + 1
+                WHILE outer_limit3 <= total_ones
+
+                    SET combos_i TO all_combinations(list_of_ones, outer_limit1)
+                    SET combo_idx1 TO 0
+                    WHILE combo_idx1 < get_length(combos_i)
+
+                        SET set_ones TO to_set(list_of_ones)
+                        SET set_combo1 TO to_set(combos_i[combo_idx1])
+                        SET left_after_combo1 TO set_difference(set_ones, set_combo1)
+
+                        SET combos_j TO all_combinations(left_after_combo1, compute_difference(outer_limit2, outer_limit1))
+                        SET combo_idx2 TO 0
+                        WHILE combo_idx2 < get_length(combos_j)
+                            SET set_combo2 TO to_set(combos_j[combo_idx2])
+                            SET combo3_list TO set_difference(left_after_combo1, set_combo2)
+
+                            SET ar1 TO rect_area(combos_i[combo_idx1])
+                            SET ar2 TO rect_area(combos_j[combo_idx2])
+                            SET ar3 TO rect_area(combo3_list)
+
+                            IF set_contains_all_positive([ar1, ar2, ar3]) THEN
+                                SET partial_sum TO ar1 + ar2 + ar3
+                                IF partial_sum < boundary_minimum THEN
+                                    SET boundary_minimum TO partial_sum
+                                END IF
+                            END IF
+                            SET combo_idx2 TO combo_idx2 + 1
+                        END WHILE
+                        SET combo_idx1 TO combo_idx1 + 1
+                    END WHILE
+                    SET outer_limit3 TO outer_limit3 + 1
+                END WHILE
+                SET outer_limit2 TO outer_limit2 + 1
+            END WHILE
+            SET outer_limit1 TO outer_limit1 + 1
+        END WHILE
+
+        RETURN boundary_minimum
+    END FUNCTION
+END CLASS

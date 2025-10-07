@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION canSortArray(nums)
+        FUNCTION bitCount(k)
+            SET result TO 0
+            WHILE k NOT EQUAL TO 0 DO
+                SET result TO result PLUS (k AND 1)
+                SET k TO k RIGHT_SHIFTED BY 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        SET lengthVal TO 0
+        WHILE lengthVal LESS THAN LENGTH OF nums DO
+            INCREMENT lengthVal BY 1
+        END WHILE
+
+        SET sortedCopy TO EMPTY LIST
+        FOR indexVar FROM 0 TO lengthVal MINUS 1 DO
+            APPEND nums AT indexVar TO sortedCopy
+        END FOR
+
+        FUNCTION customSort(arr)
+            FUNCTION innerSwapCheck(x)
+                RETURN bitCount(arr AT x) GREATER THAN bitCount(arr AT x PLUS 1)
+            END FUNCTION
+
+            SET outerIdx TO 0
+            REPEAT
+                SET innerIdx TO 0
+                SET swapped TO FALSE
+                WHILE innerIdx LESS THAN lengthVal MINUS 1 DO
+                    IF bitCount(arr AT innerIdx) EQUALS bitCount(arr AT innerIdx PLUS 1) AND innerSwapCheck(innerIdx) THEN
+                        SET tmpVar TO arr AT innerIdx
+                        SET arr AT innerIdx TO arr AT innerIdx PLUS 1
+                        SET arr AT innerIdx PLUS 1 TO tmpVar
+                        SET swapped TO TRUE
+                    END IF
+                    INCREMENT innerIdx BY 1
+                END WHILE
+                INCREMENT outerIdx BY 1
+            UNTIL outerIdx GREATER THAN lengthVal OR NOT swapped
+        END FUNCTION
+
+        CALL customSort(nums)
+
+        RETURN NOT (FUNCTION () RETURNS BOOLEAN
+                     SET i TO 0
+                     WHILE i LESS THAN lengthVal DO
+                         IF nums AT i NOT EQUAL TO sortedCopy AT i THEN
+                            RETURN FALSE
+                         END IF
+                         INCREMENT i BY 1
+                     END WHILE
+                     RETURN TRUE
+                   END FUNCTION)()
+    END FUNCTION
+END CLASS

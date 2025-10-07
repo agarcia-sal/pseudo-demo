@@ -1,0 +1,58 @@
+CLASS Solution
+	FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer
+
+		FUNCTION nxt(x x AS integer y y AS integer) RETURNS integer
+
+			IF ((x BITWISE_AND 1) BITWISE_XOR y) = 1 THEN
+				RETURN x + 1
+			ELSE
+				RETURN 2 + x
+			END IF
+
+		END FUNCTION
+
+		PROCEDURE fillRow(i i AS integer f f AS list OF list OF integer l l AS list OF integer)
+			IF i > LENGTH(l) THEN
+				RETURN
+			END IF
+			f[i][0] ← nxt(f[i - 1][0], l[i])
+			CALL fillRow(i + 1, f, l)
+		END PROCEDURE
+
+		PROCEDURE fillColumn(j j AS integer f f AS list OF list OF integer l l AS list OF integer)
+			IF j > LENGTH(l) THEN
+				RETURN
+			END IF
+			f[0][j] ← nxt(f[0][j - 1], l[j])
+			CALL fillColumn(j + 1, f, l)
+		END PROCEDURE
+
+		PROCEDURE fillGrid(i i AS integer j j AS integer m m AS integer n n AS integer f f AS list OF list OF integer l1 l1 AS list OF integer l2 l2 AS list OF integer)
+			IF i > m THEN
+				RETURN
+			END IF
+
+			IF j > n THEN
+				CALL fillGrid(i + 1, 1, m, n, f, l1, l2)
+				RETURN
+			END IF
+
+			LET a AS integer ← nxt(f[i - 1][j], l1[i])
+			LET b AS integer ← nxt(f[i][j - 1], l2[j])
+			f[i][j] ← IF a < b THEN a ELSE b
+			CALL fillGrid(i, j + 1, m, n, f, l1, l2)
+		END PROCEDURE
+
+		LET m AS integer ← LENGTH(nums1)
+		LET n AS integer ← LENGTH(nums2)
+
+		LET f AS list OF list OF integer ← LIST_FILL_WITH_DIMENSIONS(m + 1, n + 1, 0)
+
+		CALL fillRow(1, f, nums1)
+		CALL fillColumn(1, f, nums2)
+		CALL fillGrid(1, 1, m, n, f, nums1, nums2)
+
+		RETURN f[m][n]
+
+	END FUNCTION
+END CLASS

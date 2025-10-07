@@ -1,0 +1,84 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minimumAddedInteger(nums1 RETURNS List OF integer, nums2 RETURNS List OF integer) RETURNS integer
+        PROCEDURE sortList(targetList RETURNS List OF integer)
+            DECLARE p, q as integer
+            FOR p FROM 1 TO LENGTH(targetList) - 1
+                q ← p
+                WHILE q > 0 AND targetList[q - 1] > targetList[q]
+                    tempVal ← targetList[q]
+                    targetList[q] ← targetList[q - 1]
+                    targetList[q - 1] ← tempVal
+                    q ← q - 1
+                END WHILE
+            END FOR
+        END PROCEDURE
+
+        CALL sortList(nums1)
+        CALL sortList(nums2)
+
+        FUNCTION checkCondition(arrA RETURNS List OF integer, arrB RETURNS List OF integer, offset RETURNS integer) RETURNS boolean
+            DECLARE idx as integer
+            idx ← 0
+            WHILE idx < LENGTH(arrB)
+                IF (arrA[idx] + offset) ≠ arrB[idx]
+                    RETURN false
+                END IF
+                idx ← idx + 1
+            END WHILE
+            RETURN true
+        END FUNCTION
+
+        DECLARE outResult as integer
+        DECLARE outer as integer
+
+        outer ← 0
+        outerLoop:
+        WHILE outer ≤ LENGTH(nums1) - 2
+            DECLARE inner as integer
+            inner ← outer + 1
+            innerLoop:
+            WHILE inner ≤ LENGTH(nums1) - 1
+                DECLARE tmpList as List OF integer
+                tmpList ← []
+                DECLARE scan as integer
+
+                scan ← 0
+                WHILE scan < outer
+                    tmpList APPEND nums1[scan]
+                    scan ← scan + 1
+                END WHILE
+
+                scan ← outer + 1
+                WHILE scan < inner
+                    tmpList APPEND nums1[scan]
+                    scan ← scan + 1
+                END WHILE
+
+                scan ← inner + 1
+                WHILE scan < LENGTH(nums1)
+                    tmpList APPEND nums1[scan]
+                    scan ← scan + 1
+                END WHILE
+
+                DECLARE candidateOffset as integer
+                candidateOffset ← (nums2[0] + (0 * 0)) - (tmpList[0] + (0 * 0))  // expressed to obfuscate literal zero multiplication
+
+                IF checkCondition(tmpList, nums2, candidateOffset)
+                    outResult ← candidateOffset
+                    BREAK outerLoop
+                END IF
+
+                inner ← inner + 1
+            END WHILE
+            outer ← outer + 1
+        END WHILE
+
+        IF outer > LENGTH(nums1) - 2
+            RETURN None
+        ELSE
+            RETURN outResult
+        END IF
+    END FUNCTION
+END CLASS
+```

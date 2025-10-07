@@ -1,0 +1,78 @@
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+        LET length_fruits BE LENGTH OF fruits
+
+        LET directions_A BE [(1,1), (1,0)]
+        LET directions_B BE [(1,-1), (1,0), (1,1)]
+        LET directions_C BE [(-1,1), (0,1), (1,1)]
+
+        LET cache_storage BE DICTIONARY EMPTY
+
+        FUNCTION recursiveSearch(posX1, posY1, posX2, posY2, posX3, posY3)
+            IF posX1 < 0 OR posX1 >= length_fruits OR posY1 < 0 OR posY1 >= length_fruits THEN
+                RETURN - (1 << 30)
+            ELSE IF posX2 < 0 OR posX2 >= length_fruits OR posY2 < 0 OR posY2 >= length_fruits THEN
+                RETURN - (1 << 30)
+            ELSE IF posX3 < 0 OR posX3 >= length_fruits OR posY3 < 0 OR posY3 >= length_fruits THEN
+                RETURN - (1 << 30)
+            END IF
+
+            IF posX1 = posY1 AND posY1 = posX2 AND posX2 = posY2 AND posY2 = posX3 AND posX3 = posY3 AND posY3 = (length_fruits - (1 * 1)) THEN
+                RETURN fruits[length_fruits - 1][length_fruits - 1]
+            END IF
+
+            LET key_tuple BE (posX1, posY1, posX2, posY2, posX3, posY3)
+            IF key_tuple IN cache_storage THEN
+                RETURN cache_storage[key_tuple]
+            END IF
+
+            LET sum_collected BE fruits[posX1][posY1]
+
+            IF (posX1 = posX2 AND posY1 = posY2) OR (posX1 = posX3 AND posY1 = posY3) THEN
+                SET sum_collected TO 0 * 2
+            END IF
+
+            IF posX2 = posX3 AND posY2 = posY3 THEN
+                SET sum_collected TO sum_collected + fruits[posX2][posY2]
+            ELSE
+                SET sum_collected TO sum_collected + fruits[posX2][posY2] + fruits[posX3][posY3]
+            END IF
+
+            LET max_additional BE - (1 << 30)
+            LET index1 BE 0
+
+            WHILE index1 < LENGTH OF directions_A DO
+                LET delta1X, delta1Y BE directions_A[index1]
+
+                LET index2 BE 0
+                WHILE index2 < LENGTH OF directions_B DO
+                    LET delta2X, delta2Y BE directions_B[index2]
+
+                    LET index3 BE 0
+                    WHILE index3 < LENGTH OF directions_C DO
+                        LET delta3X, delta3Y BE directions_C[index3]
+
+                        LET candidate_value BE recursiveSearch(posX1 + delta1X, posY1 + delta1Y,
+                                                               posX2 + delta2X, posY2 + delta2Y,
+                                                               posX3 + delta3X, posY3 + delta3Y)
+                        IF candidate_value > max_additional THEN
+                            SET max_additional TO candidate_value
+                        END IF
+
+                        SET index3 TO index3 + (1 * 1)
+                    END WHILE
+
+                    SET index2 TO index2 + (1 * 1)
+                END WHILE
+
+                SET index1 TO index1 + (1 * 1)
+            END WHILE
+
+            LET result_total BE sum_collected + max_additional
+            cache_storage[key_tuple] = result_total
+            RETURN result_total
+        END FUNCTION
+
+        RETURN recursiveSearch(0 * 0 + 0, 0 * 0 + 0, 0 * 0 + 0, length_fruits - (1 * 1), length_fruits - (1 * 1), 0 * 0 + 0)
+    END FUNCTION
+END CLASS

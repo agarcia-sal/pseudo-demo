@@ -1,0 +1,26 @@
+```
+FUNCTION count_nums(collection_of_ints)
+    FUNCTION digits_sum(value_int)
+        SET factor_sign TO 1
+        IF value_int < 0 THEN
+            SET value_int TO (-1) * value_int
+            SET factor_sign TO -1
+        END IF
+        SET digit_seq TO [to_int(char) FOR EACH char IN to_string(value_int)]
+        SET digit_seq[0] TO digit_seq[0] * factor_sign
+        RETURN reduce((a, b) -> a + b, digit_seq, 0)
+    END FUNCTION
+
+    FUNCTION build_sums(input_sequence, acc_list)
+        IF input_sequence IS EMPTY THEN
+            RETURN acc_list
+        ELSE
+            RETURN build_sums(tail(input_sequence), acc_list + [digits_sum(head(input_sequence))])
+        END IF
+    END FUNCTION
+
+    SET sums_collection TO build_sums(collection_of_ints, [])
+    SET positive_collection TO filter(lambda n: n > 0, sums_collection)
+    RETURN length(positive_collection)
+END FUNCTION
+```

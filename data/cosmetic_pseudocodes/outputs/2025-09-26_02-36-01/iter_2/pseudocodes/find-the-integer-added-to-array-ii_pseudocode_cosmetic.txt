@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION minimumAddedInteger(nums1 RETURNS List OF integer, nums2 RETURNS List OF integer) RETURNS integer
+        CALL nums1.sort()
+        CALL nums2.sort()
+
+        SET outer_index TO 0
+        WHILE outer_index < LENGTH(nums1) - 1
+            SET inner_index TO outer_index + 1
+            WHILE inner_index < LENGTH(nums1) - 1
+                DECLARE filtered_list AS List OF integer ASSIGN []
+                
+                SET pre_segment_end TO outer_index - 1
+                FOR pos FROM 0 TO pre_segment_end
+                    filtered_list += [nums1[pos]]
+                END FOR
+                
+                SET mid_segment_start TO outer_index + 1
+                SET mid_segment_end TO inner_index - 1
+                FOR pos FROM mid_segment_start TO mid_segment_end
+                    filtered_list += [nums1[pos]]
+                END FOR
+                
+                SET post_segment_start TO inner_index + 1
+                SET last_pos TO LENGTH(nums1) - 1
+                FOR pos FROM post_segment_start TO last_pos
+                    filtered_list += [nums1[pos]]
+                END FOR
+                
+                SET difference TO nums2[0] - filtered_list[0]
+                SET valid TO TRUE
+                
+                SET idx TO 0
+                WHILE idx < LENGTH(nums2)
+                    IF filtered_list[idx] + difference != nums2[idx]
+                        valid = FALSE
+                        BREAK
+                    END IF
+                    INCREMENT idx BY 1
+                END WHILE
+                
+                IF valid == TRUE
+                    RETURN difference
+                END IF
+                
+                INCREMENT inner_index BY 1
+            END WHILE
+            INCREMENT outer_index BY 1
+        END WHILE
+
+        RETURN None
+    END FUNCTION
+END CLASS

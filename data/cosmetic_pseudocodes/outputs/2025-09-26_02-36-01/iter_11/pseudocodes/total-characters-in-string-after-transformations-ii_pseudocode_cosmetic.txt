@@ -1,0 +1,122 @@
+CLASS Solution
+	Function lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+		CONST R9 = 1_000_000_000 + 1
+
+		SET alpha_matrix TO list of lists initialized with zeros, dimension 26 by 26
+		SET index1 TO 0
+		REPEAT
+			IF index1 > 25 THEN
+				EXIT
+			END IF
+			SET index2 TO 0
+			REPEAT
+				IF index2 > (nums element at index1) - 1 THEN
+					EXIT
+				END IF
+				SET tgt_pos TO (index1 + index2 + 1) MOD 26
+				SET alpha_matrix element at index1 and tgt_pos TO (alpha_matrix element at index1 and tgt_pos) + 1
+				SET index2 TO index2 + 1
+			UNTIL FALSE
+			SET index1 TO index1 + 1
+		UNTIL FALSE
+
+		Function dotMultiply(M1 parameter M1 IS list of lists of integers M2 parameter M2 IS list of lists of integers) RETURNS list of lists of integers
+			SET res_matrix TO list of lists zeros 26 by 26
+			SET a TO 0
+			WHILE a <= 25
+				SET b TO 0
+				WHILE b <= 25
+					SET c TO 0
+					SET accumulator TO 0
+					WHILE c <= 25
+						SET tmp1 TO M1 element at a and c
+						SET tmp2 TO M2 element at c and b
+						SET accumulator TO (accumulator + (tmp1 * tmp2)) MOD R9
+						SET c TO c + 1
+					END WHILE
+					SET res_matrix element at a and b TO accumulator
+					SET b TO b + 1
+				END WHILE
+				SET a TO a + 1
+			END WHILE
+			RETURN res_matrix
+		END Function
+
+		Function powerMatrix(baseM parameter baseM IS list of lists of integers exponent parameter exponent IS integer) RETURNS list of lists of integers
+			SET result_matrix TO list of lists zeros 26 by 26
+			SET idxX TO 0
+			REPEAT
+				IF idxX > 25 THEN
+					EXIT
+				END IF
+				SET idxY TO 0
+				REPEAT
+					IF idxY > 25 THEN
+						EXIT
+					END IF
+					IF idxX = idxY THEN
+						SET result_matrix element at idxX and idxY TO 1
+					ELSE
+						SET result_matrix element at idxX and idxY TO 0
+					END IF
+					SET idxY TO idxY + 1
+				UNTIL FALSE
+				SET idxX TO idxX + 1
+			UNTIL FALSE
+
+			SET base_clone TO baseM
+			WHILE exponent > 0
+				IF (exponent MOD 2) <> 0 THEN
+					SET result_matrix TO dotMultiply(result_matrix, base_clone)
+				END IF
+				SET base_clone TO dotMultiply(base_clone, base_clone)
+				SET exponent TO exponent DIV 2
+			END WHILE
+			RETURN result_matrix
+		END Function
+
+		SET exp_matrix TO powerMatrix(alpha_matrix, t)
+
+		SET char_counts TO list of 26 zeros
+		SET pos_counter TO 0
+		REPEAT
+			IF pos_counter >= LENGTH(s) THEN
+				EXIT
+			END IF
+			SET character TO s element at pos_counter
+			SET char_index TO (ASCII code of character) - (ASCII code of 'a')
+			SET char_counts element at char_index TO char_counts element at char_index + 1
+			SET pos_counter TO pos_counter + 1
+		UNTIL FALSE
+
+		SET agg_counts TO list of 26 zeros
+		SET idx_outer TO 0
+		REPEAT
+			IF idx_outer > 25 THEN
+				EXIT
+			END IF
+			SET idx_inner TO 0
+			REPEAT
+				IF idx_inner > 25 THEN
+					EXIT
+				END IF
+				SET prod_val TO (char_counts element at idx_outer) * (exp_matrix element at idx_outer and idx_inner)
+				SET agg_counts element at idx_inner TO (agg_counts element at idx_inner + prod_val) MOD R9
+				SET idx_inner TO idx_inner + 1
+			UNTIL FALSE
+			SET idx_outer TO idx_outer + 1
+		UNTIL FALSE
+
+		SET sum_result TO 0
+		SET summation_index TO 0
+		REPEAT
+			IF summation_index > 25 THEN
+				EXIT
+			END IF
+			SET sum_result TO (sum_result + agg_counts element at summation_index) MOD R9
+			SET summation_index TO summation_index + 1
+		UNTIL FALSE
+
+		RETURN sum_result
+	END Function
+END CLASS

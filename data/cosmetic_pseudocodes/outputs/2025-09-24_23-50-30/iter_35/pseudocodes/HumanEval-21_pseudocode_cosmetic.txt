@@ -1,0 +1,25 @@
+```
+FUNCTION rescale_to_unit(sequence_of_values)
+    INITIALIZE min_val, max_val TO NULL
+    FOR i FROM 0 TO LENGTH(sequence_of_values) - 1 DO
+        SET val TO sequence_of_values[i]
+        IF min_val IS NULL OR val < min_val THEN
+            SET min_val TO val
+        ENDIF
+        IF max_val IS NULL OR val > max_val THEN
+            SET max_val TO val
+        ENDIF
+    ENDFOR
+    SET denominator TO max_val - min_val
+    DEFINE FUNCTION transform_value(index, output_accumulator)
+        IF index >= LENGTH(sequence_of_values) THEN
+            RETURN output_accumulator
+        ELSE
+            SET adjusted TO (sequence_of_values[index] - min_val) / denominator
+            ADD adjusted TO output_accumulator
+            RETURN transform_value(index + 1, output_accumulator)
+        ENDIF
+    END FUNCTION
+    RETURN transform_value(0, EMPTY LIST)
+END FUNCTION
+```

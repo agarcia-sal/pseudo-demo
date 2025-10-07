@@ -1,0 +1,69 @@
+CLASS Solution
+	FUNCTION subsequencePairCount(nums)
+  	LET r1 = 1000000000 + 7
+		LET r2 = 0
+		LET r3 = nums[0]
+		FUNCTION h(b, c)
+			IF c = 0 THEN RETURN b ELSE RETURN h(c, b % c) END IF
+		END FUNCTION
+
+		LET r5 = r3
+		FOR r7 = 1 TO LENGTH(nums) - 1
+			IF nums[r7] > r5 THEN
+				r5 = nums[r7]
+			END IF
+		END FOR
+
+		FUNCTION makeGrid(a, b)
+			let mGrid = []
+			LET r10 = 0
+			WHILE r10 <= a
+				LET tRow = []
+				LET r11 = 0
+				REPEAT
+					PUSH 0 INTO tRow
+					r11 = r11 + 1
+				UNTIL r11 > b
+				PUSH tRow INTO mGrid
+				r10 = r10 + 1
+			END WHILE
+			RETURN mGrid
+		END FUNCTION
+
+		LET dp = makeGrid(r5, r5)
+		dp[0][0] = 1
+
+		FUNCTION tryAdd(a,b,c)
+			LET t = dp[a][b]
+			c[a][b] = (c[a][b] + t) % r1
+		END FUNCTION
+
+		FOR d = 0 TO LENGTH(nums) - 1
+			LET ndp = makeGrid(r5, r5)
+			LET x = 0
+			WHILE x <= r5
+				LET y = 0
+				REPEAT
+					tryAdd(x, y, ndp)
+					LET gcdX = h(x, nums[d])
+					tryAdd(gcdX, y, ndp)
+					LET gcdY = h(y, nums[d])
+					tryAdd(x, gcdY, ndp)
+					y = y + 1
+				UNTIL y > r5
+				x = x + 1
+			END WHILE
+			dp = ndp
+		END FOR
+
+		LET res = 0
+		FUNCTION iter(rng)
+			IF rng > r5 THEN RETURN END IF
+			res = (res + dp[rng][rng]) % r1
+			iter(rng + 1)
+		END FUNCTION
+
+		iter(1)
+		RETURN res
+	END FUNCTION
+END CLASS

@@ -1,0 +1,139 @@
+CLASS Solution
+    FUNCTION makeStringGood(s)
+  
+        FUNCTION charOrdinal(ch)
+            RETURN (ch + 0) - ('a' + 0)
+        END FUNCTION
+
+        SET freqArray TO a list of 26 zeros
+        FUNCTION incrementFrequency(arr, index)
+            arr[index] = arr[index] + 1
+        END FUNCTION
+
+        FOR idx FROM 0 TO LENGTH(s) - 1
+            LET currChar = s[idx]
+            CALL incrementFrequency(freqArray, charOrdinal(currChar))
+        END FOR
+
+        FUNCTION minimumInList(lst)
+            SET minVal TO lst[0]
+            FOR pos FROM 1 TO LENGTH(lst) - 1
+                IF lst[pos] < minVal THEN
+                    SET minVal TO lst[pos]
+                END IF
+            END FOR
+            RETURN minVal
+        END FUNCTION
+
+        FUNCTION computeMinOperations(freqs, tgt)
+            SET dpArray TO a list of 27 zeros
+
+            FUNCTION minVal(a,b)
+                IF a < b THEN RETURN a ELSE RETURN b END IF
+            END FUNCTION
+
+            FOR idx FROM 25 DOWNTO 0 STEP -1
+                LET deleteAll = freqs[idx]
+
+                LET diff1
+                IF tgt > freqs[idx] THEN
+                    SET diff1 TO tgt - freqs[idx]
+                ELSE
+                    SET diff1 TO freqs[idx] - tgt
+                END IF
+
+                LET dpOption1 = minVal(deleteAll, diff1 + dpArray[idx + 1])
+
+                IF idx + 1 < 26 AND freqs[idx + 1] < tgt THEN
+                    LET nextDeficit = tgt - freqs[idx + 1]
+
+                    LET needChange
+                    IF freqs[idx] <= tgt THEN
+                        SET needChange TO freqs[idx]
+                    ELSE
+                        SET needChange TO freqs[idx] - tgt
+                    END IF
+
+                    LET changeVal
+                    IF nextDeficit > needChange THEN
+                        SET changeVal TO needChange + (nextDeficit - needChange)
+                    ELSE
+                        SET changeVal TO nextDeficit + (needChange - nextDeficit)
+                    END IF
+
+                    LET dpOption2 = minVal(dpOption1, changeVal + dpArray[idx + 2])
+                    SET dpArray[idx] TO dpOption2
+                ELSE
+                    SET dpArray[idx] TO dpOption1
+                END IF
+            END FOR
+
+            RETURN dpArray[0]
+        END FUNCTION
+
+        SET maxFrequency TO 0
+        FOR i FROM 0 TO 25
+            IF freqArray[i] > maxFrequency THEN
+                SET maxFrequency TO freqArray[i]
+            END IF
+        END FOR
+
+        SET possibleResults TO a list of length maxFrequency, filled with zeroes
+        SET currIndex TO 0
+        WHILE currIndex < maxFrequency
+            SET possibleResults[currIndex] TO computeMinOperations(freqArray, currIndex + 1)
+            SET currIndex TO currIndex + 1
+        END WHILE
+
+        RETURN minimumInList(possibleResults)
+    END FUNCTION
+
+    FUNCTION _getMinOperations(count, target)
+      
+        FUNCTION minValue(x, y)
+            IF x < y THEN RETURN x ELSE RETURN y END IF
+        END FUNCTION
+
+        SET dp TO a list of 27 zeros
+        SET i TO 25
+        WHILE i >= 0
+            LET delAll TO count[i]
+
+            LET diff
+            IF target > count[i] THEN
+                SET diff TO target - count[i]
+            ELSE
+                SET diff TO count[i] - target
+            END IF
+
+            LET dpVal1 TO minValue(delAll, diff + dp[i + 1])
+
+            IF (i + 1) < 26 AND count[i + 1] < target THEN
+                LET deficit TO target - count[i + 1]
+
+                LET needChange
+                IF count[i] <= target THEN
+                    SET needChange TO count[i]
+                ELSE
+                    SET needChange TO count[i] - target
+                END IF
+
+                LET changeAmount
+                IF deficit > needChange THEN
+                    SET changeAmount TO needChange + (deficit - needChange)
+                ELSE
+                    SET changeAmount TO deficit + (needChange - deficit)
+                END IF
+
+                LET dpVal2 TO minValue(dpVal1, changeAmount + dp[i + 2])
+                SET dp[i] TO dpVal2
+            ELSE
+                SET dp[i] TO dpVal1
+            END IF
+
+            SET i TO i - 1
+        END WHILE
+
+        RETURN dp[0]
+    END FUNCTION
+END CLASS

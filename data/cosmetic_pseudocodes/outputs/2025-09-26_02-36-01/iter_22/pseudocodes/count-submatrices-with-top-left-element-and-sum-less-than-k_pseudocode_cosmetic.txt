@@ -1,0 +1,57 @@
+CLASS Solution  
+    FUNCTION countSubmatrices(grid, k)  
+        IF (NOT grid) OR (NOT (grid[0]))  
+            RETURN 0  
+        END IF  
+        SET sizeM TO 0  
+        WHILE sizeM < LENGTH(grid)  
+            SET sizeM TO sizeM + 1  
+        END WHILE  
+        SET sizeN TO 0  
+        WHILE sizeN < LENGTH(grid[0])  
+            SET sizeN TO sizeN + 1  
+        END WHILE  
+        SET prefix_sum TO []  
+        SET idxM TO 0  
+        WHILE idxM < sizeM  
+            SET innerList TO []  
+            SET idxN TO 0  
+            WHILE idxN < sizeN  
+                APPEND 0 TO innerList  
+                SET idxN TO idxN + 1  
+            END WHILE  
+            APPEND innerList TO prefix_sum  
+            SET idxM TO idxM + 1  
+        END WHILE  
+        SET tally TO 0  
+        SET outerIdx TO 0  
+        WHILE outerIdx < sizeM  
+            SET innerIdx TO 0  
+            WHILE innerIdx < sizeN  
+                IF (outerIdx = 0) AND (innerIdx = 0) THEN  
+                    SET prefix_sum[outerIdx][innerIdx] TO grid[outerIdx][innerIdx]  
+                ELSE IF outerIdx = 0 THEN  
+                    SET tempA TO prefix_sum[outerIdx][innerIdx - 1]  
+                    SET tempB TO grid[outerIdx][innerIdx]  
+                    SET prefix_sum[outerIdx][innerIdx] TO tempA + tempB  
+                ELSE IF innerIdx = 0 THEN  
+                    SET tempC TO prefix_sum[outerIdx - 1][innerIdx]  
+                    SET tempD TO grid[outerIdx][innerIdx]  
+                    SET prefix_sum[outerIdx][innerIdx] TO tempC + tempD  
+                ELSE  
+                    SET val1 TO prefix_sum[outerIdx][innerIdx - 1]  
+                    SET val2 TO prefix_sum[outerIdx - 1][innerIdx - 1]  
+                    SET val3 TO prefix_sum[outerIdx - 1][innerIdx]  
+                    SET val4 TO grid[outerIdx][innerIdx]  
+                    SET prefix_sum[outerIdx][innerIdx] TO val1 + val3 - val2 + val4  
+                END IF  
+                IF prefix_sum[outerIdx][innerIdx] <= k THEN  
+                    SET tally TO tally + 1  
+                END IF  
+                SET innerIdx TO innerIdx + 1  
+            END WHILE  
+            SET outerIdx TO outerIdx + 1  
+        END WHILE  
+        RETURN tally  
+    END FUNCTION  
+END CLASS

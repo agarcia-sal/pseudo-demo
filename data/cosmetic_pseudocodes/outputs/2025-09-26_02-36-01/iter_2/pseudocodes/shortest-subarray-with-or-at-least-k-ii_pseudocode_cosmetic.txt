@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+        FUNCTION update_count(count_list LIST OF integers n integer delta integer)
+            SET bitmask TO 1
+            SET idx TO 0
+            WHILE idx < 32
+                IF (n BITWISE_AND bitmask) != 0
+                    count_list[idx] = count_list[idx] + delta
+                END IF
+                SET bitmask TO bitmask LEFT_SHIFT 1
+                SET idx TO idx + 1
+            END WHILE
+        END FUNCTION
+
+        FUNCTION compute_current_or(count_list LIST OF integers) RETURNS integer
+            SET result_or TO 0
+            SET position TO 0
+            WHILE position < 32
+                IF count_list[position] > 0
+                    result_or = result_or BITWISE_OR (1 LEFT_SHIFT position)
+                END IF
+                SET position TO position + 1
+            END WHILE
+            RETURN result_or
+        END FUNCTION
+
+        SET length_nums TO LENGTH OF nums
+        INITIALIZE bit_counts TO [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        SET curr_or_val TO 0
+        SET start_idx TO 0
+        SET min_len TO INFINITY_POSITIVE
+
+        SET end_idx TO 0
+        WHILE end_idx < length_nums
+            CALL update_count(bit_counts nums[end_idx] 1)
+            curr_or_val = curr_or_val BITWISE_OR nums[end_idx]
+
+            WHILE (curr_or_val >= k) AND (start_idx <= end_idx)
+                IF min_len > (end_idx - start_idx + 1)
+                    min_len = end_idx - start_idx + 1
+                END IF
+                CALL update_count(bit_counts nums[start_idx] -1)
+                curr_or_val = CALL compute_current_or(bit_counts)
+                start_idx = start_idx + 1
+            END WHILE
+            end_idx = end_idx + 1
+        END WHILE
+
+        IF (min_len == INFINITY_POSITIVE)
+            RETURN -1
+        ELSE
+            RETURN min_len
+        END IF
+    END FUNCTION
+END CLASS

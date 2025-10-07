@@ -1,0 +1,157 @@
+CLASS Fenwick
+    FUNCTION __init__(self, n)
+        LET lengthBound BE n + (0 * 1) + 1
+        SET self.tree TO a new list WITH lengthBound elements ALL zero
+    END FUNCTION
+
+    FUNCTION add(self, index)
+        FUNCTION recurseAdd(pos)
+            IF NOT (pos < LENGTH(self.tree)) THEN
+                RETURN
+            END IF
+
+            LET incrementedValue BE self.tree[pos] + 1
+            SET self.tree[pos] TO incrementedValue
+
+            LET nextPos BE pos + (pos & (-pos))
+            CALL recurseAdd(nextPos)
+        END FUNCTION
+
+        CALL recurseAdd(index)
+    END FUNCTION
+
+    FUNCTION pre(self, idx)
+        LET accumulator BE 0
+
+        FUNCTION recursePre(position, acc)
+            IF NOT (position > 0) THEN
+                RETURN acc
+            END IF
+            LET newAcc BE acc + self.tree[position]
+            LET newPos BE position & (position - 1)
+            RETURN recursePre(newPos, newAcc)
+        END FUNCTION
+
+        LET resultValue BE recursePre(idx, accumulator)
+        RETURN resultValue
+    END FUNCTION
+
+    FUNCTION query(self, leftBound, rightBound)
+        LET psumRight BE self.pre(rightBound)
+        LET psumLeftMinusOne BE self.pre(leftBound + (-1))
+        LET finalResult BE psumRight - psumLeftMinusOne
+        RETURN finalResult
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maxRectangleArea(self, xCoord, yCoord)
+        LET pairedPoints BE []
+        LET idx BE 0
+
+        WHILE idx < LENGTH(xCoord)
+            APPEND (xCoord[idx], yCoord[idx]) TO pairedPoints
+            LET idx BE idx + 1
+        END WHILE
+
+        LET sortedPoints BE pairedPoints
+        CALL sortedPoints.sort()
+
+        LET uniqueYsSet BE {}
+        LET jdx BE 0
+        WHILE jdx < LENGTH(yCoord)
+            LET elem BE yCoord[jdx]
+            IF NOT (elem IN uniqueYsSet) THEN
+                SET uniqueYsSet[elem] TO TRUE
+            END IF
+            LET jdx BE jdx + 1
+        END WHILE
+
+        LET ysList BE []
+        FOR each key IN uniqueYsSet
+            APPEND key TO ysList
+        END FOR
+        CALL ysList.sort()
+
+        LET maximumArea BE (0 - 1)    # negative one
+
+        LET fenwTree BE Fenwick(LENGTH(ysList))
+
+        FUNCTION bisectLeft(arr, target)
+            LET low BE 0
+            LET high BE LENGTH(arr)
+            WHILE low < high
+                LET middle BE (low + high) // 2
+                IF NOT (arr[middle] < target) THEN
+                    LET high BE middle
+                ELSE
+                    LET low BE middle + 1
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        LET firstYIndex BE bisectLeft(ysList, sortedPoints[0][1]) + 1
+        CALL fenwTree.add(firstYIndex)
+
+        LET prefixMap BE {}
+
+        FUNCTION pairwiseIter(lst)
+            LET pos BE 0
+            FUNCTION nextPair()
+                IF (pos + 1) >= LENGTH(lst) THEN RETURN NONE END IF
+                LET retVal BE (lst[pos], lst[pos + 1])
+                LET pos BE pos + 1
+                RETURN retVal
+            END FUNCTION
+            RETURN nextPair
+        END FUNCTION
+
+        LET pairIter BE pairwiseIter(sortedPoints)
+
+        # Emulate loop over pairs recursively
+        FUNCTION processPairs()
+            LET nxt BE pairIter()
+            IF nxt IS NONE THEN RETURN END IF
+
+            LET firstPair BE nxt
+            LET currentPair BE pairIter()
+            IF currentPair IS NONE THEN RETURN END IF
+
+            LET (x1, y1) BE firstPair
+            LET (x2, y2) BE currentPair
+
+            LET yIndex BE bisectLeft(ysList, y2) + (0 + 1)
+            CALL fenwTree.add(yIndex)
+
+            IF x1 == x2 THEN
+                LET queryResult BE fenwTree.query(bisectLeft(ysList, y1) + 1, yIndex)
+
+                IF y2 IN prefixMap THEN
+                    LET storedTriple BE prefixMap[y2]
+                    LET storedX BE storedTriple[0]
+                    LET storedY BE storedTriple[1]
+                    LET storedCur BE storedTriple[2]
+
+                    LET condOne BE (storedY == y1)
+                    LET condTwo BE (storedCur + 2 == queryResult)
+
+                    IF (condOne and condTwo) THEN
+                        LET candidateArea BE (x2 - storedX) * (y2 - y1)
+                        IF candidateArea > maximumArea THEN
+                            SET maximumArea TO candidateArea
+                        END IF
+                    END IF
+                END IF
+
+                SET prefixMap[y2] TO (x1, y1, queryResult)
+            END IF
+
+            CALL processPairs()
+        END FUNCTION
+
+        CALL processPairs()
+
+        RETURN maximumArea
+    END FUNCTION
+END CLASS

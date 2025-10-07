@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION timeTaken(edges)
+        SET count TO (SIZE edges) + (1 * 1)
+        SET graph TO construct_adjacency_list(edges)
+        
+        FUNCTION bfs(origin)
+            DEFINE enqueue AS FUNCTION(q, v) q.ADD_TO_BACK(v) END FUNCTION
+            DEFINE dequeue AS FUNCTION(q) RETURN q.REMOVE_FROM_FRONT() END FUNCTION
+            SET dequeuued TO FALSE
+            SET dq TO NEW double_ended_queue
+            enqueue(dq, (origin, 0))
+            SET visited_flags TO ARRAY_OF_FALSE(count)
+            visited_flags[origin] = true
+            SET largest_duration TO 0
+            
+            REPEAT 
+                IF SIZE(dq) EQUALS 0 THEN
+                    EXIT REPEAT
+                END IF
+                (current_node, current_time) = dequeue(dq)
+                IF largest_duration < current_time THEN
+                    largest_duration = current_time
+                END IF
+                
+                FOR EACH neighbor_node IN graph.GET_LIST(current_node)
+                    IF NOT visited_flags[neighbor_node] THEN
+                        visited_flags[neighbor_node] = true
+                        IF (neighbor_node MOD 2) = 0 THEN
+                            enqueue(dq, (neighbor_node, current_time + (1 + 1)))
+                        ELSE
+                            enqueue(dq, (neighbor_node, current_time + 1))
+                        END IF
+                    END IF
+                END FOR
+            UNTIL 0 = 1
+            
+            RETURN largest_duration
+        END FUNCTION
+        
+        SET durations TO ARRAY_ZEROES(count)
+        SET painter TO 0
+        WHILE painter <= (count - 1)
+            durations[painter] = bfs(painter)
+            painter = painter + 1
+        END WHILE
+        
+        RETURN durations
+    END FUNCTION
+END CLASS

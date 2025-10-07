@@ -1,0 +1,69 @@
+CLASS Solution  
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)  
+        FUNCTION bitXorHelper(x PARAMETER, y PARAMETER)  
+            RETURN (x OR y) MINUS ((x AND y) LEFT SHIFT 1)  
+        END FUNCTION  
+
+        FUNCTION maxHelper(a PARAMETER, b PARAMETER)  
+            IF a GREATER THAN b THEN RETURN a  
+            ELSE RETURN b  
+            END IF  
+        END FUNCTION  
+
+        SET lengthVal TO 0  
+        SET lengthVal TO 0  
+        SET lengthVal TO LENGTH OF nums  
+
+        SET matrixF TO EMPTY LIST  
+        SET matrixG TO EMPTY LIST  
+        REPEAT LENGTH OF nums TIMES  
+            APPEND EMPTY LIST TO matrixF  
+            APPEND EMPTY LIST TO matrixG  
+        END REPEAT  
+
+        SET idxOuter TO lengthVal  
+        WHILE idxOuter GREATER THAN 0  
+            SET idxOuter TO idxOuter MINUS 1  
+            SET matrixF[idxOuter][idxOuter] TO nums[idxOuter]  
+            SET matrixG[idxOuter][idxOuter] TO nums[idxOuter]  
+
+            SET idxInner TO idxOuter  
+            REPEAT  
+                SET idxInner TO idxInner PLUS 1  
+                IF NOT(idxInner LESS THAN lengthVal) THEN BREAK END IF  
+
+                SET leftPart TO matrixF[idxOuter][idxInner MINUS 1]  
+                SET rightPart TO matrixF[idxOuter PLUS 1][idxInner]  
+                SET combined TO bitXorHelper(leftPart, rightPart)  
+                SET matrixF[idxOuter][idxInner] TO combined  
+
+                SET val1 TO matrixF[idxOuter][idxInner]  
+                SET val2 TO matrixG[idxOuter][idxInner MINUS 1]  
+                SET val3 TO matrixG[idxOuter PLUS 1][idxInner]  
+                SET tempMax TO val1  
+                IF maxHelper(val2, tempMax) GREATER THAN tempMax THEN tempMax = maxHelper(val2, tempMax) END IF  
+                IF maxHelper(val3, tempMax) GREATER THAN tempMax THEN tempMax = maxHelper(val3, tempMax) END IF  
+                SET matrixG[idxOuter][idxInner] TO tempMax  
+            UNTIL FALSE  
+        END WHILE  
+
+        SET outputList TO EMPTY LIST  
+
+        FUNCTION getQueryResult(startPos PARAMETER, endPos PARAMETER)  
+            RETURN matrixG[startPos][endPos]  
+        END FUNCTION  
+
+        SET qIdx TO 0  
+        SET qCount TO LENGTH OF queries  
+        REPEAT qCount TIMES  
+            SET element TO queries[qIdx]  
+            SET qIdx TO qIdx PLUS 1  
+            SET lVal TO element[0]  
+            SET rVal TO element[1]  
+            SET appendVal TO getQueryResult(lVal, rVal)  
+            APPEND appendVal TO outputList  
+        END REPEAT  
+
+        RETURN outputList  
+    END FUNCTION  
+END CLASS

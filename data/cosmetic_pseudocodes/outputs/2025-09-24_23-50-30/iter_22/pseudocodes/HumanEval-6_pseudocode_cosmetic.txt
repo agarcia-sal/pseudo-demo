@@ -1,0 +1,39 @@
+```
+FUNCTION parse_nested_parens(parens_seq)
+    FUNCTION parse_paren_group(paren_cluster)
+        SET depth_counter TO 0
+        SET highest_depth TO 0
+        SET idx TO 0
+        WHILE idx < LENGTH(paren_cluster)
+            SET sym TO CHARACTER AT paren_cluster[idx]
+            IF sym == '(' THEN
+                SET depth_counter TO depth_counter + 1
+                IF depth_counter > highest_depth THEN
+                    SET highest_depth TO depth_counter
+                END IF
+            ELSE
+                SET depth_counter TO depth_counter - 1
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+        RETURN highest_depth
+    END FUNCTION
+
+    SET segments TO []
+    SET start_idx TO 0
+    FOR idx FROM 0 TO LENGTH(parens_seq)
+        IF idx == LENGTH(parens_seq) OR CHARACTER AT parens_seq[idx] == ' ' THEN
+            IF idx > start_idx THEN
+                APPEND SUBSTRING(parens_seq, start_idx, idx) TO segments
+            END IF
+            SET start_idx TO idx + 1
+        END IF
+    END FOR
+
+    SET results TO []
+    FOR cluster IN segments
+        APPEND parse_paren_group(cluster) TO results
+    END FOR
+    RETURN results
+END FUNCTION
+```

@@ -1,0 +1,45 @@
+CLASS Solution
+    FUNCTION getSmallestString(s parameter of type string k parameter of type integer) RETURNS string
+        FUNCTION cyclic_distance(c1 parameter of type character c2 parameter of type character) RETURNS integer
+            SET delta TO (|ASCII(c1) - ASCII(c2)|)
+            SET diff TO (26 - delta)
+            IF delta <= diff THEN
+                RETURN delta
+            ELSE
+                RETURN diff
+            END IF
+        END FUNCTION
+
+        SET char_array TO an empty list
+        SET idx TO 0
+        SET length_s TO LENGTH(s)
+        FOR pos FROM 0 TO length_s - 1 DO
+            APPEND s[pos] TO char_array
+        END FOR
+
+        WHILE (k > 0) AND (idx < length_s) DO
+            IF char_array[idx] = 'a' THEN
+                idx <- idx + 1
+                CONTINUE
+            END IF
+
+            SET dist FROM cyclic_distance(char_array[idx], 'a')
+
+            IF dist <= k THEN
+                char_array[idx] <- 'a'
+                k <- k - dist
+            ELSE
+                char_array[idx] <- CHARACTER(ASCII(char_array[idx]) - k)
+                k <- 0
+            END IF
+
+            idx = idx + 1
+        END WHILE
+
+        SET result_str TO ""
+        FOR each_char IN char_array DO
+            result_str <- result_str + each_char
+        END FOR
+        RETURN result_str
+    END FUNCTION
+END CLASS

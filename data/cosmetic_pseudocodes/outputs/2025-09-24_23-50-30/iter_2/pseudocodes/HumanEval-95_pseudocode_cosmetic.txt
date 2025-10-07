@@ -1,0 +1,45 @@
+```
+FUNCTION check_dict_case(dictionary)
+    IF NOT (LENGTH OF dictionary KEYS > 0)
+        RETURN False
+    END IF
+
+    SET current_state TO "start"
+    SET keys_list TO LIST OF dictionary KEYS
+    SET index TO 0
+
+    WHILE index < LENGTH OF keys_list
+        SET k TO keys_list[index]
+        IF k IS NOT INSTANCE OF STRING
+            SET current_state TO "mixed"
+            EXIT WHILE
+        END IF
+
+        IF current_state = "start"
+            IF NOT (k IS ALL LOWERCASE) AND (k IS ALL UPPERCASE)
+                SET current_state TO "upper"
+            ELSE IF NOT (k IS ALL UPPERCASE) AND (k IS ALL LOWERCASE)
+                SET current_state TO "lower"
+            ELSE
+                EXIT WHILE
+            END IF
+        ELSE IF current_state = "upper"
+            IF NOT (k IS ALL UPPERCASE)
+                SET current_state TO "mixed"
+                EXIT WHILE
+            END IF
+        ELSE IF current_state = "lower"
+            IF NOT (k IS ALL LOWERCASE)
+                SET current_state TO "mixed"
+                EXIT WHILE
+            END IF
+        ELSE
+            EXIT WHILE
+        END IF
+
+        SET index TO index + 1
+    END WHILE
+
+    RETURN (current_state = "upper") OR (current_state = "lower")
+END FUNCTION
+```

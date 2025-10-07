@@ -1,0 +1,195 @@
+CLASS Solution
+    FUNCTION countGoodIntegers(j integer, m integer) RETURNS integer
+        PROCEDURE buildFactorials(limit integer, TO resultList)
+            SET pivot TO 0
+            WHILE pivot <= limit
+                APPEND computeFactorial(pivot) TO resultList
+                SET pivot TO pivot + 1
+            END WHILE
+        END PROCEDURE
+
+        FUNCTION computeFactorial(num integer) RETURNS integer
+            IF num <= 1 THEN
+                RETURN 1
+            ELSE
+                RETURN num * computeFactorial(num - 1)
+            END IF
+        END FUNCTION
+
+        PROCEDURE incrementMapCount(key char, INOUT map)
+            IF key NOT IN map THEN
+                SET map[key] TO 1
+            ELSE
+                SET map[key] TO map[key] + 1
+            END IF
+        END PROCEDURE
+
+        FUNCTION sortCharsAscending(text string) RETURNS string
+            SET charArray TO convertToList(text)
+            CALL quickSort(charArray, 0, LENGTH(charArray) - 1)
+            RETURN concatenateList(charArray)
+        END FUNCTION
+
+        PROCEDURE quickSort(arr list, low integer, high integer)
+            IF low < high THEN
+                SET pIndex TO partition(arr, low, high)
+                CALL quickSort(arr, low, pIndex - 1)
+                CALL quickSort(arr, pIndex + 1, high)
+            END IF
+        END PROCEDURE
+
+        FUNCTION partition(arr list, lo integer, hi integer) RETURNS integer
+            SET pivotVal TO arr[hi]
+            SET idx TO lo - 1
+            SET k TO lo
+            WHILE k <= hi - 1
+                IF arr[k] <= pivotVal THEN
+                    SET idx TO idx + 1
+                    SWAP arr[idx], arr[k]
+                END IF
+                SET k TO k + 1
+            END WHILE
+            SWAP arr[idx + 1], arr[hi]
+            RETURN idx + 1
+        END FUNCTION
+
+        FUNCTION reverseString(st string) RETURNS string
+            SET arr TO convertToList(st)
+            SET left TO 0
+            SET right TO LENGTH(arr) - 1
+            WHILE left < right
+                SWAP arr[left], arr[right]
+                SET left TO left + 1
+                SET right TO right - 1
+            END WHILE
+            RETURN concatenateList(arr)
+        END FUNCTION
+
+        FUNCTION substringFromIndex(src string, startIdx integer) RETURNS string
+            SET lengthSrc TO LENGTH(src)
+            SET result TO empty string
+            SET pos TO startIdx
+            WHILE pos < lengthSrc
+                SET result TO result + src[pos]
+                SET pos TO pos + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        FUNCTION intToString(value integer) RETURNS string
+            IF value = 0 THEN
+                RETURN "0"
+            END IF
+            SET digits TO empty list
+            SET number TO value
+            WHILE number > 0
+                SET digitVal TO number MOD 10
+                CALL digitsAppend(digits, charFromDigit(digitVal))
+                SET number TO number DIV 10
+            END WHILE
+            CALL reverseListInPlace(digits)
+            RETURN concatenateList(digits)
+        END FUNCTION
+
+        PROCEDURE reverseListInPlace(lst list)
+            SET leftIdx TO 0
+            SET rightIdx TO LENGTH(lst) - 1
+            WHILE leftIdx < rightIdx
+                SWAP lst[leftIdx], lst[rightIdx]
+                SET leftIdx TO leftIdx + 1
+                SET rightIdx TO rightIdx - 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE digitsAppend(lst list, ch char)
+            INSERT ch AT END OF lst
+        END PROCEDURE
+
+        FUNCTION charFromDigit(d integer) RETURNS char
+            RETURN CHARACTER_WITH_CODE(d + CHARACTER_CODE('0'))
+        END FUNCTION
+
+        PROCEDURE addToSetIfAbsent(element string, INOUT setCollection)
+            IF element NOT IN setCollection THEN
+                ADD element TO setCollection
+            END IF
+        END PROCEDURE
+
+        FUNCTION mapCharFrequencies(text string) RETURNS map
+            SET freqMap TO empty map
+            SET idxPos TO 0
+            WHILE idxPos < LENGTH(text)
+                CALL incrementMapCount(text[idxPos], freqMap)
+                SET idxPos TO idxPos + 1
+            END WHILE
+            RETURN freqMap
+        END FUNCTION
+
+        SET p TO 0
+        SET factorialList TO empty list
+        CALL buildFactorials(j, factorialList)
+
+        SET totalSum TO 0
+        SET coverageSet TO empty set
+        SET baseNumber TO POWER(10, (j - 1) DIV 2)
+
+        FUNCTION isDivisible(numStr string, divisor integer) RETURNS boolean
+            RETURN CONVERT_TO_INTEGER(numStr) MOD divisor = 0
+        END FUNCTION
+
+        FUNCTION combineStrings(front string, back string) RETURNS string
+            RETURN front + back
+        END FUNCTION
+
+        FUNCTION sliceStringReversedSegment(text string, start integer) RETURNS string
+            RETURN substringFromIndex(reverseString(text), start)
+        END FUNCTION
+
+        PROCEDURE forLoopTraverse(startVal integer, endVal integer, DO handleFunc(integer))
+            SET iterator TO startVal
+            WHILE iterator <= endVal
+                CALL handleFunc(iterator)
+                SET iterator TO iterator + 1
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE processCandidate(num integer)
+            SET strNum TO intToString(num)
+            SET suffix TO sliceStringReversedSegment(strNum, j MOD 2)
+            SET fullStr TO combineStrings(strNum, suffix)
+            IF NOT isDivisible(fullStr, m) THEN
+                RETURN
+            END IF
+            SET sortedStr TO sortCharsAscending(fullStr)
+            IF sortedStr IN coverageSet THEN
+                RETURN
+            END IF
+            ADD sortedStr TO coverageSet
+            SET frequencyMap TO mapCharFrequencies(sortedStr)
+            SET resVal TO 0
+            IF '0' IN frequencyMap AND frequencyMap['0'] > 0 THEN
+                SET resVal TO (j - frequencyMap['0']) * factorialList[j - 1]
+            ELSE
+                SET resVal TO factorialList[j]
+            END IF
+            FOR EACH val IN frequencyMap VALUES
+                SET resVal TO resVal DIV factorialList[val]
+            END FOR
+            SET totalSum TO totalSum + resVal
+        END PROCEDURE
+
+        SET upperBound TO baseNumber * 10 - 1
+
+        PROCEDURE iterateCandidates()
+            SET v TO baseNumber
+            WHILE v <= upperBound
+                CALL processCandidate(v)
+                SET v TO v + 1
+            END WHILE
+        END PROCEDURE
+
+        CALL iterateCandidates()
+
+        RETURN totalSum
+    END FUNCTION
+END CLASS

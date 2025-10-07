@@ -1,0 +1,89 @@
+class Solution
+	func unmarkedSumArray(nums function parameter, queries function parameter) returns list
+		var epsilon set to 0
+		var delta set to 1
+		var omega_stack set to empty list
+		var alpha_set set to empty set
+		var gamma_value set to 0
+		var beta_list set to empty list
+
+		func heapifyLocal(h)
+			var heap_size set to h.size()
+			var i set to heap_size // 2 - delta
+			while i >= epsilon
+				var j set to i
+				while 2 * j + delta < heap_size
+					var left_child set to 2 * j + delta
+					var right_child set to left_child + delta
+					var smallest set to j
+					if h[left_child].first < h[smallest].first
+						smallest = left_child
+					end if
+					if right_child < heap_size and h[right_child].first < h[smallest].first
+						smallest = right_child
+					end if
+					if smallest != j
+						var temp_pair set to h[j]
+						h[j] = h[smallest]
+						h[smallest] = temp_pair
+						j = smallest
+					else
+						break
+					end if
+				end while
+				i = i - delta
+			end while
+		end func
+
+		func heappopLocal(h)
+			var ret_val set to h[epsilon]
+			h[epsilon] = h[h.size() - delta]
+			h.remove(h.size() - delta)
+			heapifyLocal(h)
+			return ret_val
+		end func
+
+		gamma_value = epsilon
+		while gamma_value < nums.size()
+			omega_stack.append((nums[gamma_value], gamma_value))
+			gamma_value = gamma_value + delta
+		end while
+
+		heapifyLocal(omega_stack)
+
+		var sum_accum set to epsilon
+		gamma_value = epsilon
+		while gamma_value < nums.size()
+			sum_accum = sum_accum + nums[gamma_value]
+			gamma_value = gamma_value + delta
+		end while
+
+		gamma_value = epsilon
+		while gamma_value < queries.size()
+			var current_index set to queries[gamma_value].first
+			var current_k set to queries[gamma_value].second
+			if not (current_index in alpha_set)
+				alpha_set.insert(current_index)
+				sum_accum = sum_accum - nums[current_index]
+			end if
+
+			var popped_count set to epsilon
+			while popped_count < current_k and not (omega_stack.size() == epsilon)
+				var val_idx_pair set to heappopLocal(omega_stack)
+				var local_value set to val_idx_pair.first
+				var local_index set to val_idx_pair.second
+
+				if not (local_index in alpha_set)
+					alpha_set.insert(local_index)
+					sum_accum = sum_accum - local_value
+					popped_count = popped_count + delta
+				end if
+			end while
+
+			beta_list.append(sum_accum)
+			gamma_value = gamma_value + delta
+		end while
+
+		return beta_list
+	end func
+end class

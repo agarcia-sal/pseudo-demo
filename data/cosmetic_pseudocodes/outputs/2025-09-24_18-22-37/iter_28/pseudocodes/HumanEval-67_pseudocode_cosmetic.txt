@@ -1,0 +1,49 @@
+FUNCTION fruit_distribution(string_description, total_number_of_fruits)
+    SET container TO empty list
+    SET iterator TO 0
+    WHILE iterator < LENGTH(string_description)
+        SET delimiter_positions TO FIND_WHERE(string_description, ' ')
+        SET current_word TO EMPTY_STRING
+        IF LENGTH(delimiter_positions) > 0
+            SET current_word TO SUBSTRING(string_description, 0, delimiter_positions[0])
+            SET string_description TO SUBSTRING(string_description, delimiter_positions[0] + 1, LENGTH(string_description))
+        ELSE
+            SET current_word TO string_description
+            SET string_description TO EMPTY_STRING
+        END IF
+        
+        SET status_flag TO false
+        SET character_index TO 0
+        WHILE character_index < LENGTH(current_word)
+            SET char_value TO current_word.at(character_index)
+            IF char_value >= '0' ∧ char_value <= '9'
+                SET status_flag TO true
+            ELSE
+                SET status_flag TO false
+                BREAK
+            END IF
+            SET character_index TO character_index + 1
+        END WHILE
+        
+        SWITCH status_flag
+            CASE true:
+                APPEND CONVERT_TO_INT(current_word) TO container
+            CASE false:
+                /* do nothing */
+        END SWITCH
+        
+        SET iterator TO iterator + 1
+        IF string_description = EMPTY_STRING
+            BREAK
+        END IF
+    END WHILE
+
+    SET accumulator TO 0
+    SET index_variable TO 0
+    WHILE index_variable < LENGTH(container)
+        SET accumulator TO accumulator + container.at(index_variable)
+        SET index_variable TO index_variable + 1
+    END WHILE
+
+    RETURN total_number_of_fruits + (~accumulator + 1)    /* equivalent to total_number_of_fruits - accumulator */
+END FUNCTION

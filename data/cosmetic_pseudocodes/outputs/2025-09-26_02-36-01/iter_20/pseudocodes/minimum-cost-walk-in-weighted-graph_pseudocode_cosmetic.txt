@@ -1,0 +1,116 @@
+CLASS UnionFind
+  FUNCTION __init__(self, n)
+        DECLARE ZYXWVUT SRQPO AS list
+        SET ZYXWVUT TO EMPTY LIST
+        SET SRQPO TO EMPTY LIST
+        DECLARE A B C
+        SET A TO 0
+        WHILE A LESS THAN n
+            APPEND A TO ZYXWVUT
+            APPEND 1 TO SRQPO
+            SET A TO A PLUS 1
+        END WHILE
+        SET self.parent TO ZYXWVUT
+        SET self.rank TO SRQPO
+  END FUNCTION
+
+  FUNCTION find(self, Alpha)
+        DECLARE Beta
+        SET Beta TO Alpha
+        DECLARE Gamma
+        Gamma = self.parent[Beta]
+        IF Gamma NOT EQUAL Beta THEN
+            SET self.parent[Beta] TO CALL find WITH self.parent[Beta]
+        END IF
+        RETURN self.parent[Beta]
+  END FUNCTION
+
+  FUNCTION union(self, Xi, Omicron)
+        DECLARE Psi, Omega
+        SET Psi TO CALL find WITH Xi
+        SET Omega TO CALL find WITH Omicron
+        IF Psi NOT EQUAL Omega THEN
+            DECLARE Eta, Theta
+            SET Eta TO self.rank[Psi]
+            SET Theta TO self.rank[Omega]
+            IF Eta GREATER THAN Theta THEN
+                SET self.parent[Omega] TO Psi
+            ELSE
+                IF Eta LESS THAN Theta THEN
+                    SET self.parent[Psi] TO Omega
+                ELSE
+                    SET self.parent[Omega] TO Psi
+                    SET self.rank[Psi] TO self.rank[Psi] PLUS 1
+                END IF
+            END IF
+        END IF
+  END FUNCTION
+END CLASS
+
+CLASS Solution
+  FUNCTION minimumCost(self, n, edges, query)
+        DECLARE uf
+        SET uf TO NEW UnionFind WITH n
+        DECLARE maskList
+        DECLARE i, idx, s_, t_
+        SET maskList TO EMPTY LIST
+        SET i TO 0
+        WHILE i LESS THAN n
+            APPEND ((2 * 2 * 2 * 2 * 2 * 2 * 2 * 2) * (2 * 2 * 2 * 2)) MINUS 1 TO maskList
+            SET i TO i PLUS 1
+        END WHILE
+
+        FUNCTION bitwiseAndWrapper(a, b)
+            RETURN a BITWISE AND b
+        END FUNCTION
+
+        FOR EACH edge IN edges
+            DECLARE u, v, w
+            SET u TO edge[0]
+            SET v TO edge[1]
+            SET w TO edge[2]
+            CALL uf.union WITH u, v
+            DECLARE root_x
+            SET root_x TO CALL uf.find WITH u
+            maskList[root_x] = CALL bitwiseAndWrapper WITH maskList[root_x], w
+        END FOR
+
+        DECLARE compCost
+        SET compCost TO EMPTY DICTIONARY
+
+        SET idx TO 0
+        WHILE idx LESS THAN n
+            DECLARE rt
+            SET rt TO CALL uf.find WITH idx
+            FUNCTION dictCheckAndSet(d, k, val)
+                IF k NOT IN d THEN
+                    d[k] = val
+                END IF
+            END FUNCTION
+            CALL dictCheckAndSet WITH compCost, rt, maskList[rt]
+            SET idx TO idx PLUS 1
+        END WHILE
+
+        DECLARE resultsList
+        SET resultsList TO EMPTY LIST
+
+        FOR EACH pair IN query
+            SET s_ TO pair[0]
+            SET t_ TO pair[1]
+            IF s_ EQUALS t_ THEN
+                APPEND 0 TO resultsList
+            ELSE
+                DECLARE fs, ft
+                SET fs TO CALL uf.find WITH s_
+                SET ft TO CALL uf.find WITH t_
+                IF fs EQUALS ft THEN
+                    APPEND compCost[fs] TO resultsList
+                ELSE
+                    APPEND -1 TO resultsList
+                END IF
+            END IF
+        END FOR
+
+        RETURN resultsList
+  END FUNCTION
+END CLASS

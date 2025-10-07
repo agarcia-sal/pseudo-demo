@@ -1,0 +1,184 @@
+CLASS Solution
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)
+        FUNCTION cloneList(size initialValue)
+            SET replica TO an empty list
+            SET counter TO 0
+            WHILE counter < size DO
+                APPEND initialValue TO replica
+                SET counter TO counter + 1
+            END WHILE
+            RETURN replica
+        END FUNCTION
+
+        FUNCTION pushToMap(map key value)
+            IF key NOT IN map THEN
+                SET map[key] TO an empty list
+            END IF
+            APPEND value TO map[key]
+        END FUNCTION
+
+        SET graphMap TO an empty mapping from integer to list of integers
+        SET reverseMap TO an empty mapping from integer to list of integers
+
+        SET idx TO 0
+        SET cursor1 TO 0
+        WHILE cursor1 < LENGTH(flowFrom) DO
+            SET srcNode TO flowFrom[cursor1]
+            SET dstNode TO flowTo[cursor1]
+            CALL pushToMap(graphMap srcNode dstNode)
+            CALL pushToMap(reverseMap dstNode srcNode)
+            SET cursor1 TO cursor1 + 1
+        END WHILE
+
+        SET nodeIndices TO cloneList(n -1 + 1, -1)
+        SET nodeLowLinks TO cloneList(n -1 + 1, 0)
+        SET nodeStackFlag TO cloneList(n -1 + 1, False)
+        SET nodeStack TO an empty list
+        SET sccGroups TO an empty list
+        SET globalIndex TO 0
+
+        FUNCTION exploreNode(currentNode)
+            SET nodeIndices[currentNode] TO globalIndex
+            SET nodeLowLinks[currentNode] TO globalIndex
+            SET globalIndex TO globalIndex + 1
+            APPEND currentNode TO nodeStack
+            SET nodeStackFlag[currentNode] TO True
+
+            SET neighborPointer TO 0
+            SET neighbors TO graphMap[currentNode]
+            IF neighbors IS UNDEFINED THEN
+                SET neighbors TO an empty list
+            END IF
+
+            REPEAT
+                IF neighborPointer >= LENGTH(neighbors) THEN
+                    BREAK
+                END IF
+
+                SET nextNode TO neighbors[neighborPointer]
+                IF nodeIndices[nextNode] == -1 THEN
+                    CALL exploreNode(nextNode)
+                    IF nodeLowLinks[currentNode] > nodeLowLinks[nextNode] THEN
+                        SET nodeLowLinks[currentNode] TO nodeLowLinks[nextNode]
+                    END IF
+                ELSE IF nodeStackFlag[nextNode] == True THEN
+                    IF nodeLowLinks[currentNode] > nodeIndices[nextNode] THEN
+                        SET nodeLowLinks[currentNode] TO nodeIndices[nextNode]
+                    END IF
+                END IF
+
+                SET neighborPointer TO neighborPointer + 1
+            UNTIL False
+
+            IF nodeLowLinks[currentNode] == nodeIndices[currentNode] THEN
+                SET collectedScc TO an empty list
+                WHILE True
+                    SET poppedNode TO nodeStack[LENGTH(nodeStack) - 1]
+                    REMOVE last element FROM nodeStack
+                    SET nodeStackFlag[poppedNode] TO False
+                    APPEND poppedNode TO collectedScc
+                    IF poppedNode == currentNode THEN
+                        BREAK
+                    END IF
+                END WHILE
+                APPEND collectedScc TO sccGroups
+            END IF
+        END FUNCTION
+
+        SET i TO 0
+        REPEAT
+            IF i >= n THEN
+                BREAK
+            END IF
+
+            IF nodeIndices[i] == -1 THEN
+                CALL exploreNode(i)
+            END IF
+            SET i TO i + 1
+        UNTIL False
+
+        SET componentGraph TO an empty mapping from integer to list of integers
+        SET nodeToSccIndex TO cloneList(n -1 + 1, -1)
+        SET sccContainsCrystal TO cloneList(LENGTH(sccGroups) - 1 + 1, False)
+
+        SET sccCounter TO 0
+        WHILE sccCounter < LENGTH(sccGroups)
+            SET currentGroup TO sccGroups[sccCounter]
+            SET elementCursor TO 0
+            REPEAT
+                IF elementCursor >= LENGTH(currentGroup) THEN
+                    BREAK
+                END IF
+                SET elementNode TO currentGroup[elementCursor]
+                SET nodeToSccIndex[elementNode] TO sccCounter
+
+                SET foundCrystalFlag TO False
+                SET searchCursor TO 0
+                REPEAT
+                    IF searchCursor >= LENGTH(crystals) THEN
+                        BREAK
+                    END IF
+                    IF crystals[searchCursor] == elementNode THEN
+                        SET foundCrystalFlag TO True
+                        BREAK
+                    END IF
+                    SET searchCursor TO searchCursor + 1
+                UNTIL False
+
+                IF foundCrystalFlag THEN
+                    SET sccContainsCrystal[sccCounter] TO True
+                END IF
+
+                SET elementCursor TO elementCursor + 1
+            UNTIL False
+            SET sccCounter TO sccCounter + 1
+        END WHILE
+
+        SET edgeCursor TO 0
+        WHILE edgeCursor < LENGTH(flowFrom)
+            SET fromNode TO flowFrom[edgeCursor]
+            SET toNode TO flowTo[edgeCursor]
+            SET sccFrom TO nodeToSccIndex[fromNode]
+            SET sccTo TO nodeToSccIndex[toNode]
+            IF sccFrom != sccTo THEN
+                CALL pushToMap(componentGraph sccFrom sccTo)
+            END IF
+            SET edgeCursor TO edgeCursor + 1
+        END WHILE
+
+        SET incomingDegree TO cloneList(LENGTH(sccGroups) - 1 + 1, 0)
+
+        SET sccIndexCounter TO 0
+        WHILE sccIndexCounter < LENGTH(sccGroups)
+            SET adjacencyList TO componentGraph[sccIndexCounter]
+            IF adjacencyList IS UNDEFINED THEN
+                SET adjacencyList TO an empty list
+            END IF
+
+            SET neighborCheck TO 0
+            REPEAT
+                IF neighborCheck >= LENGTH(adjacencyList) THEN
+                    BREAK
+                END IF
+                SET neighborNode TO adjacencyList[neighborCheck]
+                SET incomingDegree[neighborNode] TO incomingDegree[neighborNode] + 1
+                SET neighborCheck TO neighborCheck + 1
+            UNTIL False
+            SET sccIndexCounter TO sccIndexCounter + 1
+        END WHILE
+
+        SET neededRunes TO 0
+        SET sccIterate TO 0
+        REPEAT
+            IF sccIterate >= LENGTH(sccGroups) THEN
+                BREAK
+            END IF
+            IF incomingDegree[sccIterate] == 0 AND sccContainsCrystal[sccIterate] == False THEN
+                SET neededRunes TO neededRunes + 1
+            END IF
+            SET sccIterate TO sccIterate + 1
+        UNTIL False
+
+        RETURN neededRunes
+    END FUNCTION
+END CLASS

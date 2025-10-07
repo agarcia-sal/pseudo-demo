@@ -1,0 +1,41 @@
+CLASS Solution  
+    FUNCTION maxFrequency(nums, k, numOperations)  
+        DEFINE FUNCTION helperAddValue(dictMap, key, delta)  
+            IF key NOT IN dictMap THEN  
+                SET dictMap[key] TO 0  
+            END IF  
+            SET dictMap[key] TO dictMap[key] + delta  
+        END FUNCTION  
+
+        ASSIGN reference alpha TO new default dictionary with integer default  
+        ASSIGN reference beta TO new default dictionary with integer default  
+        SET idx TO 0  
+        WHILE idx < LENGTH(nums) DO  
+            SET currentElem TO nums[idx]  
+            CALL helperAddValue(alpha, currentElem, 1)  
+            CALL helperAddValue(beta, currentElem, 0)  
+            CALL helperAddValue(beta, currentElem - k, 1)  
+            CALL helperAddValue(beta, currentElem + k + 1, -1)  
+            SET idx TO idx + 1  
+        END WHILE  
+
+        SET limit TO 0  
+        SET accumulator TO 0  
+        LET sortedPairs BE LIST from beta's items sorted ascending by key  
+        DEFINE FUNCTION processList(arr, pos, accValue, maxValue)  
+            IF pos == LENGTH(arr) THEN  
+                RETURN maxValue  
+            ELSE  
+                LET keyX BE arr[pos][0]  
+                LET tVal BE arr[pos][1]  
+                LET newAcc BE accValue + tVal  
+                LET candidate BE MIN(newAcc, alpha.get(keyX, 0) + numOperations)  
+                LET newMax BE candidate > maxValue ? candidate : maxValue  
+                RETURN processList(arr, pos + 1, newAcc, newMax)  
+            END IF  
+        END FUNCTION  
+
+        SET limit TO processList(sortedPairs, 0, accumulator, limit)  
+        RETURN limit  
+    END FUNCTION  
+END CLASS

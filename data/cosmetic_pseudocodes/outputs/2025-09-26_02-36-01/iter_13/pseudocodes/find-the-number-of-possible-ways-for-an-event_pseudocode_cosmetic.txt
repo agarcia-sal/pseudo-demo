@@ -1,0 +1,83 @@
+CLASS Solution
+	FUNCTION numberOfWays(n integer parameter, x integer parameter, y integer parameter) RETURNS integer
+		DEFINE CONST MODVAL AS (1000 * 1000 * 1000) + 7
+		FUNCTION multiply_mod(a integer parameter, b integer parameter) RETURNS integer
+			RETURN (a * b) - (((a * b) / MODVAL) * MODVAL)
+		END FUNCTION
+
+		FUNCTION add_mod(a integer parameter, b integer parameter) RETURNS integer
+			LET tempSum BE a + b
+			IF tempSum >= MODVAL THEN
+				RETURN tempSum - MODVAL
+			ELSE
+				RETURN tempSum
+			END IF
+		END FUNCTION
+
+		FUNCTION build2DArray(rows integer parameter, cols integer parameter) RETURNS list of list of integer
+			IF rows <= 0 THEN
+				RETURN []
+			END IF
+			LET outerIndex BE 1
+			LET resultList BE []
+			REPEAT
+				LET innerList BE []
+				LET innerIndex BE 1
+				REPEAT
+					APPEND 0 TO innerList
+					SET innerIndex TO innerIndex + 1
+					IF innerIndex > cols THEN
+						EXIT
+					END IF
+				UNTIL FALSE
+				APPEND innerList TO resultList
+				SET outerIndex TO outerIndex + 1
+				IF outerIndex > rows THEN
+					EXIT
+				END IF
+			UNTIL FALSE
+			RETURN resultList
+		END FUNCTION
+
+		LET countRows BE n + 1
+		LET countCols BE x + 1
+		LET container BE build2DArray(countRows, countCols)
+		SET container[0][0] TO 1
+
+		FUNCTION process_i(iVal integer parameter) RETURNS VOID
+			LET indexJ BE 1
+			REPEAT
+				LET partA integer parameter = multiply_mod(container[iVal - 1][indexJ], indexJ)
+				LET partB integer parameter = multiply_mod(container[iVal - 1][indexJ - 1], x - (indexJ - 1))
+				LET combined integer parameter = add_mod(partA, partB)
+				SET container[iVal][indexJ] TO combined
+				SET indexJ TO indexJ + 1
+				IF indexJ > x THEN
+					EXIT
+				END IF
+			UNTIL FALSE
+		END FUNCTION
+
+		LET iCounter BE 1
+		WHILE iCounter <= n
+			CALL process_i(iCounter)
+			SET iCounter TO iCounter + 1
+		END WHILE
+
+		LET cumulativePower integer parameter = 1
+		LET answer integer parameter = 0
+
+		FUNCTION calcAnswer(jVal integer parameter) RETURNS VOID
+			SET cumulativePower TO multiply_mod(cumulativePower, y)
+			SET answer TO add_mod(answer, multiply_mod(container[n][jVal], cumulativePower))
+		END FUNCTION
+
+		LET loopJ integer parameter = 1
+		WHILE loopJ <= x
+			CALL calcAnswer(loopJ)
+			SET loopJ TO loopJ + 1
+		END WHILE
+
+		RETURN answer
+	END FUNCTION
+END CLASS

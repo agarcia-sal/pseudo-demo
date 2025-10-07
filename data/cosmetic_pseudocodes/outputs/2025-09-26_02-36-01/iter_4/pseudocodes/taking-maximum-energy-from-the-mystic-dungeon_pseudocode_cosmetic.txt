@@ -1,0 +1,38 @@
+CLASS Solution  
+    FUNCTION maximumEnergy(energy, k)  
+        DECLARE length AS LENGTH OF energy  
+        DECLARE dp_array AS ARRAY WITH length ELEMENTS INITIALLY ZERO  
+        LET last_index BE length MINUS 1  
+        ASSIGN dp_array[last_index] TO energy[last_index]  
+        DECLARE highest_energy AS dp_array[last_index]  
+        DECLARE indices_queue AS NEW deque INITIALIZED WITH last_index  
+        
+        LET current_index BE last_index MINUS 1  
+        WHILE current_index IS GREATER THAN OR EQUAL TO zero  
+            WHILE NOT (indices_queue IS EMPTY) AND (indices_queue[0] MINUS current_index) IS GREATER THAN OR EQUAL TO k  
+                REMOVE FIRST ELEMENT FROM indices_queue  
+            END WHILE  
+            
+            DECLARE front_of_queue AS indices_queue[0]  
+            LET energy_sum BE energy[current_index] PLUS dp_array[front_of_queue]  
+            ASSIGN dp_array[current_index] TO energy_sum  
+            
+            IF highest_energy IS STRICTLY LESS THAN dp_array[current_index]  
+                LET highest_energy BE dp_array[current_index]  
+            END IF  
+            
+            WHILE NOT (indices_queue IS EMPTY)  
+                LET last_in_queue_index BE indices_queue[SIZE OF indices_queue MINUS 1]  
+                IF dp_array[current_index] IS LESS THAN dp_array[last_in_queue_index]  
+                    EXIT LOOP  
+                END IF  
+                REMOVE LAST ELEMENT FROM indices_queue  
+            END WHILE  
+            
+            APPEND current_index TO indices_queue  
+            DECREMENT current_index BY one  
+        END WHILE  
+        
+        RETURN highest_energy  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,58 @@
+CLASS Solution
+    FUNCTION maximumSumSubsequence(nums, queries)
+        DECLARE MODULO VALUE AS (1 * 10 ^ 9) + 1
+        DECLARE length AS LENGTH OF nums
+        CREATE dp_take ARRAY FILLED WITH 0 OF SIZE length
+        CREATE dp_skip ARRAY FILLED WITH 0 OF SIZE length
+        LET dp_take[0] BE GREATER OF 0 AND nums[0]
+        LET dp_skip[0] BE 0
+
+        LET current_index BE 1
+        WHILE NOT (current_index >= length)
+            LET prev_skip BE dp_skip[current_index - 1]
+            LET value_num BE nums[current_index]
+            LET computed_take BE MAXIMUM(0, prev_skip + value_num)
+            dp_take[current_index] = computed_take
+
+            LET prev_take BE dp_take[current_index - 1]
+            LET computed_skip BE GREATER OF prev_skip AND prev_take
+            dp_skip[current_index] = computed_skip
+            INCREMENT current_index BY 1
+        END WHILE
+
+        DECLARE accumulated_result AS 0
+
+        FOR EACH tuple OF position, new_value IN queries
+            LET nums[position] = new_value
+
+            IF NOT (position != 0)
+                dp_take[0] = MAX(0, nums[0])
+                dp_skip[0] = 0
+            ELSE
+                LET previous_skip = dp_skip[position - 1]
+                LET current_val = nums[position]
+                dp_take[position] = MAX(0, previous_skip + current_val)
+
+                LET previous_take = dp_take[position - 1]
+                dp_skip[position] = MAX(previous_skip, previous_take)
+            ENDIF
+
+            LET idx = position + 1
+            WHILE idx < length
+                LET prev_s = dp_skip[idx - 1]
+                LET curr_num = nums[idx]
+                dp_take[idx] = MAX(0, prev_s + curr_num)
+
+                LET prev_t = dp_take[idx - 1]
+                dp_skip[idx] = MAX(prev_s, prev_t)
+                INCREMENT idx BY 1
+            END WHILE
+
+            LET best_val = IF dp_take[length - 1] > dp_skip[length - 1] THEN dp_take[length - 1] ELSE dp_skip[length - 1]
+            let added_sum = (accumulated_result + best_val) % MODULO
+            SET accumulated_result TO added_sum
+        END FOR
+
+        RETURN accumulated_result
+    END FUNCTION
+END CLASS

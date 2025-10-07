@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION minLength(s parameter, numOps parameter)
+        FUNCTION longest_uniform_substring(s parameter)
+            DECLARE max_length AS zero
+            DECLARE count AS one
+            FOR index FROM 1 TO LENGTH(s) - 1 DO
+                IF s[index] == s[index - 1] THEN
+                    count = count + 1
+                ELSE
+                    IF count > max_length THEN
+                        max_length = count
+                    END IF
+                    count = 1
+                END IF
+            END FOR
+            IF count > max_length THEN
+                RETURN count
+            ELSE
+                RETURN max_length
+            END IF
+        END FUNCTION
+
+        DECLARE result AS LENGTH(s)
+        DECLARE total_combinations AS 2 ^ LENGTH(s)
+        FOR mask FROM 0 TO total_combinations - 1 DO
+            IF BIT_COUNT(mask) > numOps THEN
+                CONTINUE
+            END IF
+            DECLARE modified_chars AS ARRAY OF CHARACTERS FROM s
+            FOR position FROM 0 TO LENGTH(s) - 1 DO
+                IF (mask BITWISE_AND (1 << position)) != 0 THEN
+                    IF modified_chars[position] == '0' THEN
+                        modified_chars[position] = '1'
+                    ELSE
+                        modified_chars[position] = '0'
+                    END IF
+                END IF
+            END FOR
+            DECLARE length_uniform AS longest_uniform_substring(modified_chars)
+            IF length_uniform < result THEN
+                result = length_uniform
+            END IF
+        END FOR
+
+        RETURN result
+    END FUNCTION
+END CLASS

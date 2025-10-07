@@ -1,0 +1,68 @@
+CLASS Solution
+	FUNCTION subsequencesWithMiddleMode(nums)
+		CONST BigMOD ← 10^9 + 7
+		VAR totalAns ← 0
+		VAR prefixCounter ← new map with default zero counts
+		VAR suffixCounter ← new map counting nums elements
+
+		FUNCTION choose2(x)
+			RETURN (x × (x − 1)) ÷ 2
+		END FUNCTION
+
+		VAR prefixSuffixSum ← 0
+		VAR sumPrefixProduct ← 0
+		VAR squarePrefix ← 0
+		VAR squareSuffix ← 0
+		VAR prefixSuffix ← 0
+
+		// Initialize squareSuffix with sum of squares of counts in suffixCounter
+		FOR EACH value freq IN suffixCounter.values()
+			squareSuffix ← squareSuffix + freq × freq
+		END FOR
+
+		VAR index ← 0
+		WHILE index < length(nums)
+			VAR currentVal ← nums[index]
+			
+			// Update accumulators with adjusted terms involving prefixCounter and suffixCounter
+			prefixSuffixSum ← prefixSuffixSum + prefixCounter[currentVal] × (− (suffixCounter[currentVal] × suffixCounter[currentVal]) + (suffixCounter[currentVal] − 1) × (suffixCounter[currentVal] − 1))
+			sumPrefixProduct ← sumPrefixProduct + (− prefixCounter[currentVal] × prefixCounter[currentVal])
+			squareSuffix ← squareSuffix + (− suffixCounter[currentVal] × suffixCounter[currentVal] + (suffixCounter[currentVal] − 1) × (suffixCounter[currentVal] − 1))
+			prefixSuffix ← prefixSuffix + (− prefixCounter[currentVal])
+
+			suffixCounter[currentVal] ← suffixCounter[currentVal] − 1
+
+			VAR leftCount ← index
+			VAR rightCount ← (length(nums) − index − 1)
+
+			totalAns ← totalAns + choose2(leftCount) × choose2(rightCount)
+			totalAns ← totalAns − choose2(leftCount − prefixCounter[currentVal]) × choose2(rightCount − suffixCounter[currentVal])
+
+			VAR adjustedPSS ← prefixSuffixSum − prefixCounter[currentVal] × suffixCounter[currentVal] × suffixCounter[currentVal]
+			VAR adjustedSPP ← sumPrefixProduct − suffixCounter[currentVal] × prefixCounter[currentVal] × prefixCounter[currentVal]
+			VAR adjustedPP ← squarePrefix − prefixCounter[currentVal] × prefixCounter[currentVal]
+			VAR adjustedSS ← squareSuffix − suffixCounter[currentVal] × suffixCounter[currentVal]
+			VAR adjustedPS ← prefixSuffix − prefixCounter[currentVal] × suffixCounter[currentVal]
+			VAR adjP ← leftCount − prefixCounter[currentVal]
+			VAR adjS ← rightCount − suffixCounter[currentVal]
+
+			totalAns ← totalAns − adjustedPS × prefixCounter[currentVal] × (rightCount − suffixCounter[currentVal]) + adjustedPSS × (− prefixCounter[currentVal])
+			totalAns ← totalAns − adjustedPS × suffixCounter[currentVal] × (leftCount − prefixCounter[currentVal]) + adjustedSPP × (− suffixCounter[currentVal])
+			totalAns ← totalAns − (adjustedPP − adjP) × suffixCounter[currentVal] × (rightCount − suffixCounter[currentVal]) ÷ 2
+			totalAns ← totalAns − (adjustedSS − adjS) × prefixCounter[currentVal] × (leftCount − prefixCounter[currentVal]) ÷ 2
+
+			totalAns ← totalAns mod BigMOD
+
+			prefixSuffixSum ← prefixSuffixSum + suffixCounter[currentVal] × suffixCounter[currentVal]
+			sumPrefixProduct ← sumPrefixProduct + suffixCounter[currentVal] × (− prefixCounter[currentVal] × prefixCounter[currentVal] + (prefixCounter[currentVal] + 1) × (prefixCounter[currentVal] + 1))
+			squarePrefix ← squarePrefix + (− prefixCounter[currentVal] × prefixCounter[currentVal] + (prefixCounter[currentVal] + 1) × (prefixCounter[currentVal] + 1))
+			prefixSuffix ← prefixSuffix + suffixCounter[currentVal]
+
+			prefixCounter[currentVal] ← prefixCounter[currentVal] + 1
+
+			index ← index + 1
+		END WHILE
+
+		RETURN totalAns
+	END FUNCTION
+END CLASS

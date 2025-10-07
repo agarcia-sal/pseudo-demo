@@ -1,0 +1,122 @@
+CLASS UnionFind
+    FUNCTION __init__(self, count)
+        SET self.parent TO an empty list
+        SET self.height TO an empty list
+        SET index TO 0
+        WHILE index LESS THAN count
+            APPEND index TO self.parent
+            APPEND 0 TO self.height
+            INCREMENT index BY 1
+        END WHILE
+    END FUNCTION
+
+    FUNCTION find(self, node)
+        DEFINE innerFind(n)
+            IF self.parent[n] EQUALS n
+                RETURN n
+            ELSE
+                SET holder TO innerFind(self.parent[n])
+                SET self.parent[n] TO holder
+                RETURN holder
+            END IF
+        END FUNCTION
+
+        RETURN innerFind(node)
+    END FUNCTION
+
+    FUNCTION union(self, x, y)
+        SET rootX TO self.find(x)
+        SET rootY TO self.find(y)
+        IF rootX NOT EQUALS rootY
+            IF self.height[rootX] GREATER THAN self.height[rootY]
+                SET self.parent[rootY] TO rootX
+            ELSE
+                IF self.height[rootY] GREATER THAN self.height[rootX]
+                    SET self.parent[rootX] TO rootY
+                ELSE
+                    SET self.parent[rootY] TO rootX
+                    SET self.height[rootX] TO self.height[rootX] PLUS 1
+                END IF
+            END IF
+        END IF
+    END FUNCTION
+END CLASS
+
+CLASS Solution
+    FUNCTION maximizeSumOfWeights(self, edgeList, maxDegree)
+        SET totalNodes TO LENGTH(edgeList) PLUS 1
+        SET degList TO list of zeros with length totalNodes
+        SET disjointSet TO NEW UnionFind(totalNodes)
+
+        DEFINE descendingComparator(a, b)
+            IF a[2] GREATER THAN b[2]
+                RETURN -1
+            ELSE IF a[2] LESS THAN b[2]
+                RETURN 1
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+        
+        PROCEDURE sortDescending(arr)
+            DEFINE swapElements(i, j)
+                SET temp TO arr[i]
+                SET arr[i] TO arr[j]
+                SET arr[j] TO temp
+            END PROCEDURE
+
+            DEFINE quickSortLowHigh(low, high)
+                IF low GREATER OR EQUAL THAN high
+                    RETURN
+                END IF
+
+                SET pivotIndex TO low
+                SET leftIndex TO low PLUS 1
+                SET rightIndex TO high
+
+                WHILE leftIndex LESS OR EQUAL THAN rightIndex
+                    WHILE leftIndex LESS OR EQUAL THAN high AND descendingComparator(arr[leftIndex], arr[pivotIndex]) LESS THAN 0
+                        INCREMENT leftIndex BY 1
+                    END WHILE
+                    WHILE rightIndex GREATER OR EQUAL THAN low AND descendingComparator(arr[rightIndex], arr[pivotIndex]) GREATER THAN 0
+                        DECREMENT rightIndex BY 1
+                    END WHILE
+
+                    IF leftIndex LESS OR EQUAL THAN rightIndex
+                        swapElements(leftIndex, rightIndex)
+                        INCREMENT leftIndex BY 1
+                        DECREMENT rightIndex BY 1
+                    END IF
+                END WHILE
+                swapElements(pivotIndex, rightIndex)
+
+                quickSortLowHigh(low, rightIndex MINUS 1)
+                quickSortLowHigh(rightIndex PLUS 1, high)
+            END FUNCTION
+
+            quickSortLowHigh(0, LENGTH(arr) MINUS 1)
+        END PROCEDURE
+
+        CALL sortDescending(edgeList)
+
+        SET accumulator TO 0
+        DEFINE indexer TO 0
+        DEFINE totalEdges TO LENGTH(edgeList)
+        WHILE indexer LESS THAN totalEdges
+            SET currentEdge TO edgeList[indexer]
+            SET firstNode TO currentEdge[0]
+            SET secondNode TO currentEdge[1]
+            SET weightVal TO currentEdge[2]
+
+            IF NOT (degList[firstNode] GREATER OR EQUAL TO maxDegree OR degList[secondNode] GREATER OR EQUAL TO maxDegree) AND disjointSet.find(firstNode) NOT EQUALS disjointSet.find(secondNode)
+                CALL disjointSet.union(firstNode, secondNode)
+                SET degList[firstNode] TO degList[firstNode] PLUS 1
+                SET degList[secondNode] TO degList[secondNode] PLUS 1
+                SET accumulator TO accumulator PLUS weightVal
+            END IF
+            INCREMENT indexer BY 1
+        END WHILE
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

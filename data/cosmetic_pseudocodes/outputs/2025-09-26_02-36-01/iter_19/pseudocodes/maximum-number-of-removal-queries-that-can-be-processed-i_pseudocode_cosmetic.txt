@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION maximumProcessableQueries(nums parameters as list of integers queries parameters as list of integers) RETURNS integer
+        FUNCTION process_queries(subseq parameters as list of integers queries parameters as list of integers) RETURNS integer
+            SET z TO 0
+            SET idx TO 0
+            WHILE idx < LENGTH OF queries
+                IF z = LENGTH OF subseq THEN
+                    EXIT LOOP
+                END IF
+                IF subseq[z] >= queries[idx] THEN
+                    SET z TO z + 1
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN z
+        END FUNCTION
+
+        SET lenNums TO LENGTH OF nums
+        SET lenQueries TO LENGTH OF queries
+        SET maxCount TO process_queries(nums, queries)
+        SET counter TO 0
+        LOOP
+            IF counter >= lenNums THEN
+                BREAK
+            END IF
+
+            SET frontPart TO EMPTY LIST
+            SET backPart TO EMPTY LIST
+            SET j TO 0
+            WHILE j < counter
+                APPEND nums[j] TO frontPart
+                SET j TO j + 1
+            END WHILE
+
+            SET k TO lenNums - 1
+            WHILE k >= counter
+                APPEND nums[k] TO backPart
+                SET k TO k - 1
+            END WHILE
+
+            SET candidateSeq TO frontPart CONCAT backPart
+
+            SET m TO 1
+            WHILE m < LENGTH OF candidateSeq
+                SET keyVal TO candidateSeq[m]
+                SET l TO m - 1
+                WHILE l >= 0 AND candidateSeq[l] > keyVal
+                    SET candidateSeq[l+1] TO candidateSeq[l]
+                    SET l TO l - 1
+                END WHILE
+                SET candidateSeq[l+1] TO keyVal
+                SET m TO m + 1
+            END WHILE
+
+            SET processed TO process_queries(candidateSeq, queries)
+            IF processed > maxCount THEN
+                SET maxCount TO processed
+            END IF
+
+            SET counter TO counter + 1
+        END LOOP
+
+        RETURN maxCount
+    END FUNCTION
+END CLASS

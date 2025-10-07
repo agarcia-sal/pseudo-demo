@@ -1,0 +1,95 @@
+CLASS Solution
+    FUNCTION lastMarkedNodes(edges)
+        FUNCTION dfs(w, p, measures)
+            SET idx TO 0
+            REPEAT
+                EXIT WHEN idx >= LENGTH of g[w]
+                SET nb TO g[w][idx]
+                IF nb != p THEN
+                    SET measures[nb] TO (measures[w] + 1)
+                    CALL dfs(nb, w, measures)
+                END IF
+                SET idx TO (idx + 1)
+            UNTIL FALSE
+        END FUNCTION
+
+        SET nodeCount TO LENGTH(edges) + 1
+        SET g TO []
+        SET cnt TO 0
+        WHILE cnt < nodeCount
+            APPEND [] TO g
+            SET cnt TO cnt + 1
+        END WHILE
+
+        SET cursor TO 0
+        WHILE cursor < LENGTH(edges)
+            SET u, v TO edges[cursor][0], edges[cursor][1]
+            APPEND v TO g[u]
+            APPEND u TO g[v]
+            SET cursor TO cursor + 1
+        END WHILE
+
+        SET measuresOne TO []
+        SET fillIndex TO 0
+        WHILE fillIndex < nodeCount
+            APPEND (-1) TO measuresOne
+            SET fillIndex TO fillIndex + 1
+        END WHILE
+
+        SET measuresOne[0] TO 0
+        CALL dfs(0, -1, measuresOne)
+
+        SET maxPosA TO 0
+        SET searchIndex TO 1
+        WHILE searchIndex < nodeCount
+            IF measuresOne[searchIndex] > measuresOne[maxPosA] THEN
+                SET maxPosA TO searchIndex
+            END IF
+            SET searchIndex TO searchIndex + 1
+        END WHILE
+
+        SET measuresTwo TO []
+        SET filler TO 0
+        WHILE filler < nodeCount
+            APPEND (-1) TO measuresTwo
+            SET filler TO filler + 1
+        END WHILE
+
+        SET measuresTwo[maxPosA] TO 0
+        CALL dfs(maxPosA, -1, measuresTwo)
+
+        SET maxPosB TO 0
+        SET idxItr TO 1
+        WHILE idxItr < nodeCount
+            IF measuresTwo[idxItr] > measuresTwo[maxPosB] THEN
+                SET maxPosB TO idxItr
+            END IF
+            SET idxItr TO idxItr + 1
+        END WHILE
+
+        SET measuresThree TO []
+        SET backfill TO 0
+        WHILE backfill < nodeCount
+            APPEND (-1) TO measuresThree
+            SET backfill TO backfill + 1
+        END WHILE
+        
+        SET measuresThree[maxPosB] TO 0
+        CALL dfs(maxPosB, -1, measuresThree)
+
+        SET outputList TO []
+        SET iterIndex TO 0
+        WHILE iterIndex < nodeCount
+            SET valOne TO measuresTwo[iterIndex]
+            SET valTwo TO measuresThree[iterIndex]
+            IF (valOne + (0 * 1)) > valTwo THEN
+                APPEND maxPosA TO outputList
+            ELSE
+                APPEND maxPosB TO outputList
+            END IF
+            SET iterIndex TO iterIndex + 1
+        END WHILE
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

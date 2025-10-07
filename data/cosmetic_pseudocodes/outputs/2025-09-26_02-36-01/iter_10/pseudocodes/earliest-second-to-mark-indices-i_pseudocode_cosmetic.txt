@@ -1,0 +1,65 @@
+CLASS Solution
+	FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+		LET p0 = LENGTH OF nums
+		LET q1 = LENGTH OF changeIndices
+		
+		FUNCTION can_mark_by_second(w7)
+			LET a3 = ARRAY FILLED WITH -1 OF SIZE p0
+			
+			DEFINE proc_apply_last_occurrence(x9, y2)
+				IF x9 >= y2 THEN RETURN END IF
+				LET c4 = changeIndices[x9] - 1
+				a3[c4] = x9
+				proc_apply_last_occurrence(x9 + 1, y2)
+			END
+			
+			proc_apply_last_occurrence(0, w7)
+			
+			LET sum_vals = 0
+			FOR EACH v IN nums DO sum_vals = sum_vals + v END FOR
+			
+			LET acc6 = 0
+			LET sx_set = EMPTY SET
+			
+			LET idx_loop = 0
+			WHILE idx_loop < w7
+				LET posA = changeIndices[idx_loop] - 1
+				IF posA NOT IN sx_set THEN
+					IF a3[posA] == idx_loop THEN
+						IF nums[posA] <= acc6 THEN
+							acc6 = acc6 - nums[posA]
+							sx_set.ADD(posA)
+						ELSE
+							RETURN False
+						END IF
+					ELSE
+						acc6 = acc6 + 1
+					END IF
+				ELSE
+					acc6 = acc6 + 1
+				END IF
+				idx_loop = idx_loop + 1
+			WEND
+			
+			RETURN (LENGTH OF sx_set == p0)
+		END
+			
+		LET l7 = 0
+		LET r2 = q1 + 1
+		
+		WHILE l7 < r2
+			LET md = (l7 + r2) \ 2
+			IF can_mark_by_second(md) THEN
+				r2 = md
+			ELSE
+				l7 = l7 + 1
+			END IF
+		END WHILE
+		
+		IF l7 <= q1 THEN
+			RETURN l7
+		ELSE
+			RETURN -1
+		END IF
+	END FUNCTION
+END CLASS

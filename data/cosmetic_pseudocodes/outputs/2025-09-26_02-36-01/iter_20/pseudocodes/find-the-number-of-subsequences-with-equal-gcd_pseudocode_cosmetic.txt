@@ -1,0 +1,78 @@
+CLASS Solution  
+    FUNCTION subsequencePairCount(A)  
+        CONSTANT K = 10 ^ 9 + 7  
+
+        FUNCTION gcdHelper(p, q)  
+            IF q = 0 THEN  
+                RETURN p  
+            ELSE  
+                RETURN gcdHelper(q, p % q)  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION zeroMatrix(rows, cols)  
+            SET arr TO EMPTY LIST  
+            SET i TO 0  
+            WHILE i < rows DO  
+                SET rowList TO EMPTY LIST  
+                SET j TO 0  
+                WHILE j < cols DO  
+                    APPEND 0 TO rowList  
+                    SET j TO j + 1  
+                END WHILE  
+                APPEND rowList TO arr  
+                SET i TO i + 1  
+            END WHILE  
+            RETURN arr  
+        END FUNCTION  
+
+        SET maxVal TO A[0]  
+        SET idx1 TO 1  
+        WHILE idx1 < LENGTH(A) DO  
+            IF A[idx1] > maxVal THEN  
+                SET maxVal TO A[idx1]  
+            END IF  
+            SET idx1 TO idx1 + 1  
+        END WHILE  
+
+        SET dpMatrix TO zeroMatrix(maxVal + 1, maxVal + 1)  
+        SET dpMatrix[0][0] TO 1  
+
+        FUNCTION copyAndUpdateDP(arrOld, val)  
+            SET newMatrix TO zeroMatrix(maxVal + 1, maxVal + 1)  
+            SET rCtr TO 0  
+            WHILE rCtr <= maxVal DO  
+                SET cCtr TO 0  
+                WHILE cCtr <= maxVal DO  
+                    SET baseCount TO arrOld[rCtr][cCtr]  
+                    SET newMatrix[rCtr][cCtr] TO (newMatrix[rCtr][cCtr] + baseCount) % K  
+
+                    SET gcdX TO gcdHelper(rCtr, val)  
+                    newMatrix[gcdX][cCtr] = (newMatrix[gcdX][cCtr] + baseCount) % K  
+
+                    SET gcdY TO gcdHelper(cCtr, val)  
+                    newMatrix[rCtr][gcdY] = (newMatrix[rCtr][gcdY] + baseCount) % K  
+
+                    SET cCtr TO cCtr + 1  
+                END WHILE  
+                SET rCtr TO rCtr + 1  
+            END WHILE  
+            RETURN newMatrix  
+        END FUNCTION  
+
+        SET pos TO 0  
+        WHILE pos < LENGTH(A) DO  
+            SET dpMatrix TO copyAndUpdateDP(dpMatrix, A[pos])  
+            SET pos TO pos + 1  
+        END WHILE  
+
+        SET finalAccum TO 0  
+        SET idx2 TO 1  
+        WHILE idx2 <= maxVal DO  
+            SET finalAccum TO finalAccum + dpMatrix[idx2][idx2]  
+            SET idx2 TO idx2 + 1  
+        END WHILE  
+
+        RETURN finalAccum % K  
+    END FUNCTION  
+END CLASS

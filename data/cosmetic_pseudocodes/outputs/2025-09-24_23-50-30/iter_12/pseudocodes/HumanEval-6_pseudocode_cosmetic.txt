@@ -1,0 +1,26 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_str)
+        FUNCTION depth_helper(index, curr_depth, max_depth)
+            IF index EQUALS LENGTH OF group_str THEN
+                RETURN max_depth
+            ELSE
+                CASE group_str[index] OF
+                    '(': 
+                        LET ascended_depth = curr_depth + 1
+                        LET updated_max = (ascended_depth > max_depth) ? ascended_depth : max_depth
+                        RETURN depth_helper(index + 1, ascended_depth, updated_max)
+                    DEFAULT:
+                        RETURN depth_helper(index + 1, curr_depth - 1, max_depth)
+                END CASE
+            END IF
+        END FUNCTION
+
+        RETURN depth_helper(0, 0, 0)
+    END FUNCTION
+
+    LET segments = FILTER(SPLIT parentheses_string, lambda x: x ≠ "")
+    LET depths = MAP(segments, lambda segment: parse_paren_group(segment))
+    RETURN depths
+END FUNCTION
+```

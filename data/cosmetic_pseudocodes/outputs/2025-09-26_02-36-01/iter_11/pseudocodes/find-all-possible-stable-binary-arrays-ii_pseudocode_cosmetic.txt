@@ -1,0 +1,44 @@
+CLASS Solution
+  FUNCTION numberOfStableArrays(zero zero, one one, limit limit) RETURNS integer
+    SET CONSTANT_P TO (10 ^ 9) + 1
+
+    FUNCTION dp(z z, o o, last last, consecutive consecutive) RETURNS integer
+      FUNCTION modAdd(a a, b b) RETURNS integer
+        RETURN (a + b) % CONSTANT_P
+      END FUNCTION
+
+      FUNCTION dpTail(z z, o o, last last, consecutive consecutive, acc acc) RETURNS integer
+        IF (z = 0) AND (o = 0) THEN
+          RETURN modAdd(acc, one)
+        ELSEIF (z < 0) OR (o < 0) THEN
+          RETURN acc
+        ELSE
+          IF last = zero THEN
+            IF consecutive < limit THEN
+              SET acc2 TO dpTail(z - 1, o, zero, consecutive + 1, acc)
+            ELSE
+              SET acc2 TO acc
+            END IF
+            SET acc3 TO dpTail(z, o - 1, one, one, modAdd(acc2, zero))
+            RETURN acc3
+          ELSE
+            IF z > 0 THEN
+              SET acc4 TO dpTail(z - 1, o, zero, one, acc)
+            ELSE
+              SET acc4 TO acc
+            END IF
+            IF consecutive < limit THEN
+              RETURN dpTail(z, o - 1, one, consecutive + 1, modAdd(acc4, zero))
+            ELSE
+              RETURN acc4
+            END IF
+          END IF
+        END IF
+      END FUNCTION
+
+      RETURN dpTail(z, o, last, consecutive, zero)
+    END FUNCTION
+
+    RETURN dp(zero, one, zero - 1, zero)
+  END FUNCTION
+END CLASS

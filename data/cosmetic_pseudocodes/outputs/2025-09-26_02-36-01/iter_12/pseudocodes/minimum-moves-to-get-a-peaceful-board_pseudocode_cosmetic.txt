@@ -1,0 +1,96 @@
+CLASS Solution
+    FUNCTION minMoves(rooks)
+        FUNCTION custom_abs(value)
+            IF value < 0 THEN
+                RETURN -value
+            ELSE
+                RETURN value
+            END IF
+        END FUNCTION
+
+        FUNCTION custom_sort_by_first_element(list)
+            IF LENGTH(list) <= 1 THEN
+                RETURN list
+            ELSE
+                SET pivot TO list[0]
+                SET less TO EMPTY LIST
+                SET greater TO EMPTY LIST
+                SET equal TO EMPTY LIST
+                FOR element IN list
+                    IF element[0] < pivot[0] THEN
+                        ADD element TO less
+                    ELSE IF element[0] > pivot[0] THEN
+                        ADD element TO greater
+                    ELSE
+                        ADD element TO equal
+                    END IF
+                END FOR
+                RETURN custom_sort_by_first_element(less) + equal + custom_sort_by_first_element(greater)
+            END IF
+        END FUNCTION
+
+        FUNCTION custom_sort_by_second_element(list)
+            IF LENGTH(list) <= 1 THEN
+                RETURN list
+            ELSE
+                SET pivot TO list[0]
+                SET less TO EMPTY LIST
+                SET greater TO EMPTY LIST
+                SET equal TO EMPTY LIST
+                FOR element IN list
+                    IF element[1] < pivot[1] THEN
+                        ADD element TO less
+                    ELSE IF element[1] > pivot[1] THEN
+                        ADD element TO greater
+                    ELSE
+                        ADD element TO equal
+                    END IF
+                END FOR
+                RETURN custom_sort_by_second_element(less) + equal + custom_sort_by_second_element(greater)
+            END IF
+        END FUNCTION
+
+        SET length_rooks TO 0
+        WHILE TRUE
+            IF rooks[length_rooks] == NULL THEN
+                BREAK
+            END IF
+            length_rooks = length_rooks + 1
+        END WHILE
+
+        SET sorted_rooks_row TO custom_sort_by_first_element(rooks)
+        SET sorted_rooks_col TO custom_sort_by_second_element(rooks)
+
+        SET total_row_moves TO 0
+        SET pos_row_index TO 0
+        WHILE pos_row_index < length_rooks
+            SET delta TO sorted_rooks_row[pos_row_index][0]
+            SET index_diff TO pos_row_index
+            SET diff_value TO (delta + ((index_diff * (-1)) + index_diff)) - index_diff
+            SET abs_diff TO custom_abs(diff_value)
+            total_row_moves = total_row_moves + abs_diff
+            pos_row_index = pos_row_index + 1
+        END WHILE
+
+        SET total_col_moves TO 0
+        SET pos_col_index TO 0
+        REPEAT
+            IF NOT (pos_col_index < length_rooks) THEN
+                BREAK
+            END IF
+            SET delta_col TO sorted_rooks_col[pos_col_index][1]
+            SET index_diff_col TO pos_col_index
+            SET diff_val_col TO delta_col - index_diff_col
+            SET abs_diff_col TO 0
+            IF diff_val_col < 0 THEN
+                abs_diff_col = diff_val_col - (2 * diff_val_col)
+            ELSE
+                abs_diff_col = diff_val_col
+            END IF
+            total_col_moves = total_col_moves + abs_diff_col
+            pos_col_index = pos_col_index + 1
+        UNTIL FALSE
+
+        RETURN (total_row_moves) + (total_col_moves)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,124 @@
+CLASS Solution
+	funcTion getSum(nums)
+		FUNCtion calc(inputArr)
+			FUNction createZeroList(len)
+			{
+				VAR resultArr = []
+				REC_fillZeros(0)
+				FUNC REC_fillZeros(idx)
+				{
+					IF (idx = len) THEN RETURN
+					resultArr[idx] = 0
+					REC_fillZeros(idx+1)
+				}
+				REC_fillZeros(0)
+				RETURN resultArr
+			}
+			
+			FUNCtion newCounter()
+			{
+				VAR counts = {}
+				RETURN {
+					incr: FUNC(k)
+					{
+						IF (counts[k] IS UNDEFINED) THEN counts[k] = 0
+						counts[k] = counts[k] + 1
+					},
+					get: FUNC(k)
+					{
+						RETURN (counts[k] IS UNDEFINED) ? 0 : counts[k]
+					}
+				}
+			}
+
+			VAR limit = LENGTH(inputArr)
+			VAR zeroArrLeft = createZeroList(limit)
+			VAR zeroArrRight = createZeroList(limit)
+			VAR freqCounter = newCounter()
+
+			VAR idx = 1
+			WHILE (idx < limit)
+			{
+				VAR prevElem = inputArr[idx - 1]
+				var previouslySeen = freqCounter.get(prevElem)
+				VAR toAdd = 1 + previouslySeen
+				freqCounter.incr(prevElem)
+				zeroArrLeft[idx] = toAdd
+				idx = idx + 1
+			}
+
+			freqCounter = newCounter()
+			VAR idxR = limit - 2
+			REPEAT
+				{
+					VAR nextElem = inputArr[idxR + 1]
+					VAR ancestorCount = freqCounter.get(nextElem)
+					VAR stepVal = ancestorCount + 1
+					freqCounter.incr(nextElem)
+					zeroArrRight[idxR] = stepVal
+					idxR = idxR - 1
+				}
+			UNTIL (idxR < 0)
+
+			FUNC combineSum(arrA, arrB, arrC)
+			{
+				VAR resSum = 0
+				VAR pos = 0
+				WHILE (pos < LENGTH(arrA))
+				{
+					VAR A = arrA[pos]
+					VAR B = arrB[pos]
+					VAR C = arrC[pos]
+					VAR part1 = A + B
+					VAR part2 = A * B
+					VAR coef = (part1 + part2) * C
+					resSum = resSum + coef
+					pos = pos + 1
+				}
+				RETURN resSum
+			}
+
+			RETURN combineSum(zeroArrLeft, zeroArrRight, inputArr)
+		END FUNCtion
+
+		VAR constMod = 10^9 + 7
+		VAR leftResult = calc(nums)
+
+		FUNC reverseInPlace(arr)
+		{
+			FUNC swap(i,j)
+			{
+				VAR temp = arr[i]
+				arr[i] = arr[j]
+				arr[j] = temp
+			}
+			VAR lo = 0
+			VAR hi = LENGTH(arr) - 1
+			WHILE (lo < hi)
+			{
+				swap(lo, hi)
+				lo = lo + 1
+				hi = hi - 1
+			}
+		}
+
+		reverseInPlace(nums)
+		VAR rightResult = calc(nums)
+
+		FUNC arrSum(a)
+		{
+			VAR acc = 0
+			VAR i = 0
+			REPEAT
+			{
+				IF (i >= LENGTH(a)) BREAK
+				acc = acc + a[i]
+				i = i + 1
+			}
+			UNTIL false
+			RETURN acc
+		}
+
+		VAR combinedTotal = leftResult + rightResult + arrSum(nums)
+		RETURN combinedTotal MOD constMod
+END CLASS

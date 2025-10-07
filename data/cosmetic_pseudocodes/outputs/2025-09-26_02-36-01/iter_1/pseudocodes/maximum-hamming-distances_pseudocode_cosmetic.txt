@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER, m INTEGER) RETURNS LIST OF INTEGER
+        DECLARE binary_representations AS LIST OF STRING = []
+        
+        FOR num IN nums DO
+            DECLARE bin_str AS STRING = ConvertToBinary(num, m)
+            ADD bin_str TO binary_representations
+        END FOR
+        
+        DECLARE results AS LIST OF INTEGER = []
+        
+        FUNCTION hamming_distance(str_a STRING, str_b STRING) RETURNS INTEGER
+            DECLARE diff_count AS INTEGER = 0
+            FOR idx FROM 0 TO LENGTH(str_a) - 1 DO
+                IF str_a[idx] != str_b[idx] THEN
+                    diff_count = diff_count + 1
+                END IF
+            END FOR
+            RETURN diff_count
+        END FUNCTION
+        
+        FOR current_index FROM 0 TO LENGTH(nums) - 1 DO
+            DECLARE max_distance AS INTEGER = -1
+            FOR compare_index FROM 0 TO LENGTH(nums) - 1 DO
+                IF current_index != compare_index THEN
+                    DECLARE distance AS INTEGER = hamming_distance(binary_representations[current_index], binary_representations[compare_index])
+                    IF distance > max_distance THEN
+                        max_distance = distance
+                    END IF
+                END IF
+            END FOR
+            APPEND max_distance TO results
+        END FOR
+        
+        RETURN results
+    END FUNCTION
+    
+    FUNCTION ConvertToBinary(number INTEGER, length INTEGER) RETURNS STRING
+        DECLARE binary_str AS STRING = ""
+        DECLARE temp AS INTEGER = number
+        
+        WHILE temp > 0 DO
+            SET binary_str = (temp MOD 2) AS STRING + binary_str
+            SET temp = temp DIV 2
+        END WHILE
+        
+        WHILE LENGTH(binary_str) < length DO
+            SET binary_str = "0" + binary_str
+        END WHILE
+        
+        RETURN binary_str
+    END FUNCTION
+END CLASS

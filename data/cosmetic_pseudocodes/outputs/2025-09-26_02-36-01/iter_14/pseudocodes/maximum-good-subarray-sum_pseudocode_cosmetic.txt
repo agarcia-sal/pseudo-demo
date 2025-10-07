@@ -1,0 +1,50 @@
+```
+CLASS Solution  
+    FUNCTION maximumSubarraySum(nums k)  
+        
+        DEFINE PROCEDURE _existsInDict(dict keyValue keyVal) RETURNS BOOLEAN  
+            RETURN NOT (keyVal NOT IN keyValue)  
+        END PROCEDURE  
+        
+        DEFINE PROCEDURE _maxVal(a b) RETURNS INTEGER  
+            IF a >= b THEN RETURN a ELSE RETURN b END IF  
+        END PROCEDURE
+        
+        DEFINE PROCEDURE _minVal(a b) RETURNS INTEGER  
+            IF a <= b THEN RETURN a ELSE RETURN b END IF  
+        END PROCEDURE
+        
+        SET dict_minPrefixSum TO {}  
+        SET val_maxSum TO (0 - (2 ^ 31) * 2)  # simulate negative infinity  
+        SET val_currentSum TO 0  
+        
+        SET idx_counter TO 0  
+        WHILE idx_counter < LENGTH(nums) DO  
+            SET item_val TO nums[idx_counter]  
+            
+            IF _existsInDict(dict_minPrefixSum , (item_val - k)) THEN  
+                SET val_maxSum TO _maxVal(val_maxSum , val_currentSum - dict_minPrefixSum[(item_val - k)] + item_val)  
+            END IF  
+            
+            IF _existsInDict(dict_minPrefixSum , (item_val + k)) THEN  
+                SET val_maxSum TO _maxVal(val_maxSum , val_currentSum - dict_minPrefixSum[(item_val + k)] + item_val)  
+            END IF  
+            
+            IF _existsInDict(dict_minPrefixSum , item_val) THEN  
+                SET dict_minPrefixSum[item_val] TO _minVal(dict_minPrefixSum[item_val] , val_currentSum)  
+            ELSE  
+                SET dict_minPrefixSum[item_val] TO val_currentSum  
+            END IF  
+            
+            SET val_currentSum TO val_currentSum + item_val  
+            SET idx_counter TO idx_counter + 1  
+        END WHILE  
+        
+        IF val_maxSum <> (0 - (2 ^ 31) * 2) THEN  
+            RETURN val_maxSum  
+        ELSE  
+            RETURN 0  
+        END IF  
+    END FUNCTION  
+END CLASS  
+```

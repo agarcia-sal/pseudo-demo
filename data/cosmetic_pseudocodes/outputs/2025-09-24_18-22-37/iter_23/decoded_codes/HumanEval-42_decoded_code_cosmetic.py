@@ -1,0 +1,13 @@
+from typing import Sequence, List
+
+def incr_list(collection: Sequence[int]) -> List[int]:
+    result_collection: List[int] = []
+    index_counter: int = 0
+
+    while index_counter < len(collection):
+        current_element: int = collection[index_counter]
+        incremented_value: int = current_element + 1
+        result_collection.append(incremented_value)
+        index_counter += 1
+
+    return result_collection

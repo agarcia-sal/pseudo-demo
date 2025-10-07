@@ -1,0 +1,40 @@
+CLASS Solution
+	FUNCTION findMaximumNumber(k, x)
+		FUNCTION count_set_bits(n, pos)
+			SET tally TO 0
+			SET block_sz TO 1 * (2 ^ pos)
+			SET whole_blocks TO n / block_sz
+			SET addend TO (whole_blocks / 2) * block_sz
+			SET tally TO tally + addend
+			IF (whole_blocks % 2) == 1
+				SET remainder TO (n % block_sz) + 1
+				SET tally TO tally + remainder
+			END IF
+			RETURN tally
+		END FUNCTION
+
+		FUNCTION accumulated_price(n)
+			SET sum_price TO 0
+			SET index TO 1
+			WHILE (2 ^ (index * x - 1)) <= n DO
+				SET factor TO index * x - 1
+				SET bits_counted TO count_set_bits(n, factor)
+				SET sum_price TO sum_price + bits_counted
+				SET index TO index + 1
+			END WHILE
+			RETURN sum_price
+		END FUNCTION
+
+		SET start TO 1
+		SET end TO 1 * (2 ^ 60)
+		WHILE start <= end
+			SET middle TO start + (end - start) / 2
+			IF accumulated_price(middle) <= k THEN
+				SET start TO middle + 1
+			ELSE
+				SET end TO middle - 1
+			END IF
+		END WHILE
+		RETURN end
+	END FUNCTION
+END CLASS

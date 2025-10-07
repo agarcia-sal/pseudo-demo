@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION doesAliceWin(s)
+            vowels_collection ← {'a', 'e', 'i', 'o', 'u'}
+
+        PROCEDURE countVowels(index, len, acc)
+            IF index = len THEN
+                RETURN acc
+            ELSE
+                IF s[index] IN vowels_collection THEN
+                    RETURN countVowels(index + 1, len, acc + 1)
+                ELSE
+                    RETURN countVowels(index + 1, len, acc)
+                ENDIF
+            ENDIF
+        END PROCEDURE
+
+        totalVowels := countVowels(0, LENGTH(s), 0)
+
+        inOddSegmentFlag := false
+        oddSegmentAccumulator := 0
+        vowelSegmentCount := 0
+
+        PROCEDURE processSegment(idx)
+            IF idx = LENGTH(s) THEN
+                IF inOddSegmentFlag AND (oddSegmentAccumulator MOD 2) = 1 THEN
+                    vowelSegmentCount := vowelSegmentCount + 1
+                ENDIF
+                RETURN
+            ENDIF
+
+            IF s[idx] IN vowels_collection THEN
+                inOddSegmentFlag := NOT inOddSegmentFlag
+            ENDIF
+
+            IF (NOT inOddSegmentFlag) AND ((oddSegmentAccumulator MOD 2) = 1) THEN
+                vowelSegmentCount := vowelSegmentCount + 1
+                oddSegmentAccumulator := 0
+            ELSE IF inOddSegmentFlag THEN
+                oddSegmentAccumulator := oddSegmentAccumulator + 1
+            ENDIF
+
+            processSegment(idx + 1)
+        END PROCEDURE
+
+        processSegment(0)
+
+        outcomeFlag := (vowelSegmentCount MOD 2) = 1
+        RETURN outcomeFlag
+    END FUNCTION
+END CLASS

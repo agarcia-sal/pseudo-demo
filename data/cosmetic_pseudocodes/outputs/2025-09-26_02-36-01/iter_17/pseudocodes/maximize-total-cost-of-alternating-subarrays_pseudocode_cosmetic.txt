@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION maximumTotalCost(nums)
+        SET totalLength TO LENGTH(nums)
+        IF totalLength = 1 THEN
+            RETURN nums[1]
+        END IF
+
+        SET cache TO ARRAY OF SIZE totalLength FILLED WITH 0
+        SET cache[totalLength - 1] TO nums[totalLength - 1]
+
+        SET outerIndex TO totalLength - 2
+        WHILE outerIndex >= 0 DO
+            BEGIN
+                SET accSum TO nums[outerIndex]
+                IF accSum > cache[outerIndex + 1] THEN
+                    cache[outerIndex] = accSum
+                ELSE
+                    cache[outerIndex] = cache[outerIndex + 1] + accSum
+                END IF
+
+                SET innerIndex TO outerIndex + 1
+                REPEAT
+                    BEGIN
+                        SET signMultiplier TO POWER(-1, innerIndex - outerIndex) * 1
+                        SET accSum = accSum + nums[innerIndex] * signMultiplier
+
+                        IF (innerIndex + 1) < totalLength THEN
+                            IF cache[outerIndex] < accSum + cache[innerIndex + 1] THEN
+                                cache[outerIndex] = accSum + cache[innerIndex + 1]
+                            END IF
+                        ELSE
+                            IF cache[outerIndex] < accSum THEN
+                                cache[outerIndex] = accSum
+                            END IF
+                        END IF
+
+                        innerIndex = innerIndex + 1
+                    END
+                UNTIL innerIndex >= totalLength
+
+                outerIndex = outerIndex - 1
+            END
+        END WHILE
+
+        RETURN cache[0]
+    END FUNCTION
+END CLASS

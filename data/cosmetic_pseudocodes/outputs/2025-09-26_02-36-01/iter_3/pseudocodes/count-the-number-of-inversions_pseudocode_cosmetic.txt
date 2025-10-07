@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION numberOfPermutations(n, requirements)
+        LET modulus BE (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+        LET requisitoMap BE an empty map
+        LET pairIndex BE 0
+        WHILE pairIndex < LENGTH(requirements)
+            LET endPos = requirements[pairIndex][0]
+            LET countReq = requirements[pairIndex][1]
+            SET requisitoMap[endPos] = countReq
+            INCREMENT pairIndex BY 1
+        END WHILE
+
+        FUNCTION count_permutations(prefix_len, inv_count, used_flags)
+            IF prefix_len = n THEN
+                LET targetInv = 0
+                IF requisitoMap HAS_KEY n THEN
+                    SET targetInv = requisitoMap[n]
+                END IF
+                IF inv_count = targetInv - 1 THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            IF prefix_len > 0 THEN
+                LET desiredInv = inv_count
+                LET mapVal = inv_count
+                IF requisitoMap HAS_KEY (prefix_len) THEN
+                    SET mapVal = requisitoMap[prefix_len]
+                END IF
+                IF inv_count <> mapVal - 1 THEN
+                    RETURN 0
+                END IF
+            END IF
+
+            LET totalCount = 0
+            LET currentNum = 0
+            WHILE currentNum < n
+                LET bitMask = 1 << currentNum
+                IF (used_flags & bitMask) = 0 THEN
+                    LET updatedInv = inv_count
+                    LET j = currentNum + 1
+                    WHILE j < n
+                        IF (used_flags & (1 << j)) <> 0 THEN
+                            SET updatedInv = updatedInv + 1
+                        END IF
+                        INCREMENT j BY 1
+                    END WHILE
+                    LET combinedFlags = used_flags | bitMask
+                    SET totalCount = (totalCount + count_permutations(prefix_len + 1, updatedInv, combinedFlags)) % modulus
+                END IF
+                INCREMENT currentNum BY 1
+            END WHILE
+            RETURN totalCount
+        END FUNCTION
+
+        RETURN count_permutations(0, 0, 0)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,36 @@
+CLASS Solution  
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER  
+        SET suffix_map TO empty dictionary mapping STRING to INTEGER  
+        
+        FOR each index WITH each word IN wordsContainer WITH their indices starting from zero  
+            FOR i FROM zero TO the LENGTH OF word MINUS one  
+                SET suffix TO substring from position i TO the end of word  
+                IF suffix NOT IN suffix_map THEN  
+                    SET suffix_map element at key suffix TO index  
+                ELSE IF suffix IN suffix_map THEN  
+                    IF the LENGTH OF word LESS THAN the LENGTH OF element at position suffix_map element at key suffix of wordsContainer OR  
+                       the LENGTH OF word EQUALS the LENGTH OF element at position suffix_map element at key suffix of wordsContainer AND index LESS THAN suffix_map element at key suffix THEN  
+                        SET suffix_map element at key suffix TO index  
+                    END IF  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        FUNCTION get_best_match(query query TO STRING) RETURNS INTEGER  
+            FOR i FROM zero TO the LENGTH OF query MINUS one  
+                SET suffix TO substring from position i TO the end of query  
+                IF suffix IN suffix_map THEN  
+                    RETURN suffix_map element at key suffix  
+                END IF  
+            END FOR  
+            SET minimum_index TO the index OF the word in wordsContainer WITH the smallest LENGTH AND if lengths equal the smallest index  
+            RETURN minimum_index  
+        END FUNCTION  
+        
+        SET result_list TO empty list of integer  
+        FOR each query IN wordsQuery  
+            APPEND get_best_match(query) TO result_list  
+        END FOR  
+        RETURN result_list  
+    END FUNCTION  
+END CLASS

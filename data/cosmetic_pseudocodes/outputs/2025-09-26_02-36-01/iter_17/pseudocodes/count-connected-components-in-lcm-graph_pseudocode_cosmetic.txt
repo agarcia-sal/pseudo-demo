@@ -1,0 +1,67 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+        LET a TO 0  
+        SET self.parent TO an empty mapping  
+        SET self.rank TO an empty mapping  
+        REPEAT WHILE a LESS THAN n  
+            SET self.parent[a] TO a  
+            SET self.rank[a] TO 0  
+            SET a TO a PLUS 1  
+        END REPEAT  
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+        WHILE self.parent[x] NOT EQUALS x DO  
+            LET h TO self.find(self.parent[x])  
+            SET self.parent[x] TO h  
+            SET x TO h  
+        END WHILE  
+        RETURN x  
+    END FUNCTION  
+
+    FUNCTION union_set(self, u, v)  
+        LET p TO self.find(u)  
+        LET q TO self.find(v)  
+        IF p NOT EQUALS q THEN  
+            IF self.rank[p] LESS THAN self.rank[q] THEN  
+                LET s TO p  
+                SET p TO q  
+                SET q TO s  
+            END IF  
+            SET self.parent[q] TO p  
+            IF self.rank[p] EQUALS self.rank[q] THEN  
+                LET y TO self.rank[p] PLUS 1  
+                SET self.rank[p] TO y  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+        LET r TO DSU(threshold PLUS 1)  
+
+        LET i TO 0  
+        REPEAT WHILE i LESS THAN LENGTH(nums)  
+            LET w TO nums[i]  
+            LET k TO w MULTIPLIED BY 2  
+            WHILE k LESS THAN OR EQUAL TO threshold DO  
+                CALL r.union_set(w, k)  
+                SET k TO k PLUS w  
+            END WHILE  
+            SET i TO i PLUS 1  
+        END REPEAT  
+
+        LET f TO an empty set  
+        FOR EACH z IN nums DO  
+            IF z GREATER THAN threshold THEN  
+                ADD z TO f  
+            ELSE  
+                LET tmp TO r.find(z)  
+                ADD tmp TO f  
+            END IF  
+        END FOR  
+
+        RETURN LENGTH(f)  
+    END FUNCTION  
+END CLASS

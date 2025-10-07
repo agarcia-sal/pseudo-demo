@@ -1,0 +1,117 @@
+CLASS Solution
+    FUNCTION numberOfStableArrays(zero, one, limit)
+        SET CONSTANT_A TO 1 + (10 * (10 * (10 * (10 * (10 * (10 * (10 * (10 * (10 * 1)))))))))
+        
+        FUNCTION dp(x1, x2, x3, x4)
+            FUNCTION helperBaseCase(a, b)
+                RETURN (a = 0 AND b = 0) ? 1 : 0
+            END FUNCTION
+
+            FUNCTION helperInvalidCase(a, b)
+                RETURN (a < 0 OR b < 0) ? 1 : 0
+            END FUNCTION
+
+            IF helperBaseCase(x1, x2) = 1 THEN
+                RETURN 1
+            END IF
+
+            IF helperInvalidCase(x1, x2) = 1 THEN
+                RETURN 0
+            END IF
+
+            SET accumulatorVar TO 0
+
+            SET probe TO x3
+            SET limitValue TO limit
+            SET cmpZero TO zero
+            SET cmpOne TO one
+
+            FUNCTION nextRunCount(currentChar, lastChar, currentCount)
+                IF lastChar = currentChar THEN
+                    RETURN currentCount + 1
+                ELSE
+                    RETURN 1
+                END IF
+            END FUNCTION
+            
+            FUNCTION addModulo(a, b, modVal)
+                RETURN ((a + b) - floor((a + b) / modVal) * modVal)
+            END FUNCTION
+
+            FUNCTION condCheckZero(lstChar, runLen, limitVal, valZero)
+                RETURN (lstChar <> valZero OR runLen < limitVal)
+            END FUNCTION
+
+            FUNCTION condCheckOne(lstChar, runLen, limitVal, valOne)
+                RETURN (lstChar <> valOne OR runLen < limitVal)
+            END FUNCTION
+
+            SET a_flag TO condCheckZero(x3, x4, limitValue, cmpZero)
+            SET b_flag TO condCheckOne(x3, x4, limitValue, cmpOne)
+
+            WHILE a_flag = true OR b_flag = true
+                IF a_flag = true THEN
+                    SET tmpRes TO dp(x1 - 1, x2, zero, nextRunCount(zero, x3, x4))
+                    SET accumulatorVar TO accumulatorVar + tmpRes
+                    SET accumulatorVar TO accumulatorVar - floor(accumulatorVar / CONSTANT_A) * CONSTANT_A
+                    SET a_flag TO false
+                ELSE IF b_flag = true THEN
+                    SET tmpResB TO dp(x1, x2 - 1, one, nextRunCount(one, x3, x4))
+                    SET accumulatorVar TO accumulatorVar + tmpResB
+                    SET accumulatorVar TO accumulatorVar - floor(accumulatorVar / CONSTANT_A) * CONSTANT_A
+                    SET b_flag TO false
+                END IF
+            END WHILE
+            
+            RETURN accumulatorVar
+        END FUNCTION
+
+        FUNCTION tailRecHelper(z, o, lastCh, lastRun)
+            IF z = 0 AND o = 0 THEN
+                RETURN 1
+            ELSE IF z < 0 OR o < 0 THEN
+                RETURN 0
+            ELSE IF lastCh <> zero OR lastRun < limit THEN
+                RETURN dp(z - 1, o, zero, (lastCh = zero) ? lastRun + 1 : 1)
+                    + ((lastCh <> one AND lastRun >= limit) ? tailRecHelper(z, o - 1, one, 1) : 0)
+            ELSE IF lastCh <> one OR lastRun < limit THEN
+                RETURN dp(z, o - 1, one, (lastCh = one) ? lastRun + 1 : 1)
+                    + ((lastCh <> zero AND lastRun >= limit) ? tailRecHelper(z - 1, o, zero, 1) : 0)
+            ELSE
+                RETURN dp(z, o, lastCh, lastRun)
+            END IF
+        END FUNCTION
+
+        DECLARE stackQueue TO [ [zero, one, -1, 0] ]
+        SET answer TO 0
+        
+        WHILE LENGTH(stackQueue) > 0
+            SET currentFrame TO stackQueue[ LENGTH(stackQueue) ]
+            REMOVE stackQueue[ LENGTH(stackQueue) ]
+            SET z_c TO currentFrame[1]
+            SET o_c TO currentFrame[2]
+            SET lastC TO currentFrame[3]
+            SET lastR TO currentFrame[4]
+
+            IF z_c = 0 AND o_c = 0 THEN
+                SET answer TO answer + 1
+                SET answer TO answer MOD CONSTANT_A
+                CONTINUE
+            END IF
+
+            IF z_c < 0 OR o_c < 0 THEN
+                CONTINUE
+            END IF
+
+            IF lastC <> zero OR lastR < limit THEN
+                APPEND stackQueue WITH [z_c - 1, o_c, zero, (lastC = zero) ? lastR + 1 : 1]
+            END IF
+
+            IF lastC <> one OR lastR < limit THEN
+                APPEND stackQueue WITH [z_c, o_c - 1, one, (lastC = one) ? lastR + 1 : 1]
+            END IF
+        END WHILE
+
+        RETURN answer MOD CONSTANT_A
+    END FUNCTION
+END CLASS

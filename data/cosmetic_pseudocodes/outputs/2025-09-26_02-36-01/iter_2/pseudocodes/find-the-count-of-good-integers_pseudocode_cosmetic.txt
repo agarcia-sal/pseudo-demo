@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer
+        DECLARE factorials AS empty array
+        LET idx = 0
+        WHILE idx <= n DO
+            LET curr_factorial = 1
+            LET mul = 1
+            WHILE mul <= idx DO
+                SET curr_factorial = curr_factorial TIMES mul
+                INCREMENT mul BY 1
+            END WHILE
+            APPEND curr_factorial TO factorials
+            INCREMENT idx BY 1
+        END WHILE
+        
+        LET total = 0
+        DECLARE seenCombinations AS empty set
+        LET half_base = 1
+        LET exp = (n - 1) DIV 2
+        LET power_index = 0
+        WHILE power_index < exp DO
+            SET half_base = half_base TIMES 10
+            INCREMENT power_index BY 1
+        END WHILE
+        
+        LET start_val = half_base
+        LET end_val = (half_base TIMES 10) MINUS 1
+        LET curr = start_val
+        WHILE curr <= end_val DO
+            LET num_str = TO_STRING(curr)
+            LET rem = n MOD 2
+            LET reversed_part = EMPTY_STRING
+            LET rev_idx = LENGTH(num_str) - 1 - rem
+            WHILE rev_idx >= 0 DO
+                SET reversed_part = reversed_part CONCAT SUBSTRING(num_str, rev_idx, 1)
+                DECREMENT rev_idx BY 1
+            END WHILE
+            SET palindrome_str = num_str CONCAT reversed_part
+            
+            LET palindrome_num = TO_INTEGER(palindrome_str)
+            IF palindrome_num MOD k != 0 THEN
+                SET curr = curr + 1
+                CONTINUE
+            END IF
+            
+            LET sorted_chars = SPLIT(palindrome_str) SORTED_ASC
+            LET sorted_str = JOIN(sorted_chars)
+            
+            IF sorted_str IN seenCombinations THEN
+                SET curr = curr + 1
+                CONTINUE
+            END IF
+            
+            ADD sorted_str TO seenCombinations
+            
+            DECLARE freq_map AS empty dictionary
+            FOR EACH ch IN sorted_chars DO
+                IF ch IN freq_map THEN
+                    SET freq_map[ch] = freq_map[ch] + 1
+                ELSE
+                    SET freq_map[ch] = 1
+                END IF
+            END FOR
+            
+            IF (freq_map CONTAINS_KEY '0') AND (freq_map['0'] > 0) THEN
+                LET zero_count = freq_map['0']
+                LET res_val = (n - zero_count) TIMES factorials[n - 1]
+            ELSE
+                LET res_val = factorials[n]
+            END IF
+            
+            FOR EACH cnt_val IN freq_map VALUES DO
+                SET res_val = res_val DIV factorials[cnt_val]
+            END FOR
+            
+            SET total = total + res_val
+            SET curr = curr + 1
+        END WHILE
+        
+        RETURN total
+    END FUNCTION
+END CLASS

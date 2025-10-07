@@ -1,0 +1,66 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minOperations(nums parameter k parameter)
+        PROCEDURE reorderHeap(arr parameter)
+            SET indexHelper TO (LENGTH of arr MINUS 2) DIVIDED BY 2
+            DEFINE PROCEDURE shiftDown(pos parameter)
+                SET currentPos TO pos
+                LOOP 
+                    SET childLeft TO currentPos MULTIPLIED BY two PLUS one
+                    IF childLeft GREATER THAN OR EQUAL TO LENGTH of arr THEN EXIT LOOP
+                    SET childRight TO childLeft PLUS one
+                    SET candidate TO childLeft
+                    IF childRight LESS THAN LENGTH of arr AND arr[childRight] LESS THAN arr[childLeft] THEN
+                        SET candidate TO childRight
+                    END IF
+                    IF arr[candidate] GREATER THAN OR EQUAL TO arr[currentPos] THEN EXIT LOOP
+                    SET arr[currentPos], arr[candidate] TO arr[candidate], arr[currentPos]
+                    SET currentPos TO candidate
+                END LOOP
+            END PROCEDURE
+
+            WHILE indexHelper GREATER THAN OR EQUAL TO zero
+                CALL shiftDown(indexHelper)
+                DECREMENT indexHelper BY one
+            END WHILE
+        END PROCEDURE
+
+        FUNCTION popHeapElement(arr parameter)
+            SET lastIndex TO LENGTH of arr MINUS one
+            SET rootVal TO arr[zero]
+            SET arr[zero] TO arr[lastIndex]
+            REMOVE LAST ELEMENT FROM arr
+            CALL reorderHeap(arr)
+            RETURN rootVal
+        END FUNCTION
+
+        PROCEDURE pushHeapElement(arr parameter val parameter)
+            APPEND val TO arr
+            SET posIndex TO LENGTH of arr MINUS one
+            WHILE posIndex GREATER THAN zero
+                SET parentIdx TO (posIndex MINUS one) DIVIDED BY two
+                IF arr[parentIdx] LESS THAN OR EQUAL TO arr[posIndex] THEN BREAK
+                SET arr[parentIdx], arr[posIndex] TO arr[posIndex], arr[parentIdx]
+                SET posIndex TO parentIdx
+            END WHILE
+        END PROCEDURE
+
+        CALL reorderHeap(nums)
+        SET countOps TO zero
+
+        FUNCTION continueCondition(arr parameter condVal parameter)
+            RETURN (arr[zero] LESS THAN condVal) AND (LENGTH of arr GREATER THAN one)
+        END FUNCTION
+
+        WHILE continueCondition(nums, k)
+            SET localA TO popHeapElement(nums)
+            SET localB TO popHeapElement(nums)
+            SET combinedVal TO (localA MIN MIN localB MULTIPLIED BY two) PLUS (localA MAX MAX localB)
+            CALL pushHeapElement(nums, combinedVal)
+            SET countOps TO countOps PLUS one
+        END WHILE
+
+        RETURN countOps
+    END FUNCTION
+END CLASS
+```

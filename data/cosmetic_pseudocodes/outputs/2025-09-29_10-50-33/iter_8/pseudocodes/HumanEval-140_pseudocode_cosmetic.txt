@@ -1,0 +1,40 @@
+FUNCTION fix_spaces(text)  
+    SET result_container TO ""  
+    SET cursor TO 0  
+    SET gap_begin TO 0  
+    SET gap_finish TO 0
+
+    DEFINE walk THROUGH index  
+        IF index < LENGTH(text) THEN  
+            LET current_char IS text[index]  
+
+            current_char =?= " "  
+            ? ( gap_finish = gap_finish + 1 )  
+            : (  
+                LET gap_length IS gap_finish - gap_begin  
+                IF gap_length > 2 THEN  
+                    result_container = result_container + "-" + current_char  
+                ELSE IF gap_length > 0 THEN  
+                    result_container = result_container + (STRING REPEAT "_" TIMES gap_length) + current_char  
+                ELSE  
+                    result_container = result_container + current_char  
+                gap_begin = index + 1  
+                gap_finish = index + 1  
+            )
+
+            EXECUTE walk(index + 1)  
+        ENDIF  
+    ENDDEFINE
+
+    EXECUTE walk(cursor)
+
+    LET trailing_gap IS gap_finish - gap_begin  
+    SWITCH TRUE DO  
+        CASE trailing_gap > 2:  
+            result_container = result_container + "-"  
+        CASE trailing_gap > 0:  
+            result_container = result_container + "_"  
+    END SWITCH
+
+    BREAK result_container  
+END FUNCTION

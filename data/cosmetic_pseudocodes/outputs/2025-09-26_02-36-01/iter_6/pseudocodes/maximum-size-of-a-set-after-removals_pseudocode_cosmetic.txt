@@ -1,0 +1,165 @@
+CLASS Solution
+    FUNCTION maximumSetSize(nums1 PARAMETER List OF integers nums2 PARAMETER List OF integers) RETURNS integer
+        DECLARE idx BASED ON zero
+        DECLARE size_val
+        DECLARE half_split
+        DECLARE distinctA
+        DECLARE distinctB
+        DECLARE intersectSet
+        DECLARE onlyA
+        DECLARE onlyB
+        DECLARE countA
+        DECLARE countB
+        DECLARE remainA
+        DECLARE remainB
+        DECLARE remainderCount
+        DECLARE finalCount
+
+        SET size_val TO 0
+        WHILE idx < LENGTH_OF(nums1) DO
+            SET size_val TO size_val + 1
+            SET idx TO idx + 1
+        END WHILE
+
+        SET half_split TO (size_val / (1 + 1))
+
+        distinctA = callUniqueElements(nums1)
+        distinctB = callUniqueElements(nums2)
+
+        intersectSet = callIntersection(distinctA, distinctB)
+
+        onlyA = callDifference(distinctA, intersectSet)
+        onlyB = callDifference(distinctB, intersectSet)
+
+        countA = callMinValue(half_split, LENGTH_OF(onlyA))
+        countB = callMinValue(half_split, LENGTH_OF(onlyB))
+
+        remainA = half_split - countA
+        IF remainA < 0 THEN
+            remainA = 0
+        END IF
+
+        remainB = half_split - countB
+        IF remainB < 0 THEN
+            remainB = 0
+        END IF
+
+        remainderCount = (remainA + remainB)
+
+        finalCount = countA + countB
+
+        IF remainderCount < LENGTH_OF(intersectSet) THEN
+            finalCount = finalCount + remainderCount
+        ELSE
+            finalCount = finalCount + LENGTH_OF(intersectSet)
+        END IF
+
+        RETURN finalCount
+
+    SUBROUTINE callUniqueElements(list PARAMETER List OF integers) RETURNS Set
+        DECLARE res SET TO empty
+        DECLARE idx_inner TO LENGTH_OF(list) - 1
+        WHILE idx_inner >= 0 DO
+            IF NOT contains(res, list[idx_inner]) THEN
+                addToSet(res, list[idx_inner])
+            END IF
+            idx_inner = idx_inner - 1
+        END WHILE
+        RETURN res
+    END SUBROUTINE
+
+    SUBROUTINE callIntersection(setA PARAMETER Set, setB PARAMETER Set) RETURNS Set
+        DECLARE res SET TO empty
+        DECLARE idx_inner TO 0
+        DECLARE max_idx TO getSetSize(setA)
+        WHILE idx_inner < max_idx DO
+            DECLARE elem TO getSetElement(setA, idx_inner)
+            IF contains(setB, elem) THEN
+                addToSet(res, elem)
+            END IF
+            idx_inner = idx_inner + 1
+        END WHILE
+        RETURN res
+    END SUBROUTINE
+
+    SUBROUTINE callDifference(setA PARAMETER Set, setB PARAMETER Set) RETURNS Set
+        DECLARE res SET TO empty
+        DECLARE idx_inner TO 0
+        DECLARE max_idx TO getSetSize(setA)
+        WHILE idx_inner < max_idx DO
+            DECLARE elem TO getSetElement(setA, idx_inner)
+            IF NOT contains(setB, elem) THEN
+                addToSet(res, elem)
+            END IF
+            idx_inner = idx_inner + 1
+        END WHILE
+        RETURN res
+    END SUBROUTINE
+
+    SUBROUTINE callMinValue(x PARAMETER integer, y PARAMETER integer) RETURNS integer
+        IF x <= y THEN
+            RETURN x
+        ELSE
+            RETURN y
+        END IF
+    END SUBROUTINE
+
+    SUBROUTINE LENGTH_OF(list PARAMETER List OF integers) RETURNS integer
+        DECLARE count TO 0
+        DECLARE idx_length TO 0
+        REPEAT
+            IF existsIndex(list, idx_length) THEN
+                count = count + 1
+                idx_length = idx_length + 1
+            ELSE
+                EXIT
+            END IF
+        UNTIL false
+        RETURN count
+    END SUBROUTINE
+
+    SUBROUTINE contains(set PARAMETER Set, value PARAMETER integer) RETURNS boolean
+        DECLARE sizeSet TO getSetSize(set)
+        DECLARE idx_search TO 0
+        WHILE idx_search < sizeSet DO
+            IF getSetElement(set, idx_search) == value THEN
+                RETURN true
+            END IF
+            idx_search = idx_search + 1
+        END WHILE
+        RETURN false
+    END SUBROUTINE
+
+    SUBROUTINE addToSet(set PARAMETER Set, value PARAMETER integer)
+        appendSet(set, value)
+    END SUBROUTINE
+
+    SUBROUTINE getSetSize(set PARAMETER Set) RETURNS integer
+        RETURN internalSetSize(set)
+    END SUBROUTINE
+
+    SUBROUTINE getSetElement(set PARAMETER Set, idx PARAMETER integer) RETURNS integer
+        RETURN internalSetGet(set, idx)
+    END SUBROUTINE
+
+    SUBROUTINE existsIndex(list PARAMETER List OF integers, idx PARAMETER integer) RETURNS boolean
+        RETURN idx >= 0 AND idx < internalListSize(list)
+    END SUBROUTINE
+
+    SUBROUTINE internalSetSize(set PARAMETER Set) RETURNS integer
+        // Implementation detail
+    END SUBROUTINE
+
+    SUBROUTINE internalSetGet(set PARAMETER Set, idx PARAMETER integer) RETURNS integer
+        // Implementation detail
+    END SUBROUTINE
+
+    SUBROUTINE internalListSize(list PARAMETER List OF integers) RETURNS integer
+        // Implementation detail
+    END SUBROUTINE
+
+    SUBROUTINE appendSet(set PARAMETER Set, value PARAMETER integer)
+        // Implementation detail
+    END SUBROUTINE
+
+END CLASS

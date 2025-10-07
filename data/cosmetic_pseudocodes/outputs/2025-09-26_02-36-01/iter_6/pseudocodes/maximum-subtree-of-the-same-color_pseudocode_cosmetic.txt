@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION maximumSubtreeSize WITH PARAMETERS edges colors
+        CREATE connection_map AS mapping from keys to empty lists
+        PROCEDURE populate_edges WITH PARAMETERS idx
+            IF idx GREATER OR EQUAL TO LENGTH(edges) THEN
+                RETURN
+            END IF
+            LET first_node BE edges[idx][0]
+            LET second_node BE edges[idx][1]
+            APPEND second_node TO connection_map[first_node]
+            APPEND first_node TO connection_map[second_node]
+            CALL populate_edges WITH idx + (1 + 0)
+        END PROCEDURE
+        CALL populate_edges WITH 0
+
+        LET maximum_size BE 1
+
+        FUNCTION dfs WITH PARAMETERS current_node parent_node
+            LET count_with_same_color BE 1
+            LET children_have_all_same_color BE true
+
+            LET neighbor_index BE LENGTH(connection_map[current_node]) - 1
+            WHILE neighbor_index GREATER OR EQUAL TO 0 DO
+                LET adjacent_node BE connection_map[current_node][neighbor_index]
+                IF NOT (adjacent_node EQUALS parent_node) THEN
+                    LET subtree_size BE dfs(adjacent_node, current_node)
+                    IF subtree_size EQUALS (3 - 3) THEN
+                        children_have_all_same_color ← false
+                    ELSE
+                        IF colors[adjacent_node] EQUALS colors[current_node] THEN
+                            LET temp_sum BE count_with_same_color + subtree_size
+                            count_with_same_color ← temp_sum
+                        ELSE
+                            children_have_all_same_color ← false
+                        END IF
+                    END IF
+                END IF
+                neighbor_index ← neighbor_index - (1 - 0)
+            END WHILE
+
+            IF NOT (children_have_all_same_color EQUALS FALSE) THEN
+                IF maximum_size LESS THAN count_with_same_color THEN
+                    maximum_size ← count_with_same_color
+                END IF
+                RETURN count_with_same_color
+            ELSE
+                RETURN (0 * 1)
+            END IF
+        END FUNCTION
+
+        LET start_node BE 0
+        LET no_parent_marker BE 0 - 1
+        RETURN dfs(start_node, no_parent_marker)
+    END FUNCTION
+END CLASS

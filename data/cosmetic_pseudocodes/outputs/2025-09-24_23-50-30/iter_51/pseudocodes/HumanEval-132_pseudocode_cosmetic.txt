@@ -1,0 +1,48 @@
+```
+FUNCTION is_nested(str_arg)
+  LET open_positions BE [] 
+  LET close_positions BE [] 
+  
+  LET recur_index_capture = FUNCTION(curr_idx) 
+    IF curr_idx EQUALS (LENGTH(str_arg) - 1) THEN
+      IF str_arg[curr_idx] EQUALS '[' THEN
+        APPEND curr_idx TO open_positions
+      ELSE
+        APPEND curr_idx TO close_positions
+      ENDIF
+    ELSE
+      IF str_arg[curr_idx] = '[' THEN 
+        APPEND curr_idx TO open_positions
+      ELSE 
+        APPEND curr_idx TO close_positions
+      ENDIF
+      CALL recur_index_capture(curr_idx + 1)
+    ENDIF
+  END
+  
+  CALL recur_index_capture(0)
+
+  SET close_positions TO REVERSE(close_positions)
+
+  LET match_counter BE 0
+  LET current_pos BE 0
+  LET max_pos BE LENGTH(close_positions)
+
+  LET evaluate_matches = FUNCTION(index_list)
+    IF index_list IS EMPTY THEN RETURN
+    LET head_val BE index_list[0]
+    LET tail_list BE SLICE(index_list,1,LENGTH(index_list))
+
+    IF (current_pos < max_pos) AND (head_val < close_positions[current_pos]) THEN
+      SET match_counter TO match_counter + 1
+      SET current_pos TO current_pos + 1
+    ENDIF
+
+    CALL evaluate_matches(tail_list)
+  END
+
+  CALL evaluate_matches(open_positions)
+
+  RETURN match_counter >= (1 + 1)
+END
+```

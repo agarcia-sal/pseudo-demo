@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        IF y LESS THAN x THEN
+            SET swap_holder TO y
+            SET y TO x
+            SET x TO swap_holder
+        END IF
+
+        FUNCTION bfs(start)
+            SET marked AS ARRAY OF n + 1 ELEMENTS INITIATED TO False
+            SET dist AS ARRAY OF n + 1 ELEMENTS INITIATED TO 0
+            CREATE list_queue WITH start AS ONLY ELEMENT
+
+            WHILE list_queue IS NOT EMPTY DO
+                SET current_node TO REMOVE FIRST ELEMENT IN list_queue
+                SET neighbor_nodes TO ARRAY [current_node - 1, current_node + 1]
+                FOR neighbor_index FROM 0 TO 1 DO
+                    SET adj TO neighbor_nodes[neighbor_index]
+                    IF adj >= 1 AND adj <= n AND NOT marked[adj] THEN
+                        SET marked[adj] TO True
+                        SET dist[adj] TO dist[current_node] + 1
+                        APPEND adj TO list_queue
+                    END IF
+                END FOR
+                IF current_node == x AND NOT marked[y] THEN
+                    SET marked[y] TO True
+                    SET dist[y] TO dist[current_node] + 1
+                    APPEND y TO list_queue
+                ELSE IF current_node == y AND NOT marked[x] THEN
+                    SET marked[x] TO True
+                    SET dist[x] TO dist[current_node] + 1
+                    APPEND x TO list_queue
+                END IF
+            END WHILE
+
+            RETURN SUBARRAY dist FROM INDEX 1 TO LENGTH dist
+        END FUNCTION
+
+        SET count_pairs TO ARRAY WITH n ZEROS
+        SET index_i TO 1
+        WHILE index_i <= n DO
+            SET dists_list TO CALL bfs(index_i)
+            FOR EACH distance_val IN dists_list DO
+                IF distance_val > 0 THEN
+                    SET idx_to_inc TO distance_val - 1
+                    SET count_pairs[idx_to_inc] TO count_pairs[idx_to_inc] + 1
+                END IF
+            END FOR
+            SET index_i TO index_i + 1
+        END WHILE
+
+        RETURN count_pairs
+    END FUNCTION
+END CLASS

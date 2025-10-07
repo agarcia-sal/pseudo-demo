@@ -1,0 +1,30 @@
+```
+FUNCTION anti_shuffle(input_string)
+  INITIALIZE index TO 0
+  INITIALIZE words_collection TO SPLIT input_string BY " "
+  INITIALIZE accumulated_sorted_words TO []
+  
+  WHILE index < LENGTH(words_collection)
+    INITIALIZE current_word TO words_collection[index]
+    INITIALIZE char_list TO TO_ARRAY(current_word)
+    
+    DEFINE FUNCTION sort_chars(chars)
+      IF LENGTH(chars) <= 1 THEN RETURN chars
+      SET pivot TO chars[0]
+      SET less TO FILTER(chars[1 to END], c -> c < pivot)
+      SET greater_equal TO FILTER(chars[1 to END], c -> NOT (c < pivot))
+      RETURN CONCATENATE(sort_chars(less), [pivot], sort_chars(greater_equal))
+    END FUNCTION
+    
+    SET sorted_chars TO sort_chars(char_list)
+    SET sorted_word TO REDUCE(sorted_chars, "", (acc, ch) -> acc + ch)
+    APPEND sorted_word TO accumulated_sorted_words
+    
+    SET index TO index + 1
+  END WHILE
+  
+  SET output_string TO REDUCE(accumulated_sorted_words, "", 
+    (acc, w) -> IF acc = "" THEN w ELSE acc + " " + w ENDIF)
+  RETURN output_string
+END FUNCTION
+```

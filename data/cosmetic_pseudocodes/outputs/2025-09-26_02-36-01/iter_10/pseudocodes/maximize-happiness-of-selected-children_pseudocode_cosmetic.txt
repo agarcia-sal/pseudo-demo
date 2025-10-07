@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION maximumHappinessSum(happiness, k)
+        DEFINE PROCEDURE arrangeDescending(arr)
+            DEFINE PROCEDURE exchanger(x, y)
+                SET temp TO arr[x]
+                SET arr[x] TO arr[y]
+                SET arr[y] TO temp
+            END PROCEDURE
+            SET m TO LENGTH(arr)
+            DEFINE PROCEDURE partition(lo, hi)
+                SET pivotIndex TO lo
+                SET pivotVal TO arr[hi]
+                SET storeIndex TO lo
+                WHILE pivotIndex < hi
+                    IF arr[pivotIndex] >= pivotVal THEN
+                        exchanger(storeIndex, pivotIndex)
+                        SET storeIndex TO storeIndex + 1
+                    END IF
+                    SET pivotIndex TO pivotIndex + 1
+                END WHILE
+                exchanger(storeIndex, hi)
+                RETURN storeIndex
+            END PROCEDURE
+            DEFINE PROCEDURE quickSort(lo, hi)
+                IF lo < hi THEN
+                    SET p TO partition(lo, hi)
+                    CALL quickSort(lo, p - 1)
+                    CALL quickSort(p + 1, hi)
+                END IF
+            END PROCEDURE
+            CALL quickSort(0, m - 1)
+        END PROCEDURE
+
+        CALL arrangeDescending(happiness)
+
+        SET accumulatorTotal TO 0
+        SET decreaseCounter TO 0
+
+        DEFINE PROCEDURE sumLoop(currIndex)
+            IF currIndex >= k THEN RETURN END_IF
+
+            SET adjustedValue TO happiness[currIndex] - decreaseCounter
+            IF adjustedValue < 0 THEN SET adjustedValue TO 0 END_IF
+
+            SET accumulatorTotal TO accumulatorTotal + adjustedValue
+            SET decreaseCounter TO decreaseCounter + 1
+
+            CALL sumLoop(currIndex + 1)
+        END PROCEDURE
+
+        CALL sumLoop(0)
+
+        RETURN accumulatorTotal
+    END FUNCTION
+END CLASS

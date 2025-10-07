@@ -1,0 +1,52 @@
+```
+FUNCTION get_row(two_dimensional_list, target_integer)
+	DEFINE helper(accumulated_coords, r_idx) AS
+		IF NOT (r_idx < LENGTH(two_dimensional_list)) THEN
+			RETURN accumulated_coords
+		ELSE
+			DEFINE inner_loop(c_idx, coords_accum) AS
+				IF NOT (c_idx < LENGTH(two_dimensional_list[r_idx])) THEN
+					RETURN coords_accum
+				ELSE
+					DEFINE condition_check AS (two_dimensional_list[r_idx][c_idx] = target_integer)
+					DEFINE updated_coords AS IF condition_check THEN coords_accum + [(r_idx, c_idx)] ELSE coords_accum
+					RETURN inner_loop(c_idx + 1, updated_coords)
+			END
+			RETURN helper(inner_loop(0, accumulated_coords), r_idx + 1)
+	END
+	LET collected_coords = helper([], 0)
+
+	DEFINE sort_by_col_desc(coords, i, j) AS coords[i][1] >= coords[j][1]
+	DEFINE sort_by_row_asc(coords, i, j) AS coords[i][0] <= coords[j][0]
+
+	DEFINE bubble_sort(coords, comp_func) AS
+		DEFINE length = LENGTH(coords)
+		DEFINE loop_outer(i, coords_arr) AS
+			IF NOT (i < length - 1) THEN
+				RETURN coords_arr
+			ELSE
+				DEFINE loop_inner(j, arr_inner) AS
+					IF NOT (j < length - i - 1) THEN
+						RETURN arr_inner
+					ELSE
+						DEFINE need_swap = NOT comp_func(arr_inner, j, j+1)
+						DEFINE swapped_arr = IF need_swap THEN
+							BEGIN
+								DEFINE temp = arr_inner[j]
+								LET arr_inner[j] = arr_inner[j+1]
+								LET arr_inner[j+1] = temp
+								RETURN arr_inner
+							END
+						ELSE arr_inner
+						RETURN loop_inner(j+1, swapped_arr)
+				END
+				RETURN loop_outer(i + 1, loop_inner(0, coords_arr))
+		END
+		RETURN loop_outer(0, coords)
+
+	LET after_col_sort = bubble_sort(collected_coords, sort_by_col_desc)
+	LET after_row_sort = bubble_sort(after_col_sort, sort_by_row_asc)
+
+	RETURN after_row_sort
+END FUNCTION
+```

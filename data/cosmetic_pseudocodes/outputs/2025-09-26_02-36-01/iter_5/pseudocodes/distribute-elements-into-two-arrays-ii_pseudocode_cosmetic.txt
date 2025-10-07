@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION resultArray(nums)
+        SET left_list TO [nums[0]]
+        SET right_list TO [nums[1]]
+        SET left_sorted TO [nums[0]]
+        SET right_sorted TO [nums[1]]
+
+        FUNCTION countGreater(sequence, reference)
+            FUNCTION binarySearchRight(seq, key, low, high)
+                IF low EQUALS high
+                    RETURN low
+                END IF
+                SET mid TO low + ((high - low) DIVIDED BY 2)
+                IF seq[mid] LESS OR EQUAL TO key
+                    RETURN binarySearchRight(seq, key, mid + 1, high)
+                ELSE
+                    RETURN binarySearchRight(seq, key, low, mid)
+                END IF
+            END FUNCTION
+            SET insertionIndex TO binarySearchRight(sequence, reference, 0, LENGTH_OF sequence)
+            SET totalElements TO LENGTH_OF sequence
+            RETURN totalElements - insertionIndex
+        END FUNCTION
+
+        FUNCTION processIndex(current)
+            IF current GREATER THAN (LENGTH_OF nums - 1)
+                RETURN
+            END IF
+
+            SET current_value TO nums[current]
+            SET left_count TO countGreater(left_sorted, current_value)
+            SET right_count TO countGreater(right_sorted, current_value)
+
+            IF left_count GREATER THAN right_count
+                SET new_left_list TO left_list + [current_value]
+                SET new_left_sorted TO insertSorted(left_sorted, current_value)
+                left_list := new_left_list
+                left_sorted := new_left_sorted
+            ELSE IF left_count LESS THAN right_count
+                SET new_right_list TO right_list + [current_value]
+                SET new_right_sorted TO insertSorted(right_sorted, current_value)
+                right_list := new_right_list
+                right_sorted := new_right_sorted
+            ELSE
+                IF LENGTH_OF left_list LESS OR EQUAL TO LENGTH_OF right_list
+                    SET new_left_list TO left_list + [current_value]
+                    SET new_left_sorted TO insertSorted(left_sorted, current_value)
+                    left_list := new_left_list
+                    left_sorted := new_left_sorted
+                ELSE
+                    SET new_right_list TO right_list + [current_value]
+                    SET new_right_sorted TO insertSorted(right_sorted, current_value)
+                    right_list := new_right_list
+                    right_sorted := new_right_sorted
+                END IF
+            END IF
+
+            CALL processIndex(current + 1)
+        END FUNCTION
+
+        FUNCTION insertSorted(arr, elem)
+            FUNCTION binarySearchLeft(arrb, keyb, lowb, highb)
+                IF lowb EQUALS highb
+                    RETURN lowb
+                END IF
+                SET midb TO lowb + ((highb - lowb) DIVIDED BY 2)
+                IF arrb[midb] GREATER OR EQUAL TO keyb
+                    RETURN binarySearchLeft(arrb, keyb, lowb, midb)
+                ELSE
+                    RETURN binarySearchLeft(arrb, keyb, midb + 1, highb)
+                END IF
+            END FUNCTION
+            SET pos_to_insert TO binarySearchLeft(arr, elem, 0, LENGTH_OF arr)
+            SET first_part TO arr[0 TO pos_to_insert - 1]
+            SET second_part TO arr[pos_to_insert TO LENGTH_OF arr - 1]
+            RETURN first_part + [elem] + second_part
+        END FUNCTION
+
+        CALL processIndex(2)
+        SET combined_result TO left_list + right_list
+        RETURN combined_result
+    END FUNCTION
+END CLASS

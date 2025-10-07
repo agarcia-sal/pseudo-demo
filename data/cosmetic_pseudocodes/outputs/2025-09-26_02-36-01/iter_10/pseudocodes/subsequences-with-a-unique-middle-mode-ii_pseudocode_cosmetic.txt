@@ -1,0 +1,89 @@
+CLASS Solution
+	FUNCTION subsequencesWithMiddleMode(nums)
+		DEFINE modVal := 10^9 + 7
+		DEFINE accumResult := 0
+		DEFINE prefixCnt := map()
+		DEFINE suffixCnt := map()
+		
+		DEFINE initializeSuffixCounter() {
+			LOOP idx FROM 0 TO LENGTH(nums) - 1 DO
+				IF suffixCnt CONTAINS nums[idx] THEN
+					SET suffixCnt[nums[idx]] = suffixCnt[nums[idx]] + 1
+				ELSE
+					SET suffixCnt[nums[idx]] = 1
+				END IF
+			END LOOP
+		}
+		initializeSuffixCounter()
+
+		FUNCTION combin2(val)
+			RETURN (val * (val - 1)) / 2
+		END FUNCTION
+
+		DEFINE accPss := 0
+		DEFINE accSpp := 0
+		DEFINE accPp := 0
+		DEFINE accSs := 0
+		DEFINE accPs := 0
+
+		DEFINE computeSumSquares(freqMap)
+			DEFINE total := 0
+			DEFINE idx := 0
+			WHILE idx < LENGTH(freqMap) DO
+				// No direct indexing possible, will iterate keys
+				EXIT
+			END WHILE
+			FOR EACH key IN freqMap KEYS DO
+				ADD freqMap[key] * freqMap[key] TO total
+			END FOR
+			RETURN total
+		END
+
+		SET accSs = 0
+		FOR eachKey IN suffixCnt KEYS DO
+			SET accSs = accSs + suffixCnt[eachKey] * suffixCnt[eachKey]
+		END FOR
+
+		FOR pos FROM 0 TO LENGTH(nums) - 1 DO
+			DEFINE currVal := nums[pos]
+
+			SET accPss = accPss + prefixCnt.GET(currVal, 0) * ( - (suffixCnt.GET(currVal, 0) ^ 2) + ((suffixCnt.GET(currVal,0) - 1) ^ 2) )
+			SET accSpp = accSpp - ( prefixCnt.GET(currVal, 0) ^ 2 )
+			SET accSs = accSs - (suffixCnt.GET(currVal, 0) ^ 2) + ((suffixCnt.GET(currVal, 0) - 1) ^ 2)
+			SET accPs = accPs - prefixCnt.GET(currVal, 0)
+
+			// decrement frequency in suffix
+			SET suffixCnt[currVal] = suffixCnt[currVal] - 1
+
+			DEFINE leftCount := pos
+			DEFINE rightCount := LENGTH(nums) - pos - 1
+
+			SET accumResult = accumResult + combin2(leftCount) * combin2(rightCount)
+			SET accumResult = accumResult - combin2(leftCount - prefixCnt.GET(currVal,0)) * combin2(rightCount - suffixCnt.GET(currVal, 0))
+
+			DEFINE adjPss := accPss - prefixCnt.GET(currVal, 0) * (suffixCnt.GET(currVal, 0) ^ 2)
+			DEFINE adjSpp := accSpp - suffixCnt.GET(currVal, 0) * (prefixCnt.GET(currVal,0) ^ 2)
+			DEFINE adjPp := accPp - ( prefixCnt.GET(currVal, 0) ^ 2 )
+			DEFINE adjSs := accSs - ( suffixCnt.GET(currVal, 0) ^ 2 )
+			DEFINE adjPs := accPs - prefixCnt.GET(currVal, 0) * suffixCnt.GET(currVal, 0)
+			DEFINE pComp := leftCount - prefixCnt.GET(currVal, 0)
+			DEFINE sComp := rightCount - suffixCnt.GET(currVal, 0)
+
+			SET accumResult = accumResult - adjPs * prefixCnt.GET(currVal, 0) * (rightCount - suffixCnt.GET(currVal, 0)) + adjPss * ( - prefixCnt.GET(currVal, 0) )
+			SET accumResult = accumResult - adjPs * suffixCnt.GET(currVal, 0) * (leftCount - prefixCnt.GET(currVal, 0)) + adjSpp * ( - suffixCnt.GET(currVal, 0) )
+			SET accumResult = accumResult - (adjPp - pComp) * suffixCnt.GET(currVal, 0) * (rightCount - suffixCnt.GET(currVal, 0)) / 2
+			SET accumResult = accumResult - (adjSs - sComp) * prefixCnt.GET(currVal,0) * (leftCount - prefixCnt.GET(currVal,0)) / 2
+
+			SET accumResult = accumResult MOD modVal
+
+			SET accPss = accPss + suffixCnt.GET(currVal, 0) * suffixCnt.GET(currVal, 0)
+			SET accSpp = accSpp + (suffixCnt.GET(currVal, 0) * ( - (prefixCnt.GET(currVal, 0) ^ 2) ) + ((prefixCnt.GET(currVal, 0) + 1)^2))
+			SET accPp = accPp + ( - (prefixCnt.GET(currVal, 0)^2) + ((prefixCnt.GET(currVal, 0) + 1)^2) )
+			SET accPs = accPs + suffixCnt.GET(currVal, 0)
+
+			SET prefixCnt[currVal] = prefixCnt.GET(currVal, 0) + 1
+		END FOR
+
+		RETURN accumResult
+	END FUNCTION
+END CLASS

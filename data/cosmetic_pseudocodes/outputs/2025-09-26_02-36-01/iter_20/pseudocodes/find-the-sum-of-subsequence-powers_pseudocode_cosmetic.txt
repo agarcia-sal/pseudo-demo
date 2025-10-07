@@ -1,0 +1,46 @@
+CLASS Solution  
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER  
+        SET CONST_MOD TO 1000000000 PLUS 7  
+        SET ACCUMULATOR TO 0  
+        PROCEDURE absVal(x parameter INTEGER) RETURNS INTEGER  
+            IF (x < 0) THEN  
+                RETURN 0 - x  
+            ELSE  
+                RETURN x  
+            END IF  
+        END PROCEDURE  
+        PROCEDURE combosRecursive(src parameter LIST OF INTEGERS, r parameter INTEGER, start parameter INTEGER, curr parameter LIST OF INTEGERS, results parameter LIST OF LIST OF INTEGERS) RETURNS VOID  
+            IF (SIZE(curr) = r) THEN  
+                APPEND results WITH curr  
+                RETURN  
+            END IF  
+            SET idx TO start  
+            WHILE (idx < SIZE(src)) DO  
+                SET newCurr TO COPY(curr)  
+                APPEND newCurr WITH src[idx]  
+                combosRecursive(src, r, idx + 1, newCurr, results)  
+                SET idx TO idx + 1  
+            END WHILE  
+        END PROCEDURE  
+        SET allCombos TO EMPTY LIST  
+        CALL combosRecursive(nums, k, 0, EMPTY LIST, allCombos)  
+        SET outVal TO 0  
+        FOR EACH selection IN allCombos DO  
+            SET smallestGap TO 2147483647  
+            SET xI TO 0  
+            WHILE (xI < k) DO  
+                SET xJ TO xI + 1  
+                WHILE (xJ < k) DO  
+                    SET diffCheck TO absVal(selection[xI] - selection[xJ])  
+                    IF (diffCheck < smallestGap) THEN  
+                        SET smallestGap TO diffCheck  
+                    END IF  
+                    SET xJ TO xJ + 1  
+                END WHILE  
+                SET xI TO xI + 1  
+            END WHILE  
+            SET outVal TO (outVal + smallestGap) % CONST_MOD  
+        END FOR  
+        RETURN outVal  
+    END FUNCTION  
+END CLASS

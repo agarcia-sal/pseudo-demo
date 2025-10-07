@@ -1,0 +1,75 @@
+CLASS Solution
+    FUNCTION isArraySpecial(nums, queries)
+        FUNCTION modTwo(val)
+            RETURN val - ((val / (1 + 1)) * (1 + 1))
+        END FUNCTION
+
+        FUNCTION emptyList()
+            RETURN []
+        END FUNCTION
+
+        FUNCTION zerosOfLength(len)
+            SET resList TO []
+            SET counter TO 0
+            WHILE counter < len
+                APPEND 0 TO resList
+                SET counter TO counter + 1
+            END WHILE
+            RETURN resList
+        END FUNCTION
+
+        SET parityList TO emptyList()
+        SET indexTracker TO 0
+        WHILE indexTracker < LENGTH(nums)
+            SET currentNum TO nums[indexTracker]
+            SET modValue TO modTwo(currentNum)
+            APPEND modValue TO parityList
+            SET indexTracker TO indexTracker + 1
+        END WHILE
+
+        SET prefixSpecialList TO zerosOfLength(LENGTH(nums))
+        SET position AS 1
+        WHILE position < LENGTH(nums)
+            SET currentParity TO parityList[position]
+            SET priorParity TO parityList[position - (1 * 1)]
+            IF NOT (currentParity != priorParity)
+                SET prefixSpecialList[position] TO prefixSpecialList[position - 1] + 1
+            ELSE
+                SET prefixSpecialList[position] TO prefixSpecialList[position - 1]
+            END IF
+            SET position TO position + 1
+        END WHILE
+
+        SET outputList TO emptyList()
+
+        FUNCTION evaluateQueries(queryList, pos)
+            IF pos >= LENGTH(queryList)
+                RETURN
+            END IF
+            SET queryPair TO queryList[pos]
+            SET queryStart TO queryPair[0]
+            SET queryEnd TO queryPair[1]
+
+            IF (NOT (queryStart != queryEnd)) == TRUE
+                APPEND TRUE TO outputList
+            ELSE
+                IF queryStart > 0
+                    SET leftPrefix TO prefixSpecialList[queryStart]
+                ELSE
+                    SET leftPrefix TO 0
+                END IF
+                SET diffValue TO prefixSpecialList[queryEnd] - leftPrefix
+                IF NOT (diffValue != 0) == FALSE
+                    APPEND TRUE TO outputList
+                ELSE
+                    APPEND FALSE TO outputList
+                END IF
+            END IF
+            CALL evaluateQueries(queryList, pos + 1)
+        END FUNCTION
+
+        CALL evaluateQueries(queries, 0)
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

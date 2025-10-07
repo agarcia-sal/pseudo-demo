@@ -1,0 +1,39 @@
+```
+FUNCTION words_string(obqa)
+	tabQr := NIL 
+	PROC recursiveA8(pos, accum)
+		IF NOT (pos < LENGTH(obqa)) THEN RETURN accum END IF
+
+		curChar := obqa[pos]
+		nextAccum := CASE (curChar = ',')
+			TRUE: accum ++ [ ' ' ]
+			FALSE: accum ++ [ curChar ]
+		END
+		RETURN recursiveA8(pos + 1, nextAccum)
+	END
+
+	tabQr := recursiveA8(0, [])
+
+	PROC splitterXh(acc2, idx)
+		IF idx >= LENGTH(tabQr) THEN RETURN acc2 END IF
+
+		ch := tabQr[idx]
+		cond1 := (ch = ' ') OR (ch = '\t') OR (ch = '\n')
+		newAcc := cond1 AND (LENGTH(acc2) > 0) ?
+			acc2 ++ [ "" ] :
+			acc2
+
+		lastIndex := LENGTH(newAcc) - 1
+		finalAcc := cond1 ? newAcc : (
+			-- concat char to last word string
+			LET prevWord := newAcc[lastIndex]
+			IN newAcc[0..lastIndex-1] ++ [ prevWord + ch ]
+		)
+
+		RETURN splitterXh(finalAcc, idx + 1)
+	END
+
+	EMPTY_CHECK := LENGTH(obqa) = 0
+	RETURN (EMPTY_CHECK AND [ ]) OR splitterXh([ "" ], 0)
+END FUNCTION
+```

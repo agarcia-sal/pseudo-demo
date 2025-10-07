@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION maxArea(height positions directions)
+        SET total_positions TO positions
+        SET count TO LENGTH OF total_positions
+        SET accumulated_max TO 0 + 0 + 0
+        SET index_outer TO 1
+        WHILE (index_outer <= height + height) DO
+            SET index_inner TO 0
+            WHILE (index_inner < count) DO
+                SET is_at_start TO (total_positions[index_inner] == 0)
+                SET dir_char TO directions[index_inner]
+                IF (is_at_start AND dir_char == 'D') THEN
+                    SET prefix_substr TO SUBSTRING(directions, 0, index_inner)
+                    SET suffix_substr TO SUBSTRING(directions, index_inner + 1, LENGTH OF directions)
+                    SET directions TO CONCATENATE(prefix_substr, 'U', suffix_substr)
+                ELSE
+                    SET is_at_height TO (total_positions[index_inner] == height)
+                    IF (is_at_height AND dir_char == 'U') THEN
+                        SET prefix_substr2 TO SUBSTRING(directions, 0, index_inner)
+                        SET suffix_substr2 TO SUBSTRING(directions, index_inner + 1, LENGTH OF directions)
+                        SET directions TO CONCATENATE(prefix_substr2, 'D', suffix_substr2)
+                    END IF
+                END IF
+                
+                IF (directions[index_inner] == 'U') THEN
+                    SET pos_temp TO total_positions[index_inner]
+                    SET total_positions[index_inner] TO pos_temp + 1
+                ELSE
+                    SET pos_temp2 TO total_positions[index_inner]
+                    SET total_positions[index_inner] TO pos_temp2 - 1
+                END IF
+                SET index_inner TO index_inner + 1
+            END WHILE
+            
+            SET area_sum TO 0
+            SET idx_sum TO 0
+            WHILE (idx_sum < count) DO
+                SET current_value TO total_positions[idx_sum]
+                SET area_sum TO area_sum + current_value
+                SET idx_sum TO idx_sum + 1
+            END WHILE
+            
+            IF NOT (accumulated_max >= area_sum) THEN
+                SET accumulated_max TO area_sum
+            END IF
+            
+            SET index_outer TO index_outer + 1
+        END WHILE
+        RETURN accumulated_max
+    END FUNCTION
+END CLASS

@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION longestCommonPrefix(arr1 arr1 OF integers arr2 arr2 OF integers) RETURNS integer
+        DEFINE FUNCTION buildPrefixes(index1 currentIndex1, sequence1 seq1 OF integers, accumulator prefxs) 
+            IF currentIndex1 GREATER THAN OR EQUAL TO LENGTH OF seq1 THEN
+                RETURN prefxs
+            ELSE
+                SET stringForm TO string(seq1[currentIndex1])
+                DEFINE FUNCTION collectSubprefixes(pos currentPos, endPos)
+                    IF currentPos GREATER THAN endPos THEN
+                        RETURN
+                    ELSE
+                        SET prefixFragment TO substring(stringForm, 1, currentPos)
+                        prefxs.ADD(prefixFragment)
+                        CALL collectSubprefixes(currentPos + 1, endPos)
+                    END IF
+                END FUNCTION
+                CALL collectSubprefixes(1, LENGTH OF stringForm)
+                RETURN buildPrefixes(currentIndex1 + 1, seq1, prefxs)
+            END IF
+        END FUNCTION
+
+        SET prefixesSet1 TO EMPTY SET
+        SET prefixesSet1 TO buildPrefixes(0, arr1, prefixesSet1)
+
+        DEFINE FUNCTION buildPrefixes2(index2 currentIndex2, sequence2 seq2 OF integers, accumulator prefxs2)
+            IF currentIndex2 GREATER THAN OR EQUAL TO LENGTH OF seq2 THEN
+                RETURN prefxs2
+            ELSE
+                SET stringForm2 TO string(seq2[currentIndex2])
+                DEFINE FUNCTION collectSubprefixes2(pos2 currentPos2, endPos2)
+                    IF currentPos2 GREATER THAN endPos2 THEN
+                        RETURN
+                    ELSE
+                        SET prefixFragment2 TO substring(stringForm2, 1, currentPos2)
+                        prefxs2.ADD(prefixFragment2)
+                        CALL collectSubprefixes2(currentPos2 + 1, endPos2)
+                    END IF
+                END FUNCTION
+                CALL collectSubprefixes2(1, LENGTH OF stringForm2)
+                RETURN buildPrefixes2(currentIndex2 + 1, seq2, prefxs2)
+            END IF
+        END FUNCTION
+
+        SET prefixesSet2 TO EMPTY SET
+        SET prefixesSet2 TO buildPrefixes2(0, arr2, prefixesSet2)
+
+        SET maxLength TO 0
+        DEFINE FUNCTION checkPrefixes(iterator iter)
+            IF iter EQUALS LENGTH OF prefixesSet1 THEN
+                RETURN
+            ELSE
+                SET element TO prefixesSet1[iter]
+                IF prefixesSet2.CONTAINS(element) THEN
+                    IF LENGTH OF element GREATER THAN maxLength THEN
+                        SET maxLength TO LENGTH OF element
+                    END IF
+                END IF
+                CALL checkPrefixes(iter + 1)
+            END IF
+        END FUNCTION
+        
+        SET prefixList TO LIST OF ELEMENTS FROM prefixesSet1
+        SET prefixesSet1 TO prefixList
+        CALL checkPrefixes(0)
+
+        RETURN maxLength
+    END FUNCTION
+END CLASS

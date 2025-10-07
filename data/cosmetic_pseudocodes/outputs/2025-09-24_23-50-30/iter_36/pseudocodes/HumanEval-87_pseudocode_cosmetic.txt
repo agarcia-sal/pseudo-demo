@@ -1,0 +1,62 @@
+```
+FUNCTION get_row(matrix_grid, search_key)
+  LET found_pairs BE QUEUE()
+  LET row_counter BE 0
+  WHILE row_counter < LENGTH(matrix_grid)
+    LET col_counter BE 0
+    WHILE col_counter < LENGTH(matrix_grid[row_counter])
+      IF NOT (matrix_grid[row_counter][col_counter] != search_key)
+        found_pairs.ENQUEUE((row_counter, col_counter))
+      col_counter = col_counter + 1
+    END WHILE
+    row_counter = row_counter + 1
+  END WHILE
+  LET sorted_pairs_desc_col BE LIST()
+  LET temp_queue BE found_pairs
+  WHILE NOT temp_queue.IS_EMPTY()
+    sorted_pairs_desc_col.APPEND(temp_queue.DEQUEUE())
+  END WHILE
+
+  FUNCTION compare_by_col_desc(a, b)
+    RETURN a[1] >= b[1]
+  END FUNCTION
+
+  FUNCTION compare_by_row_asc(a, b)
+    RETURN a[0] <= b[0]
+  END FUNCTION
+
+  LET descending_col_sorted BE sorted_pairs_desc_col
+  LET swapped BE TRUE
+  WHILE swapped
+    LET idx BE 0
+    SET swapped TO FALSE
+    WHILE idx < LENGTH(descending_col_sorted) - 1
+      IF NOT compare_by_col_desc(descending_col_sorted[idx], descending_col_sorted[idx + 1])
+        LET tmp = descending_col_sorted[idx]
+        descending_col_sorted[idx] = descending_col_sorted[idx + 1]
+        descending_col_sorted[idx + 1] = tmp
+        SET swapped TO TRUE
+      END IF
+      idx = idx + 1
+    END WHILE
+  END WHILE
+
+  LET final_sorted BE descending_col_sorted
+  SET swapped TO TRUE
+  WHILE swapped
+    LET idx BE 0
+    SET swapped TO FALSE
+    WHILE idx < LENGTH(final_sorted) - 1
+      IF NOT compare_by_row_asc(final_sorted[idx], final_sorted[idx + 1])
+        LET temp_val = final_sorted[idx]
+        final_sorted[idx] = final_sorted[idx + 1]
+        final_sorted[idx + 1] = temp_val
+        SET swapped TO TRUE
+      END IF
+      idx = idx + 1
+    END WHILE
+  END WHILE
+
+  RETURN final_sorted
+END FUNCTION
+```

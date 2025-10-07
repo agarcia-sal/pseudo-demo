@@ -1,0 +1,34 @@
+FUNCTION fix_spaces(text)  
+  PROCEDURE processTrailingSpaces(pendingStart, pendingEnd, outputAcc)  
+    SELECT TRUE  
+      CASE (pendingEnd - pendingStart) > 2: EXECUTE outputAcc <- outputAcc + "-"  
+      CASE (pendingEnd - pendingStart) > 0: EXECUTE outputAcc <- outputAcc + "_" * (pendingEnd - pendingStart)  
+    END SELECT  
+    RETURN outputAcc  
+  END PROCEDURE  
+  
+  VARIABLE positionCounter <- 0  
+  VARIABLE segmentStart <- 0  
+  VARIABLE segmentEnd <- 0  
+  VARIABLE transformedResult <- ""  
+  
+  WHILE positionCounter < LENGTH(text) DO  
+    IF NOT (text[positionCounter] <> " ") THEN  
+      segmentEnd <- segmentEnd + 1  
+    ELSE  
+      transformedResult <-  
+        ((segmentEnd - segmentStart) > 2) ?  
+          transformedResult + "-" + text[positionCounter] :  
+          (((segmentEnd - segmentStart) > 0) ?  
+            transformedResult + ("_" * (segmentEnd - segmentStart)) + text[positionCounter] :  
+            transformedResult + text[positionCounter])  
+      segmentStart <- positionCounter + 1  
+      segmentEnd <- positionCounter + 1  
+    END IF  
+    positionCounter <- positionCounter + 1  
+  END WHILE  
+  
+  transformedResult <- processTrailingSpaces(segmentStart, segmentEnd, transformedResult)  
+  
+  EXECUTE RETURN transformedResult  
+END FUNCTION

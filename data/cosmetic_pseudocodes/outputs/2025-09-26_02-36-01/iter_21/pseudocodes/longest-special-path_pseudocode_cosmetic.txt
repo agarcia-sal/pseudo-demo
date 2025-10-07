@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+     
+        SET A TO empty list
+        SET B TO 0
+        WHILE B LESS THAN LENGTH(nums)
+          APPEND empty list TO A
+          SET B TO B PLUS 1
+        END WHILE
+     
+        SET C TO 0
+        REPEAT
+          IF C GREATER OR EQUAL LENGTH(edges) THEN
+            BREAK
+          END IF
+          SET D TO element at position C of edges
+          LET E, F, G BE elements u, v, w OF D RESPECTIVELY (decompose)
+          APPEND pair (F, G) TO element at position E of A
+          APPEND pair (E, G) TO element at position F of A
+          SET C TO C PLUS 1
+        UNTIL FALSE
+     
+        FUNCTION dfs(H, I, J, K)
+            ACCESS maxLength FROM outer
+            ACCESS minNodes FROM outer
+            ACCESS prefix FROM outer
+            ACCESS lastSeenDepth FROM outer
+     
+            SET L TO 0
+            IF CONTAINS(lastSeenDepth, nums[H]) THEN
+                SET L TO element at key nums[H] of lastSeenDepth
+            END IF
+     
+            SET element at key nums[H] of lastSeenDepth TO K
+            IF NOT (J GREATER OR EQUAL L) THEN
+                SET J TO L
+            END IF
+     
+            SET M TO (element at position LENGTH(prefix) MINUS ONE of prefix) MINUS (element at position J of prefix)
+            SET N TO K MINUS J
+     
+            IF (M GREATER THAN maxLength) OR ((M EQUALS maxLength) AND (N LESS THAN minNodes)) THEN
+                SET maxLength TO M
+                SET minNodes TO N
+            END IF
+     
+            SET O TO 0
+            WHILE O LESS THAN LENGTH(element at position H of A)
+                LET P, Q BE elements v,w OF element at position O of element at position H of A
+                IF NOT (P EQUAL I) THEN
+                    APPEND (element at position LENGTH(prefix) MINUS ONE of prefix) PLUS Q TO prefix
+                    CALL dfs(P, I, J, K PLUS 1)
+                    REMOVE last element OF prefix
+                END IF
+                SET O TO O PLUS 1
+            END WHILE
+     
+            SET element at key nums[H] of lastSeenDepth TO L
+        END FUNCTION
+     
+        SET maxLength TO 0
+        SET minNodes TO 1
+        SET prefix TO list containing 0
+        SET lastSeenDepth TO empty dictionary
+        CALL dfs(0, -1, 0, 1)
+        RETURN list containing maxLength, minNodes
+    END FUNCTION
+END CLASS

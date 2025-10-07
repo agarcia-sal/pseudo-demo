@@ -1,0 +1,95 @@
+CLASS Solution  
+	FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER  
+		SET constantBase TO 10  
+		SET constantExponent TO 9  
+		SET moduloValue TO (constantBase * constantBase * constantBase * constantBase * constantBase * constantBase * constantBase * constantBase * constantBase) + 7  
+		SET accumulator TO 0  
+		
+		DEFINE FUNCTION iterateCombos(comboList parameter LIST OF LIST OF INTEGERS idx parameter INTEGER) RETURNS INTEGER
+			IF idx EQUALS comboList LENGTH THEN
+				SET minDiff TO (moduloValue * moduloValue)
+				SET outerIdx TO 0
+				WHILE outerIdx < k DO
+					SET innerIdx TO outerIdx + 1
+					REPEAT  
+						IF innerIdx >= k THEN BREAK  
+						END IF
+						SET diffVal TO comboList[idx - 1][outerIdx] - comboList[idx - 1][innerIdx]
+						IF diffVal < 0 THEN
+							SET diffVal TO 0 - diffVal
+						END IF
+						IF diffVal < minDiff THEN
+							SET minDiff TO diffVal
+						END IF
+						ADD 1 TO innerIdx
+					UNTIL FALSE
+					ADD 1 TO outerIdx
+				END WHILE
+				RETURN minDiff
+			END IF
+			
+			SET currentCombo TO comboList[idx]
+			SET returnSum TO 0
+			SET recIndex TO idx
+			SET tmpSum TO 0
+			WHILE recIndex < comboList LENGTH DO
+				SET tmpSum TO iterateCombos(comboList, recIndex + 1)
+				SET returnSum TO (returnSum + tmpSum) MODULO moduloValue
+				SET recIndex TO recIndex + 1
+			END WHILE
+			RETURN returnSum
+		END FUNCTION
+		
+		SET allCombos TO []
+		SET combinationIndices TO []
+		
+		DEFINE FUNCTION buildCombos(startIndex parameter INTEGER, depth parameter INTEGER)
+			IF depth EQUALS k THEN
+				SET selectedCombo TO []
+				SET idxSelect TO 0
+				WHILE idxSelect < k DO
+					APPEND nums[combinationIndices[idxSelect]] TO selectedCombo
+					SET idxSelect TO idxSelect + 1
+				END WHILE
+				APPEND selectedCombo TO allCombos
+				RETURN
+			END IF
+			SET nextIndex TO startIndex
+			WHILE nextIndex < nums LENGTH - (k - depth) + 1 DO
+				SET combinationIndices[depth] TO nextIndex
+				call buildCombos(nextIndex + 1, depth + 1)
+				SET nextIndex TO nextIndex + 1
+			END WHILE
+		END FUNCTION
+		
+		call buildCombos(0, 0)
+		
+		SET totalSumVar TO 0
+		SET positionOne TO 0
+		WHILE positionOne < allCombos LENGTH DO
+			SET comboVar TO allCombos[positionOne]
+			SET minDiffVal TO (moduloValue * moduloValue)
+			SET posTwo TO 0
+			WHILE posTwo < k DO
+				SET posThree TO posTwo + 1
+				REPEAT
+					IF posThree >= k THEN BREAK END IF
+					SET distVal TO comboVar[posTwo] - comboVar[posThree]
+					IF NOT (distVal >= 0) THEN
+						SET distVal TO 0 - distVal
+					END IF
+					IF distVal < minDiffVal THEN
+						SET minDiffVal TO distVal
+					END IF
+					SET posThree TO posThree + 1
+				UNTIL FALSE
+				SET posTwo TO posTwo + 1
+			END WHILE
+			SET totalSumVar TO totalSumVar + minDiffVal
+			SET totalSumVar TO totalSumVar - ((totalSumVar DIV moduloValue) * moduloValue)
+			SET positionOne TO positionOne + 1
+		END WHILE
+		
+		RETURN totalSumVar
+	END FUNCTION  
+END CLASS

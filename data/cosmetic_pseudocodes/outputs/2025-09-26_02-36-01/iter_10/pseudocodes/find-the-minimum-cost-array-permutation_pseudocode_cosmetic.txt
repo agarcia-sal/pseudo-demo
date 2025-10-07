@@ -1,0 +1,84 @@
+CLASS Solution
+  FUNCTION findPermutation(nums)
+    FUNCTION dfs(mask, pre)
+      FUNCTION isMaskFull(m)
+        RETURN m = ((1 << LENGTH(nums)) - 1)
+      END FUNCTION
+
+      FUNCTION absDiff(a, b)
+        IF a >= b THEN
+          RETURN a - b
+        ELSE
+          RETURN b - a
+        END IF
+      END FUNCTION
+
+      FUNCTION dfsLoop(curIdx, resAcc)
+        IF curIdx = LENGTH(nums) THEN
+          RETURN resAcc
+        ELSE
+          FUNCTION isNotVisited(m, idx)
+            RETURN ((m >> idx) & 1) = 0
+          END FUNCTION
+
+          IF isNotVisited(mask, curIdx) THEN
+            tempCandidate := absDiff(pre, nums[curIdx]) + dfs(mask | (1 << curIdx), curIdx)
+            IF tempCandidate < resAcc THEN
+              RETURN dfsLoop(curIdx + 1, tempCandidate)
+            ELSE
+              RETURN dfsLoop(curIdx + 1, resAcc)
+            END IF
+          ELSE
+            RETURN dfsLoop(curIdx + 1, resAcc)
+          END IF
+        END IF
+      END FUNCTION
+
+      IF isMaskFull(mask) THEN
+        RETURN absDiff(pre, nums[0])
+      ELSE
+        RETURN dfsLoop(0, +∞)
+      END IF
+    END FUNCTION
+
+    FUNCTION generate(mask, pre)
+      FUNCTION appendAns(val)
+        ans = ans + [val]
+      END FUNCTION
+
+      FUNCTION isMaskComplete(m)
+        RETURN m = ((1 << LENGTH(nums)) - 1)
+      END FUNCTION
+
+      PROCEDURE recurLoop(i)
+        IF i = LENGTH(nums) THEN RETURN END IF
+        FUNCTION isFree(m, idx)
+          RETURN ((m >> idx) & 1) = 0
+        END FUNCTION
+
+        IF isFree(mask, i) THEN
+          potential := abs(pre - nums[i]) + dfs(mask | (1 << i), i)
+          IF potential = dfs(mask, pre) THEN
+            generate(mask | (1 << i), i)
+            RETURN
+          ELSE
+            recurLoop(i + 1)
+          END IF
+        ELSE
+          recurLoop(i + 1)
+        END IF
+      END PROCEDURE
+
+      appendAns(pre)
+      IF isMaskComplete(mask) THEN
+        RETURN
+      END IF
+      recurLoop(0)
+    END FUNCTION
+
+    lengthNums := LENGTH(nums)
+    ans := []
+    generate(1 << 0, 0)
+    RETURN ans
+  END FUNCTION
+END CLASS

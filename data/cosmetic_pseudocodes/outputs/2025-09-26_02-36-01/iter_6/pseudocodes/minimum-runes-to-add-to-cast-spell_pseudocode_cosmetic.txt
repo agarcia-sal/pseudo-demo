@@ -1,0 +1,144 @@
+CLASS Solution
+	FUNCTION minRunesToAdd(n aglaeO sgynAw sresync)
+		DEFINE BuildList(val e, map)
+			IF e NOT IN map THEN map[e]← []
+			APPEND val TO map[e]
+		END
+
+		SET graph TO {} 
+		SET reverseGraph TO {}
+
+		DEFINE addEdges(ix)
+			IF ix ≥ LENGTH(sgynAw) THEN return
+			LET startNode← sgynAw[ix]
+			LET endNode← sresync[ix]
+			BuildList(endNode, graph)
+			BuildList(startNode, reverseGraph)
+			addEdges(ix + 1)
+		END
+
+		addEdges(0)
+
+		SET indices TO [−1 × 1] REPEATED n TIMES
+		SET lows TO [0 × 1] REPEATED n TIMES
+		SET stackFlag TO [FALSE] REPEATED n TIMES
+		SET workingStack TO []
+		SET currentIndex TO 0
+		SET components TO []
+
+		DEFINE smaller(a, b)
+			IF a < b THEN RETURN a ELSE RETURN b
+		END
+
+		DEFINE tarjan(cur)
+			SET indices[cur]← currentIndex
+			SET lows[cur]← currentIndex
+			currentIndex← currentIndex + 1
+			APPEND cur TO workingStack
+			stackFlag[cur]← TRUE
+
+			DEFINE iterateNeighbors(pos)
+				IF pos ≥ LENGTH(graph[cur]) THEN return
+				LET neigh← graph[cur][pos]
+				IF indices[neigh] = −1 THEN
+					tarjan(neigh)
+					lows[cur] ← smaller(lows[cur], lows[neigh])
+				ELSE
+					IF stackFlag[neigh] THEN 
+						lows[cur] ← smaller(lows[cur], indices[neigh])
+					END
+				END
+				iterateNeighbors(pos + 1)
+			END
+
+			iterateNeighbors(0)
+
+			IF lows[cur] = indices[cur] THEN
+				SET memberList ← []
+				DEFINE peelStack()
+					SET topElem ← workingStack[-1]
+					REMOVE workingStack[-1]
+					stackFlag[topElem] ← FALSE
+					APPEND topElem TO memberList
+					IF topElem ≠ cur THEN peelStack() END
+				END
+				peelStack()
+				APPEND memberList TO components
+			END
+		END
+
+		DEFINE processIndices(pos)
+			IF pos = n THEN return
+			IF indices[pos] = −1 THEN tarjan(pos) END
+			processIndices(pos + 1)
+		END
+
+		processIndices(0)
+
+		SET componentMap TO {}
+		SET sccAtNode TO [−1] REPEATED n TIMES
+		SET hasCrystal TO [FALSE] REPEATED LENGTH(components) TIMES
+		SET compCount TO 0
+
+		DEFINE assignComponents(ix)
+			IF ix = LENGTH(components) THEN return
+			LET cluster ← components[ix]
+			DEFINE markNodes(j)
+				IF j = LENGTH(cluster) THEN return
+				LET nd ← cluster[j]
+				sccAtNode[nd] ← compCount
+				IF nd IN sresync THEN hasCrystal[ix] ← TRUE END
+				markNodes(j + 1)
+			END
+			markNodes(0)
+			compCount ← compCount + 1
+			assignComponents(ix + 1)
+		END
+
+		assignComponents(0)
+
+		SET componentGraph TO {}
+
+		DEFINE addSccEdge(idx)
+			IF idx = LENGTH(sgynAw) THEN return
+			LET fromComp ← sccAtNode[sgynAw[idx]]
+			LET toComp ← sccAtNode[sresync[idx]]
+			IF fromComp ≠ toComp THEN
+				IF fromComp NOT IN componentGraph THEN componentGraph[fromComp] ← [] END
+				APPEND toComp TO componentGraph[fromComp]
+			END
+			addSccEdge(idx + 1)
+		END
+
+		addSccEdge(0)
+
+		SET incomingCount TO [0 × 1] REPEATED LENGTH(components) TIMES
+
+		DEFINE countIncoming(i)
+			IF i = LENGTH(components) THEN return
+			IF i IN componentGraph THEN
+				DEFINE incrementIn(j)
+					IF j = LENGTH(componentGraph[i]) THEN return
+					incomingCount[componentGraph[i][j]] ← incomingCount[componentGraph[i][j]] + 1
+					incrementIn(j + 1)
+				END
+				incrementIn(0)
+			END
+			countIncoming(i + 1)
+		END
+
+		countIncoming(0)
+
+		SET neededTurns TO 0
+
+		DEFINE calcNeeded(k)
+			IF k = LENGTH(components) THEN return
+			IF incomingCount[k] = 0 AND hasCrystal[k] = FALSE THEN neededTurns ← neededTurns + 1 END
+			calcNeeded(k + 1)
+		END
+
+		calcNeeded(0)
+
+		RETURN neededTurns
+	END FUNCTION
+END CLASS

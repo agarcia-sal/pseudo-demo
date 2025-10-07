@@ -1,0 +1,52 @@
+CLASS Solution
+	FUNCTION numberOfPermutations(n, requirements)
+		LET CONSTANT_MOD BE (10 ^ 9) + 7
+		LET mapping_dict BE new dictionary
+		LET temp_index BE 0
+		WHILE temp_index < LENGTH(requirements)
+			LET pair_element BE requirements[temp_index]
+			mapping_dict[pair_element[0]] ← pair_element[1]
+			temp_index ← temp_index + 1
+		END WHILE
+
+		FUNCTION count_permutations(a_length, a_inversions, a_used)
+			IF a_length = n THEN
+				LET val_check BE mapping_dict.get(n - 1, 0)
+				IF a_inversions = val_check THEN
+					RETURN 1
+				ELSE
+					RETURN 0
+				END IF
+			END IF
+
+			IF a_length > 0 THEN
+				LET val_check_two BE mapping_dict.get(a_length - 1, a_inversions)
+				IF a_inversions ≠ val_check_two THEN
+					RETURN 0
+				END IF
+			END IF
+
+			LET accumulator ← 0
+			LET index_var ← 0
+			WHILE index_var < n
+				LET bit_check ← a_used bitwise-AND (1 bit-shifted left by index_var)
+				IF bit_check = 0 THEN
+					LET new_inversion_count ← a_inversions
+					LET idx_inner ← index_var + 1
+					WHILE idx_inner < n
+						LET used_bit_inner ← a_used bitwise-AND (1 bit-shifted left by idx_inner)
+						IF used_bit_inner ≠ 0 THEN
+							new_inversion_count ← new_inversion_count + 1
+						END IF
+						idx_inner ← idx_inner + 1
+					END WHILE
+					accumulator ← (accumulator + count_permutations(a_length + 1, new_inversion_count, a_used bitwise-OR (1 bit-shifted left by index_var))) mod CONSTANT_MOD
+				END IF
+				index_var ← index_var + 1
+			END WHILE
+			RETURN accumulator
+		END FUNCTION
+
+		RETURN count_permutations(0, 0, 0)
+	END FUNCTION
+END CLASS

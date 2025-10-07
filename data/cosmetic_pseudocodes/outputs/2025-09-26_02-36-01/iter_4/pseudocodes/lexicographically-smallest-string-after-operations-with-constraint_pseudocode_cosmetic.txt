@@ -1,0 +1,49 @@
+CLASS Solution  
+    FUNCTION getSmallestString(s parameter of type string k parameter of type integer) RETURNS string  
+        FUNCTION cyclic_distance(c1 parameter of type character c2 parameter of type character) RETURNS integer  
+            DECLARE diff AS integer ASSIGN absolute_value(character_code(c1) - character_code(c2))  
+            DECLARE alt_diff AS integer ASSIGN 26 - diff  
+            IF diff < alt_diff THEN  
+                RETURN diff  
+            ELSE  
+                RETURN alt_diff  
+            END IF  
+        END FUNCTION  
+
+        DECLARE chars AS list of characters ASSIGN empty list  
+        FOR index FROM 0 TO length(s) - 1  
+            APPEND s[index] TO chars  
+        END FOR  
+
+        DECLARE position AS integer ASSIGN 0  
+        DECLARE length_s AS integer ASSIGN length(s)  
+
+        WHILE (k > 0) AND (position < length_s)  
+            IF chars[position] = 'a' THEN  
+                SET position TO position + 1  
+                SKIP TO NEXT ITERATION  
+            END IF  
+
+            DECLARE distance_to_a AS integer ASSIGN cyclic_distance(chars[position], 'a')  
+
+            IF distance_to_a <= k THEN  
+                SET chars[position] TO 'a'  
+                SET k TO k - distance_to_a  
+            ELSE  
+                DECLARE original_code AS integer ASSIGN character_code(chars[position])  
+                DECLARE new_code AS integer ASSIGN original_code - k  
+                SET chars[position] TO character_from_code(new_code)  
+                SET k TO 0  
+            END IF  
+
+            SET position TO position + 1  
+        END WHILE  
+
+        DECLARE result_string AS string ASSIGN empty string  
+        FOR each_char IN chars  
+            SET result_string TO result_string + each_char  
+        END FOR  
+
+        RETURN result_string  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION minimumCost(target, words, costs)
+        DECLARE cost_mapping AS empty dictionary
+        DECLARE idx TO zero
+        DECLARE total_words TO LENGTH(words)
+        WHILE idx LESS THAN total_words
+            DECLARE current_word TO words[idx]
+            DECLARE current_cost TO costs[idx]
+            IF NOT EXISTS cost_mapping[current_word]
+                ASSIGN cost_mapping[current_word] = current_cost
+            ELSE
+                IF current_cost LESS THAN cost_mapping[current_word]
+                    REASSIGN cost_mapping[current_word] TO current_cost
+                END IF
+            END IF
+            INCREMENT idx BY one
+        END WHILE
+        
+        DECLARE target_chars TO SPLIT target INTO array_of_characters
+        
+        FUNCTION min_cost_to_form_target(position)
+            IF position EQUALS LENGTH(target_chars)
+                RETURN 0
+            END IF
+            DECLARE minimal_cost TO positive_infinity
+            FOR EACH pair (dict_word, dict_cost) IN cost_mapping
+                DECLARE dict_word_length TO LENGTH(dict_word)
+                DECLARE next_pos TO position PLUS dict_word_length
+                IF next_pos LESS THAN OR EQUAL TO LENGTH(target_chars)
+                    DECLARE target_segment TO SUBARRAY target_chars FROM position TO next_pos
+                    DECLARE dict_word_chars TO SPLIT dict_word INTO array_of_characters
+                    DECLARE words_match TO true
+                    DECLARE i TO 0
+                    WHILE i LESS THAN dict_word_length AND words_match
+                        IF target_segment[i] NOT EQUAL dict_word_chars[i]
+                            ASSIGN words_match TO false
+                        END IF
+                        INCREMENT i BY one
+                    END WHILE
+                    IF words_match
+                        DECLARE next_cost TO min_cost_to_form_target(next_pos)
+                        IF next_cost NOT EQUAL positive_infinity
+                            DECLARE combined_cost TO dict_cost MINUS (0 - next_cost)
+                            IF combined_cost LESS THAN minimal_cost
+                                ASSIGN minimal_cost TO combined_cost
+                            END IF
+                        END IF
+                    END IF
+                END IF
+            END FOR
+            
+            IF minimal_cost NOT EQUAL positive_infinity
+                RETURN minimal_cost
+            ELSE
+                RETURN positive_infinity
+            END IF
+        END FUNCTION
+        
+        DECLARE final_cost TO min_cost_to_form_target(0)
+        IF final_cost NOT EQUAL positive_infinity
+            RETURN final_cost
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

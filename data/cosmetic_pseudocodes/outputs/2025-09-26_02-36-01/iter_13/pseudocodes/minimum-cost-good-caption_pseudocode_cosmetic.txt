@@ -1,0 +1,105 @@
+CLASS Solution
+    FUNCTION minCostGoodCaption(caption)
+        SET total_length TO LENGTH(caption)
+        IF total_length LESS THAN 3 THEN
+            RETURN ""
+        END IF
+
+        SET char_list TO EMPTY LIST
+        FOR index FROM 0 TO total_length - 1
+            ADD character AT caption[index] TO char_list
+        END FOR
+
+        FUNCTION expandLeftRight(idx_left, idx_right, arr)
+            SET new_left TO idx_left
+            SET new_right TO idx_right
+            WHILE new_left GREATER THAN 0 AND arr[new_left - 1] EQUALS arr[new_left]
+                SET new_left TO new_left - 1
+            END WHILE
+            WHILE new_right LESS THAN LENGTH(arr) - 1 AND arr[new_right + 1] EQUALS arr[new_right]
+                SET new_right TO new_right + 1
+            END WHILE
+            RETURN (new_left, new_right)
+        END FUNCTION
+        
+        FUNCTION nextAlphabetChar(ch)
+            IF ch EQUALS "a"
+                RETURN "b"
+            ELSE IF ch EQUALS "z"
+                RETURN "y"
+            ELSE
+                SET alpha_code TO ASCII_VALUE(ch)
+                RETURN CHARACTER_FROM_ASCII(alpha_code + 1)
+            END IF
+        END FUNCTION
+        
+        FUNCTION fillRange(arr, start_idx, length_fill, fill_char)
+            SET fill_end TO start_idx + length_fill
+            SET pos TO start_idx
+            REPEAT
+                SET arr[pos] TO fill_char
+                SET pos TO pos + 1
+            UNTIL pos EQUALS fill_end
+        END FUNCTION
+
+        SET position TO 0
+        SET limit TO total_length
+
+        WHILE position LESS THAN limit
+            SET segment_start TO position
+            WHILE position LESS THAN limit AND char_list[position] EQUALS char_list[segment_start]
+                SET position TO position + 1
+            END WHILE
+
+            SET segment_len TO position - segment_start
+
+            IF segment_len LESS THAN 3 THEN
+                SET left_extend TO FALSE
+                SET right_extend TO FALSE
+
+                IF segment_start GREATER THAN 0 AND char_list[segment_start - 1] EQUALS char_list[segment_start] THEN
+                    SET char_list[segment_start - 1] TO char_list[segment_start]
+                    SET segment_start TO segment_start - 1
+                    SET segment_len TO segment_len + 1
+                    SET left_extend TO TRUE
+                END IF
+                
+                IF position LESS THAN limit AND char_list[position - 1] EQUALS char_list[position] THEN
+                    SET char_list[position] TO char_list[position - 1]
+                    SET position TO position + 1
+                    SET segment_len TO segment_len + 1
+                    SET right_extend TO TRUE
+                END IF
+
+                IF segment_len LESS THAN 3 THEN
+                    IF segment_start GREATER THAN 0 THEN
+                        SET focus_char TO char_list[segment_start - 1]
+                    ELSE
+                        SET focus_char TO char_list[position]
+                    END IF
+
+                    IF focus_char EQUALS "a" THEN
+                        SET replacement_char TO "b"
+                    ELSE IF focus_char EQUALS "z" THEN
+                        SET replacement_char TO "y"
+                    ELSE
+                        SET replacement_char TO nextAlphabetChar(focus_char)
+                    END IF
+
+                    fillRange(char_list, segment_start, segment_len, replacement_char)
+
+                    SET position TO segment_start + segment_len
+                END IF
+            END IF
+        END WHILE
+        
+        SET result_string TO ""
+        SET cursor TO 0
+        WHILE cursor LESS THAN LENGTH(char_list)
+            SET result_string TO result_string + char_list[cursor]
+            SET cursor TO cursor + 1
+        END WHILE
+
+        RETURN result_string
+    END FUNCTION
+END CLASS

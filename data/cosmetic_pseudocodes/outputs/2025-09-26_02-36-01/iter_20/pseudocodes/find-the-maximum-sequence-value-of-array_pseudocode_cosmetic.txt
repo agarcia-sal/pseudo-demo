@@ -1,0 +1,92 @@
+CLASS Solution  
+    FUNCTION maxValue(nums LIST OF INTEGER paramA INTEGER) RETURNS INTEGER  
+        FUNCTION bitwiseOr(paramB INTEGER, paramC INTEGER) RETURNS INTEGER
+            RETURN paramB + paramC - (paramB AND paramC)
+        END FUNCTION
+
+        FUNCTION bitwiseXor(paramD INTEGER, paramE INTEGER) RETURNS INTEGER
+            RETURN (paramD OR paramE) - (paramD AND paramE)
+        END FUNCTION
+
+        CONST constOne <- 1
+        CONST constZero <- 0
+        CONST constTwo <- 2
+        CONST constSeven <- 7
+
+        LET dimensionalLimit <- constTwo ^ constSeven
+        LET lenNums <- LENGTH(nums)
+        LET fTable <- ARRAY OF ARRAY OF ARRAY OF BOOLEAN with dimensions (lenNums + constOne, paramA + constTwo, dimensionalLimit) FILLED WITH FALSE
+        LET gTable <- ARRAY OF ARRAY OF ARRAY OF BOOLEAN with same dimensions AS fTable FILLED WITH FALSE
+
+        fTable[constZero][constZero][constZero] <- TRUE
+        LET outerIndex <- constZero
+        WHILE outerIndex < lenNums DO
+            LET midIndex <- constZero
+            WHILE midIndex <= paramA DO
+                LET innermostIndex <- constZero
+                REPEAT
+                    IF innermostIndex >= dimensionalLimit THEN BREAK
+                    LET firstVal <- fTable[outerIndex + constOne][midIndex][innermostIndex]
+                    LET secondVal <- fTable[outerIndex][midIndex][innermostIndex]
+                    fTable[outerIndex + constOne][midIndex][innermostIndex] <- firstVal OR secondVal
+
+                    LET bitwiseIndex <- bitwiseOr(innermostIndex, nums[outerIndex])
+                    LET prevVal <- fTable[outerIndex][midIndex][innermostIndex]
+                    fTable[outerIndex + constOne][midIndex + constOne][bitwiseIndex] <- fTable[outerIndex + constOne][midIndex + constOne][bitwiseIndex] OR prevVal
+                    innermostIndex <- innermostIndex + constOne
+                UNTIL FALSE
+                midIndex <- midIndex + constOne
+            END WHILE
+            outerIndex <- outerIndex + constOne
+        END WHILE
+
+        gTable[lenNums][constZero][constZero] <- TRUE
+        LET indexDown <- lenNums
+        WHILE indexDown > constZero DO
+            LET indexMid <- constZero
+            WHILE indexMid <= paramA DO
+                LET indexInn <- constZero
+                REPEAT
+                    IF indexInn >= dimensionalLimit THEN BREAK
+                    LET valOne <- gTable[indexDown - constOne][indexMid][indexInn]
+                    LET valTwo <- gTable[indexDown][indexMid][indexInn]
+                    gTable[indexDown - constOne][indexMid][indexInn] <- valOne OR valTwo
+
+                    LET computedIndex <- bitwiseOr(indexInn, nums[indexDown - constOne])
+                    LET tempVal <- gTable[indexDown][indexMid][indexInn]
+                    gTable[indexDown - constOne][indexMid + constOne][computedIndex] <- gTable[indexDown - constOne][indexMid + constOne][computedIndex] OR tempVal
+                    indexInn <- indexInn + constOne
+                UNTIL FALSE
+                indexMid <- indexMid + constOne
+            END WHILE
+            indexDown <- indexDown - constOne
+        END WHILE
+
+        LET ansVal <- constZero
+        LET iteratorI <- paramA
+        REPEAT
+            IF iteratorI > (lenNums - paramA - constOne) THEN BREAK
+            LET iterX <- constZero
+            REPEAT
+                IF iterX >= dimensionalLimit THEN BREAK
+                IF fTable[iteratorI][paramA][iterX] THEN
+                    LET iterY <- constZero
+                    REPEAT
+                        IF iterY >= dimensionalLimit THEN BREAK
+                        IF gTable[iteratorI][paramA][iterY] THEN
+                            LET xorVal <- bitwiseXor(iterX, iterY)
+                            IF xorVal > ansVal THEN
+                                ansVal <- xorVal
+                            END IF
+                        END IF
+                        iterY <- iterY + constOne
+                    UNTIL FALSE
+                END IF
+                iterX <- iterX + constOne
+            UNTIL FALSE
+            iteratorI <- iteratorI + constOne
+        UNTIL FALSE
+
+        RETURN ansVal
+    END FUNCTION  
+END CLASS

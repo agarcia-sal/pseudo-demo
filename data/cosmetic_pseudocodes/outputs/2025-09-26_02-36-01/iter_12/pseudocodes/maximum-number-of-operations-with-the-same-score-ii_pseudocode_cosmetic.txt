@@ -1,0 +1,59 @@
+CLASS Solution
+    FUNCTION maxOperations(nums)
+        FUNCTION explore(startIndex, endIndex, targetSum, cacheMap)
+            FUNCTION checkPairSum(a, b) 
+                RETURN ((a + b) = targetSum)
+            END FUNCTION
+
+            IF startIndex >= endIndex THEN
+                RETURN 0
+            END IF
+
+            keyTriple = (startIndex, endIndex, targetSum)
+            IF keyTriple IN cacheMap THEN
+                RETURN cacheMap[keyTriple]
+            END IF
+
+            highestCount = 0
+
+            tempVal1 = nums[startIndex]
+            tempVal2 = nums[startIndex + 1]
+            tempVal3 = nums[endIndex]
+            tempVal4 = nums[endIndex - 1]
+
+            IF checkPairSum(tempVal1, tempVal2) THEN
+                candidateCount = 1 + explore(startIndex + 2, endIndex, targetSum, cacheMap)
+                highestCount = IF candidateCount > highestCount THEN candidateCount ELSE highestCount
+            END IF
+
+            IF checkPairSum(tempVal4, tempVal3) THEN
+                candidateCount = 1 + explore(startIndex, endIndex - 2, targetSum, cacheMap)
+                highestCount = IF candidateCount > highestCount THEN candidateCount ELSE highestCount
+            END IF
+
+            IF checkPairSum(tempVal1, tempVal3) THEN
+                candidateCount = 1 + explore(startIndex + 1, endIndex - 1, targetSum, cacheMap)
+                highestCount = IF candidateCount > highestCount THEN candidateCount ELSE highestCount
+            END IF
+
+            cacheMap[keyTriple] = highestCount
+            RETURN highestCount
+        END FUNCTION
+
+        FUNC createTargetSum(valA, valB)
+            PARTIAL_SUM = valA + valB
+            RETURN PARTIAL_SUM
+        END FUNC
+
+        lenNums = LENGTH(nums)
+        firstPairSum = createTargetSum(nums[0], nums[1])
+        secondPairSum = createTargetSum(nums[lenNums - 2], nums[lenNums - 1])
+        thirdPairSum = createTargetSum(nums[0], nums[lenNums - 1])
+
+        result1 = 1 + explore(2, lenNums - 1, firstPairSum, {})
+        result2 = 1 + explore(0, lenNums - 3, secondPairSum, {})
+        result3 = 1 + explore(1, lenNums - 2, thirdPairSum, {})
+
+        RETURN MAXIMUM(result1, result2, result3)
+    END FUNCTION
+END CLASS

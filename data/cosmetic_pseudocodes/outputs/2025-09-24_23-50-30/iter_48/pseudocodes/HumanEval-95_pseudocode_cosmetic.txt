@@ -1,0 +1,37 @@
+```
+FUNCTION check_dict_case(dict_param)
+  SWITCH NOT (LENGTH(dict_param KEYS) = 0)
+    CASE False:
+      RETURN False
+    CASE True:
+      VAR mode_var = "start"
+      VAR key_iter = dict_param KEYS
+      VAR idx_var = 0
+      WHILE idx_var < LENGTH(key_iter)
+        VAR cur_key = key_iter[idx_var]
+        idx_var = idx_var + 1
+        IF NOT (cur_key IS INSTANCEOF STRING)
+          mode_var = "mixed"
+          BREAK
+        END IF
+        SWITCH TRUE
+          CASE (mode_var = "start")
+            SWITCH TRUE
+              CASE (cur_key TOUPPER() = cur_key)
+                mode_var = "upper"
+              CASE (cur_key TOLOWER() = cur_key)
+                mode_var = "lower"
+              DEFAULT:
+                BREAK
+            END SWITCH
+          CASE ((mode_var = "upper" AND NOT (cur_key TOUPPER() = cur_key)) OR (mode_var = "lower" AND NOT (cur_key TOLOWER() = cur_key)))
+            mode_var = "mixed"
+            BREAK
+          DEFAULT:
+            BREAK
+        END SWITCH
+      END WHILE
+      RETURN (mode_var = "upper") OR (mode_var = "lower")
+  END SWITCH
+END FUNCTION
+```

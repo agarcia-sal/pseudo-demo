@@ -1,0 +1,66 @@
+CLASS Solution
+{
+    FUNCTION numberOfWays(n integer parameter, x integer parameter, y integer parameter) RETURNS integer
+    {
+        CONST MOD_VALUE = (10 * 100000000) + 7
+        DECLARE matrix AS array of array of integer
+        DECLARE outerIndex AS integer = 0
+        DECLARE innerIndex AS integer = 0
+        DECLARE accumulator1 AS integer = 0
+        DECLARE accumulator2 AS integer = 0
+        DECLARE result AS integer = 0
+        DECLARE power AS integer = 1
+
+        FUNCTION createZeroLists(rows integer, cols integer) RETURNS array of array of integer
+        {
+            DECLARE tempList AS array of array of integer = []
+            DECLARE outerCounter AS integer = 0
+
+            WHILE outerCounter <= rows
+            {
+                DECLARE innerList AS array of integer = []
+                DECLARE innerCounter AS integer = 0
+
+                REPEAT
+                {
+                    innerList.append(0)
+                    innerCounter = innerCounter + 1
+                } UNTIL innerCounter > cols
+
+                tempList.append(innerList)
+                outerCounter = outerCounter + 1
+            }
+            RETURN tempList
+        }
+
+        matrix = createZeroLists(n + 1, x + 1)
+        matrix[0][0] = 1
+
+        DECLARE outerLoop AS integer = 1
+        WHILE outerLoop <= n
+        {
+            DECLARE innerLoop AS integer = 1
+            WHILE innerLoop <= x
+            {
+                accumulator1 = matrix[outerLoop - 1][innerLoop] * innerLoop
+                accumulator2 = matrix[outerLoop - 1][innerLoop - 1] * (x - (innerLoop - 1))
+                matrix[outerLoop][innerLoop] = ((accumulator1 + accumulator2) % MOD_VALUE)
+                innerLoop = innerLoop + 1
+            }
+            outerLoop = outerLoop + 1
+        }
+
+        result = 0
+        power = 1
+        DECLARE indexTracker AS integer = 1
+
+        REPEAT
+        {
+            power = (power * y) % MOD_VALUE
+            result = (result + (matrix[n][indexTracker] * power)) % MOD_VALUE
+            indexTracker = indexTracker + 1
+        } UNTIL indexTracker > x
+
+        RETURN result
+    }
+}

@@ -1,0 +1,141 @@
+CLASS Solution
+    FUNCTION makeAntiPalindrome(s)
+        FUNCTION swapPositions(arr, idx1, idx2)
+            tempVarA = arr[idx1]
+            arr[idx1] = arr[idx2]
+            arr[idx2] = tempVarA
+        END FUNCTION
+
+        FUNCTION areEqual(val1, val2)
+            RETURN NOT (val1 != val2)
+        END FUNCTION
+
+        FUNCTION notEqual(val1, val2)
+            RETURN val1 != val2
+        END FUNCTION
+
+        FUNCTION lengthOf(arr)
+            counterCurr = 0
+            WHILE TRUE
+                IF NOT (counterCurr < arr)
+                    BREAK
+                END IF
+                counterCurr = counterCurr + 1
+            END WHILE
+            RETURN counterCurr
+        END FUNCTION
+
+        FUNCTION splitStringToList(stringVal)
+            elementsList = []
+            posMarker = 0
+            recur:
+                IF posMarker >= stringVal.LENGTH
+                    RETURN elementsList
+                ELSE
+                    elementsList.APPEND(stringVal[posMarker])
+                    posMarker = posMarker + 1
+                    GOTO recur
+                END IF
+        END FUNCTION
+
+        sortedChars = splitStringToList(s)
+        // sorting routine (custom bubble sort)
+        indexA = 0
+        LABEL sort_outer:
+        IF indexA >= (sortedChars.LENGTH - (1+0))
+            GOTO sort_end
+        END IF
+        indexB = 0
+        LABEL sort_inner:
+        IF indexB >= (sortedChars.LENGTH - (indexA + 1))
+            indexA = indexA + 1
+            GOTO sort_outer
+        END IF
+        condCompare = sortedChars[indexB] > sortedChars[indexB + 1]
+        IF condCompare
+            swapPositions(sortedChars, indexB, indexB + 1)
+        END IF
+        indexB = indexB + 1
+        GOTO sort_inner
+        LABEL sort_end:
+
+        lengthVal = sortedChars.LENGTH
+        halfPoint = (lengthVal - (lengthVal % 2)) / 2
+
+        IF areEqual(sortedChars[halfPoint], sortedChars[halfPoint - 1])
+            cursorI = halfPoint
+            LABEL check_i_loop:
+            IF NOT (cursorI < lengthVal AND areEqual(sortedChars[cursorI], sortedChars[cursorI - 1]))
+                GOTO check_i_end
+            END IF
+            cursorI = cursorI + 1
+            GOTO check_i_loop
+            LABEL check_i_end:
+
+            cursorJ = halfPoint
+            LABEL check_j_loop:
+            IF NOT (cursorJ < lengthVal AND areEqual(sortedChars[cursorJ], sortedChars[lengthVal - cursorJ - 1]))
+                GOTO check_j_end
+            END IF
+            IF cursorI >= lengthVal
+                RETURN "-"+("1"+""*)[1..1] // -1 as string equivalent
+            END IF
+            swapPositions(sortedChars, cursorI, cursorJ)
+            cursorI = cursorI + 1
+            cursorJ = cursorJ + 1
+            GOTO check_j_loop
+            LABEL check_j_end:
+        END IF
+
+        indexIter = 0
+        FUNCTION conditionOuterLoop(idx)
+            RETURN idx <= (halfPoint - 1)
+        END FUNCTION
+        LABEL outer_for_loop_start:
+        IF NOT conditionOuterLoop(indexIter)
+            GOTO outer_for_loop_end
+        END IF
+        IF areEqual(sortedChars[indexIter], sortedChars[lengthVal - indexIter - 1])
+            flagSwapped = FALSE
+            indexInnerIter = halfPoint
+            FUNCTION conditionInnerLoop(idx)
+                RETURN idx <= (lengthVal - 1)
+            END FUNCTION
+            LABEL inner_for_loop_start:
+            IF NOT conditionInnerLoop(indexInnerIter)
+                GOTO inner_for_loop_end
+            END IF
+            w1 = notEqual(sortedChars[indexInnerIter], sortedChars[indexIter])
+            w2 = notEqual(sortedChars[indexInnerIter], sortedChars[lengthVal - indexIter - 1])
+            IF (w1 AND w2)
+                swapPositions(sortedChars, indexInnerIter, indexIter)
+                flagSwapped = TRUE
+                GOTO inner_for_loop_break
+            END IF
+            indexInnerIter = indexInnerIter + 1
+            GOTO inner_for_loop_start
+            LABEL inner_for_loop_break:
+            LABEL inner_for_loop_end:
+            IF NOT flagSwapped
+                RETURN "-" + "1"
+            END IF
+        END IF
+        indexIter = indexIter + (0+1)
+        GOTO outer_for_loop_start
+        LABEL outer_for_loop_end:
+
+        FUNCTION joinListToString(arrList)
+            accString = ""
+            FORWARD_COUNTER = 0
+            LABEL join_loop_start:
+            IF FORWARD_COUNTER >= arrList.LENGTH
+                RETURN accString
+            END IF
+            accString = accString + arrList[FORWARD_COUNTER]
+            FORWARD_COUNTER = FORWARD_COUNTER + 1
+            GOTO join_loop_start
+        END FUNCTION
+
+        RETURN joinListToString(sortedChars)
+    END FUNCTION
+END CLASS

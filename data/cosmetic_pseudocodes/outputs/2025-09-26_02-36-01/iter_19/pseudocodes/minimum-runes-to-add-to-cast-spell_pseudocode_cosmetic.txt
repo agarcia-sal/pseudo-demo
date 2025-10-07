@@ -1,0 +1,104 @@
+CLASS Solution  
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)  
+        SET alpha TO a new empty mapping from integer to list of integers  
+        SET beta TO a new empty mapping from integer to list of integers  
+
+        FOR idx FROM 0 TO LENGTH(flowFrom) - 1  
+            SET key1 TO flowFrom[idx]  
+            SET key2 TO flowTo[idx]  
+            APPEND key2 TO the list at key key1 in alpha  
+            APPEND key1 TO the list at key key2 in beta  
+        END FOR  
+
+        FUNCTION explore(node)  
+            SET indices[node] TO counter  
+            SET low[node] TO counter  
+            SET counter TO counter + 1  
+            APPEND node TO holder  
+            SET active[node] TO True  
+
+            FOR each adj IN alpha[node]  
+                IF indices[adj] EQUALS -1 THEN
+                    CALL explore(adj)  
+                    IF low[adj] < low[node] THEN
+                        SET low[node] TO low[adj]  
+                    END IF  
+                ELSE  
+                    IF active[adj] = True AND indices[adj] < low[node] THEN
+                        SET low[node] TO indices[adj]  
+                    END IF  
+                END IF  
+            END FOR  
+
+            IF low[node] == indices[node] THEN  
+                SET component TO an empty list  
+                LOOP  
+                    SET w TO REMOVE last element FROM holder  
+                    SET active[w] TO False  
+                    APPEND w TO component  
+                    IF w == node THEN  
+                        EXIT LOOP  
+                    END IF  
+                END LOOP  
+                APPEND component TO components  
+            END IF  
+        END FUNCTION  
+
+        SET indices TO a list of size n FILLED WITH -1  
+        SET low TO a list of size n FILLED WITH 0  
+        SET active TO a list of size n FILLED WITH False  
+        SET holder TO an empty list  
+        SET counter TO 0  
+        SET components TO an empty list  
+
+        FOR variable_x FROM 0 TO n - 1  
+            IF indices[variable_x] EQUALS -1 THEN  
+                CALL explore(variable_x)  
+            END IF  
+        END FOR  
+
+        SET dag TO a new empty mapping from integer to list of integers  
+        SET belong TO a list of size n FILLED WITH -1  
+        SET crystal_flag TO a list of size LENGTH(components) FILLED WITH False  
+        SET component_id TO 0  
+
+        FOR iterator FROM 0 TO LENGTH(components) - 1  
+            FOR each ele IN components[iterator]  
+                SET belong[ele] TO component_id  
+                FOR each elem_crystal IN crystals  
+                    IF ele == elem_crystal THEN  
+                        SET crystal_flag[iterator] TO True  
+                    END IF  
+                END FOR  
+            END FOR  
+            SET component_id TO component_id + 1  
+        END FOR  
+
+        FOR pos FROM 0 TO LENGTH(flowFrom) - 1  
+            SET a TO belong[flowFrom[pos]]  
+            SET b TO belong[flowTo[pos]]  
+            IF a != b THEN  
+                APPEND b TO the list at key a in dag  
+            END IF  
+        END FOR  
+
+        SET indeg_tracker TO a list of size LENGTH(components) FILLED WITH 0  
+
+        FOR num FROM 0 TO LENGTH(components) - 1  
+            FOR each nxt IN dag[num]  
+                SET indeg_tracker[nxt] TO indeg_tracker[nxt] + 1  
+            END FOR  
+        END FOR  
+
+        SET result_counter TO 0  
+        FOR index FROM 0 TO LENGTH(components) - 1  
+            IF indeg_tracker[index] == 0 THEN  
+                IF crystal_flag[index] == False THEN  
+                    SET result_counter TO result_counter + 1  
+                END IF  
+            END IF  
+        END FOR  
+
+        RETURN result_counter  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,33 @@
+```
+FUNCTION check_dict_case(input_map)
+    IF (COUNT input_map KEYS) = 0 THEN
+        RETURN False
+    ELSE
+        LET mode BE "start"
+        FOR EACH element IN input_map KEYS DO
+            WHEN NOT (element INSTANCEOF STRING) DO
+                SET mode TO "mixed"
+                LEAVE FOR
+            END
+            IF mode = "start" THEN
+                SELECT
+                    CASE element = TOUPPER(element):
+                        SET mode TO "upper"
+                    CASE element = TOLOWER(element):
+                        SET mode TO "lower"
+                    DEFAULT:
+                        LEAVE FOR
+                ENDSELECT
+            ELSE
+                IF ((mode = "upper") AND NOT (element = TOUPPER(element))) OR ((mode = "lower") AND NOT (element = TOLOWER(element))) THEN
+                    SET mode TO "mixed"
+                    LEAVE FOR
+                ELSE
+                    LEAVE FOR
+                ENDIF
+            ENDIF
+        END FOR
+        RETURN (mode = "upper") OR (mode = "lower")
+    ENDIF
+END FUNCTION
+```

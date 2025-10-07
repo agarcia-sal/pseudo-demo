@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION maxTargetNodes(edges1, edges2)
+        
+        FUNCTION buildAdjacencyMap(edgePairs)
+            SET map TO new default dictionary with list as default
+            SET idx TO 0
+            REPEAT
+                IF idx GREATER OR EQUAL TO LENGTH(edgePairs)
+                    BREAK
+                END IF
+                SET src TO edgePairs[idx][0]
+                SET dst TO edgePairs[idx][1]
+                APPEND dst TO map[src]
+                APPEND src TO map[dst]
+                SET idx TO idx PLUS 1
+            UNTIL FALSE
+            RETURN map
+        END FUNCTION
+        
+        SET adjacencyOne TO buildAdjacencyMap(edges1)
+        SET adjacencyTwo TO buildAdjacencyMap(edges2)
+        
+        SET sizeOne TO LENGTH(adjacencyOne.KEYS)
+        SET sizeTwo TO LENGTH(adjacencyTwo.KEYS)
+        
+        FUNCTION breadthSearch(treeStructure, rootNode)
+            SET evenCounter TO 0
+            SET oddCounter TO 0
+            SET line TO new deque CONTAINING (rootNode, 0)
+            SET encountered TO new set CONTAINING rootNode
+            
+            WHILE TRUE
+                IF LENGTH(line) EQUALS 0
+                    BREAK
+                END IF
+                SET currentPair TO line.POP_FRONT()
+                SET currNode TO currentPair[0]
+                SET currDistance TO currentPair[1]
+                
+                IF (currDistance MOD 2) NOT EQUAL 1
+                    SET evenCounter TO evenCounter PLUS 1
+                ELSE
+                    SET oddCounter TO oddCounter PLUS 1
+                END IF
+                
+                FOR EACH adjNode IN treeStructure[currNode]
+                    IF adjNode NOT IN encountered
+                        encountered.ADD(adjNode)
+                        line.APPEND((adjNode, currDistance PLUS 1))
+                    END IF
+                END FOR
+            END WHILE
+            
+            RETURN (evenCounter, oddCounter)
+        END FUNCTION
+        
+        SET collectedCountsOne TO []
+        SET counterA TO 0
+        WHILE counterA LESS THAN sizeOne
+            collectedCountsOne.APPEND(breadthSearch(adjacencyOne, counterA))
+            SET counterA TO counterA PLUS 1
+        END WHILE
+        
+        SET collectedCountsTwo TO []
+        SET counterB TO 0
+        WHILE counterB LESS THAN sizeTwo
+            collectedCountsTwo.APPEND(breadthSearch(adjacencyTwo, counterB))
+            SET counterB TO counterB PLUS 1
+        END WHILE
+        
+        SET finalResults TO []
+        SET outerIndex TO 0
+        WHILE outerIndex LESS THAN sizeOne
+            SET evOne TO collectedCountsOne[outerIndex][0]
+            SET odOne TO collectedCountsOne[outerIndex][1]
+            SET highestTargetCount TO 0
+            
+            SET innerIndex TO 0
+            WHILE innerIndex LESS THAN sizeTwo
+                SET evTwo TO collectedCountsTwo[innerIndex][0]
+                SET odTwo TO collectedCountsTwo[innerIndex][1]
+                
+                IF outerIndex EQUALS innerIndex OR ((outerIndex MOD 2) EQUALS (innerIndex MOD 2))
+                    SET targetsCount TO evTwo
+                ELSE
+                    SET targetsCount TO odTwo
+                END IF
+                
+                IF targetsCount GREATER THAN highestTargetCount
+                    SET highestTargetCount TO targetsCount
+                END IF
+                SET innerIndex TO innerIndex PLUS 1
+            END WHILE
+            
+            finalResults.APPEND(evOne PLUS highestTargetCount)
+            SET outerIndex TO outerIndex PLUS 1
+        END WHILE
+        
+        RETURN finalResults
+    END FUNCTION
+END CLASS

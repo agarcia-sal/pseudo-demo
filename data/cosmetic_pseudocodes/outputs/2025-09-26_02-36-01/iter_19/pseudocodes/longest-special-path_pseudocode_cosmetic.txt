@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION longestSpecialPath(edges, nums)
+        SET adjacency TO empty list
+        FOR i FROM 0 TO LENGTH(nums) - 1
+            APPEND empty list TO adjacency
+        END FOR
+
+        FOR EACH edgeItem IN edges
+            SET p TO edgeItem[0]
+            SET q TO edgeItem[1]
+            SET r TO edgeItem[2]
+            APPEND pair(q, r) TO adjacency[p]
+            APPEND pair(p, r) TO adjacency[q]
+        END FOR
+
+        FUNCTION dfs(x, y, z, m)
+            ACCESS peak FROM enclosing scope
+            ACCESS minimum FROM enclosing scope
+
+            SET historyDepth TO 0
+            IF nums[x] IN lastAppearanceDepth
+                SET historyDepth TO lastAppearanceDepth[nums[x]]
+            END IF
+
+            SET lastAppearanceDepth[nums[x]] TO m
+
+            IF z < historyDepth
+                SET z TO historyDepth
+            END IF
+
+            SET segmentLength TO prefixList[COUNT(prefixList) - 1] - prefixList[z]
+            SET nodeCount TO m - z
+
+            IF (segmentLength > peak) OR (segmentLength = peak AND nodeCount < minimum)
+                SET peak TO segmentLength
+                SET minimum TO nodeCount
+            END IF
+
+            FOR EACH pairItem IN adjacency[x]
+                SET a TO pairItem[0]
+                SET b TO pairItem[1]
+                IF a = y
+                    CONTINUE
+                END IF
+                APPEND prefixList[COUNT(prefixList) - 1] + b TO prefixList
+                CALL dfs(a, x, z, m + 1)
+                REMOVE LAST ELEMENT FROM prefixList
+            END FOR
+
+            SET lastAppearanceDepth[nums[x]] TO historyDepth
+        END FUNCTION
+
+        SET peak TO 0
+        SET minimum TO 1
+        SET prefixList TO list containing 0
+        SET lastAppearanceDepth TO empty dictionary
+        CALL dfs(0, -1, 0, 1)
+        RETURN list(peak, minimum)
+    END FUNCTION
+END CLASS

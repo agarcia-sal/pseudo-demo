@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION numberOfPairs(nums1, nums2, k)
+        FUNCTION tally(collection)
+            INITIALIZE index TO 0
+            INITIALIZE frequencyMap TO empty map
+            WHILE index LESS THAN LENGTH(collection)
+                SET currentElem TO collection[index]
+                IF currentElem IN frequencyMap THEN
+                    SET frequencyMap[currentElem] TO frequencyMap[currentElem] + 1
+                ELSE
+                    SET frequencyMap[currentElem] TO 1
+                END IF
+                SET index TO index + 1
+            END WHILE
+            RETURN frequencyMap
+        END FUNCTION
+
+        SET hashmap TO tally(nums2)
+        SET accumulator TO 0
+
+        FUNCTION processPairs(arr, map, key)
+            DEFINE helperLoop(mKeys, mValues, pos, total)
+                IF pos GREATER THAN OR EQUAL TO LENGTH(mKeys) THEN
+                    RETURN total
+                ELSE
+                    SET divisorCandidate TO mKeys[pos]
+                    SET freqValue TO mValues[pos]
+                    IF (key MOD (divisorCandidate * k)) EQUALS 0 THEN
+                        SET updatedTotal TO total + freqValue
+                    ELSE
+                        SET updatedTotal TO total
+                    END IF
+                    RETURN helperLoop(mKeys, mValues, pos + 1, updatedTotal)
+                END IF
+            END FUNCTION
+            RETURN helperLoop(ARRAY_KEYS(map), ARRAY_VALUES(map), 0, 0)
+        END FUNCTION
+
+        FUNCTION outerIndexLoop(array, map, idx, result)
+            IF idx GREATER THAN OR EQUAL TO LENGTH(array) THEN
+                RETURN result
+            ELSE
+                SET currentVal TO array[idx]
+                SET newResult TO result + processPairs(array, map, currentVal)
+                RETURN outerIndexLoop(array, map, idx + 1, newResult)
+            END IF
+        END FUNCTION
+
+        RETURN outerIndexLoop(nums1, hashmap, 0, accumulator)
+    END FUNCTION
+END CLASS

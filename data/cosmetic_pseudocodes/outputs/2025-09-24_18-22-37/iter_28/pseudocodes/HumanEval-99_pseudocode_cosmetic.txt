@@ -1,0 +1,55 @@
+FUNCTION closest_integer(input_val)
+    IMPORT floor, ceil FROM math
+
+    SET decimal_count_flag TO False
+    SET str_length TO LENGTH OF input_val
+    SET char_index TO 0
+    SET trimmed_flag TO False
+
+    // Check decimal point count
+    SET decimal_points TO 0
+    WHILE char_index LESS THAN str_length
+        IF input_val.at(char_index) EQUALS '.'
+            SET decimal_points TO decimal_points + 1
+        END IF
+        SET char_index TO char_index + 1
+    END WHILE
+    IF decimal_points EQUALS 1
+        SET decimal_count_flag TO True
+    END IF
+
+    IF decimal_count_flag IS True
+        SET last_idx TO str_length - 1
+        SET finished_trimming TO False
+        WHILE finished_trimming IS False AND last_idx GREATER OR EQUAL TO 0
+            IF input_val.at(last_idx) EQUALS '0'
+                SET input_val TO SUBSTRING OF input_val FROM 0 TO last_idx EXCLUSIVE
+                SET last_idx TO last_idx - 1
+            ELSE
+                SET finished_trimming TO True
+            END IF
+        END WHILE
+    END IF
+
+    SET converted_num TO FLOAT OF input_val
+
+    SET res TO 0
+    SET input_len TO LENGTH OF input_val
+
+    SWITCH TRUE
+        CASE input_len GREATER THAN 1 AND input_val.at(input_len - 2) EQUALS '.' AND input_val.at(input_len - 1) EQUALS '5':
+            IF converted_num GREATER THAN 0
+                SET res TO ceil(converted_num)
+            ELSE
+                SET res TO floor(converted_num)
+            END IF
+            BREAK
+        CASE input_len GREATER THAN 0:
+            SET res TO INTEGER ROUND OF converted_num
+            BREAK
+        DEFAULT:
+            SET res TO 0
+    END SWITCH
+
+    RETURN res
+END FUNCTION

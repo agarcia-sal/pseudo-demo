@@ -1,0 +1,47 @@
+CLASS Solution
+	 FUNCTION timeTaken(edges)
+		 LET totalNodes BE (SIZE(edges) + 1)
+		 LET adjacencyMap BE construct_adjacency_list(edges)
+
+		 FUNCTION bfs(origin)
+			 LET dequeStructure BE double_ended_queue((origin, 0))
+			 LET visitedFlags BE array_of_false_of_length(totalNodes)
+			 visitedFlags[origin] ← true
+			 LET greatestDuration BE 0
+
+			 WHILE SIZE(dequeStructure) > 0
+				 LET (currentNode, elapse) BE POP_LEFT(dequeStructure)
+
+				 IF NOT (greatestDuration >= elapse)
+					 greatestDuration ← elapse
+				 END IF
+
+				 FOR each adjNode FROM 0 TO SIZE(adjacencyMap[currentNode]) - 1
+					 LET neighbor ← adjacencyMap[currentNode][adjNode]
+
+					 IF visitedFlags[neighbor] == false
+						 visitedFlags[neighbor] ← true
+
+						 LET delay BE 1
+						 IF (neighbor MOD 2) == 0
+							 delay ← 2
+						 END IF
+
+						 APPEND_TO_RIGHT(dequeStructure, (neighbor, elapse + delay))
+					 END IF
+				 END FOR
+			 END WHILE
+
+			 RETURN greatestDuration
+		 END FUNCTION
+
+		 LET durations BE ARRAY_WITH_SIZE(totalNodes, 0)
+		 LET pos ← 0
+		 WHILE pos < totalNodes
+			 durations[pos] ← bfs(pos)
+			 pos ← pos + 1
+		 END WHILE
+
+		 RETURN durations
+	 END FUNCTION
+END CLASS

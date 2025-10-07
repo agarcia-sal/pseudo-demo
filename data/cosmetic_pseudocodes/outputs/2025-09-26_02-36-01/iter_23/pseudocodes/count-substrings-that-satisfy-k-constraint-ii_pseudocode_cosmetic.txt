@@ -1,0 +1,77 @@
+```pseudocode
+CLASS Solution
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+        SET totalLength TO LENGTH OF s
+        SET zeroPrefixArray TO ARRAY WITH (totalLength + 1) ELEMENTS INITIALIZED TO 0
+        SET onePrefixArray TO ARRAY WITH (totalLength + 1) ELEMENTS INITIALIZED TO 0
+
+        FUNCTION buildPrefixArrays(index parameter)
+            IF index EQUALS totalLength
+                RETURN
+            END IF
+            SET zeroPrefixArray[index + 1] TO zeroPrefixArray[index] + (IF s[index] EQUALS '0' THEN 1 ELSE 0)
+            SET onePrefixArray[index + 1] TO onePrefixArray[index] + (IF s[index] EQUALS '1' THEN 1 ELSE 0)
+            CALL buildPrefixArrays(index + 1)
+        END FUNCTION
+
+        CALL buildPrefixArrays(0)
+
+        FUNCTION count_valid_substrings(leftBound parameter rightBound parameter) RETURNS INTEGER
+            SET validSubstringCount TO 0
+
+            FUNCTION loopStart(currentStart parameter)
+                IF currentStart GREATER THAN rightBound
+                    RETURN
+                END IF
+
+                FUNCTION binarySearch(lowBound parameter highBound parameter)
+                    IF lowBound NOT LESS THAN highBound
+                        RETURN lowBound
+                    END IF
+                    SET midPoint TO (lowBound + highBound) / 2
+
+                    SET zeroCountSegment TO zeroPrefixArray[midPoint + 1] - zeroPrefixArray[currentStart]
+                    SET oneCountSegment TO onePrefixArray[midPoint + 1] - onePrefixArray[currentStart]
+
+                    IF zeroCountSegment <= k OR oneCountSegment <= k
+                        RETURN binarySearch(midPoint + 1, highBound)
+                    ELSE
+                        RETURN binarySearch(lowBound, midPoint)
+                    END IF
+                END FUNCTION
+
+                SET maxValidEnd TO binarySearch(currentStart, rightBound + 1) - 1
+
+                IF maxValidEnd >= currentStart
+                    SET validSubstringCount TO validSubstringCount + (maxValidEnd - currentStart + 1)
+                END IF
+
+                CALL loopStart(currentStart + 1)
+            END FUNCTION
+
+            CALL loopStart(leftBound)
+
+            RETURN validSubstringCount
+        END FUNCTION
+
+        SET outputResults TO EMPTY LIST
+
+        FUNCTION processQueries(index parameter)
+            IF index EQUALS LENGTH OF queries
+                RETURN
+            END IF
+
+            SET currentPair TO queries[index]
+            SET leftQueryBound TO currentPair[0]
+            SET rightQueryBound TO currentPair[1]
+
+            APPEND count_valid_substrings(leftQueryBound, rightQueryBound) TO outputResults
+            CALL processQueries(index + 1)
+        END FUNCTION
+
+        CALL processQueries(0)
+
+        RETURN outputResults
+    END FUNCTION
+END CLASS
+```

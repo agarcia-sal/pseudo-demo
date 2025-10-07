@@ -1,0 +1,58 @@
+```
+FUNCTION parse_nested_parens(expr_string)
+    FUNCTION parse_paren_group(inner_expr)
+        SET depth_counter TO 0
+        SET peak_depth TO 0
+        SET idx TO 1
+
+        WHILE idx <= LENGTH(inner_expr)
+            SET ch TO inner_expr[idx]
+            SELECT ch
+                CASE '('
+                    SET depth_counter TO depth_counter + 1
+                    IF peak_depth < depth_counter THEN
+                        SET peak_depth TO depth_counter
+                    END IF
+                CASE ')'
+                    SET depth_counter TO depth_counter - 1
+            END SELECT
+            SET idx TO idx + 1
+        END WHILE
+        RETURN peak_depth
+    END FUNCTION
+
+    SET split_list TO []
+    SET temp_str TO ""
+    SET pos TO 1
+    SET len_expr TO LENGTH(expr_string)
+
+    WHILE pos <= len_expr
+        IF expr_string[pos] = ' ' THEN
+            IF temp_str != "" THEN
+                APPEND temp_str TO split_list
+                SET temp_str TO ""
+            END IF
+        ELSE
+            SET temp_str TO temp_str + expr_string[pos]
+        END IF
+        SET pos TO pos + 1
+    END WHILE
+
+    IF temp_str != "" THEN
+        APPEND temp_str TO split_list
+    END IF
+
+    SET result_list TO []
+    SET i TO 1
+
+    WHILE i <= LENGTH(split_list)
+        SET elem TO split_list[i]
+        IF LENGTH(elem) > 0 THEN
+            APPEND parse_paren_group(elem) TO result_list
+        END IF
+        SET i TO i + 1
+    END WHILE
+
+    RETURN result_list
+END FUNCTION
+```

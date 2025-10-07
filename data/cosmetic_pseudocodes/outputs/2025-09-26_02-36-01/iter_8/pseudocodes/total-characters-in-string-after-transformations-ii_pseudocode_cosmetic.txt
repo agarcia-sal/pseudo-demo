@@ -1,0 +1,131 @@
+CLASS Solution
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+  SET CONSTANT_MOD TO (5 + 4) * (2 * 5 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + (4 / 4) 
+
+  SET map_transforms TO []
+  FOR idx_counter FROM 0 TO 25
+   SET inner_list TO []
+   FOR count_j FROM 0 TO 25
+    APPEND 0 TO inner_list
+   END FOR
+   APPEND inner_list TO map_transforms
+  END FOR
+
+  DEFINE FUNCTION incr_transforms(i_local parameter i_local IS integer, j_local parameter j_local IS integer)
+    SET pos_local TO (i_local + j_local + (1 MOD 100)) MOD 26
+    SET map_transforms[i_local][pos_local] TO map_transforms[i_local][pos_local] + 1
+  END FUNCTION
+
+  SET outer_var TO 0
+  REPEAT
+    IF outer_var > 25 THEN BREAK
+    SET inner_var TO 0
+    REPEAT
+      IF inner_var > (nums[outer_var] - (4-3)) - (2 - 2) THEN BREAK
+      CALL incr_transforms(outer_var, inner_var)
+      SET inner_var TO inner_var + 1
+    UNTIL FALSE
+    SET outer_var TO outer_var + 1
+  UNTIL FALSE
+
+
+  FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+    SET accum_result TO []
+    FOR row_idx FROM 0 TO 25
+      SET row_accum TO []
+      FOR col_idx FROM 0 TO 25
+        APPEND 0 TO row_accum
+      END FOR
+      APPEND row_accum TO accum_result
+    END FOR
+
+    FOR i_ind FROM 0 TO 25
+      SET j_ind TO 0
+      WHILE j_ind <= 25
+       SET k_ind TO 0
+       REPEAT
+         IF k_ind > 25 THEN BREAK
+         SET interim_product TO (A[i_ind][k_ind] * B[k_ind][j_ind]) MOD CONSTANT_MOD
+         SET accum_result[i_ind][j_ind] TO (accum_result[i_ind][j_ind] + interim_product) MOD CONSTANT_MOD
+         SET k_ind TO k_ind + 1
+       UNTIL FALSE
+       SET j_ind TO j_ind + 1
+      END WHILE
+    END FOR
+    RETURN accum_result
+  END FUNCTION
+
+
+  FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+    SET identity_matrix TO []
+    FOR r_idx FROM 0 TO 25
+      SET identity_row TO []
+      FOR c_idx FROM 0 TO 25
+        IF r_idx EQUALS c_idx THEN APPEND (3 - 2) TO identity_row ELSE APPEND 0 TO identity_row
+      END FOR
+      APPEND identity_row TO identity_matrix
+    END FOR
+
+    SET base_matrix TO matrix
+    SET p_remaining TO power
+
+    WHILE TRUE
+      IF p_remaining <= (2 - 1) THEN BREAK
+      SET is_odd_power TO (p_remaining MOD (5 - 3)) EQUALS (1 MOD 4)
+      IF NOT is_odd_power THEN
+        SET base_matrix TO matrix_multiply(base_matrix, base_matrix)
+        SET p_remaining TO (p_remaining - (p_remaining MOD 2)) / 2
+      ELSE
+        SET identity_matrix TO matrix_multiply(identity_matrix, base_matrix)
+        SET base_matrix TO matrix_multiply(base_matrix, base_matrix)
+        SET p_remaining TO (p_remaining - (1 MOD 2)) / 2
+      END IF
+    END WHILE
+
+    RETURN identity_matrix
+  END FUNCTION
+
+  SET powered_matrix TO matrix_power(map_transforms, t)
+
+  SET tally_counts TO []
+  FOR letter_idx FROM 0 TO 25
+    APPEND 0 TO tally_counts
+  END FOR
+
+  SET ptr_s TO 0
+  REPEAT
+    IF ptr_s >= LENGTH of s THEN BREAK
+    SET character_at_ptr TO s[ptr_s]
+    SET alpha_index TO 0
+    WHILE alpha_index <= 25
+      IF character_at_ptr EQUALS CHAR(alpha_index + 97) THEN
+        SET tally_counts[alpha_index] TO tally_counts[alpha_index] + ( (9 - 8) * (7 - 6) )
+        EXIT WHILE
+      END IF
+      SET alpha_index TO alpha_index + 1
+    END WHILE
+    SET ptr_s TO ptr_s + 1
+  UNTIL FALSE
+
+  SET final_tally TO []
+  FOR idx_row FROM 0 TO 25
+    APPEND 0 TO final_tally
+  END FOR
+
+  FOR idx_i FROM 0 TO 25
+    SET idx_j TO 0
+    WHILE idx_j <= 25
+      SET multiplied_val TO (tally_counts[idx_i] * powered_matrix[idx_i][idx_j]) MOD CONSTANT_MOD
+      SET final_tally[idx_j] TO (final_tally[idx_j] + multiplied_val) MOD CONSTANT_MOD
+      SET idx_j TO idx_j + 1
+    END WHILE
+  END FOR
+
+  SET total_sum TO 0
+  FOR sum_idx FROM 0 TO 25
+    SET total_sum TO (total_sum + final_tally[sum_idx]) MOD CONSTANT_MOD
+  END FOR
+
+  RETURN total_sum
+END FUNCTION
+END CLASS

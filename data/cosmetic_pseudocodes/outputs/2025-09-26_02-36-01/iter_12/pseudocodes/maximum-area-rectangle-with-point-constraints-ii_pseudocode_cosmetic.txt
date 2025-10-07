@@ -1,0 +1,153 @@
+CLASS Fenwick  
+	FUNCTION __init__(self, n)  
+		DEFINE FUNC create_zero_list(size)  
+			SET result_list TO empty list  
+			SET counter TO 0  
+			WHILE counter LESS THAN size DO  
+				APPEND 0 TO result_list  
+				SET counter TO counter PLUS 1  
+			END WHILE  
+			RETURN result_list  
+		END FUNC  
+		SET self.tree TO create_zero_list(n + 1)  
+	END FUNCTION  
+
+	FUNCTION add(self, i)  
+		DEFINE FUNCTION bit_update(index, limit, data)  
+			IF index GREATER OR EQUAL TO limit THEN RETURN END IF  
+			SET data[index] TO data[index] PLUS 1  
+			CALL bit_update WITH ARGUMENTS (index + (index AND (-index)), limit, data)  
+		END FUNCTION  
+		CALL bit_update WITH ARGUMENTS (i, LENGTH OF self.tree, self.tree)  
+	END FUNCTION  
+
+	FUNCTION pre(self, i)  
+		DEFINE FUNCTION bit_prefix(index, data)  
+			IF index LESS OR EQUAL TO 0 THEN RETURN 0 END IF  
+			RETURN data[index] + bit_prefix(index AND (index - 1), data)  
+		END FUNCTION  
+		RETURN bit_prefix(i, self.tree)  
+	END FUNCTION  
+
+	FUNCTION query(self, l, r)  
+		DEFINE FUNCTION binn_search(array, val)  
+			SET low TO 0  
+			SET high TO LENGTH OF array  
+			WHILE low LESS THAN high DO  
+				SET mid TO low + (high - low) DIVIDED BY 2  
+				IF array[mid] LESS THAN val THEN  
+					SET low TO mid + 1  
+				ELSE  
+					SET high TO mid  
+				END IF  
+			END WHILE  
+			RETURN low  
+		END FUNCTION  
+		SET p1 TO self.pre(r)  
+		SET p2 TO self.pre(l - 1)  
+		RETURN p1 - p2  
+	END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+	FUNCTION maxRectangleArea(self, xCoord, yCoord)  
+		DEFINE FUNCTION pairwise_iter(lst)  
+			SET idx TO 0  
+			SET limit TO LENGTH OF lst  
+			DEFINE FUNCTION inner(n)  
+				IF n GREATER OR EQUAL TO limit - 1 THEN RETURN END IF  
+				RETURN (lst[n], lst[n + 1])  
+			END FUNCTION  
+			RETURN inner(idx)  
+		END FUNCTION  
+
+		DEFINE FUNCTION bisect_left(local_array, target)  
+			SET lhs TO 0  
+			SET rhs TO LENGTH OF local_array  
+			WHILE lhs LESS THAN rhs DO  
+				SET median TO lhs + (rhs - lhs) DIVIDED BY 2  
+				IF local_array[median] LESS THAN target THEN  
+					SET lhs TO median + 1  
+				ELSE  
+					SET rhs TO median  
+				END IF  
+			END WHILE  
+			RETURN lhs  
+		END FUNCTION  
+
+		DEFINE FUNCTION unique_sort(elems)  
+			SET accum TO empty list  
+			SET seen TO empty set  
+			FOR each val IN elems DO  
+				IF val NOT IN seen THEN  
+					ADD val TO accum  
+					ADD val TO seen  
+				END IF  
+			END FOR  
+			SORT accum IN ascending order  
+			RETURN accum  
+		END FUNCTION  
+
+		DEFINE FUNCTION make_pairs(a_list, b_list)  
+			SET pairings TO empty list  
+			SET idx TO 0  
+			WHILE idx LESS THAN LENGTH OF a_list DO  
+				APPEND (a_list[idx], b_list[idx]) TO pairings  
+				SET idx TO idx + 1  
+			END WHILE  
+			RETURN pairings  
+		END FUNCTION  
+
+		SET pts TO make_pairs(xCoord, yCoord)  
+		SORT pts IN ascending order BY first element THEN second element  
+
+		SET sorted_unique_y TO unique_sort(yCoord)  
+		SET answer TO -1  
+
+		SET fenwick_tree TO Fenwick(LENGTH OF sorted_unique_y)  
+		CALL fenwick_tree.add(bisect_left(sorted_unique_y, pts[0][1]) + 1)  
+
+		SET previous TO empty dictionary  
+
+		DEFINE FUNCTION pair_blob(lst)  
+			SET i TO 0  
+			DEFINE FUNCTION next_pair()  
+				IF i >= LENGTH OF lst - 1 THEN RETURN NULL END IF  
+				RETURN (lst[i], lst[i + 1])  
+			END FUNCTION  
+			RETURN next_pair  
+		END FUNCTION  
+
+		SET idx TO 0  
+		WHILE idx LESS THAN LENGTH OF pts - 1 DO  
+			SET (x1y1, x2y2) TO (pts[idx], pts[idx + 1])  
+			SET x1 TO x1y1[0]  
+			SET y1 TO x1y1[1]  
+			SET x2 TO x2y2[0]  
+			SET y2 TO x2y2[1]  
+
+			SET y_val TO bisect_left(sorted_unique_y, y2) + 1  
+			CALL fenwick_tree.add(y_val)  
+
+			IF x1 NOT EQUAL TO x2 THEN  
+				SET idx TO idx + 1  
+				CONTINUE  
+			END IF  
+
+			SET left_bound TO bisect_left(sorted_unique_y, y1) + 1  
+			SET current_sum TO fenwick_tree.query(left_bound, y_val)  
+
+			IF y2 IN previous AND previous[y2][1] == y1 AND previous[y2][2] + 2 == current_sum THEN  
+				DEFINE width AS x2 - previous[y2][0]  
+				DEFINE height AS y2 - y1  
+				IF answer LESS THAN width * height THEN  
+					SET answer TO width * height  
+				END IF  
+			END IF  
+
+			SET previous[y2] TO (x1, y1, current_sum)  
+			SET idx TO idx + 1  
+		END WHILE  
+		RETURN answer  
+	END FUNCTION  
+END CLASS

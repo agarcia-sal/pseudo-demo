@@ -1,0 +1,211 @@
+CLASS Solution
+    FUNCTION maxTargetNodes(edges1, edges2)
+        FUNCTION custom_append(lst, val)
+            lst_length ← LENGTH(lst)
+            lst[lst_length] ← val
+        END FUNCTION
+
+        FUNCTION custom_pop_front(queue)
+            first_element ← queue[0]
+            FOR idx FROM 0 TO LENGTH(queue) - 2
+                queue[idx] ← queue[idx + 1]
+            END FOR
+            REMOVE last element FROM queue
+            RETURN first_element
+        END FUNCTION
+
+        FUNCTION custom_contains(collection, element)
+            found ← FALSE
+            index ← 0
+            REPEAT
+                IF index >= LENGTH(collection) THEN
+                    EXIT
+                END IF
+                IF collection[index] = element THEN
+                    found ← TRUE
+                    EXIT
+                END IF
+                index ← index + 1
+            UNTIL found = TRUE
+            RETURN found
+        END FUNCTION
+
+        FUNCTION custom_mod(a, b)
+            RETURN a - (a / b) * b
+        END FUNCTION
+
+        helper_adj1 ← new default dictionary WITH list AS default
+        helper_adj2 ← new default dictionary WITH list AS default
+
+        procedure_build ← PROCEDURE(input_edges, adj_structure)
+            PROCEDURE_LOOP ← PROCEDURE(index)
+                IF index < LENGTH(input_edges) THEN
+                    curr_pair ← input_edges[index]
+                    first_node ← curr_pair[0]
+                    second_node ← curr_pair[1]
+
+                    IF adj_structure CONTAINS_KEY first_node THEN
+                        temp_list_1 ← adj_structure[first_node]
+                    ELSE
+                        temp_list_1 ← new list
+                    END IF
+
+                    IF adj_structure CONTAINS_KEY second_node THEN
+                        temp_list_2 ← adj_structure[second_node]
+                    ELSE
+                        temp_list_2 ← new list
+                    END IF
+
+                    custom_append(temp_list_1, second_node)
+                    custom_append(temp_list_2, first_node)
+
+                    adj_structure[first_node] ← temp_list_1
+                    adj_structure[second_node] ← temp_list_2
+
+                    PROCEDURE_LOOP(index + 1)
+                END IF
+            END PROCEDURE
+            PROCEDURE_LOOP(0)
+        END PROCEDURE
+
+        procedure_build(edges1, helper_adj1)
+        procedure_build(edges2, helper_adj2)
+
+        count_n ← 0
+        count_m ← 0
+        keys_list_1 ← new list
+        keys_list_2 ← new list
+
+        FOR key_1 IN helper_adj1 KEYS
+            keys_list_1[count_n] ← key_1
+            count_n ← count_n + 1
+        END FOR
+
+        FOR key_2 IN helper_adj2 KEYS
+            keys_list_2[count_m] ← key_2
+            count_m ← count_m + 1
+        END FOR
+
+        FUNCTION bfs(tree_map, starting_node)
+            even_counter ← 0
+            odd_counter ← 0
+            queue_container ← new list
+            visited_set ← new list
+
+            helper_enqueue ← PROCEDURE(queue_temp, element)
+                custom_append(queue_temp, element)
+            END PROCEDURE
+
+            helper_visited_add ← PROCEDURE(visited_temp, element)
+                custom_append(visited_temp, element)
+            END PROCEDURE
+
+            helper_is_visited ← FUNCTION(visited_temp, elem)
+                RETURN custom_contains(visited_temp, elem)
+            END FUNCTION
+
+            helper_dequeue ← FUNCTION(queue_temp)
+                RETURN custom_pop_front(queue_temp)
+            END FUNCTION
+
+            helper_mod_two ← FUNCTION(num)
+                RETURN custom_mod(num, 2)
+            END FUNCTION
+
+            helper_get_neighbors ← FUNCTION(tree_temp, node_key)
+                IF tree_temp CONTAINS_KEY node_key THEN
+                    RETURN tree_temp[node_key]
+                ELSE
+                    RETURN new list
+                END IF
+            END FUNCTION
+
+            helper_enqueue(queue_container, (starting_node, 0))
+            helper_visited_add(visited_set, starting_node)
+
+            LOOP_WHILE ← TRUE
+            WHILE LOOP_WHILE
+                IF LENGTH(queue_container) = 0 THEN
+                    LOOP_WHILE ← FALSE
+                    BREAK
+                END IF
+
+                current_tuple ← helper_dequeue(queue_container)
+                current_node ← current_tuple[0]
+                current_distance ← current_tuple[1]
+
+                IF helper_mod_two(current_distance) = 0 THEN
+                    even_counter ← even_counter + 1
+                ELSE
+                    odd_counter ← odd_counter + 1
+                END IF
+
+                neighbors_list ← helper_get_neighbors(tree_map, current_node)
+                length_neighbors ← LENGTH(neighbors_list)
+
+                index_neighbor ← 0
+                WHILE index_neighbor < length_neighbors
+                    candidate ← neighbors_list[index_neighbor]
+
+                    IF NOT helper_is_visited(visited_set, candidate) THEN
+                        helper_visited_add(visited_set, candidate)
+                        helper_enqueue(queue_container, (candidate, current_distance + 1))
+                    END IF
+
+                    index_neighbor ← index_neighbor + 1
+                END WHILE
+            END WHILE
+
+            RETURN (even_counter, odd_counter)
+        END FUNCTION
+
+        list_even_odd_1 ← new list
+        idx_i ← 0
+        WHILE idx_i < count_n
+            bfs_result ← bfs(helper_adj1, keys_list_1[idx_i])
+            list_even_odd_1[idx_i] ← bfs_result
+            idx_i ← idx_i + 1
+        END WHILE
+
+        list_even_odd_2 ← new list
+        idx_j ← 0
+        WHILE idx_j < count_m
+            bfs_result_2 ← bfs(helper_adj2, keys_list_2[idx_j])
+            list_even_odd_2[idx_j] ← bfs_result_2
+            idx_j ← idx_j + 1
+        END WHILE
+
+        output_list ← new list
+        idx_o ← 0
+        WHILE idx_o < count_n
+            result_1 ← list_even_odd_1[idx_o]
+            even_1 ← result_1[0]
+            odd_1 ← result_1[1]
+            max_found ← 0
+
+            idx_p ← 0
+            WHILE idx_p < count_m
+                result_2 ← list_even_odd_2[idx_p]
+                even_2 ← result_2[0]
+                odd_2 ← result_2[1]
+
+                IF (idx_o = idx_p) OR (custom_mod(idx_o, 2) = custom_mod(idx_p, 2)) THEN
+                    connected_targets ← even_2
+                ELSE
+                    connected_targets ← odd_2
+                END IF
+
+                IF connected_targets > max_found THEN
+                    max_found ← connected_targets
+                END IF
+
+                idx_p ← idx_p + 1
+            END WHILE
+
+            output_list[idx_o] ← even_1 + max_found
+            idx_o ← idx_o + 1
+        END WHILE
+
+        RETURN output_list
+    END FUNCTION
+END CLASS

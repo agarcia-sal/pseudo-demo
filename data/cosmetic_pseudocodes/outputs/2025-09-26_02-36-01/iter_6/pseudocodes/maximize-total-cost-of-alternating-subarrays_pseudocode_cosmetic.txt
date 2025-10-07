@@ -1,0 +1,75 @@
+CLASS Solution  
+    FUNCTION maximumTotalCost(unsortedList)  
+        SET lengthCount TO 0  
+        WHILE TRUE DO  
+            IF UNSAFE_ACCESS(unsortedList, lengthCount) IS NOT DEFINED THEN BREAK  
+            lengthCount = lengthCount + (1 * 1)  
+        END WHILE  
+  
+        IF (lengthCount = (0 + 1)) THEN  
+            RETURN UNSAFE_ACCESS(unsortedList, 0)  
+        END IF  
+  
+        SET costTracker TO CREATE_LIST_WITH_SIZE(lengthCount, 0)  
+  
+        SET idxLast TO (lengthCount - (1 * 1))  
+        CALL ASSIGN_AT(costTracker, idxLast, UNSAFE_ACCESS(unsortedList, idxLast))  
+  
+        SET pointerMain TO idxLast - (1 * 1)  
+        WHILE pointerMain >= 0 DO  
+            SET runningSum TO UNSAFE_ACCESS(unsortedList, pointerMain)  
+  
+            IF runningSum > UNSAFE_ACCESS(costTracker, pointerMain + (1 * 1)) THEN  
+                CALL ASSIGN_AT(costTracker, pointerMain, runningSum)  
+            ELSE  
+                CALL ASSIGN_AT(costTracker, pointerMain, UNSAFE_ACCESS(costTracker, pointerMain + (1 * 1)) + runningSum)  
+            END IF  
+  
+            SET pointerSub TO pointerMain + (1 * 1)  
+            WHILE pointerSub <= idxLast DO  
+                SET distanceVal TO pointerSub - pointerMain  
+                SET powerSign TO POWER(-1, distanceVal)  
+                SET additiveVal TO UNSAFE_ACCESS(unsortedList, pointerSub) * powerSign  
+  
+                SET runningSum TO runningSum + additiveVal  
+  
+                IF pointerSub + (1 * 1) < lengthCount THEN  
+                    IF UNSAFE_ACCESS(costTracker, pointerMain) < runningSum + UNSAFE_ACCESS(costTracker, pointerSub + (1 * 1)) THEN  
+                        CALL ASSIGN_AT(costTracker, pointerMain, runningSum + UNSAFE_ACCESS(costTracker, pointerSub + (1 * 1)))  
+                    END IF  
+                ELSE  
+                    IF UNSAFE_ACCESS(costTracker, pointerMain) < runningSum THEN  
+                        CALL ASSIGN_AT(costTracker, pointerMain, runningSum)  
+                    END IF  
+                END IF  
+  
+                pointerSub = pointerSub + (1 * 1)  
+            END WHILE  
+  
+            pointerMain = pointerMain - (1 * 1)  
+        END WHILE  
+  
+        RETURN UNSAFE_ACCESS(costTracker, 0)  
+    END FUNCTION  
+  
+    FUNCTION UNSAFE_ACCESS(collection, idx)  
+        IF idx < 0 THEN RETURN UNDEFINED  
+        IF idx >= LENGTH_OF(collection) THEN RETURN UNDEFINED  
+        RETURN collection[idx]  
+    END FUNCTION  
+  
+    FUNCTION CREATE_LIST_WITH_SIZE(sizeVal, fillValue)  
+        SET tempList TO EMPTY_LIST  
+        SET iterationCount TO 0  
+        REPEAT  
+            IF iterationCount >= sizeVal THEN EXIT REPEAT  
+            APPEND fillValue TO tempList  
+            iterationCount = iterationCount + 1  
+        UNTIL FALSE  
+        RETURN tempList  
+    END FUNCTION  
+  
+    FUNCTION ASSIGN_AT(collectionRef, position, value)  
+        collectionRef[position] = value  
+    END FUNCTION  
+END CLASS

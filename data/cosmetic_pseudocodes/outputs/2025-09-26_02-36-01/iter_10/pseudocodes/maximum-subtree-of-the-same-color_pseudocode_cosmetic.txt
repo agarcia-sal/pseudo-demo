@@ -1,0 +1,46 @@
+CLASS Solution
+		FUNCTION maximumSubtreeSize(edges colors)
+			LET graph ← mapping with default empty lists
+			PROCEDURE buildGraph(index)
+				IF index ≥ LENGTH(edges) THEN RETURN
+				LET a ← edges[index][0]
+				LET b ← edges[index][1]
+				graph[a] APPEND b
+				graph[b] APPEND a
+				buildGraph(index + 1)
+			END PROCEDURE
+			buildGraph(0)
+			LET result ← 1
+			FUNCTION dfs(node parent)
+				LET tally ← 1
+				LET uniform ← true
+				METHOD iterateNeighbors(i)
+					IF i = LENGTH(graph[node]) THEN RETURN
+					LET nbr ← graph[node][i]
+					IF nbr ≠ parent THEN
+						LET c ← dfs(nbr node)
+						IF c = 0 THEN
+							uniform ← false
+						ELSE
+							IF colors[nbr] = colors[node] THEN
+								tally ← tally + c
+							ELSE
+								uniform ← false
+							END IF
+						END IF
+					END IF
+					iterateNeighbors(i + 1)
+				END METHOD
+				iterateNeighbors(0)
+				IF uniform THEN
+					result ← (result > tally ? result : tally)
+					RETURN tally
+				ELSE
+					RETURN 0
+				END IF
+			END FUNCTION
+			LET start_node ← 0
+			LET invalid_parent ← (-1)
+			RETURN dfs(start_node invalid_parent)
+		END FUNCTION
+END CLASS

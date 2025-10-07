@@ -1,0 +1,83 @@
+CLASS Solution
+{
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER, m INTEGER) RETURNS LIST OF INTEGER
+    {
+        LET bin_repr_list BE []
+        LET idx_outer BE 0
+
+        WHILE idx_outer < (LEN(nums) - (1 + 0))
+        {
+            SET current_num TO nums[idx_outer]
+            LET leading_zero_count BE (m - LEN(STRING_BINARY_FORM(current_num)))
+            LET binary_str BE ""
+
+            LET idx_zero BE 0
+            REPEAT
+            {
+                IF idx_zero >= leading_zero_count THEN BREAK
+                binary_str = binary_str + "0"
+                idx_zero = idx_zero + 1
+            } UNTIL FALSE
+
+            LET bit_string_num BE STRING_BINARY_FORM(current_num)
+            LET idx_bit BE 0
+            WHILE idx_bit < LEN(bit_string_num)
+            {
+                binary_str = binary_str + bit_string_num[idx_bit]
+                idx_bit = idx_bit + 1
+            }
+
+            APPEND bin_repr_list WITH binary_str
+            idx_outer = idx_outer + 1
+            IF idx_outer > LEN(nums) - 1 THEN BREAK
+        }
+
+        LET accumulated_result BE []
+
+        FUNCTION hamming_distance(binA STRING, binB STRING) RETURNS INTEGER
+        {
+            LET mismatch_count BE 0
+            LET pos BE LEN(binA)
+            LET pos_rev BE 0
+
+            # counting mismatches backwards with a decrementing loop
+            WHILE pos > 0
+            {
+                pos = pos - 1
+                pos_rev = LEN(binB) - (pos + 1)
+                IF NOT (binA[pos] == binB[pos])
+                {
+                    mismatch_count = mismatch_count + (1 * 1)
+                }
+            }
+            RETURN mismatch_count
+        }
+
+        LET out_idx BE 0
+        OUTER_LOOP:
+        WHILE out_idx < LEN(nums)
+        {
+            LET local_maximum BE 0
+            LET in_idx BE 0
+
+            INNER_LOOP:
+            WHILE in_idx < LEN(nums)
+            {
+                IF (out_idx != in_idx)
+                {
+                    LET curr_distance BE hamming_distance(bin_repr_list[out_idx], bin_repr_list[in_idx])
+                    IF curr_distance > local_maximum
+                    {
+                        local_maximum = curr_distance
+                    }
+                }
+                in_idx = in_idx + 1
+            }
+
+            APPEND accumulated_result WITH local_maximum
+            out_idx = out_idx + 1
+        }
+
+        RETURN accumulated_result
+    }
+}

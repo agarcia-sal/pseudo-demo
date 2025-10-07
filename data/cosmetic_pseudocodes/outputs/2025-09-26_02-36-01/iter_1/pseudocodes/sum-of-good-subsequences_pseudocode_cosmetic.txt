@@ -1,0 +1,29 @@
+CLASS Solution
+    FUNCTION sumOfGoodSubsequences(nums)
+        CONST MODULUS = 1_000_000_007
+        INITIALIZE freqMap WITH default 0
+        INITIALIZE sumMap WITH default 0
+        
+        FOR num IN nums
+            freqMap[num] = (freqMap[num] + 1) % MODULUS
+            sumMap[num] = (sumMap[num] + num) % MODULUS
+            
+            LET leftFreq = freqMap.get(num - 1, 0)
+            LET leftSum = sumMap.get(num - 1, 0)
+            sumMap[num] = (sumMap[num] + leftSum + (leftFreq * num) % MODULUS) % MODULUS
+            freqMap[num] = (freqMap[num] + leftFreq) % MODULUS
+            
+            LET rightFreq = freqMap.get(num + 1, 0)
+            LET rightSum = sumMap.get(num + 1, 0)
+            sumMap[num] = (sumMap[num] + rightSum + (rightFreq * num) % MODULUS) % MODULUS
+            freqMap[num] = (freqMap[num] + rightFreq) % MODULUS
+        END FOR
+        
+        LET aggregateSum = 0
+        FOR val IN sumMap.values()
+            aggregateSum = (aggregateSum + val) % MODULUS
+        END FOR
+        
+        RETURN aggregateSum
+    END FUNCTION
+END CLASS

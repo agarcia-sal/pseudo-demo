@@ -1,0 +1,72 @@
+CLASS Solution  
+    FUNCTION betterCompression(compressed)  
+        CREATE FUNCTION StringifyNumber(num)  
+            DECLARE res AS STRING = ""  
+            DECLARE tempVal AS INTEGER = num  
+            REPEAT  
+                DECLARE digit AS INTEGER = tempVal MOD 10  
+                SET res TO CHAR(digit + 48) + res  
+                SET tempVal TO (tempVal - digit) / 10  
+            UNTIL tempVal = 0  
+            RETURN res  
+        END FUNCTION
+
+        CREATE FUNCTION IsAlpha(ch)  
+            RETURN ((ch >= 'A') AND (ch <= 'Z')) OR ((ch >= 'a') AND (ch <= 'z'))  
+        END FUNCTION
+
+        DECLARE freqMap AS DICTIONARY<CHAR, INTEGER> = {}  
+        DECLARE lastChar AS CHAR = ""  
+        DECLARE countVal AS INTEGER = 0  
+
+        DECLARE i AS INTEGER = 1  
+        WHILE i <= LENGTH(compressed)  
+            DECLARE currentChar AS CHAR = compressed[i]  
+            IF IsAlpha(currentChar) THEN  
+                IF lastChar <> "" THEN  
+                    IF NOT freqMap.CONTAINS_KEY(lastChar) THEN  
+                        freqMap[lastChar] = 0  
+                    END IF  
+                    freqMap[lastChar] = freqMap[lastChar] + countVal  
+                END IF  
+                lastChar = currentChar  
+                countVal = 0  
+            ELSE  
+                DECLARE digitVal AS INTEGER = ORD(currentChar) - ORD('0')  
+                countVal = countVal * 10 + digitVal  
+            END IF  
+            i = i + 1  
+        END WHILE  
+
+        IF lastChar <> "" THEN  
+            IF NOT freqMap.CONTAINS_KEY(lastChar) THEN  
+                freqMap[lastChar] = 0  
+            END IF  
+            freqMap[lastChar] = freqMap[lastChar] + countVal  
+        END IF  
+
+        DECLARE keyList AS LIST<CHAR> = []  
+        FOR EACH k IN freqMap.KEYS() DO  
+            keyList.APPEND(k)  
+        END FOR  
+        SET keyList TO keyList.SORTED_BY_ASCENDING()  
+
+        DECLARE resultParts AS LIST<STRING> = []  
+        DECLARE j AS INTEGER = 1  
+        WHILE j <= LENGTH(keyList)  
+            DECLARE ch AS CHAR = keyList[j]  
+            DECLARE numStr AS STRING = StringifyNumber(freqMap[ch])  
+            resultParts.APPEND(ch + numStr)  
+            j = j + 1  
+        END WHILE  
+
+        DECLARE outputStr AS STRING = ""  
+        DECLARE idx AS INTEGER = 1  
+        WHILE idx <= LENGTH(resultParts)  
+            outputStr = outputStr + resultParts[idx]  
+            idx = idx + 1  
+        END WHILE  
+
+        RETURN outputStr  
+    END FUNCTION  
+END CLASS

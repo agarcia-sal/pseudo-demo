@@ -1,0 +1,39 @@
+CLASS Solution  
+    FUNCTION makeStringGood(s)  
+        SET count TO a list of zero values with LENGTH equal to twenty six  
+        FOR each character c IN s  
+            INCREMENT the element at position the ordinal value of c MINUS the ordinal value of the lowercase letter a IN count BY one  
+        END FOR  
+        SET minimum_operations TO the minimum value AMONG the results of calling the FUNCTION _getMinOperations WITH parameters count AND target FOR each target FROM one TO the maximum value IN count  
+        RETURN minimum_operations  
+    END FUNCTION  
+  
+    FUNCTION _getMinOperations(count, target)  
+        SET dp TO a list of zero values with LENGTH equal to twenty seven  
+        FOR i FROM twenty five DOWN TO zero  
+            SET deleteAllToZero TO the element at position i IN count  
+            IF target GREATER THAN the element at position i IN count THEN  
+                SET deleteOrInsertToTarget TO target MINUS the element at position i IN count  
+            ELSE  
+                SET deleteOrInsertToTarget TO the element at position i IN count MINUS target  
+            END IF  
+            SET dp_at_i TO the minimum value BETWEEN deleteAllToZero AND deleteOrInsertToTarget PLUS the element at position i PLUS one IN dp  
+            IF i PLUS one LESS THAN twenty six AND the element at position i PLUS one IN count LESS THAN target THEN  
+                SET nextDeficit TO target MINUS the element at position i PLUS one IN count  
+                IF the element at position i IN count LESS THAN OR EQUAL TO target THEN  
+                    SET needToChange TO the element at position i IN count  
+                ELSE  
+                    SET needToChange TO the element at position i IN count MINUS target  
+                END IF  
+                IF nextDeficit GREATER THAN needToChange THEN  
+                    SET changeToTarget TO needToChange PLUS (nextDeficit MINUS needToChange)  
+                ELSE  
+                    SET changeToTarget TO nextDeficit PLUS (needToChange MINUS nextDeficit)  
+                END IF  
+                SET dp_at_i TO the minimum value BETWEEN dp_at_i AND changeToTarget PLUS the element at position i PLUS two IN dp  
+            END IF  
+            SET the element at position i IN dp TO dp_at_i  
+        END FOR  
+        RETURN the element at position zero IN dp  
+    END FUNCTION  
+END CLASS

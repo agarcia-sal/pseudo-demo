@@ -1,0 +1,46 @@
+CLASS Solution
+	 FUNCTION maximumSumSubsequence(nums, queries)
+		  LET M = 10 ^ 9 + 1
+		  LET L = LENGTH(nums)
+		  INITIALIZE A = ARRAY OF SIZE L FILLED WITH 0
+		  INITIALIZE B = ARRAY OF SIZE L FILLED WITH 0
+		  
+		  A[0] <- IF 0 > nums[0] THEN 0 ELSE nums[0]
+		  B[0] <- 0
+		  
+		  LET f = 1
+		  WHILE f < L
+			 LET p = f - 1
+			 A[f] <- MAX(0, B[p] + nums[f])
+			 B[f] <- MAX(B[p], A[p])
+			 f <- f + 1
+		  END WHILE
+		  
+		  LET R = 0
+		  FOR EACH (i, v) IN queries DO
+			 nums[i] <- v
+			 
+			 IF i = 0 THEN
+				  A[i] <- IF 0 > nums[i] THEN 0 ELSE nums[i]
+				  B[i] <- 0
+			 ELSE
+				  LET q = i - 1
+				  A[i] <- MAX(0, B[q] + nums[i])
+				  B[i] <- MAX(B[q], A[q])
+			 END IF
+			 
+			 LET j = i + 1
+			 WHILE j < L
+				  LET k = j - 1
+				  A[j] <- MAX(0, B[k] + nums[j])
+				  B[j] <- MAX(B[k], A[k])
+				  j <- j + 1
+			 END WHILE
+			 
+			 LET X = MAX(A[L - 1], B[L - 1])
+			 R <- (R + X) % M
+		  END FOR
+		  
+		  RETURN R
+	 END FUNCTION
+END CLASS

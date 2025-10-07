@@ -1,0 +1,44 @@
+CLASS Solution
+	 FUNCTION findPermutation(nums)
+	 	DEFINE FUNCTION dfs(currentMask, previousIndex)
+	 		IF currentMask EQUALS ((1 LEFT SHIFT (LENGTH OF nums)) MINUS 1) THEN
+	 			RETURN ABS(previousIndex MINUS nums[0])
+	 		END IF
+	 		SET minimalValue TO +∞
+	 		SET indexIterator TO 0
+	 		WHILE indexIterator LESS THAN LENGTH OF nums DO
+	 			IF ((currentMask RIGHT SHIFT indexIterator) BITWISE_AND 1) EQUALS 0 THEN
+	 				SET tempCalc TO ABS(previousIndex MINUS nums[indexIterator]) PLUS dfs(currentMask BITWISE_OR (1 LEFT SHIFT indexIterator), indexIterator)
+	 				IF tempCalc LESS THAN minimalValue THEN
+	 					minimalValue ← tempCalc
+	 				END IF
+	 			END IF
+	 			SET indexIterator TO indexIterator PLUS 1
+	 		END WHILE
+	 		RETURN minimalValue
+	 	END FUNCTION
+
+	 	DEFINE FUNCTION g(currentMask, previousIndex)
+	 		APPEND previousIndex TO ans
+	 		IF currentMask EQUALS ((1 LEFT SHIFT (LENGTH OF nums)) MINUS 1) THEN
+	 			RETURN
+	 		END IF
+	 		SET resultValue TO dfs(currentMask, previousIndex)
+	 		RECURSIVE_LOOP:
+	 		FOR newCur FROM 0 TO LENGTH OF nums MINUS 1 DO
+	 			IF ((currentMask RIGHT SHIFT newCur) BITWISE_AND 1) EQUALS 0 THEN
+	 				SET candidateResult TO ABS(previousIndex MINUS nums[newCur]) PLUS dfs(currentMask BITWISE_OR (1 LEFT SHIFT newCur), newCur)
+	 				IF candidateResult EQUALS resultValue THEN
+	 					CALL g(currentMask BITWISE_OR (1 LEFT SHIFT newCur), newCur)
+	 					EXIT FOR
+	 				END IF
+	 			END IF
+	 		END FOR
+	 	END FUNCTION
+
+	 	SET lengthOfNums TO LENGTH OF nums
+	 	SET ans TO EMPTY LIST
+	 	CALL g(1, 0)
+	 	RETURN ans
+	 END FUNCTION
+END CLASS

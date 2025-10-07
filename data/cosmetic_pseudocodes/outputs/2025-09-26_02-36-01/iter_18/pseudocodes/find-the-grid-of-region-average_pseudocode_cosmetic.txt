@@ -1,0 +1,87 @@
+```pseudocode
+CLASS Solution  
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer  
+        SET alpha TO LENGTH OF image  
+        SET beta TO LENGTH OF element AT POSITION 0 OF image  
+        SET omega TO A NEW LIST OF alpha ITEMS EACH BEING A LIST OF beta ITEMS EACH INITIALIZED TO 0  
+        SET zeta TO A NEW LIST OF alpha ITEMS EACH BEING A LIST OF beta ITEMS EACH INITIALIZED TO 0  
+
+        FUNCTION is_valid_region(p WITH TYPE integer q WITH TYPE integer) WITH RETURN TYPE boolean
+            SET idx TO p
+            LOOP WHILE idx < p + 3
+                SET jdx TO q
+                LOOP WHILE jdx < q + 3
+                    FOR EACH (dx, dy) IN [( -1, 0 ), ( 1, 0 ), ( 0, -1 ), ( 0, 1 )] DO
+                        SET nx_ TO idx + dx
+                        SET ny_ TO jdx + dy
+                        IF NOT (nx_ >= 0 AND nx_ < p + 3 AND ny_ >= 0 AND ny_ < q + 3) THEN
+                            CONTINUE
+                        END IF
+                        IF ABS(image[idx][jdx] - image[nx_][ny_]) > threshold THEN
+                            RETURN False
+                        END IF
+                    END FOR
+                    SET jdx TO jdx + 1
+                END LOOP
+                SET idx TO idx + 1
+            END LOOP
+            SET outcome TO True
+            RETURN outcome
+        END FUNCTION  
+
+        FUNCTION calculate_average(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE integer
+            SET summation TO 0
+            SET cnt1 TO a
+            WHILE cnt1 < a + 3
+                SET cnt2 TO b
+                WHILE cnt2 < b + 3
+                    SET summation TO summation + image[cnt1][cnt2]
+                    SET cnt2 TO cnt2 + 1
+                END WHILE
+                SET cnt1 TO cnt1 + 1
+            END WHILE
+            SET divisor TO 9
+            SET result_avg TO summation DIVIDED BY divisor
+            RETURN result_avg
+        END FUNCTION  
+
+        SET outer_i TO 0
+        WHILE outer_i <= alpha - 3
+            SET outer_j TO 0
+            WHILE outer_j <= beta - 3
+                IF is_valid_region(outer_i, outer_j) = True THEN
+                    SET val_avg TO calculate_average(outer_i, outer_j)
+                    SET inner_x TO outer_i
+                    WHILE inner_x < outer_i + 3
+                        SET inner_y TO outer_j
+                        WHILE inner_y < outer_j + 3
+                            SET omega[inner_x][inner_y] TO omega[inner_x][inner_y] + val_avg
+                            SET zeta[inner_x][inner_y] TO zeta[inner_x][inner_y] + 1
+                            SET inner_y TO inner_y + 1
+                        END WHILE
+                        SET inner_x TO inner_x + 1
+                    END WHILE
+                END IF
+                SET outer_j TO outer_j + 1
+            END WHILE
+            SET outer_i TO outer_i + 1
+        END WHILE
+
+        SET idx_i TO 0
+        WHILE idx_i < alpha
+            SET idx_j TO 0
+            WHILE idx_j < beta
+                IF zeta[idx_i][idx_j] > 0 THEN
+                    SET omega[idx_i][idx_j] TO omega[idx_i][idx_j] DIVIDED BY zeta[idx_i][idx_j]
+                ELSE
+                    SET omega[idx_i][idx_j] TO image[idx_i][idx_j]
+                END IF
+                SET idx_j TO idx_j + 1
+            END WHILE
+            SET idx_i TO idx_i + 1
+        END WHILE
+
+        RETURN omega
+    END FUNCTION  
+END CLASS  
+```

@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION minimumSubstringsInPartition(s)
+        FUNCTION dfs(x)
+            FUNCTION inc_map(m, k)
+                IF k NOT IN m THEN
+                    m[k] ← 0
+                END IF
+                m[k] ← m[k] + 1
+            END FUNCTION
+
+            FUNCTION dec_map(m, k)
+                IF k IN m THEN
+                    m[k] ← m[k] - 1
+                    IF m[k] = 0 THEN
+                        REMOVE k FROM m
+                    END IF
+                END IF
+            END FUNCTION
+
+            IF x >= LEN(s) THEN
+                RETURN 0
+            END IF
+
+            local_a ← DICTIONARY defaulting to 0
+            local_b ← DICTIONARY defaulting to 0
+            result_v ← LEN(s) - x
+
+            PROCEDURE helper(y, cnt_map, freq_map, best_val)
+                IF y >= LEN(s) THEN
+                    RETURN best_val
+                END IF
+
+                c ← s[y]
+
+                prev_count ← 0
+                IF c IN cnt_map THEN
+                    prev_count ← cnt_map[c]
+                END IF
+
+                dec_map(freq_map, prev_count)
+                inc_map(cnt_map, c)
+                inc_map(freq_map, cnt_map[c])
+
+                IF LEN(freq_map) = 1 THEN
+                    candidate ← 1 + dfs(y + 1)
+                    IF candidate < best_val THEN
+                        best_val ← candidate
+                    END IF
+                END IF
+
+                RETURN best_val
+            END PROCEDURE
+
+            i ← x
+            WHILE i < LEN(s) DO
+                result_v ← helper(i, local_a, local_b, result_v)
+                i ← i + 1
+            END WHILE
+
+            RETURN result_v
+        END FUNCTION
+
+        len_s ← LEN(s)
+        RETURN dfs(0)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,45 @@
+```
+FUNCTION minPath(grid,k)
+  LET N = LENGTH(grid)
+  LET V = (N*N)+1
+  LET oi = 0
+  FUNCTION processJ(oj,ok,acc_v)
+    IF oj == N THEN
+      RETURN acc_v
+    LET _res_v = acc_v
+    LET _temp_values = []
+    IF (grid[oi][oj] == 1) THEN
+      FUNCTION gatherAdj(idx,arr)
+        IF idx == 4 THEN
+          RETURN arr
+        LET _updated_arr = arr
+        IF idx == 0 AND oi != 0 THEN _updated_arr = _updated_arr + [grid[oi-1][oj]]
+        IF idx == 1 AND oj != 0 THEN _updated_arr = _updated_arr + [grid[oi][oj-1]]
+        IF idx == 2 AND oi != (N-1) THEN _updated_arr = _updated_arr + [grid[oi+1][oj]]
+        IF idx == 3 AND oj != (N-1) THEN _updated_arr = _updated_arr + [grid[oi][oj+1]]
+        RETURN gatherAdj(idx+1,_updated_arr)
+      LET collected = gatherAdj(0,[])
+      LET min_val = collected[0]
+      FUNCTION minFind(pos,currentMin)
+        IF pos == LENGTH(collected) THEN RETURN currentMin
+        LET candidate = collected[pos]
+        RETURN minFind(pos+1, (candidate < currentMin) ? candidate : currentMin)
+      SET _res_v = minFind(1,min_val)
+    RETURN processJ(oj+1,ok,_res_v)
+  FUNCTION processI(ii,acc_val)
+    IF ii == N THEN RETURN acc_val
+    LET val_at_i = processJ(0,k,acc_val)
+    RETURN processI(ii+1,val_at_i)
+  LET val = processI(0,V)
+  LET result = []
+  FUNCTION fillAnswer(idx)
+    IF idx == k THEN RETURN
+    IF idx MOD 2 == 0 THEN
+      result = result + [1]
+    ELSE 
+      result = result + [val]
+    fillAnswer(idx+1)
+  fillAnswer(0)
+  RETURN result
+END FUNCTION
+```

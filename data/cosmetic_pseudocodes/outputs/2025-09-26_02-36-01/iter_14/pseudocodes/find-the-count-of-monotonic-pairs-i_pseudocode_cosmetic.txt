@@ -1,0 +1,95 @@
+CLASS Solution
+    FUNCTION countOfPairs(nums)
+        DEFINE CONSTANT BOUNDARY AS ((10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7)
+
+        SET lengthValue TO LENGTH OF nums
+        SET highestNumber TO nums[0]
+        FOR indexVar FROM 1 TO lengthValue - 1 DO
+            IF nums[indexVar] GREATER THAN highestNumber THEN
+                SET highestNumber TO nums[indexVar]
+            END IF
+        END FOR
+
+        PROCEDURE initialize3DArray(dim1, dim2, dim3)
+            DECLARE array3D AS LIST
+            SET idx1 TO 0
+            WHILE idx1 LESS THAN dim1 DO
+                DECLARE subArray2D AS LIST
+                SET idx2 TO 0
+                WHILE idx2 LESS THAN dim2 DO
+                    DECLARE subArray1D AS LIST
+                    SET idx3 TO 0
+                    WHILE idx3 LESS THAN dim3 DO
+                        APPEND 0 TO subArray1D
+                        SET idx3 TO idx3 + 1
+                    END WHILE
+                    APPEND subArray1D TO subArray2D
+                    SET idx2 TO idx2 + 1
+                END WHILE
+                APPEND subArray2D TO array3D
+                SET idx1 TO idx1 + 1
+            END WHILE
+            RETURN array3D
+        END PROCEDURE
+
+        SET dpArray TO initialize3DArray(lengthValue, highestNumber + 1, highestNumber + 1)
+
+        PROCEDURE assignInitialValues()
+            SET stepVal TO 0
+            REPEAT
+                IF stepVal GREATER THAN nums[0] THEN
+                    BREAK
+                END IF
+                SET complementaryVal TO ((nums[0] + 0) - stepVal)
+                SET dpArray[0][stepVal][complementaryVal] TO 1
+                SET stepVal TO stepVal + 1
+            UNTIL FALSE
+        END PROCEDURE
+
+        CALL assignInitialValues()
+
+        PROCEDURE transferValues(currentIndex)
+            IF currentIndex NOT LESS THAN lengthValue THEN
+                RETURN
+            END IF
+
+            SET firstLoopVar TO 0
+            WHILE firstLoopVar LESS THAN OR EQUAL TO nums[currentIndex] DO
+                SET secondLoopVar TO (nums[currentIndex] - firstLoopVar)
+                SET prevFirstLoopVar TO 0
+                WHILE prevFirstLoopVar LESS THAN OR EQUAL TO firstLoopVar DO
+                    SET prevSecondLoopVar TO secondLoopVar
+                    WHILE prevSecondLoopVar LESS THAN OR EQUAL TO highestNumber DO
+                        SET prevValue TO dpArray[currentIndex - 1][prevFirstLoopVar][prevSecondLoopVar]
+                        SET currentValue TO dpArray[currentIndex][firstLoopVar][secondLoopVar]
+                        SET summedValue TO currentValue + prevValue
+                        SET dpArray[currentIndex][firstLoopVar][secondLoopVar] TO (summedValue - ((summedValue DIV BOUNDARY) * BOUNDARY))
+                        SET prevSecondLoopVar TO prevSecondLoopVar + 1
+                    END WHILE
+                    SET prevFirstLoopVar TO prevFirstLoopVar + 1
+                END WHILE
+                SET firstLoopVar TO firstLoopVar + 1
+            END WHILE
+
+            CALL transferValues(currentIndex + 1)
+        END PROCEDURE
+
+        CALL transferValues(1)
+
+        SET accumulatedResult TO 0
+        SET outerCounter TO 0
+        WHILE outerCounter LESS THAN OR EQUAL TO highestNumber DO
+            SET innerCounter TO 0
+            WHILE innerCounter LESS THAN OR EQUAL TO highestNumber DO
+                IF (outerCounter + innerCounter) EQUALS nums[lengthValue - 1] THEN
+                    SET accumulatedResult TO accumulatedResult + dpArray[lengthValue - 1][outerCounter][innerCounter]
+                    SET accumulatedResult TO accumulatedResult MOD BOUNDARY
+                END IF
+                SET innerCounter TO innerCounter + 1
+            END WHILE
+            SET outerCounter TO outerCounter + 1
+        END WHILE
+
+        RETURN accumulatedResult
+    END FUNCTION
+END CLASS

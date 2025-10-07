@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION resultArray(nums)
+        SET def helper_binary_right_insert_position(alst, aval)
+            SET mleft TO 0
+            SET mright TO LENGTH OF alst
+            WHILE mleft < mright
+                SET mmid TO (mleft + mright) DIV 2
+                IF alst[mmid] <= aval
+                    SET mleft TO mmid + 1
+                ELSE
+                    SET mright TO mmid
+                END IF
+            END WHILE
+            RETURN mleft
+        END FUNCTION
+
+        SET zeta1 TO NEW LIST CONTAINING nums[0]
+        SET zeta2 TO NEW LIST CONTAINING nums[1]
+        SET lambda1 TO NEW LIST CONTAINING nums[0]
+        SET lambda2 TO NEW LIST CONTAINING nums[1]
+
+        SET FUNCTION winged_count(alpha, omega)
+            SET idx_pos TO helper_binary_right_insert_position(alpha, omega)
+            RETURN LENGTH OF alpha - idx_pos
+        END FUNCTION
+
+        SET idx TO 2
+        WHILE idx < LENGTH OF nums
+            SET v_alt TO nums[idx]
+            SET c1 THEN winged_count(lambda1, v_alt)
+            SET c2 THEN winged_count(lambda2, v_alt)
+
+            IF c1 > c2 THEN
+                APPEND v_alt TO zeta1
+                SET p_ins TO helper_binary_right_insert_position(lambda1, v_alt)
+                INSERT v_alt INTO lambda1 AT p_ins
+            ELSE 
+                IF c1 < c2 THEN
+                    APPEND v_alt TO zeta2
+                    SET p_ins_alt TO helper_binary_right_insert_position(lambda2, v_alt)
+                    INSERT v_alt INTO lambda2 AT p_ins_alt
+                ELSE
+                    IF LENGTH OF zeta1 <= LENGTH OF zeta2 THEN
+                        APPEND v_alt TO zeta1
+                        SET pos_insert TO helper_binary_right_insert_position(lambda1, v_alt)
+                        INSERT v_alt INTO lambda1 AT pos_insert
+                    ELSE
+                        APPEND v_alt TO zeta2
+                        SET pos_insert_alt TO helper_binary_right_insert_position(lambda2, v_alt)
+                        INSERT v_alt INTO lambda2 AT pos_insert_alt
+                    END IF
+                END IF
+            END IF
+
+            SET idx TO idx + 1
+        END WHILE
+
+        SET retout TO CONCATENATE zeta1 FOLLOWED BY zeta2
+        RETURN retout
+    END FUNCTION
+END CLASS

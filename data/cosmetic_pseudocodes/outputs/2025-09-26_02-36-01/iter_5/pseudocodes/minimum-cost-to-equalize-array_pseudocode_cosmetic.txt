@@ -1,0 +1,69 @@
+CLASS Solution
+    FUNCTION minCostToEqualizeArray(inputList valA valB)
+        SET MOD_VALUE TO (10^9) + 7
+        SET lengthList TO 0
+        SET idx TO 0
+        WHILE idx < LENGTH OF inputList
+            SET lengthList TO lengthList + 1
+            SET idx TO idx + 1
+        END WHILE
+        
+        SET smallestVal TO inputList[0]
+        SET largestVal TO inputList[0]
+        SET sumVals TO 0
+        
+        PROCEDURE findBoundsAndSum(i accumMin accumMax accumSum)
+            IF i == lengthList
+                RETURN accumMin, accumMax, accumSum
+            ELSE
+                SET currentElem TO inputList[i]
+                SET newMin TO accumMin
+                IF currentElem < accumMin THEN SET newMin TO currentElem END IF
+                SET newMax TO accumMax
+                IF currentElem > accumMax THEN SET newMax TO currentElem END IF
+                RETURN findBoundsAndSum(i + 1, newMin, newMax, accumSum + currentElem)
+            END IF
+        END PROCEDURE
+        
+        SET smallestVal, largestVal, sumVals TO findBoundsAndSum(0, smallestVal, largestVal, 0)
+        
+        IF (valA * 2) <= valB OR lengthList < 3 THEN
+            SET totalDiff TO (largestVal * lengthList) - sumVals
+            SET outcome TO valA * totalDiff
+            SET finalResult TO MODULO(outcome, MOD_VALUE)
+            RETURN finalResult
+        END IF
+        
+        FUNCTION computeCostForTarget(targetVal)
+            SET gapMax TO targetVal - smallestVal
+            SET overallGap TO (targetVal * lengthList) - sumVals
+            
+            SET pairsCount1 TO FLOOR_DIVIDE(overallGap, 2)
+            SET pairsCount2 TO overallGap - gapMax
+            SET pairsCount TO pairsCount1
+            IF pairsCount2 < pairsCount1 THEN pairsCount TO pairsCount2 END IF
+            
+            SET partOne TO valA * overallGap
+            SET partTwo TO 2 * pairsCount
+            SET partThree TO valB * pairsCount
+            SET totalCost TO partOne - (partTwo) + (partThree)
+            RETURN totalCost
+        END FUNCTION
+        
+        FUNCTION rangeMinValue(s low high currentMin)
+            IF low > high THEN
+                RETURN currentMin
+            ELSE
+                SET valCurr TO computeCostForTarget(low)
+                SET newMin TO currentMin
+                IF valCurr < currentMin THEN newMin TO valCurr END IF
+                RETURN rangeMinValue(low + 1, high, newMin)
+            END IF
+        END FUNCTION
+        
+        SET upperBound TO (2 * largestVal) - 1
+        SET minimalCostFinal TO rangeMinValue(largestVal, upperBound, 9223372036854775807)
+        SET answerFinal TO minimalCostFinal MODULO MOD_VALUE
+        RETURN answerFinal
+    END FUNCTION
+END CLASS

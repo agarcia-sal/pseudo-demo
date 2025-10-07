@@ -1,0 +1,71 @@
+CLASS Solution
+{
+  FUNCTION maxSubstringLength(s)
+  {
+    CONST ZERO = 0
+    CONST ONE = 1
+    LET frequencies_full = EMPTY_DICTIONARY()
+    LET maximum_length = - (ONE + ZERO)       
+    
+    // compute frequency count for all characters of s
+    LET index_outer = ZERO
+    WHILE index_outer < (LENGTH(s) - ONE)
+    {
+      LET char_outer = s[ index_outer ]
+      IF char_outer IN frequencies_full THEN
+        frequencies_full[ char_outer ] = frequencies_full[ char_outer ] + ONE
+      ELSE
+        frequencies_full[ char_outer ] = ONE
+      END IF
+      index_outer = index_outer + ONE
+    }
+    // handle last character frequency
+    LET last_char = s[ LENGTH(s) - ONE ]
+    IF last_char IN frequencies_full THEN
+      frequencies_full[ last_char ] = frequencies_full[ last_char ] + ONE
+    ELSE
+      frequencies_full[ last_char ] = ONE
+    END IF
+
+    LET start_pos = ZERO
+    REPEAT
+      LET frequencies_current = NEW_DICTIONARY()
+      LET end_pos = start_pos
+      LOOP
+        IF end_pos > (LENGTH(s) - ONE) THEN
+          BREAK
+        END IF
+        LET current_char = s[ end_pos ]
+        IF current_char IN frequencies_current THEN
+          frequencies_current[ current_char ] = frequencies_current[ current_char ] + ONE
+        ELSE
+          frequencies_current[ current_char ] = ONE
+        END IF
+
+        LET condition_met = TRUE
+        LET keys_list = KEYS(frequencies_current)
+        LET key_index = 0
+        WHILE key_index < LENGTH(keys_list)
+          LET char_key = keys_list[ key_index ]
+          IF frequencies_current[ char_key ] < frequencies_full[ char_key ] THEN
+            condition_met = FALSE
+            EXIT
+          END IF
+          key_index = key_index + ONE
+        END WHILE
+        IF condition_met == TRUE THEN
+          IF LENGTH( KEYS(frequencies_current) ) < LENGTH( KEYS(frequencies_full) ) THEN
+            LET candidate_length = (end_pos - start_pos) + ONE
+            IF candidate_length > maximum_length THEN
+              maximum_length = candidate_length
+            END IF
+          END IF
+        END IF
+        end_pos = end_pos + ONE
+      END LOOP
+      
+      start_pos = start_pos + ONE
+    UNTIL start_pos > (LENGTH(s) - ONE)
+    RETURN maximum_length
+  }
+}

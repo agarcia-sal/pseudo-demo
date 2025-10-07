@@ -1,0 +1,62 @@
+CLASS Solution
+	 FUNCTION minimumSubarrayLength(nums LIST OF integers k integer) RETURNS integer
+		  FUNCTION update_count(count LIST OF integers num integer add integer)
+				SET bitMask TO integer 1
+				SET idx TO integer 0
+				WHILE idx LESS THAN 32
+					IF (num BITWISE_AND bitMask) NOT_EQUAL integer 0 THEN
+						SET count AT idx TO count AT idx PLUS add
+					END IF
+					SET bitMask TO bitMask MULTIPLIED_BY 2
+					SET idx TO idx PLUS 1
+				END WHILE
+		  END FUNCTION
+
+		  FUNCTION compute_current_or(count LIST OF integers) RETURNS integer
+				SET result TO integer 0
+				SET position TO integer 0
+				REPEAT
+					IF (count AT position) GREATER_THAN 0 THEN
+						SET shiftedBit TO integer 1 LEFT_SHIFT position
+						SET result TO result BITWISE_OR shiftedBit
+					END IF
+					SET position TO position PLUS 1
+				UNTIL position EQUALS 32
+				RETURN result
+		  END FUNCTION
+
+		  SET arrayLength TO LENGTH OF nums
+		  SET bitCounts TO LIST OF integer 0 REPEATED 32 TIMES
+		  SET currentValue TO integer 0
+		  SET startIndex TO integer 0
+		  SET minimalLength TO positive infinity
+
+		  WHILE startIndex LESS_THAN_OR_EQUAL_TO arrayLength MINUS 1
+				SET endIndex TO startIndex
+				WHILE endIndex LESS_THAN arrayLength
+					CALL update_count(bitCounts nums AT endIndex integer 1)
+					SET currentValue TO currentValue BITWISE_OR nums AT endIndex
+
+					IF currentValue GREATER_THAN_OR_EQUAL_TO k THEN
+						IF minimalLength GREATER_THAN ((endIndex MINUS startIndex) PLUS 1) THEN
+							SET minimalLength TO (endIndex MINUS startIndex) PLUS 1
+						END IF
+						CALL update_count(bitCounts nums AT startIndex MINUS 1)
+						SET currentValue TO CALL compute_current_or(bitCounts)
+						SET startIndex TO startIndex PLUS 1
+						EXIT WHILE
+					END IF
+					SET endIndex TO endIndex PLUS 1
+				END WHILE
+				IF endIndex GREATER_THAN_OR_EQUAL_TO arrayLength THEN
+					EXIT WHILE
+				END IF
+		  END WHILE
+
+		  IF minimalLength EQUALS positive infinity THEN
+				RETURN negative 1
+		  ELSE
+				RETURN minimalLength
+		  END IF
+	 END FUNCTION
+END CLASS

@@ -1,0 +1,73 @@
+CLASS Solution  
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER  
+        DECLARE suffixIndices AS empty map from STRING to INTEGER  
+        
+        LET containerLength BE LENGTH OF wordsContainer  
+        DECLARE currentWordIndex AS zero  
+        
+        WHILE currentWordIndex < containerLength  
+            LET currentWord BE element at position currentWordIndex in wordsContainer  
+            DECLARE positionInWord AS zero  
+            LET wordLength BE LENGTH OF currentWord  
+            WHILE positionInWord < wordLength  
+                DECLARE currentSuffix AS substring of currentWord STARTING AT positionInWord TO wordLength  
+                
+                IF currentSuffix NOT EXISTS IN suffixIndices THEN  
+                    SET suffixIndices at key currentSuffix TO currentWordIndex  
+                ELSE  
+                    LET recordedIndex BE suffixIndices at key currentSuffix  
+                    LET recordedWord BE element at position recordedIndex in wordsContainer  
+                    LET recordedLength BE LENGTH OF recordedWord  
+                    
+                    IF (wordLength < recordedLength) OR ((wordLength == recordedLength) AND (currentWordIndex < recordedIndex)) THEN  
+                        SET suffixIndices at key currentSuffix TO currentWordIndex  
+                    END IF  
+                END IF  
+                
+                INCREMENT positionInWord BY one  
+            END WHILE  
+            INCREMENT currentWordIndex BY one  
+        END WHILE  
+        
+        FUNCTION get_best_match(query query TO STRING) RETURNS INTEGER  
+            DECLARE posInQuery AS zero  
+            LET lengthOfQuery BE LENGTH OF query  
+            
+            WHILE posInQuery < lengthOfQuery  
+                LET suffixSubstring BE substring of query FROM posInQuery TO lengthOfQuery  
+                IF suffixSubstring EXISTS IN suffixIndices THEN  
+                    RETURN suffixIndices at key suffixSubstring  
+                END IF  
+                INCREMENT posInQuery BY one  
+            END WHILE  
+            
+            DECLARE minimumIdx AS zero  
+            DECLARE minLength AS LENGTH OF element at position zero in wordsContainer  
+            DECLARE indexCheck AS one  
+            LET totalWordsCount BE LENGTH OF wordsContainer  
+            WHILE indexCheck < totalWordsCount  
+                LET checkWordLength BE LENGTH OF element at position indexCheck in wordsContainer  
+                IF (checkWordLength < minLength) OR ((checkWordLength == minLength) AND (indexCheck < minimumIdx)) THEN  
+                    SET minimumIdx TO indexCheck  
+                    SET minLength TO checkWordLength  
+                END IF  
+                INCREMENT indexCheck BY one  
+            END WHILE  
+            
+            RETURN minimumIdx  
+        END FUNCTION  
+        
+        DECLARE outputList AS empty LIST OF INTEGER  
+        LET queriesCount BE LENGTH OF wordsQuery  
+        DECLARE qIndex AS zero  
+        
+        WHILE qIndex < queriesCount  
+            LET currentQuery BE element at position qIndex in wordsQuery  
+            LET matchIndex BE get_best_match(currentQuery)  
+            APPEND matchIndex TO outputList  
+            INCREMENT qIndex BY one  
+        END WHILE  
+        
+        RETURN outputList  
+    END FUNCTION  
+END CLASS

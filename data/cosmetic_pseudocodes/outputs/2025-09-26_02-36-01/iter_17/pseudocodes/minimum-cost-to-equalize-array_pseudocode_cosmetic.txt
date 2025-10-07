@@ -1,0 +1,46 @@
+CLASS Solution  
+    FUNCTION minCostToEqualizeArray(nums cost1 cost2)  
+        SET CONST_MOD_VALUE TO 1000000007  
+        SET lenVal TO LENGTH(nums)  
+        SET lowBound TO nums[0]  
+        SET highBound TO nums[0]  
+        SET totalSum TO 0  
+        FOR idx FROM 0 TO lenVal - 1 DO  
+            IF nums[idx] LESS THAN lowBound THEN  
+                SET lowBound TO nums[idx]  
+            END IF  
+            IF nums[idx] GREATER THAN highBound THEN  
+                SET highBound TO nums[idx]  
+            END IF  
+            SET totalSum TO totalSum + nums[idx]  
+        END FOR  
+
+        IF (cost1 * 2) <= cost2 OR lenVal < 3 THEN  
+            SET gapSum TO (highBound * lenVal) - totalSum  
+            RETURN (cost1 * gapSum) MOD CONST_MOD_VALUE  
+        END IF  
+
+        FUNCTION getMinCost(target)  
+            SET diffMax TO target - lowBound  
+            SET diffTotal TO (target * lenVal) - totalSum  
+            SET pairCount TO diffTotal / 2  
+            IF pairCount GREATER THAN diffTotal - diffMax THEN  
+                SET pairCount TO diffTotal - diffMax  
+            END IF  
+            SET costCalc TO (cost1 * diffTotal) - (2 * cost1 * pairCount) + (cost2 * pairCount)  
+            RETURN costCalc  
+        END FUNCTION  
+
+        SET iterVal TO highBound  
+        SET minResult TO getMinCost(iterVal)  
+        WHILE iterVal LESS THAN (2 * highBound - 1) DO  
+            SET iterVal TO iterVal + 1  
+            SET valToCheck TO getMinCost(iterVal)  
+            IF valToCheck LESS THAN minResult THEN  
+                SET minResult TO valToCheck  
+            END IF  
+        END WHILE  
+
+        RETURN minResult MOD CONST_MOD_VALUE  
+    END FUNCTION  
+END CLASS

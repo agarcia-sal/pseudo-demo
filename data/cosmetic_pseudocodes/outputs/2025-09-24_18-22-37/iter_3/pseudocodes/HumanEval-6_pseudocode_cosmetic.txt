@@ -1,0 +1,47 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        DEFINE depth_tracker(current_index, current_depth, max_found)
+            IF current_index > LENGTH(group_string)
+                RETURN max_found
+            ELSE
+                IF SUBSTRING(group_string, current_index, 1) == '('
+                    RETURN depth_tracker(current_index + 1, current_depth + 1, IF current_depth + 1 > max_found THEN current_depth + 1 ELSE max_found ENDIF)
+                ELSE
+                    RETURN depth_tracker(current_index + 1, current_depth - 1, max_found)
+                END IF
+            END IF
+        END DEFINE
+        RETURN depth_tracker(1, 0, 0)
+    END FUNCTION
+
+    DEFINE split_groups(str, index, acc)
+        IF index > LENGTH(str)
+            RETURN acc
+        ELSE
+            LET start_idx = index
+            WHILE index <= LENGTH(str) AND SUBSTRING(str, index, 1) != ' '
+                SET index = index + 1
+            END WHILE
+            LET token = SUBSTRING(str, start_idx, index - start_idx)
+            IF token != ''
+                SET acc = acc + [token]
+            END IF
+            WHILE index <= LENGTH(str) AND SUBSTRING(str, index, 1) == ' '
+                SET index = index + 1
+            END WHILE
+            RETURN split_groups(str, index, acc)
+        END IF
+    END DEFINE
+
+    LET groups = split_groups(parentheses_string, 1, [])
+    LET result = []
+    FOR i FROM 1 TO LENGTH(groups)
+        LET grp = groups[i]
+        IF grp != ''
+            APPEND parse_paren_group(grp) TO result
+        END IF
+    END FOR
+    RETURN result
+END FUNCTION
+```

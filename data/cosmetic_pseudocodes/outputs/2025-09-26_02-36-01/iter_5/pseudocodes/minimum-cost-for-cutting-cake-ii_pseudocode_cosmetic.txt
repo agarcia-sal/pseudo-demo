@@ -1,0 +1,57 @@
+CLASS Solution
+    FUNCTION minimumCost(m n horizontalCut verticalCut)
+        FUNCTION sortDesc(arr tempArr lengthVal)
+            IF lengthVal LESS THAN OR EQUAL TO 1 THEN
+                RETURN
+            END IF
+            SET pivotIndex TO lengthVal MINUS 1
+            SET leftSide TO 0
+            SET rightSide TO pivotIndex MINUS 1
+            WHILE leftSide LESS THAN OR EQUAL TO rightSide
+                WHILE leftSide LESS THAN lengthVal AND tempArr[leftSide] GREATER THAN tempArr[pivotIndex]
+                    SET leftSide TO leftSide PLUS one
+                END WHILE
+                WHILE rightSide GREATER THAN OR EQUAL TO 0 AND tempArr[rightSide] LESS THAN OR EQUAL TO tempArr[pivotIndex]
+                    SET rightSide TO rightSide MINUS one
+                END WHILE
+                IF leftSide LESS THAN rightSide
+                    SET temp TO tempArr[leftSide]
+                    SET tempArr[leftSide] TO tempArr[rightSide]
+                    SET tempArr[rightSide] TO temp
+                    SET leftSide TO leftSide PLUS one
+                    SET rightSide TO rightSide MINUS one
+                END IF
+            END WHILE
+            SET temp TO tempArr[leftSide]
+            SET tempArr[leftSide] TO tempArr[pivotIndex]
+            SET tempArr[pivotIndex] TO temp
+            CALL sortDesc(tempArr leftSide)
+            CALL sortDesc(tempArr MINUS leftSide MINUS one)
+        END FUNCTION
+
+        CALL sortDesc(horizontalCut LENGTH OF horizontalCut)
+        CALL sortDesc(verticalCut LENGTH OF verticalCut)
+
+        SET accumulatedCost TO zero
+        SET indexH TO zero
+        SET indexV TO zero
+        SET heightCount TO one
+        SET widthCount TO one
+
+        FUNCTION processCuts(posH posV accCost heightSeg widthSeg)
+            IF (posH GREATER THAN OR EQUAL TO horizontalCut LENGTH OF horizontalCut) AND (posV GREATER THAN OR EQUAL TO verticalCut LENGTH OF verticalCut)
+                RETURN accCost
+            END IF
+            IF (posV GREATER THAN OR EQUAL TO verticalCut LENGTH OF verticalCut) OR ((posH LESS THAN horizontalCut LENGTH OF horizontalCut) AND ((horizontalCut[posH]) GREATER THAN (verticalCut[posV])))
+                SET updatedCost TO accCost PLUS (horizontalCut[posH] TIMES widthSeg)
+                RETURN processCuts(posH PLUS one posV updatedCost heightSeg PLUS one widthSeg)
+            ELSE
+                SET updatedCost TO accCost PLUS (verticalCut[posV] TIMES heightSeg)
+                RETURN processCuts(posH posV PLUS one updatedCost heightSeg widthSeg PLUS one)
+            END IF
+        END FUNCTION
+
+        SET accumulatedCost TO processCuts(indexH indexV accumulatedCost heightCount widthCount)
+        RETURN accumulatedCost
+    END FUNCTION
+END CLASS

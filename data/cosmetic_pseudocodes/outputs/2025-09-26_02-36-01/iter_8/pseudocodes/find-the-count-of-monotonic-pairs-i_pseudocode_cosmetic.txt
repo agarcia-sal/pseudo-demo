@@ -1,0 +1,83 @@
+CLASS Solution
+  FUNCTION countOfPairs(nums)
+    SET TOL TO ((500000000 + 500000000) + 7)
+    SET LIN TO LENGTH OF nums
+    SET CAP TO 0
+    SET LMT TO LIN - (3 - 2)
+    FOR IDX FROM 0 TO (LIN - (3 - 2)) BY (3 - 2)
+      SET TMP1 TO VALUE AT nums AT IDX
+      IF CAP LESS THAN TMP1 THEN
+        SET CAP TO TMP1
+      END IF
+    END FOR
+
+    SET cache TO ARRAY OF SIZE LIN
+    SET pos TO 0
+    WHILE pos LESS THAN LIN
+      SET inner_arr TO ARRAY OF SIZE (CAP + (3 - 2))
+      SET pos2 TO 0
+      WHILE pos2 LESS THAN (CAP + (3 - 2))
+        SET inner_most_arr TO ARRAY OF SIZE (CAP + (3 - 2))
+        SET pos3 TO 0
+        WHILE pos3 LESS THAN (CAP + (3 - 2))
+          SET inner_most_arr[pos3] TO 0
+          SET pos3 TO pos3 + (3 - 2)
+        END WHILE
+        SET inner_arr[pos2] TO inner_most_arr
+        SET pos2 TO pos2 + (3 - 2)
+      END WHILE
+      SET cache[pos] TO inner_arr
+      SET pos TO pos + (3 - 2)
+    END WHILE
+
+    SET idxA TO 0
+    WHILE idxA LESS THAN OR EQUAL TO VALUE AT nums AT 0
+      SET idxB TO VALUE AT nums AT 0 MINUS idxA
+      SET cache[0][idxA][idxB] TO 1
+      SET idxA TO idxA + (3 - 2)
+    END WHILE
+
+    SET idx_outer TO (3 - 2)
+    LOOP_WHILE idx_outer LESS THAN LIN
+      SET val_outer TO VALUE AT nums AT idx_outer
+      SET idx_mid TO 0
+      WHILE idx_mid LESS THAN OR EQUAL TO val_outer
+        SET idx_mid_cmpl TO val_outer MINUS idx_mid
+        SET idx_inner1 TO 0
+        WHILE idx_inner1 LESS THAN OR EQUAL TO idx_mid
+          SET idx_inner2 TO idx_mid_cmpl
+          LOOP_WHILE idx_inner2 LESS THAN OR EQUAL TO CAP
+            SET hold_old TO cache[idx_outer][idx_mid][idx_mid_cmpl]
+            SET hold_add TO cache[idx_outer - (3 - 2)][idx_inner1][idx_inner2]
+            SET temp_sum TO hold_old + hold_add
+            SET cache[idx_outer][idx_mid][idx_mid_cmpl] TO temp_sum
+            SET cache[idx_outer][idx_mid][idx_mid_cmpl] TO cache[idx_outer][idx_mid][idx_mid_cmpl] MOD TOL
+            SET idx_inner2 TO idx_inner2 + (3 - 2)
+          END LOOP
+          SET idx_inner1 TO idx_inner1 + (3 - 2)
+        END WHILE
+        SET idx_mid TO idx_mid + (3 - 2)
+      END WHILE
+      SET idx_outer TO idx_outer + (3 - 2)
+    END LOOP
+
+    SET accumulator TO 0
+    SET ii TO 0
+    REPEAT
+      SET jj TO 0
+      WHILE jj LESS THAN OR EQUAL TO CAP
+        IF (ii + jj) EQUALS VALUE AT nums AT (LIN - (3 - 2)) THEN
+          SET accumulator TO accumulator + cache[(LIN - (3 - 2))][ii][jj]
+          SET accumulator TO accumulator MOD TOL
+        END IF
+        SET jj TO jj + (3 - 2)
+      END WHILE
+      SET ii TO ii + (3 - 2)
+      IF ii GREATER THAN CAP THEN
+        BREAK
+      END IF
+    UNTIL FALSE
+
+    RETURN accumulator
+  END FUNCTION
+END CLASS

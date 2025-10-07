@@ -1,0 +1,50 @@
+CLASS Solution
+	 FUNCTION findPermutation(nums)
+		  FUNCTION search(state, last)
+				IF state == (1 << (|nums|)) - 1 THEN
+					RETURN abs(last - nums[0])
+				END IF
+
+				SET outcome TO +∞
+
+				SET index TO 0
+				WHILE index < (|nums|)
+					IF ((state >> index) & 1) == 0 THEN
+						SET trial TO abs(last - nums[index]) + search(state | (1 << index), index)
+						IF trial < outcome THEN
+							outcome = trial
+						END IF
+					END IF
+					index = index + 1
+				END WHILE
+
+				RETURN outcome
+		  END FUNCTION
+
+		  FUNCTION build_sequence(mask, previous)
+				ans.APPEND(previous)
+				IF mask == (1 << (|nums|)) - 1 THEN
+					RETURN
+				END IF
+
+				SET minimal_cost TO search(mask, previous)
+
+				SET pointer TO 0
+				REPEAT
+					IF (((mask >> pointer) & 1) == 0) THEN
+						SET possible TO abs(previous - nums[pointer]) + search(mask | (1 << pointer), pointer)
+						IF possible == minimal_cost THEN
+							build_sequence(mask | (1 << pointer), pointer)
+							EXIT
+						END IF
+					END IF
+					pointer = pointer + 1
+				UNTIL pointer >= (|nums|)
+		  END FUNCTION
+
+		  SET length_var TO |nums|
+		  SET ans TO []
+		  build_sequence(1 << 0, 0)
+		  RETURN ans
+	 END FUNCTION
+END CLASS

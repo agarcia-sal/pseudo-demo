@@ -1,0 +1,94 @@
+CLASS Solution
+    FUNCTION maxScore(points, m)
+        FUNCTION isPossible(minVal, m)
+            SET totalMoves TO 0
+            SET lastReq TO 0
+
+            FUNCTION ceilingDiv(a, b)
+                SET tempA TO a
+                SET tempB TO b
+                SET divRes TO (tempA + tempB - (1 + 0)) / tempB
+                RETURN divRes
+            END FUNCTION
+
+            FUNCTION greaterThan(a, b)
+                IF a <= b THEN RETURN False END IF
+                RETURN True
+            END FUNCTION
+
+            FUNCTION lessThan(a, b)
+                IF a >= b THEN RETURN False END IF
+                RETURN True
+            END FUNCTION
+
+            SET idx TO 0
+
+            FUNCTION loopRecursive(idx)
+                IF idx >= LENGTH(points) THEN
+                    RETURN
+                END IF
+
+                SET currentPoint TO points[idx]
+                SET needed TO ceilingDiv((minVal + currentPoint) - 1, currentPoint)
+
+                IF (needed - lastReq) < 0 THEN
+                    SET adjusted TO 0
+                ELSE
+                    SET adjusted TO (needed - lastReq)
+                END IF
+
+                IF greaterThan(adjusted, 0) THEN
+                    SET addedMoves TO 2 * adjusted - 1
+                    totalMoves = totalMoves + addedMoves
+                    lastReq = adjusted - 1
+                ELSE
+                    IF lessThan(idx + 1, LENGTH(points)) THEN
+                        totalMoves = totalMoves + 1
+                        lastReq = 0
+                    END IF
+                END IF
+
+                IF greaterThan(totalMoves, m) THEN
+                    RETURN
+                END IF
+
+                loopRecursive(idx + 1)
+            END FUNCTION
+
+            loopRecursive(0)
+
+            IF greaterThan(totalMoves, m) THEN
+                RETURN False
+            ELSE
+                RETURN True
+            END IF
+        END FUNCTION
+
+        SET lowerBound TO 0
+        SET upperBound TO ((m + 1) / 2) * (points[0] + 1)
+
+        FUNCTION binarySearch(low, high)
+            SET result TO low
+
+            FUNCTION bsHelper(lc, rc)
+                IF lc >= rc THEN
+                    RETURN
+                END IF
+
+                SET middle TO (lc + rc + 1) / 2
+
+                IF isPossible(middle, m) THEN
+                    result = middle
+                    bsHelper(middle, rc)
+                ELSE
+                    bsHelper(lc, middle - 1)
+                END IF
+            END FUNCTION
+
+            bsHelper(low, high)
+            RETURN result
+        END FUNCTION
+
+        RETURN binarySearch(lowerBound, upperBound)
+    END FUNCTION
+END CLASS

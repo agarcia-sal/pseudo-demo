@@ -1,0 +1,84 @@
+CLASS Solution
+    FUNCTION minimumDeletions(word, k)
+        FUNCTION calculateFrequencies(text)
+            SET counts TO empty map
+            SET pos TO 0
+            WHILE pos < LENGTH(text) DO
+                SET ch TO text[pos]
+                IF NOT ch IN counts THEN
+                    SET counts[ch] = 1
+                ELSE
+                    SET oldCount TO counts[ch]
+                    SET counts[ch] = oldCount + 1
+                END IF
+                SET pos TO pos + 1
+            END WHILE
+            RETURN counts
+        END FUNCTION
+
+        FUNCTION sortAscending(arr)
+            IF LENGTH(arr) <= 1 THEN
+                RETURN arr
+            END IF
+            SET middleIndex TO LENGTH(arr) DIVIDED BY 2
+            SET leftPart TO sortAscending(SLICE(arr, 0, middleIndex))
+            SET rightPart TO sortAscending(SLICE(arr, middleIndex, LENGTH(arr)))
+            SET resultList TO EMPTY LIST
+            SET iLeft TO 0
+            SET iRight TO 0
+            WHILE iLeft < LENGTH(leftPart) OR iRight < LENGTH(rightPart) DO
+                IF iRight >= LENGTH(rightPart) OR (iLeft < LENGTH(leftPart) AND leftPart[iLeft] <= rightPart[iRight]) THEN
+                    APPEND leftPart[iLeft] TO resultList
+                    SET iLeft TO iLeft + 1
+                ELSE
+                    APPEND rightPart[iRight] TO resultList
+                    SET iRight TO iRight + 1
+                END IF
+            END WHILE
+            RETURN resultList
+        END FUNCTION
+
+        FUNCTION equalsInfinity(val)
+            RETURN val >= 1.0E+300
+        END FUNCTION
+
+        SET freqMap TO calculateFrequencies(word)
+        SET valuesList TO EMPTY LIST
+        FOR EACH key IN freqMap KEYS DO
+            APPEND freqMap[key] TO valuesList
+        END FOR
+        SET sortedFreqs TO sortAscending(valuesList)
+
+        SET bestScore TO 1.0E+300
+        SET idx TO 0
+        WHILE idx < LENGTH(sortedFreqs) DO
+            SET maxFreqAllowed TO sortedFreqs[idx] + k
+            SET sumDeletion TO 0
+
+            FUNCTION sumFromIndex(start, endExclusive)
+                SET total TO 0
+                SET p TO start
+                WHILE p < endExclusive DO
+                    SET total TO total + sortedFreqs[p]
+                    SET p TO p + 1
+                END WHILE
+                RETURN total
+            END FUNCTION
+
+            SET posDel TO idx + 1
+            WHILE posDel < LENGTH(sortedFreqs) DO
+                IF sortedFreqs[posDel] > maxFreqAllowed THEN
+                    SET sumDeletion TO sumDeletion + (sortedFreqs[posDel] - maxFreqAllowed)
+                END IF
+                SET posDel TO posDel + 1
+            END WHILE
+
+            SET sumDeletion TO sumDeletion + sumFromIndex(0, idx)
+            IF sumDeletion < bestScore THEN
+                SET bestScore TO sumDeletion
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+        RETURN bestScore
+    END FUNCTION
+END CLASS

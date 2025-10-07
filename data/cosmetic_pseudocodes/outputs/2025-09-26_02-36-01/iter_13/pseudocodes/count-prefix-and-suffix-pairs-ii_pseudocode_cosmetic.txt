@@ -1,0 +1,36 @@
+CLASS Solution
+    FUNCTION countPrefixSuffixPairs(words)
+        SET totalPairs TO 0
+        SET frequencyMap TO empty mapping defaulting to 0
+        DEFINE FUNCTION checkAllKeysRecursively(keysList, idx, currentWord)
+            IF idx >= LENGTH(keysList) THEN
+                RETURN 0
+            END IF
+            SET currentKey TO keysList[idx]
+            SET partialCount TO 0
+            SET lenCurrentWord TO LENGTH(currentWord)
+            SET lenCurrentKey TO LENGTH(currentKey)
+            IF currentWord = SUBSTRING(currentKey, 0, lenCurrentWord) AND currentWord = SUBSTRING(currentKey, lenCurrentKey - lenCurrentWord, lenCurrentKey) THEN
+                SET partialCount TO frequencyMap[currentKey]
+            END IF
+            RETURN partialCount + checkAllKeysRecursively(keysList, idx + 1, currentWord)
+        END FUNCTION
+
+        DEFINE FUNCTION processWordsRecursively(idx)
+            IF idx < 0 THEN
+                RETURN 0
+            END IF
+            SET wordNow TO words[idx]
+            SET keysList TO []
+            FOR each k IN frequencyMap
+                APPEND k TO keysList
+            END FOR
+            SET countForThis TO checkAllKeysRecursively(keysList, 0, wordNow)
+            frequencyMap[wordNow] <- frequencyMap[wordNow] + 1
+            RETURN countForThis + processWordsRecursively(idx - 1)
+        END FUNCTION
+
+        SET totalPairs <- processWordsRecursively(LENGTH(words) - 1)
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

@@ -1,0 +1,53 @@
+FUNCTION file_name_check(input_string)
+  
+  EXECUTE
+    valid_endings ← {'dll', 'txt', 'exe'}
+    
+    components ← EMPTY LIST
+    index ← 0
+    length_input ← LENGTH OF input_string
+
+    REPEAT
+      position ← FIND '.' IN input_string FROM index
+      IF position < 0 THEN
+        ADD SUBSTRING(input_string, index, length_input) TO components
+        BREAK
+      ELSE
+        ADD SUBSTRING(input_string, index, position) TO components
+        index ← position + 1
+      END IF
+    UNTIL FALSE
+
+    IF NOT (LENGTH components = 2) THEN
+      EXECUTE BREAK WITH 'No'  
+    END IF
+
+    suffix ← components AT 1
+    IF NOT (suffix IN valid_endings) THEN
+      EXECUTE BREAK WITH 'No'
+    END IF
+
+    prefix ← components AT 0
+
+    IF (LENGTH prefix = 0) OR (NOT (('A' ≤ prefix[0] ≤ 'Z') OR ('a' ≤ prefix[0] ≤ 'z'))) THEN
+      EXECUTE BREAK WITH 'No'
+    END IF
+
+    number_of_digits ← 0
+    pointer ← 0
+    WHILE pointer < LENGTH prefix DO
+      character ← prefix[pointer]
+      IF (character ≥ '0') AND (character ≤ '9') THEN
+        number_of_digits ← number_of_digits + 1
+      END IF
+      pointer ← pointer + 1
+    END WHILE
+
+    IF number_of_digits > 3 THEN
+      EXECUTE BREAK WITH 'No'
+    END IF
+
+    EXECUTE BREAK WITH 'Yes'
+
+  ON BREAK RETURN value
+END FUNCTION

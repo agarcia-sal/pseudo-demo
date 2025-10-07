@@ -1,0 +1,97 @@
+```pseudocode
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        PROCEDURE accumulate_frequencies(seq, freq_map)
+            FOR each elem IN seq DO
+                IF freq_map CONTAINS elem THEN
+                    freq_map[elem] = freq_map[elem] + 1
+                ELSE
+                    freq_map[elem] = 1
+                END IF
+            END FOR
+        END PROCEDURE
+
+        VAR freq_dict = DICTIONARY()
+        CALL accumulate_frequencies(CONVERT_TO_LIST(s), freq_dict)
+
+        IF freq_dict CONTAINS '?' THEN
+            REMOVE '?' FROM freq_dict
+        END IF
+
+        VAR positions = LIST()
+        VAR idx = 0
+        REPEAT
+            IF idx >= LENGTH(s) THEN
+                EXIT REPEAT
+            END IF
+            IF s[idx] = '?' THEN
+                APPEND idx TO positions
+            END IF
+            idx = idx + 1
+        UNTIL FALSE
+
+        VAR replacements = LIST()
+        VAR pos_idx = 0
+        WHILE pos_idx < LENGTH(positions) DO
+            VAR current_min = 1 / 0
+            VAR chosen_char = NULL
+            VAR letter_code = 97
+            WHILE letter_code <= 122 DO
+                VAR char_candidate = CHAR(letter_code)
+                VAR freq_val = 0
+                IF char_candidate IN freq_dict THEN
+                    freq_val = freq_dict[char_candidate]
+                END IF
+                IF NOT (freq_val >= current_min) THEN
+                    chosen_char = char_candidate
+                    current_min = freq_val
+                END IF
+                letter_code = letter_code + 1
+            END WHILE
+            APPEND chosen_char TO replacements
+            IF chosen_char IN freq_dict THEN
+                freq_dict[chosen_char] = freq_dict[chosen_char] + 1
+            ELSE
+                freq_dict[chosen_char] = 1
+            END IF
+            pos_idx = pos_idx + 1
+        END WHILE
+
+        VAR sorted_replacements = LIST()
+        VAR temp_repl = replacements
+        VAR inserted_count = 0
+        WHILE inserted_count < LENGTH(temp_repl) DO
+            VAR smallest = 'z'
+            VAR smallest_index = -1
+            VAR i = 0
+            WHILE i < LENGTH(temp_repl) DO
+                IF temp_repl[i] <= smallest THEN
+                    smallest = temp_repl[i]
+                    smallest_index = i
+                END IF
+                i = i + 1
+            END WHILE
+            APPEND smallest TO sorted_replacements
+            REMOVE ELEMENT AT smallest_index FROM temp_repl
+            inserted_count = inserted_count + 1
+        END WHILE
+
+        VAR char_array = CONVERT_TO_LIST(s)
+        VAR pos_ptr = 0
+        WHILE pos_ptr < LENGTH(positions) DO
+            VAR pos_val = positions[pos_ptr]
+            char_array[pos_val] = sorted_replacements[pos_ptr]
+            pos_ptr = pos_ptr + 1
+        END WHILE
+
+        VAR output_string = ''
+        VAR out_idx = 0
+        WHILE out_idx < LENGTH(char_array) DO
+            output_string = output_string + char_array[out_idx]
+            out_idx = out_idx + 1
+        END WHILE
+
+        RETURN output_string
+    END FUNCTION
+END CLASS
+```

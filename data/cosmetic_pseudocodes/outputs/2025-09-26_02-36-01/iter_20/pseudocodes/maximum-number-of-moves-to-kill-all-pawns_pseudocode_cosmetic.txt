@@ -1,0 +1,102 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+        FUNCTION generateKnightSteps()
+            RETURN [(1, 2), (1, -2), (-1, 2), (-1, -2), (2, 1), (2, -1), (-2, 1), (-2, -1)]
+        END FUNCTION
+
+        FUNCTION isValid(x, y)
+            RETURN (0 <= x) AND (x < 50) AND (0 <= y) AND (y < 50)
+        END FUNCTION
+
+        FUNCTION enqueue(q, item)
+            q.APPEND(item)
+        END FUNCTION
+
+        FUNCTION dequeue(q)
+            SET item TO q[0]
+            REMOVE q[0]
+            RETURN item
+        END FUNCTION
+
+        SET knights TO generateKnightSteps()
+        SET pawnsSet TO EMPTY SET
+
+        FOR pos IN positions DO
+            ADD (pos[0], pos[1]) TO pawnsSet
+        END FOR
+
+        SET countPawns TO LENGTH(pawnsSet)
+
+        FUNCTION dp(a, b, mask, turn)
+            IF mask == 0 THEN
+                RETURN 0
+            END IF
+
+            IF turn THEN
+                SET optimum TO 0
+            ELSE
+                SET optimum TO 1e9
+            END IF
+
+            SET idx TO 0
+            REPEAT
+                IF idx >= countPawns THEN
+                    BREAK
+                END IF
+
+                SET flag TO (mask & (2 ^ idx)) != 0
+
+                IF flag THEN
+                    SET targetX TO positions[idx][0]
+                    SET targetY TO positions[idx][1]
+
+                    SET q TO [(a, b, 0)]
+                    SET visitedCoords TO EMPTY SET
+                    ADD (a, b) TO visitedCoords
+
+                    SET reached TO FALSE
+
+                    WHILE LENGTH(q) > 0 DO
+                        (cx, cy, stepCount) = dequeue(q)
+
+                        IF (cx == targetX) AND (cy == targetY) THEN
+                            SET reached TO TRUE
+                            BREAK
+                        END IF
+
+                        FOR move IN knights DO
+                            SET nx TO cx + move[0]
+                            SET ny TO cy + move[1]
+
+                            IF isValid(nx, ny) AND NOT ((nx, ny) IN visitedCoords) THEN
+                                ADD (nx, ny) TO visitedCoords
+                                enqueue(q, (nx, ny, stepCount + 1))
+                            END IF
+                        END FOR
+                    END WHILE
+
+                    IF reached THEN
+                        SET newMask TO mask ^ (2 ^ idx)
+                        SET recCall TO dp(targetX, targetY, newMask, NOT turn)
+                        IF turn THEN
+                            IF optimum < stepCount + recCall THEN
+                                optimum = stepCount + recCall
+                            END IF
+                        ELSE
+                            IF optimum > stepCount + recCall THEN
+                                optimum = stepCount + recCall
+                            END IF
+                        END IF
+                    END IF
+                END IF
+
+                idx = idx + 1
+            UNTIL FALSE
+
+            RETURN optimum
+        END FUNCTION
+
+        SET initialMask TO (2 ^ countPawns) - 1
+        RETURN dp(kx, ky, initialMask, TRUE)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,110 @@
+CLASS Solution
+    FUNCTION constructGridLayout(n, edges)
+        SET graphAdj TO a list of size n, each element initialized as empty list
+        DEFINE PROCEDURE addEdges(index)
+            IF index EQUALS length of edges THEN
+                RETURN
+            END IF
+            SET nodeA TO edges[index][0]
+            SET nodeB TO edges[index][1]
+            SET graphAdj[nodeA] TO graphAdj[nodeA] PLUS [nodeB]
+            SET graphAdj[nodeB] TO graphAdj[nodeB] PLUS [nodeA]
+            CALL addEdges(index PLUS one)
+        END PROCEDURE
+        CALL addEdges(zero)
+
+        SET degreeMap TO list of five elements, each set to negative one
+        SET pos TO zero
+        WHILE pos LESS THAN length of graphAdj DO
+            SET neighbors TO graphAdj[pos]
+            SET idx TO length of neighbors
+            SET degreeMap[idx] TO pos
+            SET pos TO pos PLUS one
+        END WHILE
+
+        SET resultRow TO empty list
+        IF degreeMap[1] NOT EQUALS negative one THEN
+            SET resultRow TO [degreeMap[1]]
+        ELSE
+            IF degreeMap[4] EQUALS negative one THEN
+                SET centralNode TO degreeMap[2]
+                SET foundRow TO false
+                FUNCTION findRow(nodes, pos)
+                    IF pos EQUALS length of nodes OR foundRow THEN
+                        RETURN
+                    END IF
+                    SET candidate TO nodes[pos]
+                    IF length of graphAdj[candidate] EQUALS two THEN
+                        SET resultRow TO [centralNode, candidate]
+                        SET foundRow TO true
+                        RETURN
+                    END IF
+                    CALL findRow(nodes, pos PLUS one)
+                END FUNCTION
+                CALL findRow(graphAdj[centralNode], zero)
+            ELSE
+                SET currentNode TO degreeMap[2]
+                SET resultRow TO [currentNode]
+                SET previousNode TO currentNode
+                SET adjNodes TO graphAdj[currentNode]
+                SET currentNode TO adjNodes[0]
+                FUNCTION traverseChain(prev, curr)
+                    WHILE length of graphAdj[curr] GREATER THAN two DO
+                        APPEND curr TO resultRow
+                        SET adjVals TO graphAdj[curr]
+                        SET i TO zero
+                        WHILE i LESS THAN length of adjVals DO
+                            SET neighbor TO adjVals[i]
+                            IF neighbor NOT EQUALS prev AND length of graphAdj[neighbor] LESS THAN four THEN
+                                SET prev TO curr
+                                SET curr TO neighbor
+                                BREAK
+                            END IF
+                            SET i TO i PLUS one
+                        END WHILE
+                    END WHILE
+                    APPEND curr TO resultRow
+                END FUNCTION
+                CALL traverseChain(previousNode, currentNode)
+            END IF
+        END IF
+
+        SET outputGrid TO [resultRow]
+        SET visitedNodes TO list of n elements set to false
+        SET iterCount TO (n DIV length of resultRow) MINUS one
+        FUNCTION markVisited(nodes)
+            FOR idx FROM zero TO length of nodes MINUS one DO
+                SET visitedNodes[nodes[idx]] TO true
+            END FOR
+        END FUNCTION
+
+        FUNCTION buildNextRow(currentRow)
+            SET nextRow TO empty list
+            FOR idx FROM zero TO length of currentRow MINUS one DO
+                SET nodeVal TO currentRow[idx]
+                SET neighbors IN graphAdj[nodeVal]
+                SET j TO zero
+                WHILE j LESS THAN length of neighbors DO
+                    SET neighborNode TO neighbors[j]
+                    IF visitedNodes[neighborNode] EQUALS false THEN
+                        APPEND neighborNode TO nextRow
+                        BREAK
+                    END IF
+                    SET j TO j PLUS one
+                END WHILE
+            END FOR
+            RETURN nextRow
+        END FUNCTION
+
+        SET loopCounter TO zero
+        WHILE loopCounter LESS THAN iterCount DO
+            CALL markVisited(resultRow)
+            SET resultRow TO buildNextRow(resultRow)
+            APPEND resultRow TO outputGrid
+            SET loopCounter TO loopCounter PLUS one
+        END WHILE
+
+        SET finalResult TO outputGrid
+        RETURN finalResult
+    END FUNCTION
+END CLASS

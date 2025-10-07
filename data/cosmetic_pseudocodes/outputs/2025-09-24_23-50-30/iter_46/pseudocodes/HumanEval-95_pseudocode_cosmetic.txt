@@ -1,0 +1,49 @@
+```
+FUNCTION check_dict_case(dict_obj)
+    FUNCTION iterate_keys(idx, curr_state)
+        IF idx >= LENGTH OF dict_obj KEYS
+            RETURN (curr_state = "upper") OR (curr_state = "lower")
+        END IF
+
+        SET k TO dict_obj KEYS AT idx
+
+        SWITCH NOT (k INSTANCEOF STRING)
+            CASE True:
+                RETURN False
+            CASE False:
+                SWITCH curr_state
+                    CASE "start":
+                        IF (k IS ALL UPPERCASE) THEN
+                            RETURN iterate_keys(idx + 1, "upper")
+                        ELSE
+                            IF (k IS ALL LOWERCASE) THEN
+                                RETURN iterate_keys(idx + 1, "lower")
+                            ELSE
+                                RETURN False
+                            END IF
+                        END IF
+                    CASE "upper":
+                        IF (NOT (k IS ALL UPPERCASE)) THEN
+                            RETURN False
+                        ELSE
+                            RETURN iterate_keys(idx + 1, "upper")
+                        END IF
+                    CASE "lower":
+                        IF (NOT (k IS ALL LOWERCASE)) THEN
+                            RETURN False
+                        ELSE
+                            RETURN iterate_keys(idx + 1, "lower")
+                        END IF
+                    DEFAULT:
+                        RETURN False
+                END SWITCH
+        END SWITCH
+    END FUNCTION
+
+    IF NOT ((0) = LENGTH OF dict_obj KEYS)
+        RETURN iterate_keys(0, "start")
+    ELSE
+        RETURN False
+    END IF
+END FUNCTION
+```

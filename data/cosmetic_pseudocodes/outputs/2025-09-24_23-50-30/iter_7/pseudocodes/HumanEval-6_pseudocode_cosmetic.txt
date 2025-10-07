@@ -1,0 +1,46 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        PROCEDURE helper(index, depth_accum, max_accum)
+            IF index >= LENGTH(group_string)
+                RETURN max_accum
+            END IF
+
+            IF SUBSTRING(group_string, index, 1) EQUALS '('
+                LET new_depth = depth_accum + 1
+                LET new_max = (IF max_accum < new_depth THEN new_depth ELSE max_accum)
+                RETURN helper(index + 1, new_depth, new_max)
+            ELSE
+                RETURN helper(index + 1, depth_accum - 1, max_accum)
+            END IF
+        END PROCEDURE
+
+        RETURN helper(0, 0, 0)
+    END FUNCTION
+
+    LET split_groups = []
+    LET temp_str = ""
+    FOR pos FROM 0 TO LENGTH(parentheses_string) - 1
+        IF SUBSTRING(parentheses_string, pos, 1) EQUALS ' '
+            IF LENGTH(temp_str) <> 0
+                APPEND temp_str TO split_groups
+            END IF
+            LET temp_str = ""
+        ELSE
+            LET temp_str = temp_str + SUBSTRING(parentheses_string, pos, 1)
+        END IF
+    END FOR
+    IF LENGTH(temp_str) <> 0
+        APPEND temp_str TO split_groups
+    END IF
+
+    LET result_list = []
+    FOR each element IN split_groups
+        IF LENGTH(element) > 0
+            APPEND parse_paren_group(element) TO result_list
+        END IF
+    END FOR
+
+    RETURN result_list
+END FUNCTION
+```

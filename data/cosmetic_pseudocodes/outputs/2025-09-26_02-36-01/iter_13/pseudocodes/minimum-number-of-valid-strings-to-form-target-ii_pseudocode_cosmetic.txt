@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION minValidStrings(words, target)
+        FUNCTION containsPrefix(setCollection, query)
+            REPEAT idx FROM 1 TO LENGTH(query)
+                IF query[1 TO idx] IN setCollection THEN
+                    RETURN TRUE
+                END IF
+            END REPEAT
+            RETURN FALSE
+        END FUNCTION
+
+        FUNCTION getMin(a, b)
+            IF a <= b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        PROCEDURE buildPrefixes(srcWords, prefixSet)
+            PROCEDURE insertPrefixes(word, count)
+                IF count > LENGTH(word) THEN
+                    RETURN
+                END IF
+                SET prefixSet TO prefixSet UNION { word[1 TO count] }
+                CALL insertPrefixes(word, count + 1)
+            END PROCEDURE
+
+            REPEAT widx FROM 1 TO LENGTH(srcWords)
+                CALL insertPrefixes(srcWords[widx], 1)
+            END REPEAT
+        END PROCEDURE
+
+        SET prefixes TO empty set
+        CALL buildPrefixes(words, prefixes)
+
+        SET lengthTarget TO LENGTH(target)
+        SET dpList TO a LIST from 0 TO lengthTarget with each element set to +∞
+        SET dpList[0] TO 0
+
+        PROCEDURE updateDP(pos)
+            IF pos > lengthTarget THEN
+                RETURN
+            END IF
+
+            PROCEDURE innerCheck(begin)
+                IF begin > pos THEN
+                    RETURN
+                END IF
+
+                SET subStr TO target[begin TO pos]
+                IF subStr IN prefixes THEN
+                    SET dpList[pos] TO getMin(dpList[pos], dpList[begin - 1] + 1)
+                END IF
+
+                CALL innerCheck(begin + 1)
+            END PROCEDURE
+
+            CALL innerCheck(1)
+            CALL updateDP(pos + 1)
+        END PROCEDURE
+
+        CALL updateDP(1)
+
+        IF dpList[lengthTarget] < +∞ THEN
+            RETURN dpList[lengthTarget]
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

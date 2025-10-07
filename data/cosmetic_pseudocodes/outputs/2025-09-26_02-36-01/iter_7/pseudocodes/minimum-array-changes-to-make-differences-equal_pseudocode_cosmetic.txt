@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION minChanges(nums k)
+        DEFINE LEN = LENGTH OF nums
+        DEFINE HALF_CNT = (LEN DIV 2) - 1
+        DEFINE ARR_SIZE = (k + 2)
+        DEFINE COUNTS = ARRAY OF ARR_SIZE ZEROS
+
+        FUNCTION sumArray(arr)
+            DEFINE idx = 1
+            DEFINE total = arr[0]
+            WHILE idx < LENGTH OF arr
+                SET total = total + arr[idx]
+                INCREMENT idx BY 1
+            END WHILE
+            RETURN total
+        END FUNCTION
+
+        DEFINE cursor = 0
+        WHILE cursor <= HALF_CNT
+            DEFINE firstVal = nums[cursor]
+            DEFINE secondVal = nums[LEN - cursor - 1]
+
+            IF firstVal > secondVal THEN
+                DEFINE swapTemp = firstVal
+                SET firstVal = secondVal
+                SET secondVal = swapTemp
+            END IF
+
+            SET COUNTS[0] = COUNTS[0] + 1
+            SET COUNTS[secondVal - firstVal] = COUNTS[secondVal - firstVal] - 1
+            SET COUNTS[(secondVal - firstVal) + 1] = COUNTS[(secondVal - firstVal) + 1] + 1
+
+            DEFINE M = MAX(secondVal, (k - firstVal))
+            SET COUNTS[M + 1] = COUNTS[M + 1] - 1
+            SET COUNTS[M + 2] = COUNTS[M + 2] + 1
+
+            INCREMENT cursor BY 1
+        END WHILE
+
+        DEFINE result = COUNTS[0]
+        DEFINE position = 1
+        WHILE position < LENGTH OF COUNTS
+            SET COUNTS[position] = COUNTS[position] + COUNTS[position - 1]
+            IF COUNTS[position] < result THEN
+                SET result = COUNTS[position]
+            END IF
+            INCREMENT position BY 1
+        END WHILE
+
+        RETURN result
+    END FUNCTION
+END CLASS

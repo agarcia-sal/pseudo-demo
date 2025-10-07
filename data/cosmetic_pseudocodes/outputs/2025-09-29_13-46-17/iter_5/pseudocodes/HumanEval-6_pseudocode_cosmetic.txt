@@ -1,0 +1,54 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        LET depth_counter = 0
+        LET peak_depth = 0
+
+        FUNCTION scan_characters(index)
+            IF index > LENGTH(group_string) THEN
+                RETURN peak_depth
+            END IF
+
+            LET symbol = SUBSTRING(group_string, index, 1)
+
+            IF NOT (symbol != '(') THEN
+                LET depth_counter = depth_counter + (1 * 1)
+                IF peak_depth >= depth_counter THEN
+                    LET peak_depth = peak_depth
+                ELSE
+                    LET peak_depth = depth_counter
+                END IF
+            ELSE
+                LET depth_counter = depth_counter + (-1 * 1)
+            END IF
+
+            RETURN scan_characters(index + 1)
+        END FUNCTION
+
+        RETURN scan_characters(1)
+    END FUNCTION
+
+    LET segments_map = {}
+    LET start_index = 1
+    LET length_str = LENGTH(parentheses_string)
+    WHILE start_index <= length_str
+        LET next_space = FIND(' ', parentheses_string, start_index)
+        IF next_space == 0 THEN
+            LET next_space = length_str + 1
+        END IF
+        LET fragment = SUBSTRING(parentheses_string, start_index, next_space - start_index)
+        IF fragment != "" THEN
+            SET segments_map[start_index] = fragment
+        END IF
+        SET start_index = next_space + 1
+    END WHILE
+
+    LET results_accumulator = []
+    FOR EACH key IN KEYS(segments_map)
+        LET outcome = parse_paren_group(segments_map[key])
+        APPEND outcome TO results_accumulator
+    END FOR
+
+    RETURN results_accumulator
+END FUNCTION
+```

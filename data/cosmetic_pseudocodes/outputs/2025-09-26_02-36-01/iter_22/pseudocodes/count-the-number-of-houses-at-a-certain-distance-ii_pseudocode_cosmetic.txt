@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION countOfPairs(n, x, y)
+        SET swapped TO False
+        IF y LESS THAN x
+            SET temp TO y
+            SET y TO x
+            SET x TO temp
+            SET swapped TO True
+        END IF
+
+        FUNCTION bfs(start)
+            SET visitedFlags TO array of size n + 1 with all False
+            SET distancesArray TO array of size n + 1 filled with 0
+            SET fifoQueue TO queue with start enqueued
+            SET visitedFlags[start] TO True
+
+            WHILE NOT (fifoQueue IS empty)
+                SET currNode TO dequeue head from fifoQueue
+
+                FOR each adjacent IN [currNode - 1, currNode + 1]
+                    IF adjacent GREATER OR EQUAL TO 1 AND adjacent LESS OR EQUAL TO n AND NOT visitedFlags[adjacent]
+                        SET visitedFlags[adjacent] TO True
+                        SET distancesArray[adjacent] TO distancesArray[currNode] + 1
+                        ENQUEUE adjacent INTO fifoQueue
+                    END IF
+                END FOR
+
+                IF currNode EQUALS x AND NOT visitedFlags[y]
+                    SET visitedFlags[y] TO True
+                    SET distancesArray[y] TO distancesArray[currNode] + 1
+                    ENQUEUE y INTO fifoQueue
+                ELSE IF currNode EQUALS y AND NOT visitedFlags[x]
+                    SET visitedFlags[x] TO True
+                    SET distancesArray[x] TO distancesArray[currNode] + 1
+                    ENQUEUE x INTO fifoQueue
+                END IF
+            END WHILE
+
+            SET resultSlice TO empty list
+            SET idxHolder TO 1
+            WHILE idxHolder LESS OR EQUAL TO n
+                APPEND distancesArray[idxHolder] TO resultSlice
+                INCREMENT idxHolder BY 1
+            END WHILE
+
+            RETURN resultSlice
+        END FUNCTION
+
+        SET outputArray TO array of length n filled with 0
+
+        SET counterIdx TO 1
+        WHILE counterIdx LESS OR EQUAL TO n
+            SET distancesList TO bfs(counterIdx)
+            SET distIterator TO 0
+            WHILE distIterator LESS THAN LENGTH of distancesList
+                IF distancesList[distIterator] GREATER THAN 0
+                    INCREMENT outputArray[distancesList[distIterator] - 1] BY 1
+                END IF
+                INCREMENT distIterator BY 1
+            END WHILE
+            INCREMENT counterIdx BY 1
+        END WHILE
+
+        RETURN outputArray
+    END FUNCTION
+END CLASS

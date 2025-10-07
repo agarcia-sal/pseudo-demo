@@ -1,0 +1,47 @@
+CLASS Solution  
+    FUNCTION numberOfPermutations(n, requirements)  
+  SET M TO ( (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7 )  
+  SET dict_req TO an empty dictionary  
+  FOR each pair idx_x, count_x IN requirements DO  
+    SET dict_req[idx_x] TO count_x  
+  END FOR  
+  
+  FUNCTION count_permutations(len_prefix, inv_count, used_mask)  
+    IF len_prefix NOT EQUAL n THEN  
+      IF len_prefix GREATER THAN 0 THEN  
+        SET expect_val TO (dict_req[len_prefix] IF EXISTS ELSE inv_count) - 1  
+        IF inv_count NOT EQUAL expect_val THEN  
+          RETURN 0  
+        END IF  
+      END IF  
+  
+      SET total_count TO 0  
+      SET index_iter TO 0  
+      WHILE index_iter LESS THAN n DO  
+        IF (used_mask AND (1 LEFT SHIFT index_iter)) EQUALS 0 THEN  
+          SET updated_inv TO inv_count  
+          FOR other_pos FROM (index_iter + 1) TO (n - 1) DO  
+            IF (used_mask AND (1 LEFT SHIFT other_pos)) NOT EQUAL 0 THEN  
+              SET updated_inv TO updated_inv + 1  
+            END IF  
+          END FOR  
+  
+          SET total_count TO (total_count + count_permutations(len_prefix + 1, updated_inv, (used_mask OR (1 LEFT SHIFT index_iter)))) MOD M  
+        END IF  
+        SET index_iter TO index_iter + 1  
+      END WHILE  
+  
+      RETURN total_count  
+    ELSE  
+      SET val_n TO (dict_req[n] IF EXISTS ELSE 0) - 1  
+      IF inv_count EQUALS val_n THEN  
+        RETURN 1  
+      ELSE  
+        RETURN 0  
+      END IF  
+    END IF  
+  END FUNCTION  
+  
+  RETURN count_permutations(0, 0, 0)  
+    END FUNCTION  
+END CLASS

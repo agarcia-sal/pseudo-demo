@@ -1,0 +1,83 @@
+CLASS Solution
+	FUNCTION canReachCorner(xCorner yCorner circles)
+		FUNCTION isInsideCircle(pointX pointY centerX centerY radius)
+			LET deltaX = pointX - centerX
+			LET deltaY = pointY - centerY
+			RETURN (deltaX * deltaX + deltaY * deltaY) <= (radius * radius)
+		END FUNCTION
+
+		FUNCTION touchesLeftOrTopEdge(centerX centerY radius)
+			LET condLeft = (ABS(centerX) <= radius) AND (centerY >= 0) AND (centerY <= yCorner)
+			LET condTop = (ABS(centerY - yCorner) <= radius) AND (centerX >= 0) AND (centerX <= xCorner)
+			RETURN condLeft OR condTop
+		END FUNCTION
+
+		FUNCTION touchesRightOrBottomEdge(centerX centerY radius)
+			LET condRight = (ABS(centerX - xCorner) <= radius) AND (centerY >= 0) AND (centerY <= yCorner)
+			LET condBottom = (ABS(centerY) <= radius) AND (centerX >= 0) AND (centerX <= xCorner)
+			RETURN condRight OR condBottom
+		END FUNCTION
+
+		FUNCTION exploreCircle(index)
+			LET currX = circles[index][0]
+			LET currY = circles[index][1]
+			LET currRadius = circles[index][2]
+
+			IF touchesRightOrBottomEdge(currX currY currRadius)
+				RETURN TRUE
+			END IF
+
+			vis[index] = TRUE
+
+			LET m = LENGTH(circles)
+			LET iterator = 0
+
+			WHILE iterator < m
+				LET nextX = circles[iterator][0]
+				LET nextY = circles[iterator][1]
+				LET nextRadius = circles[iterator][2]
+
+				IF (vis[iterator] = TRUE) OR ((currX - nextX) * (currX - nextX) + (currY - nextY) * (currY - nextY) > (currRadius + nextRadius) * (currRadius + nextRadius))
+					SET iterator = iterator + 1
+					CONTINUE
+				END IF
+
+				LET sumRadius = currRadius + nextRadius
+				LET weightedX = currX * nextRadius + nextX * currRadius
+				LET weightedY = currY * nextRadius + nextY * currRadius
+
+				IF (weightedX < sumRadius * xCorner) AND (weightedY < sumRadius * yCorner) AND exploreCircle(iterator)
+					RETURN TRUE
+				END IF
+
+				SET iterator = iterator + 1
+			END WHILE
+
+			RETURN FALSE
+		END FUNCTION
+
+		LET vis = []
+		FOR _ FROM 1 TO LENGTH(circles)
+			APPEND FALSE TO vis
+		END FOR
+
+		LET idx = 0
+		WHILE idx < LENGTH(circles)
+			LET cX = circles[idx][0]
+			LET cY = circles[idx][1]
+			LET cR = circles[idx][2]
+
+			IF isInsideCircle(0 0 cX cY cR) OR isInsideCircle(xCorner yCorner cX cY cR)
+				RETURN FALSE
+			END IF
+
+			IF (vis[idx] = FALSE) AND touchesLeftOrTopEdge(cX cY cR) AND exploreCircle(idx)
+				RETURN FALSE
+			END IF
+
+			SET idx = idx + 1
+		END WHILE
+
+		RETURN TRUE
+	END FUNCTION
+END CLASS

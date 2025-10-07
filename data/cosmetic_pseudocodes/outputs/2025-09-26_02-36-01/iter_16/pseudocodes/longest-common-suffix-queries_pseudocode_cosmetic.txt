@@ -1,0 +1,64 @@
+CLASS Solution  
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER  
+        SET mapSuffixes TO empty dictionary mapping STRING to INTEGER  
+        
+        FUNCTION findMatch(word STRING, idx INTEGER)  
+            PROCEDURE recurse(i INTEGER)  
+                IF i > LENGTH(word) - 1 THEN RETURN END IF  
+                SET subSuffix TO substring of word FROM i TO end  
+                IF NOT (subSuffix IN mapSuffixes) THEN  
+                    SET mapSuffixes[subSuffix] TO idx  
+                ELSE  
+                    SET currentIdx TO mapSuffixes[subSuffix]  
+                    SET currentWord TO wordsContainer[currentIdx]  
+                    IF (LENGTH(word) < LENGTH(currentWord)) OR ((LENGTH(word) = LENGTH(currentWord)) AND idx < currentIdx) THEN  
+                        SET mapSuffixes[subSuffix] TO idx  
+                    END IF  
+                END IF  
+                CALL recurse(i + 1)  
+            END PROCEDURE  
+            CALL recurse(0)  
+        END FUNCTION
+        
+        SET counter INTEGER TO 0  
+        WHILE counter < LENGTH(wordsContainer) DO  
+            SET curWord STRING TO wordsContainer[counter]  
+            CALL findMatch(curWord, counter)  
+            SET counter TO counter + 1  
+        END WHILE  
+        
+        FUNCTION get_best_match(query STRING) RETURNS INTEGER  
+            SET position INTEGER TO 0  
+            WHILE position < LENGTH(query) DO  
+                SET querySuffix STRING TO substring of query FROM position TO end  
+                IF querySuffix IN mapSuffixes THEN  
+                    RETURN mapSuffixes[querySuffix]  
+                END IF  
+                SET position TO position + 1  
+            END WHILE  
+            
+            SET minIndex INTEGER TO 0  
+            SET minWord STRING TO wordsContainer[0]  
+            SET minIter INTEGER TO 1  
+            WHILE minIter < LENGTH(wordsContainer) DO  
+                SET cmpWord STRING TO wordsContainer[minIter]  
+                IF (LENGTH(cmpWord) < LENGTH(minWord)) OR ((LENGTH(cmpWord) = LENGTH(minWord)) AND minIter < minIndex) THEN  
+                    SET minIndex TO minIter  
+                    SET minWord TO cmpWord  
+                END IF  
+                SET minIter TO minIter + 1  
+            END WHILE  
+            RETURN minIndex  
+        END FUNCTION  
+        
+        SET outputResults TO empty list of integer  
+        SET idx INTEGER TO 0  
+        WHILE idx < LENGTH(wordsQuery) DO  
+            SET queryItem STRING TO wordsQuery[idx]  
+            SET matchedIndex INTEGER TO get_best_match(queryItem)  
+            APPEND matchedIndex TO outputResults  
+            SET idx TO idx + 1  
+        END WHILE  
+        RETURN outputResults  
+    END FUNCTION  
+END CLASS

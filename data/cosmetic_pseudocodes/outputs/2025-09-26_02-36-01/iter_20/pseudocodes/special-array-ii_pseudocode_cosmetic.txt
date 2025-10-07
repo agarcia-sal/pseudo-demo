@@ -1,0 +1,68 @@
+CLASS Solution  
+    FUNCTION isArraySpecial(nums, queries)  
+        FUNCTION customMod(x, y)  
+            SET tempVal TO x  
+            WHILE tempVal GREATER THAN OR EQUAL TO y  
+                SET tempVal TO tempVal MINUS y  
+            END WHILE  
+            RETURN tempVal  
+        END FUNCTION  
+        
+        SET alpha TO empty list  
+        SET idxA TO 0  
+        SET lenA TO LENGTH OF nums  
+        WHILE idxA LESS THAN lenA  
+            SET itemX TO nums[idxA]  
+            SET resM TO customMod(itemX, 2)  
+            APPEND resM TO alpha  
+            SET idxA TO idxA PLUS 1  
+        END WHILE  
+        
+        SET beta TO list of zeros with size lenA  
+        SET idxB TO 1  
+        LOOP  
+            IF idxB GREATER THAN OR EQUAL TO lenA THEN   
+                EXIT LOOP  
+            END IF  
+            
+            IF NOT (alpha[idxB] NOT EQUALS alpha[idxB MINUS 1])  
+                SET beta[idxB] TO beta[idxB MINUS 1] PLUS 1  
+            ELSE  
+                SET beta[idxB] TO beta[idxB MINUS 1]  
+            END IF  
+            
+            SET idxB TO idxB PLUS 1  
+        END LOOP  
+        
+        FUNCTION checkZero(val)  
+            RETURN val EQUALS 0  
+        END FUNCTION  
+        
+        SET outList TO empty list  
+        DEFINE RECURSIVE FUNCTION processQueries(pos)  
+            IF pos GREATER OR EQUAL TO LENGTH OF queries THEN  
+                RETURN  
+            END IF  
+            
+            SET pairQ TO queries[pos]  
+            SET s TO pairQ[0]  
+            SET e TO pairQ[1]  
+            
+            IF s EQUALS e THEN  
+                APPEND True TO outList  
+            ELSE  
+                IF s GREATER THAN 0 THEN  
+                    SET diff TO beta[e] MINUS beta[s]  
+                ELSE  
+                    SET diff TO beta[e] MINUS 0  
+                END IF  
+                APPEND checkZero(diff) TO outList  
+            END IF  
+            
+            CALL processQueries(pos PLUS 1)  
+        END FUNCTION  
+        
+        CALL processQueries(0)  
+        RETURN outList  
+    END FUNCTION  
+END CLASS

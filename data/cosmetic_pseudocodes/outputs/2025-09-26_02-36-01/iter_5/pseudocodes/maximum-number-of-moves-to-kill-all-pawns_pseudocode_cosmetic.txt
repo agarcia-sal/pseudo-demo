@@ -1,0 +1,108 @@
+CLASS Solution
+    FUNCTION maxMoves(kx, ky, positions)
+        DECLARE knightDirections AS list of pairs = [(2,1),(1,2),(-1,2),(-2,1),(-2,-1),(-1,-2),(1,-2),(2,-1)]
+        DECLARE pawnsSet AS empty set
+        PROCEDURE fillPawnsSet(posList, idx, limit)
+            IF idx EQUALS limit THEN
+                RETURN
+            END IF
+            DECLARE currentPos AS tuple = (posList[idx][0], posList[idx][1])
+            pawnsSet.ADD(currentPos)
+            CALL fillPawnsSet(posList, idx + 1, limit)
+        END PROCEDURE
+        CALL fillPawnsSet(positions, 0, LENGTH(positions))
+        DECLARE countPawns AS INTEGER = LENGTH(pawnsSet)
+        
+        FUNCTION dp(kxP, kyP, bitmask, aliceTurn)
+            IF bitmask EQUALS 0 THEN
+                DECLARE resultZero AS INTEGER = 0
+                RETURN resultZero
+            END IF
+
+            DECLARE bestValue
+            IF aliceTurn EQUALS TRUE THEN
+                bestValue = 0
+            ELSE
+                bestValue = +INF
+            END IF
+
+            DECLARE processIndex AS INTEGER = 0
+            FUNCTION loopIndices(indx, boundary, currentBest)
+                IF indx GREATER OR EQUAL boundary THEN
+                    RETURN currentBest
+                END IF
+
+                DECLARE bitTest AS INTEGER = 1 << indx
+                IF (bitmask & bitTest) NOT EQUAL 0 THEN
+                    DECLARE targetX AS INTEGER = positions[indx][0]
+                    DECLARE targetY AS INTEGER = positions[indx][1]
+
+                    DECLARE bfsQueue AS list = [(kxP, kyP, 0)]
+                    DECLARE visitedNodes AS set = {(kxP, kyP)}
+                    
+                    FUNCTION bfsProcess(queue)
+                        IF LENGTH(queue) EQUALS 0 THEN
+                            RETURN -1
+                        END IF
+
+                        DECLARE currentNode = queue[0]
+                        DECLARE restQueue AS list = queue[1..]
+                        DECLARE cx = currentNode[0]
+                        DECLARE cy = currentNode[1]
+                        DECLARE stepCount = currentNode[2]
+
+                        IF (cx EQUALS targetX) AND (cy EQUALS targetY) THEN
+                            RETURN stepCount
+                        END IF
+
+                        DECLARE newQueue AS list = restQueue
+
+                        FUNCTION processDirections(dirs, idxDir, limitDir, qAcc)
+                            IF idxDir GREATER OR EQUAL limitDir THEN
+                                RETURN qAcc
+                            END IF
+                            DECLARE dx = dirs[idxDir][0]
+                            DECLARE dy = dirs[idxDir][1]
+                            DECLARE nx = cx + dx
+                            DECLARE ny = cy + dy
+                            IF (nx GREATER OR EQUAL 0) AND (nx LESS THAN 50) AND (ny GREATER OR EQUAL 0) AND (ny LESS THAN 50) AND (NOT (nx, ny) IN visitedNodes) THEN
+                                visitedNodes.ADD((nx, ny))
+                                qAcc = qAcc + [(nx, ny, stepCount + 1)]
+                            END IF
+                            RETURN processDirections(dirs, idxDir + 1, limitDir, qAcc)
+                        END FUNCTION
+
+                        DECLARE updatedQueue = processDirections(knightDirections, 0, LENGTH(knightDirections), newQueue)
+                        RETURN bfsProcess(updatedQueue)
+                    END FUNCTION
+
+                    DECLARE distSteps = bfsProcess(bfsQueue)
+                    IF distSteps NOT EQUAL -1 THEN
+                        DECLARE newMask = bitmask ^ (1 << indx)
+                        DECLARE recursiveCall = dp(targetX, targetY, newMask, NOT aliceTurn)
+                        DECLARE combinedSteps = distSteps + recursiveCall
+                        IF aliceTurn EQUALS TRUE THEN
+                            IF currentBest LESS THAN combinedSteps THEN
+                                currentBest = combinedSteps
+                            END IF
+                        ELSE
+                            IF currentBest GREATER THAN combinedSteps THEN
+                                currentBest = combinedSteps
+                            END IF
+                        END IF
+                    END IF
+                    RETURN loopIndices(indx + 1, boundary, currentBest)
+                ELSE
+                    RETURN loopIndices(indx + 1, boundary, currentBest)
+                END IF
+            END FUNCTION
+
+            bestValue = loopIndices(processIndex, countPawns, bestValue)
+            RETURN bestValue
+        END FUNCTION
+
+        DECLARE fullMask AS INTEGER = (1 << countPawns) - 1
+        DECLARE finalAnswer AS INTEGER = dp(kx, ky, fullMask, TRUE)
+        RETURN finalAnswer
+    END FUNCTION
+END CLASS

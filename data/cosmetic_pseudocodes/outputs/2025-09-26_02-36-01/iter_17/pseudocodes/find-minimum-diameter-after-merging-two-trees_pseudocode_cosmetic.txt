@@ -1,0 +1,107 @@
+CLASS Solution
+    FUNCTION bfs(graph, start)
+        DECLARE _a TO LENGTH(graph)
+        DECLARE _b TO ARRAY OF BOOL WITH SIZE _a INITIALIZED TO false
+        DECLARE _c TO NEW DEQUE
+        CALL _c.APPEND((start, 0))
+        SET _b[start] TO true
+        DECLARE _d TO start
+        DECLARE _e TO 0
+
+        REPEAT
+            IF LENGTH(_c) = 0 THEN BREAK
+            DECLARE _f, _g TO _c.POP_LEFT()
+            IF _g > _e THEN
+                SET _e TO _g
+                SET _d TO _f
+            END IF
+            FOR EACH _h IN graph[_f] DO
+                IF NOT _b[_h] THEN
+                    SET _b[_h] TO true
+                    CALL _c.APPEND((_h, _g + 1))
+                END IF
+            END FOR
+        UNTIL false
+
+        RETURN _d, _e
+    END FUNCTION
+
+    FUNCTION tree_diameter(graph)
+        DECLARE _i TO 0
+        DECLARE _j, _ TO bfs(graph, _i)
+        DECLARE _, _k TO bfs(graph, _j)
+        RETURN _k
+    END FUNCTION
+
+    FUNCTION maximum_path_length_from_node(graph, node)
+        DECLARE _l TO LENGTH(graph)
+        DECLARE _m TO ARRAY OF BOOL WITH SIZE _l INITIALIZED TO false
+        DECLARE _n TO NEW DEQUE
+        CALL _n.APPEND((node, 0))
+        SET _m[node] TO true
+        DECLARE _o TO 0
+
+        WHILE LENGTH(_n) != 0
+            DECLARE _p, _q TO _n.POP_LEFT()
+            IF _q > _o THEN
+                SET _o TO _q
+            END IF
+            FOR EACH _r IN graph[_p] DO
+                IF NOT _m[_r] THEN
+                    SET _m[_r] TO true
+                    CALL _n.APPEND((_r, _q + 1))
+                END IF
+            END FOR
+        END WHILE
+
+        RETURN _o
+    END FUNCTION
+
+    FUNCTION minimumDiameterAfterMerge(edges1, edges2)
+        DECLARE _s TO LENGTH(edges1) + 1
+        DECLARE _t TO LENGTH(edges2) + 1
+
+        DECLARE _u TO ARRAY OF EMPTY LISTS WITH SIZE _s
+        DECLARE _v TO ARRAY OF EMPTY LISTS WITH SIZE _t
+
+        FOR EACH _w, _x IN edges1 DO
+            CALL _u[_w].APPEND(_x)
+            CALL _u[_x].APPEND(_w)
+        END FOR
+
+        FOR EACH _y, _z IN edges2 DO
+            CALL _v[_y].APPEND(_z)
+            CALL _v[_z].APPEND(_y)
+        END FOR
+
+        DECLARE _aa TO tree_diameter(_u)
+        DECLARE _ab TO tree_diameter(_v)
+
+        DECLARE _ac TO EMPTY LIST
+        FOR _ad FROM 0 TO _s - 1 DO
+            CALL _ac.APPEND(maximum_path_length_from_node(_u, _ad))
+        END FOR
+
+        DECLARE _ae TO EMPTY LIST
+        FOR _af FROM 0 TO _t - 1 DO
+            CALL _ae.APPEND(maximum_path_length_from_node(_v, _af))
+        END FOR
+
+        DECLARE _ag TO +∞
+
+        FOR _ah FROM 0 TO _s - 1 DO
+            FOR _ai FROM 0 TO _t - 1 DO
+                DECLARE _aj TO _ac[_ah] + _ae[_ai] + 1
+                DECLARE _ak TO _aa
+                IF _ab > _ak THEN SET _ak TO _ab END IF
+                IF _aj > _ak THEN SET _ak TO _aj END IF
+
+                IF _ak < _ag THEN
+                    SET _ag TO _ak
+                END IF
+            END FOR
+        END FOR
+
+        RETURN _ag
+    END FUNCTION
+END CLASS

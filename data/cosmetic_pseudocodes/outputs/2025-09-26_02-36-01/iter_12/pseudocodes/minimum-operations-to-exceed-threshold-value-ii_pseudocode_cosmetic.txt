@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION minOperations(nums parameter k parameter)
+        DEFINE FUNCTION popMin WITH PARAMETER collection
+            SET index TO 0
+            SET size TO LENGTH OF collection
+            IF size EQUALS 0 THEN RETURN null
+            SET last TO collection[size - 1]
+            SWAP collection[0], collection[size - 1]
+            REMOVE last FROM collection
+            SET parent TO 0
+            SET child TO 1
+            WHILE child LESS THAN LENGTH OF collection
+                IF child + 1 LESS THAN LENGTH OF collection AND collection[child + 1] LESS THAN collection[child] THEN
+                    SET child TO child + 1
+                END IF
+                IF collection[parent] LESS THAN OR EQUAL TO collection[child] THEN
+                    BREAK
+                END IF
+                SWAP collection[parent], collection[child]
+                SET parent TO child
+                SET child TO 2 * parent + 1
+            END WHILE
+            RETURN last
+        END FUNCTION
+
+        DEFINE FUNCTION insertValue WITH PARAMETERS collection, val
+            APPEND val TO collection
+            SET idx TO LENGTH OF collection - 1
+            WHILE idx GREATER THAN 0
+                SET parentIdx TO (idx - 1) / 2
+                IF collection[parentIdx] LESS THAN OR EQUAL TO collection[idx] THEN
+                    BREAK
+                END IF
+                SWAP collection[parentIdx], collection[idx]
+                SET idx TO parentIdx
+            END WHILE
+        END FUNCTION
+
+        DEFINE FUNCTION buildHeap WITH PARAMETER collection
+            SET start TO (LENGTH OF collection / 2) - 1
+            WHILE start GREATER THAN OR EQUAL TO 0
+                SET root TO start
+                REPEAT
+                    SET child TO root * 2 + 1
+                    IF child GREATER THAN OR EQUAL TO LENGTH OF collection THEN
+                        BREAK
+                    END IF
+                    IF child + 1 LESS THAN LENGTH OF collection AND collection[child + 1] LESS THAN collection[child] THEN
+                        SET child TO child + 1
+                    END IF
+                    IF collection[root] LESS THAN OR EQUAL TO collection[child] THEN
+                        BREAK
+                    END IF
+                    SWAP collection[root], collection[child]
+                    SET root TO child
+                UNTIL FALSE
+                DECREMENT start BY 1
+            END WHILE
+        END FUNCTION
+
+        CALL buildHeap WITH nums
+        
+        SET counter TO 0
+        SET conditionFulfilled TO true
+
+        WHILE conditionFulfilled
+            SET cond1 TO IF LENGTH OF nums GREATER THAN 1 THEN true ELSE false
+            SET cond2 TO IF LENGTH OF nums GREATER THAN 0 AND nums[0] LESS THAN k THEN true ELSE false
+            SET conditionFulfilled TO cond1 AND cond2
+            IF NOT conditionFulfilled THEN
+                BREAK
+            END IF
+
+            SET firstMin TO CALL popMin WITH nums
+            SET secondMin TO CALL popMin WITH nums
+            SET smaller TO firstMin
+            SET bigger TO secondMin
+            IF firstMin GREATER THAN secondMin THEN
+                SET smaller TO secondMin
+                SET bigger TO firstMin
+            END IF
+            SET computedValue TO (smaller + smaller) + bigger
+            CALL insertValue WITH nums AND computedValue
+
+            SET counter TO counter + 1
+        END WHILE
+
+        RETURN counter
+    END FUNCTION
+END CLASS

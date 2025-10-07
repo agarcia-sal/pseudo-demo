@@ -1,0 +1,44 @@
+```
+FUNCTION anti_shuffle(input_string)
+    DEFINE FUNCTION process_words(words_list, accum_list, idx)
+        IF idx >= LENGTH(words_list) THEN
+            RETURN accum_list
+        ELSE
+            SET w TO words_list[idx]
+            SET c TO w TO ARRAY OF CHARACTERS
+            DEFINE FUNCTION sort_array(arr, left, right)
+                IF left >= right THEN
+                    RETURN
+                END IF
+                SET i TO left
+                SET j TO right
+                SET pivot TO arr[(left + right) DIV 2]
+                WHILE i <= j
+                    WHILE arr[i] < pivot
+                        SET i TO i + 1
+                    END WHILE
+                    WHILE arr[j] > pivot
+                        SET j TO j - 1
+                    END WHILE
+                    IF i <= j THEN
+                        SET temp TO arr[i]
+                        SET arr[i] TO arr[j]
+                        SET arr[j] TO temp
+                        SET i TO i + 1
+                        SET j TO j - 1
+                    END IF
+                END WHILE
+                sort_array(arr, left, j)
+                sort_array(arr, i, right)
+            END FUNCTION
+            sort_array(c, 0, LENGTH(c)-1)
+            SET sorted_w TO CONCATENATE ALL ELEMENTS OF c INTO STRING
+            CALL process_words(words_list, accum_list + [sorted_w], idx + 1)
+        END IF
+    END FUNCTION
+    SET words TO SPLIT input_string BY ' '
+    SET sorted_words TO process_words(words, [], 0)
+    SET output TO JOIN sorted_words WITH ' '
+    RETURN output
+END FUNCTION
+```

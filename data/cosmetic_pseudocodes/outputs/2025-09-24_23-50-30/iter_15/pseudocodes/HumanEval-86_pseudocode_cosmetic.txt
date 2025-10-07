@@ -1,0 +1,83 @@
+```
+FUNCTION anti_shuffle(input_string)
+    DECLARE queue_of_tokens AS QUEUE
+    ASSIGN queue_of_tokens TO EMPTY QUEUE
+
+    DECLARE index_marker AS INTEGER
+    ASSIGN index_marker TO 1
+
+    WHILE index_marker <= LENGTH OF input_string
+        DECLARE token_buffer AS STRING
+        ASSIGN token_buffer TO EMPTY STRING
+
+        WHILE index_marker <= LENGTH OF input_string AND SUBSTRING(input_string, index_marker, 1) IS NOT " "
+            APPEND SUBSTRING(input_string, index_marker, 1) TO token_buffer
+            INCREMENT index_marker BY 1
+        END WHILE
+
+        ENQUEUE token_buffer INTO queue_of_tokens
+
+        IF index_marker <= LENGTH OF input_string AND SUBSTRING(input_string, index_marker, 1) = " "
+            INCREMENT index_marker BY 1
+        END IF
+    END WHILE
+
+    DECLARE stack_of_sorted_words AS STACK
+    ASSIGN stack_of_sorted_words TO EMPTY STACK
+
+    WHILE IS NOT EMPTY(queue_of_tokens)
+        DECLARE current_token AS STRING
+        DEQUEUE queue_of_tokens INTO current_token
+
+        DECLARE char_list AS LIST OF CHARACTERS
+        ASSIGN char_list TO EMPTY LIST
+
+        FOR position FROM 1 TO LENGTH OF current_token
+            APPEND SUBSTRING(current_token, position, 1) TO char_list
+        END FOR
+
+        DECLARE is_changed AS BOOLEAN
+        ASSIGN is_changed TO TRUE
+
+        WHILE is_changed
+            ASSIGN is_changed TO FALSE
+            FOR iterator FROM 1 TO LENGTH OF char_list - 1
+                IF NOT (ASCII OF char_list[iterator] <= ASCII OF char_list[iterator + 1])
+                    SWAP char_list[iterator], char_list[iterator + 1]
+                    ASSIGN is_changed TO TRUE
+                END IF
+            END FOR
+        END WHILE
+
+        DECLARE rebuilt_word AS STRING
+        ASSIGN rebuilt_word TO EMPTY STRING
+
+        FOR element FROM 1 TO LENGTH OF char_list
+            CONCATENATE rebuilt_word WITH char_list[element]
+        END FOR
+
+        PUSH rebuilt_word ONTO stack_of_sorted_words
+    END WHILE
+
+    DECLARE assembled_words AS LIST
+    ASSIGN assembled_words TO EMPTY LIST
+
+    WHILE NOT IS EMPTY(stack_of_sorted_words)
+        DECLARE word_out AS STRING
+        POP stack_of_sorted_words INTO word_out
+        PREPEND word_out TO assembled_words
+    END WHILE
+
+    DECLARE output_string AS STRING
+    ASSIGN output_string TO EMPTY STRING
+
+    FOR seq FROM 1 TO LENGTH OF assembled_words
+        CONCATENATE output_string WITH assembled_words[seq]
+        IF NOT seq = LENGTH OF assembled_words
+            CONCATENATE output_string WITH " "
+        END IF
+    END FOR
+
+    RETURN output_string
+END FUNCTION
+```

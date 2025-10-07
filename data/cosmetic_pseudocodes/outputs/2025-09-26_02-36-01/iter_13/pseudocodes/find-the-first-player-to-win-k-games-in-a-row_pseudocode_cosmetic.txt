@@ -1,0 +1,35 @@
+CLASS Solution
+	 FUNCTION findWinningPlayer(skillList, threshold)
+		  SET totalPlayers TO LENGTH(skillList)
+		  SET playerQueue TO EMPTY LIST
+		  DEFINE FUNCTION buildQueue(index, limit)
+			   IF index EQUALS limit
+					RETURN
+			   END IF
+			   APPEND index TO playerQueue
+			   CALL buildQueue(index + 1, limit)
+		  END FUNCTION
+		  CALL buildQueue(0, totalPlayers)
+		  SET consecutiveWins TO 0
+		  SET champion TO playerQueue[0]
+		  REMOVE first element FROM playerQueue
+		  DEFINE FUNCTION competitionCycle()
+			   IF consecutiveWins GREATER OR EQUAL threshold OR LENGTH(playerQueue) EQUALS 0
+					RETURN
+			   END IF
+			   SET challenger TO playerQueue[0]
+			   REMOVE first element FROM playerQueue
+			   IF skillList[champion] GREATER THAN skillList[challenger]
+					SET consecutiveWins TO consecutiveWins + 1
+					APPEND challenger TO playerQueue
+			   ELSE
+					SET consecutiveWins TO 1
+					APPEND champion TO playerQueue
+					SET champion TO challenger
+			   END IF
+			   CALL competitionCycle()
+		  END FUNCTION
+		  CALL competitionCycle()
+		  RETURN champion
+	 END FUNCTION
+END CLASS

@@ -1,0 +1,54 @@
+CLASS Solution
+    FUNCTION maxTotalReward(rewardValues)
+          FUNCTION hunt(z)
+                FUNCTION seekInsertPos(arr, target)
+                    // custom bisect_right implementation
+                    SET low TO 0
+                    SET high TO length(arr)
+                    WHILE low < high DO
+                        SET mid TO (low + high) / 2
+                        IF arr[mid] <= target THEN
+                            SET low TO mid + 1
+                        ELSE
+                            SET high TO mid
+                        END IF
+                    END WHILE
+                    RETURN low
+                END FUNCTION
+
+                SET pos TO seekInsertPos(rewardValues, z)
+                SET cumulativeMax TO 0
+                REPEAT
+                  IF pos >= length(rewardValues) THEN
+                      BREAK
+                  END IF
+                  SET val TO rewardValues[pos]
+                  IF (z + val) > z THEN
+                      SET recursiveResult TO hunt(z + val)
+                      SET candidate TO val + recursiveResult
+                      IF candidate > cumulativeMax THEN
+                          SET cumulativeMax TO candidate
+                      END IF
+                  END IF
+                  SET pos TO pos + 1
+                UNTIL false
+                RETURN cumulativeMax
+          END FUNCTION
+
+          // manual ascending insertion sort
+          SET n TO length(rewardValues)
+          SET idx TO 1
+          WHILE idx < n DO
+              SET key TO rewardValues[idx]
+              SET inner TO idx - 1
+              WHILE inner >= 0 AND rewardValues[inner] > key DO
+                  SET rewardValues[inner + 1] TO rewardValues[inner]
+                  SET inner TO inner - 1
+              END WHILE
+              SET rewardValues[inner + 1] TO key
+              SET idx TO idx + 1
+          END WHILE
+
+          RETURN hunt(0)
+    END FUNCTION
+END CLASS

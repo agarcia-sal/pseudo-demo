@@ -1,0 +1,77 @@
+CLASS Solution
+	FUNCTION subsequencesWithMiddleMode(nums)
+		CONST MOD_VALUE := 10^9 + 7
+		VAR result_accumulator := 0
+		VAR prefix_counts := map()
+		VAR suffix_counts := map()
+		FOR element IN nums DO
+			suffix_counts[element] := IF element IN suffix_counts THEN suffix_counts[element] + 1 ELSE 1
+		END FOR
+
+		FUNCTION combinations_of_two(x)
+			RETURN (x * (x - 1)) / 2
+		END FUNCTION
+
+		VAR cross_term_1 := 0
+		VAR cross_term_2 := 0
+		VAR prefix_squared_sum := 0
+		VAR suffix_squared_sum := 0
+		FOR freq IN suffix_counts.values() DO
+			suffix_squared_sum := suffix_squared_sum + freq * freq
+		END FOR
+		VAR cross_term_3 := 0
+
+		FOR idx := 0 WHILE idx < LENGTH(nums) DO
+			VAR current_val := nums[idx]
+
+			VAR val_suffix_count := IF current_val IN suffix_counts THEN suffix_counts[current_val] ELSE 0
+			VAR val_prefix_count := IF current_val IN prefix_counts THEN prefix_counts[current_val] ELSE 0
+
+			VAR squared_suffix_minus_one := (val_suffix_count - 1) * (val_suffix_count - 1)
+			VAR squared_prefix := val_prefix_count * val_prefix_count
+
+			cross_term_1 := cross_term_1 + (val_prefix_count * (-val_suffix_count * val_suffix_count + squared_suffix_minus_one))
+			cross_term_2 := cross_term_2 - squared_prefix
+			suffix_squared_sum := suffix_squared_sum - val_suffix_count * val_suffix_count + squared_suffix_minus_one
+			cross_term_3 := cross_term_3 - val_prefix_count
+
+			suffix_counts[current_val] := val_suffix_count - 1
+
+			VAR left_length := idx
+			VAR right_length := LENGTH(nums) - idx - 1
+
+			VAR comb_left := combinations_of_two(left_length)
+			VAR comb_right := combinations_of_two(right_length)
+
+			result_accumulator := result_accumulator + (comb_left * comb_right)
+			result_accumulator := result_accumulator - ((combinations_of_two(left_length - val_prefix_count)) * (combinations_of_two(right_length - (val_suffix_count))))
+
+			VAR cross_term_1_adj := cross_term_1 - (val_prefix_count * val_suffix_count * val_suffix_count)
+			VAR cross_term_2_adj := cross_term_2 - (val_suffix_count * squared_prefix)
+			VAR cross_term_3_adj := cross_term_3 - squared_prefix
+			VAR suffix_sq_adj := suffix_squared_sum - val_suffix_count * val_suffix_count
+			VAR cross_term_3_val := cross_term_3 - (val_prefix_count * val_suffix_count)
+			VAR prefix_remaining := left_length - val_prefix_count
+			VAR suffix_remaining := right_length - val_suffix_count
+
+			result_accumulator := result_accumulator - (cross_term_3_val * val_prefix_count * (right_length - val_suffix_count) + cross_term_1_adj * (-val_prefix_count))
+			result_accumulator := result_accumulator - (cross_term_3_val * val_suffix_count * (left_length - val_prefix_count) + cross_term_2_adj * (-val_suffix_count))
+			result_accumulator := result_accumulator - (((cross_term_3_adj - prefix_remaining) * val_suffix_count * (right_length - val_suffix_count)) / 2)
+			result_accumulator := result_accumulator - (((suffix_sq_adj - suffix_remaining) * val_prefix_count * (left_length - val_prefix_count)) / 2)
+
+			result_accumulator := result_accumulator MOD MOD_VALUE
+
+			cross_term_1 := cross_term_1 + val_suffix_count * val_suffix_count
+			cross_term_2 := cross_term_2 + val_suffix_count * (-squared_prefix + (val_prefix_count + 1) * (val_prefix_count + 1))
+			cross_term_3 := cross_term_3 + (-squared_prefix + (val_prefix_count + 1) * (val_prefix_count + 1))
+			cross_term_3_adj := cross_term_3_adj - squared_prefix
+
+			cross_term_3 := cross_term_3 + val_suffix_count
+			prefix_counts[current_val] := val_prefix_count + 1
+
+			idx := idx + 1
+		END FOR
+
+		RETURN result_accumulator
+	END FUNCTION
+END CLASS

@@ -1,0 +1,110 @@
+CLASS Solution
+    FUNCTION canSortArray(nums)
+        FUNCTION bitCount(val)
+            FUNCTION bitCountHelper(x, acc)
+                IF x EQUALS 0 THEN
+                    RETURN acc
+                ELSE
+                    RETURN bitCountHelper(x DIV 2, acc PLUS (x MOD 2))
+                END IF
+            END FUNCTION
+            RETURN bitCountHelper(val, 0)
+        END FUNCTION
+
+        SET size TO 0
+        WHILE TRUE
+            IF size LESS THAN LENGTH OF nums THEN
+                size := size PLUS 1
+            ELSE
+                BREAK
+            END IF
+        END WHILE
+
+        FUNCTION copyAndSort(list)
+            SET result TO EMPTY LIST
+            SET idx TO 0
+            REPEAT
+                IF idx EQUALS LENGTH OF list THEN
+                    BREAK
+                END IF
+                APPEND list[idx] TO result
+                idx := idx PLUS 1
+            UNTIL FALSE
+
+            FUNCTION sortList(l)
+                IF LENGTH OF l LESS THAN 2 THEN
+                    RETURN l
+                END IF
+                SET pivot TO l[0]
+                SET less TO EMPTY LIST
+                SET more TO EMPTY LIST
+                SET k TO 1
+                WHILE k LESS THAN LENGTH OF l
+                    IF l[k] LESS THAN pivot THEN
+                        APPEND l[k] TO less
+                    ELSE
+                        APPEND l[k] TO more
+                    END IF
+                    k := k PLUS 1
+                END WHILE
+                SET sortedLess TO sortList(less)
+                SET sortedMore TO sortList(more)
+                SET combined TO EMPTY LIST
+                SET p TO 0
+                WHILE p LESS THAN LENGTH OF sortedLess
+                    APPEND sortedLess[p] TO combined
+                    p := p PLUS 1
+                END WHILE
+                APPEND pivot TO combined
+                SET q TO 0
+                WHILE q LESS THAN LENGTH OF sortedMore
+                    APPEND sortedMore[q] TO combined
+                    q := q PLUS 1
+                END WHILE
+                RETURN combined
+            END FUNCTION
+
+            RETURN sortList(result)
+        END FUNCTION
+
+        SET sortedNums TO copyAndSort(nums)
+
+        FUNCTION innerSwapLoop(lst, idx, limit)
+            IF idx GREATER THAN OR EQUAL TO limit THEN
+                RETURN lst
+            ELSE
+                IF bitCount(lst[idx]) EQUALS bitCount(lst[idx PLUS 1]) AND lst[idx] GREATER THAN lst[idx PLUS 1] THEN
+                    SET tempVal TO lst[idx]
+                    lst[idx] := lst[idx PLUS 1]
+                    lst[idx PLUS 1] := tempVal
+                END IF
+                RETURN innerSwapLoop(lst, idx PLUS 1, limit)
+            END IF
+        END FUNCTION
+
+        FUNCTION outerSwapLoop(lst, outerIdx, length)
+            IF outerIdx GREATER THAN OR EQUAL TO length THEN
+                RETURN lst
+            ELSE
+                SET lstAfterInner TO innerSwapLoop(lst, 0, length MINUS 1)
+                RETURN outerSwapLoop(lstAfterInner, outerIdx PLUS 1, length)
+            END IF
+        END FUNCTION
+
+        SET processedNums TO outerSwapLoop(nums, 0, size)
+
+        FUNCTION equalsList(a, b, pos)
+            IF pos EQUALS LENGTH OF a THEN
+                RETURN TRUE
+            ELSE
+                IF a[pos] NOT EQUAL TO b[pos] THEN
+                    RETURN FALSE
+                ELSE
+                    RETURN equalsList(a, b, pos PLUS 1)
+                END IF
+            END IF
+        END FUNCTION
+
+        RETURN equalsList(processedNums, sortedNums, 0)
+    END FUNCTION
+END CLASS

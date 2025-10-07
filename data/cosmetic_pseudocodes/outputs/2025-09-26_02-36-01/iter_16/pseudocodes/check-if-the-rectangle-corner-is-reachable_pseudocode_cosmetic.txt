@@ -1,0 +1,83 @@
+CLASS Solution
+
+    FUNCTION canReachCorner(xCorner yCorner circles)
+        FUNCTION circle_includes(px py cx cy radius)
+            SET dx TO px - cx
+            SET dy TO py - cy
+            SET dist_squared TO (dx * dx) + (dy * dy)
+            SET radius_squared TO radius * radius
+            RETURN dist_squared <= radius_squared
+        END FUNCTION
+
+        FUNCTION touches_left_top(cx cy radius)
+            SET cond_left_edge TO (ABS(cx) <= radius) AND (0 <= cy) AND (cy <= yCorner)
+            SET cond_top_edge TO (ABS(cy - yCorner) <= radius) AND (0 <= cx) AND (cx <= xCorner)
+            RETURN cond_left_edge OR cond_top_edge
+        END FUNCTION
+
+        FUNCTION touches_right_bottom(cx cy radius)
+            SET cond_right_edge TO (ABS(cx - xCorner) <= radius) AND (0 <= cy) AND (cy <= yCorner)
+            SET cond_bottom_edge TO (ABS(cy) <= radius) AND (0 <= cx) AND (cx <= xCorner)
+            RETURN cond_right_edge OR cond_bottom_edge
+        END FUNCTION
+
+        FUNCTION depth_first_search(index)
+            SET cx_curr TO circles[index][0]
+            SET cy_curr TO circles[index][1]
+            SET r_curr TO circles[index][2]
+
+            IF touches_right_bottom(cx_curr cy_curr r_curr)
+                RETURN True
+            END IF
+
+            SET vis[index] TO True
+
+            SET j_counter TO 0
+            WHILE j_counter < LENGTH(circles)
+                SET cx_next TO circles[j_counter][0]
+                SET cy_next TO circles[j_counter][1]
+                SET r_next TO circles[j_counter][2]
+
+                IF vis[j_counter] OR ((cx_curr - cx_next)*(cx_curr - cx_next) + (cy_curr - cy_next)*(cy_curr - cy_next) > (r_curr + r_next)*(r_curr + r_next))
+                    SET j_counter TO j_counter + 1
+                    CONTINUE
+                END IF
+
+                SET lhs_x TO (cx_curr * r_next) + (cx_next * r_curr)
+                SET rhs_x TO (r_curr + r_next) * xCorner
+                SET lhs_y TO (cy_curr * r_next) + (cy_next * r_curr)
+                SET rhs_y TO (r_curr + r_next) * yCorner
+
+                IF lhs_x < rhs_x AND lhs_y < rhs_y AND depth_first_search(j_counter)
+                    RETURN True
+                END IF
+
+                SET j_counter TO j_counter + 1
+            END WHILE
+
+            RETURN False
+        END FUNCTION
+
+        SET vis TO [False FOR _ IN RANGE LENGTH(circles)]
+
+        SET i_loop TO 0
+        WHILE i_loop < LENGTH(circles)
+            SET cx TO circles[i_loop][0]
+            SET cy TO circles[i_loop][1]
+            SET r TO circles[i_loop][2]
+
+            IF circle_includes(0 0 cx cy r) OR circle_includes(xCorner yCorner cx cy r)
+                RETURN False
+            END IF
+
+            IF NOT vis[i_loop] AND touches_left_top(cx cy r) AND depth_first_search(i_loop)
+                RETURN False
+            END IF
+
+            SET i_loop TO i_loop + 1
+        END WHILE
+
+        RETURN True
+    END FUNCTION
+
+END CLASS

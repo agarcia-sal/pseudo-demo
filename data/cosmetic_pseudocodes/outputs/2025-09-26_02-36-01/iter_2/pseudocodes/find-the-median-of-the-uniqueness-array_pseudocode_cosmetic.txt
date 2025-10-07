@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION medianOfUniquenessArray(nums)
+        FUNCTION countLessOrEqual(threshold)
+            SET accumulator TO 0
+            SET windowStart TO 0
+            ASSIGN frequencyMap TO a map with default zero values
+            SET uniqueCounter TO 0
+            SET index TO 0
+            WHILE index < LENGTH(nums)
+                IF frequencyMap[nums[index]] = 0
+                    SET uniqueCounter TO uniqueCounter + 1
+                END IF
+                SET frequencyMap[nums[index]] TO frequencyMap[nums[index]] + 1
+                WHILE uniqueCounter > threshold
+                    SET frequencyMap[nums[windowStart]] TO frequencyMap[nums[windowStart]] - 1
+                    IF frequencyMap[nums[windowStart]] = 0
+                        SET uniqueCounter TO uniqueCounter - 1
+                    END IF
+                    SET windowStart TO windowStart + 1
+                END WHILE
+                SET accumulator TO accumulator + (index - windowStart + 1)
+                SET index TO index + 1
+            END WHILE
+            RETURN accumulator
+        END FUNCTION
+
+        SET n TO LENGTH(nums)
+        SET totalSubarrays TO (n * (n + 1)) / 2
+        SET medianTarget TO (totalSubarrays + 1) / 2
+        SET start TO 1
+        SET end TO n
+
+        WHILE start < end
+            SET middle TO start + (end - start) / 2
+            IF countLessOrEqual(middle) < medianTarget
+                SET start TO middle + 1
+            ELSE
+                SET end TO middle
+            END IF
+        END WHILE
+
+        RETURN start
+    END FUNCTION
+END CLASS

@@ -1,0 +1,39 @@
+CLASS Solution  
+    FUNCTION maxDifference(s, k)  
+        INITIALIZE result TO negative infinity  
+        DEFINE chars AS [zero, one, two, three, four]  
+        FOR EACH x IN chars  
+            FOR EACH y IN chars  
+                IF x IS NOT y THEN  
+                    CREATE mapMinDiff AS dictionary WITH default infinity  
+                    INITIALIZE prefixX AS [0]  
+                    INITIALIZE prefixY AS [0]  
+                    SET start TO 0  
+                    FOR index, char IN ENUMERATE(s)  
+                        IF char EQUALS x THEN  
+                            ADD prefixX[-1] + 1 TO prefixX  
+                        ELSE  
+                            ADD 0 TO prefixX  
+                        END IF  
+                        IF char EQUALS y THEN  
+                            ADD prefixY[-1] + 1 TO prefixY  
+                        ELSE  
+                            ADD 0 TO prefixY  
+                        END IF  
+                        WHILE index - start + 1 >= k AND prefixX[start] < prefixX[-1] AND prefixY[start] < prefixY[-1]  
+                            LET key BE (prefixX[start] MOD 2, prefixY[start] MOD 2)  
+                            SET mapMinDiff[key] TO MINIMUM OF mapMinDiff[key] AND (prefixX[start] - prefixY[start])  
+                            INCREMENT start BY 1  
+                        END WHILE  
+                        LET currentKey BE ((1 - (prefixX[-1] MOD 2)), prefixY[-1] MOD 2)  
+                        SET candidate TO prefixX[-1] - prefixY[-1] - mapMinDiff[currentKey]  
+                        IF candidate > result THEN  
+                            SET result TO candidate  
+                        END IF  
+                    END FOR  
+                END IF  
+            END FOR  
+        END FOR  
+        RETURN result  
+    END FUNCTION  
+END CLASS

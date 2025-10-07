@@ -1,0 +1,54 @@
+```
+FUNCTION check_dict_case(dict_obj)
+    DEFINE inner_loop(index)
+        IF index >= LENGTH(dict_obj KEYS)
+            RETURN False
+        END IF
+
+        LET current_item BE dict_obj KEYS[index]
+
+        IF NOT (TYPE_OF current_item EQUALS STRING)
+            RETURN False
+        END IF
+
+        RETURN True
+    END DEFINE
+
+    IF LENGTH(dict_obj KEYS) = 0 THEN
+        RETURN False
+    END IF
+
+    LET mode BE "start"
+
+    DEFINE recur(i)
+        IF i = LENGTH(dict_obj KEYS)
+            RETURN (mode = "upper") OR (mode = "lower")
+        END IF
+
+        LET k BE dict_obj KEYS[i]
+
+        IF TYPE_OF k != STRING THEN
+            mode ← "mixed"
+            RETURN False
+        END IF
+
+        IF mode = "start" THEN
+            IF k = TO_UPPERCASE(k) THEN
+                mode ← "upper"
+            ELSE IF k = TO_LOWERCASE(k) THEN
+                mode ← "lower"
+            ELSE
+                mode ← "mixed"
+                RETURN False
+            END IF
+        ELSE IF (mode = "upper" AND k ≠ TO_UPPERCASE(k)) OR (mode = "lower" AND k ≠ TO_LOWERCASE(k)) THEN
+            mode ← "mixed"
+            RETURN False
+        END IF
+
+        RETURN recur(i + 1)
+    END DEFINE
+
+    RETURN recur(0)
+END FUNCTION
+```

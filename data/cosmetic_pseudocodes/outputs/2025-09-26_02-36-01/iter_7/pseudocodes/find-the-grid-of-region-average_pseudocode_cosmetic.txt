@@ -1,0 +1,107 @@
+CLASS Solution  
+	FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer  
+		DEFINE m_value AS INTEGER = LENGTH(image)  
+		DEFINE n_value AS INTEGER = LENGTH(image[0])  
+		
+		DEFINE zero_matrix AS FUNCTION(rows WITH TYPE integer cols WITH TYPE integer) RETURNS List OF List OF integer  
+			DEFINE res_list AS List OF List OF integer = []  
+			DEFINE row_idx AS INTEGER = 0  
+			WHILE row_idx < rows  
+				DEFINE inner_row AS List OF integer = []  
+				REPEAT  
+					IF LENGTH(inner_row) < cols THEN  
+						APPEND 0 TO inner_row  
+					END IF  
+				UNTIL LENGTH(inner_row) = cols  
+				APPEND inner_row TO res_list  
+				INCREMENT row_idx BY 1  
+			END WHILE  
+			RETURN res_list  
+		END FUNCTION  
+
+		LET acc_matrix BE zero_matrix(m_value, n_value)  
+		LET cnt_matrix BE zero_matrix(m_value, n_value)  
+
+		FUNCTION check_region_validity(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE boolean  
+			DEFINE dx_dy_pairs AS List OF (integer, integer) = [( -1,  0 ),( 1, 0 ), (0, -1), (0, 1)]  
+			DEFINE row AS integer = a  
+			WHILE row < a + (1 + 1 + 1)  
+				DEFINE col AS integer = b  
+				WHILE col < b + (1 + 1 + 1)  
+					FOR EACH delta_x, delta_y IN dx_dy_pairs  
+						DEFINE next_x AS integer = row + delta_x  
+						DEFINE next_y AS integer = col + delta_y  
+						IF (0 <= next_x) AND (next_x < a + (1 + 1 + 1)) AND (0 <= next_y) AND (next_y < b + (1 + 1 + 1)) THEN  
+							IF ABS(image[row][col] - image[next_x][next_y]) > threshold THEN  
+								RETURN FALSE  
+							END IF  
+						END IF  
+					END FOR  
+					INCREMENT col BY 1  
+				END WHILE  
+				INCREMENT row BY 1  
+			END WHILE  
+			RETURN TRUE  
+		END FUNCTION  
+
+		FUNCTION compute_average_area(r WITH TYPE integer s WITH TYPE integer) WITH RETURN TYPE integer  
+			DEFINE sum_total AS integer = 0  
+			DEFINE i_idx AS integer = r  
+			REPEAT  
+				IF i_idx < r + (3) THEN  
+					DEFINE j_idx AS integer = s  
+					REPEAT  
+						IF j_idx < s + (3) THEN  
+							sum_total = sum_total + image[i_idx][j_idx]  
+							INCREMENT j_idx BY 1  
+						END IF  
+					UNTIL j_idx >= s + (3)  
+					INCREMENT i_idx BY 1  
+				END IF  
+			UNTIL i_idx >= r + (3)  
+			RETURN sum_total DIV (3 * 3)  
+		END FUNCTION  
+
+		DEFINE outer_i AS integer = 0  
+		WHILE outer_i < (m_value - (1 + 1))  
+			DEFINE outer_j AS integer = 0  
+			WHILE outer_j < (n_value - (1 + 1))  
+				IF check_region_validity(outer_i, outer_j) == TRUE THEN  
+					DEFINE avg_val AS integer = compute_average_area(outer_i, outer_j)  
+					DEFINE inner_x AS integer = outer_i  
+					WHILE inner_x < outer_i + (3)  
+						DEFINE inner_y AS integer = outer_j  
+						WHILE inner_y < outer_j + (3)  
+							acc_matrix[inner_x][inner_y] = acc_matrix[inner_x][inner_y] + avg_val  
+							cnt_matrix[inner_x][inner_y] = cnt_matrix[inner_x][inner_y] + 1  
+							INCREMENT inner_y BY 1  
+						END WHILE  
+						INCREMENT inner_x BY 1  
+					END WHILE  
+				END IF  
+				INCREMENT outer_j BY 1  
+			END WHILE  
+			INCREMENT outer_i BY 1  
+		END WHILE  
+
+		DEFINE fin_i AS integer = 0  
+		REPEAT  
+			IF fin_i < m_value THEN  
+				DEFINE fin_j AS integer = 0  
+				REPEAT  
+					IF fin_j < n_value THEN  
+						IF cnt_matrix[fin_i][fin_j] > 0 THEN  
+							acc_matrix[fin_i][fin_j] = acc_matrix[fin_i][fin_j] DIV cnt_matrix[fin_i][fin_j]  
+						ELSE  
+							acc_matrix[fin_i][fin_j] = image[fin_i][fin_j]  
+						END IF  
+						INCREMENT fin_j BY 1  
+					END IF  
+				UNTIL fin_j >= n_value  
+				INCREMENT fin_i BY 1  
+			END IF  
+		UNTIL fin_i >= m_value  
+
+		RETURN acc_matrix  
+	END FUNCTION  
+END CLASS

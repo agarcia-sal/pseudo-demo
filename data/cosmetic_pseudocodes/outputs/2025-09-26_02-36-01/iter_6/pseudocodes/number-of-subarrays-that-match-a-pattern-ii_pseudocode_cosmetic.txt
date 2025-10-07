@@ -1,0 +1,46 @@
+CLASS Solution  
+    FUNCTION countMatchingSubarrays(alist, bpattern)  
+        FUNCTION determine_relation(xval, yval)  
+            IF NOT (xval >= yval) THEN  
+                RETURN 1  
+            ELSE IF (xval = yval) THEN  
+                RETURN 0  
+            ELSE  
+                RETURN -1  
+            END IF  
+        END FUNCTION  
+        
+        LET length_a BE LENGTH OF alist  
+        LET length_b BE LENGTH OF bpattern  
+        LET total_matches BE 0  
+        
+        LET rels BE EMPTY ARRAY  
+        LET pos BE 0  
+        WHILE (pos < length_a - 1) DO  
+            LET relation_result BE determine_relation(alist[pos], alist[pos + 1])  
+            APPEND relation_result TO rels  
+            pos ← pos + 1  
+        END WHILE  
+        
+        FUNCTION check_match(idx, limit, relarray, pat)  
+            IF idx >= limit THEN  
+                RETURN 0  
+            ELSE  
+                LET slice_sublist BE EMPTY ARRAY  
+                FOR offset FROM 0 TO length_b - 1 DO  
+                    APPEND relarray[idx + offset] TO slice_sublist  
+                END FOR  
+                LET matches_here BE 0  
+                IF slice_sublist = pat THEN  
+                    matches_here ← matches_here + 1  
+                END IF  
+                RETURN matches_here + check_match(idx + 1, limit, relarray, pat)  
+            END IF  
+        END FUNCTION  
+        
+        LET search_limit BE length_a - length_b  
+        LET result_count BE check_match(0, search_limit, rels, bpattern)  
+        
+        RETURN result_count  
+    END FUNCTION  
+END CLASS

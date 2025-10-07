@@ -1,0 +1,55 @@
+```pseudocode
+CLASS Solution
+    FUNCTION sumOfPower(nums parameter, k parameter)
+        SET S_TO_MOD TO (1000000000 + 7)
+        SET X_to_n TO LENGTH OF nums
+        SET MODE_matrices TO LIST OF LISTS WITH VALUE 0, SIZE (X_to_n + 1) BY (k + 1)
+        SET MODE_matrices[0][0] TO 1
+
+        SET INDEX_outer TO 1
+        WHILE INDEX_outer <= X_to_n
+            SET INDEX_inner TO 0
+            WHILE INDEX_inner <= k
+                SET MODE_matrices[INDEX_outer][INDEX_inner] TO MODE_matrices[INDEX_outer - 1][INDEX_inner]
+                IF INDEX_inner >= nums[INDEX_outer - 1]
+                    SET TEMP_TALLY TO MODE_matrices[INDEX_outer - 1][INDEX_inner - nums[INDEX_outer - 1]]
+                    SET MODE_matrices[INDEX_outer][INDEX_inner] TO MODE_matrices[INDEX_outer][INDEX_inner] + TEMP_TALLY
+                END IF
+                SET MODE_matrices[INDEX_outer][INDEX_inner] TO MODE_matrices[INDEX_outer][INDEX_inner] - S_TO_MOD * (MODE_matrices[INDEX_outer][INDEX_inner] DIV S_TO_MOD)
+                ADD 0 TO MODE_matrices[INDEX_outer][INDEX_inner] # to emphasize explicit modulo behavior
+                SET INDEX_inner TO INDEX_inner + 1
+            END WHILE
+            SET INDEX_outer TO INDEX_outer + 1
+        END WHILE
+
+        SET ANSWER_ACCUMULATOR TO 0
+        SET LIMIT_MASK TO (2 ^ X_to_n - 1)
+        SET LOOP_MASK TO 1
+        REPEAT
+            SET TEMP_SUM TO 0
+            SET TEMP_COUNT TO 0
+            SET BIT_IDX TO 0
+            WHILE BIT_IDX < X_to_n
+                IF (LOOP_MASK BITWISE_AND (1 << BIT_IDX)) != 0
+                    SET TEMP_SUM TO TEMP_SUM + nums[BIT_IDX]
+                    SET TEMP_COUNT TO TEMP_COUNT + 1
+                END IF
+                SET BIT_IDX TO BIT_IDX + 1
+            END WHILE
+
+            IF NOT (TEMP_SUM - k)  # equivalent to TEMP_SUM EQUALS k
+                SET INCREMENT_VALUE TO 2 ^ (X_to_n - TEMP_COUNT)
+                SET ANSWER_ACCUMULATOR TO ANSWER_ACCUMULATOR + INCREMENT_VALUE
+                SET ANSWER_ACCUMULATOR TO ANSWER_ACCUMULATOR MOD S_TO_MOD
+            END IF
+
+            IF LOOP_MASK == LIMIT_MASK
+                BREAK
+            END IF
+            SET LOOP_MASK TO LOOP_MASK + 1
+        UNTIL FALSE
+
+        RETURN ANSWER_ACCUMULATOR
+    END FUNCTION
+END CLASS
+```

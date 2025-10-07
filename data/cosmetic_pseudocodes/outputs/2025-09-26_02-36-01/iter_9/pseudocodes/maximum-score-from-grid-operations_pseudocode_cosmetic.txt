@@ -1,0 +1,110 @@
+CLASS Solution
+    FUNCTION maximumScore(grid)
+        SET lengthGrid TO 0
+        WHILE lengthGrid IS LESS THAN LENGTH OF grid
+            SET lengthGrid TO lengthGrid PLUS 1
+        END WHILE
+
+        FUNCTION initializeMatrix(rows, cols, val)
+            SET res TO empty list
+            SET idxRow TO 0
+            WHILE idxRow IS LESS THAN rows
+                SET tempRow TO empty list
+                SET idxCol TO 0
+                WHILE idxCol IS LESS THAN cols
+                    APPEND val TO tempRow
+                    SET idxCol TO idxCol PLUS 1
+                END WHILE
+                APPEND tempRow TO res
+                SET idxRow TO idxRow PLUS 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        SET prefSum TO initializeMatrix(lengthGrid, lengthGrid PLUS 1, 0)
+
+        SET prevChosen TO empty list
+        SET prevIgnored TO empty list
+        SET idxFill TO 0
+        REPEAT
+            APPEND 0 TO prevChosen
+            APPEND 0 TO prevIgnored
+            SET idxFill TO idxFill PLUS 1
+        UNTIL idxFill GREATER THAN lengthGrid
+
+        SET colIdx TO 0
+        WHILE colIdx IS LESS THAN lengthGrid
+            SET rowIdx TO 0
+            WHILE rowIdx IS LESS THAN lengthGrid
+                SET prefSum[colIdx][rowIdx PLUS 1] TO prefSum[colIdx][rowIdx] PLUS grid[rowIdx][colIdx]
+                SET rowIdx TO rowIdx PLUS 1
+            END WHILE
+            SET colIdx TO colIdx PLUS 1
+        END WHILE
+
+        SET rowCount TO 1
+        REPEAT
+            IF rowCount EQUALS lengthGrid THEN
+                BREAK
+            END IF
+
+            SET currChosen TO empty list
+            SET currIgnored TO empty list
+            SET fillIdx TO 0
+            WHILE fillIdx IS LESS THAN lengthGrid PLUS 1
+                APPEND 0 TO currChosen
+                APPEND 0 TO currIgnored
+                SET fillIdx TO fillIdx PLUS 1
+            END WHILE
+
+            SET indexCurr TO 0
+            WHILE indexCurr IS LESS THAN lengthGrid PLUS 1
+
+                SET indexPrev TO 0
+                WHILE indexPrev IS LESS THAN lengthGrid PLUS 1
+
+                    IF indexCurr GREATER THAN indexPrev THEN
+                        SET segScore TO prefSum[rowCount - 1][indexCurr] MINUS prefSum[rowCount - 1][indexPrev]
+                        IF currChosen[indexCurr] LESS THAN prevIgnored[indexPrev] PLUS segScore THEN
+                            SET currChosen[indexCurr] TO prevIgnored[indexPrev] PLUS segScore
+                        END IF
+                        IF currIgnored[indexCurr] LESS THAN prevIgnored[indexPrev] PLUS segScore THEN
+                            SET currIgnored[indexCurr] TO prevIgnored[indexPrev] PLUS segScore
+                        END IF
+                    ELSE
+                        SET segScore TO prefSum[rowCount][indexPrev] MINUS prefSum[rowCount][indexCurr]
+                        IF currChosen[indexCurr] LESS THAN prevChosen[indexPrev] PLUS segScore THEN
+                            SET currChosen[indexCurr] TO prevChosen[indexPrev] PLUS segScore
+                        END IF
+                        IF currIgnored[indexCurr] LESS THAN prevChosen[indexPrev] THEN
+                            SET currIgnored[indexCurr] TO prevChosen[indexPrev]
+                        END IF
+                    END IF
+
+                    SET indexPrev TO indexPrev PLUS 1
+                END WHILE
+
+                SET indexCurr TO indexCurr PLUS 1
+            END WHILE
+
+            SET prevChosen TO currChosen
+            SET prevIgnored TO currIgnored
+
+            SET rowCount TO rowCount PLUS 1
+        UNTIL rowCount GREATER THAN lengthGrid
+
+        FUNCTION findMaximum(arr)
+            SET maxVal TO arr[0]
+            SET idxMax TO 1
+            WHILE idxMax LESS THAN LENGTH OF arr
+                IF arr[idxMax] GREATER THAN maxVal THEN
+                    SET maxVal TO arr[idxMax]
+                END IF
+                SET idxMax TO idxMax PLUS 1
+            END WHILE
+            RETURN maxVal
+        END FUNCTION
+
+        RETURN findMaximum(prevChosen)
+    END FUNCTION
+END CLASS

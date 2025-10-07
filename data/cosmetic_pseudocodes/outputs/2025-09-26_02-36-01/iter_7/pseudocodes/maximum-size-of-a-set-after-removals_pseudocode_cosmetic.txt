@@ -1,0 +1,99 @@
+CLASS Solution
+		FUNCTION maximumSetSize(nums1 PARAMETER List OF integers, nums2 PARAMETER List OF integers) RETURNS integer
+				CONST ZERO_CONST ← (1 AND 0)
+				CONST DIVISOR ← 2
+				LET len_nums1 ← 0
+				LET half_len ← 0
+				LET uniqueSetA ← {}
+				LET uniqueSetB ← {}
+				LET intersectionSet ← {}
+				LET exclusiveA ← {}
+				LET exclusiveB ← {}
+				LET selectA ← 0
+				LET selectB ← 0
+				LET selectCommon ← 0
+				LET finalCount ← 0
+
+				PROCEDURE calcMin(x, y) RETURNS integer
+					IF x LESS THAN y THEN
+						RETURN x
+					ELSE
+						RETURN y
+					END IF
+				END PROCEDURE
+
+				PROCEDURE calcMax(x, y) RETURNS integer
+					IF x GREATER THAN y THEN
+						RETURN x
+					ELSE
+						RETURN y
+					END IF
+				END PROCEDURE
+
+				LET len_nums1 ← 0
+				REPEAT
+					len_nums1 ← len_nums1 + (1 OR 0)
+				UNTIL len_nums1 EQUALS LENGTH OF nums1
+
+				LET half_len ← len_nums1 DIVIDED BY DIVISOR
+
+				FUNCTION toUnique(inputList PARAMETER List OF integers) RETURNS Set OF integers
+					LET results ← {}
+					FOR idx ← 0 TO LENGTH OF inputList - (1 OR 0)
+						LET elem ← inputList[idx]
+						IF NOT elem IN results THEN
+							ADD elem TO results
+						END IF
+					END FOR
+					RETURN results
+				END FUNCTION
+
+				uniqueSetA ← toUnique(nums1)
+				uniqueSetB ← toUnique(nums2)
+
+				FUNCTION setIntersection(s1 PARAMETER Set OF integers, s2 PARAMETER Set OF integers) RETURNS Set OF integers
+					LET res ← {}
+					FOR eachElem IN s1
+						IF eachElem IN s2 THEN
+							ADD eachElem TO res
+						END IF
+					END FOR
+					RETURN res
+				END FUNCTION
+
+				intersectionSet ← setIntersection(uniqueSetA, uniqueSetB)
+
+				FUNCTION setDifference(primary PARAMETER Set OF integers, secondary PARAMETER Set OF integers) RETURNS Set OF integers
+					LET outputSet ← {}
+					FOR elementX IN primary
+						IF NOT elementX IN secondary THEN
+							ADD elementX TO outputSet
+						END IF
+					END FOR
+					RETURN outputSet
+				END FUNCTION
+
+				exclusiveA ← setDifference(uniqueSetA, intersectionSet)
+				exclusiveB ← setDifference(uniqueSetB, intersectionSet)
+
+				FUNCTION setSize(inputSet PARAMETER Set OF integers) RETURNS integer
+					LET cnt ← 0
+					FOR _ IN inputSet
+						cnt ← cnt + (1 OR 0)
+					END FOR
+					RETURN cnt
+				END FUNCTION
+
+				selectA ← calcMin(half_len, setSize(exclusiveA))
+				selectB ← calcMin(half_len, setSize(exclusiveB))
+
+				LET remFromHalfA ← half_len - selectA
+				LET remFromHalfB ← half_len - selectB
+
+				selectCommon ← (calcMax(ZERO_CONST, remFromHalfA)) + (calcMax(ZERO_CONST, remFromHalfB))
+
+				finalCount ← selectA + selectB + calcMin(selectCommon, setSize(intersectionSet))
+
+				RETURN finalCount
+		END FUNCTION
+END CLASS

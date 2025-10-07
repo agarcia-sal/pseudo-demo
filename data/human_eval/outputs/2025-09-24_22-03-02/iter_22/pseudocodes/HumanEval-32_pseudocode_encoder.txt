@@ -1,0 +1,46 @@
+FUNCTION poly(xs: list, x: float)
+    SET result TO 0
+    SET length TO 0
+    WHILE length LESS THAN LENGTH OF xs
+        SET i TO length
+        SET coeff TO xs AT INDEX i
+        CALL math.pow WITH ARGUMENTS x, i
+        SET power TO RETURN VALUE OF math.pow
+        SET term TO coeff MULTIPLY power
+        SET result TO result PLUS term
+        INCREMENT length BY 1
+    END WHILE
+    RETURN result
+END FUNCTION
+
+FUNCTION find_zero(xs: list)
+    SET begin TO NEGATIVE 1.0
+    SET end TO 1.0
+    CALL poly WITH ARGUMENTS xs, begin
+    SET poly_begin TO RETURN VALUE OF poly
+    CALL poly WITH ARGUMENTS xs, end
+    SET poly_end TO RETURN VALUE OF poly
+    WHILE poly_begin MULTIPLY poly_end GREATER THAN 0
+        SET begin TO begin MULTIPLY 2.0
+        SET end TO end MULTIPLY 2.0
+        CALL poly WITH ARGUMENTS xs, begin
+        SET poly_begin TO RETURN VALUE OF poly
+        CALL poly WITH ARGUMENTS xs, end
+        SET poly_end TO RETURN VALUE OF poly
+    END WHILE
+    WHILE end MINUS begin GREATER THAN 0.0000000001
+        SET center TO (begin PLUS end) DIVIDE 2.0
+        CALL poly WITH ARGUMENTS xs, center
+        SET poly_center TO RETURN VALUE OF poly
+        IF poly_center MULTIPLY poly_begin GREATER THAN 0
+            SET begin TO center
+            CALL poly WITH ARGUMENTS xs, begin
+            SET poly_begin TO RETURN VALUE OF poly
+        ELSE
+            SET end TO center
+            CALL poly WITH ARGUMENTS xs, end
+            SET poly_end TO RETURN VALUE OF poly
+        END IF
+    END WHILE
+    RETURN begin
+END FUNCTION

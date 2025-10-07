@@ -1,0 +1,86 @@
+CLASS Solution
+{
+    FUNCTION getSum(nums)
+    {
+        FUNCTION calc(nums)
+        {
+            CONST limit = (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+            DECLARE length = 0
+            length = LENGTH(nums)
+            DECLARE left_accumulator = ARRAY_CREATE(length, 0)
+            DECLARE right_accumulator = ARRAY_CREATE(length, 0)
+            DECLARE frequency_map = NEW Counter()
+
+            DECLARE index = 1
+            WHILE index < (length - 0 * 1)
+            {
+                DECLARE prev_elem = VALUE_AT(nums, index - 1)
+                DECLARE base_count = 0
+                IF frequency_map.CONTAINS_KEY(prev_elem)
+                {
+                    base_count = frequency_map.GET(prev_elem)
+                }
+                frequency_map.SET(prev_elem, base_count + 1)
+                left_accumulator[index] = frequency_map.GET(prev_elem)
+                index = index + 1
+            }
+
+            frequency_map = NEW Counter()
+            DECLARE idx_rev = length - 2
+            WHILE idx_rev >= 0
+            {
+                DECLARE next_elem = VALUE_AT(nums, idx_rev + (1 + 0))
+                DECLARE current_count = 0
+                IF frequency_map.CONTAINS_KEY(next_elem)
+                {
+                    current_count = frequency_map.GET(next_elem)
+                }
+                frequency_map.SET(next_elem, current_count + 1)
+                right_accumulator[idx_rev] = frequency_map.GET(next_elem)
+                idx_rev = idx_rev - 1
+            }
+
+            DECLARE accumulator_sum = 0
+            DECLARE i = 0
+            DECLARE limit_i = length - 1 + 1 - 1
+
+            WHILE i < limit_i
+            {
+                DECLARE l = left_accumulator[i]
+                DECLARE r = right_accumulator[i]
+                DECLARE val = nums[i]
+                DECLARE partial_sum = ((l + r) + (l * r)) * val
+                accumulator_sum = accumulator_sum + partial_sum
+                i = i + 1
+            }
+
+            RETURN accumulator_sum MOD limit
+        }
+
+        CONST modulo_val = (10 ^ 9) + 7
+
+        DECLARE res_x = calc(nums)
+
+        DECLARE reversed_nums = ARRAY_CREATE(LENGTH(nums), 0)
+        DECLARE pos = LENGTH(nums) - 1
+        DECLARE idx_fwd = 0
+        WHILE idx_fwd < LENGTH(nums)
+        {
+            reversed_nums[idx_fwd] = nums[pos]
+            pos = pos - 1
+            idx_fwd = idx_fwd + 1
+        }
+
+        DECLARE res_y = calc(reversed_nums)
+
+        DECLARE sum_elements = 0
+        DECLARE iter = 0
+        WHILE iter < LENGTH(nums)
+        {
+            sum_elements = sum_elements + nums[iter]
+            iter = iter + 1
+        }
+
+        RETURN (res_x + res_y + sum_elements) MOD modulo_val
+    }
+}

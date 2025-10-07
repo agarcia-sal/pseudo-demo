@@ -1,0 +1,79 @@
+CLASS Enemy  
+    FUNCTION __init__(self, damage, timeTakenDown)  
+        SET self.damage TO damage  
+        SET self.timeTakenDown TO timeTakenDown  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION minDamage(self, power, damage, health)  
+        SET accumulatedResult TO 0  
+        SET totalDamageSum TO 0  
+        SET enemyList TO empty list  
+        
+        FUNCTION sumList(numbers, idx)  
+            IF NOT (idx >= LENGTH(numbers)) THEN  
+                RETURN numbers[idx] + sumList(numbers, idx + 1)  
+            ELSE  
+                RETURN 0  
+            END IF  
+        END FUNCTION  
+        
+        SET totalDamageSum TO sumList(damage, 0)  
+        
+        FUNCTION buildEnemies(i)  
+            IF i < LENGTH(damage) THEN  
+                SET dmgVal TO damage[i]  
+                SET hpVal TO health[i]  
+                SET timeCount TO ((hpVal + power - 1) // power)  
+                SET newEnemy TO Enemy(dmgVal, timeCount)  
+                CALL enemyList.APPEND(newEnemy)  
+                CALL buildEnemies(i + 1)  
+            END IF  
+        END FUNCTION  
+        
+        CALL buildEnemies(0)  
+        
+        FUNCTION compareRatio(a, b)  
+            RETURN (a.damage * b.timeTakenDown) > (b.damage * a.timeTakenDown)  
+        END FUNCTION  
+        
+        FUNCTION sortDescending(lst)  
+            IF LENGTH(lst) <= 1 THEN  
+                RETURN lst  
+            ELSE  
+                SET pivot TO lst[0]  
+                SET leftSide TO empty list  
+                SET rightSide TO empty list  
+                SET idx TO 1  
+                WHILE idx < LENGTH(lst) DO  
+                    IF compareRatio(lst[idx], pivot) THEN  
+                        CALL leftSide.APPEND(lst[idx])  
+                    ELSE  
+                        CALL rightSide.APPEND(lst[idx])  
+                    END IF  
+                    SET idx TO idx + 1  
+                END WHILE  
+                RETURN sortDescending(leftSide) + [pivot] + sortDescending(rightSide)  
+            END IF  
+        END FUNCTION  
+        
+        SET enemyList TO sortDescending(enemyList)  
+        
+        FUNCTION processEnemies(lst, accAns, accSumDamage, pos)  
+            IF pos < LENGTH(lst) THEN  
+                SET enemyObj TO lst[pos]  
+                SET incrementVal TO accSumDamage * enemyObj.timeTakenDown  
+                SET newAns TO accAns + incrementVal  
+                SET newSumDamage TO accSumDamage - enemyObj.damage  
+                RETURN processEnemies(lst, newAns, newSumDamage, pos + 1)  
+            ELSE  
+                RETURN accAns  
+            END IF  
+        END FUNCTION  
+        
+        SET accumulatedResult TO processEnemies(enemyList, 0, totalDamageSum, 0)  
+        
+        RETURN accumulatedResult  
+    END FUNCTION  
+END CLASS

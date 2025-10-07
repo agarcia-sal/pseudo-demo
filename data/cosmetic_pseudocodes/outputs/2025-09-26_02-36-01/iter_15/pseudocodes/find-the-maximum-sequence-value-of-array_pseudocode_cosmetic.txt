@@ -1,0 +1,71 @@
+``` 
+CLASS Solution
+    FUNCTION maxValue(nums LIST OF INTEGER, k INTEGER) RETURNS INTEGER
+        SET P TO 1 SHL 7
+        SET L TO LENGTH(nums)
+        DECLARE DP_F AS 3D ARRAY OF BOOLEAN SIZE (L + 1, k + 2, P)
+        INITIALIZE ALL ELEMENTS OF DP_F TO FALSE
+        SET DP_F[0][0][0] TO TRUE
+
+        SET idx_outer TO 0
+        WHILE idx_outer < L
+            SET idx_mid TO 0
+            WHILE idx_mid <= k
+                SET idx_inner TO 0
+                WHILE idx_inner < P
+                    SET DP_F[idx_outer + 1][idx_mid][idx_inner] TO (DP_F[idx_outer + 1][idx_mid][idx_inner] OR DP_F[idx_outer][idx_mid][idx_inner])
+                    SET bitwise_or_val TO idx_inner BITWISE_OR nums[idx_outer]
+                    SET current_val TO DP_F[idx_outer][idx_mid][idx_inner]
+                    SET DP_F[idx_outer + 1][idx_mid + 1][bitwise_or_val] TO (DP_F[idx_outer + 1][idx_mid + 1][bitwise_or_val] OR current_val)
+                    SET idx_inner TO idx_inner + 1
+                END WHILE
+                SET idx_mid TO idx_mid + 1
+            END WHILE
+            SET idx_outer TO idx_outer + 1
+        END WHILE
+
+        DECLARE DP_G AS 3D ARRAY OF BOOLEAN SIZE (L + 1, k + 2, P)
+        INITIALIZE ALL ELEMENTS OF DP_G TO FALSE
+        SET DP_G[L][0][0] TO TRUE
+
+        SET pos_outer TO L
+        REPEAT UNTIL pos_outer <= 0
+            SET pos_outer TO pos_outer - 1
+            SET pos_mid TO 0
+            WHILE pos_mid <= k
+                SET pos_inner TO 0
+                WHILE pos_inner < P
+                    SET DP_G[pos_outer][pos_mid][pos_inner] TO (DP_G[pos_outer][pos_mid][pos_inner] OR DP_G[pos_outer + 1][pos_mid][pos_inner])
+                    SET or_val TO pos_inner BITWISE_OR nums[pos_outer]
+                    SET val_g TO DP_G[pos_outer + 1][pos_mid][pos_inner]
+                    SET DP_G[pos_outer][pos_mid + 1][or_val] TO (DP_G[pos_outer][pos_mid + 1][or_val] OR val_g)
+                    SET pos_inner TO pos_inner + 1
+                END WHILE
+                SET pos_mid TO pos_mid + 1
+            END WHILE
+        END REPEAT
+
+        SET max_result TO 0
+        SET i_val TO k
+        WHILE i_val <= L - k
+            SET x_val TO 0
+            WHILE x_val < P
+                IF DP_F[i_val][k][x_val] = TRUE THEN
+                    SET y_val TO 0
+                    WHILE y_val < P
+                        IF DP_G[i_val][k][y_val] = TRUE THEN
+                            SET candidate TO x_val BITWISE_XOR y_val
+                            SET max_result TO MAX(max_result, candidate)
+                        END IF
+                        SET y_val TO y_val + 1
+                    END WHILE
+                END IF
+                SET x_val TO x_val + 1
+            END WHILE
+            SET i_val TO i_val + 1
+        END WHILE
+
+        RETURN max_result
+    END FUNCTION
+END CLASS
+```

@@ -1,0 +1,39 @@
+```
+FUNCTION check_dict_case(dictionary)
+	NONE_MINUS_ONE_ZERO_COUNT = LENGTH(dictionary KEYS)
+	IF NONE_MINUS_ONE_ZERO_COUNT = 0
+		RETURN False
+	END IF
+	state_variable = "start"
+	index_tracker = 0
+	LOOP
+		IF index_tracker >= NONE_MINUS_ONE_ZERO_COUNT
+			EXIT LOOP
+		END IF
+		current_element = dictionary KEYS[index_tracker]
+		IF NOT (current_element INSTANCEOF STRING)
+			state_variable = "mixed"
+			EXIT LOOP
+		END IF
+		IF state_variable = "start"
+			condition_upper = current_element IS ALL UPPERCASE
+			condition_lower = current_element IS ALL LOWERCASE
+			state_variable = (condition_upper) ? "upper" : ((condition_lower) ? "lower" : (BREAK_LOOP := TRUE, ""))
+			IF BREAK_LOOP
+				EXIT LOOP
+			END IF
+		ELSE
+			state_variable_mismatch = ((state_variable = "upper") AND NOT (current_element IS ALL UPPERCASE))
+			state_variable_mismatch = state_variable_mismatch OR ((state_variable = "lower") AND NOT (current_element IS ALL LOWERCASE))
+			IF state_variable_mismatch
+				state_variable = "mixed"
+				EXIT LOOP
+			ELSE
+				EXIT LOOP
+			END IF
+		END IF
+		index_tracker = index_tracker + 1
+	END LOOP
+	RETURN ((state_variable = "upper") OR (state_variable = "lower"))
+END FUNCTION
+```

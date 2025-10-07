@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION countPrefixSuffixPairs(words)
+        FUNCTION equalsSubstring(source, startIndex, endIndex, sub)
+            VAR a, b, c
+            a = endIndex - startIndex
+            b = LENGTH(sub)
+            IF a - b + 1 != 1 THEN
+                RETURN false
+            END IF
+            c = 0
+            REPEAT
+                IF c >= b THEN
+                    RETURN true
+                END IF
+                IF source[startIndex + c] != sub[c] THEN
+                    RETURN false
+                END IF
+                c = c + 1
+            UNTIL false
+        END FUNCTION
+
+        VAR totalPairs
+        VAR lookupMap
+        VAR idxOuter, idxInner
+        VAR currentWord
+        VAR candidateKey
+
+        totalPairs = 0
+        lookupMap = NEW MAP DEFAULT 0
+
+        idxOuter = LENGTH(words) - 1
+        WHILE idxOuter >= 0
+            currentWord = words[idxOuter]
+            idxInner = 0
+            FOR candidateKey IN lookupMap KEYS
+                IF equalsSubstring(candidateKey, 0, LENGTH(currentWord) - 1, currentWord) AND equalsSubstring(candidateKey, LENGTH(candidateKey) - LENGTH(currentWord), LENGTH(candidateKey) - 1, currentWord) THEN
+                    totalPairs = totalPairs + lookupMap[candidateKey]
+                END IF
+                idxInner = idxInner + 1
+            END FOR
+            lookupMap[currentWord] = lookupMap[currentWord] + 1
+            idxOuter = idxOuter - 1
+        END WHILE
+
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

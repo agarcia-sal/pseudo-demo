@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list
+        SET priority_queue TO []
+        SET position_counter TO 0
+        WHILE position_counter < LENGTH(nums)
+            SET element_value TO nums[position_counter]
+            APPEND [element_value, position_counter] TO priority_queue
+            SET position_counter TO position_counter + 1
+        END WHILE
+        CALL heapify(priority_queue)
+
+        SET flagged_positions TO {}
+        SET aggregate_total TO 0
+        SET idx TO 0
+        WHILE idx < LENGTH(nums)
+            SET aggregate_total TO aggregate_total + nums[idx]
+            SET idx TO idx + 1
+        END WHILE
+
+        SET output_list TO []
+        SET query_index TO 0
+        WHILE query_index < LENGTH(queries)
+            SET query_pos TO queries[query_index][0]
+            SET threshold_k TO queries[query_index][1]
+
+            IF NOT query_pos IN flagged_positions
+                INSERT query_pos INTO flagged_positions
+                SET aggregate_total TO aggregate_total - nums[query_pos]
+            END IF
+
+            SET removals_remaining TO threshold_k
+            WHILE removals_remaining > 0 AND LENGTH(priority_queue) > 0
+                SET extracted_pair TO heappop(priority_queue)
+                SET val := extracted_pair[0]
+                SET pos := extracted_pair[1]
+
+                IF pos NOT IN flagged_positions
+                    ADD pos TO flagged_positions
+                    SET aggregate_total TO aggregate_total - val
+                    SET removals_remaining TO removals_remaining - 1
+                END IF
+            END WHILE
+
+            APPEND aggregate_total TO output_list
+            SET query_index TO query_index + 1
+        END WHILE
+
+        RETURN output_list
+    END FUNCTION
+END CLASS

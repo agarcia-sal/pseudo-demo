@@ -1,0 +1,37 @@
+```
+FUNCTION check_dict_case(dictionary)
+    IF NOT (COUNT(dictionary KEYS) > 0)
+        RETURN False
+    END IF
+
+    SET mode TO "start"
+    SET key_queue TO COPY(dictionary KEYS)
+
+    WHILE NOT (LENGTH(key_queue) == 0)
+        REMOVE_FIRST_ELEMENT key_queue INTO current_key
+
+        IF NOT (TYPEOF(current_key) == STRING)
+            SET mode TO "mixed"
+            BREAK
+        END IF
+
+        IF mode == "start"
+            IF current_key == TOUPPER(current_key)
+                SET mode TO "upper"
+            ELSE 
+                IF NOT (current_key == TOLOWER(current_key))
+                    BREAK
+                END IF
+                SET mode TO "lower"
+            END IF
+        ELSEIF NOT ((mode == "upper" AND current_key == TOUPPER(current_key)) OR (mode == "lower" AND current_key == TOLOWER(current_key))) 
+            SET mode TO "mixed"
+            BREAK
+        ELSE
+            BREAK
+        END IF
+    END WHILE
+
+    RETURN (mode == "upper") OR (mode == "lower")
+END FUNCTION
+```

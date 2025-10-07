@@ -1,0 +1,62 @@
+CLASS UnionFind  
+    FUNCTION __init__(self, length)  
+        LET self.parent ASSIGN [i FOR i IN RANGE(length)]  
+        LET self.rank ASSIGN [0 REPEATED length TIMES]  
+    END FUNCTION  
+  
+    FUNCTION find(self, x)  
+        WHILE self.parent[x] IS NOT x  
+            LET self.parent[x] ASSIGN self.find(self.parent[x])  
+        END WHILE  
+        RETURN self.parent[x]  
+    END FUNCTION  
+  
+    FUNCTION union(self, a, b)  
+        LET root_a ASSIGN self.find(a)  
+        LET root_b ASSIGN self.find(b)  
+        IF root_a != root_b THEN  
+            IF self.rank[root_a] > self.rank[root_b] THEN  
+                self.parent[root_b] = root_a  
+            ELSE IF self.rank[root_a] < self.rank[root_b] THEN  
+                self.parent[root_a] = root_b  
+            ELSE  
+                self.parent[root_b] = root_a  
+                self.rank[root_a] = self.rank[root_a] + 1  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+    FUNCTION maximizeSumOfWeights(self, edges, limit)  
+        LET total_nodes ASSIGN LENGTH(edges) + 1  
+        LET degree_counter ASSIGN [0 FOR _ IN RANGE(total_nodes)]  
+        LET union_find ASSIGN UnionFind(total_nodes)  
+  
+        LET ordered_edges ASSIGN SORT(edges, key=lambda e: e[2], reverse=True)  
+  
+        LET accumulated_sum ASSIGN 0  
+  
+        LET idx ASSIGN 0  
+        WHILE idx < LENGTH(ordered_edges)  
+            LET current_edge ASSIGN ordered_edges[idx]  
+            LET start_node ASSIGN current_edge[0]  
+            LET end_node ASSIGN current_edge[1]  
+            LET weight ASSIGN current_edge[2]  
+  
+            IF degree_counter[start_node] < limit AND degree_counter[end_node] < limit THEN  
+                LET root_start ASSIGN union_find.find(start_node)  
+                LET root_end ASSIGN union_find.find(end_node)  
+                IF root_start != root_end THEN  
+                    union_find.union(start_node, end_node)  
+                    degree_counter[start_node] = degree_counter[start_node] + 1  
+                    degree_counter[end_node] = degree_counter[end_node] + 1  
+                    accumulated_sum = accumulated_sum + weight  
+                END IF  
+            END IF  
+            idx = idx + 1  
+        END WHILE  
+  
+        RETURN accumulated_sum  
+    END FUNCTION  
+END CLASS

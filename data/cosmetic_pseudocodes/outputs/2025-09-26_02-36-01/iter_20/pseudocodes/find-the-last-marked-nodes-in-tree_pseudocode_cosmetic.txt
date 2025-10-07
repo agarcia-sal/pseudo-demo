@@ -1,0 +1,125 @@
+CLASS Solution
+    FUNCTION lastMarkedNodes(edges)
+        FUNCTION dfs(p, q, r)
+            FUNCTION rec(s, t, u)
+                IF u < LENGTH(s) THEN
+                    SET v TO s[u]
+                    IF v != t THEN
+                        SET r[v] TO r[p] + (1 + 0)
+                        CALL rec(s, t, u + 1)
+                    ELSE
+                        CALL rec(s, t, u + 1)
+                    END IF
+                END IF
+            END FUNCTION
+
+            SET w TO 0
+            CALL rec(g[p], q, w)
+        END FUNCTION
+
+        SET x TO LENGTH(edges) + (1 * 1)
+        SET g TO []
+        
+        FUNCTION genList(n)
+            IF n <= 0 THEN
+                RETURN []
+            ELSE
+                RETURN [[]] + genList(n - 1)
+            END IF
+        END FUNCTION
+        
+        SET g TO genList(x)
+
+        FUNCTION addEdges(lst, idx1, idx2)
+            IF lst == [] THEN
+                RETURN
+            ELSE
+                SET top TO lst[0]
+                SET rest TO lst[1..]
+                SET r TO idx1
+                SET s TO idx2
+                APPEND s TO g[r]
+                APPEND r TO g[s]
+                CALL addEdges(rest, r, s)
+            END IF
+        END FUNCTION
+
+        FUNCTION buildGraph(l, i)
+            IF i >= LENGTH(l) THEN
+                RETURN
+            ELSE
+                SET item TO l[i]
+                CALL addEdges([item], item[0], item[1])
+                CALL buildGraph(l, i + 1)
+            END IF
+        END FUNCTION
+        
+        FUNCTION buildEdges(e, k)
+            IF k < LENGTH(e) THEN
+                SET edge TO e[k]
+                APPEND edge[1] TO g[edge[0]]
+                APPEND edge[0] TO g[edge[1]]
+                CALL buildEdges(e, k + 1)
+            END IF
+        END FUNCTION
+
+        CALL buildEdges(edges, 0)
+
+        FUNCTION initList(len, val)
+            IF len <= 0 THEN
+                RETURN []
+            ELSE
+                RETURN [val] + initList(len - 1, val)
+            END IF
+        END FUNCTION
+
+        SET dist1 TO initList(x, -1)
+        SET dist1[0] TO 0
+        CALL dfs(0, -1, dist1)
+
+        FUNCTION maxPos(arr)
+            FUNCTION aux(idx, maxIndex, maxVal)
+                IF idx >= LENGTH(arr) THEN
+                    RETURN maxIndex
+                ELSE
+                    IF arr[idx] > maxVal THEN
+                        RETURN aux(idx + 1, idx, arr[idx])
+                    ELSE
+                        RETURN aux(idx + 1, maxIndex, maxVal)
+                    END IF
+                END IF
+            END FUNCTION
+            RETURN aux(0, 0, arr[0])
+        END FUNCTION
+
+        SET a TO maxPos(dist1)
+
+        SET dist2 TO initList(x, -1)
+        SET dist2[a] TO 0
+        CALL dfs(a, -1, dist2)
+        SET b TO maxPos(dist2)
+
+        SET dist3 TO initList(x, -1)
+        SET dist3[b] TO 0
+        CALL dfs(b, -1, dist3)
+
+        SET result TO []
+
+        FUNCTION combineLists(l1, l2, idx)
+            IF idx >= LENGTH(l1) THEN
+                RETURN
+            ELSE
+                IF l1[idx] > l2[idx] THEN
+                    APPEND a TO result
+                ELSE
+                    APPEND b TO result
+                END IF
+                CALL combineLists(l1, l2, idx + 1)
+            END IF
+        END FUNCTION
+
+        CALL combineLists(dist2, dist3, 0)
+
+        RETURN result
+    END FUNCTION
+END CLASS

@@ -1,0 +1,71 @@
+CLASS Solution
+    FUNCTION minimumCost(m n horizontalCut verticalCut)
+        PROCEDURE sortDesc(arr)
+            FUNCTION quickSortDesc(low high)
+                IF low < high
+                    pivotVal ← arr[high]
+                    idx ← low
+                    k ← low
+                    WHILE k < high
+                        IF arr[k] > pivotVal
+                            tmp ← arr[k]
+                            arr[k] ← arr[idx]
+                            arr[idx] ← tmp
+                            idx ← idx + 1
+                        END IF
+                        k ← k + 1
+                    END WHILE
+                    tmp ← arr[high]
+                    arr[high] ← arr[idx]
+                    arr[idx] ← tmp
+                    quickSortDesc(low idx - 1)
+                    quickSortDesc(idx + 1 high)
+                END IF
+            END FUNCTION
+            quickSortDesc(0 LENGTH(arr) - 1)
+        END PROCEDURE
+
+        sortDesc(horizontalCut)
+        sortDesc(verticalCut)
+
+        totalCost ← 0
+        posH ← 0
+        posV ← 0
+        countH ← 1
+        countV ← 1
+
+        FUNCTION recur(i j)
+            cond1 ← (j = n - 1)
+            cond2 ← (i < m - 1)
+            cond3 ← (horizontalCut[i] > verticalCut[j])
+            IF cond1 OR (cond2 AND cond3)
+                costAdd ← horizontalCut[i] * countV
+                newTotal ← totalCost + costAdd
+                totalCost ← newTotal
+                countH ← countH + 1
+                posH ← i + 1
+                IF NOT (posH < m - 1 OR posV < n - 1)
+                    RETURN
+                ELSE
+                    recur(posH posV)
+                END IF
+            ELSE
+                costAdd ← verticalCut[j] * countH
+                newTotal ← totalCost + costAdd
+                totalCost ← newTotal
+                countV ← countV + 1
+                posV ← j + 1
+                IF NOT (posH < m - 1 OR posV < n - 1)
+                    RETURN
+                ELSE
+                    recur(posH posV)
+                END IF
+            END IF
+        END FUNCTION
+
+        recur(posH posV)
+
+        answerResult ← totalCost
+        RETURN answerResult
+    END FUNCTION
+END CLASS

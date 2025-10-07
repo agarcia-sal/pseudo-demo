@@ -1,0 +1,90 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        DEFINE CONSTANT MOD_VALUE = (one times ten to the nine) plus seven
+        VARIABLE totalCount ASSIGN zero
+        DECLARE prefixCounter AS empty dictionary defaulting to zero
+        DECLARE suffixCounter AS dictionary mapping each element of nums to zero counts
+        FOR each element elem IN nums DO
+            INCREMENT suffixCounter[elem] BY one
+        END FOR
+
+        FUNCTION combinationTwo(num)
+            RETURN (num times (num minus one)) divided by two
+        END FUNCTION
+
+        VARIABLE prefixSuffixSquaredAccum ASSIGN zero
+        VARIABLE suffixPrefixProductAccum ASSIGN zero
+        VARIABLE prefixPairsAccum ASSIGN zero
+        VARIABLE suffixPairsSquaredSum ASSIGN zero
+        FOR each freq IN values of suffixCounter DO
+            suffixPairsSquaredSum ASSIGN suffixPairsSquaredSum plus (freq times freq)
+        END FOR
+        VARIABLE prefixSuffixAccum ASSIGN zero
+
+        DEFINE FUNCTION loopIndex(currentIndex, maxIndex)
+            IF currentIndex GREATER THAN maxIndex THEN
+                RETURN
+            END IF
+
+            VARIABLE currentElement ASSIGN nums[currentIndex]
+
+            VARIABLE termOne ASSIGN prefixCounter[currentElement]
+            VARIABLE termTwo ASSIGN suffixCounter[currentElement]
+            VARIABLE termTwoSq ASSIGN termTwo times termTwo
+            VARIABLE termTwoMinusOneSq ASSIGN (termTwo minus one) times (termTwo minus one)
+            VARIABLE termOneSq ASSIGN termOne times termOne
+            VARIABLE termOnePlusOneSq ASSIGN (termOne plus one) times (termOne plus one)
+            VARIABLE negativeTermOneSq ASSIGN zero minus termOneSq
+            VARIABLE negativeTermOne ASSIGN zero minus termOne
+            VARIABLE negativeTermTwoSq ASSIGN zero minus termTwoSq
+            VARIABLE negativeTermTwo ASSIGN zero minus termTwo
+
+            prefixSuffixSquaredAccum ASSIGN prefixSuffixSquaredAccum plus (termOne times (negativeTermTwoSq plus termTwoMinusOneSq))
+            suffixPrefixProductAccum ASSIGN suffixPrefixProductAccum plus negativeTermOneSq
+            suffixPairsSquaredSum ASSIGN suffixPairsSquaredSum plus (negativeTermTwoSq plus termTwoMinusOneSq)
+            prefixSuffixAccum ASSIGN prefixSuffixAccum plus negativeTermOne
+
+            suffixCounter[currentElement] ASSIGN suffixCounter[currentElement] minus one
+
+            VARIABLE leftCount ASSIGN currentIndex
+            VARIABLE rightCount ASSIGN (length of nums) minus currentIndex minus one
+
+            VARIABLE leftComb ASSIGN combinationTwo(leftCount)
+            VARIABLE rightComb ASSIGN combinationTwo(rightCount)
+            VARIABLE leftMinusPrefix ASSIGN leftCount minus termOne
+            VARIABLE rightMinusSuffix ASSIGN rightCount minus suffixCounter[currentElement]
+
+            totalCount ASSIGN totalCount plus (leftComb times rightComb)
+            totalCount ASSIGN totalCount minus (leftMinusPrefix times rightMinusSuffix)
+
+            VARIABLE tempPss ASSIGN prefixSuffixSquaredAccum minus (termOne times (suffixCounter[currentElement] times suffixCounter[currentElement]))
+            VARIABLE tempSpp ASSIGN suffixPrefixProductAccum minus (suffixCounter[currentElement] times (termOne times termOne))
+            VARIABLE tempPp ASSIGN prefixPairsAccum minus termOneSq
+            VARIABLE tempSs ASSIGN suffixPairsSquaredSum minus (suffixCounter[currentElement] times suffixCounter[currentElement])
+            VARIABLE tempPs ASSIGN prefixSuffixAccum minus (termOne times suffixCounter[currentElement])
+            VARIABLE pDash ASSIGN leftCount minus termOne
+            VARIABLE sDash ASSIGN rightCount minus suffixCounter[currentElement]
+
+            totalCount ASSIGN totalCount minus (tempPs times termOne times (rightCount minus suffixCounter[currentElement]) plus tempPss times (zero minus termOne))
+            totalCount ASSIGN totalCount minus (tempPs times suffixCounter[currentElement] times (leftCount minus termOne) plus tempSpp times (zero minus suffixCounter[currentElement]))
+            totalCount ASSIGN totalCount minus ((tempPp minus pDash) times suffixCounter[currentElement] times (rightCount minus suffixCounter[currentElement]) divided by two)
+            totalCount ASSIGN totalCount minus ((tempSs minus sDash) times termOne times (leftCount minus termOne) divided by two)
+
+            totalCount ASSIGN totalCount modulo MOD_VALUE
+
+            prefixSuffixSquaredAccum ASSIGN prefixSuffixSquaredAccum plus (suffixCounter[currentElement] times suffixCounter[currentElement])
+            suffixPrefixProductAccum ASSIGN suffixPrefixProductAccum plus ((suffixCounter[currentElement] times negativeTermOneSq) plus termOnePlusOneSq)
+            prefixPairsAccum ASSIGN prefixPairsAccum plus (negativeTermOneSq plus termOnePlusOneSq)
+            prefixSuffixAccum ASSIGN prefixSuffixAccum plus suffixCounter[currentElement]
+
+            prefixCounter[currentElement] ASSIGN prefixCounter[currentElement] plus one
+
+            CALL loopIndex(currentIndex plus one, maxIndex)
+        END FUNCTION
+
+        CALL loopIndex(zero, (length of nums) minus one)
+
+        VARIABLE finalResult ASSIGN totalCount
+        RETURN finalResult
+    END FUNCTION
+END CLASS

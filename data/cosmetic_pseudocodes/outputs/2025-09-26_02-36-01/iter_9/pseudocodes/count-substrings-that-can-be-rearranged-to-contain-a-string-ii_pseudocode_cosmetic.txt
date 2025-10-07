@@ -1,0 +1,78 @@
+CLASS Solution
+
+    FUNCTION validSubstringCount(inputA, inputB)
+        
+        IMPORT Counter FROM collections
+        
+        SET freqMapB TO Counter(inputB)
+        SET freqMapWindow TO Counter()
+        SET neededCount TO LENGTH(freqMapB)
+        SET matchedCount TO 0
+        SET startIdx TO 0
+        SET totalValid TO 0
+
+        PROCEDURE incrementMap(m, key)
+            IF key IN m THEN
+                SET m[key] TO m[key] + 1
+            ELSE
+                SET m[key] TO 1
+            END IF
+        END PROCEDURE
+
+        PROCEDURE decrementMap(m, key)
+            IF key IN m THEN
+                SET m[key] TO m[key] - 1
+            END IF
+        END PROCEDURE
+
+        PROCEDURE isEqualCount(m1, m2, k)
+            RETURN (k IN m1) AND (k IN m2) AND (m1[k] = m2[k])
+        END PROCEDURE
+
+        PROCEDURE isLessCount(m1, m2, k)
+            RETURN (k IN m1) AND (k IN m2) AND (m1[k] < m2[k])
+        END PROCEDURE
+
+        PROCEDURE innerLoop(currentRight)
+            SET continueLoop TO TRUE
+
+            WHILE continueLoop
+                IF (matchedCount = neededCount) AND ((currentRight + 1 - startIdx) >= LENGTH(inputB)) THEN
+                    SET totalValid TO totalValid + (LENGTH(inputA) - currentRight)
+
+                    SET leftChar TO inputA[startIdx]
+                    CALL decrementMap(freqMapWindow, leftChar)
+                    IF isLessCount(freqMapWindow, freqMapB, leftChar) THEN
+                        SET matchedCount TO matchedCount - 1
+                    END IF
+
+                    SET startIdx TO startIdx + 1
+                ELSE
+                    SET continueLoop TO FALSE
+                END IF
+            END WHILE
+        END PROCEDURE
+
+        PROCEDURE outerLoop(index)
+            IF index > (LENGTH(inputA) - 1) THEN
+                RETURN
+            END IF
+
+            SET rightChar TO inputA[index]
+            CALL incrementMap(freqMapWindow, rightChar)
+
+            IF isEqualCount(freqMapWindow, freqMapB, rightChar) THEN
+                SET matchedCount TO matchedCount + 1
+            END IF
+
+            CALL innerLoop(index)
+
+            CALL outerLoop(index + 1)
+        END PROCEDURE
+
+        CALL outerLoop(0)
+
+        RETURN totalValid
+    END FUNCTION
+
+END CLASS

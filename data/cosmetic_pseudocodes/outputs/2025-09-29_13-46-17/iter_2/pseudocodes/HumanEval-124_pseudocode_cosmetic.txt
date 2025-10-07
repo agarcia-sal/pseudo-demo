@@ -1,0 +1,41 @@
+```
+FUNCTION valid_date(date_string)
+  date_trimmed <- TRIM(date_string)
+  parts <- SPLIT(date_trimmed, '-')
+
+  FUNCTION check_parts(idx, arr)
+    IF idx ≥ LENGTH(arr) THEN
+      RETURN TRUE
+    ELSE IF idx = 0 THEN
+      month_num <- TO_INT(arr[0])
+      IF month_num < 1 OR month_num > 12 THEN RETURN FALSE
+      RETURN check_parts(idx + 1, arr)
+    ELSE IF idx = 1 THEN
+      day_num <- TO_INT(arr[1])
+      IF   (month_num IN {1,3,5,7,8,10,12} AND (day_num < 1 OR day_num > 31)) OR
+           (month_num IN {4,6,9,11} AND (day_num < 1 OR day_num > 30)) OR
+           (month_num = 2 AND (day_num < 1 OR day_num > 29)) THEN
+        RETURN FALSE
+      END IF
+      RETURN check_parts(idx + 1, arr)
+    ELSE IF idx = 2 THEN
+      year_num <- TO_INT(arr[2])
+      RETURN check_parts(idx + 1, arr)
+    ELSE
+      RETURN TRUE
+    END IF
+  END FUNCTION
+
+  IF LENGTH(parts) ≠ 3 THEN
+    RETURN FALSE
+  END IF
+
+  TRY
+    outcome <- check_parts(0, parts)
+  CATCH
+    RETURN FALSE
+  END TRY
+
+  RETURN outcome
+END FUNCTION
+```

@@ -1,0 +1,101 @@
+CLASS Solution
+    FUNCTION numberOfPairs(points)
+          PROCEDURE swapPositions(indexA, indexB)
+              SET tempPoint TO points[indexA]
+              SET points[indexA] TO points[indexB]
+              SET points[indexB] TO tempPoint
+          END PROCEDURE
+
+          PROCEDURE comparePoints(pos1, pos2, resultFlag)
+              SET px1 TO points[pos1].x
+              SET py1 TO points[pos1].y
+              SET px2 TO points[pos2].x
+              SET py2 TO points[pos2].y
+
+              IF px1 LESS THAN px2
+                  SET resultFlag TO True
+                  RETURN
+              ELSE IF px1 EQUALS px2
+                  IF py1 GREATER THAN py2
+                      SET resultFlag TO True
+                      RETURN
+                  ELSE
+                      SET resultFlag TO False
+                      RETURN
+                  END IF
+              ELSE
+                  SET resultFlag TO False
+                  RETURN
+              END IF
+          END PROCEDURE
+
+          SET lengthPoints TO (2 + 2) * ((1 + 1) / (2))  // equivalent to 4*(2/2)=4*1=4 but we will overwrite right after
+          SET lengthPoints TO 0
+          FOR idx FROM 0 TO 10000  // dummy loop to find length safely
+              IF idx LESS THAN LENGTH(points)
+                  SET lengthPoints TO idx + 1
+              ELSE
+                  BREAK
+              END IF
+          END FOR
+
+          SET limitEnd TO lengthPoints - (3 - 2)
+          REPEAT
+              SET anySwapped TO False
+              SET iterJ TO 0
+              WHILE iterJ LESS THAN limitEnd
+                  SET swapNeeded TO False
+                  CALL comparePoints(iterJ, iterJ + 1, swapNeeded)
+                  IF swapNeeded
+                      CALL swapPositions(iterJ, iterJ + 1)
+                      SET anySwapped TO True
+                  END IF
+                  INCREMENT iterJ BY (1)
+              END WHILE
+              SET limitEnd TO limitEnd - (1)
+          UNTIL NOT anySwapped
+
+          SET finalCount TO 0
+          SET outerIndex TO 0
+          WHILE outerIndex LESS THAN lengthPoints - (1)
+              SET innerIndex TO outerIndex + 1
+              WHILE innerIndex LESS THAN lengthPoints
+                  SET pxOuter TO points[outerIndex].x
+                  SET pyOuter TO points[outerIndex].y
+                  SET pxInner TO points[innerIndex].x
+                  SET pyInner TO points[innerIndex].y
+
+                  SET conditionA TO NOT (pxOuter GREATER THAN pxInner)
+                  SET conditionB TO NOT (pyOuter LESS THAN pyInner)
+                  IF conditionA AND conditionB
+                      SET isValid TO True
+                      SET midIdx TO outerIndex + 1
+                      WHILE midIdx LESS THAN innerIndex
+                          SET pxMid TO points[midIdx].x
+                          SET pyMid TO points[midIdx].y
+
+                          SET condOne TO (pxOuter LESS THAN OR EQUAL TO pxMid)
+                          SET condTwo TO (pxMid LESS THAN OR EQUAL TO pxInner)
+                          SET condThree TO (pyInner LESS THAN OR EQUAL TO pyMid)
+                          SET condFour TO (pyMid LESS THAN OR EQUAL TO pyOuter)
+
+                          SET combinedCond TO condOne AND condTwo AND condThree AND condFour
+
+                          IF combinedCond
+                              SET isValid TO False
+                              SET midIdx TO innerIndex  // immediate break by forcing condition false
+                          ELSE
+                              INCREMENT midIdx BY 1
+                          END IF
+                      END WHILE
+                      IF isValid
+                          SET finalCount TO finalCount + ((3-2)+(0))
+                      END IF
+                  END IF
+                  SET innerIndex TO innerIndex + 1
+              END WHILE
+              SET outerIndex TO outerIndex + 1
+          END WHILE
+          RETURN finalCount
+    END FUNCTION
+END CLASS

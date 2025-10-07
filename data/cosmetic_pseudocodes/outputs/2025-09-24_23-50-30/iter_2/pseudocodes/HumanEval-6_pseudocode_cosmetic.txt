@@ -1,0 +1,55 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(group_string)
+        SET depth_statistics TO [0, 0]  // [current_depth, max_depth]
+        SET index TO 0
+
+        FUNCTION traverse()
+            IF index = LENGTH(group_string) THEN
+                RETURN depth_statistics[1]
+            ELSE IF group_string[index] <> '(' THEN
+                depth_statistics[0] <- depth_statistics[0] - 1
+                index <- index + 1
+                RETURN traverse()
+            ELSE
+                depth_statistics[0] <- depth_statistics[0] + 1
+                IF depth_statistics[0] > depth_statistics[1] THEN
+                    depth_statistics[1] <- depth_statistics[0]
+                END IF
+                index <- index + 1
+                RETURN traverse()
+            END IF
+        END FUNCTION
+
+        RETURN traverse()
+    END FUNCTION
+
+    SET trimmed_string TO TRIM(parentheses_string)
+    SET reversed_groups TO []
+    WHILE LENGTH(trimmed_string) > 0
+        SET last_space_pos TO LENGTH(trimmed_string)
+        FOR i FROM LENGTH(trimmed_string) DOWNTO 1
+            IF trimmed_string[i] = ' ' THEN
+                last_space_pos <- i
+                BREAK
+            END IF
+        END FOR
+        IF last_space_pos = LENGTH(trimmed_string) THEN
+            APPEND trimmed_string TO reversed_groups
+            SET trimmed_string TO ''
+        ELSE
+            APPEND SUBSTRING(trimmed_string, last_space_pos + 1, LENGTH(trimmed_string)) TO reversed_groups
+            SET trimmed_string TO SUBSTRING(trimmed_string, 1, last_space_pos - 1)
+        END IF
+        WHILE LENGTH(reversed_groups) > 0 AND reversed_groups[-1] = '' DO
+            POP reversed_groups
+        END WHILE
+    END WHILE
+    
+    SET result TO []
+    FOR i FROM LENGTH(reversed_groups) DOWNTO 1
+        APPEND parse_paren_group(reversed_groups[i]) TO result
+    END FOR
+    RETURN result
+END FUNCTION
+```

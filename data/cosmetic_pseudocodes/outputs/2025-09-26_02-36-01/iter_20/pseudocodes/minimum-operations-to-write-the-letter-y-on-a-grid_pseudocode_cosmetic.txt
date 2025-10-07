@@ -1,0 +1,113 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+        SET lengthVar TO LENGTH OF grid
+        SET midIndex TO lengthVar DIVIDED BY 2
+        SET coordCollection TO EMPTY SET
+
+        SET iterVar TO 0
+        WHILE iterVar <= midIndex
+            SET tempPair TO (iterVar, iterVar)
+            INSERT tempPair INTO coordCollection
+            SET iterVar TO iterVar + 1
+        END WHILE
+
+        SET auxIndex TO 0
+        WHILE auxIndex <= midIndex
+            SET pairItem TO (auxIndex, (lengthVar - auxIndex - 1))
+            INSERT pairItem INTO coordCollection
+            SET auxIndex TO auxIndex + 1
+        END WHILE
+
+        SET kIndex TO midIndex
+        REPEAT
+            SET element TO (kIndex, midIndex)
+            INSERT element INTO coordCollection
+            SET kIndex TO kIndex + 1
+        UNTIL kIndex > (lengthVar - 1)
+
+        FUNCTION countFrequencies(posSet, matrix)
+            SET freqDict TO EMPTY MAP
+            SET rowCounter TO 0
+            WHILE rowCounter < LENGTH OF matrix
+                SET colCounter TO 0
+                WHILE colCounter < LENGTH OF matrix[rowCounter]
+                    SET currentCoord TO (rowCounter, colCounter)
+                    SET currentVal TO matrix[rowCounter][colCounter]
+                    IF currentCoord IN posSet THEN
+                        IF currentVal IN freqDict THEN
+                            SET freqDict[currentVal] TO freqDict[currentVal] + 1
+                        ELSE
+                            SET freqDict[currentVal] TO 1
+                        END IF
+                    END IF
+                    SET colCounter TO colCounter + 1
+                END WHILE
+                SET rowCounter TO rowCounter + 1
+            END WHILE
+            RETURN freqDict
+        END FUNCTION
+
+        FUNCTION countExclusionFrequencies(posSet, matrix)
+            SET freqMap TO EMPTY DICTIONARY
+            SET rIndex TO 0
+            WHILE rIndex < LENGTH OF matrix
+                SET cIndex TO 0
+                WHILE cIndex < LENGTH OF matrix[rIndex]
+                    SET posRef TO (rIndex, cIndex)
+                    SET valueRef TO matrix[rIndex][cIndex]
+                    IF posRef NOT IN posSet THEN
+                        IF valueRef IN freqMap THEN
+                            SET freqMap[valueRef] TO freqMap[valueRef] + 1
+                        ELSE
+                            SET freqMap[valueRef] TO 1
+                        END IF
+                    END IF
+                    SET cIndex TO cIndex + 1
+                END WHILE
+                SET rIndex TO rIndex + 1
+            END WHILE
+            RETURN freqMap
+        END FUNCTION
+
+        SET countingY TO countFrequencies(coordCollection, grid)
+        SET countingNonY TO countExclusionFrequencies(coordCollection, grid)
+        SET infiniteVal TO 1 / 0
+        SET currentMin TO infiniteVal
+
+        FUNCTION totalFrequency(freqMap)
+            SET totalSum TO 0
+            SET keysIter TO LIST OF KEYS OF freqMap
+            FOR eachKey IN keysIter
+                SET totalSum TO totalSum + freqMap[eachKey]
+            END FOR
+            RETURN totalSum
+        END FUNCTION
+
+        SET outerLoopVar TO 0
+        WHILE outerLoopVar <= 2
+            SET innerLoopVar TO 0
+            WHILE innerLoopVar <= 2
+                IF outerLoopVar != innerLoopVar THEN
+                    SET sumAllY TO totalFrequency(countingY)
+                    SET freqYAtVal TO 0
+                    IF outerLoopVar IN countingY THEN
+                        SET freqYAtVal TO countingY[outerLoopVar]
+                    END IF
+                    SET sumAllNonY TO totalFrequency(countingNonY)
+                    SET freqNonYAtVal TO 0
+                    IF innerLoopVar IN countingNonY THEN
+                        SET freqNonYAtVal TO countingNonY[innerLoopVar]
+                    END IF
+                    SET opVal TO (sumAllY - freqYAtVal) + (sumAllNonY - freqNonYAtVal)
+                    IF opVal < currentMin THEN
+                        SET currentMin TO opVal
+                    END IF
+                END IF
+                SET innerLoopVar TO innerLoopVar + 1
+            END WHILE
+            SET outerLoopVar TO outerLoopVar + 1
+        END WHILE
+
+        RETURN currentMin
+    END FUNCTION
+END CLASS

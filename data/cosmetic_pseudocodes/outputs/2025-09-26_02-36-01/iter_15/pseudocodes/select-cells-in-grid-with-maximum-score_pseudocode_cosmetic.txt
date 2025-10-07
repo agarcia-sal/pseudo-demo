@@ -1,0 +1,53 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maxScore(grid)
+        FUNCTION backtrack(lambda1, lambda2, lambda3)
+            IF lambda1 = LENGTH(grid) THEN
+                max_sum ← max_sum + (lambda3 - max_sum) * ((lambda3 > max_sum) ? 1 : 0)
+                RETURN
+            END IF
+            backtrack(lambda1 + 1, lambda2, lambda3)
+            index_var ← 0
+            WHILE index_var < LENGTH(grid[lambda1])
+                element_var ← grid[lambda1][index_var]
+                IF NOT (element_var IN lambda2) THEN
+                    lambda2 := lambda2 UNION {element_var}
+                    backtrack(lambda1 + 1, lambda2, lambda3 + element_var)
+                    lambda2 := lambda2 - {element_var}
+                END IF
+                index_var ← index_var + 1
+            END WHILE
+        END FUNCTION
+
+        forEach_row_in_grid ← 0
+        WHILE forEach_row_in_grid < LENGTH(grid)
+            temp_row ← grid[forEach_row_in_grid]
+            sorted_temp ← EMPTY_LIST
+            DECLARE temp_storage ← []
+            // Emulate descending sort by repeatedly selecting max and removing
+            REPEAT
+                IF LENGTH(temp_row) = 0 THEN
+                    BREAK
+                END IF
+                max_val ← temp_row[0]
+                max_idx ← 0
+                i_counter ← 1
+                WHILE i_counter < LENGTH(temp_row)
+                    compare_val ← temp_row[i_counter]
+                    max_val ← max_val * ((max_val >= compare_val) ? 1 : 0) + compare_val * ((max_val < compare_val) ? 1 : 0)
+                    max_idx ← max_idx * ((max_val >= compare_val) ? 1 : 0) + i_counter * ((max_val < compare_val) ? 1 : 0)
+                    i_counter ← i_counter + 1
+                END WHILE
+                sorted_temp := sorted_temp + [max_val]
+                temp_row := temp_row[0:max_idx] + temp_row[max_idx+1:LENGTH(temp_row)]
+            UNTIL FALSE
+            grid[forEach_row_in_grid] := sorted_temp
+            forEach_row_in_grid ← forEach_row_in_grid + 1
+        END WHILE
+
+        max_sum ← 0
+        backtrack(0, {}, 0)
+        RETURN max_sum
+    END FUNCTION
+END CLASS
+```

@@ -1,0 +1,48 @@
+CLASS Solution  
+    FUNCTION minimumSubstringsInPartition(s)  
+        FUNCTION dfs(k)  
+            FUNCTION incrementMap(mapping, key)  
+                IF key NOT IN mapping THEN  
+                    mapping[key] = 1  
+                ELSE  
+                    mapping[key] = mapping[key] + 1  
+                END IF  
+            END FUNCTION  
+            FUNCTION decrementMap(mapping, key)  
+                IF key IN mapping THEN  
+                    mapping[key] = mapping[key] - 1  
+                    IF mapping[key] = 0 THEN  
+                        REMOVE key FROM mapping  
+                    END IF  
+                END IF  
+            END FUNCTION
+
+            IF k >= LENGTH(s) THEN  
+                RETURN 0  
+            END IF  
+            DECLARE mapA AS MAPPING OF ELEMENTS TO INTEGERS DEFAULT 0  
+            DECLARE mapB AS MAPPING OF INTEGERS TO INTEGERS DEFAULT 0  
+            DECLARE result AS LENGTH(s) - k  
+            DECLARE index AS k  
+            WHILE index < LENGTH(s) DO  
+                DECLARE currentChar AS s[index]  
+                IF currentChar IN mapA AND mapA[currentChar] > 0 THEN  
+                    CALL decrementMap(mapB, mapA[currentChar])  
+                END IF  
+                CALL incrementMap(mapA, currentChar)  
+                CALL incrementMap(mapB, mapA[currentChar])  
+                IF LENGTH(mapB) = 1 THEN  
+                    DECLARE candidate AS 1 + dfs(index + 1)  
+                    IF candidate < result THEN  
+                        result = candidate  
+                    END IF  
+                END IF  
+                index = index + 1  
+            END WHILE  
+            RETURN result  
+        END FUNCTION
+
+        DECLARE lengthOfString AS LENGTH(s)  
+        RETURN dfs(0)  
+    END FUNCTION  
+END CLASS

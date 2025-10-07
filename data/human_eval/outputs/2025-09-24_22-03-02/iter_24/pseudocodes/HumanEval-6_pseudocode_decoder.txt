@@ -1,0 +1,40 @@
+FUNCTION parse_nested_parens(paren_string : STRING) RETURNS LIST OF INTEGER
+    FUNCTION parse_paren_group(s : STRING) RETURNS INTEGER
+        SET depth TO 0
+        SET max_depth TO 0
+        SET index TO 0
+        WHILE index LESS THAN LENGTH OF s
+            SET c TO CHARACTER AT POSITION index OF s
+            IF c EQUALS "("
+                SET depth TO depth PLUS 1
+                IF depth GREATER THAN max_depth
+                    SET max_depth TO depth
+                END IF
+            ELSE
+                SET depth TO depth MINUS 1
+            END IF
+            INCREMENT index BY 1
+        END WHILE
+        RETURN max_depth
+    END FUNCTION
+
+    SET result TO LIST WITH ELEMENTS EMPTY
+    SET temp_string TO EMPTY STRING
+    SET index TO 0
+    SET length TO LENGTH OF paren_string
+    WHILE index LESS THAN length
+        IF CHARACTER AT POSITION index OF paren_string EQUALS " "
+            IF temp_string NOT EQUAL TO EMPTY STRING
+                APPEND CALL parse_paren_group WITH ARGUMENTS temp_string TO result
+                SET temp_string TO EMPTY STRING
+            END IF
+        ELSE
+            CONCATENATE CHARACTER AT POSITION index OF paren_string TO temp_string
+        END IF
+        INCREMENT index BY 1
+    END WHILE
+    IF temp_string NOT EQUAL TO EMPTY STRING
+        APPEND CALL parse_paren_group WITH ARGUMENTS temp_string TO result
+    END IF
+    RETURN result
+END FUNCTION

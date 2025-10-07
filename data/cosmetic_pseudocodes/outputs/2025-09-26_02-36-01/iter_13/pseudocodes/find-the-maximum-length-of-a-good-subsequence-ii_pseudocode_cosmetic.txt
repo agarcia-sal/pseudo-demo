@@ -1,0 +1,62 @@
+CLASS Solution
+    FUNCTION maximumLength(nums PARAMETER, k PARAMETER)
+        SET lenNums TO LENGTH(nums)
+        SET dpMatrix TO A two-dimensional LIST WITH lenNums ROWS AND k + 1 COLUMNS FILLED WITH 0
+        SET dictList TO A LIST OF k + 1 ELEMENTS WHERE EACH IS AN EMPTY MAP DEFAULTING TO 0
+        SET bestThree TO A two-dimensional LIST WITH k + 1 ROWS AND 3 COLUMNS FILLED WITH 0
+        SET maxResult TO 0
+
+        FUNCTION updateBest(groupIndex PARAMETER, currentVal PARAMETER, currentNum PARAMETER)
+            IF bestThree[groupIndex][0] IS NOT EQUAL TO currentNum THEN
+                IF currentVal >= bestThree[groupIndex][1] THEN
+                    bestThree[groupIndex][2] = bestThree[groupIndex][1]
+                    bestThree[groupIndex][1] = currentVal
+                    bestThree[groupIndex][0] = currentNum
+                ELSE
+                    bestThree[groupIndex][2] = MAX(bestThree[groupIndex][2], currentVal)
+                END IF
+            ELSE
+                bestThree[groupIndex][1] = MAX(bestThree[groupIndex][1], currentVal)
+            END IF
+        END FUNCTION
+
+        PROCEDURE processIndex(currentIndex PARAMETER)
+            SET numAtIndex TO nums[currentIndex]
+            SET groupCounter TO 0
+
+            REPEAT
+                IF groupCounter > k THEN
+                    BREAK
+                END IF
+
+                SET dpMatrix[currentIndex][groupCounter] = dictList[groupCounter].get(numAtIndex, 0)
+
+                IF groupCounter > 0 THEN
+                    IF bestThree[groupCounter - 1][0] != nums[currentIndex] THEN
+                        dpMatrix[currentIndex][groupCounter] = MAX(dpMatrix[currentIndex][groupCounter], bestThree[groupCounter - 1][1])
+                    ELSE
+                        dpMatrix[currentIndex][groupCounter] = MAX(dpMatrix[currentIndex][groupCounter], bestThree[groupCounter - 1][2])
+                    END IF
+                END IF
+
+                dpMatrix[currentIndex][groupCounter] = dpMatrix[currentIndex][groupCounter] + 1
+                dictList[groupCounter][nums[currentIndex]] = MAX(dictList[groupCounter].get(nums[currentIndex], 0), dpMatrix[currentIndex][groupCounter])
+                CALL updateBest(groupCounter, dpMatrix[currentIndex][groupCounter], nums[currentIndex])
+                maxResult = MAX(maxResult, dpMatrix[currentIndex][groupCounter])
+                groupCounter = groupCounter + 1
+            UNTIL FALSE
+        END PROCEDURE
+
+        WHILE TRUE
+            IF lenNums <= 0 THEN
+                BREAK
+            END IF
+            FOR currIdx FROM 0 TO lenNums - 1
+                CALL processIndex(currIdx)
+            END FOR
+            BREAK
+        END WHILE
+
+        RETURN maxResult
+    END FUNCTION
+END CLASS

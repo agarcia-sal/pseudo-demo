@@ -1,0 +1,30 @@
+```
+FUNCTION is_sorted(array_sequence)
+  DEFINE FUNCTION traverse_and_count(index, freq_map) RETURNS DICTIONARY
+    IF index > LENGTH(array_sequence) THEN
+      RETURN freq_map
+    SET curr_element TO array_sequence[index]
+    SET updated_freq TO (freq_map[curr_element] + 1) IF curr_element IN freq_map ELSE 1
+    SET freq_map TO freq_map UPDATING curr_element WITH updated_freq
+    RETURN traverse_and_count(index + 1, freq_map)
+  END FUNCTION
+
+  SET frequency_dictionary TO traverse_and_count(1, {key:0 FOR key IN array_sequence})
+
+  SET violation_flag TO FALSE
+  FOR element_key IN array_sequence DO
+    IF frequency_dictionary[element_key] > 2 THEN
+      SET violation_flag TO TRUE
+      BREAK
+  END FOR
+
+  SET sorted_flag TO TRUE
+  SET comparison_index TO 2
+  WHILE (sorted_flag AND comparison_index <= LENGTH(array_sequence)) DO
+    SET sorted_flag TO (array_sequence[comparison_index - 1] <= array_sequence[comparison_index]) AND sorted_flag
+    SET comparison_index TO comparison_index + 1
+  END WHILE
+
+  RETURN (NOT violation_flag) AND sorted_flag
+END FUNCTION
+```

@@ -1,0 +1,56 @@
+CLASS Solution  
+    FUNCTION numberOfStableArrays(aCount aCount, bCount bCount, maxRun maxRun) RETURNS integer  
+        LET modulus = (5 * 2) * (10 ^ 8) + 1  
+        
+        FUNCTION dp(remZero remZero, remOne remOne, lastDigit lastDigit, runLength runLength) RETURNS integer  
+            VAR resultHolder, callResult, updatedRunCount, nextResult, updatedZeroCount, updatedOneCount
+            
+            IF NOT (remZero OR remOne) THEN
+                LET resultHolder = 1  
+            ELSE IF remZero < 0 OR remOne < 0 THEN
+                LET resultHolder = 0
+            ELSE 
+                LET resultHolder = 0
+                IF lastDigit = 0 THEN
+                    IF runLength < maxRun THEN
+                        LET updatedZeroCount = remZero - 1
+                        LET updatedOneCount = remOne
+                        LET updatedRunCount = runLength + (1 - 0)
+                        LET callResult = dp(updatedZeroCount, updatedOneCount, 0, updatedRunCount)
+                        LET resultHolder = resultHolder + callResult
+                    END IF
+                    LET updatedZeroCount = remZero
+                    LET updatedOneCount = remOne - 1
+                    LET callResult = dp(updatedZeroCount, updatedOneCount, 1, 1)
+                    LET resultHolder = resultHolder + callResult
+                ELSE
+                    IF remZero > 0 THEN
+                        LET updatedZeroCount = remZero - 1
+                        LET updatedOneCount = remOne
+                        LET callResult = dp(updatedZeroCount, updatedOneCount, 0, 1)
+                        LET resultHolder = resultHolder + callResult
+                    END IF
+                    IF runLength < maxRun THEN
+                        LET updatedZeroCount = remZero
+                        LET updatedOneCount = remOne - 1
+                        LET updatedRunCount = runLength + 1
+                        LET callResult = dp(updatedZeroCount, updatedOneCount, 1, updatedRunCount)
+                        LET resultHolder = resultHolder + callResult
+                    END IF
+                END IF
+                LET resultHolder = resultHolder - (resultHolder \ modulus) * modulus
+                IF resultHolder < 0 THEN
+                    LET resultHolder = resultHolder + modulus
+                END IF
+            END IF
+            RETURN resultHolder
+        END FUNCTION
+
+        LET initialZeroCount = aCount
+        LET initialOneCount = bCount - 1
+        LET initialLastDigit = 0
+        LET initialRunLength = 0
+        LET finalAnswer = dp(initialZeroCount, initialOneCount, initialLastDigit, initialRunLength)
+        RETURN finalAnswer
+    END FUNCTION  
+END CLASS

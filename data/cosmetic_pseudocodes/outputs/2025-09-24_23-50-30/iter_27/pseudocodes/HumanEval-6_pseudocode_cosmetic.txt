@@ -1,0 +1,50 @@
+```
+FUNCTION parse_nested_parens(parens_input)
+    FUNCTION parse_paren_group(sub_string)
+        SET depth_counter TO 0
+        SET depth_max TO 0
+        SET index_var TO 0
+        WHILE index_var < LENGTH(sub_string)
+            SET symbol TO sub_string[index_var]
+            SWITCH symbol
+                CASE '(':
+                    SET depth_counter TO depth_counter + 1
+                    IF depth_counter > depth_max THEN
+                        SET depth_max TO depth_counter
+                    END IF
+                CASE ')':
+                    SET depth_counter TO depth_counter - 1
+            END SWITCH
+            SET index_var TO index_var + 1
+        END WHILE
+        RETURN depth_max
+    END FUNCTION
+
+    SET split_groups TO []
+    SET temp_str TO ""
+    SET char_index TO 0
+    WHILE char_index <= LENGTH(parens_input)
+        IF char_index = LENGTH(parens_input) OR parens_input[char_index] = ' ' THEN
+            IF temp_str <> "" THEN
+                APPEND temp_str TO split_groups
+                SET temp_str TO ""
+            END IF
+        ELSE
+            SET temp_str TO CONCATENATE(temp_str, parens_input[char_index])
+        END IF
+        SET char_index TO char_index + 1
+    END WHILE
+
+    SET result_list TO []
+    SET group_counter TO 0
+    WHILE group_counter < LENGTH(split_groups)
+        SET current_entry TO split_groups[group_counter]
+        IF current_entry <> "" THEN
+            APPEND parse_paren_group(current_entry) TO result_list
+        END IF
+        SET group_counter TO group_counter + 1
+    END WHILE
+
+    RETURN result_list
+END FUNCTION
+```

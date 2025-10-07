@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+        SET totalCount TO LENGTH OF nums
+        SET matrixA TO a LIST OF LISTS WITH totalCount ROWS AND totalCount COLUMNS FILLED WITH 0
+        SET matrixB TO a LIST OF LISTS WITH totalCount ROWS AND totalCount COLUMNS FILLED WITH 0
+
+        SET outerIndex TO totalCount MINUS 1
+        WHILE outerIndex GREATER OR EQUAL TO 0
+            BEGIN
+                SET matrixA[outerIndex][outerIndex] = nums[outerIndex]
+                SET matrixB[outerIndex][outerIndex] = nums[outerIndex]
+
+                SET innerIndex TO outerIndex PLUS 1
+                WHILE innerIndex LESS THAN totalCount
+                    BEGIN
+                        SET xorLeft TO matrixA[outerIndex][innerIndex MINUS 1]
+                        SET xorRight TO matrixA[outerIndex PLUS 1][innerIndex]
+
+                        SET matrixA[outerIndex][innerIndex] = xorLeft XOR xorRight
+
+                        SET maxVal TO matrixA[outerIndex][innerIndex]
+                        IF matrixB[outerIndex][innerIndex MINUS 1] GREATER THAN maxVal THEN
+                            SET maxVal TO matrixB[outerIndex][innerIndex MINUS 1]
+                        END IF
+                        IF matrixB[outerIndex PLUS 1][innerIndex] GREATER THAN maxVal THEN
+                            SET maxVal TO matrixB[outerIndex PLUS 1][innerIndex]
+                        END IF
+                        SET matrixB[outerIndex][innerIndex] = maxVal
+
+                        SET innerIndex TO innerIndex PLUS 1
+                    END
+                END WHILE
+
+                SET outerIndex TO outerIndex MINUS 1
+            END
+        END WHILE
+
+        SET results TO EMPTY LIST
+        SET idx TO 0
+        WHILE idx LESS THAN LENGTH OF queries
+            BEGIN
+                SET pair TO queries[idx]
+                SET leftVal TO pair[0]
+                SET rightVal TO pair[1]
+                APPEND matrixB[leftVal][rightVal] TO results
+                SET idx TO idx PLUS 1
+            END
+        END WHILE
+
+        RETURN results
+    END FUNCTION
+END CLASS

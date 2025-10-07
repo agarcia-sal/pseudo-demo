@@ -1,0 +1,43 @@
+FUNCTION file_name_check(input_string)
+  DEFINE accepted_endings AS ('txt', 'exe', 'dll')
+  
+  FUNCTION verify_structure(parts)
+    RETURN NOT (LENGTH parts <> 2)
+  END FUNCTION
+  
+  FUNCTION allowed_extension(extension)
+    RETURN extension IN accepted_endings
+  END FUNCTION
+  
+  FUNCTION nonempty_prefix(prefix)
+    RETURN LENGTH prefix > 0
+  END FUNCTION
+  
+  FUNCTION starts_with_letter(prefix)
+    DEFINE alphabet AS 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+    DEFINE initial AS prefix[0]
+    RETURN initial IN alphabet
+  END FUNCTION
+  
+  FUNCTION count_digits(sequence)
+    IF sequence IS EMPTY THEN RETURN 0 END IF
+    FUNCTION recurse(idx, cnt)
+      IF idx >= LENGTH sequence THEN RETURN cnt END IF
+      RETURN recurse(idx + 1, cnt + (IF sequence[idx] >= '0' AND sequence[idx] <= '9' THEN 1 ELSE 0))
+    END FUNCTION
+    RETURN recurse(0, 0)
+  END FUNCTION
+
+  LET components BE SPLIT input_string BY '.'
+
+  EXECUTE guard_checks:
+    IF NOT verify_structure(components) THEN BREAK END EXECUTE
+    IF NOT allowed_extension(components[1]) THEN BREAK END EXECUTE
+    IF NOT nonempty_prefix(components[0]) THEN BREAK END EXECUTE
+    IF NOT starts_with_letter(components[0]) THEN BREAK END EXECUTE
+    IF count_digits(components[0]) > 3 THEN BREAK END EXECUTE
+    RETURN 'Yes'
+
+  RETURN 'No'
+
+END FUNCTION

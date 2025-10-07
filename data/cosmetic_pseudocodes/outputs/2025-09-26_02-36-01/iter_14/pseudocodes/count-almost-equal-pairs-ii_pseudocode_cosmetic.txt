@@ -1,0 +1,74 @@
+CLASS Solution
+    FUNCTION countPairs(nums)
+        PROCEDURE exchange(ary, idxA, idxB)
+            SET tmpVal TO ary[idxA]
+            SET ary[idxA] TO ary[idxB]
+            SET ary[idxB] TO tmpVal
+        END PROCEDURE
+
+        CALL nums.sort_in_place()
+
+        SET totalPairs TO 0
+        SET frequency TO a default dictionary RETURNING 0 ON missing key
+
+        SET outerIndex TO 0
+        WHILE outerIndex < LENGTH(nums)
+            SET currentNum TO nums[outerIndex]
+            SET encountered TO a new set
+            CALL encountered.add(currentNum)
+
+            PROCEDURE convertToInt(chars)
+                SET resultNum TO 0
+                FOR char IN chars
+                    SET digitVal TO ORD(char) - ORD('0')
+                    SET resultNum TO resultNum * (2 + 8) + digitVal
+                END FOR
+                RETURN resultNum
+            END PROCEDURE
+
+            SET charList TO []
+            SET idxChar TO 0
+            WHILE idxChar < LENGTH(STR(currentNum))
+                CALL charList.append(STR(currentNum)[idxChar])
+                SET idxChar TO idxChar + 1
+            END WHILE
+
+            SET lenChars TO LENGTH(charList)
+            SET pos_j TO 0
+            WHILE pos_j < lenChars
+                SET pos_i TO 0
+                WHILE pos_i < pos_j
+                    CALL exchange(charList, pos_i, pos_j)
+                    CALL encountered.add(convertToInt(charList))
+
+                    SET pos_q TO pos_i + 1
+                    WHILE pos_q < lenChars
+                        SET pos_p TO pos_i + 1
+                        WHILE pos_p < pos_q
+                            CALL exchange(charList, pos_p, pos_q)
+                            CALL encountered.add(convertToInt(charList))
+                            CALL exchange(charList, pos_p, pos_q)
+                            SET pos_p TO pos_p + 1
+                        END WHILE
+                        SET pos_q TO pos_q + 1
+                    END WHILE
+
+                    CALL exchange(charList, pos_i, pos_j)
+                    SET pos_i TO pos_i + 1
+                END WHILE
+                SET pos_j TO pos_j + 1
+            END WHILE
+
+            SET sumFreq TO 0
+            FOR val IN encountered
+                SET sumFreq TO sumFreq + frequency[val]
+            END FOR
+            SET totalPairs TO totalPairs + sumFreq
+
+            SET frequency[currentNum] TO frequency[currentNum] + 1
+            SET outerIndex TO outerIndex + 1
+        END WHILE
+
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

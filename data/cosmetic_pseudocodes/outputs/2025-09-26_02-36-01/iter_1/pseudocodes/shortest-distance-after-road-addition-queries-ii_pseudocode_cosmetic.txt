@@ -1,0 +1,41 @@
+CLASS Solution  
+    FUNCTION shortestDistanceAfterQueries(n, queries)  
+        INITIALIZE graph AS a map FROM integers 0 TO n-1 TO empty arrays  
+        
+        FOR index IN RANGE 0 TO n-2 DO  
+            INSERT (index + 1, 1) INTO graph[index]  
+        END FOR  
+        
+        FUNCTION dijkstra()  
+            CREATE dist ARRAY WITH length n FILLED WITH infinity  
+            ASSIGN dist[0] = 0  
+            CREATE priority_queue AS a min-heap WITH ELEMENT (0, 0)  # (distance, node)  
+            
+            WHILE priority_queue IS NOT EMPTY DO  
+                EXTRACT_MIN FROM priority_queue INTO (curr_dist, curr_node)  
+                
+                IF curr_dist > dist[curr_node] THEN  
+                    CONTINUE  
+                END IF  
+                
+                FOR EACH (adj_node, edge_weight) IN graph[curr_node] DO  
+                    COMPUTE total_dist = curr_dist + edge_weight  
+                    IF total_dist < dist[adj_node] THEN  
+                        dist[adj_node] = total_dist  
+                        INSERT (total_dist, adj_node) INTO priority_queue  
+                    END IF  
+                END FOR  
+            END WHILE  
+            RETURN dist[n-1]  
+        END FUNCTION  
+        
+        CREATE results AS empty array  
+        FOR pair IN queries DO  
+            [start_node, weight_val] = pair  
+            INSERT (weight_val, 1) INTO graph[start_node]  
+            APPEND dijkstra() TO results  
+        END FOR  
+        
+        RETURN results  
+    END FUNCTION  
+END CLASS

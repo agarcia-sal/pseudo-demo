@@ -1,0 +1,81 @@
+CLASS Solution
+    FUNCTION maxCollectedFruits(fruits)
+        LET size := fruits.LENGTH()
+
+        LET movesA := [(1, 1), (0, 1)]
+        LET movesB := [(1, -1), (1, 0), (1, 1)]
+        LET movesC := [(-1, 1), (0, 1), (1, 1)]
+
+        LET cache := EMPTY MAP
+
+        FUNCTION dp(aX, aY, bX, bY, cX, cY)
+            IF aX < 0 OR aX >= size THEN
+                RETURN -∞
+            END IF
+            IF aY < 0 OR aY >= size THEN
+                RETURN -∞
+            END IF
+            IF bX < 0 OR bX >= size THEN
+                RETURN -∞
+            END IF
+            IF bY < 0 OR bY >= size THEN
+                RETURN -∞
+            END IF
+            IF cX < 0 OR cX >= size THEN
+                RETURN -∞
+            END IF
+            IF cY < 0 OR cY >= size THEN
+                RETURN -∞
+            END IF
+
+            LET state := (aX, aY, bX, bY, cX, cY)
+            IF cache.CONTAINS_KEY(state) THEN
+                RETURN cache[state]
+            END IF
+
+            IF aX = aY AND aY = bX AND bX = bY AND bY = cX AND cX = cY AND cY = size - 1 THEN
+                RETURN fruits[size - 1][size - 1]
+            END IF
+
+            LET gathered := fruits[aX][aY]
+
+            IF (aX = bX AND aY = bY) OR (aX = cX AND aY = cY) THEN
+                gathered := 0
+            END IF
+
+            IF bX = cX AND bY = cY THEN
+                gathered := gathered + fruits[bX][bY]
+            ELSE
+                gathered := gathered + fruits[bX][bY] + fruits[cX][cY]
+            END IF
+
+            LET best := -∞
+            LET idxA := 0
+            WHILE idxA < movesA.LENGTH() DO
+                LET stepA := movesA[idxA]
+                LET idxB := 0
+                WHILE idxB < movesB.LENGTH() DO
+                    LET stepB := movesB[idxB]
+                    LET idxC := 0
+                    WHILE idxC < movesC.LENGTH() DO
+                        LET stepC := movesC[idxC]
+
+                        LET result := dp(aX + stepA.0, aY + stepA.1, bX + stepB.0, bY + stepB.1, cX + stepC.0, cY + stepC.1)
+                        IF result > best THEN
+                            best := result
+                        END IF
+
+                        idxC := idxC + 1
+                    END WHILE
+                    idxB := idxB + 1
+                END WHILE
+                idxA := idxA + 1
+            END WHILE
+
+            cache[state] := gathered + best
+            RETURN cache[state]
+        END FUNCTION
+
+        RETURN dp(0, 0, 0, size - 1, size - 1, 0)
+    END FUNCTION
+END CLASS

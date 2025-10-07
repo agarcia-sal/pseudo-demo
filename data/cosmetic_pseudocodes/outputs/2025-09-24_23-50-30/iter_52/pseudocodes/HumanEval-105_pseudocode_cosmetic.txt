@@ -1,0 +1,56 @@
+```
+FUNCTION by_length(original_list)
+    SET lookup_map TO MAP OF
+        9 => "Nine",
+        7 => "Seven",
+        8 => "Eight",
+        3 => "Three",
+        6 => "Six",
+        1 => "One",
+        4 => "Four",
+        2 => "Two",
+        5 => "Five"
+    SET descending_list TO EMPTY LIST
+    SET index_key TO 0
+
+    FUNCTION build_descending(input_collection, result_collection)
+        IF input_collection IS EMPTY THEN
+            RETURN result_collection
+        ELSE
+            SET max_value TO input_collection[0]
+            FOR each item IN input_collection
+                IF item > max_value THEN
+                    SET max_value TO item
+            END FOR
+            APPEND max_value TO result_collection
+            SET filtered_collection TO EMPTY LIST
+            FOR each num IN input_collection
+                IF NOT (num = max_value) THEN
+                    APPEND num TO filtered_collection
+            END FOR
+            RETURN build_descending(filtered_collection, result_collection)
+        END IF
+    END FUNCTION
+    
+    SET descending_list TO build_descending(original_list, descending_list)
+
+    FUNCTION translate_elements(collection_to_translate, accumulated_result)
+        IF collection_to_translate IS EMPTY THEN
+            RETURN accumulated_result
+        ELSE
+            SET current_element TO collection_to_translate[0]
+            SET tail_collection TO collection_to_translate[1 to END]
+
+            IF lookup_map CONTAINS current_element THEN
+                SET updated_result TO accumulated_result + [lookup_map[current_element]]
+            ELSE
+                SET updated_result TO accumulated_result
+            END IF
+
+            RETURN translate_elements(tail_collection, updated_result)
+        END IF
+    END FUNCTION
+
+    RETURN translate_elements(descending_list, [])
+END FUNCTION
+```

@@ -1,0 +1,47 @@
+CLASS Solution
+    FUNCTION valueAfterKSeconds(n k)
+    SET CONSTANT_ONE_BILLION_PLUS_SEVEN TO 1_000_000_000 + 7
+
+    FUNCTION addMod(x y)
+        RETURN ((x % CONSTANT_ONE_BILLION_PLUS_SEVEN) + (y % CONSTANT_ONE_BILLION_PLUS_SEVEN)) % CONSTANT_ONE_BILLION_PLUS_SEVEN
+    END FUNCTION
+
+    FUNCTION populateInitialList(size)
+        SET resultList TO empty list
+        PROCEDURE fillWithOnes(count)
+            IF count = 0 THEN
+                RETURN
+            ELSE
+                CALL fillWithOnes(count - 1)
+                APPEND 1 TO resultList
+            END IF
+        END PROCEDURE
+        CALL fillWithOnes(size)
+        RETURN resultList
+    END FUNCTION
+
+    FUNCTION updateValuesRecursively(iteration currentList targetIterations)
+        IF iteration >= targetIterations THEN
+            RETURN currentList
+        ELSE
+            SET updatedList TO list with currentList[0]
+            FUNCTION computeNextElement(i)
+                IF i >= LENGTH(currentList) THEN
+                    RETURN
+                ELSE
+                    SET newVal TO addMod(currentList[i], currentList[i - 1])
+                    APPEND newVal TO updatedList
+                    CALL computeNextElement(i + 1)
+                END IF
+            END FUNCTION
+            CALL computeNextElement(1)
+            RETURN updateValuesRecursively(iteration + 1, updatedList, targetIterations)
+        END IF
+    END FUNCTION
+
+    SET sequenceList TO populateInitialList(n)
+    SET finalList TO updateValuesRecursively(0, sequenceList, k)
+    
+    RETURN finalList[n - 1]
+    END FUNCTION
+END CLASS

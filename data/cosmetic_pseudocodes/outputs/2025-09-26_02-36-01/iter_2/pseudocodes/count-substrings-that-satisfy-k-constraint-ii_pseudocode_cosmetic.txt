@@ -1,0 +1,64 @@
+CLASS Solution  
+    FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER  
+        LET lengthValue BE THE LENGTH OF s  
+        LET zerosPrefix ARRAY BE A LIST CONTAINING (lengthValue PLUS 1) ELEMENTS INITIALIZED WITH 0  
+        LET onesPrefix ARRAY BE A LIST CONTAINING (lengthValue PLUS 1) ELEMENTS FILLED WITH 0  
+        
+        SET index TO 0  
+        WHILE index LESS THAN lengthValue  
+            LET previousZeros BE zerosPrefix[index]  
+            LET previousOnes BE onesPrefix[index]  
+            LET currentChar BE s[index]  
+            
+            IF currentChar EQUALS '0'  
+                LET zerosPrefix[index PLUS 1] BE previousZeros PLUS 1  
+            ELSE  
+                LET zerosPrefix[index PLUS 1] BE previousZeros  
+            END IF  
+            
+            IF currentChar EQUALS '1'  
+                LET onesPrefix[index PLUS 1] BE previousOnes PLUS 1  
+            ELSE  
+                LET onesPrefix[index PLUS 1] BE previousOnes  
+            END IF  
+            
+            index ASSIGN index PLUS 1  
+        END WHILE  
+        
+        FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER  
+            LET tally BE 0  
+            SET startPointer TO l  
+            WHILE startPointer LESS THAN OR EQUAL TO r  
+                LET lowBound BE startPointer  
+                LET highBound BE r PLUS 1  
+                WHILE NOT (lowBound GREATER OR EQUAL TO highBound)  
+                    LET midPoint BE (lowBound PLUS highBound) DIVIDED BY 2  
+                    LET zeroQuantity BE zerosPrefix[midPoint PLUS 1] MINUS zerosPrefix[startPointer]  
+                    LET oneQuantity BE onesPrefix[midPoint PLUS 1] MINUS onesPrefix[startPointer]  
+                    
+                    IF (zeroQuantity LESS THAN OR EQUAL TO k) OR (oneQuantity LESS THAN OR EQUAL TO k)  
+                        LET lowBound BE midPoint PLUS 1  
+                    ELSE  
+                        LET highBound BE midPoint  
+                    END IF  
+                END WHILE  
+                LET lastIndex BE lowBound MINUS 1  
+                IF lastIndex GREATER THAN OR EQUAL TO startPointer  
+                    LET tally BE tally PLUS (lastIndex MINUS startPointer PLUS 1)  
+                END IF  
+                startPointer ASSIGN startPointer PLUS 1  
+            END WHILE  
+            RETURN tally  
+        END FUNCTION  
+        
+        LET finalResults BE AN EMPTY LIST  
+        FOR EACH queryItem IN queries  
+            LET leftBound BE queryItem[0]  
+            LET rightBound BE queryItem[1]  
+            LET countAns BE count_valid_substrings(leftBound, rightBound)  
+            APPEND countAns TO finalResults  
+        END FOR  
+        
+        RETURN finalResults  
+    END FUNCTION  
+END CLASS

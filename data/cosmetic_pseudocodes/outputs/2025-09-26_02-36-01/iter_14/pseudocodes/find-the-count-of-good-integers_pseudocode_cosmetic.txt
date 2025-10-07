@@ -1,0 +1,78 @@
+CLASS Solution
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer
+        FUNCTION multiplyFactorials(value integer) RETURNS integer
+            SET result TO 1
+            FOR idx FROM 2 TO value
+                SET result TO result * idx
+            END FOR
+            RETURN result
+        END FUNCTION
+
+        SET accumulator TO 0
+        SET encountered TO empty set
+        SET factorialCache TO empty list
+        SET upperLimit TO (10 ^ ((n - 1) \ 2))
+        
+        PROCEDURE buildFactorials(count integer)
+            SET counter TO 0
+            WHILE counter <= count
+                APPEND multiplyFactorials(counter) TO factorialCache
+                SET counter TO counter + 1
+            END WHILE
+        END PROCEDURE
+
+        CALL buildFactorials(n)
+
+        FOR candidate FROM upperLimit TO (upperLimit * 10) - 1
+            SET halfString TO toString(candidate)
+            SET mirrorStart TO n % 2
+            SET suffix TO substring(reverseString(halfString), mirrorStart, length(halfString))
+            SET fullString TO concatenate(halfString, suffix)
+
+            IF intValue(fullString) % k != 0 THEN
+                CONTINUE
+            END IF
+
+            SET sortedForm TO sortCharactersAscending(fullString)
+            
+            IF contains(encountered, sortedForm) THEN
+                CONTINUE
+            END IF
+            
+            ADD sortedForm TO encountered
+
+            FUNCTION frequencyMap(inputStr string) RETURNS map of char to integer
+                SET freq TO empty map
+                SET pos TO 0
+                WHILE pos < length(inputStr)
+                    SET ch TO charAt(inputStr, pos)
+                    IF ch IN freq THEN
+                        SET freq[ch] TO freq[ch] + 1
+                    ELSE
+                        SET freq[ch] TO 1
+                    END IF
+                    SET pos TO pos + 1
+                END WHILE
+                RETURN freq
+            END FUNCTION
+            
+            SET counts TO frequencyMap(sortedForm)
+            SET totalCount TO n
+            SET productResult TO 0
+
+            IF '0' IN counts AND counts['0'] > 0 THEN
+                SET productResult TO (totalCount - counts['0']) * factorialCache[totalCount - 1]
+            ELSE
+                SET productResult TO factorialCache[totalCount]
+            END IF
+
+            FOR each amount IN values(counts)
+                SET productResult TO productResult \ factorialCache[amount]
+            END FOR
+            
+            SET accumulator TO accumulator + productResult
+        END FOR
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

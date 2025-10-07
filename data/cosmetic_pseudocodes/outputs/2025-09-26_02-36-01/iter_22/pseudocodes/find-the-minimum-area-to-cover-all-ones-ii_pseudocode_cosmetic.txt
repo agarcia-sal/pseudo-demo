@@ -1,0 +1,91 @@
+CLASS Solution
+    FUNCTION minimumSum(grid)
+        SET x5x TO []
+        SET l1x TO 0
+        WHILE l1x < (LENGTH(grid))
+            SET l2x TO 0
+            WHILE l2x < (LENGTH(grid[l1x]))
+                IF (grid[l1x][l2x] = 1) AND (grid[l1x] = 1) THEN
+                    APPEND (l1x, l2x) TO x5x
+                END IF
+                SET l2x TO l2x + 1
+            END WHILE
+            SET l1x TO l1x + 1
+        END WHILE
+
+        FUNCTION rect_area(points)
+            IF NOT (LENGTH(points) <> 0) THEN
+                RETURN 0
+            ELSE
+                SET min_a TO points[0][0]
+                SET max_a TO points[0][0]
+                SET min_b TO points[0][1]
+                SET max_b TO points[0][1]
+                SET idx1 TO 1
+                WHILE idx1 < LENGTH(points)
+                    IF points[idx1][0] < min_a THEN
+                        SET min_a TO points[idx1][0]
+                    ELSE IF points[idx1][0] > max_a THEN
+                        SET max_a TO points[idx1][0]
+                    END IF
+                    IF points[idx1][1] < min_b THEN
+                        SET min_b TO points[idx1][1]
+                    ELSE IF points[idx1][1] > max_b THEN
+                        SET max_b TO points[idx1][1]
+                    END IF
+                    SET idx1 TO idx1 + 1
+                END WHILE
+                SET wdx TO ((max_a - min_a) + 1)
+                SET hdx TO ((max_b - min_b) + 1)
+                RETURN wdx * hdx
+            END IF
+        END FUNCTION
+
+        SET min_sum TO +∞
+        SET csz TO LENGTH(x5x)
+
+        SET p1 TO 1
+        WHILE p1 < (csz - 1)
+            SET p2 TO (p1 + 1)
+            WHILE p2 < (csz - 1)
+                SET p3 TO (p2 + 1)
+                WHILE p3 < csz
+                    SET combObs TO COMBINATIONS(x5x, p1)
+                    FOR each combA IN combObs
+                        SET set_A TO {}
+                        FOR elem1 IN combA
+                            ADD elem1 TO set_A
+                        END FOR
+                        SET allSet TO {}
+                        FOR elemAll IN x5x
+                            ADD elemAll TO allSet
+                        END FOR
+                        SET remSet1 TO DIFFERENCE(allSet, set_A)
+                        SET combObs2 TO COMBINATIONS(CONVERT_TO_LIST(remSet1), (p2 - p1))
+                        FOR each combB IN combObs2
+                            SET set_B TO {}
+                            FOR elem2 IN combB
+                                ADD elem2 TO set_B
+                            END FOR
+                            SET remSet2 TO DIFFERENCE(remSet1, set_B)
+                            SET aa TO rect_area(FROM_SET(combA))
+                            SET bb TO rect_area(FROM_SET(combB))
+                            SET cc TO rect_area(FROM_SET(remSet2))
+                            IF (aa > 0) AND (bb > 0) AND (cc > 0) THEN
+                                SET tmpS TO aa + bb + cc
+                                IF tmpS < min_sum THEN
+                                    SET min_sum TO tmpS
+                                END IF
+                            END IF
+                        END FOR
+                    END FOR
+                    SET p3 TO p3 + 1
+                END WHILE
+                SET p2 TO p2 + 1
+            END WHILE
+            SET p1 TO p1 + 1
+        END WHILE
+
+        RETURN min_sum
+    END FUNCTION
+END CLASS

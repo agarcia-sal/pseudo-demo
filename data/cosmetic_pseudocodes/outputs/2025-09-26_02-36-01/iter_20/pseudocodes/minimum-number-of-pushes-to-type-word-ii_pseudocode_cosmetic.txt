@@ -1,0 +1,64 @@
+CLASS Solution
+    FUNCTION minimumPushes(word)
+        FUNCTION countLetters(str)
+            SET registry TO empty map
+            SET idx TO 0
+            WHILE idx LESS THAN length of str
+                SET ch TO character at position idx in str
+                IF ch IN registry
+                    SET registry[ch] TO registry[ch] PLUS 1
+                ELSE
+                    SET registry[ch] TO 1
+                END IF
+                SET idx TO idx PLUS 1
+            END WHILE
+            RETURN registry
+        END FUNCTION
+
+        FUNCTION sortDescending(values)
+            IF length of values LESS THAN OR EQUAL TO 1
+                RETURN values
+            END IF
+            SET pivot TO values[0]
+            SET left TO empty list
+            SET right TO empty list
+            SET i TO 1
+            WHILE i LESS THAN length of values
+                IF values[i] GREATER THAN OR EQUAL TO pivot
+                    APPEND values[i] TO left
+                ELSE
+                    APPEND values[i] TO right
+                END IF
+                SET i TO i PLUS 1
+            END WHILE
+            RETURN sortDescending(left) CONCATENATED WITH [pivot] CONCATENATED WITH sortDescending(right)
+        END FUNCTION
+
+        SET letterFreq TO countLetters(word)
+        SET freqList TO empty list
+        FOR EACH key IN keys of letterFreq
+            APPEND letterFreq[key] TO freqList
+        END FOR
+        SET orderedFreq TO sortDescending(freqList)
+
+        SET accumulator TO 0
+        SET multiplier TO 1
+        SET batchCount TO 0
+        SET index TO 0
+        LOOP
+            IF index GREATER THAN OR EQUAL TO length of orderedFreq
+                BREAK
+            END IF
+            SET element TO orderedFreq[index]
+            SET accumulator TO accumulator PLUS element MULTIPLIED BY multiplier
+            SET batchCount TO batchCount PLUS 1
+            IF batchCount EQUALS 8
+                SET batchCount TO 0
+                SET multiplier TO multiplier PLUS 1
+            END IF
+            SET index TO index PLUS 1
+        END LOOP
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

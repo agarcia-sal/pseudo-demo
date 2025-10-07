@@ -1,0 +1,81 @@
+```pseudocode
+CLASS Solution
+    FUNCTION subsequencePairCount(nums)
+        CONST LIMIT <- 1_000_000_007
+        SET topVal <- -∞
+        
+        SET ind <- 0
+        WHILE ind < LENGTH(nums)
+            IF nums[ind] > topVal THEN
+                SET topVal <- nums[ind]
+            END IF
+            SET ind <- ind + 1
+        END WHILE
+
+        PROCEDURE createMatrix(rows, cols)
+            SET res <- []
+            SET i1 <- 0
+            WHILE i1 <= rows - 1
+                SET rowList <- []
+                SET j1 <- 0
+                WHILE j1 <= cols - 1
+                    APPEND 0 TO rowList
+                    SET j1 <- j1 + 1
+                END WHILE
+                APPEND rowList TO res
+                SET i1 <- i1 + 1
+            END WHILE
+            RETURN res
+        END PROCEDURE
+
+        SET table <- createMatrix(topVal + 1, topVal + 1)
+        table[0][0] <- 1
+
+        PROCEDURE gcdFunc(a, b)
+            IF b = 0 THEN
+                RETURN a
+            END IF
+            RETURN gcdFunc(b, a MOD b)
+        END PROCEDURE
+
+        SET idx <- 0
+        WHILE idx < LENGTH(nums)
+            SET currentNum <- nums[idx]
+            SET updatedTbl <- createMatrix(topVal + 1, topVal + 1)
+
+            SET outer <- 0
+            WHILE outer <= topVal
+                SET inner <- 0
+                WHILE inner <= topVal
+                    SET tempVal <- table[outer][inner]
+                    updatedTbl[outer][inner] <- updatedTbl[outer][inner] + tempVal
+                    updatedTbl[outer][inner] <- updatedTbl[outer][inner] MOD LIMIT
+
+                    SET newO <- gcdFunc(outer, currentNum)
+                    updatedTbl[newO][inner] <- updatedTbl[newO][inner] + tempVal
+                    updatedTbl[newO][inner] <- updatedTbl[newO][inner] MOD LIMIT
+
+                    SET newI <- gcdFunc(inner, currentNum)
+                    updatedTbl[outer][newI] <- updatedTbl[outer][newI] + tempVal
+                    updatedTbl[outer][newI] <- updatedTbl[outer][newI] MOD LIMIT
+
+                    SET inner <- inner + 1
+                END WHILE
+                SET outer <- outer + 1
+            END WHILE
+
+            table <- updatedTbl
+            SET idx <- idx + 1
+        END WHILE
+
+        SET accumulator <- 0
+        SET count <- 1
+        WHILE count <= topVal
+            accumulator <- accumulator + table[count][count]
+            SET count <- count + 1
+        END WHILE
+
+        RETURN accumulator MOD LIMIT
+    END FUNCTION
+END CLASS
+```

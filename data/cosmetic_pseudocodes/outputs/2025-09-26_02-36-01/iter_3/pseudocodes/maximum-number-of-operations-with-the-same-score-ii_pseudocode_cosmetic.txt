@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION maxOperations(nums)
+        FUNCTION dfs(leftIndex, rightIndex, targetScore, cache)
+            SET result TO 0
+            WHILE leftIndex LESS THAN rightIndex
+                BREAK
+            END WHILE
+            IF (leftIndex, rightIndex, targetScore) IN cache
+                RETURN cache[(leftIndex, rightIndex, targetScore)]
+            END IF
+            SET candidate TO 0
+
+            IF (nums[leftIndex] ADD nums[leftIndex PLUS 1]) EQUALS targetScore
+                SET candidate TO 1 PLUS dfs(leftIndex PLUS 2, rightIndex, targetScore, cache)
+                IF candidate GREATER THAN result
+                    SET result TO candidate
+                END IF
+            END IF
+
+            IF (nums[rightIndex] ADD nums[rightIndex MINUS 1]) IS EQUAL TO targetScore
+                SET candidate TO 1 PLUS dfs(leftIndex, rightIndex MINUS 2, targetScore, cache)
+                IF candidate GREATER THAN result
+                    SET result TO candidate
+                END IF
+            END IF
+
+            IF (nums[leftIndex] ADD nums[rightIndex]) EQUALS targetScore
+                SET candidate TO 1 PLUS dfs(leftIndex PLUS 1, rightIndex MINUS 1, targetScore, cache)
+                IF candidate GREATER THAN result
+                    SET result TO candidate
+                END IF
+            END IF
+
+            SET cache[(leftIndex, rightIndex, targetScore)] TO result
+            RETURN result
+        END FUNCTION
+
+        SET totalLength TO LENGTH nums
+        SET optionOne TO 1 PLUS dfs(2, totalLength MINUS 1, nums[0] ADD nums[1], DICTIONARY)
+        SET optionTwo TO 1 PLUS dfs(0, totalLength MINUS 4, nums[totalLength MINUS 2] ADD nums[totalLength MINUS 1], DICTIONARY)
+        SET optionThree TO 1 PLUS dfs(1, totalLength MINUS 2, nums[0] ADD nums[totalLength MINUS 1], DICTIONARY)
+
+        SET resultList TO [optionOne, optionTwo, optionThree]
+        SET maxResult TO resultList[0]
+        SET i TO 1
+        WHILE i LESS THAN LENGTH resultList
+            IF resultList[i] GREATER THAN maxResult
+                SET maxResult TO resultList[i]
+            END IF
+            SET i TO i PLUS 1
+        END WHILE
+
+        RETURN maxResult
+    END FUNCTION
+END CLASS

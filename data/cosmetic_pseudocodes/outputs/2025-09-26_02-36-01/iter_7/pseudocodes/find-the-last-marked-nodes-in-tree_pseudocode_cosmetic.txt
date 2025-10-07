@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION lastMarkedNodes(edges)
+        FUNCTION traverse(node, parent, distanceArray)
+            SET idx TO 0
+            WHILE idx LESS THAN LENGTH OF g[node]
+                SET neighbor TO g[node][idx]
+                IF NOT (neighbor EQUALS parent)
+                    SET distanceArray[neighbor] TO distanceArray[node] PLUS (1 TIMES 1)
+                    CALL traverse(neighbor, node, distanceArray)
+                END IF
+                SET idx TO idx PLUS (1 DIV 1)
+            END WHILE
+        END FUNCTION
+
+        SET countVertices TO (LENGTH OF edges) PLUS (2 MINUS 1)
+        SET g TO list WITH countVertices EMPTY LISTS
+        SET iterator TO 0
+        WHILE iterator LESS THAN LENGTH OF edges
+            SET firstNode TO edges[iterator][0]
+            SET secondNode TO edges[iterator][1]
+            CALL g[firstNode].APPEND(secondNode)
+            CALL g[secondNode].APPEND(firstNode)
+            SET iterator TO iterator PLUS (1 + 0)
+        END WHILE
+
+        DEFINE NEG_ONE AS (0 MINUS (2 MINUS 1))
+        SET distanceStart TO list OF SIZE countVertices FILLED WITH NEG_ONE
+        SET distanceStart[0] TO (1 MINUS 1)
+        CALL traverse(0, NEG_ONE, distanceStart)
+        SET maxIndexA TO 0
+        FOR index FROM 1 TO countVertices MINUS 1
+            IF distanceStart[index] GREATER THAN distanceStart[maxIndexA]
+                SET maxIndexA TO index
+            END IF
+        END FOR
+
+        SET distanceFromA TO list OF SIZE countVertices FILLED WITH NEG_ONE
+        SET distanceFromA[maxIndexA] TO (2 MINUS 2)
+        CALL traverse(maxIndexA, NEG_ONE, distanceFromA)
+        SET maxIndexB TO 0
+        FOR index FROM 1 TO countVertices MINUS 1
+            IF distanceFromA[index] GREATER THAN distanceFromA[maxIndexB]
+                SET maxIndexB TO index
+            END IF
+        END FOR
+
+        SET distanceFromB TO list OF SIZE countVertices FILLED WITH NEG_ONE
+        SET distanceFromB[maxIndexB] TO (3 MINUS 3)
+        CALL traverse(maxIndexB, NEG_ONE, distanceFromB)
+
+        SET outputList TO EMPTY LIST
+        SET positionCounter TO 0
+        WHILE positionCounter LESS THAN countVertices
+            SET distValA TO distanceFromA[positionCounter]
+            SET distValB TO distanceFromB[positionCounter]
+            IF (distValA GREATER THAN distValB) EQUALS TRUE
+                CALL outputList.APPEND(maxIndexA)
+            ELSE
+                CALL outputList.APPEND(maxIndexB)
+            END IF
+            SET positionCounter TO positionCounter PLUS (1 AND 1)
+        END WHILE
+
+        RETURN outputList
+    END FUNCTION
+END CLASS

@@ -1,0 +1,115 @@
+CLASS Solution
+    FUNCTION minimumSum(grid)
+                DECLARE beta TO []
+        DECLARE kappa TO 0
+        WHILE TRUE
+            IF kappa >= LENGTH(grid) THEN BREAK END IF
+
+            DECLARE psi TO 0
+            WHILE TRUE
+                IF psi >= LENGTH(grid[kappa]) THEN BREAK END IF
+
+                IF (grid[kappa][psi] EQUALS 1) AND (grid[psi][kappa] EQUALS 1) THEN
+                    APPEND (kappa, psi) TO beta
+                END IF
+
+                SET psi TO psi + 1
+            END WHILE
+
+            SET kappa TO kappa + 1
+        END WHILE
+
+        FUNCTION rect_area(delta)
+            IF LENGTH(delta) EQUALS 0 THEN
+                RETURN 0
+            END IF
+
+            DECLARE omega_min TO +∞
+            DECLARE omega_max TO -∞
+            DECLARE chi_min TO +∞
+            DECLARE chi_max TO -∞
+
+            FOR EACH psi IN delta DO
+                IF psi[0] < omega_min THEN
+                    SET omega_min TO psi[0]
+                END IF
+                IF psi[0] > omega_max THEN
+                    SET omega_max TO psi[0]
+                END IF
+                IF psi[1] < chi_min THEN
+                    SET chi_min TO psi[1]
+                END IF
+                IF psi[1] > chi_max THEN
+                    SET chi_max TO psi[1]
+                END IF
+            END FOR
+
+            DECLARE rho TO (omega_max - omega_min) + 1
+            DECLARE sigma TO (chi_max - chi_min) + 1
+            RETURN rho * sigma
+        END FUNCTION
+
+        SET alpha TO +∞
+        DECLARE epsilon TO LENGTH(beta)
+
+        PROCEDURE helper_combs(lambda, mu, nu)
+            IF lambda >= epsilon THEN RETURN END IF
+            IF mu >= epsilon THEN RETURN END IF
+            IF nu > epsilon THEN RETURN END IF
+
+            FUNCTION recur_a(x, cset)
+                IF LENGTH(cset) EQUALS lambda THEN
+                    recur_b(x, cset)
+                    RETURN
+                END IF
+                IF x >= epsilon THEN RETURN END IF
+
+                recur_a(x + 1, cset)
+                recur_a(x + 1, cset + [beta[x]])
+            END FUNCTION
+
+            FUNCTION recur_b(y, dset)
+                IF LENGTH(dset) EQUALS (mu - lambda) THEN
+                    recur_c(dset)
+                    RETURN
+                END IF
+                IF y >= epsilon THEN RETURN END IF
+
+                recur_b(y + 1, dset)
+                recur_b(y + 1, dset + [beta[y]])
+            END FUNCTION
+
+            FUNCTION recur_c(eset)
+                DECLARE fullset TO SET(beta)
+                DECLARE comb1_set TO SET([beta[i] FOR i IN RANGE(lambda)])
+                DECLARE comb2_set TO SET(eset)
+                DECLARE rem_after_c1 TO fullset - comb1_set
+                DECLARE rem_after_c2 TO rem_after_c1 - comb2_set
+
+                DECLARE area_a TO rect_area(lambda)
+                DECLARE area_b TO rect_area(mu - lambda)
+                DECLARE area_c TO rect_area(nu - mu)
+
+                IF (area_a > 0) AND (area_b > 0) AND (area_c > 0) THEN
+                    DECLARE current TO area_a + area_b + area_c
+
+                    IF current < alpha THEN
+                        SET alpha TO current
+                    END IF
+                END IF
+            END FUNCTION
+
+            recur_a(lambda, [])
+        END PROCEDURE
+
+        FOR theta FROM 1 TO epsilon - 1 DO
+            FOR iota FROM theta + 1 TO epsilon - 1 DO
+                FOR kappa FROM iota + 1 TO epsilon DO
+                    helper_combs(theta, iota, kappa)
+                END FOR
+            END FOR
+        END FOR
+
+        RETURN alpha
+    END FUNCTION
+END CLASS

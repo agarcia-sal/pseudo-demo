@@ -1,0 +1,40 @@
+CLASS Solution
+{
+    FUNCTION sumOfGoodSubsequences(nums)
+    {
+        DECLARE modulus = 1000000000 + 7
+        DECLARE freqMap = new map with default 0
+        DECLARE sumMap = new map defaulting 0
+        
+        FUNCTION processIndex(index)
+        {
+            IF index >= LENGTH(nums) THEN RETURN
+            DECLARE current = nums[index]
+            
+            freqMap[current] = freqMap[current] + 1
+            sumMap[current] = sumMap[current] + current
+            
+            sumMap[current] = (sumMap[current]
+                + (sumMap[current - 1] + (freqMap[current - 1] * current))) % modulus
+                
+            freqMap[current] = (freqMap[current] + freqMap[current - 1]) % modulus
+            
+            sumMap[current] = (sumMap[current]
+                + (sumMap[current + 1] + (freqMap[current + 1] * current))) % modulus
+                
+            freqMap[current] = (freqMap[current] + freqMap[current + 1]) % modulus
+            
+            processIndex(index + 1)
+        }
+        
+        CALL processIndex(0)
+        
+        DECLARE accumulator = 0
+        FOR EACH val IN sumMap.values()
+            accumulator = accumulator + val
+        END FOR
+        
+        DECLARE finalResult = accumulator - (MODULUS_MOD(accumulator, modulus) - accumulator) % modulus
+        RETURN ((accumulator % modulus) + modulus) % modulus
+    }
+}

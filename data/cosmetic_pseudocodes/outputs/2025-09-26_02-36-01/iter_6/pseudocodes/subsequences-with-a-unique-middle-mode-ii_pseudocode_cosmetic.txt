@@ -1,0 +1,111 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        CONST MODULO_VAL <- (10 * 1000 * 1000 * 1000) + 7
+
+        VAR resultSum <- 0
+        VAR firstCounter <- dict() 
+        VAR secondCounter <- dict()
+
+        PROCEDURE incrementKey(dictMap, key)
+            IF key IN dictMap THEN
+                dictMap[key] <- dictMap[key] + 1
+            ELSE
+                dictMap[key] <- 1
+            END IF
+        END PROCEDURE
+
+        PROCEDURE decrementKey(dictMap, key)
+            IF key IN dictMap THEN
+                dictMap[key] <- dictMap[key] - 1
+            ELSE
+                dictMap[key] <- -1
+            END IF
+        END PROCEDURE
+
+        VAR nChoose2 <- FUNCTION(x)
+            RETURN (x * (x - 1)) / 2
+        END FUNCTION
+
+        FOR idx FROM 0 TO LENGTH(nums) - 1
+            CALL incrementKey(secondCounter, nums[idx])
+        END FOR
+
+        VAR tempPss <- 0
+        VAR tempSpp <- 0
+        VAR tempPp <- 0
+        VAR tempSs <- 0
+        VAR tempPs <- 0
+
+        VAR valsList <- LIST_OF_KEYS(secondCounter)
+
+        FOR idx2 FROM LENGTH(valsList) - 1 DOWNTO 0
+            VAR elem <- valsList[idx2]
+            VAR freq <- secondCounter[elem]
+            tempSs <- tempSs + (freq * freq)
+        END FOR
+
+        VAR currentIndex <- 0
+        WHILE currentIndex < LENGTH(nums)
+            VAR val <- nums[currentIndex]
+            VAR firstFreq <- 0
+            VAR secondFreq <- 0
+
+            IF val IN firstCounter THEN
+                firstFreq <- firstCounter[val]
+            END IF
+            IF val IN secondCounter THEN
+                secondFreq <- secondCounter[val]
+            END IF
+
+            VAR temp1 <- (-firstFreq) * (secondFreq * secondFreq)
+            VAR temp2 <- (-firstFreq) * ((secondFreq - 1) * (secondFreq - 1))
+            VAR temp3 <- (- (firstFreq * firstFreq))
+            VAR temp4 <- (-(secondFreq * secondFreq))
+            VAR temp5 <- (-firstFreq)
+            VAR temp6 <- (- (firstFreq * firstFreq))
+            VAR temp7 <- ((firstFreq + 1) * (firstFreq + 1))
+            VAR temp8 <- (- (secondFreq * secondFreq))
+            VAR temp9 <- ((secondFreq - 1) * (secondFreq - 1))
+            VAR temp10 <- (secondFreq * (- (firstFreq * firstFreq)) + temp7)
+
+            tempPss <- tempPss + temp2 + temp1 + (secondFreq)
+            tempSpp <- tempSpp + temp3
+            tempSs <- tempSs + temp4 + temp9
+            tempPs <- tempPs + temp5
+
+            decrementKey(secondCounter, val)
+
+            VAR lenLeft <- currentIndex
+            VAR lenRight <- (LENGTH(nums) - currentIndex) - 1
+
+            VAR addVal1 <- nChoose2(lenLeft) * nChoose2(lenRight)
+            VAR addVal2 <- nChoose2(lenLeft - firstFreq) * nChoose2(lenRight - secondFreq)
+            VAR pssAdj <- tempPss - (firstFreq * (secondFreq * secondFreq))
+            VAR sppAdj <- tempSpp - (secondFreq * (firstFreq * firstFreq))
+            VAR ppAdj <- tempPp - (firstFreq * firstFreq)
+            VAR ssAdj <- tempSs - (secondFreq * secondFreq)
+            VAR psAdj <- tempPs - (firstFreq * secondFreq)
+            VAR pAdj <- lenLeft - firstFreq
+            VAR sAdj <- lenRight - secondFreq
+
+            VAR decVal1 <- (psAdj * firstFreq * (lenRight - secondFreq)) + (pssAdj * (- firstFreq))
+            VAR decVal2 <- (psAdj * secondFreq * (lenLeft - firstFreq)) + (sppAdj * (- secondFreq))
+            VAR decVal3 <- ((ppAdj - pAdj) * secondFreq * (lenRight - secondFreq)) / 2
+            VAR decVal4 <- ((ssAdj - sAdj) * firstFreq * (lenLeft - firstFreq)) / 2
+
+            resultSum <- resultSum + addVal1 - addVal2 - decVal1 - decVal2 - decVal3 - decVal4
+            resultSum <- resultSum MOD MODULO_VAL
+
+            tempPss <- tempPss + (secondFreq * secondFreq)
+            tempSpp <- tempSpp + (secondFreq * (- (firstFreq * firstFreq)) + ((firstFreq + 1) * (firstFreq + 1)))
+            tempPp <- tempPp + (-(firstFreq * firstFreq) + ((firstFreq + 1) * (firstFreq + 1)))
+            tempPs <- tempPs + (secondFreq)
+
+            incrementKey(firstCounter, val)
+
+            currentIndex <- currentIndex + 1
+        END WHILE
+
+        RETURN resultSum
+    END FUNCTION
+END CLASS

@@ -1,0 +1,83 @@
+CLASS Solution
+    FUNCTION minimumMoves(nums LIST OF INTEGERS k INTEGER maxChanges INTEGER) RETURNS INTEGER
+	  DECLARE positions_one LIST OF INTEGERS ← []
+	  
+	  FUNCTION collectOnes(pos INTEGER)
+	    IF pos = LENGTH(nums) THEN RETURN END IF
+	    IF nums[pos] = 1 THEN
+		  APPEND pos TO positions_one
+		END IF
+	    CALL collectOnes(pos + 1)
+	  END FUNCTION
+	  CALL collectOnes(0)
+	  
+	  IF LENGTH(positions_one) = 0 THEN
+	    RETURN (k * 2)
+	  END IF
+	  
+	  DECLARE length_positions INTEGER ← LENGTH(positions_one)
+	  DECLARE pref_sum LIST OF INTEGERS ← [0 FOR _ IN RANGE(0, length_positions + 1)]
+	  
+	  PROCEDURE buildPrefix(pos INTEGER)
+	    IF pos = length_positions THEN RETURN END IF
+		pref_sum[pos + 1] ← pref_sum[pos] + positions_one[pos]
+		CALL buildPrefix(pos + 1)
+	  END PROCEDURE
+	  CALL buildPrefix(0)
+	  
+	  FUNCTION computeCost(start INTEGER, finish INTEGER) RETURNS INTEGER
+	    DECLARE center INTEGER ← (start + finish) // 2
+		DECLARE med_val INTEGER ← positions_one[center]
+		DECLARE aggregate_cost INTEGER ← 0
+		
+		PROCEDURE accumulateLeft(i INTEGER)
+		  IF i = center THEN RETURN END IF
+		  aggregate_cost ← aggregate_cost + (med_val - positions_one[i]) - (center - i)
+		  CALL accumulateLeft(i + 1)
+		END PROCEDURE
+		CALL accumulateLeft(start)
+		
+		PROCEDURE accumulateRight(j INTEGER)
+		  IF j = finish + 1 THEN RETURN END IF
+		  aggregate_cost ← aggregate_cost + (positions_one[j] - med_val) - (j - center)
+		  CALL accumulateRight(j + 1)
+		END PROCEDURE
+		CALL accumulateRight(center + 1)
+		
+		RETURN aggregate_cost
+	  END FUNCTION
+	  
+	  DECLARE minimal_moves INTEGER ← ⊤∞
+	  
+	  PROCEDURE analyzeRange(s INTEGER)
+	    IF s > length_positions - k THEN RETURN END IF
+		DECLARE e INTEGER ← s + k - 1
+		DECLARE current_cost INTEGER ← computeCost(s, e)
+		
+		IF (k % 2) = 1 THEN
+		  DECLARE m INTEGER ← (s + e) // 2
+		  DECLARE med INTEGER ← positions_one[m]
+		  DECLARE needed_changes INTEGER ← e - m - ((med - positions_one[m]) - 1)
+		ELSE
+		  DECLARE left_m INTEGER ← (s + e) // 2
+		  DECLARE right_m INTEGER ← left_m + 1
+		  DECLARE left_med INTEGER ← positions_one[left_m]
+		  DECLARE right_med INTEGER ← positions_one[right_m]
+		  DECLARE needed_changes INTEGER ← right_m - left_m - 1 - ((right_med - left_med) - 1)
+		END IF
+		
+		IF needed_changes > maxChanges THEN
+		  current_cost ← current_cost + (needed_changes - maxChanges)
+		END IF
+		
+		IF current_cost < minimal_moves THEN
+		  minimal_moves ← current_cost
+		END IF
+		
+		CALL analyzeRange(s + 1)
+	  END PROCEDURE
+	  CALL analyzeRange(0)
+	  
+	  RETURN minimal_moves
+    END FUNCTION
+END CLASS

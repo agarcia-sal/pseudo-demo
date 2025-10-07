@@ -1,0 +1,188 @@
+class Solution
+    function maximumTotalDamage(power)
+        function computeCount(arr)
+            function helper(i, m)
+                if i >= length(arr)
+                    return m
+                else
+                    key = arr[i]
+                    val = 1
+                    if key in m
+                        val = m[key] + 1
+                    end if
+                    newMap = copyMap(m)
+                    newMap[key] = val
+                    return helper(i + 1, newMap)
+                end if
+            end function
+
+            return helper(0, emptyMap())
+        end function
+
+        function copyMap(original)
+            newM = emptyMap()
+            keysList = keysOf(original)
+            l = length(keysList)
+            r = 0
+            repeat
+                if r >= l then break end if
+                k = keysList[r]
+                newM[k] = original[k]
+                r = r + 1
+            until false
+            return newM
+        end function
+
+        function keysOf(m)
+            ks = emptyList()
+            for k in iterateKeys(m)
+                append(ks, k)
+            end for
+            return ks
+        end function
+
+        countMap = computeCount(power)
+        uniqueList = keysOf(countMap)
+        sortedUnique = insertionSort(uniqueList)
+
+        function insertionSort(arr)
+            function insert(sorted, val)
+                if length(sorted) == 0
+                    return [val]
+                else if val < sorted[0]
+                    return prepend(val, sorted)
+                else
+                    rest = insert(slice(sorted, 1, length(sorted)), val)
+                    return prepend(sorted[0], rest)
+                end if
+            end function
+
+            function helperSort(i, res)
+                if i >= length(arr)
+                    return res
+                else
+                    return helperSort(i + 1, insert(res, arr[i]))
+                end if
+            end function
+
+            return helperSort(0, emptyList())
+        end function
+
+        function prepend(x, lst)
+            newL = emptyList()
+            newL[0] = x
+            idx = 0
+            while idx < length(lst)
+                newL[idx + 1] = lst[idx]
+                idx = idx + 1
+            end while
+            return newL
+        end function
+
+        dpMap = emptyMap()
+        n = length(sortedUnique)
+        idx = 0
+        repeat
+            if idx >= n then break end if
+            pwr = sortedUnique[idx]
+
+            excludeVal = 0
+            if idx > 0
+                keyL = sortedUnique[idx - 1]
+                if keyL in dpMap
+                    excludeVal = dpMap[keyL]
+                end if
+            end if
+
+            countVal = 0
+            if pwr in countMap
+                countVal = countMap[pwr]
+            end if
+
+            includeVal = pwr * countVal
+
+            j = idx - 1
+            while j >= 0 and sortedUnique[j] >= (pwr - 2)
+                j = j - 1
+            end while
+
+            if j >= 0
+                beforeKey = sortedUnique[j]
+                if beforeKey in dpMap
+                    includeVal = includeVal + dpMap[beforeKey]
+                end if
+            end if
+
+            if includeVal > excludeVal
+                dpMap[pwr] = includeVal
+            else
+                dpMap[pwr] = excludeVal
+            end if
+
+            idx = idx + 1
+        until false
+
+        valuesList = emptyList()
+        for k in iterateKeys(dpMap)
+            append(valuesList, dpMap[k])
+        end for
+
+        return maxInList(valuesList)
+    end function
+
+    function maxInList(lst)
+        if length(lst) == 0
+            return 0
+        end if
+
+        function helper(i, currentMax)
+            if i >= length(lst)
+                return currentMax
+            else
+                newMax = currentMax
+                if lst[i] > currentMax
+                    newMax = lst[i]
+                end if
+                return helper(i + 1, newMax)
+            end if
+        end function
+
+        return helper(0, lst[0])
+    end function
+
+    function emptyMap()
+        return newMap()
+    end function
+
+    function newMap()
+        return {}
+    end function
+
+    function emptyList()
+        return []
+    end function
+
+    function append(lst, val)
+        lst[length(lst)] = val
+    end function
+
+    function slice(lst, start, endIndex)
+        res = emptyList()
+        i = start
+        while i < endIndex
+            append(res, lst[i])
+            i = i + 1
+        end while
+        return res
+    end function
+
+    function iterateKeys(m)
+        i = 0
+        keysList = []
+        for k in m
+            keysList[i] = k
+            i = i + 1
+        end for
+        return keysList
+    end function
+end class

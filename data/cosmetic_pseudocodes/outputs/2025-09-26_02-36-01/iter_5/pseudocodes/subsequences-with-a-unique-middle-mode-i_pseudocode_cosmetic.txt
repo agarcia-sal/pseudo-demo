@@ -1,0 +1,81 @@
+CLASS Solution
+    FUNCTION subsequencesWithMiddleMode(nums)
+        SET MOD TO 10^9 + 7
+        SET length_nums TO 0
+        WHILE length_nums IS NOT THE LENGTH OF nums
+            INCREMENT length_nums BY 1
+        END WHILE
+
+        IF NOT (length_nums >= 5)
+            SET result TO 0
+            RETURN result
+        END IF
+
+        FUNCTION generateCombinations(arr, r, start, combo, output, idx)
+            IF idx EQUALS r
+                CALL output.APPEND(combo)
+                RETURN
+            END IF
+            SET i TO start
+            WHILE i LESS THAN length_nums
+                SET new_combo TO []
+                SET j TO 0
+                WHILE j LESS THAN idx
+                    new_combo.APPEND(combo[j])
+                    INCREMENT j BY 1
+                END WHILE
+                new_combo.APPEND(arr[i])
+                CALL generateCombinations(arr, r, i + 1, new_combo, output, idx + 1)
+                INCREMENT i BY 1
+            END WHILE
+        END FUNCTION
+
+        SET all_fives TO []
+        CALL generateCombinations(nums, 5, 0, [], all_fives, 0)
+
+        SET total_count TO 0
+
+        FUNCTION frequencies(seq)
+            SET freq_map TO EMPTY MAP
+            SET pos TO 0
+            WHILE pos LESS THAN 5
+                SET el TO seq[pos]
+                IF el NOT IN freq_map
+                    SET freq_map[el] TO 1
+                ELSE
+                    SET freq_map[el] TO freq_map[el] + 1
+                END IF
+                INCREMENT pos BY 1
+            END WHILE
+            RETURN freq_map
+        END FUNCTION
+
+        FUNCTION check_unique_mode(freq_dict, mid_el, mid_freq)
+            SET unique TO 1
+            FOR EACH key IN freq_dict KEYS
+                IF (key != mid_el) AND (freq_dict[key] >= mid_freq)
+                    SET unique TO 0
+                    BREAK
+                END IF
+            END FOR
+            RETURN unique
+        END FUNCTION
+
+        SET index_subseq TO 0
+        WHILE index_subseq LESS THAN LENGTH(all_fives)
+            SET current_seq TO all_fives[index_subseq]
+            SET freq_counts TO frequencies(current_seq)
+            SET middle_val TO current_seq[2]
+            SET middle_freq TO freq_counts[middle_val]
+
+            IF check_unique_mode(freq_counts, middle_val, middle_freq) EQUALS 1
+                SET total_count TO total_count + 1
+            END IF
+
+            INCREMENT index_subseq BY 1
+        END WHILE
+
+        SET final_result TO total_count MOD MOD
+        RETURN final_result
+    END FUNCTION
+END CLASS

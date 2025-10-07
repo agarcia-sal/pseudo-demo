@@ -1,0 +1,45 @@
+CLASS Solution  
+    FUNCTION timeTaken(edges)  
+        LET totalNodes BE LENGTH(edges) + 1  
+        LET adjacency_map BE CALL construct_adjacency_list(edges)  
+        
+        FUNCTION bfs(origin)  
+            LET deq BE A double-ended queue INITIALIZED WITH [(origin, 0)]  
+            LET seen BE AN ARRAY OF totalNodes ELEMENTS ALL FALSE  
+            SET seen[origin] TO TRUE  
+            LET highest_time BE 0  
+            
+            WHILE LENGTH(deq) NOT EQUAL 0  
+                LET (node, elapsed) BE FIRST ELEMENT OF deq  
+                REMOVE FIRST ELEMENT FROM deq  
+                
+                IF elapsed > highest_time THEN  
+                    highest_time = elapsed  
+                END IF  
+                
+                FOR EACH adj_node IN adjacency_map[node]  
+                    IF seen[adj_node] == FALSE THEN  
+                        seen[adj_node] = TRUE  
+                        LET remainder_val BE adj_node MOD 2  
+                        IF remainder_val == 0 THEN  
+                            APPEND (adj_node, elapsed + 2) TO deq  
+                        ELSE  
+                            APPEND (adj_node, elapsed + 1) TO deq  
+                        END IF  
+                    END IF  
+                END FOR  
+            END WHILE  
+            
+            RETURN highest_time  
+        END FUNCTION  
+        
+        LET result_times BE AN ARRAY OF totalNodes ZEROS  
+        LET idx BE 0  
+        WHILE idx <= totalNodes - 1  
+            SET result_times[idx] TO CALL bfs(idx)  
+            INCREMENT idx BY 1  
+        END WHILE  
+        
+        RETURN result_times  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,68 @@
+CLASS Solution
+    FUNCTION maxScore(grid)
+        SET rowsCount TO LENGTH OF grid
+        SET colsCount TO LENGTH OF element at position zero of grid
+
+        FUNCTION replicateInfiniteMatrix(rows, cols)
+            FUNCTION makeRow(sz)
+                IF sz EQUALS 0 THEN RETURN an empty list END IF
+                RETURN CONCATENATE [positive infinity] WITH makeRow(sz MINUS 1)
+            END FUNCTION
+            IF rows EQUALS 0 THEN RETURN an empty list END IF
+            RETURN CONCATENATE [makeRow(cols)] WITH replicateInfiniteMatrix(rows MINUS 1, cols)
+        END FUNCTION
+
+        SET infinityMatrix TO replicateInfiniteMatrix(rowsCount, colsCount)
+
+        FUNCTION lesserValue(a, b)
+            IF a LESS THAN b THEN RETURN a ELSE RETURN b END IF
+        END FUNCTION
+
+        FUNCTION greaterValue(a, b)
+            IF a GREATER THAN b THEN RETURN a ELSE RETURN b END IF
+        END FUNCTION
+
+        SET storageMatrix TO infinityMatrix
+        SET element at position zero of element at position zero of storageMatrix TO element at position zero of element at position zero of grid
+
+        FUNCTION populateFirstRow(currentIndex)
+            IF currentIndex GREATER THAN OR EQUAL TO colsCount THEN RETURN END FUNCTION
+            SET element at position currentIndex of element at position zero of storageMatrix TO lesserValue(element at position currentIndex MINUS 1 of element at position zero of storageMatrix, element at position currentIndex of element at position zero of grid)
+            CALL populateFirstRow(currentIndex PLUS 1)
+        END FUNCTION
+
+        CALL populateFirstRow(1)
+
+        FUNCTION populateFirstColumn(currentIndex)
+            IF currentIndex GREATER THAN OR EQUAL TO rowsCount THEN RETURN END FUNCTION
+            SET element at position currentIndex of element at position zero of storageMatrix TO lesserValue(element at position currentIndex MINUS 1 of element at position zero of storageMatrix, element at position currentIndex of element at position zero of grid)
+            CALL populateFirstColumn(currentIndex PLUS 1)
+        END FUNCTION
+
+        CALL populateFirstColumn(1)
+
+        SET bestScore TO negative infinity
+
+        FUNCTION traverseGrid(rowIndex, colIndex)
+            IF rowIndex GREATER THAN OR EQUAL TO rowsCount THEN RETURN END FUNCTION
+            IF colIndex GREATER THAN OR EQUAL TO colsCount THEN
+                CALL traverseGrid(rowIndex PLUS 1, 1)
+                RETURN
+            END IF
+
+            SET upperPath TO element at position colIndex of element at position rowIndex MINUS 1 of storageMatrix
+            SET leftPath TO element at position colIndex MINUS 1 of element at position rowIndex of storageMatrix
+            SET chosenMin TO lesserValue(upperPath, leftPath)
+            SET element at position colIndex of element at position rowIndex of storageMatrix TO chosenMin
+
+            SET currentScore TO element at position colIndex of element at position rowIndex of grid MINUS chosenMin
+            SET bestScore TO greaterValue(bestScore, currentScore)
+
+            CALL traverseGrid(rowIndex, colIndex PLUS 1)
+        END FUNCTION
+
+        CALL traverseGrid(1, 1)
+
+        RETURN bestScore
+    END FUNCTION
+END CLASS

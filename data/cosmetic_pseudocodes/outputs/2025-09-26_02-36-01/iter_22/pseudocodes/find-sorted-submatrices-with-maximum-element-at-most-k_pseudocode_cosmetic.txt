@@ -1,0 +1,89 @@
+CLASS Solution  
+    FUNCTION countSubmatrices(grid, k)  
+        SET delta TO 0  
+        SET alpha TO LENGTH(grid)  
+        SET beta TO LENGTH(grid[0])  
+        
+        FUNCTION checkValidity(sub)  
+            SET p TO 0  
+            WHILE p < LENGTH(sub)  
+                SET q TO 0  
+                WHILE q < LENGTH(sub[p])  
+                    IF NOT(sub[p][q] <= k) THEN  
+                        RETURN False  
+                    END IF  
+                    SET q TO q + 1  
+                END WHILE  
+                SET p TO p + 1  
+            END WHILE  
+            RETURN True  
+        END FUNCTION  
+        
+        FUNCTION checkSortedness(sub)  
+            SET rIndex TO 0  
+            REPEAT  
+                IF rIndex >= LENGTH(sub) THEN  
+                    BREAK  
+                END IF  
+                SET sIndex TO 1  
+                LOOP  
+                    IF sIndex >= LENGTH(sub[rIndex]) THEN  
+                        EXIT LOOP  
+                    END IF  
+                    IF sub[rIndex][sIndex] > sub[rIndex][sIndex - 1] THEN  
+                        RETURN False  
+                    END IF  
+                    SET sIndex TO sIndex + 1  
+                END LOOP  
+                SET rIndex TO rIndex + 1  
+            UNTIL False  
+            RETURN True  
+        END FUNCTION  
+        
+        SET i TO 0  
+        WHILE i <= alpha - 1  
+            SET j TO 0  
+            WHILE j <= beta - 1  
+                SET kVar TO i  
+                REPEAT  
+                    IF kVar > alpha - 1 THEN  
+                        BREAK  
+                    END IF  
+                    SET lVar TO j  
+                    LOOP  
+                        IF lVar > beta - 1 THEN  
+                            EXIT LOOP  
+                        END IF  
+                        
+                        FUNCTION extractSubmatrix(P, Q, R, S)  
+                            SET tempMatrix TO []  
+                            SET idx1 TO P  
+                            WHILE idx1 <= R  
+                                SET rowSlice TO []  
+                                SET idx2 TO Q  
+                                WHILE idx2 <= S  
+                                    rowSlice = rowSlice + [grid[idx1][idx2]]  
+                                    SET idx2 TO idx2 + 1  
+                                END WHILE  
+                                tempMatrix = tempMatrix + [rowSlice]  
+                                SET idx1 TO idx1 + 1  
+                            END WHILE  
+                            RETURN tempMatrix  
+                        END FUNCTION  
+                        
+                        SET curSub TO extractSubmatrix(i, j, kVar, lVar)  
+                        IF checkValidity(curSub) AND checkSortedness(curSub) THEN  
+                            SET delta TO delta + 1  
+                        END IF  
+                        SET lVar TO lVar + 1  
+                    END LOOP  
+                    SET kVar TO kVar + 1  
+                UNTIL False  
+                SET j TO j + 1  
+            END WHILE  
+            SET i TO i + 1  
+        END WHILE  
+        
+        RETURN delta  
+    END FUNCTION  
+END CLASS

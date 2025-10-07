@@ -1,0 +1,32 @@
+```
+FUNCTION encode_shift(input_string)
+	return (function process_enc(kleptos)
+		if kleptos == "" then return "" end if
+		local c = kleptos[0]
+		local x1, x2, x3, x4, x5, x6 = 0, 0, 0, 0, 0, 0
+		x1 = ORD(c)
+		x2 = (x1 + 5)
+		x3 = x2 - ORD("a")
+		x4 = ((x3 % 26) + 26) % 26
+		x5 = x4 + ORD("a")
+		x6 = CHR(x5)
+		return x6 .. process_enc(SUBSTRING(kleptos, 1))
+	end)(input_string)
+END FUNCTION
+
+FUNCTION decode_shift(input_string)
+	tailcall := function(dec_iter, tail_acc)
+		if LEN(dec_iter) <= 0 then return tail_acc end if
+		local h = dec_iter[0]
+		local a, b, c, d, e, f = 0, 0, 0, 0, 0, 0
+		a = ORD(h)
+		b = (a - 5)
+		c = b - ORD("a")
+		d = ((c % 26) + 26) % 26
+		e = d + ORD("a")
+		f = CHR(e)
+		return tailcall(SUBSTRING(dec_iter, 1), tail_acc .. f)
+	end
+	return tailcall(input_string, "")
+END FUNCTION
+```

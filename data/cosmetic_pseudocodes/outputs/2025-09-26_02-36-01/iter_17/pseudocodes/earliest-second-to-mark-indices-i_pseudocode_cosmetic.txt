@@ -1,0 +1,80 @@
+CLASS Solution
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+        SET lengthNums TO 0
+        REPEAT
+            IF lengthNums EQUALS LENGTH OF nums THEN
+                BREAK
+            END IF
+            SET lengthNums TO lengthNums + 1
+        UNTIL FALSE
+
+        SET lengthChanges TO 0
+        REPEAT
+            IF lengthChanges EQUALS LENGTH OF changeIndices THEN
+                BREAK
+            END IF
+            SET lengthChanges TO lengthChanges + 1
+        UNTIL FALSE
+
+        FUNCTION can_mark_by_second(k)
+            DECLARE occurrences AS LIST OF SIZE lengthNums INITIALIZED WITH -1
+            DECLARE idxCounter AS 0
+            WHILE idxCounter < k DO
+                DECLARE pos AS (changeIndices[idxCounter]) - 1
+                SET occurrences[pos] TO idxCounter
+                SET idxCounter TO idxCounter + 1
+            END WHILE
+
+            DECLARE totalNeeded AS 0
+            DECLARE indexScan AS 0
+            WHILE indexScan < lengthNums DO
+                SET totalNeeded TO totalNeeded + nums[indexScan]
+                SET indexScan TO indexScan + 1
+            END WHILE
+
+            DECLARE available AS 0
+            DECLARE marked AS EMPTY SET
+
+            DECLARE step AS 0
+            WHILE step < k DO
+                DECLARE currentIndex AS (changeIndices[step]) - 1
+                IF NOT (currentIndex IN marked) THEN
+                    IF occurrences[currentIndex] EQUALS step THEN
+                        IF nums[currentIndex] <= available THEN
+                            SET available TO available - nums[currentIndex]
+                            ADD currentIndex TO marked
+                        ELSE
+                            RETURN False
+                        END IF
+                    ELSE
+                        SET available TO available + 1
+                    END IF
+                ELSE
+                    SET available TO available + 1
+                END IF
+                SET step TO step + 1
+            END WHILE
+
+            RETURN (LENGTH OF marked) EQUALS lengthNums
+        END FUNCTION
+
+        DECLARE lowerBound AS 0
+        DECLARE upperBound AS lengthChanges + 1
+
+        WHILE lowerBound < upperBound DO
+            DECLARE midpoint AS (lowerBound + upperBound) / 2
+            SET midpoint TO midpoint - (midpoint MOD 1)  // integer floor
+            IF can_mark_by_second(midpoint) THEN
+                SET upperBound TO midpoint
+            ELSE
+                SET lowerBound TO lowerBound + 1
+            END IF
+        END WHILE
+
+        IF lowerBound <= lengthChanges THEN
+            RETURN lowerBound
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

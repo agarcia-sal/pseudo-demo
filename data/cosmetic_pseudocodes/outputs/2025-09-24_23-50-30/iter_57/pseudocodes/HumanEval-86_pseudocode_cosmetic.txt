@@ -1,0 +1,67 @@
+```
+FUNCTION anti_shuffle(token_line)
+  SET words_collection TO []
+  SET cursor TO 0
+  WHILE cursor < LENGTH(token_line)
+    SET start_idx TO cursor
+    WHILE cursor < LENGTH(token_line) AND token_line[cursor] != ' '
+      SET cursor TO cursor + 1
+    END WHILE
+    ADD SUBSTRING(token_line, start_idx, cursor) TO words_collection
+    SET cursor TO cursor + 1
+  END WHILE
+
+  SET reordered_terms TO []
+  
+  PROCEDURE process_word(index)
+    IF index == LENGTH(words_collection)
+      RETURN
+    ELSE
+      SET current_chunk TO words_collection[index]
+      SET char_box TO []
+      FOR EACH character IN current_chunk
+        ADD character TO char_box
+      END FOR
+
+      SET position_a TO 0
+      WHILE position_a < LENGTH(char_box) - 1
+        SET position_b TO position_a + 1
+        WHILE position_b < LENGTH(char_box)
+          IF char_box[position_a] > char_box[position_b]
+            SET temp_char TO char_box[position_a]
+            SET char_box[position_a] TO char_box[position_b]
+            SET char_box[position_b] TO temp_char
+          END IF
+          SET position_b TO position_b + 1
+        END WHILE
+        SET position_a TO position_a + 1
+      END WHILE
+
+      SET reconstructed_word TO ''
+      SET pos_c TO 0
+      WHILE pos_c < LENGTH(char_box)
+        SET reconstructed_word TO reconstructed_word + char_box[pos_c]
+        SET pos_c TO pos_c + 1
+      END WHILE
+
+      ADD reconstructed_word TO reordered_terms
+      CALL process_word(index + 1)
+    END IF
+  END PROCEDURE
+  
+  CALL process_word(0)
+
+  SET final_phrase TO ''
+  SET iter_d TO 0
+  WHILE iter_d < LENGTH(reordered_terms)
+    IF iter_d == LENGTH(reordered_terms) - 1
+      SET final_phrase TO final_phrase + reordered_terms[iter_d]
+    ELSE
+      SET final_phrase TO final_phrase + reordered_terms[iter_d] + ' '
+    END IF
+    SET iter_d TO iter_d + 1
+  END WHILE
+
+  RETURN final_phrase
+END FUNCTION
+```

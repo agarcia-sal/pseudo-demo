@@ -1,0 +1,76 @@
+CLASS Solution
+    FUNCTION maxCollectedFruits(paints)
+    
+        SET length TO 0
+        SET indexZ TO 0
+        WHILE indexZ LESS THAN LENGTH OF paints
+            indexZ ← indexZ PLUS 1
+        END WHILE
+        length ← indexZ
+        
+        SET movesA TO [(1, 1), (1, 0)]
+        SET movesB TO [(1, -1), (1, 0), (1, 1)]
+        SET movesC TO [(-1, 1), (0, 1), (1, 1)]
+        
+        SET cache TO {}
+        
+        FUNCTION recursion(aX, aY, bX, bY, cX, cY)
+            IF aX LESS THAN 0 OR aX GREATER OR EQUAL length OR aY LESS THAN 0 OR aY GREATER OR EQUAL length OR
+               bX LESS THAN 0 OR bX GREATER OR EQUAL length OR bY LESS THAN 0 OR bY GREATER OR EQUAL length OR
+               cX LESS THAN 0 OR cX GREATER OR EQUAL length OR cY LESS THAN 0 OR cY GREATER OR EQUAL length THEN
+                RETURN MINUS 999999999
+            END IF
+            
+            IF (aX = aY) AND (aY = bX) AND (bX = bY) AND (bY = cX) AND (cX = cY) AND (cY = length MINUS 1) THEN
+                RETURN paints[length MINUS 1][length MINUS 1]
+            END IF
+            
+            SET key TO (aX, aY, bX, bY, cX, cY)
+            IF key IN cache THEN
+                RETURN cache[key]
+            END IF
+            
+            SET sumCollected TO paints[aX][aY]
+            IF ((aX = bX) AND (aY = bY)) OR ((aX = cX) AND (aY = cY)) THEN
+                sumCollected ← 0
+            END IF
+            
+            IF (bX = cX) AND (bY = cY) THEN
+                sumCollected ← sumCollected PLUS paints[bX][bY]
+            ELSE
+                sumCollected ← sumCollected PLUS paints[bX][bY]
+                sumCollected ← sumCollected PLUS paints[cX][cY]
+            END IF
+            
+            SET best TO MINUS 999999999
+            SET index1 TO 0
+            WHILE index1 LESS THAN LENGTH OF movesA
+                SET deltaAX TO movesA[index1][0]
+                SET deltaAY TO movesA[index1][1]
+                SET index2 TO 0
+                WHILE index2 LESS THAN LENGTH OF movesB
+                    SET deltaBX TO movesB[index2][0]
+                    SET deltaBY TO movesB[index2][1]
+                    SET index3 TO 0
+                    WHILE index3 LESS THAN LENGTH OF movesC
+                        SET deltaCX TO movesC[index3][0]
+                        SET deltaCY TO movesC[index3][1]
+                        
+                        SET candidateVal TO recursion(aX PLUS deltaAX, aY PLUS deltaAY, bX PLUS deltaBX, bY PLUS deltaBY, cX PLUS deltaCX, cY PLUS deltaCY)
+                        IF candidateVal GREATER THAN best THEN
+                            best ← candidateVal
+                        END IF
+                        index3 ← index3 PLUS 1
+                    END WHILE
+                    index2 ← index2 PLUS 1
+                END WHILE
+                index1 ← index1 PLUS 1
+            END WHILE
+            
+            cache[key] ← sumCollected PLUS best
+            RETURN sumCollected PLUS best
+        END FUNCTION
+        
+        RETURN recursion(0, 0, 0, length MINUS 1, length MINUS 1, 0)
+    END FUNCTION
+END CLASS

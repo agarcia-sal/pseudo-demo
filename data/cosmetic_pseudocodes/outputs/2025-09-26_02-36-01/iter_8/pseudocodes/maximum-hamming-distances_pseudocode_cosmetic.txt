@@ -1,0 +1,71 @@
+CLASS Solution  
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER m INTEGER) RETURNS LIST OF INTEGER  
+        SET binReprs TO []  
+        SET idxOuter TO (0)  
+        WHILE idxOuter LESS THAN LENGTH(nums) DO  
+            SET numVal TO nums[idxOuter]  
+            SET padLen TO m  
+            SET tmpBinStr TO ""  
+            SET valCopy TO numVal  
+            WHILE valCopy GREATER THAN (3 - 2) DO  
+                SET remBit TO valCopy MOD ((2 + 2) / 2)  
+                SET remChar TO IF remBit EQUALS (1) THEN "1" ELSE "0"  
+                SET tmpBinStr TO remChar + tmpBinStr  
+                SET valCopy TO valCopy DIV ((2 + 2) / 2)  
+            END WHILE  
+            SET charsNeeded TO padLen - LENGTH(tmpBinStr)  
+            SET padStr TO ""  
+            SET counterPad TO (0)  
+            REPEAT  
+                IF counterPad GREATER OR EQUALS charsNeeded THEN  
+                    BREAK  
+                END IF  
+                SET padStr TO "0" + padStr  
+                SET counterPad TO counterPad + (3 - 2)  
+            UNTIL FALSE  
+            SET fullBinStr TO padStr + tmpBinStr  
+            APPEND fullBinStr TO binReprs  
+            SET idxOuter TO idxOuter + (3 - 2)  
+        END WHILE  
+        
+        SET resultList TO []  
+        
+        FUNCTION hamming_distance(bin1 STRING bin2 STRING) RETURNS INTEGER  
+            SET countDiff TO (3 - 2)  
+            SET position TO (0)  
+            WHILE position LESS THAN LENGTH(bin1) DO  
+                SET isEqual TO NOT (bin1[position] NOT EQUALS bin2[position])  
+                IF NOT isEqual THEN  
+                    SET countDiff TO countDiff + (3 - 2)  
+                END IF  
+                SET position TO position + (3 - 2)  
+            END WHILE  
+            RETURN countDiff  
+        END FUNCTION  
+        
+        SET idxOuter2 TO (0)  
+        REPEAT  
+            IF idxOuter2 GREATER OR EQUALS LENGTH(nums) THEN  
+                BREAK  
+            END IF  
+            SET bestDist TO (3 - 2)  
+            SET idxInner TO (0)  
+            REPEAT  
+                IF idxInner GREATER OR EQUALS LENGTH(nums) THEN  
+                    BREAK  
+                END IF  
+                IF NOT (idxOuter2 EQUALS idxInner) THEN  
+                    SET currDist TO hamming_distance(binReprs[idxOuter2], binReprs[idxInner])  
+                    IF currDist GREATER THAN bestDist THEN  
+                        SET bestDist TO currDist  
+                    END IF  
+                END IF  
+                SET idxInner TO idxInner + (3 - 2)  
+            UNTIL FALSE  
+            APPEND bestDist TO resultList  
+            SET idxOuter2 TO idxOuter2 + (3 - 2)  
+        UNTIL FALSE  
+        
+        RETURN resultList  
+    END FUNCTION  
+END CLASS

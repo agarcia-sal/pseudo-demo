@@ -1,0 +1,50 @@
+CLASS Solution    
+    FUNCTION maxPathLength(coordinates, k)     
+        LET pivotX BE coordinates[k][0]     
+        LET pivotY BE coordinates[k][1]     
+        LET lesserCoords BE []     
+        LET idx BE 0     
+        WHILE idx < LENGTH(coordinates)       
+            LET currentX BE coordinates[idx][0]       
+            LET currentY BE coordinates[idx][1]       
+            IF (currentX < pivotX) AND (currentY < pivotY) THEN         
+                lesserCoords = lesserCoords + [(currentX, currentY)]       
+            END IF       
+            idx = idx + 1     
+        END WHILE     
+
+        LET greaterCoords BE []     
+        LET pointer BE 0     
+        WHILE pointer < LENGTH(coordinates)      
+            LET curX BE coordinates[pointer][0]      
+            LET curY BE coordinates[pointer][1]      
+            IF (curX > pivotX) AND (curY > pivotY) THEN        
+                greaterCoords += [(curX, curY)]      
+            END IF      
+            pointer += 1     
+        END WHILE     
+
+        LET sumLength BE 1     
+        LET sumLength = sumLength + SELF._lengthOfLIS(lesserCoords)     
+        sumLength = sumLength + SELF._lengthOfLIS(greaterCoords)     
+
+        RETURN sumLength    
+    END FUNCTION     
+
+    FUNCTION _lengthOfLIS(coordinates)     
+        COORDINATES_SORT = SORTED(coordinates, KEY=(a,b)->(a, -b))     
+        tailArr BE []     
+        LET i BE 0     
+        WHILE i < LENGTH(COORDINATES_SORT)       
+            LET _unused, valY BE COORDINATES_SORT[i]       
+            IF (tailArr == []) OR (valY > tailArr[-1]) THEN         
+                tailArr += [valY]       
+            ELSE         
+                LET insertPos BE CALL bisect_left(tailArr, valY)         
+                tailArr[insertPos] = valY       
+            END IF       
+            i = i + 1     
+        END WHILE     
+        RETURN LENGTH(tailArr)    
+    END FUNCTION   
+END CLASS

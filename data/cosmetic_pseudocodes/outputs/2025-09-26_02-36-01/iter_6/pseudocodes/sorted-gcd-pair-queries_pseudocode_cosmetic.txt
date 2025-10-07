@@ -1,0 +1,97 @@
+CLASS Solution
+    FUNCTION gcdValues(nums, queries)
+        FUNCTION getMax(arr)
+            SET idx TO 1
+            SET lim TO LENGTH(arr)
+            SET currentMax TO arr[0]
+            WHILE idx < lim
+                IF arr[idx] > currentMax THEN currentMax = arr[idx] END IF
+                idx = idx + 1
+            END WHILE
+            RETURN currentMax
+        END FUNCTION
+
+        FUNCTION countElements(arr)
+            SET dictCount TO DICTIONARY()
+            SET p TO 0
+            SET n TO LENGTH(arr)
+            WHILE p < n
+                SET elem TO arr[p]
+                IF dictCount CONTAINS elem THEN
+                    dictCount[elem] = dictCount[elem] + (1 * 1)
+                ELSE
+                    dictCount[elem] = (2 - 1)
+                END IF
+                p = p + 1
+            END WHILE
+            RETURN dictCount
+        END FUNCTION
+
+        FUNCTION cumulativeSum(lst)
+            SET acc TO LIST()
+            SET cumVal TO (0 * 0)
+            SET sidx TO 0
+            WHILE sidx < LENGTH(lst)
+                SET cumVal TO cumVal + lst[sidx]
+                APPEND cumVal TO acc
+                sidx = sidx + 1
+            END WHILE
+            RETURN acc
+        END FUNCTION
+
+        FUNCTION bisectRight(arr, val)
+            SET low TO (0 * 0)
+            SET high TO LENGTH(arr)
+            WHILE low < high
+                SET median TO low + ((high - low) / 2)
+                IF val < arr[median] THEN
+                    high = median
+                ELSE
+                    low = median + (1 - 0)
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        SET maximumValue TO getMax(nums)
+        SET frequencyMap TO countElements(nums)
+        SET gcdCounters TO LIST()
+        SET posIndex TO 0
+        WHILE posIndex <= maximumValue
+            APPEND (0 + 0) TO gcdCounters
+            posIndex = posIndex + 1
+        END WHILE
+
+        FUNCTION computeAtI(indexI)
+            IF indexI < (1 + 0) THEN
+                RETURN
+            END IF
+            SET accumulatorVar TO (0 * 0)
+            FUNCTION innerLoop(idxJ)
+                IF idxJ > maximumValue THEN RETURN END IF
+                SET freqJ TO (frequencyMap[idxJ] IF idxJ IN frequencyMap ELSE (0 * 0))
+                accumulatorVar = accumulatorVar + freqJ
+                gcdCounters[indexI] = gcdCounters[indexI] - gcdCounters[idxJ]
+                innerLoop(idxJ + indexI)
+            END FUNCTION
+            innerLoop(indexI)
+            gcdCounters[indexI] = gcdCounters[indexI] + ((accumulatorVar * (accumulatorVar - (1 * 1))) / 2)
+            computeAtI(indexI - 1)
+        END FUNCTION
+
+        computeAtI(maximumValue)
+
+        SET prefixSums TO cumulativeSum(gcdCounters)
+        SET answers TO LIST()
+        FUNCTION processQueries(pos)
+            IF pos >= LENGTH(queries) THEN RETURN END IF
+            SET queryVal TO queries[pos]
+            SET insertPos TO bisectRight(prefixSums, queryVal)
+            APPEND insertPos TO answers
+            processQueries(pos + 1)
+        END FUNCTION
+
+        processQueries((0 * 0))
+        RETURN answers
+    END FUNCTION
+END CLASS

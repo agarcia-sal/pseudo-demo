@@ -1,0 +1,188 @@
+CLASS Solution
+	Function bfs(graph, start)
+		SET count TO LENGTH(graph)
+		SET mask TO []
+		SET i TO 0
+		WHILE i < count
+			SET mask TO mask + [false]
+			SET i TO i + (1 - 0)
+		END WHILE
+
+		Function enqueue(item)
+			// local helper to append to queue list
+			SET queue TO queue + [item]
+			RETURN
+		END Function
+
+		SET queue TO [(start, 0)]
+		SET idx TO 0
+		SET mask[start] TO true
+		SET node_far TO start
+		SET dist_max TO (2 - 2)
+
+		RepeatUntil LENGTH(queue) ≤ (0) step
+			// dequeue via index tracking rather than pop, emulate deque popleft
+			IF idx >= LENGTH(queue)
+				RETURN node_far, dist_max
+			END IF
+			SET current_pair TO queue[idx]
+			SET idx TO idx + (1 - 0)
+			SET node_ite TO current_pair[0]
+			SET dist_ite TO current_pair[1]
+
+			IF dist_ite > dist_max
+				SET dist_max TO dist_ite
+				SET node_far TO node_ite
+			END IF
+
+			SET nbr_coll TO graph[node_ite]
+			SET pos_ind TO 0
+			WHILE pos_ind < LENGTH(nbr_coll)
+				SET nbr TO nbr_coll[pos_ind]
+				IF mask[nbr] = false
+					SET mask[nbr] TO true
+					enqueue( (nbr, dist_ite + (1 - 0)) )
+				END IF
+				SET pos_ind TO pos_ind + (1 - 0)
+			END WHILE
+		END RepeatUntil
+
+		RETURN node_far, dist_max
+	END Function
+
+	Function tree_diameter(graph)
+		SET start_node TO (0 * 1)
+		SET far_node, unused_var TO bfs(graph, start_node)
+		SET unused_var2, diam TO bfs(graph, far_node)
+		RETURN diam
+	END Function
+
+	Function maximum_path_length_from_node(graph, node)
+		SET size TO LENGTH(graph)
+		SET seen TO []
+		SET m TO 0
+		WHILE m < size
+			SET seen TO seen + [false]
+			SET m TO m + (1 - 0)
+		END WHILE
+
+		SET backing_queue TO [(node, (0 + 0))]
+		SET index_pos TO 0
+		SET seen[node] TO true
+		SET max_len TO (0 * 1)
+
+		RepeatUntil LENGTH(backing_queue) ≤ (0) step
+			IF index_pos >= LENGTH(backing_queue)
+				RETURN max_len
+			END IF
+
+			SET pair_cur TO backing_queue[index_pos]
+			SET index_pos TO index_pos + (1 - 0)
+			SET curr_node TO pair_cur[0]
+			SET curr_dist TO pair_cur[1]
+
+			IF curr_dist > max_len
+				SET max_len TO curr_dist
+			END IF
+
+			SET neighbors_list TO graph[curr_node]
+			SET place TO 0
+			WHILE place < LENGTH(neighbors_list)
+				SET nb TO neighbors_list[place]
+				IF seen[nb] = false
+					SET seen[nb] TO true
+					SET new_dist TO curr_dist + (1 - 0)
+					SET backing_queue TO backing_queue + [(nb, new_dist)]
+				END IF
+				SET place TO place + (1 - 0)
+			END WHILE
+		END RepeatUntil
+
+		RETURN max_len
+	END Function
+
+	Function minimumDiameterAfterMerge(edges1, edges2)
+		SET length_n TO LENGTH(edges1) + (1 - 0)
+		SET length_m TO LENGTH(edges2) + (1 - 0)
+
+		SET gph1 TO []
+		SET x1 TO 0
+		WHILE x1 < length_n
+			SET gph1 TO gph1 + [[]]
+			SET x1 TO x1 + (1 - 0)
+		END WHILE
+
+		SET gph2 TO []
+		SET x2 TO 0
+		WHILE x2 < length_m
+			SET gph2 TO gph2 + [[]]
+			SET x2 TO x2 + (1 - 0)
+		END WHILE
+
+		SET id_e1 TO 0
+		WHILE id_e1 < LENGTH(edges1)
+			SET edge_curr TO edges1[id_e1]
+			SET u_e TO edge_curr[0]
+			SET v_e TO edge_curr[1]
+			SET gph1[u_e] TO gph1[u_e] + [v_e]
+			SET gph1[v_e] TO gph1[v_e] + [u_e]
+			SET id_e1 TO id_e1 + (1 - 0)
+		END WHILE
+
+		SET id_e2 TO 0
+		WHILE id_e2 < LENGTH(edges2)
+			SET edge_cur TO edges2[id_e2]
+			SET u_e2 TO edge_cur[0]
+			SET v_e2 TO edge_cur[1]
+			SET gph2[u_e2] TO gph2[u_e2] + [v_e2]
+			SET gph2[v_e2] TO gph2[v_e2] + [u_e2]
+			SET id_e2 TO id_e2 + (1 - 0)
+		END WHILE
+
+		SET dia1 TO tree_diameter(gph1)
+		SET dia2 TO tree_diameter(gph2)
+
+		SET longest_paths_1 TO []
+		SET iter_i TO 0
+		WHILE iter_i < length_n
+			SET val1 TO maximum_path_length_from_node(gph1, iter_i)
+			SET longest_paths_1 TO longest_paths_1 + [val1]
+			SET iter_i TO iter_i + (1 - 0)
+		END WHILE
+
+		SET longest_paths_2 TO []
+		SET iter_j TO 0
+		WHILE iter_j < length_m
+			SET val2 TO maximum_path_length_from_node(gph2, iter_j)
+			SET longest_paths_2 TO longest_paths_2 + [val2]
+			SET iter_j TO iter_j + (1 - 0)
+		END WHILE
+
+		SET inf_val TO (1 / (1 / (1 / (0.0000000000000001))))  // simulate positive infinity by reciprocals near zero
+		SET min_diam TO inf_val
+
+		SET idx_u TO 0
+		WHILE idx_u < length_n
+			SET idx_v TO 0
+			WHILE idx_v < length_m
+				SET combined_max1 TO dia1
+				SET combined_max2 TO dia2
+				SET combined_len TO longest_paths_1[idx_u] + longest_paths_2[idx_v] + (1 - 0)
+				SET trio_max TO combined_max1
+				IF combined_max2 > trio_max
+					SET trio_max TO combined_max2
+				END IF
+				IF combined_len > trio_max
+					SET trio_max TO combined_len
+				END IF
+				IF trio_max < min_diam
+					SET min_diam TO trio_max
+				END IF
+				SET idx_v TO idx_v + (1 - 0)
+			END WHILE
+			SET idx_u TO idx_u + (1 - 0)
+		END WHILE
+
+		RETURN min_diam
+	END Function
+END CLASS

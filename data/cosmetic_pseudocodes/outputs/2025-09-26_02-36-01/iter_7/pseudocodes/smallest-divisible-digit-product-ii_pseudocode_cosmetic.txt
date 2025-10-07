@@ -1,0 +1,159 @@
+CLASS Solution
+  FUNCTION smallestNumber(num, t)
+    DEFINE NEG_ONE_STR AS "-" + "1"
+    DEFINE ONE_CHAR AS CHAR(49)
+    DEFINE ZERO_CHAR AS CHAR(48)
+    SET primeCounter, divisibleFlag TO self._getPrimeCount(t)
+    IF divisibleFlag == FALSE THEN
+      RETURN NEG_ONE_STR
+    END IF
+
+    SET factorFrequency TO self._getFactorCount(primeCounter)
+    SET sumFactors TO 0
+    FOR value IN factorFrequency.values()
+      SET sumFactors TO sumFactors + value
+    END FOR
+    IF sumFactors > LENGTH(num) THEN
+      SET assembledString TO ""
+      FOR key IN factorFrequency.keys()
+        FOR i FROM 1 TO factorFrequency[key]
+          SET assembledString TO assembledString + key
+        END FOR
+      END FOR
+      RETURN assembledString
+    END IF
+
+    FUNCTION sumPrefixFactors(stringVal)
+      SET aggregateCounter TO DICTIONARY()
+      SET digitsList TO CONVERT stringVal TO LIST OF CHARACTERS
+      FOR digitChar IN digitsList
+        SET digitVal TO INTEGER(digitChar)
+        SET factorCountMap TO FACTOR_COUNTS[digitVal]
+        FOR factorKey IN factorCountMap.keys()
+          IF factorKey IN aggregateCounter THEN
+            SET aggregateCounter[factorKey] TO aggregateCounter[factorKey] + factorCountMap[factorKey]
+          ELSE
+            SET aggregateCounter[factorKey] TO factorCountMap[factorKey]
+          END IF
+        END FOR
+      END FOR
+      RETURN aggregateCounter
+    END FUNCTION
+
+    SET primeCounterPrefix TO sumPrefixFactors(num)
+
+    FUNCTION findFirstZeroIndex(s)
+      SET position TO 0
+      WHILE position < LENGTH(s)
+        IF s[position] == ZERO_CHAR THEN
+          RETURN position
+        END IF
+        SET position TO position + 1
+      END WHILE
+      RETURN LENGTH(s)
+    END FUNCTION
+
+    SET idxFirstZero TO findFirstZeroIndex(num)
+    FUNCTION countersum(counterMap)
+      SET totalSum TO 0
+      FOR v IN counterMap.values()
+        SET totalSum TO totalSum + v
+      END FOR
+      RETURN totalSum
+    END FUNCTION
+
+    IF idxFirstZero == LENGTH(num) AND compareCounters(primeCounter, primeCounterPrefix) <= 0 THEN
+      RETURN num
+    END IF
+
+    FUNCTION compareCounters(c1, c2)
+      SET sum1 TO countersum(c1)
+      SET sum2 TO countersum(c2)
+      RETURN sum1 - sum2
+    END FUNCTION
+
+    SET idx DESCENDING FROM LENGTH(num) - 1 TO 0
+    WHILE idx >= 0
+      SET currentDigit TO INTEGER(num[idx])
+      FOR factorKey IN primeCounterPrefix.keys()
+        SET primeCounterPrefix[factorKey] TO primeCounterPrefix[factorKey] - FACTOR_COUNTS[currentDigit].get(factorKey, 0)
+      END FOR
+      SET positionsAfter TO (LENGTH(num) - 1) - idx
+
+      IF idx <= idxFirstZero THEN
+        SET nextDigit INCREMENT currentDigit BY 1
+        WHILE nextDigit <= 9
+          SET residueCounter TO self._getFactorCount(subtractCounters(primeCounter, addCounters(primeCounterPrefix, FACTOR_COUNTS[nextDigit])))
+          IF countersum(residueCounter) <= positionsAfter THEN
+            SET onesCount TO positionsAfter - countersum(residueCounter)
+            SET prefixString TO SUBSTRING(num, 0, idx)
+            SET onesString TO REPEAT(ONE_CHAR, onesCount)
+            SET residualString TO ""
+            FOR factorDigit IN residueCounter.keys()
+              residualString = residualString + REPEAT(factorDigit, residueCounter[factorDigit])
+            END FOR
+            RETURN prefixString + TO_STRING(nextDigit) + onesString + residualString
+          END IF
+          SET nextDigit TO nextDigit + 1
+        END WHILE
+      END IF
+      SET idx TO idx - 1
+    END WHILE
+
+    SET factorCountFinal TO self._getFactorCount(primeCounter)
+    SET totalFinalCount TO countersum(factorCountFinal)
+    SET finalOnesCount TO LENGTH(num) + 1 - totalFinalCount
+    SET returnOnes TO REPEAT(ONE_CHAR, finalOnesCount)
+    SET returnResidual TO ""
+    FOR factorDigit IN factorCountFinal.keys()
+      returnResidual = returnResidual + REPEAT(factorDigit, factorCountFinal[factorDigit])
+    END FOR
+    RETURN returnOnes + returnResidual
+  END FUNCTION
+
+  FUNCTION _getPrimeCount(t)
+    DEFINE primes AS LIST[2,3,5,7]
+    SET primeCountMap TO DICTIONARY()
+    FOR eachPrime IN primes
+      WHILE t MOD eachPrime == 0
+        SET t TO t / eachPrime
+        IF eachPrime IN primeCountMap THEN
+          SET primeCountMap[eachPrime] TO primeCountMap[eachPrime] + 1
+        ELSE
+          SET primeCountMap[eachPrime] TO 1
+        END IF
+      END WHILE
+    END FOR
+    RETURN primeCountMap, (t == 1)
+  END FUNCTION
+
+  FUNCTION _getFactorCount(counterMap)
+    SET count2val TO counterMap.get(2, 0)
+    SET count3val TO counterMap.get(3, 0)
+    SET count5val TO counterMap.get(5, 0)
+    SET count7val TO counterMap.get(7, 0)
+
+    SET c8, rem2 TO divmod(count2val, 3)
+    SET c9, rem3 TO divmod(count3val, 2)
+    SET c4, c2 TO divmod(rem2, 2)
+
+    SET c6 TO 0
+    IF c2 == 1 AND rem3 == 1 THEN
+      SET c2 TO 0
+      SET rem3 TO 0
+      SET c6 TO 1
+    END IF
+
+    IF rem3 == 1 AND c4 == 1 THEN
+      SET c2 TO 1
+      SET c6 TO 1
+      SET rem3 TO 0
+      SET c4 TO 0
+    END IF
+
+    RETURN DICTIONARY("2": c2, "3": rem3,
+                      "4": c4, "5": count5val,
+                      "6": c6, "7": count7val,
+                      "8": c8, "9": c9)
+  END FUNCTION
+END CLASS

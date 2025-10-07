@@ -1,0 +1,73 @@
+CLASS Solution  
+    FUNCTION minCostGoodCaption(caption)  
+        DECLARE lengthCaption AS LENGTH(caption)  
+        IF NOT (lengthCaption GREATER OR EQUAL TO 3) THEN  
+            RETURN ""  
+        END IF  
+  
+        DECLARE charsList AS EMPTY LIST  
+        FOR idx FROM 0 TO lengthCaption - 1  
+            APPEND caption[idx] TO charsList  
+        END FOR  
+  
+        DECLARE pos AS 0  
+        WHILE pos < lengthCaption DO  
+            DECLARE segmentStart AS pos  
+  
+            WHILE pos < lengthCaption AND charsList[pos] = charsList[segmentStart] DO  
+                SET pos TO pos + 1  
+            END WHILE  
+  
+            DECLARE segmentLength AS pos - segmentStart  
+  
+            IF segmentLength < 3 THEN  
+                IF segmentStart > 0 AND charsList[segmentStart - 1] = charsList[segmentStart] THEN  
+                    SET charsList[segmentStart - 1] TO charsList[segmentStart]  
+                    DECREMENT segmentStart BY 1  
+                    INCREMENT segmentLength BY 1  
+                END IF  
+  
+                IF pos < lengthCaption AND charsList[pos - 1] = charsList[pos] THEN  
+                    SET charsList[pos] TO charsList[pos - 1]  
+                    SET pos TO pos + 1  
+                    INCREMENT segmentLength BY 1  
+                END IF  
+  
+                IF segmentLength < 3 THEN  
+                    DECLARE replacementChar  
+                    IF segmentStart > 0 THEN  
+                        SET replacementChar TO charsList[segmentStart - 1]  
+                    ELSE  
+                        SET replacementChar TO charsList[pos]  
+                    END IF  
+  
+                    IF replacementChar = 'a' THEN  
+                        SET replacementChar TO 'b'  
+                    ELSE IF replacementChar = 'z' THEN  
+                        SET replacementChar TO 'y'  
+                    ELSE  
+                        DECLARE asciiVal AS ASCII_CODE(replacementChar)  
+                        SET replacementChar TO CHAR_FROM_CODE(asciiVal + 1)  
+                    END IF  
+  
+                    DECLARE index AS segmentStart  
+                    WHILE index <= segmentStart + segmentLength - 1 DO  
+                        SET charsList[index] TO replacementChar  
+                        SET index TO index + 1  
+                    END WHILE  
+  
+                    SET pos TO segmentStart + segmentLength  
+                END IF  
+            END IF  
+        END WHILE  
+  
+        DECLARE resultString AS ""  
+        DECLARE i AS 0  
+        WHILE i < LENGTH(charsList) DO  
+            SET resultString TO resultString + charsList[i]  
+            SET i TO i + 1  
+        END WHILE  
+  
+        RETURN resultString  
+    END FUNCTION  
+END CLASS

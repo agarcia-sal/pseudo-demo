@@ -1,0 +1,61 @@
+CLASS Solution  
+    FUNCTION shortestDistanceAfterQueries(n, queries)  
+        INITIALIZE adjacency_map AS a map from integers 0 THROUGH (n - 1) TO empty arrays  
+        SET idx TO 0  
+        WHILE idx < (n - 1)  
+            LET next_node = idx + 1  
+            LET edge_weight = 1  
+            APPEND [next_node, edge_weight] TO adjacency_map[idx]  
+            INCREMENT idx BY 1  
+        END WHILE  
+  
+        FUNCTION dijkstra()  
+            LET distances BE an array filled WITH infinite_value REPEATED n times  
+            ASSIGN distances[0] ← 0  
+            LET priority_queue BE [[0, 0]]  
+  
+            LOOP WHILE LENGTH(priority_queue) ≠ 0  
+                SORT priority_queue BASED ON first_element ASCENDING  
+                REMOVE first_element FROM priority_queue AS current_pair  
+                LET current_distance ← current_pair[0]  
+                LET current_vertex ← current_pair[1]  
+  
+                IF current_distance > distances[current_vertex] THEN  
+                    NEXT ITERATION  
+                END IF  
+  
+                LET list_neighbors ← adjacency_map[current_vertex]  
+                LET j ← 0  
+                WHILE j < LENGTH(list_neighbors)  
+                    LET pair_neighbor ← list_neighbors[j]  
+                    LET neighbor_node ← pair_neighbor[0]  
+                    LET edge_cost ← pair_neighbor[1]  
+                    LET new_distance ← current_distance + edge_cost  
+  
+                    IF new_distance < distances[neighbor_node] THEN  
+                        distances[neighbor_node] ← new_distance  
+                        APPEND [new_distance, neighbor_node] TO priority_queue  
+                    END IF  
+  
+                    INCREMENT j BY 1  
+                END WHILE  
+            END LOOP  
+  
+            RETURN distances[n - 1]  
+        END FUNCTION  
+  
+        LET output_list BE []  
+        LET iter ← 0  
+        WHILE iter < LENGTH(queries)  
+            LET query_pair ← queries[iter]  
+            LET source ← query_pair[0]  
+            LET destination ← query_pair[1]  
+  
+            APPEND [destination, 1] TO adjacency_map[source]  
+            APPEND dijkstra() TO output_list  
+            INCREMENT iter BY 1  
+        END WHILE  
+  
+        RETURN output_list  
+    END FUNCTION  
+END CLASS

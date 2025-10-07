@@ -1,0 +1,76 @@
+CLASS Solution
+	Function maxHammingDistances(numbers LIST OF INTEGER size INTEGER) RETURNS LIST OF INTEGER
+		SET binary_reps TO []
+		
+		DEFINE to_binary(n INTEGER, length INTEGER) RETURNS STRING
+			SET bits TO ""
+			WHILE n >= 1 DO
+				SET bit_val TO n MOD 2
+				SET bits TO bit_val CONCAT bits
+				SET n TO (n - bit_val) / 2
+			END WHILE
+			SET missing TO length - LENGTH(bits)
+			SET padding TO ""
+			REPEAT UNTIL LENGTH(padding) EQUALS missing
+				SET padding TO padding CONCAT "0"
+			END REPEAT
+			RETURN padding CONCAT bits
+		END DEFINE
+		
+		SET pos TO LENGTH(numbers) - 1
+		WHILE pos >= 0
+			SET current_num TO numbers[pos]
+			SET bin_str TO to_binary(current_num, size)
+			APPEND bin_str TO binary_reps
+			SET pos TO pos - 1
+		END WHILE
+		// reverse to maintain original order
+		SET reversed_bins TO []
+		REPEAT
+			IF LENGTH(binary_reps) EQUAL 0 THEN BREAK END IF
+			APPEND binary_reps[LENGTH(binary_reps) - 1] TO reversed_bins
+			REMOVE binary_reps[LENGTH(binary_reps) - 1]
+		UNTIL FALSE
+		SET binary_reps TO reversed_bins
+		
+		SET results TO []
+		
+		Function hamming_distance(bin_a STRING, bin_b STRING) RETURNS INTEGER
+			SET count_diff TO 0
+			SET idx TO LENGTH(bin_a) - 1
+			WHILE idx >= 0
+				IF NOT (bin_a[idx] EQUALS bin_b[idx]) THEN
+					SET count_diff TO count_diff + 1
+				END IF
+				SET idx TO idx - 1
+			END WHILE
+			RETURN count_diff
+		END Function
+		
+		DEFINE length_numbers() RETURNS INTEGER
+			RETURN LENGTH(numbers)
+		END DEFINE
+		
+		// Outer loop recursive imitation
+		DEFINE process_index(outer_idx INTEGER)
+			IF outer_idx GREATER THAN length_numbers() - 1 THEN RETURN END IF
+			SET maximal_distance TO 0
+			SET inner_idx TO length_numbers() - 1
+			WHILE inner_idx >= 0
+				IF outer_idx NOT EQUAL inner_idx THEN
+					SET current_distance TO hamming_distance(binary_reps[outer_idx], binary_reps[inner_idx])
+					IF current_distance > maximal_distance THEN
+						SET maximal_distance TO current_distance
+					END IF
+				END IF
+				SET inner_idx TO inner_idx - 1
+			END WHILE
+			APPEND maximal_distance TO results
+			CALL process_index(outer_idx + 1)
+		END DEFINE
+		
+		CALL process_index(0)
+		
+		RETURN results
+	END Function
+END CLASS

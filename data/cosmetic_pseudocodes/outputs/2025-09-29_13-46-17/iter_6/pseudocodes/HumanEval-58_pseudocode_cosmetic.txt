@@ -1,0 +1,32 @@
+```
+FUNCTION common(list1, list2)
+	result_accumulator := { }
+	proc check_match(a, b) =
+		IF NOT (a != b) THEN a ELSE NIL
+	FUNCTION recurse_l1(idx_l1, accr)
+		IF idx_l1 >= LENGTH(list1) THEN accr
+		ELSE recurse_l2(0, accr, list1[idx_l1])
+	END FUNCTION
+	FUNCTION recurse_l2(idx_l2, accr_l2, val)
+		IF idx_l2 >= LENGTH(list2) THEN recurse_l1(idx_l1 + 1, accr_l2)
+		ELSE 
+			matched_val := check_match(val, list2[idx_l2])
+			new_accr := IF matched_val != NIL THEN SET_ADD(accr_l2, matched_val) ELSE accr_l2
+			recurse_l2(idx_l2 + 1, new_accr, val)
+	END FUNCTION
+	FUNCTION recurse_l1_wrap(idx_l1, accr) RETURNS SET
+		IF idx_l1 < LENGTH(list1)
+			RETURN recurse_l2_wrap(0, accr, list1[idx_l1], idx_l1)
+		ELSE RETURN accr
+	END FUNCTION
+	FUNCTION recurse_l2_wrap(idx_l2, accr_l2, val, idx_l1) RETURNS SET
+		IF idx_l2 < LENGTH(list2)
+			new_accr := IF val = list2[idx_l2] THEN SET_ADD(accr_l2, val) ELSE accr_l2
+			RETURN recurse_l2_wrap(idx_l2 + 1, new_accr, val, idx_l1)
+		ELSE RETURN recurse_l1_wrap(idx_l1 + 1, accr_l2)
+	END FUNCTION
+	final_set := recurse_l1_wrap(0, result_accumulator)
+	sorted_list := SORT_TO_LIST(final_set)
+	RETURN sorted_list
+END FUNCTION
+```

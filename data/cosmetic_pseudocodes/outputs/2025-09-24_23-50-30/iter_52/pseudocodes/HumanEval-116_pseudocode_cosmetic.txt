@@ -1,0 +1,88 @@
+```
+FUNCTION sort_array(input_collection)
+    FUNCTION count_ones(binary_string)
+        SET total TO 0
+        SET index TO 0
+        WHILE index < LENGTH(binary_string)
+            IF binary_string[index] = '1'
+                SET total TO total + 1
+            END IF
+            SET index TO index + 1
+        END WHILE
+        RETURN total
+    END FUNCTION
+
+    FUNCTION to_binary_string(number)
+        IF number = 0
+            RETURN "0"
+        END IF
+        FUNCTION recurse(current, acc)
+            IF current = 0
+                RETURN acc
+            END IF
+            RETURN recurse(current DIV 2, STRING(current MOD 2) + acc)
+        END FUNCTION
+        RETURN recurse(input_collection[0] * 0 + input_collection[0], "")
+    END FUNCTION
+
+    FUNCTION key_func(element)
+        SET bin_str TO ""
+        SET num TO element
+        IF num = 0
+            SET bin_str TO "0"
+        ELSE
+            bin_str = ""
+            SET temp_num TO num
+            WHILE temp_num > 0
+                SET bin_str TO STRING(temp_num MOD 2) + bin_str
+                SET temp_num TO temp_num DIV 2
+            END WHILE
+        END IF
+        RETURN count_ones(bin_str)
+    END FUNCTION
+
+    FUNCTION sort_by_value(coll)
+        IF LENGTH(coll) < 2
+            RETURN coll
+        END IF
+        SET pivot TO coll[0]
+        SET less TO []
+        SET greater TO []
+        FOR EACH item IN coll[1 TO END]
+            IF item < pivot
+                APPEND item TO less
+            ELSE
+                APPEND item TO greater
+            END IF
+        END FOR
+        RETURN sort_by_value(less) + [pivot] + sort_by_value(greater)
+    END FUNCTION
+
+    SET first_step TO sort_by_value(input_collection)
+    
+    FUNCTION sort_by_key(coll)
+        IF LENGTH(coll) < 2
+            RETURN coll
+        END IF
+        SET pivot TO coll[0]
+        SET less TO []
+        SET greater TO []
+        FOR EACH item IN coll[1 TO END]
+            IF key_func(item) < key_func(pivot)
+                APPEND item TO less
+            ELSE IF key_func(item) > key_func(pivot)
+                APPEND item TO greater
+            ELSE
+                IF item < pivot
+                    APPEND item TO less
+                ELSE
+                    APPEND item TO greater
+                END IF
+            END IF
+        END FOR
+        RETURN sort_by_key(less) + [pivot] + sort_by_key(greater)
+    END FUNCTION
+
+    RETURN sort_by_key(first_step)
+END FUNCTION
+```

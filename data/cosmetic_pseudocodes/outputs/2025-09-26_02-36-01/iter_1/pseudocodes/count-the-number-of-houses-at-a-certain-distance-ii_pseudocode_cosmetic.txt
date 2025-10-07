@@ -1,0 +1,54 @@
+CLASS Solution  
+    FUNCTION countOfPairs(n, x, y)  
+        IF y LESS THAN x THEN  
+            SET temp TO y  
+            SET y TO x  
+            SET x TO temp  
+        END IF  
+  
+        FUNCTION bfs(source)  
+            CREATE visited_flags AS an array of size n+1 FILLED with False  
+            CREATE dist_array AS an array of size n+1 FILLED with 0  
+            CREATE processing_queue AS deque containing source  
+            SET visited_flags[source] TO True  
+  
+            WHILE processing_queue IS NOT empty DO  
+                SET node TO REMOVE_FIRST_ELEMENT(processing_queue)  
+                CREATE neighbors AS [node - 1, node + 1]  
+  
+                FOR each adj IN neighbors DO  
+                    IF adj IS BETWEEN 1 AND n AND visited_flags[adj] IS False THEN  
+                        visited_flags[adj] = True  
+                        dist_array[adj] = dist_array[node] + 1  
+                        APPEND adj TO processing_queue  
+                    END IF  
+                END FOR  
+  
+                IF node IS x AND visited_flags[y] IS False THEN  
+                    visited_flags[y] = True  
+                    dist_array[y] = dist_array[node] + 1  
+                    APPEND y TO processing_queue  
+                ELSE IF node IS y AND visited_flags[x] IS False THEN  
+                    visited_flags[x] = True  
+                    dist_array[x] = dist_array[node] + 1  
+                    APPEND x TO processing_queue  
+                END IF  
+            END WHILE  
+  
+            RETURN dist_array FROM INDEX 1 TO END  
+        END FUNCTION  
+  
+        INITIALIZE final_counts AS an array of size n FILLED with 0  
+  
+        FOR position FROM 1 TO n DO  
+            SET dist_list TO bfs(position)  
+            FOR each val IN dist_list DO  
+                IF val > 0 THEN  
+                    final_counts[val - 1] = final_counts[val - 1] + 1  
+                END IF  
+            END FOR  
+        END FOR  
+  
+        RETURN final_counts  
+    END FUNCTION  
+END CLASS

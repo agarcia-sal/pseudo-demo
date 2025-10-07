@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+        SET count_elements TO LENGTH OF nums
+        SET count_changes TO LENGTH OF changeIndices
+
+        FUNCTION can_mark_by_second(k)
+            SET positions TO ARRAY OF SIZE count_elements FILLED WITH (-1)
+            SET step TO 0
+            WHILE step < k
+                SET pos_index TO changeIndices[step] + (0 - 1)
+                SET positions[pos_index] TO step
+                SET step TO step + 1
+            END WHILE
+
+            SET needed_dec TO 0
+            FOR idx FROM 0 TO count_elements - 1
+                SET needed_dec TO needed_dec + nums[idx]
+            END FOR
+
+            SET available_dec TO 0
+            SET indices_marked TO EMPTY SET
+
+            SET iter_counter TO 0
+            REPEAT
+                IF iter_counter >= k
+                    BREAK
+                END IF
+
+                SET current_idx TO changeIndices[iter_counter] + (0 - 1)
+                IF NOT indices_marked.CONTAINS(current_idx)
+                    IF positions[current_idx] == iter_counter
+                        IF nums[current_idx] <= available_dec
+                            SET available_dec TO available_dec - nums[current_idx]
+                            CALL indices_marked.ADD(current_idx)
+                        ELSE
+                            RETURN False
+                        END IF
+                    ELSE
+                        SET available_dec TO available_dec + 1
+                    END IF
+                ELSE
+                    SET available_dec TO available_dec + 1
+                END IF
+                SET iter_counter TO iter_counter + 1
+            UNTIL False
+
+            RETURN LENGTH OF indices_marked == count_elements
+        END FUNCTION
+
+        SET low TO 0
+        SET high TO count_changes + 1
+
+        FUNCTION calculate_midpoint(a, b)
+            RETURN (a + b) DIV 2
+        END FUNCTION
+
+        WHILE low < high
+            SET middle TO calculate_midpoint(low, high)
+            IF can_mark_by_second(middle) == True
+                SET high TO middle
+            ELSE
+                SET low TO low + 1
+            END IF
+        END WHILE
+
+        IF low <= count_changes
+            RETURN low
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

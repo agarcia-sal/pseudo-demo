@@ -1,0 +1,69 @@
+CLASS Solution
+    FUNCTION maxPalindromesAfterOperations(words)
+        DEFINE FUNCTION ComputeCharFrequency(sequence)
+            DECLARE tally AS DICTIONARY WITH DEFAULT 0
+            DECLARE indexVar AS INTEGER = 0
+            WHILE indexVar < LENGTH(sequence)
+                LET currentSymbol = sequence[indexVar]
+                tally[currentSymbol] = tally[currentSymbol] + 1
+                SET indexVar = indexVar + 1
+            END WHILE
+            RETURN tally
+        END FUNCTION
+
+        LET allJoinedStrings = ""
+        DECLARE idx1 = 0
+        WHILE idx1 < LENGTH(words)
+            LET strTmp = words[idx1]
+            SET allJoinedStrings = allJoinedStrings + strTmp
+            SET idx1 = idx1 + 1
+        END WHILE
+
+        LET freqMap = ComputeCharFrequency(allJoinedStrings)
+
+        DECLARE accumPairs = 0
+        DECLARE accumSingles = 0
+
+        DECLARE freqVals = []
+        FOR EACH k IN freqMap
+            APPEND freqMap[k] TO freqVals
+        END FOR
+
+        DECLARE j = 0
+        WHILE j < LENGTH(freqVals)
+            LET currVal = freqVals[j]
+            LET evenComponent = (currVal - (currVal MOD 2))
+            accumPairs = accumPairs + (evenComponent / 2)
+            LET oddComponent = currVal MOD 2
+            accumSingles = accumSingles + oddComponent
+            SET j = j + 1
+        END WHILE
+
+        DECLARE sortedWordsCopy = words
+        FOR a = 0 TO LENGTH(sortedWordsCopy) - 2
+            FOR b = a + 1 TO LENGTH(sortedWordsCopy) - 1
+                IF LENGTH(sortedWordsCopy[a]) > LENGTH(sortedWordsCopy[b]) THEN
+                    LET tempSwap = sortedWordsCopy[a]
+                    SET sortedWordsCopy[a] = sortedWordsCopy[b]
+                    SET sortedWordsCopy[b] = tempSwap
+                END IF
+            END FOR
+        END FOR
+
+        DECLARE palindromeCount = 0
+        DECLARE idxW = 0
+
+        WHILE idxW < LENGTH(sortedWordsCopy)
+            LET candidateWord = sortedWordsCopy[idxW]
+            LET candidateLen = LENGTH(candidateWord)
+            LET halfSegLen = (candidateLen DIV 2)
+            IF halfSegLen <= accumPairs THEN
+                accumPairs = accumPairs - halfSegLen
+                palindromeCount = palindromeCount + 1
+            END IF
+            SET idxW = idxW + 1
+        END WHILE
+
+        RETURN palindromeCount
+    END FUNCTION
+END CLASS

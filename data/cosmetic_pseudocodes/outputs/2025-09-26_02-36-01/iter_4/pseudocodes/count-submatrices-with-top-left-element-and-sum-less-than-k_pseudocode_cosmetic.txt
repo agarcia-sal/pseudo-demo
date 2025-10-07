@@ -1,0 +1,37 @@
+CLASS Solution  
+    FUNCTION countSubmatrices(grid, k)  
+        IF NOT grid OR NOT grid[0] THEN  
+            RETURN 0  
+        END IF  
+        LET totalRows BE LENGTH OF grid  
+        LET totalCols BE LENGTH OF grid[0]  
+        DECLARE prefixSum AS ARRAY OF SIZE totalRows FILLED WITH ARRAYS OF SIZE totalCols FILLED WITH 0  
+        DECLARE resultCounter AS 0  
+        LET rowIndex BE 0  
+        WHILE rowIndex < totalRows  
+            LET colIndex BE 0  
+            WHILE colIndex < totalCols  
+                IF rowIndex = 0 AND colIndex = 0 THEN  
+                    SET prefixSum[rowIndex][colIndex] TO grid[rowIndex][colIndex]  
+                ELSE IF rowIndex = 0 THEN  
+                    LET leftValue BE prefixSum[rowIndex][colIndex - 1]  
+                    SET prefixSum[rowIndex][colIndex] TO leftValue + grid[rowIndex][colIndex]  
+                ELSE IF colIndex = 0 THEN  
+                    LET topValue BE prefixSum[rowIndex - 1][colIndex]  
+                    SET prefixSum[rowIndex][colIndex] TO topValue + grid[rowIndex][colIndex]  
+                ELSE  
+                    LET topValue BE prefixSum[rowIndex - 1][colIndex]  
+                    LET leftValue BE prefixSum[rowIndex][colIndex - 1]  
+                    LET topLeftValue BE prefixSum[rowIndex - 1][colIndex - 1]  
+                    SET prefixSum[rowIndex][colIndex] TO topValue + leftValue - topLeftValue + grid[rowIndex][colIndex]  
+                END IF  
+                IF prefixSum[rowIndex][colIndex] <= k THEN  
+                    SET resultCounter TO resultCounter + 1  
+                END IF  
+                SET colIndex TO colIndex + 1  
+            END WHILE  
+            SET rowIndex TO rowIndex + 1  
+        END WHILE  
+        RETURN resultCounter  
+    END FUNCTION  
+END CLASS

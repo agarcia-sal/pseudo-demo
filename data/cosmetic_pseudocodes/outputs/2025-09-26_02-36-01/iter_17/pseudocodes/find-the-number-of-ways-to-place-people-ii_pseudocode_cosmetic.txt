@@ -1,0 +1,78 @@
+CLASS Solution  
+    FUNCTION numberOfPairs(points)  
+        PROCEDURE comp(a, b)  
+            IF a.x < b.x THEN RETURN TRUE  
+            ELSE IF a.x = b.x AND a.y > b.y THEN RETURN TRUE  
+            ELSE RETURN FALSE  
+            END IF  
+        END PROCEDURE  
+
+        PROCEDURE swap(arr, idx1, idx2)  
+            TEMP = arr[idx1]  
+            arr[idx1] = arr[idx2]  
+            arr[idx2] = TEMP  
+        END PROCEDURE  
+
+        PROCEDURE quicksort(arr, left, right)  
+            IF left >= right THEN RETURN END IF  
+            PIVOT = arr[right]  
+            STORE_IDX = left  
+            FOR CURR_IDX FROM left TO right - 1  
+                IF comp(arr[CURR_IDX], PIVOT) THEN  
+                    swap(arr, CURR_IDX, STORE_IDX)  
+                    STORE_IDX = STORE_IDX + 1  
+                END IF  
+            END FOR  
+            swap(arr, STORE_IDX, right)  
+            quicksort(arr, left, STORE_IDX - 1)  
+            quicksort(arr, STORE_IDX + 1, right)  
+        END PROCEDURE  
+
+        quicksort(points, 0, LENGTH(points) - 1)  
+
+        SET totalPairs TO 0  
+        SET idx1 TO 0  
+
+        WHILE idx1 < LENGTH(points) - 1 DO  
+            SET idx2 TO idx1 + 1  
+            WHILE idx2 < LENGTH(points) DO  
+                SET px1 TO points[idx1].x  
+                SET py1 TO points[idx1].y  
+                SET px2 TO points[idx2].x  
+                SET py2 TO points[idx2].y  
+
+                IF (NOT (px1 <= px2 AND py1 >= py2)) THEN  
+                    idx2 = idx2 + 1  
+                    CONTINUE  
+                END IF  
+
+                SET isValid TO TRUE  
+                SET innerIdx TO idx1 + 1  
+
+                REPEAT  
+                    IF innerIdx >= idx2 THEN BREAK END IF  
+
+                    SET pxk TO points[innerIdx].x  
+                    SET pyk TO points[innerIdx].y  
+
+                    IF (px1 <= pxk AND pxk <= px2) AND (py2 <= pyk AND pyk <= py1) THEN  
+                        isValid = FALSE  
+                        BREAK  
+                    END IF  
+
+                    innerIdx = innerIdx + 1  
+                UNTIL FALSE  
+
+                IF isValid = TRUE THEN  
+                    totalPairs = totalPairs + 1  
+                END IF  
+
+                idx2 = idx2 + 1  
+            END WHILE  
+
+            idx1 = idx1 + 1  
+        END WHILE  
+
+        RETURN totalPairs  
+    END FUNCTION  
+END CLASS

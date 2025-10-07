@@ -1,0 +1,46 @@
+CLASS Solution
+    FUNCTION sumOfGoodSubsequences(nums)
+        CONSTANT modulus ← 10^9 + 7
+        INITIALIZE freq_map AS map defaulting to 0
+        INITIALIZE sum_map AS map defaulting to 0
+
+        INDEX ← 0
+        WHILE INDEX < length(nums)
+            elem ← nums[INDEX]
+
+            freq_map[elem] ← freq_map[elem] + 1
+            sum_map[elem] ← sum_map[elem] + elem
+
+            prev_key1 ← elem - 1
+            val1 ← sum_map[prev_key1]
+            val2 ← freq_map[prev_key1]
+            mult_val ← elem
+
+            sum_map[elem] ← sum_map[elem] + val1 + (val2 * mult_val)
+            sum_map[elem] ← sum_map[elem] mod modulus
+
+            freq_map[elem] ← freq_map[elem] + freq_map[prev_key1]
+            freq_map[elem] ← freq_map[elem] mod modulus
+
+            next_key1 ← elem + 1
+            val3 ← sum_map[next_key1]
+            val4 ← freq_map[next_key1]
+
+            sum_map[elem] ← sum_map[elem] + val3 + (val4 * mult_val)
+            sum_map[elem] ← sum_map[elem] mod modulus
+
+            freq_map[elem] ← freq_map[elem] + freq_map[next_key1]
+            freq_map[elem] ← freq_map[elem] mod modulus
+
+            INDEX ← INDEX + 1
+        END WHILE
+
+        accumulator ← 0
+        FOR key IN keys(sum_map)
+            accumulator ← accumulator + sum_map[key]
+        END FOR
+
+        output ← accumulator mod modulus
+        RETURN output
+    END FUNCTION
+END CLASS

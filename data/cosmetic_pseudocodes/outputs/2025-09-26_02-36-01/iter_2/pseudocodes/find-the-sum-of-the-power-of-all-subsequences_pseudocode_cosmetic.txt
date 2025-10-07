@@ -1,0 +1,48 @@
+CLASS Solution
+    FUNCTION sumOfPower(nums parameter, k parameter)
+        LET MODULUS BE 1000000007
+        LET length BE LENGTH(nums)
+        LET dp_matrix BE ARRAY OF ARRAYS FILLED WITH 0, SIZE (length + 1) x (k + 1)
+        ASSIGN dp_matrix[0][0] <- 1
+
+        LET idx_outer BE 1
+        WHILE idx_outer <= length
+            LET idx_inner BE 0
+            WHILE idx_inner <= k
+                dp_matrix[idx_outer][idx_inner] <- dp_matrix[idx_outer - 1][idx_inner]
+                IF idx_inner >= nums[idx_outer - 1] THEN
+                    LET prev_index BE idx_inner - nums[idx_outer - 1]
+                    dp_matrix[idx_outer][idx_inner] <- dp_matrix[idx_outer][idx_inner] + dp_matrix[idx_outer - 1][prev_index]
+                END IF
+                dp_matrix[idx_outer][idx_inner] <- dp_matrix[idx_outer][idx_inner] MOD MODULUS
+                idx_inner <- idx_inner + 1
+            END WHILE
+            idx_outer <- idx_outer + 1
+        END WHILE
+
+        LET aggregate_power BE 0
+        LET max_subset_bitmask BE (2 POWER length) - 1
+        LET bitmask_counter BE 1
+        WHILE bitmask_counter <= max_subset_bitmask
+            LET subset_sum BE 0
+            LET subset_len BE 0
+            LET position BE 0
+            WHILE position < length
+                LET bit_test BE (bitmask_counter >> position) BITWISE AND 1
+                IF bit_test == 1 THEN
+                    subset_sum <- subset_sum + nums[position]
+                    subset_len <- subset_len + 1
+                END IF
+                position <- position + 1
+            END WHILE
+            IF subset_sum == k THEN
+                LET complement_len BE length - subset_len
+                aggregate_power <- aggregate_power + (2 EXP complement_len)
+                aggregate_power <- aggregate_power MOD MODULUS
+            END IF
+            bitmask_counter <- bitmask_counter + 1
+        END WHILE
+
+        RETURN aggregate_power
+    END FUNCTION
+END CLASS

@@ -1,0 +1,56 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        DECLARE substrFreq AS dictionary WITH default 0
+        SET wordList TO arr
+        FOR pos FROM 0 UPTO LENGTH(wordList) MINUS 1
+            SET currentWord TO wordList[pos]
+            SET lenWord TO LENGTH(currentWord)
+            SET startIdx TO 0
+            WHILE startIdx <= lenWord MINUS 1
+                SET endIdx TO startIdx PLUS 1
+                WHILE endIdx <= lenWord
+                    DECLARE fragment
+                    SET fragment TO ""
+                    SET k TO startIdx
+                    WHILE k < endIdx
+                        SET fragment TO fragment + currentWord[k]
+                        SET k TO k PLUS 1
+                    END WHILE
+                    substrFreq[fragment] = substrFreq[fragment] PLUS 1
+                    SET endIdx TO endIdx PLUS 1
+                END WHILE
+                SET startIdx TO startIdx PLUS 1
+            END WHILE
+        END FOR
+
+        DECLARE resultList AS empty list
+        DECLARE idx TO 0
+        WHILE idx < LENGTH(wordList)
+            SET candidate TO ""
+            SET wordLen TO LENGTH(wordList[idx])
+            SET i TO 0
+            WHILE i <= wordLen MINUS 1
+                SET j TO i PLUS 1
+                WHILE j <= wordLen
+                    DECLARE segment
+                    SET segment TO ""
+                    FOR m FROM i TO j MINUS 1
+                        SET segment = segment + wordList[idx][m]
+                    END FOR
+                    IF substrFreq[segment] EQUALS 1 THEN
+                        IF candidate EQUALS "" OR
+                           LENGTH(segment) LESS THAN LENGTH(candidate) OR
+                           (LENGTH(segment) EQUALS LENGTH(candidate) AND segment < candidate) THEN
+                            SET candidate = segment
+                        END IF
+                    END IF
+                    SET j = j PLUS 1
+                END WHILE
+                SET i = i PLUS 1
+            END WHILE
+            APPEND candidate TO resultList
+            SET idx TO idx PLUS 1
+        END WHILE
+        RETURN resultList
+    END FUNCTION
+END CLASS

@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION minValidStrings(words, target)
+        DEFINE FUNCTION isInSet(strVal, setVal)
+            RETURN (strVal IN setVal)
+        END FUNCTION
+
+        DECLARE alphaSet AS SET
+        alphaSet ← {}
+        
+        DECLARE positionA, positionB, positionC, lengthTarget, idxA, idxB, lengthWord AS INTEGER
+        idxA ← 0
+        lengthTarget ← LENGTH(target)
+        
+        DECLARE tempStr, currentWord, subStr AS STRING
+
+        positionA ← 0
+        positionB ← 0
+        positionC ← 0
+
+        WHILE idxA < LENGTH(words)
+            currentWord ← words[idxA]
+            lengthWord ← LENGTH(currentWord)
+
+            positionB ← 1
+            WHILE positionB <= lengthWord
+                tempStr ← ""
+                positionC ← 0
+                WHILE positionC < positionB
+                    tempStr ← tempStr + currentWord[positionC]
+                    positionC ← positionC + 1
+                END WHILE
+                alphaSet ← alphaSet ∪ {tempStr}
+                positionB ← positionB + 1
+            END WHILE
+
+            idxA ← idxA + 1
+        END WHILE
+
+        DECLARE dpArray AS LIST OF INTEGER
+        dpArray ← [∞] REPEATED lengthTarget + 1 TIMES
+        dpArray[0] ← 0
+
+        idxA ← 1
+        WHILE idxA <= lengthTarget
+            idxB ← 1
+            WHILE idxB <= idxA
+                subStr ← ""
+                positionC ← idxB - 1
+                WHILE positionC < idxA
+                    subStr ← subStr + target[positionC]
+                    positionC ← positionC + 1
+                END WHILE
+
+                IF isInSet(subStr, alphaSet) THEN
+                    DECLARE candidateVal AS INTEGER
+                    candidateVal ← dpArray[idxB - 1] + 1
+                    IF candidateVal < dpArray[idxA] THEN
+                        dpArray[idxA] ← candidateVal
+                    END IF
+                END IF
+                idxB ← idxB + 1
+            END WHILE
+            idxA ← idxA + 1
+        END WHILE
+
+        IF dpArray[lengthTarget] < ∞ THEN
+            RETURN dpArray[lengthTarget]
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

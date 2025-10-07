@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION maximumSetSize(nums1 PARAMETER List OF integers nums2 PARAMETER List OF integers) RETURNS integer
+        FUNCTION gatherUniques(inputList PARAMETER List OF integers) RETURNS Set OF integers
+            SET idx TO 0
+            SET uniqueCollector TO empty set
+            WHILE idx < LENGTH OF inputList
+                IF NOT (inputList[idx] IN uniqueCollector)
+                    ADD inputList[idx] TO uniqueCollector
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN uniqueCollector
+        END FUNCTION
+
+        FUNCTION computeIntersection(setA PARAMETER Set OF integers setB PARAMETER Set OF integers) RETURNS Set OF integers
+            SET resultSet TO empty set
+            FOR EACH element IN setA
+                IF element IN setB
+                    ADD element TO resultSet
+                END IF
+            END FOR
+            RETURN resultSet
+        END FUNCTION
+
+        FUNCTION difference(setA PARAMETER Set OF integers setB PARAMETER Set OF integers) RETURNS Set OF integers
+            SET diffSet TO empty set
+            SET it TO iterator over setA
+            WHILE it HAS next
+                SET currentItem TO it.next()
+                IF NOT (currentItem IN setB)
+                    ADD currentItem TO diffSet
+                END IF
+            END WHILE
+            RETURN diffSet
+        END FUNCTION
+
+        FUNCTION minVal(a PARAMETER integer b PARAMETER integer) RETURNS integer
+            IF a < b THEN RETURN a ELSE RETURN b END IF
+        END FUNCTION
+
+        FUNCTION maxVal(a PARAMETER integer b PARAMETER integer) RETURNS integer
+            IF a > b THEN RETURN a ELSE RETURN b END IF
+        END FUNCTION
+
+        SET countNums TO LENGTH OF nums1
+        SET halfCount TO countNums DIV 2
+
+        SET uniqueNums1 TO gatherUniques(nums1)
+        SET uniqueNums2 TO gatherUniques(nums2)
+
+        SET commonElements TO computeIntersection(uniqueNums1, uniqueNums2)
+
+        SET exclusive1 TO difference(uniqueNums1, commonElements)
+        SET exclusive2 TO difference(uniqueNums2, commonElements)
+
+        SET chosenFromExcl1 TO minVal(halfCount, LENGTH OF exclusive1)
+        SET chosenFromExcl2 TO minVal(halfCount, LENGTH OF exclusive2)
+
+        SET quota1 TO maxVal(0, halfCount - chosenFromExcl1)
+        SET quota2 TO maxVal(0, halfCount - chosenFromExcl2)
+        SET totalQuota FROM common TO quota1 + quota2
+
+        SET totalSelected TO chosenFromExcl1 + chosenFromExcl2 + minVal(totalQuota FROM common, LENGTH OF commonElements)
+
+        RETURN totalSelected
+    END FUNCTION
+END CLASS

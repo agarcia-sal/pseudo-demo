@@ -1,0 +1,60 @@
+CLASS Solution
+    FUNCTION maximumSubarrayXor(nums PARAMETER, queries PARAMETER)
+        LET length = 0
+        length += LENGTH OF nums
+        LET f_matrix = []
+        LET g_matrix = []
+        LET row_idx = length - 1
+        WHILE row_idx >= 0
+            LET f_row = []
+            LET g_row = []
+            LET col_idx = 0
+            WHILE col_idx < length
+                f_row += [0]
+                g_row += [0]
+                col_idx += 1
+            END WHILE
+            f_matrix += [f_row]
+            g_matrix += [g_row]
+            row_idx -= 1
+        END WHILE
+
+        LET i = length - 1
+        WHILE i >= 0
+            f_matrix[i][i] = nums[i]
+            g_matrix[i][i] = nums[i]
+            LET j = i + 1
+            WHILE j < length
+                LET left_xor = f_matrix[i][j - 1]
+                LET right_xor = f_matrix[i + 1][j]
+                f_matrix[i][j] = left_xor XOR right_xor
+
+                LET val1 = f_matrix[i][j]
+                LET val2 = g_matrix[i][j - 1]
+                LET val3 = g_matrix[i + 1][j]
+
+                LET max_val = val1
+                IF val2 > max_val THEN
+                    max_val = val2
+                END IF
+                IF val3 > max_val THEN
+                    max_val = val3
+                END IF
+                g_matrix[i][j] = max_val
+                j = j + 1
+            END WHILE
+            i = i - 1
+        END WHILE
+
+        LET results = []
+        LET idx = 0
+        WHILE idx < LENGTH OF queries
+            LET l_r_pair = queries[idx]
+            LET l_index = l_r_pair[0]
+            LET r_index = l_r_pair[1]
+            results += [g_matrix[l_index][r_index]]
+            idx += 1
+        END WHILE
+        RETURN results
+    END FUNCTION
+END CLASS

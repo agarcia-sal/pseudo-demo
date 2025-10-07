@@ -1,0 +1,78 @@
+CLASS Solution
+
+    FUNCTION maxTotalReward(rewardValues)
+        
+        FUNCTION auxiliaryTraverse(currentSum)
+            
+            FUNCTION findInsertionIndex(array, target)
+                SET lowBoundary TO 0
+                SET highBoundary TO length(array)
+                WHILE lowBoundary < highBoundary
+                    SET midpoint TO lowBoundary + ((highBoundary - lowBoundary) DIV 2)
+                    IF target < array[midpoint] THEN
+                        SET highBoundary TO midpoint
+                    ELSE
+                        SET lowBoundary TO midpoint + 1
+                    END IF
+                END WHILE
+                RETURN lowBoundary
+            END FUNCTION
+
+            SET startIndex TO findInsertionIndex(rewardValues, currentSum)
+            SET accumulatedMaximum TO 0            
+            SET indexCounter TO startIndex
+
+            WHILE indexCounter < length(rewardValues)
+                SET candidateValue TO rewardValues[indexCounter]
+                IF NOT ((currentSum + candidateValue) <= currentSum)
+                    SET recursiveResult TO auxiliaryTraverse(currentSum + candidateValue)
+                    IF (candidateValue + recursiveResult) > accumulatedMaximum
+                        SET accumulatedMaximum TO candidateValue + recursiveResult
+                    END IF
+                END IF
+                SET indexCounter TO indexCounter + 1
+            END WHILE
+
+            RETURN accumulatedMaximum
+        END FUNCTION
+
+        FUNCTION ascendingSort(arr)
+            PROCEDURE swapElements(i,j)
+                SET tempVal TO arr[i]
+                SET arr[i] TO arr[j]
+                SET arr[j] TO tempVal
+            END PROCEDURE
+
+            FUNCTION partition(low, high)
+                SET pivotValue TO arr[high]
+                SET pointer TO low - 1
+                SET iterIdx TO low
+
+                WHILE iterIdx < high
+                    IF arr[iterIdx] <= pivotValue
+                        SET pointer TO pointer + 1
+                        swapElements(pointer, iterIdx)
+                    END IF
+                    SET iterIdx TO iterIdx + 1
+                END WHILE
+
+                swapElements(pointer + 1, high)
+                RETURN pointer + 1
+            END FUNCTION
+
+            FUNCTION quickSortRec(low, high)
+                IF low < high
+                    SET partitionIndex TO partition(low, high)
+                    quickSortRec(low, partitionIndex - 1)
+                    quickSortRec(partitionIndex + 1, high)
+                END IF
+            END FUNCTION
+            
+            quickSortRec(0, length(arr) - 1)
+        END FUNCTION
+
+        ascendingSort(rewardValues)
+        RETURN auxiliaryTraverse(0)
+
+    END FUNCTION
+END CLASS

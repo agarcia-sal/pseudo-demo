@@ -1,0 +1,113 @@
+CLASS Solution
+    FUNCTION largestPalindrome(n k)
+        FUNCTION customToString(v)
+            DECLARE c AS EMPTY STRING
+            DECLARE m AS v
+            IF m EQUALS 0 THEN
+                RETURN "0"
+            END IF
+            WHILE m GREATER THAN 0
+                SET r TO m MINUS ( (m DIV 10) TIMES 10 )
+                SET m TO m DIV 10
+                SET c TO CONCAT(CHAR(48 PLUS r), c)
+            END WHILE
+            RETURN c
+        END FUNCTION
+
+        FUNCTION customReverse(s)
+            DECLARE t AS EMPTY STRING
+            DECLARE i AS LENGTH(s) MINUS 1
+            WHILE i GREATER OR EQUAL 0
+                SET t TO CONCAT(t, s[i])
+                SET i TO i MINUS 1
+            END WHILE
+            RETURN t
+        END FUNCTION
+
+        FUNCTION concatStrings(a b)
+            DECLARE res AS a
+            DECLARE j AS 0
+            WHILE j LESS THAN LENGTH(b)
+                SET res TO CONCAT(res, b[j])
+                SET j TO j PLUS 1
+            END WHILE
+            RETURN res
+        END FUNCTION
+
+        FUNCTION toInteger(s)
+            DECLARE val AS 0
+            DECLARE idx AS 0
+            WHILE idx LESS THAN LENGTH(s)
+                SET val TO (val TIMES 10) PLUS (ORD(s[idx]) MINUS 48)
+                SET idx TO idx PLUS 1
+            END WHILE
+            RETURN val
+        END FUNCTION
+
+        IF n EQUALS 1 THEN
+            DECLARE u AS 9
+            PROCEDURE loopDescending()
+                IF u LESS THAN 1 THEN RETURN END IF
+                IF (u MOD k) EQUALS 0 THEN
+                    SET vResult TO customToString(u)
+                    RAISE ReturnException(vResult)
+                END IF
+                SET u TO u MINUS 1
+                loopDescending()
+            END PROCEDURE
+            TRY
+                loopDescending()
+            CATCH ReturnException WITH val
+                RETURN val
+            END TRY
+            RETURN "0"
+        END IF
+
+        DECLARE halfStr AS EMPTY STRING
+        DECLARE halfCount AS (n PLUS 1) DIV 2
+        DECLARE i1 AS 0
+        WHILE i1 LESS THAN halfCount
+            SET halfStr TO CONCAT(halfStr, "9")
+            SET i1 TO i1 PLUS 1
+        END WHILE
+        
+        DECLARE halfNum AS toInteger(halfStr)
+
+        PROCEDURE descendHalf()
+            IF halfNum LESS OR EQUAL 0 THEN RETURN END IF
+
+            DECLARE halfStrLocal AS customToString(halfNum)
+
+            IF (n MOD 2) EQUALS 0 THEN
+                DECLARE revHalf AS customReverse(halfStrLocal)
+                DECLARE fullStr AS concatStrings(halfStrLocal, revHalf)
+                DECLARE fullNum AS toInteger(fullStr)
+            ELSE
+                DECLARE truncated AS ""
+                DECLARE idx2 AS 0
+                WHILE idx2 LESS THAN LENGTH(halfStrLocal) MINUS 1
+                    SET truncated TO CONCAT(truncated, halfStrLocal[idx2])
+                    SET idx2 TO idx2 PLUS 1
+                END WHILE
+                DECLARE revTrunc AS customReverse(truncated)
+                DECLARE fullStr AS concatStrings(halfStrLocal, revTrunc)
+                DECLARE fullNum AS toInteger(fullStr)
+            END IF
+
+            IF (fullNum MOD k) EQUALS 0 THEN
+                RAISE ReturnException(customToString(fullNum))
+            END IF
+
+            SET halfNum TO halfNum MINUS 1
+            descendHalf()
+        END PROCEDURE
+
+        TRY
+            descendHalf()
+        CATCH ReturnException WITH val
+            RETURN val
+        END TRY
+
+        RETURN "0"
+    END FUNCTION
+END CLASS

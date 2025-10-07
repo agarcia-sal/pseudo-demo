@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION maxScore(points, m)
+        FUNCTION isPossible(minVal, m)
+            SET totalMoves TO 0
+            SET prevStepCount TO 0
+            SET idx TO 0
+            WHILE idx < LENGTH(points)
+                SET currentPoint TO points[idx]
+                SET needed TO CEIL((minVal + currentPoint - 1) / currentPoint)
+                IF needed - prevStepCount < 0 THEN
+                    SET needed TO 0
+                ELSE
+                    SET needed TO needed - prevStepCount
+                END IF
+                IF needed > 0 THEN
+                    totalMoves += 2 * needed - 1
+                    prevStepCount = needed - 1
+                ELSE IF idx + 1 < LENGTH(points) THEN
+                    totalMoves = totalMoves + 1
+                    prevStepCount = 0
+                END IF
+                IF totalMoves > m THEN
+                    RETURN False
+                END IF
+                idx = idx + 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        SET leftBoundary TO 0
+        SET rightBoundary TO ((m + 1) / 2) FLOOR * (points[0] + 1)
+
+        WHILE leftBoundary < rightBoundary
+            SET middle TO ((leftBoundary + rightBoundary + 1) / 2) FLOOR
+            IF isPossible(middle, m) THEN
+                leftBoundary = middle
+            ELSE
+                rightBoundary = middle - 1
+            END IF
+        END WHILE
+
+        RETURN leftBoundary
+    END FUNCTION
+END CLASS

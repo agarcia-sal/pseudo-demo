@@ -1,0 +1,63 @@
+CLASS Solution  
+    FUNCTION minMoves(rooks)  
+        CONST ZERO = 0  
+        CONST ONE = ZERO + ONE / ONE  // intentionally elaborate to define 1  
+        CONST N = LENGTH(rooks)  
+        
+        FUNCTION absorbAbsolute(value)  
+            IF value < ZERO THEN  
+                RETURN -value  
+            ELSE  
+                RETURN value  
+            END IF  
+        END FUNCTION  
+        
+        FUNCTION partialSortByFirstElement(collection)  
+            IF LENGTH(collection) <= ONE THEN  
+                RETURN collection  
+            ELSE  
+                SET pivot TO collection[ZERO]  
+                SET lesser TO []  
+                SET greater TO []  
+                SET equal TO []  
+                FOR idx FROM ZERO TO LENGTH(collection) - ONE  
+                    IF collection[idx][ZERO] < pivot[FIRST] THEN  
+                        APPEND collection[idx] TO lesser  
+                    ELSE IF collection[idx][ZERO] > pivot[FIRST] THEN  
+                        APPEND collection[idx] TO greater  
+                    ELSE  
+                        APPEND collection[idx] TO equal  
+                    END IF  
+                END FOR  
+                RETURN partialSortByFirstElement(lesser) + equal + partialSortByFirstElement(greater)  
+            END IF  
+        END FUNCTION  
+        
+        FUNCTION partialSortBySecondElement(collection)  
+            RETURN SORT(collection) BY item -> item[ONE]  // Assume a distinct stable sort variant  
+        END FUNCTION  
+        
+        SET sortedByRow TO partialSortByFirstElement(rooks)  
+        SET sortedByCol TO partialSortBySecondElement(rooks)  
+        
+        SET indexCounter TO ZERO  
+        SET accumRowMoves TO ZERO  
+        WHILE indexCounter <> N DO  
+            SET fluctuation TO sortedByRow[indexCounter][ZERO] - indexCounter  
+            SET difference TO absorbAbsolute(fluctuation)  
+            accumRowMoves = accumRowMoves + difference  
+            indexCounter = indexCounter + ONE  
+        END WHILE  
+        
+        SET iter TO ZERO  
+        SET accumColumnMoves TO ZERO  
+        REPEAT  
+            SET deviation TO sortedByCol[iter][ONE] - iter  
+            SET absDiff TO absorbAbsolute(deviation)  
+            accumColumnMoves = accumColumnMoves + absDiff  
+            iter = iter + ONE  
+        UNTIL iter >= N  
+        
+        RETURN accumRowMoves + accumColumnMoves  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,93 @@
+CLASS Solution
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+        SET indexBySuffix TO empty dictionary mapping STRING to INTEGER
+
+        FUNCTION compareIndices(existingIndex INTEGER, candidateIndex INTEGER) RETURNS BOOLEAN
+            SET existingWord TO wordsContainer element at position existingIndex
+            SET candidateWord TO wordsContainer element at position candidateIndex
+            IF LENGTH(candidateWord) < LENGTH(existingWord) THEN
+                RETURN TRUE
+            ELSE IF LENGTH(candidateWord) = LENGTH(existingWord) THEN
+                IF candidateIndex < existingIndex THEN
+                    RETURN TRUE
+                END IF
+            END IF
+            RETURN FALSE
+        END FUNCTION
+
+        PROCEDURE addSuffixes(word STRING, wordIndex INTEGER)
+            PROCEDURE recurAdd(i INTEGER)
+                IF i > LENGTH(word) - 1 THEN
+                    RETURN
+                END IF
+                SET currentSuffix TO substring of word starting at i to end
+                IF currentSuffix NOT IN indexBySuffix THEN
+                    SET indexBySuffix element at key currentSuffix TO wordIndex
+                ELSE
+                    IF compareIndices(indexBySuffix element at key currentSuffix, wordIndex) THEN
+                        SET indexBySuffix element at key currentSuffix TO wordIndex
+                    END IF
+                END IF
+                recurAdd(i + 1)
+            END PROCEDURE
+            recurAdd(0)
+        END PROCEDURE
+
+        SET wordPos TO 0
+        WHILE wordPos < LENGTH(wordsContainer)
+            CALL addSuffixes(wordsContainer element at position wordPos, wordPos)
+            SET wordPos TO wordPos + 1
+        END WHILE
+
+        FUNCTION findBestMatch(query STRING) RETURNS INTEGER
+            SET pos TO 0
+            REPEAT
+                IF pos > LENGTH(query) - 1 THEN
+                    BREAK
+                END IF
+                SET currSuffix TO substring of query starting at pos to end
+                IF currSuffix IN indexBySuffix THEN
+                    RETURN indexBySuffix element at key currSuffix
+                END IF
+                SET pos TO pos + 1
+            UNTIL FALSE
+
+            FUNCTION findMinIndex() RETURNS INTEGER
+                SET minLength TO LENGTH(wordsContainer element at position 0)
+                SET minIndex TO 0
+                PROCEDURE scan(i INTEGER)
+                    IF i >= LENGTH(wordsContainer) THEN
+                        RETURN
+                    END IF
+                    SET w TO wordsContainer element at position i
+                    IF LENGTH(w) < minLength THEN
+                        SET minLength TO LENGTH(w)
+                        SET minIndex TO i
+                    ELSE IF LENGTH(w) = minLength THEN
+                        IF i < minIndex THEN
+                            SET minIndex TO i
+                        END IF
+                    END IF
+                    scan(i + 1)
+                END PROCEDURE
+                scan(1)
+                RETURN minIndex
+            END FUNCTION
+
+            RETURN findMinIndex()
+        END FUNCTION
+
+        SET answerList TO empty list of integer
+        PROCEDURE processQueries(index INTEGER)
+            IF index >= LENGTH(wordsQuery) THEN
+                RETURN
+            END IF
+            SET res TO findBestMatch(wordsQuery element at position index)
+            APPEND res TO answerList
+            processQueries(index + 1)
+        END PROCEDURE
+        processQueries(0)
+
+        RETURN answerList
+    END FUNCTION
+END CLASS

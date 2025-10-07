@@ -1,0 +1,50 @@
+CLASS Solution
+    FUNCTION countSubstrings(s)
+        PROCEDURE toInt(ch)
+            RETURN (ORD(ch) - ORD('0'))
+        END PROCEDURE
+
+        FUNCTION checkDivisible(num, digit)
+            RETURN (num - (digit * (num / digit))) = 0
+        END FUNCTION
+
+        SET length_counter TO 0
+        SET string_len TO 0
+
+        WHILE TRUE
+            IF (string_len >= (LEN(s))) THEN
+                BREAK
+            END IF
+            SET string_len TO (string_len + 1)
+        END WHILE
+
+        PROCEDURE innerLoop(startIndex)
+            FUNCTION helper(j, accumulated)
+                IF j >= string_len THEN
+                    RETURN 0
+                END IF
+
+                SET current_char_digit TO toInt(s[j])
+                SET new_accumulated TO (accumulated * 10) + current_char_digit
+                SET count_increment TO 0
+
+                IF (NOT (current_char_digit = 0)) THEN
+                    IF checkDivisible(new_accumulated, current_char_digit) THEN
+                        SET count_increment TO 1
+                    END IF
+                END IF
+
+                RETURN count_increment + helper(j + 1, new_accumulated)
+            END FUNCTION
+            RETURN helper(startIndex, 0)
+        END PROCEDURE
+
+        SET index_val TO 0
+        WHILE index_val < string_len
+            SET length_counter TO length_counter + innerLoop(index_val)
+            SET index_val TO index_val + 1
+        END WHILE
+
+        RETURN length_counter
+    END FUNCTION
+END CLASS

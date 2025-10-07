@@ -1,0 +1,43 @@
+FUNCTION parse_nested_parens WITH PARAMETER paren_string OF TYPE str RETURNS List[int]
+    FUNCTION parse_paren_group WITH PARAMETER s RETURNS int
+        SET depth TO 0
+        SET max_depth TO 0
+        FOR index FROM 0 TO LENGTH OF s MINUS 1
+            SET c TO CHARACTER OF s AT POSITION index
+            IF c EQUALS '(' THEN
+                SET depth TO depth PLUS 1
+                IF depth GREATER THAN max_depth THEN
+                    SET max_depth TO depth
+                ENDIF
+            ELSE
+                SET depth TO depth MINUS 1
+            ENDIF
+        ENDFOR
+        RETURN max_depth
+    END FUNCTION
+
+    SET result TO LIST WITH ELEMENTS EMPTY
+    SET words TO LIST WITH ELEMENTS EMPTY
+    SET current_word TO EMPTY STRING
+    FOR index FROM 0 TO LENGTH OF paren_string MINUS 1
+        SET char TO CHARACTER OF paren_string AT POSITION index
+        IF char EQUALS ' ' THEN
+            IF current_word NOT EQUAL TO EMPTY STRING THEN
+                APPEND current_word TO words
+                SET current_word TO EMPTY STRING
+            ENDIF
+        ELSE
+            SET current_word TO CONCATENATE current_word WITH char
+        ENDIF
+    ENDFOR
+    IF current_word NOT EQUAL TO EMPTY STRING THEN
+        APPEND current_word TO words
+    ENDIF
+
+    FOR index FROM 0 TO LENGTH OF words MINUS 1
+        SET word TO ELEMENT OF words AT POSITION index
+        SET depth_value TO CALL parse_paren_group WITH ARGUMENT word
+        APPEND depth_value TO result
+    ENDFOR
+    RETURN result
+END FUNCTION

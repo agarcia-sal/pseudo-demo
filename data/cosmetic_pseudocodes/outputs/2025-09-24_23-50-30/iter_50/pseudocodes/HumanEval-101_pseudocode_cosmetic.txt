@@ -1,0 +1,44 @@
+```
+FUNCTION words_string(original_text)
+      DEFINE procedure transform(index, acc):
+          IF index >= LENGTH(original_text) THEN
+              RETURN acc
+          ELSE
+              DEFINE current_char AS original_text[index]
+              IF NOT (current_char = ',') THEN
+                  RETURN transform(index + 1, acc + [current_char])
+              ELSE
+                  RETURN transform(index + 1, acc + [' '])
+              END IF
+          END IF
+      END DEFINE
+
+      DEFINE replaced_chars AS transform(0, [])
+
+      DEFINE concatenated_text AS ""
+      FOR position FROM 0 TO LENGTH(replaced_chars) - 1 DO
+          concatenated_text = concatenated_text + replaced_chars[position]
+      END FOR
+
+      DEFINE result_words AS []
+      DEFINE temp_buffer AS ""
+      DEFINE add_word AS PROCEDURE()
+          IF LENGTH(temp_buffer) > 0 THEN
+              result_words = result_words + [temp_buffer]
+          END IF
+      END PROCEDURE
+
+      FOR iterator FROM 0 TO LENGTH(concatenated_text) - 1 DO
+          DEFINE symbol AS concatenated_text[iterator]
+          IF symbol = ' ' OR symbol = '\t' OR symbol = '\n' THEN
+              add_word()
+              temp_buffer = ""
+          ELSE
+              temp_buffer = temp_buffer + symbol
+          END IF
+      END FOR
+      add_word()
+
+      RETURN result_words
+END FUNCTION
+```

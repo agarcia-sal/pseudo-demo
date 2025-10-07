@@ -1,0 +1,86 @@
+```pseudocode
+CLASS Solution
+    FUNCTION constructGridLayout(n, edges)
+        SET B TO a collection of n collections, each empty
+        SET D TO a collection of 5 elements initialized to (-1)
+        FOR i FROM 0 TO LENGTH(edges) - 1
+            LET p = edges[i][0]
+            LET q = edges[i][1]
+            INSERT q INTO B[p]
+            INSERT p INTO B[q]
+        END FOR
+
+        FOR idx FROM 0 TO LENGTH(B) - 1
+            LET nbrs = B[idx]
+            LET deg_idx = LENGTH(nbrs)
+            SET D[deg_idx] = idx
+        END FOR
+
+        IF D[1] != (-1) THEN
+            SET S TO [ D[1] ]
+        ELSE IF D[4] = (-1) THEN
+            LET M = D[2]
+            SET S TO []
+            LET flag = false
+            SET pos = 0
+            WHILE flag = false AND pos < LENGTH(B[M])
+                LET k = B[M][pos]
+                IF LENGTH(B[k]) = 2 THEN
+                    SET S = [ M, k ]
+                    SET flag = true
+                END IF
+                SET pos = pos + 1
+            END WHILE
+        ELSE
+            LET M = D[2]
+            SET S TO [ M ]
+            LET Prev = M
+            SET Curr = B[M][0]
+
+            WHILE LENGTH(B[Curr]) > 2
+                INSERT Curr INTO S
+                SET found = false
+                LET zdx = 0
+                WHILE found = false AND zdx < LENGTH(B[Curr])
+                    LET candidate = B[Curr][zdx]
+                    IF candidate != Prev AND LENGTH(B[candidate]) < 4 THEN
+                        SET Prev = Curr
+                        SET Curr = candidate
+                        SET found = true
+                    END IF
+                    SET zdx = zdx + 1
+                END WHILE
+            END WHILE
+            INSERT Curr INTO S
+        END IF
+
+        LET T = [S]
+        LET checked = ARRAY OF SIZE n FILLED false
+        LET R = 1
+        LET loopLimit = (n DIV LENGTH(S)) - 1
+        WHILE R <= loopLimit
+            FOR each el IN S
+                SET checked[el] = true
+            END FOR
+
+            LET U = []
+            FOR each el IN S
+                LET zz = 0
+                WHILE zz < LENGTH(B[el])
+                    LET nb = B[el][zz]
+                    IF checked[nb] = false THEN
+                        INSERT nb INTO U
+                        BREAK
+                    END IF
+                    SET zz = zz + 1
+                END WHILE
+            END FOR
+            INSERT U INTO T
+            SET S = U
+            SET R = R + 1
+        END WHILE
+
+        RETURN T
+    END FUNCTION
+END CLASS
+```

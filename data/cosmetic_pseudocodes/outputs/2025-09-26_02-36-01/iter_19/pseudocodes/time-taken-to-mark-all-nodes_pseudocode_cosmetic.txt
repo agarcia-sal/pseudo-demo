@@ -1,0 +1,45 @@
+CLASS Solution
+    FUNCTION timeTaken(edges)
+        LET count_elements = LENGTH(edges) + 1
+        LET adjacency_map = construct_adjacency_list(edges)
+
+        FUNCTION bfs(origin)
+            LET deque_structure = double_ended_queue()
+            CALL deque_structure.append((origin, 0))
+
+            LET markers = LIST_OF_FALSE(count_elements)
+            SET markers[origin] = True
+            LET peak_time = 0
+
+            WHILE (LENGTH(deque_structure) > 0)
+                LET current_pair = deque_structure.pop_front()
+                LET position = current_pair[0]
+                LET elapsed = current_pair[1]
+
+                IF elapsed > peak_time THEN
+                    peak_time = elapsed
+                END IF
+
+                LET neighbors_list = adjacency_map[position]
+                FOR EACH adj_node IN neighbors_list
+                    IF markers[adj_node] == False THEN
+                        markers[adj_node] = True
+                        LET val_to_add = (adj_node % 2 == 0) ? 2 : 1
+                        CALL deque_structure.append((adj_node, elapsed + val_to_add))
+                    END IF
+                END FOR
+            END WHILE
+
+            RETURN peak_time
+        END FUNCTION
+
+        LET answers = ARRAY_WITH_VALUE(count_elements, 0)
+        LET i = 0
+        WHILE i < count_elements
+            SET answers[i] = bfs(i)
+            i = i + 1
+        END WHILE
+
+        RETURN answers
+    END FUNCTION
+END CLASS

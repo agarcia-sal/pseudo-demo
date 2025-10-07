@@ -1,0 +1,73 @@
+CLASS Solution
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+        ASSIGN CONST_MOD WITH 1_000_000_001
+
+        DEFINE transition AS list WITH 26 ELEMENTS EACH BEING list WITH 26 ZEROS
+        SET idx_outer TO 0
+        WHILE idx_outer < 26
+            SET upper_bound TO nums[idx_outer]
+            SET idx_inner TO 0
+            WHILE idx_inner < upper_bound
+                SET target_pos TO (idx_outer + idx_inner + 1) MOD 26
+                transition[idx_outer][target_pos] <- transition[idx_outer][target_pos] + 1
+                idx_inner <- idx_inner + 1
+            END WHILE
+            idx_outer <- idx_outer + 1
+        END WHILE
+
+        FUNCTION matrix_multiply(A parameter A IS list of lists of integers B parameter B IS list of lists of integers) RETURNS list of lists of integers
+            LET R BE list WITH 26 ELEMENTS EACH BEING list WITH 26 ZEROS
+            FOR row FROM 0 TO 25 DO
+                col SET TO 0
+                WHILE col < 26 DO
+                    acc <- 0
+                    k_iter <- 0
+                    WHILE k_iter < 26 DO
+                        acc <- acc + (A[row][k_iter] * B[k_iter][col])
+                        k_iter <- k_iter + 1
+                    END WHILE
+                    R[row][col] <- acc MOD CONST_MOD
+                    col <- col + 1
+                END WHILE
+            END FOR
+            RETURN R
+        END FUNCTION
+
+        FUNCTION matrix_power(matrix parameter matrix IS list of lists of integers power parameter power IS integer) RETURNS list of lists of integers
+            LET I BE list WITH 26 ELEMENTS WHERE EACH IS list WITH 26 ELEMENTS: FOR i FROM 0 TO 25 AND j FROM 0 TO 25 SET TO 1 IF i = j ELSE 0
+            LET base_matrix BE matrix
+            LET exponent BE power
+            WHILE exponent > 0
+                IF exponent MOD 2 = 1 THEN
+                    I <- matrix_multiply(I, base_matrix)
+                END IF
+                base_matrix <- matrix_multiply(base_matrix, base_matrix)
+                exponent <- exponent DIV 2
+            END WHILE
+            RETURN I
+        END FUNCTION
+
+        LET powered_matrix BE matrix_power(transition, t)
+
+        LET count_vec BE list OF 26 ZEROS
+        FOR EACH character IN s DO
+            LET char_ind BE ASCII_VALUE(character) - ASCII_VALUE('a')
+            count_vec[char_ind] <- count_vec[char_ind] + 1
+        END FOR
+
+        LET final_vector BE list OF 26 ZEROS
+        FOR ind_i FROM 0 TO 25
+            FOR ind_j FROM 0 TO 25
+                LET prod_val BE (count_vec[ind_i] * powered_matrix[ind_i][ind_j]) MOD CONST_MOD
+                final_vector[ind_j] <- (final_vector[ind_j] + prod_val) MOD CONST_MOD
+            END FOR
+        END FOR
+
+        LET result_sum BE 0
+        FOR val IN final_vector DO
+            result_sum <- (result_sum + val) MOD CONST_MOD
+        END FOR
+
+        RETURN result_sum
+    END FUNCTION
+END CLASS

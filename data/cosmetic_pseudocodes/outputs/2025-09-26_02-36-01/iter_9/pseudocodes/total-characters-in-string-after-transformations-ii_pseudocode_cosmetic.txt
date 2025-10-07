@@ -1,0 +1,139 @@
+CLASS Solution
+    FUNCTION lengthAfterTransformations(s parameter s IS string t parameter t IS integer nums parameter nums IS list of integers) RETURNS integer
+        CONST MODULO_VALUE IS (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+        
+        PROCEDURE initializeZeroMatrix(rows parameter rows IS integer cols parameter cols IS integer) RETURNS list of lists of integers
+            SET matrix_out TO empty list
+            SET outer_index TO 0
+            WHILE outer_index NOT EQUAL TO rows
+                SET inner_list TO empty list
+                SET inner_index TO 0
+                REPEAT
+                    IF inner_index EQUALS cols THEN EXIT REPEAT
+                    APPEND 0 TO inner_list
+                    SET inner_index TO inner_index + 1
+                UNTIL FALSE
+                APPEND inner_list TO matrix_out
+                SET outer_index TO outer_index + 1
+            END WHILE
+            RETURN matrix_out
+        END PROCEDURE
+
+        SET transformation TO initializeZeroMatrix(26, 26)
+        
+        SET primary_counter TO 0
+        REPEAT
+            IF primary_counter GREATER THAN 25 THEN EXIT REPEAT
+            SET steps TO 0
+            REPEAT
+                IF steps GREATER OR EQUAL TO nums element at primary_counter THEN EXIT REPEAT
+                SET target_index TO ((primary_counter + steps + 1) MOD 26)
+                ADD 1 TO transformation element at [primary_counter][target_index]
+                SET steps TO steps + 1
+            UNTIL FALSE
+            SET primary_counter TO primary_counter + 1
+        UNTIL FALSE
+
+        FUNCTION multiplyMatrices(first parameter first IS list of lists of integers second parameter second IS list of lists of integers) RETURNS list of lists of integers
+            SET rows_count TO 26
+            SET cols_count TO 26
+            SET k_limit TO 26
+            SET product_matrix TO initializeZeroMatrix(rows_count, cols_count)
+            
+            SET row_iter TO 0
+            while row_iter LESS THAN rows_count DO
+                SET col_iter TO 0
+                WHILE col_iter LESS THAN cols_count
+                    SET sum_accumulator TO 0
+                    SET index_k TO 0
+                    REPEAT
+                        IF index_k EQUALS k_limit THEN EXIT REPEAT
+                        SET temp1 TO first element at [row_iter][index_k]
+                        SET temp2 TO second element at [index_k][col_iter]
+                        SET sum_accumulator TO (sum_accumulator + (temp1 * temp2)) MODULO MODULO_VALUE
+                        SET index_k TO index_k + 1
+                    UNTIL FALSE
+                    SET product_matrix element at [row_iter][col_iter] TO sum_accumulator
+                    SET col_iter TO col_iter + 1
+                END WHILE
+                SET row_iter TO row_iter + 1
+            END WHILE
+            
+            RETURN product_matrix
+        END FUNCTION
+
+        FUNCTION powerMatrix(input_mat parameter input_mat IS list of lists of integers exp parameter exp IS integer) RETURNS list of lists of integers
+            PROCEDURE generateIdentity(size parameter size IS integer) RETURNS list of lists of integers
+                SET id_mat TO initializeZeroMatrix(size, size)
+                SET idx TO 0
+                WHILE idx LESS THAN size
+                    SET id_mat element at [idx][idx] TO 1
+                    SET idx TO idx + 1
+                END WHILE
+                RETURN id_mat
+            END PROCEDURE
+
+            SET result_mat TO generateIdentity(26)
+            SET base_mat TO input_mat
+            SET power_val TO exp
+
+            WHILE power_val GREATER THAN 0
+                IF (power_val MOD 2) EQUALS 1
+                    SET result_mat TO multiplyMatrices(result_mat, base_mat)
+                END IF
+                SET base_mat TO multiplyMatrices(base_mat, base_mat)
+                SET power_val TO power_val DIV 2
+            END WHILE
+
+            RETURN result_mat
+        END FUNCTION
+
+        SET final_transform_matrix TO powerMatrix(transformation, t)
+
+        PROCEDURE countLetters(word parameter word IS string) RETURNS list of integers
+            SET counts TO list filled with 26 zeros
+            SET position TO 0
+            REPEAT
+                IF position EQUALS LENGTH(word) THEN EXIT REPEAT
+                SET current_char TO word element at position
+                SET char_pos TO ASCII code of current_char MINUS ASCII code of 'a'
+                SET counts element at char_pos TO counts element at char_pos + 1
+                SET position TO position + 1
+            UNTIL FALSE
+            RETURN counts
+        END PROCEDURE
+
+        SET initial_counts TO countLetters(s)
+
+        PROCEDURE multiplyVectorMatrix(vec parameter vec IS list of integers mat parameter mat IS list of lists of integers) RETURNS list of integers
+            SET result_vec TO list filled with 26 zeros
+            SET col_idx TO 0
+            WHILE col_idx LESS THAN 26
+                SET val_accum TO 0
+                SET row_idx TO 0
+                REPEAT
+                    IF row_idx EQUALS 26 THEN EXIT REPEAT
+                    SET val_accum TO (val_accum + (vec element at row_idx) * (mat element at [row_idx][col_idx])) MODULO MODULO_VALUE
+                    SET row_idx TO row_idx + 1
+                UNTIL FALSE
+                SET result_vec element at col_idx TO val_accum
+                SET col_idx TO col_idx + 1
+            END WHILE
+            RETURN result_vec
+        END PROCEDURE
+
+        SET transformed_counts TO multiplyVectorMatrix(initial_counts, final_transform_matrix)
+
+        FUNCTION sumElements(lst parameter lst IS list of integers) RETURNS integer
+            SET aggregate TO 0
+            SET idx TO 0
+            WHILE idx LESS THAN LENGTH(lst)
+                SET aggregate TO (aggregate + lst element at idx) MODULO MODULO_VALUE
+                SET idx TO idx + 1
+            END WHILE
+            RETURN aggregate
+        END FUNCTION
+
+        RETURN sumElements(transformed_counts)
+    END FUNCTION
+END CLASS

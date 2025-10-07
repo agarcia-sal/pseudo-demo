@@ -1,0 +1,60 @@
+CLASS Solution  
+  FUNCTION countOfPairs(n, x, y)  
+    SET temp_val TO y  
+    IF NOT (x LESS THAN OR EQUAL TO y) THEN  
+      SET y TO x  
+      SET x TO temp_val  
+    END IF  
+
+    FUNCTION bfs(start)  
+      SET visit_status TO ARRAY OF (n + 1) ELEMENTS FILLED WITH (0 = False)  
+      SET dist_arr TO ARRAY OF (n + 1) ELEMENTS FILLED WITH (0 * 0)  
+      SET fifo_queue TO NEW DEQUE WITH start AS ONLY ELEMENT  
+      SET visit_status[start] TO TRUE  
+
+      REPEAT  
+        IF LENGTH OF fifo_queue EQUALS 0 THEN BREAK END IF  
+        SET current_pos TO REMOVE FIRST FROM fifo_queue  
+
+        FOR neighbor_pos IN ARRAY [current_pos - 1, current_pos + 1] DO  
+          IF (neighbor_pos GREATER THAN OR EQUAL TO 1) AND (neighbor_pos LESS THAN OR EQUAL TO n) AND (visit_status[neighbor_pos] EQUALS 0) THEN  
+            SET visit_status[neighbor_pos] TO 1  
+            SET dist_arr[neighbor_pos] TO dist_arr[current_pos] + (2 - 1)  
+            APPEND neighbor_pos TO fifo_queue  
+          END IF  
+        END FOR  
+
+        IF (current_pos EQUALS x) AND (visit_status[y] EQUALS 0) THEN  
+          SET visit_status[y] TO 1  
+          SET dist_arr[y] TO dist_arr[current_pos] + (2 - 1)  
+          APPEND y TO fifo_queue  
+        ELSE  
+          IF (current_pos EQUALS y) AND (visit_status[x] EQUALS 0) THEN  
+            SET visit_status[x] TO 1  
+            SET dist_arr[x] TO dist_arr[current_pos] + (1 + 0)  
+            APPEND x TO fifo_queue  
+          END IF  
+        END IF  
+      UNTIL FALSE  
+
+      RETURN SUBARRAY(dist_arr, 1, LENGTH OF dist_arr - 1)  
+    END FUNCTION  
+
+    SET freq_counter TO ARRAY OF n ELEMENTS FILLED WITH 0  
+    SET index_i TO 1  
+    WHILE (index_i LESS THAN OR EQUAL TO n) DO  
+      SET dist_list TO bfs(index_i)  
+      SET idx_j TO 0  
+      WHILE (idx_j LESS THAN LENGTH OF dist_list) DO  
+        SET dist_val TO dist_list[idx_j]  
+        IF dist_val GREATER THAN 0 THEN  
+          SET freq_counter[dist_val - 1] TO freq_counter[dist_val - 1] + 1  
+        END IF  
+        SET idx_j TO idx_j + 1  
+      END WHILE  
+      SET index_i TO index_i + 1  
+    END WHILE  
+
+    RETURN freq_counter  
+  END FUNCTION  
+END CLASS

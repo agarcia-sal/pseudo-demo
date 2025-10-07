@@ -1,0 +1,71 @@
+CLASS Solution
+	FUNCTION maxTotalReward(rewardValues)
+		SET G TO NEW SET()
+		FOR i FROM 0 TO LENGTH(rewardValues) - 1
+			CALL addToSet(G, rewardValues[i])
+		END FOR
+		
+		RETURN computeBitLength(processSet(G)) - 1
+	END FUNCTION
+	
+	FUNCTION addToSet(targetSet, element)
+		IF NOT contains(targetSet, element)
+			targetSet = insert(targetSet, element)
+		END IF
+	END FUNCTION
+	
+	FUNCTION contains(s, x)
+		FOR EACH y IN s
+			IF y = x
+				RETURN true
+			END IF
+		END FOR
+		RETURN false
+	END FUNCTION
+	
+	FUNCTION insert(s, x)
+		RETURN s union {x}
+	END FUNCTION
+	
+	FUNCTION processSet(S)
+		SET h TO 1
+		SET iterator TO createIterator(S)
+		RETURN processElementsRec(iterator, h)
+	END FUNCTION
+	
+	FUNCTION processElementsRec(it, acc)
+		IF NOT hasNext(it)
+			RETURN acc
+		END IF
+		SET currentValue TO next(it)
+		SET shiftedTo TO (1 << currentValue)
+		SET tempVal TO (acc & (shiftedTo - 1))
+		SET combined TO tempVal << currentValue
+		SET newAcc TO acc | combined
+		RETURN processElementsRec(it, newAcc)
+	END FUNCTION
+	
+	FUNCTION computeBitLength(n)
+		SET count TO 0
+		SET value TO n
+		REPEAT
+			value = value >> 1
+			count = count + 1
+		UNTIL value = 0
+		RETURN count
+	END FUNCTION
+	
+	FUNCTION createIterator(s)
+		RETURN NEW iteratorObject with elements s and index 0
+	END FUNCTION
+	
+	FUNCTION hasNext(it)
+		RETURN it.index < LENGTH(it.elements)
+	END FUNCTION
+	
+	FUNCTION next(it)
+		SET result TO it.elements[it.index]
+		it.index = it.index + 1
+		RETURN result
+	END FUNCTION
+END CLASS

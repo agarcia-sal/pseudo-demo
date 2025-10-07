@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION getSum(nums)
+        FUNCTION calc(seq)
+            LET lengthVal BE LENGTH OF seq
+            LET leftCounts BE NEW LIST lengthVal OF 0
+            LET rightCounts BE NEW LIST lengthVal OF 0
+
+            LET tally1 BE NEW counter
+            LET index1 BE 1
+            WHILE index1 < lengthVal
+                LET prevElem BE seq[index1 - 1]
+                LET baseCount BE tally1[prevElem - 1] OR 0
+                LET incrementedCount BE 1 + baseCount
+                tally1[prevElem - 1] = incrementedCount
+                leftCounts[index1] = incrementedCount
+                SET index1 TO index1 + 1
+            END WHILE
+
+            LET tally2 BE NEW counter
+            LET index2 BE lengthVal - 2
+            WHILE index2 >= 0
+                LET nextElem BE seq[index2 + 1]
+                LET baseCount2 BE tally2[nextElem + 1] OR 0
+                LET incrementedCount2 BE 1 + baseCount2
+                tally2[nextElem + 1] = incrementedCount2
+                rightCounts[index2] = incrementedCount2
+                SET index2 TO index2 - 1
+            END WHILE
+
+            LET aggregateSum BE 0
+            LET position BE 0
+            WHILE position < lengthVal
+                LET val1 BE leftCounts[position]
+                LET val2 BE rightCounts[position]
+                LET baseVal BE seq[position]
+                LET partialSum BE (val1 + val2 + (val1 * val2)) * baseVal
+                aggregateSum = aggregateSum + partialSum
+                SET position TO position + 1
+            END WHILE
+
+            RETURN aggregateSum MOD (10^9 + 7)
+        END FUNCTION
+
+        LET moduloBase BE 1000000007
+        LET firstCalc BE calc(nums)
+        LET reversedNums BE REVERSE OF nums
+        LET secondCalc BE calc(reversedNums)
+        LET totalSum BE firstCalc + secondCalc + SUM OF nums
+
+        RETURN totalSum MOD moduloBase
+    END FUNCTION
+END CLASS

@@ -1,0 +1,53 @@
+CLASS Solution
+    FUNCTION isArraySpecial(nums, queries)
+        FUNCTION modTwo(value)
+            RETURN value - (value / 2) * 2
+        END FUNCTION
+
+        FUNCTION boolToInt(flag)
+            IF flag = TRUE RETURN 1 ELSE RETURN 0 END IF
+        END FUNCTION
+
+        SET parity_sequence TO empty list
+        PROCEDURE build_parity(index)
+            IF index >= LENGTH nums THEN RETURN END IF
+            APPEND modTwo(nums[index]) TO parity_sequence
+            CALL build_parity(index + 1)
+        END PROCEDURE
+        CALL build_parity(0)
+
+        SET prefix_special TO list of zeros with size LENGTH nums
+        FUNCTION fill_prefix(index)
+            IF index >= LENGTH nums THEN RETURN END IF
+            IF parity_sequence[index] <> parity_sequence[index - 1]
+                THEN prefix_special[index] <- prefix_special[index - 1]
+                ELSE prefix_special[index] <- prefix_special[index - 1] + 1
+            END IF
+            CALL fill_prefix(index + 1)
+        END FUNCTION
+        IF LENGTH nums > 0 THEN CALL fill_prefix(1) END IF
+
+        SET output_list TO empty list
+        FUNCTION process_queries(idx)
+            IF idx >= LENGTH queries THEN RETURN END IF
+            SET start_pos TO queries[idx][0]
+            SET end_pos TO queries[idx][1]
+
+            IF start_pos = end_pos THEN
+                APPEND TRUE TO output_list
+            ELSE
+                IF start_pos > 0
+                    THEN SET diff TO prefix_special[end_pos] - prefix_special[start_pos]
+                    ELSE SET diff TO prefix_special[end_pos] - 0
+                END IF
+
+                SET check TO (diff = 0)
+                APPEND check TO output_list
+            END IF
+            CALL process_queries(idx + 1)
+        END FUNCTION
+        CALL process_queries(0)
+
+        RETURN output_list
+    END FUNCTION
+END CLASS

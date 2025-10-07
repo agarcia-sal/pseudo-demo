@@ -1,0 +1,59 @@
+FUNCTION largest_smallest_integers(list_of_numbers)
+  DEFINE FUNCTION recursive_filter_negatives(collection, position, accumulator)
+    IF position = LENGTH(collection)
+      EXECUTE accumulator
+    ELSE
+      IF NOT (collection[position] >= 0)
+        EXECUTE recursive_filter_negatives(collection, position + 1, accumulator + [collection[position]])
+      ELSE
+        EXECUTE recursive_filter_negatives(collection, position + 1, accumulator)
+  END FUNCTION
+
+  DEFINE FUNCTION recursive_filter_positives(collection, count, gather)
+    IF count = LENGTH(collection)
+      EXECUTE gather
+    ELSE
+      IF (collection[count] > 0)
+        EXECUTE recursive_filter_positives(collection, count + 1, gather + [collection[count]])
+      ELSE
+        EXECUTE recursive_filter_positives(collection, count + 1, gather)
+  END FUNCTION
+
+  DEFINE FUNCTION fold_maximum(numbers, idx, current_maximum)
+    IF idx >= LENGTH(numbers)
+      EXECUTE current_maximum
+    ELSE
+      IF numbers[idx] > current_maximum
+        EXECUTE fold_maximum(numbers, idx + 1, numbers[idx])
+      ELSE
+        EXECUTE fold_maximum(numbers, idx + 1, current_maximum)
+  END FUNCTION
+
+  DEFINE FUNCTION fold_minimum(numbers, offset, current_minimum)
+    IF offset >= LENGTH(numbers)
+      EXECUTE current_minimum
+    ELSE
+      IF numbers[offset] < current_minimum
+        EXECUTE fold_minimum(numbers, offset + 1, numbers[offset])
+      ELSE
+        EXECUTE fold_minimum(numbers, offset + 1, current_minimum)
+  END FUNCTION
+
+  SET negatives_filtered TO recursive_filter_negatives(list_of_numbers, 0, [])
+  SET positives_filtered TO recursive_filter_positives(list_of_numbers, 0, [])
+
+  SWITCH LENGTH(negatives_filtered) IS EQUAL TO 0
+    CASE TRUE
+      SET max_neg_val TO None
+    CASE FALSE
+      SET max_neg_val TO fold_maximum(negatives_filtered, 0, negatives_filtered[0])
+  END SWITCH
+
+  CASE LENGTH(positives_filtered) NOT EQUAL 0
+    SET min_pos_val TO fold_minimum(positives_filtered, 0, positives_filtered[0])
+  ELSE
+    SET min_pos_val TO None
+  END CASE
+
+  YIELD (max_neg_val, min_pos_val)
+END FUNCTION

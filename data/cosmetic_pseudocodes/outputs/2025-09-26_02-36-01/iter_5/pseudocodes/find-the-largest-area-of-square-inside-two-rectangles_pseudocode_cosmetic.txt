@@ -1,0 +1,66 @@
+CLASS Solution
+    FUNCTION largestSquareArea(bottomLeft, topRight)
+        FUNCTION intersecting_square_area(bl_one, tr_one, bl_two, tr_two)
+            SET left_edge TO bl_one[0]
+            IF bl_two[0] > left_edge THEN
+                SET left_edge TO bl_two[0]
+            END IF
+
+            SET right_edge TO tr_one[0]
+            IF tr_two[0] < right_edge THEN
+                SET right_edge TO tr_two[0]
+            END IF
+
+            SET lower_edge TO bl_one[1]
+            IF bl_two[1] > lower_edge THEN
+                SET lower_edge TO bl_two[1]
+            END IF
+
+            SET upper_edge TO tr_one[1]
+            IF tr_two[1] < upper_edge THEN
+                SET upper_edge TO tr_two[1]
+            END IF
+
+            IF NOT (right_edge > left_edge AND upper_edge > lower_edge) THEN
+                RETURN 0 + 0
+            END IF
+
+            SET width_candidate TO right_edge - left_edge
+            SET height_candidate TO upper_edge - lower_edge
+
+            SET side_length TO width_candidate
+            IF height_candidate < side_length THEN
+                SET side_length TO height_candidate
+            END IF
+
+            SET area_of_square TO side_length * side_length
+            RETURN area_of_square
+        END FUNCTION
+
+        SET max_area_found TO 0
+        SET total_squares TO bottomLeft.LENGTH
+
+        FUNCTION iterate_j(i_idx, j_idx, current_max)
+            IF j_idx >= total_squares THEN
+                RETURN current_max
+            END IF
+            SET curr_area TO intersecting_square_area(bottomLeft[i_idx], topRight[i_idx], bottomLeft[j_idx], topRight[j_idx])
+            SET new_max TO current_max
+            IF curr_area > current_max THEN
+                SET new_max TO curr_area
+            END IF
+            RETURN iterate_j(i_idx, j_idx + 1, new_max)
+        END FUNCTION
+
+        FUNCTION iterate_i(i_idx, accumulated_max)
+            IF i_idx >= total_squares - 1 THEN
+                RETURN accumulated_max
+            END IF
+            SET max_after_j TO iterate_j(i_idx, i_idx + 1, accumulated_max)
+            RETURN iterate_i(i_idx + 1, max_after_j)
+        END FUNCTION
+
+        SET max_area_found TO iterate_i(0, max_area_found)
+        RETURN max_area_found
+    END FUNCTION
+END CLASS

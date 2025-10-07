@@ -1,0 +1,48 @@
+```
+FUNCTION histogram(test_string_param)
+  DECLARE freq_map AS DICTIONARY = {}
+  DECLARE letters_queue AS QUEUE = ENQUEUE_ALL(EMPTY_QUEUE, SPLIT(test_string_param, " "))
+  DECLARE max_freq AS INTEGER = 0
+
+  PROCEDURE find_max_frequency(queue_param)
+    IF IS_EMPTY(queue_param) THEN RETURN
+    DECLARE current_element AS STRING = DEQUEUE(queue_param)
+    IF current_element != "" THEN
+      DECLARE count_current AS INTEGER = 0
+      PROCEDURE count_occurrences(q, target)
+        IF IS_EMPTY(q) THEN RETURN 0
+        DECLARE head AS STRING = DEQUEUE(q)
+        RETURN (IF head == target THEN 1 ELSE 0) + count_occurrences(q, target)
+      END PROCEDURE
+      count_current = count_occurrences(COPY_QUEUE(letters_queue), current_element)
+      IF max_freq < count_current THEN max_freq = count_current
+    END IF
+    find_max_frequency(queue_param)
+  END PROCEDURE
+
+  find_max_frequency(COPY_QUEUE(letters_queue))
+
+  IF max_freq > 0 THEN
+    DECLARE index AS INTEGER = 0
+    WHILE index < LENGTH(letters_queue) DO
+      DECLARE current_letter AS STRING = PEEK_AT(letters_queue, index)
+      IF current_letter != "" THEN
+        DECLARE freq_check AS INTEGER = 0
+        DECLARE counter As INTEGER = 0
+        WHILE counter < LENGTH(letters_queue) DO
+          IF PEEK_AT(letters_queue, counter) == current_letter THEN
+            freq_check = freq_check + 1
+          END IF
+          counter = counter + 1
+        END WHILE
+        IF freq_check == max_freq THEN
+          freq_map[current_letter] = max_freq
+        END IF
+      END IF
+      index = index + 1
+    END WHILE
+  END IF
+
+  RETURN freq_map
+END FUNCTION
+```

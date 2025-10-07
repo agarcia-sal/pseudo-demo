@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION maximumTotalDamage(power)
+        FUNCTION recProcess(pos, uniqPwr, freqMap, memo)  
+            IF pos LESS THAN 0 THEN
+                RETURN 0
+            ENDIF
+
+            IF memo CONTAINS pos THEN
+                RETURN memo[pos]
+            ENDIF
+
+            LET currPwr BE uniqPwr[pos]
+            LET exclVal BE recProcess(pos - 1, uniqPwr, freqMap, memo)
+
+            LET incVal INITIAL  = currPwr * freqMap[currPwr]
+            LET checkIdx BE pos - 1
+
+            WHILE (checkIdx >= 0) AND (uniqPwr[checkIdx] >= currPwr - 2)
+                SET checkIdx TO checkIdx - 1
+            ENDWHILE
+
+            IF checkIdx >= 0 THEN
+                SET incVal TO incVal + recProcess(checkIdx, uniqPwr, freqMap, memo)
+            ENDIF
+
+            LET resultVal BE (incVal > exclVal) ? incVal : exclVal
+            SET memo[pos] TO resultVal
+            RETURN resultVal
+        END FUNCTION
+
+        LET frequencyMapping BE empty mapping
+        FOR each element IN power
+            IF element NOT IN frequencyMapping THEN
+                SET frequencyMapping[element] TO 0
+            ENDIF
+            SET frequencyMapping[element] TO frequencyMapping[element] + 1
+        ENDFOR
+
+        LET distinctPowers BE empty list
+        FOR key IN frequencyMapping
+            append key TO distinctPowers
+        ENDFOR
+
+        SORT distinctPowers in ascending order
+
+        LET dynamicProgMemo BE empty mapping
+
+        LET finalMaxDamage BE recProcess(length(distinctPowers) - 1, distinctPowers, frequencyMapping, dynamicProgMemo)
+
+        RETURN finalMaxDamage
+    END FUNCTION
+END CLASS

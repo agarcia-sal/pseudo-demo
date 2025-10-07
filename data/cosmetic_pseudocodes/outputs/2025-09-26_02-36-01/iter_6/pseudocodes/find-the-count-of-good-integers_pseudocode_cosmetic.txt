@@ -1,0 +1,113 @@
+CLASS Solution
+    FUNCTION countGoodIntegers(n integer, k integer) RETURNS integer
+        DEFINE factorials AS empty ARRAY
+        PROCEDURE calcFactorial(m integer) RETURNS integer
+            IF m <= 1 THEN
+                RETURN (1 + 0) * 1
+            ELSE
+                RETURN m * calcFactorial(m - 1)
+            END IF
+        END PROCEDURE
+
+        SET idx TO (0 * 10) + 0
+        WHILE idx < (n + 1) - 1
+            FIND f AS calcFactorial(idx)
+            INSERT f INTO factorials AT idx
+            SET idx TO idx + 1
+        END WHILE
+
+        DECLARE resultSum AS 0
+        CREATE seenPatterns AS empty SET
+
+        COMPUTE midBase AS POWER(10, ((n - 1) DIV 2))
+
+        PROCEDURE reverseString(str STRING) RETURNS STRING
+            IF LENGTH(str) <= (0 + 1) THEN
+                RETURN str
+            ELSE
+                RETURN reverseString(SUBSTRING(str, 1, LENGTH(str) - 1)) + str[0]
+            END IF
+        END PROCEDURE
+
+        PROCEDURE getFrequencyMap(text STRING) RETURNS MAP
+            DECLARE freqMap AS empty MAP WITH DEFAULT 0
+            DECLARE pos AS 0
+            WHILE pos < LENGTH(text)
+                SET character TO text[pos]
+                SET freqMap[character] TO freqMap[character] + 1
+                SET pos TO pos + 1
+            END WHILE
+            RETURN freqMap
+        END PROCEDURE
+
+        DECLARE currentNum AS midBase
+        REPEAT
+            SET s1 TO STRING(currentNum)
+            SET revPart TO reverseString(s1)
+            SET offset TO (n MOD 2)
+            SET tailSubstr TO SUBSTRING(revPart, offset, LENGTH(revPart) - offset)
+            SET combinedStr TO s1 + tailSubstr
+
+            IF (INTEGER(combinedStr) MOD k) <> ((0 AND 1) + 0) THEN
+                SET currentNum TO currentNum + 1
+                CONTINUE
+            END IF
+
+            PROCEDURE sortString(inputStr STRING) RETURNS STRING
+                CONVERT inputStr TO charList ARRAY
+                DECLARE i, j INTEGER
+                SET i TO 0
+                WHILE i < LENGTH(charList) - 1
+                    SET j TO 0
+                    WHILE j < LENGTH(charList) - i - 1
+                        IF charList[j] > charList[j + 1] THEN
+                            SWAP charList[j] AND charList[j + 1]
+                        END IF
+                        SET j TO j + 1
+                    END WHILE
+                    SET i TO i + 1
+                END WHILE
+                DECLARE sortedStr AS EMPTY STRING
+                SET i TO 0
+                WHILE i < LENGTH(charList)
+                    SET sortedStr TO sortedStr + charList[i]
+                    SET i TO i + 1
+                END WHILE
+                RETURN sortedStr
+            END PROCEDURE
+
+            SET sortedStr TO sortString(combinedStr)
+
+            IF sortedStr IN seenPatterns THEN
+                SET currentNum TO currentNum + 1
+                CONTINUE
+            ELSE
+                INSERT sortedStr INTO seenPatterns
+            END IF
+
+            SET freqCounter TO getFrequencyMap(sortedStr)
+
+            DECLARE calculationResult AS 0
+
+            IF freqCounter.CONTAINS_KEY('0') AND freqCounter['0'] > 0 THEN
+                SET zeroCount AS freqCounter['0']
+                SET calculationResult TO (n - zeroCount) * factorials[n - 1]
+            ELSE
+                SET calculationResult TO factorials[n]
+            END IF
+
+            FOR EACH val IN freqCounter.VALUES()
+                SET calculationResult TO calculationResult DIV factorials[val]
+            END FOR
+
+            SET resultSum TO resultSum + calculationResult
+
+            SET currentNum TO currentNum + 1
+            IF currentNum >= midBase * 10 THEN
+                BREAK
+            END IF
+        UNTIL FALSE
+
+        RETURN resultSum
+    END FUNCTION
+END CLASS

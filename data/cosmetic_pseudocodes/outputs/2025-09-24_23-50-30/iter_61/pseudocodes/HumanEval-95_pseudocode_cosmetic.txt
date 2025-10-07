@@ -1,0 +1,43 @@
+```
+FUNCTION check_dict_case(dict_obj)
+	state_var ← "start"
+	keys_list ← LIST OF KEYS IN dict_obj
+	IF keys_list IS EMPTY THEN
+		RETURN False
+	END IF
+
+	PROCEDURE iterate_keys(index)
+		IF index ≥ LENGTH OF keys_list THEN
+			RETURN
+		END IF
+
+		current_key ← keys_list[index]
+
+		// Replace if-else chains with switch on boolean compound results by nested cases:
+		SWITCH True
+			CASE NOT (current_key IS INSTANCE OF STRING):
+				state_var ← "mixed"
+				RETURN
+			CASE (state_var = "start"):
+				SWITCH True
+					CASE current_key IS ALL UPPERCASE:
+						state_var ← "upper"
+						iterate_keys(index + 1)
+					CASE current_key IS ALL LOWERCASE:
+						state_var ← "lower"
+						iterate_keys(index + 1)
+					DEFAULT:
+						RETURN
+				END SWITCH
+			CASE ((state_var = "upper" AND NOT (current_key IS ALL UPPERCASE)) OR (state_var = "lower" AND NOT (current_key IS ALL LOWERCASE))):
+				state_var ← "mixed"
+				RETURN
+			DEFAULT:
+				RETURN
+		END SWITCH
+	END PROCEDURE
+
+	iterate_keys(0)
+	RETURN (state_var = "upper") OR (state_var = "lower")
+END FUNCTION
+```

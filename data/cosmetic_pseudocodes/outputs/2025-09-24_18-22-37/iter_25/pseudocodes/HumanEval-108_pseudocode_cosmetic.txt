@@ -1,0 +1,45 @@
+FUNCTION count_nums(sequence_of_values)
+        
+    FUNCTION digits_sum(num_param)
+        SET polarity_factor <- 1
+        IF num_param < 0 THEN
+            SET num_param <- num_param * (-1)
+            SET polarity_factor <- -1
+        END IF
+
+        SET digits_str <- TO_STRING(num_param)
+        SET digit_chars_list <- EMPTY LIST
+        FOR index_var FROM 0 TO (LENGTH(digits_str) - 1) DO
+            APPEND TO digit_chars_list INTEGER_OF(digits_str[index_var])
+        END FOR
+
+        SET first_digit_modified <- digit_chars_list[0] * polarity_factor
+        SET digit_chars_list[0] <- first_digit_modified
+        
+        SET total_sum <- 0
+        FOR val IN digit_chars_list DO
+            SET total_sum <- total_sum + val
+        END FOR
+
+        RETURN total_sum
+    END FUNCTION
+
+    SET results_accumulator <- EMPTY LIST
+    SET iterator_idx <- 0
+    WHILE iterator_idx < LENGTH(sequence_of_values)
+        SET current_elem <- sequence_of_values[iterator_idx]
+        SET computed_sum <- digits_sum(current_elem)
+        APPEND computed_sum TO results_accumulator
+        SET iterator_idx <- iterator_idx + 1
+    END WHILE
+
+    SET positive_sums <- EMPTY LIST
+    FOR entry_index FROM 0 TO (LENGTH(results_accumulator) - 1)
+        SET current_entry <- results_accumulator[entry_index]
+        IF NOT (current_entry <= 0) THEN
+            APPEND current_entry TO positive_sums
+        END IF
+    END FOR
+
+    RETURN LENGTH(positive_sums)
+END FUNCTION

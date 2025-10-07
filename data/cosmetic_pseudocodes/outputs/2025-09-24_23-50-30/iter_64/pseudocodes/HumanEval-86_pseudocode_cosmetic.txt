@@ -1,0 +1,83 @@
+```
+FUNCTION anti_shuffle(original_input)
+    DECLARE index_counter := 0
+    DECLARE intermediate_collection := []
+    DECLARE temporary_storage_1 := []
+    
+    PROCEDURE process_word_collection()
+        IF index_counter >= LENGTH(temporary_storage_1) THEN
+            RETURN
+        ELSE
+            DECLARE current_element := temporary_storage_1[index_counter]
+            DECLARE temporary_storage_2 := TO_LIST_OF_CHARACTERS(current_element)
+            
+            DECLARE sorted_sequence := []
+            DECLARE recursion_position := 0
+
+            PROCEDURE sort_characters_recursively()
+                IF recursion_position >= LENGTH(temporary_storage_2) THEN
+                    RETURN
+                ELSE
+                    DECLARE key := temporary_storage_2[recursion_position]
+                    DECLARE inner_pos := recursion_position - 1
+                    WHILE inner_pos >= 0 AND temporary_storage_2[inner_pos] > key DO
+                        temporary_storage_2[inner_pos + 1] := temporary_storage_2[inner_pos]
+                        inner_pos := inner_pos - 1
+                    END WHILE
+                    temporary_storage_2[inner_pos + 1] := key
+                    recursion_position := recursion_position + 1
+                    sort_characters_recursively()
+                END IF
+            END PROCEDURE
+
+            sort_characters_recursively()
+            
+            DECLARE combined_element := ""
+            FOR char_index FROM 0 TO LENGTH(temporary_storage_2) - 1 DO
+                combined_element := combined_element + temporary_storage_2[char_index]
+            END FOR
+
+            APPEND combined_element TO sorted_sequence
+            APPEND combined_element TO intermediate_collection
+            index_counter := index_counter + 1
+            process_word_collection()
+        END IF
+    END PROCEDURE
+
+    SET temporary_storage_1 := []
+    FOR temp_i IN RANGE 0 TO LENGTH(original_input) - 1 DO
+        DECLARE temp_char := original_input[temp_i]
+        IF temp_char != ' ' THEN
+            IF LENGTH(temporary_storage_1) = 0 THEN
+                APPEND temp_char TO temporary_storage_1
+            ELSE
+                DECLARE last_string := temporary_storage_1[LENGTH(temporary_storage_1) - 1]
+                DECLARE last_char := last_string[LENGTH(last_string) - 1]
+                IF last_char == ' ' THEN
+                    APPEND temp_char TO temporary_storage_1
+                ELSE
+                    temporary_storage_1[LENGTH(temporary_storage_1) - 1] := last_string + temp_char
+                END IF
+            END IF
+        ELSE
+            APPEND " " TO temporary_storage_1
+        END IF
+    END FOR
+
+    IF LENGTH(temporary_storage_1) = 0 THEN
+        RETURN ""
+    END IF
+
+    process_word_collection()
+
+    DECLARE output_accumulator := ""
+    FOR index_var  FROM 0 TO LENGTH(intermediate_collection) - 1 DO
+        output_accumulator := output_accumulator + intermediate_collection[index_var]
+        IF index_var < LENGTH(intermediate_collection) - 1 THEN
+            output_accumulator := output_accumulator + " "
+        END IF
+    END FOR
+
+    RETURN output_accumulator
+END FUNCTION
+```

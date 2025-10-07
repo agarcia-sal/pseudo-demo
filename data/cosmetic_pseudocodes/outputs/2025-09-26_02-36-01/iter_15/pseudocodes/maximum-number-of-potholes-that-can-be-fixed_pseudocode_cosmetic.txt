@@ -1,0 +1,52 @@
+```  
+CLASS Solution  
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER  
+        SET segmentsList TO empty list  
+        SET idx TO 1  
+        SET startIdx TO 1  
+        WHILE idx LESS THAN OR EQUAL TO LENGTH(road) + 1 DO  
+            IF idx GREATER THAN LENGTH(road) OR road[idx] EQUALS '.' THEN  
+                APPEND SUBSTRING(road, startIdx, idx - 1) TO segmentsList  
+                SET startIdx TO idx + 1  
+            END IF  
+            INCREMENT idx BY 1  
+        END WHILE  
+
+        DEFINE FUNCTION segmentLengthAsc(seg STRING) RETURNS INTEGER  
+            RETURN LENGTH(seg)  
+        END FUNCTION  
+
+        CALL segmentsList SORTED BY segmentLengthAsc INTO sortedSegments  
+
+        SET totalFixed TO 0  
+        SET i TO 1  
+        WHILE i LESS THAN OR EQUAL TO LENGTH(sortedSegments) DO  
+            SET currentSegment TO sortedSegments[i]  
+            SET segmentLen TO LENGTH(currentSegment)  
+            IF NOT(segmentLen EQUALS 0) THEN  
+                SET repairCost TO segmentLen + (1 * 1)  
+                IF repairCost <= budget THEN  
+                    SET totalFixed TO totalFixed + segmentLen  
+                    SET budget TO budget - repairCost  
+                ELSE  
+                    CALL FUNCTION tryReduceAndFix(segmentLen, repairCost, budget, totalFixed)  
+                END IF  
+            END IF  
+            INCREMENT i BY 1  
+        END WHILE  
+        RETURN totalFixed  
+
+        FUNCTION tryReduceAndFix(VAR n INTEGER, VAR c INTEGER, VAR b INTEGER, VAR fixed INTEGER)  
+            WHILE n GREATER THAN 0 AND b GREATER THAN 0 DO  
+                SET c TO n + 1  
+                IF b GREATER THAN OR EQUAL TO c THEN  
+                    SET fixed TO fixed + n  
+                    SET b TO b - c  
+                    BREAK  
+                END IF  
+                SET n TO n - 1  
+            END WHILE  
+        END FUNCTION  
+    END FUNCTION  
+END CLASS  
+```

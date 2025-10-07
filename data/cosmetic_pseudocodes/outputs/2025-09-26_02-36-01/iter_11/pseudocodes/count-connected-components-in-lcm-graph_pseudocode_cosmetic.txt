@@ -1,0 +1,78 @@
+CLASS DSU  
+    FUNCTION __init__(self, n)  
+        DECLARE i AS INTEGER  
+        SET self.parent TO an empty mapping  
+        SET self.rank TO an empty mapping  
+        SET i TO 0  
+        WHILE i LESS THAN n DO  
+            SET self.parent[i] TO i  
+            SET self.rank[i] TO 0  
+            SET i TO i PLUS 1  
+        END WHILE  
+    END FUNCTION  
+
+    FUNCTION find(self, x)  
+        FUNCTION helper(p)  
+            IF self.parent[p] EQUALS p THEN  
+                RETURN p  
+            ELSE  
+                SET result TO helper(self.parent[p])  
+                SET self.parent[p] TO result  
+                RETURN result  
+            END IF  
+        END FUNCTION  
+        RETURN helper(x)  
+    END FUNCTION  
+
+    FUNCTION union_set(self, a, b)  
+        SET first TO self.find(a)  
+        SET second TO self.find(b)  
+        IF first NOT EQUALS second THEN  
+            IF self.rank[first] LESS THAN self.rank[second] THEN  
+                SET temp_holder TO first  
+                SET first TO second  
+                SET second TO temp_holder  
+            END IF  
+            SET self.parent[second] TO first  
+            IF self.rank[first] EQUALS self.rank[second] THEN  
+                SET count_val TO self.rank[first] PLUS 1  
+                SET self.rank[first] TO count_val  
+            END IF  
+        END IF  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION countComponents(self, nums, threshold)  
+        SET structure TO DSU(threshold PLUS 1)  
+
+        DECLARE idx_outer AS INTEGER  
+        SET idx_outer TO 0  
+        WHILE idx_outer LESS THAN LENGTH OF nums DO  
+            SET num_val TO nums[idx_outer]  
+            DECLARE mult_val AS INTEGER  
+            SET mult_val TO num_val PLUS num_val  
+            WHILE mult_val LESS THAN OR EQUAL TO threshold DO  
+                CALL structure.union_set(num_val, mult_val)  
+                SET mult_val TO mult_val PLUS num_val  
+            END WHILE  
+            SET idx_outer TO idx_outer PLUS 1  
+        END WHILE  
+
+        SET distinct_roots TO an empty set  
+        DECLARE idx_inner AS INTEGER  
+        SET idx_inner TO 0  
+        REPEAT  
+            SET current_num TO nums[idx_inner]  
+            IF current_num LESS THAN OR EQUAL TO threshold THEN  
+                SET root_val TO structure.find(current_num)  
+                ADD root_val TO distinct_roots  
+            ELSE  
+                ADD current_num TO distinct_roots  
+            END IF  
+            SET idx_inner TO idx_inner PLUS 1  
+        UNTIL idx_inner EQUALS LENGTH OF nums  
+
+        RETURN LENGTH OF distinct_roots  
+    END FUNCTION  
+END CLASS

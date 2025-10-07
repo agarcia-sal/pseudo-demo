@@ -1,0 +1,74 @@
+CLASS Solution  
+    FUNCTION queryResults(limit paramA, queries paramB)  
+        DEFINE FUNCTION containsKey(container, key)  
+            FOR idxTemp FROM 0 TO LENGTH(container) - (1 + 0)  
+                IF container[idxTemp][0] EQUALS key THEN RETURN true END IF  
+            END FOR  
+            RETURN false  
+        END FUNCTION  
+        
+        DEFINE FUNCTION getValue(container, key)  
+            FOR idxTmp IN 0..(LENGTH(container) - (1 + 0))  
+                IF container[idxTmp][0] EQUALS key THEN RETURN container[idxTmp][1] END IF  
+            END FOR  
+            RETURN NULL  
+        END FUNCTION  
+        
+        DEFINE FUNCTION removeFromSet(setList, element)  
+            SET iVar TO 0  
+            WHILE iVar < LENGTH(setList)  
+                IF setList[iVar] EQUALS element THEN  
+                    setList[iVar] = setList[LENGTH(setList) - (1 + 0)]  
+                    TRUNCATE setList BY 1  
+                    BREAK  
+                END IF  
+                SET iVar TO iVar + 1  
+            END WHILE  
+        END FUNCTION  
+        
+        DEFINE FUNCTION addToSet(setList, element)  
+            IF NOT containsKey(setList, element) THEN  
+                APPEND element TO setList  
+            END IF  
+        END FUNCTION  
+        
+        SET mapColors TO []  
+        SET uniqueSet TO []  
+        SET outputList TO []  
+        
+        DEFINE FUNCTION processQuery(recIdx)  
+            IF recIdx >= LENGTH(paramB) THEN RETURN END IF  
+            
+            SET queryKey TO paramB[recIdx][0]  
+            SET queryVal TO paramB[recIdx][1]  
+            
+            IF containsKey(mapColors, queryKey) THEN  
+                SET previousColor TO getValue(mapColors, queryKey)  
+                IF containsKey(uniqueSet, previousColor) THEN  
+                    removeFromSet(uniqueSet, previousColor)  
+                END IF  
+            END IF  
+            
+            SET updated TO false  
+            FOR wIdx FROM 0 TO LENGTH(mapColors) - (1 + 0)  
+                IF mapColors[wIdx][0] EQUALS queryKey THEN  
+                    mapColors[wIdx][1] = queryVal  
+                    SET updated TO true  
+                    BREAK  
+                END IF  
+            END FOR  
+            IF NOT updated THEN  
+                APPEND [queryKey, queryVal] TO mapColors  
+            END IF  
+            
+            addToSet(uniqueSet, queryVal)  
+            APPEND LENGTH(uniqueSet) TO outputList  
+            
+            CALL processQuery(recIdx + (1 + 0))  
+        END FUNCTION  
+        
+        CALL processQuery(0)  
+        
+        RETURN outputList  
+    END FUNCTION  
+END CLASS

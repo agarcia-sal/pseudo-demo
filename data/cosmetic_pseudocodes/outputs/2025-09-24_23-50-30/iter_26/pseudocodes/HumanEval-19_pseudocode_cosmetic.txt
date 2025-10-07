@@ -1,0 +1,64 @@
+```
+FUNCTION sort_numbers(alphanumeric_sequence)
+    SET digit_values TO DICTIONARY MAPPING
+        'zero' TO 0,
+        'one' TO 1,
+        'two' TO 2,
+        'three' TO 3,
+        'four' TO 4,
+        'five' TO 5,
+        'six' TO 6,
+        'seven' TO 7,
+        'eight' TO 8,
+        'nine' TO 9
+
+    FUNCTION extract_valid_terms(source_text, index, acc)
+        IF index >= LENGTH(source_text) THEN
+            RETURN acc
+        ELSE
+            SET next_space TO FIND_FROM(source_text, ' ', index)
+            IF next_space = -1 THEN
+                SET candidate TO SUBSTRING(source_text, index, LENGTH(source_text))
+                IF candidate != '' THEN
+                    RETURN acc + [candidate]
+                ELSE
+                    RETURN acc
+                ENDIF
+            ELSE
+                SET candidate TO SUBSTRING(source_text, index, next_space)
+                SET updated_acc TO acc
+                IF candidate != '' THEN
+                    SET updated_acc TO acc + [candidate]
+                ENDIF
+                RETURN extract_valid_terms(source_text, next_space + 1, updated_acc)
+            ENDIF
+        ENDIF
+    END FUNCTION
+
+    SET raw_items TO extract_valid_terms(alphanumeric_sequence, 0, [])
+    
+    FUNCTION quicksort(collection)
+        IF collection IS EMPTY OR LENGTH(collection) = 1 THEN
+            RETURN collection
+        ELSE
+            SET pivot TO collection[0]
+            SET less_than TO FILTER(collection[1:], (item) => digit_values[item] < digit_values[pivot])
+            SET greater_eq TO FILTER(collection[1:], (item) => NOT (digit_values[item] < digit_values[pivot]))
+            RETURN quicksort(less_than) + [pivot] + quicksort(greater_eq)
+        ENDIF
+    END FUNCTION
+
+    SET ordered_items TO quicksort(raw_items)
+    
+    FUNCTION concatenate_words(words_list, idx, acc_str)
+        IF idx = LENGTH(words_list) THEN
+            RETURN acc_str
+        ELSE
+            SET delimiter TO (IF idx = 0 THEN '' ELSE ' ')
+            RETURN concatenate_words(words_list, idx + 1, acc_str + delimiter + words_list[idx])
+        ENDIF
+    END FUNCTION
+
+    RETURN concatenate_words(ordered_items, 0, '')
+END FUNCTION
+```

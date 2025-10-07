@@ -1,0 +1,47 @@
+```
+FUNCTION parse_nested_parens(input_string)
+  FUNCTION parse_paren_group(substring)
+    DEFINE helper(current_index, depth_acc, max_acc)
+      IF current_index >= LENGTH(substring) THEN
+        RETURN max_acc
+      ELSE
+        DEFINE ch AS substring[current_index]
+        DEFINE new_depth AS
+          SWITCH ch
+            CASE '(' : depth_acc + 1
+            DEFAULT : depth_acc - 1
+          END SWITCH
+        DEFINE new_max AS
+          IF new_depth > max_acc THEN new_depth ELSE max_acc END IF
+        RETURN helper(current_index + 1, new_depth, new_max)
+      END IF
+    END DEFINE
+    RETURN helper(0, 0, 0)
+  END FUNCTION
+
+  DEFINE parts AS []
+  DEFINE start_idx AS 0
+  DEFINE i AS 0
+  WHILE i < LENGTH(input_string) DO
+    IF input_string[i] == ' ' THEN
+      IF i - start_idx > 0 THEN
+        APPEND SUBSTRING(input_string, start_idx, i - start_idx) TO parts
+      END IF
+      start_idx = i + 1
+    END IF
+    i = i + 1
+  END WHILE
+  IF LENGTH(input_string) - start_idx > 0 THEN
+    APPEND SUBSTRING(input_string, start_idx, LENGTH(input_string) - start_idx) TO parts
+  END IF
+
+  DEFINE result AS []
+  FOR idx FROM 0 TO LENGTH(parts) - 1 DO
+    DEFINE segment AS parts[idx]
+    IF LENGTH(segment) > 0 THEN
+      APPEND parse_paren_group(segment) TO result
+    END IF
+  END FOR
+  RETURN result
+END FUNCTION
+```

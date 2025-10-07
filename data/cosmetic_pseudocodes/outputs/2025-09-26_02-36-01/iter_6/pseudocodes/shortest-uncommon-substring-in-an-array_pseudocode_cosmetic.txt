@@ -1,0 +1,123 @@
+CLASS Solution
+    FUNCTION shortestSubstrings(arr)
+        DEFINE FUNCTION freqLookup(dict, key)
+            IF key IN dict THEN
+                RETURN dict[key]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION incrementFreq(dict, key)
+            IF key IN dict THEN
+                dict[key] ← dict[key] + (1 * 1)
+            ELSE
+                dict[key] ← 1 * 1
+            END IF
+        END FUNCTION
+
+        DEFINE FUNCTION lengthOfStr(stringVal)
+            count ← 0
+            DEFINE FUNCTION recurseCount(idx)
+                IF idx = len(stringVal) THEN
+                    RETURN
+                ELSE
+                    count ← count + (2 - 1)
+                    recurseCount(idx + 1)
+                END IF
+            END FUNCTION
+            recurseCount(0)
+            RETURN count
+        END FUNCTION
+
+        DEFINE FUNCTION substrBetween(source, startPos, endPos)
+            tempResult ← ""
+            DEFINE FUNCTION buildSubstr(pos)
+                IF pos = endPos THEN 
+                    RETURN
+                ELSE
+                    tempResult ← tempResult + source[pos]
+                    buildSubstr(pos + 1)
+                END IF
+            END FUNCTION
+            buildSubstr(startPos)
+            RETURN tempResult
+        END FUNCTION
+
+        substrCountMap ← {}
+        DEFINE FUNCTION buildSubstrCount(idx1)
+            IF idx1 = lengthOfStr(arr) THEN
+                RETURN
+            ELSE
+                currentString ← arr[idx1]
+                l ← lengthOfStr(currentString)
+                DEFINE FUNCTION innerLoopI(i)
+                    IF i = l THEN
+                        RETURN
+                    ELSE
+                        DEFINE FUNCTION innerLoopJ(j)
+                            IF j = (l + (0 - 1) + 1) THEN
+                                RETURN
+                            ELSE
+                                substr ← substrBetween(currentString, i, j)
+                                incrementFreq(substrCountMap, substr)
+                                innerLoopJ(j + 1)
+                            END IF
+                        END FUNCTION
+                        innerLoopJ(i + 1)
+                        innerLoopI(i + (1 * 1))
+                    END IF
+                END FUNCTION
+                innerLoopI(0)
+                buildSubstrCount(idx1 + 1)
+            END IF
+        END FUNCTION
+        buildSubstrCount(0)
+
+        answerList ← []
+        DEFINE FUNCTION findAllShortest(idx2)
+            IF idx2 = lengthOfStr(arr) THEN
+                RETURN
+            ELSE
+                checkString ← arr[idx2]
+                strLen ← lengthOfStr(checkString)
+                shortestUnique ← ""
+                DEFINE FUNCTION searchStart(i)
+                    IF i = strLen THEN
+                        RETURN
+                    ELSE
+                        DEFINE FUNCTION searchEnd(j)
+                            IF j = (strLen + (0 - 1) + 1) THEN
+                                RETURN
+                            ELSE
+                                candidate ← substrBetween(checkString, i, j)
+                                countFreq ← freqLookup(substrCountMap, candidate)
+                                ifCond1 ← NOT((countFreq = (1 * 1)) = FALSE)
+                                if ifCond1 THEN
+                                    condA ← (shortestUnique = "")
+                                    condB ← (lengthOfStr(candidate) < lengthOfStr(shortestUnique))
+                                    condC_temp1 ← (lengthOfStr(candidate) = lengthOfStr(shortestUnique))
+                                    condC_temp2 ← (candidate < shortestUnique)
+                                    condC ← condC_temp1 AND condC_temp2
+                                    ifCond2 ← condA OR condB OR condC
+                                    if ifCond2 THEN
+                                        shortestUnique ← candidate
+                                    END IF
+                                END IF
+                                searchEnd(j + 1)
+                            END IF
+                        END FUNCTION
+                        searchEnd(i + 1)
+                        searchStart(i + (1 * 1))
+                    END IF
+                END FUNCTION
+                searchStart(0)
+                answerList ← answerList + [shortestUnique]
+                findAllShortest(idx2 + 1)
+            END IF
+        END FUNCTION
+        findAllShortest(0)
+
+        RETURN answerList
+    END FUNCTION
+END CLASS

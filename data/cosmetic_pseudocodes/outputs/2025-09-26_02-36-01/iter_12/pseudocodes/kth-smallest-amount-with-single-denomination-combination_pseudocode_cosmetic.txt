@@ -1,0 +1,81 @@
+CLASS Solution
+    FUNCTION findKthSmallest(coins k)
+        FUNCTION calcCount(threshold)
+            FUNCTION gcd(a b)
+                VARIABLE u = a
+                VARIABLE v = b
+                WHILE v GREATER THAN zero
+                    VARIABLE temp = v
+                    SET v TO u MODULO v
+                    SET u TO temp
+                END WHILE
+                RETURN u
+            END FUNCTION
+
+            VARIABLE total = 0
+            VARIABLE subsetIndex = 1
+            VARIABLE upperLimit = (2 RAISED TO THE POWER (LENGTH OF coins)) MINUS 1
+
+            FUNCTION processSubset(idx)
+                VARIABLE productLCM = 1
+                VARIABLE elementsCount = 0
+                VARIABLE bitPos = 0
+
+                LOOP
+                    IF bitPos GREATER THAN OR EQUAL TO LENGTH OF coins THEN
+                        EXIT LOOP
+                    END IF
+
+                    VARIABLE mask = 1 LEFT SHIFTED BY bitPos
+                    IF (idx BITWISE AND mask) NOT EQUAL TO 0 THEN
+                        productLCM = (productLCM MULTIPLIED BY coins[bitPos]) DIVIDED BY gcd(productLCM coins[bitPos])
+                        elementsCount = elementsCount + 1
+                    END IF
+                    bitPos = bitPos + 1
+                END LOOP
+
+                RETURN (productLCM elementsCount)
+            END FUNCTION
+
+            FUNCTION updateCount()
+                IF subsetIndex GREATER THAN upperLimit THEN
+                    RETURN total
+                END IF
+
+                VARIABLE lcmAndCount = processSubset(subsetIndex)
+                VARIABLE currentLCM = lcmAndCount[0]
+                VARIABLE setSize = lcmAndCount[1]
+
+                IF (setSize MODULO 2) EQUAL TO 1 THEN
+                    total = total + (threshold DIVIDED BY currentLCM)
+                ELSE
+                    total = total - (threshold DIVIDED BY currentLCM)
+                END IF
+
+                subsetIndex = subsetIndex + 1
+                RETURN updateCount()
+            END FUNCTION
+
+            RETURN updateCount()
+        END FUNCTION
+
+        VARIABLE start = 1
+        VARIABLE endVal = k MULTIPLIED BY (MINIMUM ELEMENT OF coins)
+
+        FUNCTION binarySearch(lb ub)
+            IF lb GREATER THAN OR EQUAL TO ub THEN
+                RETURN lb
+            END IF
+
+            VARIABLE middle = (lb PLUS ub) DIVIDED BY 2
+
+            IF calcCount(middle) LESS THAN k THEN
+                RETURN binarySearch(middle + 1 ub)
+            ELSE
+                RETURN binarySearch(lb middle)
+            END IF
+        END FUNCTION
+
+        RETURN binarySearch(start endVal)
+    END FUNCTION
+END CLASS

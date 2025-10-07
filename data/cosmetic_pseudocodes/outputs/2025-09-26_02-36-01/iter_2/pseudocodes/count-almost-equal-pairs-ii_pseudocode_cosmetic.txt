@@ -1,0 +1,78 @@
+CLASS Solution
+    FUNCTION countPairs(nums)
+        CALL method TO sort nums IN PLACE
+        SET totalPairs TO 0
+        SET frequencyMap TO a default dictionary RETURNING 0 ON missing keys
+
+        SET idx TO 0
+        WHILE idx < LENGTH OF nums
+            SET currentNum TO nums[idx]
+            SET seenVariants TO NEW set INCLUDING currentNum
+            SET numChars TO LIST OF CHARACTERS FROM STRING currentNum
+            SET lengthChars TO LENGTH OF numChars
+
+            SET posJ TO 0
+            WHILE posJ < lengthChars
+                SET posI TO 0
+                WHILE posI < posJ
+                    # swap characters at posI and posJ
+                    SET tempChar TO numChars[posI]
+                    SET numChars[posI] TO numChars[posJ]
+                    SET numChars[posJ] TO tempChar
+
+                    SET combinedStr TO EMPTY STRING
+                    FOR ch IN numChars
+                        SET combinedStr TO combinedStr + ch
+                    END FOR
+                    SET variantNum TO INTEGER OF combinedStr
+                    CALL add variantNum TO seenVariants
+
+                    SET innerQ TO posI + 1
+                    WHILE innerQ < lengthChars
+                        SET innerP TO posI + 1
+                        WHILE innerP < innerQ
+                            # swap characters at innerP and innerQ
+                            SET tempInnerChar TO numChars[innerP]
+                            SET numChars[innerP] TO numChars[innerQ]
+                            SET numChars[innerQ] TO tempInnerChar
+
+                            SET innerStr TO EMPTY STRING
+                            FOR c IN numChars
+                                SET innerStr TO innerStr + c
+                            END FOR
+                            SET innerVariant TO INTEGER OF innerStr
+                            CALL add innerVariant TO seenVariants
+
+                            # swap back innerP and innerQ
+                            SET tempRestoreChar TO numChars[innerP]
+                            SET numChars[innerP] TO numChars[innerQ]
+                            SET numChars[innerQ] TO tempRestoreChar
+
+                            SET innerP TO innerP + 1
+                        END WHILE
+                        SET innerQ TO innerQ + 1
+                    END WHILE
+
+                    # swap back posI and posJ
+                    SET tempRestore TO numChars[posI]
+                    SET numChars[posI] TO numChars[posJ]
+                    SET numChars[posJ] TO tempRestore
+
+                    SET posI TO posI + 1
+                END WHILE
+                SET posJ TO posJ + 1
+            END WHILE
+
+            SET sumCount TO 0
+            FOR element IN seenVariants
+                SET sumCount TO sumCount + frequencyMap[element]
+            END FOR
+            SET totalPairs TO totalPairs + sumCount
+
+            SET frequencyMap[currentNum] TO frequencyMap[currentNum] + 1
+            SET idx TO idx + 1
+        END WHILE
+
+        RETURN totalPairs
+    END FUNCTION
+END CLASS

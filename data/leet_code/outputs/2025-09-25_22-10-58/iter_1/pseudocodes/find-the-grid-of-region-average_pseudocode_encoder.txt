@@ -1,0 +1,62 @@
+CLASS Solution  
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer  
+        SET m TO the LENGTH OF image  
+        SET n TO the LENGTH OF element at position zero of image  
+        SET result TO a LIST containing m ELEMENTS EACH of a LIST containing n ELEMENTS EACH set TO zero  
+        SET count TO a LIST containing m ELEMENTS EACH of a LIST containing n ELEMENTS EACH set TO zero  
+        
+        FUNCTION is_valid_region(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE boolean  
+            FOR i FROM x TO x PLUS three MINUS one  
+                FOR j FROM y TO y PLUS three MINUS one  
+                    FOR each pair dx AND dy IN the COLLECTION consisting of the PAIRS negative one AND zero positive one AND zero zero AND negative one zero AND positive one  
+                        SET nx TO i PLUS dx  
+                        SET ny TO j PLUS dy  
+                        IF nx GREATER THAN OR EQUAL TO zero AND nx LESS THAN x PLUS three AND ny GREATER THAN OR EQUAL TO zero AND ny LESS THAN y PLUS three THEN  
+                            IF the ABSOLUTE VALUE OF the ELEMENT at position i of image at position j MINUS the ELEMENT at position nx of image at position ny GREATER THAN threshold THEN  
+                                RETURN False  
+                            END IF  
+                        END IF  
+                    END FOR  
+                END FOR  
+            END FOR  
+            RETURN True  
+        END FUNCTION  
+        
+        FUNCTION calculate_average(x WITH TYPE integer y WITH TYPE integer) WITH RETURN TYPE integer  
+            SET total TO zero  
+            FOR i FROM x TO x PLUS three MINUS one  
+                FOR j FROM y TO y PLUS three MINUS one  
+                    INCREMENT total BY the ELEMENT at position i of image at position j  
+                END FOR  
+            END FOR  
+            SET average_value TO total DIVIDED BY nine  
+            RETURN average_value  
+        END FUNCTION  
+        
+        FOR i FROM zero TO m MINUS two MINUS one  
+            FOR j FROM zero TO n MINUS two MINUS one  
+                IF is_valid_region(i j) EQUALS True THEN  
+                    SET avg TO calculate_average(i j)  
+                    FOR x FROM i TO i PLUS three MINUS one  
+                        FOR y FROM j TO j PLUS three MINUS one  
+                            INCREMENT the ELEMENT at position x of result at position y BY avg  
+                            INCREMENT the ELEMENT at position x of count at position y BY one  
+                        END FOR  
+                    END FOR  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        FOR i FROM zero TO m MINUS one  
+            FOR j FROM zero TO n MINUS one  
+                IF the ELEMENT at position i of count at position j GREATER THAN zero THEN  
+                    SET the ELEMENT at position i of result at position j TO the ELEMENT at position i of result at position j DIVIDED BY the ELEMENT at position i of count at position j  
+                ELSE  
+                    SET the ELEMENT at position i of result at position j TO the ELEMENT at position i of image at position j  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        RETURN result  
+    END FUNCTION  
+END CLASS

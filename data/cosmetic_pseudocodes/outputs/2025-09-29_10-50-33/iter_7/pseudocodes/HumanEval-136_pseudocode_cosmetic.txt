@@ -1,0 +1,48 @@
+FUNCTION largest_smallest_integers(sequence_of_values)
+    INITIALIZE negatives_collection AS EMPTY_LIST
+    INITIALIZE positives_collection AS EMPTY_LIST
+
+    INDEX cursor := 0
+    WHILE cursor < LENGTH(sequence_of_values)
+        VALUE candidate := sequence_of_values[cursor]
+        PERFORM
+            WHEN candidate < 0
+                APPEND candidate TO negatives_collection
+            OTHERWISE WHEN candidate > 0
+                APPEND candidate TO positives_collection
+        END PERFORM
+        cursor += 1
+    END WHILE
+
+    FUNCTION select_maximum(elements)
+        IF elements IS EMPTY THEN
+            RETURN null
+        ENDIF
+        INITIALIZE peak := elements[0]
+        FOR EACH item IN elements
+            IF item > peak THEN
+                peak := item
+            ENDIF
+        ENDFOR
+        RETURN peak
+    END FUNCTION
+
+    FUNCTION select_minimum(elements)
+        IF elements IS EMPTY THEN
+            RETURN null
+        ENDIF
+        INITIALIZE trough := elements[0]
+        USAGE cursor2 IN 0 TO LENGTH(elements) - 1
+            IF elements[cursor2] < trough THEN
+                trough := elements[cursor2]
+            ENDIF
+        EXIT_LOOP WHEN cursor2 IS EQUAL TO LENGTH(elements) - 1
+        END USAGE
+        RETURN trough
+    END FUNCTION
+
+    SET max_neg_value TO select_maximum(negatives_collection)
+    SET min_pos_value TO select_minimum(positives_collection)
+
+    RETURN (max_neg_value, min_pos_value)
+END FUNCTION

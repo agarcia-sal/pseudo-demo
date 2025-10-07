@@ -1,0 +1,132 @@
+CLASS Solution
+    FUNCTION maxArea(height positions directions)
+{
+    DEFINE FUNCTION get_length(arr)
+    {
+        SET count TO 0
+        WHILE TRUE
+        {
+            TRY
+            {
+                _ = arr[count]
+                count = count + 1
+            }
+            CATCH
+            {
+                BREAK
+            }
+        }
+        RETURN count
+    }
+    DEFINE FUNCTION char_eq(a, b)
+    {
+        RETURN NOT (NOT (a = b))
+    }
+    DEFINE FUNCTION get_substring(str, start, end)
+    {
+        SET result TO ""
+        SET idx TO start
+        WHILE idx <= end
+        {
+            SET result TO result + str[idx]
+            idx = idx + 1
+        }
+        RETURN result
+    }
+    DEFINE FUNCTION concat(str1, str2, str3)
+    {
+        RETURN str1 + str2 + str3
+    }
+    DEFINE FUNCTION sum_array(arr)
+    {
+        SET total TO 0
+        SET pos TO 0
+        WHILE pos < get_length(arr)
+        {
+            total = total + arr[pos]
+            pos = pos + 1
+        }
+        RETURN total
+    }
+    DEFINE FUNCTION swap_char(c)
+    {
+        IF c = 'D' THEN RETURN 'U'
+        ELSE RETURN 'D'
+    }
+    DEFINE FUNCTION inc(v)
+    {
+        RETURN v + 1
+    }
+    DEFINE FUNCTION dec(v)
+    {
+        RETURN v - 1
+    }
+
+    SET total_positions TO get_length(positions)
+    SET best_area TO sum_array(positions)
+    SET iter_count TO 1
+    WHILE iter_count <= height * 2
+    {
+        SET idx TO 0
+        WHILE idx < total_positions
+        {
+            IF (positions[idx] = 0) AND (directions[idx] = 'D') THEN
+            {
+                SET left_sub TO ""
+                SET pos_l TO 0
+                WHILE pos_l < idx
+                {
+                    left_sub = left_sub + directions[pos_l]
+                    pos_l = pos_l + 1
+                }
+                SET right_sub TO ""
+                SET pos_r TO idx + 1
+                WHILE pos_r < total_positions
+                {
+                    right_sub = right_sub + directions[pos_r]
+                    pos_r = pos_r + 1
+                }
+                directions = concat(left_sub, 'U', right_sub)
+            }
+            ELSE IF (positions[idx] = height) AND (directions[idx] = 'U') THEN
+            {
+                SET left_sub2 TO ""
+                SET pos_l2 TO 0
+                WHILE pos_l2 < idx
+                {
+                    left_sub2 = left_sub2 + directions[pos_l2]
+                    pos_l2 = pos_l2 + 1
+                }
+                SET right_sub2 TO ""
+                SET pos_r2 TO idx + 1
+                WHILE pos_r2 < total_positions
+                {
+                    right_sub2 = right_sub2 + directions[pos_r2]
+                    pos_r2 = pos_r2 + 1
+                }
+                directions = concat(left_sub2, 'D', right_sub2)
+            }
+            ENDIF
+
+            IF directions[idx] = 'U' THEN
+            {
+                positions[idx] = inc(positions[idx])
+            }
+            ELSE
+            {
+                positions[idx] = dec(positions[idx])
+            }
+            idx = idx + 1
+        }
+
+        SET curr_area TO sum_array(positions)
+        IF best_area < curr_area THEN
+        {
+            best_area = curr_area
+        }
+        iter_count = iter_count + 1
+    }
+    RETURN best_area
+}
+END FUNCTION
+END CLASS

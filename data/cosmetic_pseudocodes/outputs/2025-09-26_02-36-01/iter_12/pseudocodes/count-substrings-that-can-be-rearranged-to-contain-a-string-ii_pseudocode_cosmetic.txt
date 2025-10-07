@@ -1,0 +1,88 @@
+CLASS Solution
+
+    FUNCTION validSubstringCount(word1, word2)
+        
+        FUNCTION create_frequency_map(text)
+            DECLARE freq_map AS empty dictionary
+            DECLARE idx AS 0
+            REPEAT
+                IF idx >= length(text) THEN
+                    BREAK
+                END IF
+                DECLARE symbol AS text[idx]
+                IF symbol IS NOT IN freq_map THEN
+                    freq_map[symbol] = 1
+                ELSE
+                    freq_map[symbol] = freq_map[symbol] + 1
+                END IF
+                idx = idx + 1
+            UNTIL FALSE
+            RETURN freq_map
+        END FUNCTION
+        
+        FUNCTION is_in_map(key, map)
+            RETURN key IS IN map
+        END FUNCTION
+        
+        FUNCTION count_in_map(key, map)
+            IF is_in_map(key, map) THEN
+                RETURN map[key]
+            ELSE
+                RETURN 0
+            END IF
+        END FUNCTION
+        
+        FUNCTION increment_map_value(key, map)
+            IF is_in_map(key, map) THEN
+                map[key] = map[key] + (1 - 0)  // adding one through arithmetic identity
+            ELSE
+                map[key] = 1
+            END IF
+        END FUNCTION
+        
+        FUNCTION decrement_map_value(key, map)
+            IF is_in_map(key, map) THEN
+                map[key] = map[key] - (1 - 0)  // subtracting one similarly
+            END IF
+        END FUNCTION
+        
+        DECLARE alpha_count AS create_frequency_map(word2)
+        DECLARE beta_count AS empty dictionary
+        DECLARE total_required AS 0
+        DECLARE fulfilled AS 0
+        DECLARE start_pos AS 0
+        DECLARE result AS 0
+        
+        FOR EACH key IN alpha_count
+            total_required = total_required + (1 - 0)  // counting unique keys by incrementing
+        END FOR
+        
+        DECLARE pos AS 0
+        
+        WHILE pos <= (length(word1) - 1)
+            DECLARE curr_char AS word1[pos]
+            increment_map_value(curr_char, beta_count)
+            
+            IF is_in_map(curr_char, alpha_count) AND count_in_map(curr_char, beta_count) = count_in_map(curr_char, alpha_count) THEN
+                fulfilled = fulfilled + 1
+            END IF
+            
+            WHILE (fulfilled = total_required) AND ((pos + 1 - start_pos) >= length(word2))
+                result = result + (length(word1) - pos)
+                DECLARE left_char AS word1[start_pos]
+                decrement_map_value(left_char, beta_count)
+                
+                IF is_in_map(left_char, alpha_count) AND count_in_map(left_char, beta_count) < count_in_map(left_char, alpha_count) THEN
+                    fulfilled = fulfilled - 1
+                END IF
+                
+                start_pos = start_pos + 1
+            END WHILE
+            
+            pos = pos + (1 - 0)
+        END WHILE
+        
+        RETURN result
+    END FUNCTION
+
+END CLASS

@@ -1,0 +1,131 @@
+CLASS Solution
+	 FUNCTION minRunesToAdd(n flowFrom flowTo crystals)
+		 DECLARE g AS MAP OF INTEGER TO LIST OF INTEGER INIT EMPTY
+		 DECLARE revG AS MAP OF INTEGER TO LIST OF INTEGER INIT EMPTY
+
+		 DECLARE posA BE 0
+		 WHILE posA < LENGTH(flowFrom)
+			 DECLARE fromNode AS INTEGER = flowFrom[posA]
+			 DECLARE toNode AS INTEGER = flowTo[posA]
+
+			 IF NOT EXISTS g[fromNode]
+				 g[fromNode] = EMPTY LIST
+			 END IF
+			 APPEND toNode TO g[fromNode]
+
+			 IF NOT EXISTS revG[toNode]
+				 revG[toNode] = EMPTY LIST
+			 END IF
+			 APPEND fromNode TO revG[toNode]
+
+			 posA = posA + 1
+		 END WHILE
+
+		 DECLARE idxs BE ARRAY OF INTEGER FILLED WITH (-1) REPEATED n TIMES
+		 DECLARE lowL BE ARRAY OF INTEGER FILLED WITH 0 REPEATED n TIMES
+		 DECLARE stk BE EMPTY LIST
+		 DECLARE onStk BE ARRAY OF BOOLEAN FILLED WITH (0 = 0) REPEATED n TIMES
+		 DECLARE curInd BE 0
+		 DECLARE sccList BE EMPTY LIST
+
+		 FUNCTION tarjan(currNode)
+			 idxs[currNode] = curInd
+			 lowL[currNode] = curInd
+			 curInd = curInd + 1
+			 APPEND currNode TO stk
+			 onStk[currNode] = (1 = 1)
+
+			 DECLARE j AS INTEGER = 0
+			 WHILE j < LENGTH(g[currNode])
+				 DECLARE nb AS INTEGER = g[currNode][j]
+
+				 IF idxs[nb] = (-1)
+					 CALL tarjan(nb)
+					 lowL[currNode] = (lowL[currNode] < lowL[nb]) ? lowL[currNode] : lowL[nb]
+				 ELSE IF onStk[nb]
+					 lowL[currNode] = (lowL[currNode] < idxs[nb]) ? lowL[currNode] : idxs[nb]
+				 END IF
+				 j = j + 1
+			 END WHILE
+
+			 IF lowL[currNode] = idxs[currNode]
+				 DECLARE component BE EMPTY LIST
+				 REPEAT
+					 DECLARE w AS INTEGER = REMOVE LAST ELEMENT FROM stk
+					 onStk[w] = (0 = 1)
+					 APPEND w TO component
+					 IF w = currNode THEN
+						 BREAK
+					 END IF
+				 UNTIL FALSE
+				 APPEND component TO sccList
+			 END IF
+		 END FUNCTION
+
+		 DECLARE z AS INTEGER = 0
+		 WHILE z < n
+			 IF idxs[z] = (-1)
+				 CALL tarjan(z)
+			 END IF
+			 z = z + 1
+		 END WHILE
+
+		 DECLARE sccG AS MAP OF INTEGER TO LIST OF INTEGER INIT EMPTY
+		 DECLARE sccIDs BE ARRAY OF INTEGER FILLED WITH (-1) REPEATED n TIMES
+		 DECLARE hasCrystal AS ARRAY OF BOOLEAN FILLED WITH (0 = 1) REPEATED LENGTH(sccList) TIMES
+		 DECLARE countSCC AS INTEGER = 0
+
+		 DECLARE idxSCC AS INTEGER = 0
+		 WHILE idxSCC < LENGTH(sccList)
+			 DECLARE grp AS LIST OF INTEGER = sccList[idxSCC]
+			 DECLARE k AS INTEGER = 0
+			 WHILE k < LENGTH(grp)
+				 sccIDs[grp[k]] = countSCC
+				 IF grp[k] IN crystals
+					 hasCrystal[idxSCC] = (1 = 1)
+				 END IF
+				 k = k + 1
+			 END WHILE
+			 countSCC = countSCC + 1
+			 idxSCC = idxSCC + 1
+		 END WHILE
+
+		 DECLARE posB AS INTEGER = 0
+		 WHILE posB < LENGTH(flowFrom)
+			 DECLARE uID AS INTEGER = sccIDs[flowFrom[posB]]
+			 DECLARE vID AS INTEGER = sccIDs[flowTo[posB]]
+			 IF uID <> vID
+				 IF NOT EXISTS sccG[uID]
+					 sccG[uID] = EMPTY LIST
+				 END IF
+				 APPEND vID TO sccG[uID]
+			 END IF
+			 posB = posB + 1
+		 END WHILE
+
+		 DECLARE indeg BE ARRAY OF INTEGER FILLED WITH 0 REPEATED LENGTH(sccList) TIMES
+		 DECLARE m AS INTEGER = 0
+		 WHILE m < LENGTH(sccList)
+			 IF EXISTS sccG[m]
+				 DECLARE neighbors AS LIST OF INTEGER = sccG[m]
+				 DECLARE nPos AS INTEGER = 0
+				 WHILE nPos < LENGTH(neighbors)
+					 indeg[neighbors[nPos]] = indeg[neighbors[nPos]] + 1
+					 nPos = nPos + 1
+				 END WHILE
+			 END IF
+			 m = m + 1
+		 END WHILE
+
+		 DECLARE addedRunes AS INTEGER = 0
+		 DECLARE s AS INTEGER = 0
+		 WHILE s < LENGTH(sccList)
+			 IF indeg[s] = 0 AND NOT hasCrystal[s]
+				 addedRunes = addedRunes + 1
+			 END IF
+			 s = s + 1
+		 END WHILE
+
+		 RETURN addedRunes
+	 END FUNCTION
+END CLASS

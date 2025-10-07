@@ -1,0 +1,36 @@
+```
+FUNCTION anti_shuffle(input_string)
+    DEFINE FUNCTION sort_chars(word, index, chars_accum)
+        IF index >= LENGTH(word) THEN
+            RETURN JOIN chars_accum INTO STRING
+        ELSE
+            SET current_char TO SUBSTRING(word, index, index+1)
+            SET chars_accum TO chars_accum + [current_char]
+            RETURN sort_chars(word, index + 1, chars_accum)
+        END IF
+    END FUNCTION
+
+    DEFINE FUNCTION sort_word(word)
+        SET char_list TO []
+        SET char_list TO sort_chars(word, 0, char_list)
+        SET sorted_list TO SORT char_list ASCENDING BY ASCII VALUE
+        RETURN JOIN sorted_list INTO STRING
+    END FUNCTION
+
+    SET words_array TO []
+    SET words_array TO SPLIT input_string BY " "
+
+    FUNCTION process_words(words, idx, acc)
+        IF idx = LENGTH(words) THEN
+            RETURN acc
+        ELSE
+            SET sorted_version TO sort_word(words[idx])
+            RETURN process_words(words, idx + 1, acc + [sorted_version])
+        END IF
+    END FUNCTION
+
+    SET processed_list TO process_words(words_array, 0, [])
+
+    RETURN JOIN processed_list WITH " "
+END FUNCTION
+```

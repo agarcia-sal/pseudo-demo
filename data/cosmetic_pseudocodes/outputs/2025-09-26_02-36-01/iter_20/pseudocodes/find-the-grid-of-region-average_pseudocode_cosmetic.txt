@@ -1,0 +1,96 @@
+CLASS Solution
+    FUNCTION resultGrid(image WITH TYPE List OF List OF integer threshold WITH TYPE integer) WITH RETURN TYPE List OF List OF integer
+        FUNCTION _check_region(a WITH TYPE integer b WITH TYPE integer) WITH RETURN TYPE boolean
+            SET _p TO 0
+            WHILE _p < 3
+                SET _q TO 0
+                WHILE _q < 3
+                    FOR EACH (_r, _s) IN [(-1,0), (1,0), (0,-1), (0,1)]
+                        SET _t TO _p + _r
+                        SET _u TO _q + _s
+                        IF 0 <= _t AND _t < 3 AND 0 <= _u AND _u < 3 THEN
+                            IF ABS(image[a + _p][b + _q] - image[a + _t][b + _u]) > threshold THEN
+                                RETURN False
+                            END IF
+                        END IF
+                    END FOR
+                    SET _q TO _q + 1
+                END WHILE
+                SET _p TO _p + 1
+            END WHILE
+            RETURN True
+        END FUNCTION
+
+        FUNCTION _avg_sum(c WITH TYPE integer d WITH TYPE integer) WITH RETURN TYPE integer
+            SET _v TO 0
+            SET _w TO 0
+            WHILE _w < 3
+                SET _x TO 0
+                WHILE _x < 3
+                    SET _v TO _v + image[c + _w][d + _x]
+                    SET _x TO _x + 1
+                END WHILE
+                SET _w TO _w + 1
+            END WHILE
+            SET _y TO _v / 9
+            RETURN _y
+        END FUNCTION
+
+        SET _z TO LENGTH(image)
+        SET __a TO LENGTH(image[0])
+        SET __b TO []
+        SET __c TO []
+        SET __i TO 0
+        WHILE __i < _z
+            SET _list1 TO []
+            SET _list2 TO []
+            SET __j TO 0
+            WHILE __j < __a
+                APPEND 0 TO _list1
+                APPEND 0 TO _list2
+                SET __j TO __j + 1
+            END WHILE
+            APPEND _list1 TO __b
+            APPEND _list2 TO __c
+            SET __i TO __i + 1
+        END WHILE
+
+        SET __k TO 0
+        WHILE __k < _z - 2
+            SET __l TO 0
+            WHILE __l < __a - 2
+                IF _check_region(__k, __l) = True THEN
+                    SET __m TO _avg_sum(__k, __l)
+                    SET __n TO 0
+                    WHILE __n < 3
+                        SET __o TO 0
+                        WHILE __o < 3
+                            SET __b[__k + __n][__l + __o] TO __b[__k + __n][__l + __o] + __m
+                            SET __c[__k + __n][__l + __o] TO __c[__k + __n][__l + __o] + 1
+                            SET __o TO __o + 1
+                        END WHILE
+                        SET __n TO __n + 1
+                    END WHILE
+                END IF
+                SET __l TO __l + 1
+            END WHILE
+            SET __k TO __k + 1
+        END WHILE
+
+        SET __p TO 0
+        WHILE __p < _z
+            SET __q TO 0
+            WHILE __q < __a
+                IF __c[__p][__q] > 0 THEN
+                    SET __b[__p][__q] TO __b[__p][__q] / __c[__p][__q]
+                ELSE
+                    SET __b[__p][__q] TO image[__p][__q]
+                END IF
+                SET __q TO __q + 1
+            END WHILE
+            SET __p TO __p + 1
+        END WHILE
+
+        RETURN __b
+    END FUNCTION
+END CLASS

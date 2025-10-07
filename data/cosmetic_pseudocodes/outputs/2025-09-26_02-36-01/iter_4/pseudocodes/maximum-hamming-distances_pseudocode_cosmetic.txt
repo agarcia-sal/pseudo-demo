@@ -1,0 +1,62 @@
+CLASS Solution  
+    FUNCTION maxHammingDistances(nums LIST OF INTEGER m INTEGER) RETURNS LIST OF INTEGER  
+        DECLARE binary_reprs AS LIST OF STRING INITIALIZED TO empty collection  
+        DECLARE idx_outer AS INTEGER SET TO zero  
+        
+        WHILE idx_outer < LENGTH(nums) DO  
+            DECLARE val AS INTEGER ASSIGNED nums AT idx_outer  
+            DECLARE bin_str AS STRING  
+            DECLARE bits_needed AS INTEGER ASSIGNED m  
+            
+            LET bin_str BE EMPTY STRING  
+            DECLARE temp_val AS INTEGER ASSIGNED val  
+            
+            WHILE LENGTH(bin_str) < bits_needed DO  
+                LET remainder_being AS INTEGER ASSIGNED temp_val MODULO 2  
+                LET char_bit AS STRING ASSIGNED "1" IF remainder_being EQUALS 1 ELSE "0"  
+                LET bin_str BE char_bit CONCATENATED TO bin_str  
+                LET temp_val BE temp_val DIVIDED BY 2 (INTEGER DIVISION)  
+            END WHILE  
+            
+            APPEND bin_str TO binary_reprs  
+            INCREMENT idx_outer BY one  
+        END WHILE  
+        
+        DECLARE results AS LIST OF INTEGER INITIALIZED TO empty list  
+        
+        FUNCTION hamming_distance(bin1 STRING bin2 STRING) RETURNS INTEGER  
+            DECLARE dist_count AS INTEGER SET TO 0  
+            DECLARE pos AS INTEGER SET TO 0  
+            
+            REPEAT WHILE pos IS LESS THAN LENGTH(bin1)  
+                IF NOT (bin1 AT pos EQUALS bin2 AT pos) THEN  
+                    LET dist_count BE dist_count PLUS 1  
+                END IF  
+                LET pos BE pos PLUS 1  
+            END REPEAT  
+            
+            RETURN dist_count  
+        END FUNCTION  
+        
+        DECLARE i AS INTEGER SET TO zero  
+        REPEAT WHILE i < LENGTH(nums)  
+            DECLARE max_found AS INTEGER SET TO zero  
+            DECLARE j AS INTEGER SET TO zero  
+            
+            REPEAT WHILE j < LENGTH(nums)  
+                IF NOT (i = j) THEN  
+                    DECLARE curr_dist AS INTEGER ASSIGNED hamming_distance(binary_reprs AT i, binary_reprs AT j)  
+                    IF curr_dist > max_found THEN  
+                        LET max_found BE curr_dist  
+                    END IF  
+                END IF  
+                LET j BE j PLUS 1  
+            END REPEAT  
+            
+            APPEND max_found TO results  
+            LET i BE i PLUS 1  
+        END REPEAT  
+        
+        RETURN results  
+    END FUNCTION  
+END CLASS

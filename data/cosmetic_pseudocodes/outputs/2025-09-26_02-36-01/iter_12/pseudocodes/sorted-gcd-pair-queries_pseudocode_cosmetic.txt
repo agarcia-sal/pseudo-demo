@@ -1,0 +1,85 @@
+CLASS Solution
+    FUNCTION gcdValues(nums, queries) 
+        FUNCTION computeMax(arr)
+            SET idx TO 0
+            SET val TO arr[0]
+            WHILE idx LESS THAN LENGTH(arr) DO
+                IF val LESS THAN arr[idx] THEN
+                    SET val TO arr[idx]
+                ENDIF
+                SET idx TO idx + 1
+            ENDWHILE
+            RETURN val
+        END FUNCTION
+
+        FUNCTION countElements(arr)
+            SET dictCount TO EMPTY MAP
+            FOR elem IN arr DO
+                IF elem IN dictCount THEN
+                    SET dictCount[elem] TO dictCount[elem] + 1
+                ELSE
+                    SET dictCount[elem] TO 1
+                ENDIF
+            ENDFOR
+            RETURN dictCount
+        END FUNCTION
+
+        FUNCTION accumulateList(lst)
+            SET cumulative TO EMPTY LIST
+            SET runningTotal TO 0
+            FOR val IN lst DO
+                SET runningTotal TO runningTotal + val
+                APPEND runningTotal TO cumulative
+            ENDFOR
+            RETURN cumulative
+        END FUNCTION
+
+        FUNCTION bisectRight(arr, target)
+            SET low TO 0
+            SET high TO LENGTH(arr)
+            WHILE low LESS THAN high DO
+                SET mid TO (low + high) DIV 2
+                IF target LESS THAN arr[mid] THEN
+                    SET high TO mid
+                ELSE
+                    SET low TO mid + 1
+                ENDIF
+            ENDWHILE
+            RETURN low
+        END FUNCTION
+
+        SET P TO computeMax(nums)
+        SET frequency TO countElements(nums)
+        SET counts_g TO EMPTY LIST
+        FOR u FROM 0 TO P DO
+            APPEND 0 TO counts_g
+        ENDFOR
+
+        FUNCTION process(i)
+            SET temp_v TO 0
+            SET k TO i
+            WHILE k LESS THAN OR EQUAL TO P DO
+                IF k IN frequency THEN
+                    SET temp_v TO temp_v + frequency[k]
+                ENDIF
+                SET counts_g[i] TO counts_g[i] - counts_g[k]
+                SET k TO k + i
+            ENDWHILE
+            SET counts_g[i] TO counts_g[i] + (temp_v * (temp_v - 1)) DIV 2
+        END FUNCTION
+
+        SET x TO P
+        WHILE x GREATER THAN 0 DO
+            CALL process(x)
+            SET x TO x - 1
+        ENDWHILE
+
+        SET prefixSum TO accumulateList(counts_g)
+        SET answer TO EMPTY LIST
+        FOR each target IN queries DO
+            APPEND bisectRight(prefixSum, target) TO answer
+        ENDFOR
+
+        RETURN answer
+    END FUNCTION
+END CLASS

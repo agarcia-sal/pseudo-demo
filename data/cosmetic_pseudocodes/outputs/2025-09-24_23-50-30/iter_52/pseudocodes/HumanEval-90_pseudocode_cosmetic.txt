@@ -1,0 +1,53 @@
+```
+FUNCTION next_smallest(container)
+    PROCEDURE build_sorted(distinct_items, accumulator)
+        IF distinct_items IS EMPTY THEN
+            RETURN accumulator
+        ELSE
+            LET head_element BE FIRST ELEMENT OF distinct_items
+            LET tail_segment BE ALL ELEMENTS OF distinct_items EXCEPT FIRST
+            IF head_element IS IN accumulator THEN
+                RETURN build_sorted(tail_segment, accumulator)
+            ELSE
+                LET extended_accumulator BE accumulator APPENDED WITH head_element
+                RETURN build_sorted(tail_segment, extended_accumulator)
+            END IF
+        END IF
+    END PROCEDURE
+
+    PROCEDURE insertion_sort(collection)
+        IF collection IS EMPTY THEN
+            RETURN EMPTY LIST
+        ELSE
+            LET first_part BE FIRST ELEMENT OF collection
+            LET remaining_part BE ALL ELEMENTS OF collection EXCEPT FIRST
+
+            PROCEDURE insert_element(sorted_sublist, element)
+                IF sorted_sublist IS EMPTY THEN
+                    RETURN LIST WITH element
+                ELSE
+                    LET first_sorted BE FIRST ELEMENT OF sorted_sublist
+                    LET rest_sorted BE ALL ELEMENTS OF sorted_sublist EXCEPT FIRST
+                    IF element <= first_sorted THEN
+                        RETURN LIST WITH element FOLLOWED BY sorted_sublist
+                    ELSE
+                        RETURN LIST WITH first_sorted FOLLOWED BY insert_element(rest_sorted, element)
+                    END IF
+                END IF
+            END PROCEDURE
+
+            LET sorted_remaining BE insertion_sort(remaining_part)
+            RETURN insert_element(sorted_remaining, first_part)
+        END IF
+    END PROCEDURE
+
+    LET removed_duplicates BE build_sorted(container, EMPTY LIST)
+    LET sorted_unique_collection BE insertion_sort(removed_duplicates)
+
+    IF LENGTH OF sorted_unique_collection < 2 THEN
+        RETURN None
+    END IF
+
+    RETURN ELEMENT AT INDEX 1 OF sorted_unique_collection
+END FUNCTION
+```

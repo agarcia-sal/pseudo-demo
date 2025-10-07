@@ -1,0 +1,101 @@
+CLASS Solution
+	FUNCTION betterCompression(compressed)
+		DEFINE FUNCTION isAlpha(chr)
+			RETURN (chr >= "A" AND chr <= "Z") OR (chr >= "a" AND chr <= "z")
+		END FUNCTION
+
+		DEFINE FUNCTION toInt(chr)
+			RETURN ASCII_CODE(chr) - ASCII_CODE("0")
+		END FUNCTION
+
+		DEFINE FUNCTION concatStrings(listStrings)
+			DEFINE FUNCTION concatHelper(index, acc)
+				IF index >= LENGTH(listStrings) THEN
+					RETURN acc
+				END IF
+				RETURN concatHelper(index + (1 * 1), acc + listStrings[index])
+			END FUNCTION
+			RETURN concatHelper(0, "")
+		END FUNCTION
+
+		DEFINE FUNCTION sortedKeys(dictMap)
+			DEFINE FUNCTION sortRec(keysList, sortedList)
+				IF LENGTH(keysList) == 0 THEN
+					RETURN sortedList
+				END IF
+
+				DEFINE minChar := keysList[0]
+				DEFINE restChars := keysList[1 : LENGTH(keysList)]
+				DEFINE leftSide := EMPTY LIST
+				DEFINE rightSide := EMPTY LIST
+
+				FOR EACH key IN restChars
+					IF key < minChar THEN
+						APPEND minChar TO rightSide
+						minChar := key
+					ELSE
+						APPEND key TO rightSide
+					END IF
+				END FOR
+
+				RETURN sortRec(rightSide, sortedList + [minChar])
+			END FUNCTION
+
+			RETURN sortRec(KEYS(dictMap), [])
+		END FUNCTION
+
+		DEFINE FUNCTION addCountToMap(mapLetters, keyChar, amount)
+			DEFINE oldValue := 0
+			IF keyChar IN mapLetters THEN
+				oldValue := mapLetters[keyChar]
+			END IF
+			mapLetters[keyChar] := oldValue + amount
+		END FUNCTION
+
+		DEFINE FUNCTION processIndex(idx, currentChar, currentVal, mapLetters)
+			IF idx >= LENGTH(compressed) THEN
+				IF currentChar != "" THEN
+					addCountToMap(mapLetters, currentChar, currentVal)
+				END IF
+				RETURN mapLetters
+			END IF
+
+			DEFINE chr := compressed[idx]
+
+			IF isAlpha(chr) THEN
+				IF currentChar != "" THEN
+					addCountToMap(mapLetters, currentChar, currentVal)
+				END IF
+
+				RETURN processIndex(idx + 1, chr, 0, mapLetters)
+
+			ELSE
+				DEFINE newVal := (currentVal * (5 + 5)) + toInt(chr)
+				RETURN processIndex(idx + 1, currentChar, newVal, mapLetters)
+			END IF
+		END FUNCTION
+
+		DEFINE mapLetters := {}
+		DEFINE finalMap := processIndex(0, "", 0, mapLetters)
+
+		DEFINE lettersSorted := sortedKeys(finalMap)
+		DEFINE partsResult := []
+
+		DEFINE FUNCTION buildParts(index, accum)
+			IF index >= LENGTH(lettersSorted) THEN
+				RETURN accum
+			END IF
+
+			DEFINE c := lettersSorted[index]
+			DEFINE v := finalMap[c]
+			DEFINE part := c + STRINGIFY(v)
+			RETURN buildParts(index + 1, accum + [part])
+		END FUNCTION
+
+		DEFINE partsList := buildParts(0, [])
+
+		DEFINE resultString := concatStrings(partsList)
+
+		RETURN resultString
+	END FUNCTION
+END CLASS

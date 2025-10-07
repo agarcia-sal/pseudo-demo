@@ -1,0 +1,107 @@
+CLASS Solution
+    FUNCTION minimizeStringValue(s)
+        DEFINE FUNCTION countElements(sequence)
+            DEFINE FUNCTION helper(idx, freqMap)
+                IF idx GREATER OR EQUAL TO LENGTH(sequence) THEN
+                    RETURN freqMap
+                END IF
+                DEFINE currentChar AS sequence[idx]
+                IF freqMap CONTAINS currentChar THEN
+                    SET updatedFreq TO freqMap[currentChar] PLUS 1
+                ELSE
+                    SET updatedFreq TO 1
+                END IF
+                SET updatedMap TO FREQUENCY_MAP_COPY_WITH(freqMap, currentChar, updatedFreq)
+                RETURN helper(idx PLUS 1, updatedMap)
+            END FUNCTION
+            RETURN helper(0, EMPTY_MAP)
+        END FUNCTION
+
+        SET frequency_data TO countElements(s)
+
+        IF frequency_data CONTAINS "?"
+            REMOVE "?" FROM frequency_data
+        END IF
+
+        DEFINE indicesWithQuestionMarks AS EMPTY_STACK
+        DEFINE pos AS 0
+        DEFINE limit AS LENGTH(s)
+        WHILE TRUE
+            IF pos NOT LESS THAN limit THEN
+                BREAK
+            END IF
+            IF s[pos] EQUALS "?" THEN
+                PUSH pos ONTO indicesWithQuestionMarks
+            END IF
+            SET pos TO pos PLUS 1
+        END WHILE
+
+        DEFINE substitutions AS EMPTY_QUEUE
+
+        DEFINE tailRecursor AS FUNCTION (i, subs, freq)
+            IF i NOT LESS THAN LENGTH(indicesWithQuestionMarks) THEN
+                RETURN (subs, freq)
+            END IF
+
+            DEFINE minFrequency AS MAXIMUM_POSSIBLE_INTEGER
+            DEFINE chosenCharacter AS NULL
+            DEFINE letters AS ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
+            DEFINE innerIdx AS 0
+            DEFINE innerLimit AS LENGTH(letters)
+            DEFINE selectedCharacter AS NULL
+            DEFINE minimalFrequency AS minFrequency
+
+            WHILE innerIdx LESS THAN innerLimit
+                DEFINE candidateChar AS letters[innerIdx]
+                DEFINE candidateCount AS 0
+                IF freq CONTAINS candidateChar THEN
+                    SET candidateCount TO freq[candidateChar]
+                END IF
+                IF candidateCount LESS THAN minimalFrequency THEN
+                    SET minimalFrequency TO candidateCount
+                    SET selectedCharacter TO candidateChar
+                END IF
+                SET innerIdx TO innerIdx PLUS 1
+            END WHILE
+
+            DEFINE updatedSubs AS subs PLUS [selectedCharacter]
+
+            DEFINE updatedFreq AS MAP_COPY(freq)
+            IF updatedFreq CONTAINS selectedCharacter THEN
+                SET updatedFreq[selectedCharacter] TO updatedFreq[selectedCharacter] PLUS 1
+            ELSE
+                SET updatedFreq[selectedCharacter] TO 1
+            END IF
+
+            RETURN tailRecursor(i PLUS 1, updatedSubs, updatedFreq)
+        END FUNCTION
+
+        DEFINE (finalSubs, _) AS tailRecursor(0, EMPTY_LIST, frequency_data)
+        SET orderedSubs TO FINAL_SORT(finalSubs)
+
+        DEFINE sCharArray AS ARRAY_FROM_STRING(s)
+        DEFINE k AS LENGTH(orderedSubs) MINUS 1
+
+        WHILE k GREATER OR EQUAL TO 0
+            DEFINE replacedIndex AS indicesWithQuestionMarks[k]
+            SET sCharArray[replacedIndex] TO orderedSubs[k]
+            SET k TO k MINUS 1
+        END WHILE
+
+        DEFINE FUNCTION joinCharacters(charArray)
+            DEFINE resultString AS EMPTY_STRING
+            DEFINE index AS 0
+            DEFINE lengthLimit AS LENGTH(charArray)
+            WHILE TRUE
+                IF index NOT LESS THAN lengthLimit THEN
+                    BREAK
+                END IF
+                SET resultString TO resultString PLUS charArray[index]
+                SET index TO index PLUS 1
+            END WHILE
+            RETURN resultString
+        END FUNCTION
+
+        RETURN joinCharacters(sCharArray)
+    END FUNCTION
+END CLASS

@@ -1,0 +1,49 @@
+FUNCTION check_dict_case(map_input)
+    IF NOT (COUNT(map_input KEYS) > 0) THEN
+        RETURN False
+    END IF
+
+    DECLARE mode SET TO "start"
+    DECLARE idx SET TO 0
+    DECLARE keys_list ASSIGN map_input KEYS
+    WHILE idx < COUNT(keys_list) DO
+        SET current_key TO keys_list[idx]
+
+        IF TYPEOF(current_key) IS NOT STRING THEN
+            SET mode TO "mixed"
+            BREAK
+        END IF
+
+        IF mode = "start" THEN
+            IF current_key = TO_UPPERCASE(current_key) THEN
+                SET mode TO "upper"
+            ELSE
+                IF current_key = TO_LOWERCASE(current_key) THEN
+                    SET mode TO "lower"
+                ELSE
+                    BREAK
+                END IF
+            END IF
+        ELSE
+            IF mode = "upper" THEN
+                IF current_key <> TO_UPPERCASE(current_key) THEN
+                    SET mode TO "mixed"
+                    BREAK
+                END IF
+            ELSE
+                IF mode = "lower" THEN
+                    IF current_key <> TO_LOWERCASE(current_key) THEN
+                        SET mode TO "mixed"
+                        BREAK
+                    END IF
+                ELSE
+                    BREAK
+                END IF
+            END IF
+        END IF
+
+        SET idx TO idx + 1
+    END WHILE
+
+    RETURN (mode = "upper") OR (mode = "lower")
+END FUNCTION

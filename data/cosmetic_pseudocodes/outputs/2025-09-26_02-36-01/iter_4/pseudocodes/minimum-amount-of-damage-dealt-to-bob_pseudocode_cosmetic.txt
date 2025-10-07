@@ -1,0 +1,59 @@
+CLASS Enemy  
+    FUNCTION __init__(self, damage, timeTakenDown)  
+        ASSIGN self.damage AS damage  
+        ASSIGN self.timeTakenDown AS timeTakenDown  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION minDamage(self, power, damage, health)  
+        DECLARE totalDamageAccum AS zero  
+        DECLARE damageSum AS zero  
+        DECLARE enemyList AS an empty collection  
+        
+        DECLARE idx AS zero  
+        WHILE idx IS LESS THAN (LENGTH OF damage) DO  
+            SET damageSum TO damageSum PLUS damage[idx]  
+            INCREMENT idx BY one  
+        END WHILE  
+        
+        SET counter TO zero  
+        WHILE counter IS LESS THAN (LENGTH OF damage) DO  
+            DECLARE dmgAtPos AS damage[counter]  
+            DECLARE hpAtPos AS health[counter]  
+            
+            DECLARE numerator AS hpAtPos PLUS power MINUS one  
+            DECLARE timeUnits AS numerator DIVIDED BY power USING INTEGER DIVISION  
+            
+            DECLARE foe AS NEW Enemy WITH dmgAtPos, timeUnits  
+            APPEND foe TO enemyList  
+            INCREMENT counter BY one  
+        END WHILE  
+
+        DEFINE FUNCTION comparator(a, b)  
+            DECLARE valA AS a.damage DIVIDED BY a.timeTakenDown  
+            DECLARE valB AS b.damage DIVIDED BY b.timeTakenDown  
+            IF valA IS GREATER THAN valB THEN  
+                RETURN True  
+            ELSE  
+                RETURN False  
+            END IF  
+        END FUNCTION  
+        
+        SORT enemyList USING comparator FUNCTION TO ORDER DESCENDING  
+        
+        SET iterator TO zero  
+        WHILE iterator IS LESS THAN (LENGTH OF enemyList) DO  
+            DECLARE currentEnemy AS enemyList[iterator]  
+            
+            DECLARE addVal AS damageSum MULTIPLIED BY currentEnemy.timeTakenDown  
+            SET totalDamageAccum TO totalDamageAccum PLUS addVal  
+            
+            SET damageSum TO damageSum MINUS currentEnemy.damage  
+            
+            INCREMENT iterator BY one  
+        END WHILE  
+        
+        RETURN totalDamageAccum  
+    END FUNCTION  
+END CLASS

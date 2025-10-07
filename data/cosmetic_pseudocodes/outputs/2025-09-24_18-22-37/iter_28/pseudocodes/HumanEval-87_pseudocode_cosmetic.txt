@@ -1,0 +1,70 @@
+FUNCTION get_row(lst_2d, val_target)
+    DECLARE found_positions AS EMPTY LIST
+    SET i_counter TO 0
+    WHILE i_counter <= LENGTH(lst_2d) - 1
+        SET j_counter TO 0
+        WHILE j_counter <= LENGTH(lst_2d.at(i_counter)) - 1
+            SET current_element TO lst_2d.at(i_counter).at(j_counter)
+            SET condition_flag TO (current_element = val_target)
+            IF NOT condition_flag = TRUE
+                SET skip_addition TO TRUE
+            ELSE
+                SET skip_addition TO FALSE
+            END IF
+            IF NOT skip_addition
+                DECLARE pos_pair AS TUPLE(i_counter, j_counter)
+                APPEND pos_pair TO found_positions
+            END IF
+            SET j_counter TO j_counter + 1
+        END WHILE
+        SET i_counter TO i_counter + 1
+    END WHILE
+
+    SET sorted_by_col_desc TO EMPTY LIST
+    SET index_c TO 0
+    WHILE index_c < LENGTH(found_positions)
+        SET sorted_by_col_desc TO sorted_by_col_desc + [found_positions.at(index_c)]
+        SET index_c TO index_c + 1
+    END WHILE
+
+    DECLARE temp_swap AS TUPLE
+    DECLARE flag_swap AS BOOLEAN
+    SET flag_swap TO TRUE
+    WHILE flag_swap
+        SET flag_swap TO FALSE
+        SET idx_p TO 0
+        WHILE idx_p < LENGTH(sorted_by_col_desc) - 1
+            IF sorted_by_col_desc.at(idx_p).at(1) < sorted_by_col_desc.at(idx_p + 1).at(1)
+                SET temp_swap TO sorted_by_col_desc.at(idx_p)
+                SET sorted_by_col_desc.at(idx_p) TO sorted_by_col_desc.at(idx_p + 1)
+                SET sorted_by_col_desc.at(idx_p + 1) TO temp_swap
+                SET flag_swap TO TRUE
+            END IF
+            SET idx_p TO idx_p + 1
+        END WHILE
+    END WHILE
+
+    SET sorted_by_row_asc TO EMPTY LIST
+    SET counter_z TO 0
+    WHILE counter_z < LENGTH(sorted_by_col_desc)
+        SET sorted_by_row_asc TO sorted_by_row_asc + [sorted_by_col_desc.at(counter_z)]
+        SET counter_z TO counter_z + 1
+    END WHILE
+
+    SET flag_sorted TO TRUE
+    WHILE flag_sorted
+        SET flag_sorted TO FALSE
+        SET idx_r TO 0
+        WHILE idx_r < LENGTH(sorted_by_row_asc) - 1
+            IF sorted_by_row_asc.at(idx_r).at(0) > sorted_by_row_asc.at(idx_r + 1).at(0)
+                SET temp_swap TO sorted_by_row_asc.at(idx_r)
+                SET sorted_by_row_asc.at(idx_r) TO sorted_by_row_asc.at(idx_r + 1)
+                SET sorted_by_row_asc.at(idx_r + 1) TO temp_swap
+                SET flag_sorted TO TRUE
+            END IF
+            SET idx_r TO idx_r + 1
+        END WHILE
+    END WHILE
+
+    RETURN sorted_by_row_asc
+END FUNCTION

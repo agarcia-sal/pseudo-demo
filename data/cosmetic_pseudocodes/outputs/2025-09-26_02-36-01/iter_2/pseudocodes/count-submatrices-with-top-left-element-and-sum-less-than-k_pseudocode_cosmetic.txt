@@ -1,0 +1,44 @@
+CLASS Solution
+    FUNCTION countSubmatrices(grid, k)
+        IF grid IS EMPTY OR grid[0] IS EMPTY THEN
+            RETURN 0
+        END IF
+
+        LET rowCount BE LENGTH OF grid
+        LET colCount BE LENGTH OF grid[0]
+
+        LET cumulative_matrix BE ARRAY WITH rowCount ELEMENTS WHERE EACH ELEMENT IS AN ARRAY OF colCount ZEROS
+
+        LET total_submatrices BE 0
+
+        SET p TO 0
+        WHILE p < rowCount DO
+            LET q TO 0
+            WHILE q < colCount DO
+                
+                IF p = 0 AND q = 0 THEN
+                    cumulative_matrix[p][q] := grid[p][q]
+                ELSE IF p = 0 THEN
+                    cumulative_matrix[p][q] := cumulative_matrix[p][q - 1] + grid[p][q]
+                ELSE IF q = 0 THEN
+                    cumulative_matrix[p][q] := cumulative_matrix[p - 1][q] + grid[p][q]
+                ELSE
+                    LET top_left_val BE cumulative_matrix[p - 1][q - 1]
+                    LET top_val BE cumulative_matrix[p - 1][q]
+                    LET left_val BE cumulative_matrix[p][q - 1]
+                    LET current_val BE grid[p][q]
+                    cumulative_matrix[p][q] := top_val + left_val - top_left_val + current_val
+                END IF
+
+                IF cumulative_matrix[p][q] <= k THEN
+                    total_submatrices := total_submatrices + 1
+                END IF
+
+                q := q + 1
+            END WHILE
+            p := p + 1
+        END WHILE
+
+        RETURN total_submatrices
+    END FUNCTION
+END CLASS

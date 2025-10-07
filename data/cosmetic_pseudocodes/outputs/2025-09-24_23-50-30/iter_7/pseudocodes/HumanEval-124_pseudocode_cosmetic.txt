@@ -1,0 +1,71 @@
+```
+FUNCTION valid_date(date_string)
+  DEFINE check_bounds(x, lower, upper)
+    RETURN NOT (x < lower OR x > upper)
+  END
+
+  DEFINE split_and_parse(i, parts)
+    IF i > 2 THEN
+      RETURN parts
+    END
+    LET part = parts[i]
+    TRY
+      LET parts[i] = TO_INTEGER(part)
+    EXCEPT
+      RETURN NULL
+    END
+    RETURN split_and_parse(i + 1, parts)
+  END
+
+  LET trimmed = ""
+  FOR idx IN 1 TO LENGTH(date_string)
+    LET ch = date_string[idx]
+    IF NOT (ch = ' ' AND (idx = 1 OR idx = LENGTH(date_string))) THEN
+      trimmed = trimmed + ch
+    END
+  END
+
+  LET segments = [] 
+  LET buffer = ""
+  FOR ch IN trimmed
+    IF ch = '-' THEN
+      APPEND buffer TO segments
+      buffer = ""
+    ELSE
+      buffer = buffer + ch
+    END
+  END
+  APPEND buffer TO segments
+
+  IF LENGTH(segments) != 3 THEN
+    RETURN False
+  END
+
+  LET numeric_parts = split_and_parse(0, segments)
+  IF numeric_parts IS NULL THEN
+    RETURN False
+  END
+
+  LET m = numeric_parts[0]
+  LET d = numeric_parts[1]
+  LET y = numeric_parts[2]
+
+  IF NOT check_bounds(m, 1, 12) THEN
+    RETURN False
+  END
+
+  IF ( (m = 1 OR m = 3 OR m = 5 OR m = 7 OR m = 8 OR m = 10 OR m = 12) AND NOT check_bounds(d, 1, 31) ) THEN
+    RETURN False
+  END
+
+  IF ( (m = 4 OR m = 6 OR m = 9 OR m = 11) AND NOT check_bounds(d, 1, 30) ) THEN
+    RETURN False
+  END
+
+  IF (m = 2 AND NOT check_bounds(d, 1, 29)) THEN
+    RETURN False
+  END
+
+  RETURN True
+END FUNCTION
+```

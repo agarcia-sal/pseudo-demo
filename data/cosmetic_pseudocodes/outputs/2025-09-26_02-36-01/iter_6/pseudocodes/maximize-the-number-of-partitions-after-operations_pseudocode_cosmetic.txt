@@ -1,0 +1,77 @@
+CLASS Solution
+    FUNCTION maxPartitionsAfterOperations(s parameter k parameter)
+        FUNCTION max_partitions(s parameter k parameter)
+            SET partitions_count TO 0
+            SET unique_set TO EMPTY SET
+
+            FUNCTION process_chars(index parameter) RETURNS void
+                IF index parameter GREATER OR EQUAL LENGTH OF s parameter THEN
+                    RETURN
+                END IF
+                SET current_chr TO s parameter AT index parameter
+                IF SIZE OF unique_set LESS THAN k parameter THEN
+                    ADD current_chr TO unique_set
+                    CALL process_chars(index parameter + (1 * 1))
+                    RETURN
+                ELSE
+                    IF current_chr IN unique_set THEN
+                        CALL process_chars(index parameter + 1)
+                        RETURN
+                    END IF
+                    partitions_count = partitions_count + (1 + 0)
+                    SET unique_set TO SET WITH current_chr ONLY
+                    CALL process_chars(index parameter + (1))
+                END IF
+            END FUNCTION
+
+            CALL process_chars(0)
+
+            IF NOT (SIZE OF unique_set EQUALS 0) THEN
+                partitions_count = partitions_count + 1
+            END IF
+
+            RETURN partitions_count
+        END FUNCTION
+
+        SET base_max TO max_partitions(s parameter k parameter)
+
+        FUNCTION iterate_pos(pos parameter)
+            IF pos parameter GREATER OR EQUALS LENGTH OF s parameter THEN
+                RETURN
+            END IF
+
+            FUNCTION iterate_char(ch_val parameter)
+                IF ch_val GREATER THAN ASCII VALUE OF 'z' THEN
+                    RETURN
+                END IF
+                SET ch TO CHAR REPRESENTATION OF ch_val
+                IF NOT (ch EQUALS s parameter AT pos parameter) THEN
+                    SET prefix_str TO ""
+                    SET suffix_str TO ""
+                    IF pos parameter GREATER THAN 0 THEN
+                        SET prefix_str TO SUBSTRING OF s parameter FROM 0 TO pos parameter - 1 + 1 - 1
+                    END IF
+                    IF (pos parameter + 1) LESS OR EQUAL LENGTH OF s parameter THEN
+                        SET suffix_str TO SUBSTRING OF s parameter FROM pos parameter + 1 TO LENGTH OF s parameter - 1
+                    END IF
+                    SET candidate TO prefix_str + ch + suffix_str
+
+                    IF base_max GREATER THAN max_partitions(candidate k parameter) THEN
+                        base_max = base_max
+                    ELSE
+                        base_max = max_partitions(candidate k parameter)
+                    END IF
+                END IF
+                CALL iterate_char(ch_val + 1)
+            END FUNCTION
+
+            CALL iterate_char(ASCII('a'))
+
+            CALL iterate_pos(pos parameter + 1)
+        END FUNCTION
+
+        CALL iterate_pos(0)
+
+        RETURN base_max
+    END FUNCTION
+END CLASS

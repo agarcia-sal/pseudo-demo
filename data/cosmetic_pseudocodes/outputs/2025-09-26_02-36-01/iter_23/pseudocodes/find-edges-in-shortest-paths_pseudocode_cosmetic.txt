@@ -1,0 +1,183 @@
+```  
+CLASS Solution  
+    FUNCTION findAnswer(n, edges)  
+        FUNCTION pushHeap(arr, item)  
+            SET idx TO LENGTH of arr  
+            APPEND item TO arr  
+            WHILE idx GREATER THAN 0  
+                SET parent TO (idx - 1) DIV 2  
+                IF arr[parent][0] GREATER THAN arr[idx][0]  
+                    SET temp TO arr[parent]  
+                    SET arr[parent] TO arr[idx]  
+                    SET arr[idx] TO temp  
+                    SET idx TO parent  
+                ELSE  
+                    BREAK  
+                END IF  
+            END WHILE  
+        END FUNCTION  
+
+        FUNCTION popHeap(arr)  
+            IF LENGTH arr EQUALS 0  
+                RETURN NULL  
+            END IF  
+            SET root TO arr[0]  
+            SET endElem TO arr[LENGTH arr - 1]  
+            REMOVE last element FROM arr  
+            IF LENGTH arr EQUALS 0  
+                RETURN root  
+            END IF  
+            SET arr[0] TO endElem  
+            SET idx TO 0  
+            SET length TO LENGTH arr  
+            WHILE TRUE  
+                SET leftChild TO 2 * idx + 1  
+                SET rightChild TO 2 * idx + 2  
+                SET swapIdx TO idx  
+                IF leftChild LESS THAN length AND arr[leftChild][0] LESS THAN arr[swapIdx][0]  
+                    SET swapIdx TO leftChild  
+                END IF  
+                IF rightChild LESS THAN length AND arr[rightChild][0] LESS THAN arr[swapIdx][0]  
+                    SET swapIdx TO rightChild  
+                END IF  
+                IF swapIdx EQUALS idx  
+                    BREAK  
+                END IF  
+                SET temp TO arr[idx]  
+                SET arr[idx] TO arr[swapIdx]  
+                SET arr[swapIdx] TO temp  
+                SET idx TO swapIdx  
+            END WHILE  
+            RETURN root  
+        END FUNCTION  
+
+        FUNCTION buildGraph(edgeList)  
+            SET mapRep TO empty mapping with default empty list  
+            FUNCTION recurBuild(idx)  
+                IF idx EQUALS LENGTH edgeList  
+                    RETURN  
+                END IF  
+                SET curEdge TO edgeList[idx]  
+                SET a TO curEdge[0]  
+                SET b TO curEdge[1]  
+                SET c TO curEdge[2]  
+                APPEND tuple (b, c) TO mapRep[a]  
+                APPEND tuple (a, c) TO mapRep[b]  
+                CALL recurBuild(idx + 1)  
+            END FUNCTION  
+            CALL recurBuild(0)  
+            RETURN mapRep  
+        END FUNCTION  
+
+        SET graphMap TO buildGraph(edges)  
+
+        SET maxVal TO (1 SHIFT LEFT BY 30) PLUS (1 SHIFT LEFT BY 15) MINUS 123456  
+        SET distArr TO list of length n each set to maxVal  
+        SET distArr[0] TO 0  
+
+        FUNCTION relaxAndPush(pQ, node, distVal)  
+            CALL pushHeap(pQ, tuple(distVal, node))  
+        END FUNCTION  
+
+        SET heapQueue TO empty list  
+        CALL relaxAndPush(heapQueue, 0, 0)  
+
+        FUNCTION dijkstraLoop()  
+            IF LENGTH heapQueue EQUALS 0  
+                RETURN  
+            END IF  
+            SET currPair TO popHeap(heapQueue)  
+            SET curDist TO currPair[0]  
+            SET currNode TO currPair[1]  
+
+            IF curDist GREATER THAN distArr[currNode]  
+                CALL dijkstraLoop()  
+                RETURN  
+            END IF  
+
+            FUNCTION neighborsLoop(idxN)  
+                IF idxN EQUALS LENGTH graphMap[currNode]  
+                    CALL dijkstraLoop()  
+                    RETURN  
+                END IF  
+                SET neighborPair TO graphMap[currNode][idxN]  
+                SET nd TO neighborPair[0]  
+                SET wgt TO neighborPair[1]  
+                SET sumDist TO curDist PLUS wgt  
+                IF sumDist LESS THAN distArr[nd]  
+                    SET distArr[nd] TO sumDist  
+                    CALL relaxAndPush(heapQueue, nd, sumDist)  
+                END IF  
+                CALL neighborsLoop(idxN + 1)  
+            END FUNCTION  
+            CALL neighborsLoop(0)  
+        END FUNCTION  
+
+        CALL dijkstraLoop()  
+
+        SET spEdges TO empty set  
+        SET stackList TO list containing tuple(n - 1, distArr[n - 1])  
+        SET visitedArr TO list of length n each set to FALSE  
+
+        FUNCTION stackProc()  
+            IF LENGTH stackList EQUALS 0  
+                RETURN  
+            END IF  
+            SET topPair TO stackList[LENGTH stackList - 1]  
+            REMOVE last element FROM stackList  
+            SET currU TO topPair[0]  
+            SET currD TO topPair[1]  
+            IF visitedArr[currU]  
+                CALL stackProc()  
+                RETURN  
+            END IF  
+            SET visitedArr[currU] TO TRUE  
+
+            FUNCTION innerCheck(indexC)  
+                IF indexC EQUALS LENGTH graphMap[currU]  
+                    CALL stackProc()  
+                    RETURN  
+                END IF  
+                SET nbPair TO graphMap[currU][indexC]  
+                SET nbV TO nbPair[0]  
+                SET nbW TO nbPair[1]  
+
+                IF currD EQUALS distArr[nbV] PLUS nbW  
+                    IF currU LESS THAN nbV  
+                        SET lowNode TO currU  
+                        SET highNode TO nbV  
+                    ELSE  
+                        SET lowNode TO nbV  
+                        SET highNode TO currU  
+                    END IF  
+                    ADD tuple(lowNode, highNode) TO spEdges  
+                    APPEND tuple(nbV, distArr[nbV]) TO stackList  
+                END IF  
+                CALL innerCheck(indexC + 1)  
+            END FUNCTION  
+            CALL innerCheck(0)  
+        END FUNCTION  
+
+        CALL stackProc()  
+
+        SET retList TO empty list  
+
+        FUNCTION finalCheck(idxE)  
+            IF idxE EQUALS LENGTH edges  
+                RETURN  
+            END IF  
+            SET ed TO edges[idxE]  
+            SET u1 TO ed[0]  
+            SET v1 TO ed[1]  
+            SET lowVal1 TO (u1 LESS THAN v1) ? u1 : v1  
+            SET highVal1 TO (u1 GREATER THAN v1) ? u1 : v1  
+            SET containsEdge TO spEdges CONTAINS tuple(lowVal1, highVal1)  
+            APPEND containsEdge TO retList  
+            CALL finalCheck(idxE + 1)  
+        END FUNCTION  
+        CALL finalCheck(0)  
+
+        RETURN retList  
+    END FUNCTION  
+END CLASS  
+```

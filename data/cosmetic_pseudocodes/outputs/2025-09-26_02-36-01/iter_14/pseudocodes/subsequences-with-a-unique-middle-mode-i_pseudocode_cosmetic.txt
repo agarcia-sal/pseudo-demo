@@ -1,0 +1,72 @@
+CLASS Solution
+	FUNCTION subsequencesWithMiddleMode(nums)
+		CONST BASE ← 1000000000 + 7
+		LET O ← LENGTH(nums)
+		
+		IF NOT (O >= 5) THEN
+			RETURN 0
+		END IF
+		
+		FUNCTION combinationsOfSizeFIVE(array, currentIndex, collector, results)
+			IF LENGTH(collector) = 5 THEN
+				APPEND results WITH COPY(collector)
+				RETURN
+			END IF
+			IF currentIndex > LENGTH(array) THEN
+				RETURN
+			END IF
+			combinationsOfSizeFIVE(array, currentIndex + 1, collector, results)
+			APPEND collector WITH array[currentIndex]
+			combinationsOfSizeFIVE(array, currentIndex + 1, collector, results)
+			REMOVE LAST collector
+		END FUNCTION
+		
+		LET allGroups ← []
+		combinationsOfSizeFIVE(nums, 1, [], allGroups)
+		
+		LET finalAnswer ← 0
+		
+		FUNCTION buildsFrequencyMap(sequence)
+			LET map ← EMPTY MAP
+			FOR EACH x IN sequence DO
+				IF x IN map THEN
+					map[x] ← map[x] + 1
+				ELSE
+					map[x] ← 1
+				END IF
+			END FOR
+			RETURN map
+		END FUNCTION
+		
+		FOR EACH subgroup IN allGroups DO
+			LET frequencies ← buildsFrequencyMap(subgroup)
+			
+			LET middlePos ← 3
+			LET middleVal ← subgroup[middlePos]
+			LET middleFreq ← frequencies[middleVal]
+			
+			LET uniqueModeFlag ← TRUE
+			LET keysIterator ← KEYS(frequencies)
+			
+			FUNCTION checkFrequencies(iter)
+				IF iter IS EMPTY THEN
+					RETURN
+				END IF
+				LET currentKey ← FIRST(iter)
+				LET currentValue ← frequencies[currentKey]
+				IF currentKey != middleVal AND currentValue >= middleFreq THEN
+					uniqueModeFlag ← FALSE
+					RETURN
+				END IF
+				checkFrequencies(REST(iter))
+			END FUNCTION
+			
+			checkFrequencies(keysIterator)
+			IF uniqueModeFlag THEN
+				finalAnswer ← finalAnswer + (1 * 1)
+			END IF
+		END FOR
+		
+		RETURN finalAnswer - BASE * ((finalAnswer DIV BASE))
+	END FUNCTION
+END CLASS

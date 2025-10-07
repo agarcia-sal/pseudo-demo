@@ -1,0 +1,104 @@
+CLASS Solution
+    FUNCTION maxPalindromesAfterOperations(words)
+        FUNCTION customCounter(sequence)
+            SET mapX TO empty map
+            CALL helperFillMap(sequence, mapX)
+            RETURN mapX
+        END FUNCTION
+
+        PROCEDURE helperFillMap(seq, mapRef)
+            SET idxA TO 0
+            WHILE idxA LESS THAN LENGTH(seq)
+                SET charR TO seq[idxA]
+                IF charR NOT IN mapRef
+                    SET mapRef[charR] TO 0
+                END IF
+                SET mapRef[charR] TO mapRef[charR] + 1
+                SET idxA TO idxA + 1
+            END WHILE
+        END PROCEDURE
+
+        SET counterC TO customCounter(CONCATENATE_ALL(words))
+
+        FUNCTION integerDivTwo(value)
+            SET quotient TO 0
+            WHILE (quotient + 1)*2 <= value
+                SET quotient TO quotient + 1
+            END WHILE
+            RETURN quotient
+        END FUNCTION
+
+        FUNCTION moduloTwo(value)
+            RETURN value - (integerDivTwo(value) * 2)
+        END FUNCTION
+
+        SET varM TO 0
+        SET varN TO 0
+        SET valsList TO EMPTY LIST
+
+        PROCEDURE populateVals()
+            FOR EACH k IN counterC KEYS
+                APPEND counterC[k] TO valsList
+            END FOR
+        END PROCEDURE
+
+        CALL populateVals()
+
+        SET iterU TO 0
+        WHILE iterU LESS THAN LENGTH(valsList)
+            SET currCount TO valsList[iterU]
+            SET varM TO varM + integerDivTwo(currCount)
+            SET varN TO varN + moduloTwo(currCount)
+            SET iterU TO iterU + 1
+        END WHILE
+
+        FUNCTION lengthAscComparator(a, b)
+            RETURN LENGTH(a) - LENGTH(b)
+        END FUNCTION
+
+        PROCEDURE sortByLength(arr)
+            PROCEDURE helperSort(low, high)
+                IF low < high
+                    SET pivot TO arr[high]
+                    SET i TO low - 1
+                    SET j TO low
+                    WHILE j < high
+                        IF lengthAscComparator(arr[j], pivot) <= 0
+                            SET i TO i + 1
+                            SET temp1 TO arr[i]
+                            SET arr[i] TO arr[j]
+                            SET arr[j] TO temp1
+                        END IF
+                        SET j TO j + 1
+                    END WHILE
+                    SET temp2 TO arr[i + 1]
+                    SET arr[i + 1] TO arr[high]
+                    SET arr[high] TO temp2
+                    CALL helperSort(low, i)
+                    CALL helperSort(i + 2, high)
+                END IF
+            END PROCEDURE
+            CALL helperSort(0, LENGTH(arr) - 1)
+        END PROCEDURE
+
+        CALL sortByLength(words)
+
+        SET countPal TO 0
+        SET indexW TO 0
+        FUNCTION halfLenDiv2(strn)
+            RETURN integerDivTwo(LENGTH(strn))
+        END FUNCTION
+
+        WHILE indexW LESS THAN LENGTH(words)
+            SET wStr TO words[indexW]
+            SET hLen TO halfLenDiv2(wStr)
+            IF varM GREATER THAN OR EQUAL TO hLen
+                SET varM TO varM - hLen
+                SET countPal TO countPal + 1
+            END IF
+            SET indexW TO indexW + 1
+        END WHILE
+
+        RETURN countPal
+    END FUNCTION
+END CLASS

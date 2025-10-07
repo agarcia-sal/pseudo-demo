@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION minimumCost(m n horizontalCut verticalCut)
+        FUNCTION calculateProduct(a b)
+            RETURN a * b
+        END FUNCTION
+
+        FUNCTION greaterThan(x y)
+            IF NOT(x <= y) THEN RETURN TRUE ELSE RETURN FALSE END IF
+        END FUNCTION
+
+        PROCEDURE swapDescending(arr)
+            PROCEDURE bubblePass(array, length)
+                SET flag TO false
+                SET counter TO 0
+                REPEAT
+                    IF counter >= length - 1 THEN
+                        EXIT
+                    END IF
+                    IF array[counter] < array[counter + 1] THEN
+                        SET temp TO array[counter]
+                        SET array[counter] TO array[counter + 1]
+                        SET array[counter + 1] TO temp
+                        SET flag TO true
+                    END IF
+                    SET counter TO counter + 1
+                UNTIL counter >= length - 1
+
+                IF flag THEN bubblePass(array, length) END IF
+            END PROCEDURE
+            bubblePass(arr, LENGTH(arr))
+        END PROCEDURE
+
+        SET result TO 0
+        SET alpha TO 0
+        SET beta TO 0
+        SET hSeg TO 1
+        SET vSeg TO 1
+
+        CALL swapDescending(horizontalCut)
+        CALL swapDescending(verticalCut)
+
+        PROCEDURE recurseProcess()
+            IF alpha >= m - 1 AND beta >= n - 1 THEN RETURN END IF
+
+            IF beta = n - 1 OR (alpha < m - 1 AND greaterThan(horizontalCut[alpha], verticalCut[beta])) THEN
+                SET tempVal TO calculateProduct(horizontalCut[alpha], vSeg)
+                SET result TO result + tempVal
+                SET hSeg TO hSeg + 1
+                SET alpha TO alpha + 1
+                CALL recurseProcess()
+            ELSE
+                SET tempVal TO calculateProduct(verticalCut[beta], hSeg)
+                SET result TO result + tempVal
+                SET vSeg TO vSeg + 1
+                SET beta TO beta + 1
+                CALL recurseProcess()
+            END IF
+        END PROCEDURE
+
+        CALL recurseProcess()
+        RETURN result
+    END FUNCTION
+END CLASS

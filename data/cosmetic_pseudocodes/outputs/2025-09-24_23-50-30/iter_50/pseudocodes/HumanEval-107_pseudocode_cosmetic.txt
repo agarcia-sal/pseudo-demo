@@ -1,0 +1,41 @@
+```
+FUNCTION even_odd_palindrome(n)
+    FUNCTION is_palindrome(number)
+        SET str_repr TO CONVERT_TO_STRING(number)
+        SET rev_str TO EMPTY_STRING
+        FOR idx FROM LENGTH(str_repr) DOWNTO 1 STEP -1
+            SET rev_str TO CONCATENATE(rev_str, CHAR_AT(str_repr, idx))
+        END FOR
+        IF rev_str = str_repr THEN
+            RETURN TRUE
+        ELSE
+            RETURN FALSE
+        END IF
+    END FUNCTION
+
+    SET count_storage TO DICTIONARY_WITH_KEYS("even":0, "odd":0)
+
+    PROCEDURE count_palindromes(current, limit, counts)
+        IF current > limit THEN
+            RETURN counts
+        END IF
+        IF NOT is_palindrome(current) THEN
+            CALL count_palindromes(current + 1, limit, counts)
+        ELSE
+            SWITCH (current MOD 2)
+                CASE 0:
+                    SET counts["even"] TO counts["even"] + 1
+                    BREAK
+                CASE 1:
+                    SET counts["odd"] TO counts["odd"] + 1
+                    BREAK
+            END SWITCH
+            CALL count_palindromes(current + 1, limit, counts)
+        END IF
+    END PROCEDURE
+
+    SET final_counts TO count_palindromes(1, n, count_storage)
+
+    RETURN TUPLE(final_counts["even"], final_counts["odd"])
+END FUNCTION
+```

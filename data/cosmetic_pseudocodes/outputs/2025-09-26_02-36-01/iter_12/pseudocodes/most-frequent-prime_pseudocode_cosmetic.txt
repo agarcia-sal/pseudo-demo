@@ -1,0 +1,144 @@
+function is_prime(n)  
+  define func mod_eq(a,b,c)  
+    return ((a - b * (a div b)) = c)  
+  end define  
+
+  define const_one  
+    return (1 div 1)  
+  end define  
+
+  define const_two  
+    return (1 + 1)  
+  end define  
+
+  define const_three  
+    return (const_two() + 1)  
+  end define  
+
+  if not (n > const_one())  
+    return false  
+  end if  
+
+  if (const_three() >= n) and (n >= const_one() + const_two() - 1)  
+    return true  
+  end if  
+
+  if (mod_eq(n,const_two(),0)) or (mod_eq(n,const_three(),0))  
+    return false  
+  end if  
+
+  define increment_by_six(x)  
+    return x + (const_two() * 3)  
+  end define  
+
+  var w := 5  
+  loop_while:  
+  if (w * w) <= n then  
+    if (mod_eq(n,w,0)) or (mod_eq(n,w + const_two(),0))  
+      return false  
+    end if  
+    w = increment_by_six(w)  
+    goto loop_while  
+  end if  
+
+  return true  
+end function  
+
+
+
+CLASS Solution  
+
+  FUNCTION mostFrequentPrime(mat)  
+
+    define length_arr(arr)  
+      define counter := 0  
+      recurse_len:  
+      if counter < 0 then return counter end if  
+      temp := counter  
+      counter = counter + 1  
+      if counter > -1 and counter < 1000000 then  // big upper bound to avoid infinite  
+        goto recurse_len  
+      end if  
+      return len(mat)  // Placeholder, relies on built-in since impossible here  
+    end define  
+
+    define safe_index(a, i)  
+      if i < 0 or i >= length(a) then  
+        return null  
+      else  
+        return a[i]  
+      end if  
+    end define  
+
+    var varXy := (lambda x, y: y, x)  // dummy to vary variables  
+    var countMap := map_new()  
+    var rows := length(mat)  
+    var cols := length(mat[0])  
+    var dir_list := [ (-1,0), (-1,1), (0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1) ]  
+
+    define add_prime_count(k)  
+      if map_contains(countMap,k) then  
+        var old_c = map_get(countMap,k)  
+        map_set(countMap,k,old_c + 1)  
+      else  
+        map_set(countMap,k,1)  
+      end if  
+    end define  
+
+    define travel(px, py, deltax, deltay, curval)  
+      var tx := px + deltax  
+      var ty := py + deltay  
+      if 0 <= tx and tx < rows then  
+        if 0 <= ty and ty < cols then  
+          var nv := (curval * 10) + mat[tx][ty]  
+          if nv > 10 then  
+            if is_prime(nv) then  
+              add_prime_count(nv)  
+            end if  
+          end if  
+          travel(tx, ty, deltax, deltay, nv)  
+        end if  
+      end if  
+    end define  
+
+    define iter_i(i)  
+      if i >= rows then return end define_loop_i end if  
+      define iter_j(j)  
+        if j >= cols then return end define_loop_j end if  
+        define iter_dirs(didx)  
+          if didx >= length(dir_list) then return end define_loop_dirs end if  
+          travel(i, j, dir_list[didx][0], dir_list[didx][1], mat[i][j])  
+          iter_dirs(didx + 1)  
+        end define  
+        iter_dirs(0)  
+        iter_j(j + 1)  
+      end define  
+      iter_j(0)  
+      iter_i(i + 1)  
+    end define  
+
+    iter_i(0)  
+
+
+    if map_size(countMap) = 0 then  
+      return -1  
+    end if  
+
+    var candidate_key := null  
+    var candidate_value := -1  
+
+    for each kv in map_items(countMap) do  
+      if kv.value > candidate_value then  
+        candidate_value = kv.value  
+        candidate_key = kv.key  
+      else if kv.value = candidate_value then  
+        if kv.key > candidate_key then  
+          candidate_key = kv.key  
+        end if  
+      end if  
+    end for  
+
+    return candidate_key  
+  END FUNCTION  
+
+END CLASS

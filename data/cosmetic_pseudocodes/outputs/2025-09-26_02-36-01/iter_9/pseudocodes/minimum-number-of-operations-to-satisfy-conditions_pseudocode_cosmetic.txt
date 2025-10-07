@@ -1,0 +1,49 @@
+CLASS Solution  
+    FUNCTION minimumOperations(matrix)  
+        FUNCTION areDifferent(x, y)  
+            RETURN (x <> y)  
+        END FUNCTION
+
+        FUNCTION assignValue(ref cell, value)  
+            cell <- value  
+        END FUNCTION
+
+        FUNCTION findReplacement(excludeValue)  
+            FOR candidate IN [0,1,2,3,4,5,6,7,8,9]  
+                IF candidate <> excludeValue THEN  
+                    RETURN candidate  
+                END IF  
+            END FOR  
+            RETURN 0  
+        END FUNCTION
+
+        SET totalOps TO 0  
+        SET numRows TO LENGTH OF matrix  
+        SET numCols TO LENGTH OF matrix[0]  
+
+        SET columnIndex TO 0  
+        WHILE columnIndex < numCols  
+            SET rowIndex TO 0  
+            WHILE rowIndex < (numRows - 1)  
+                IF areDifferent(matrix[rowIndex][columnIndex], matrix[rowIndex + 1][columnIndex]) THEN  
+                    totalOps <- totalOps + 1  
+                    assignValue(matrix[rowIndex + 1][columnIndex], matrix[rowIndex][columnIndex])  
+                END IF  
+                rowIndex <- rowIndex + 1  
+            END WHILE
+
+            SET scanRow TO 0  
+            WHILE scanRow < numRows  
+                IF (columnIndex < (numCols - 1)) AND (matrix[scanRow][columnIndex] = matrix[scanRow][columnIndex + 1]) THEN  
+                    totalOps <- totalOps + 1  
+                    matrix[scanRow][columnIndex + 1] <- findReplacement(matrix[scanRow][columnIndex])  
+                END IF  
+                scanRow <- scanRow + 1  
+            END WHILE
+
+            columnIndex <- columnIndex + 1  
+        END WHILE
+
+        RETURN totalOps  
+    END FUNCTION  
+END CLASS

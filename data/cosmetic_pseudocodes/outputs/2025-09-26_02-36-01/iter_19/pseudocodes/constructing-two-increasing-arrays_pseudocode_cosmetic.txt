@@ -1,0 +1,52 @@
+CLASS Solution
+    FUNCTION minLargest(nums1 nums1 AS list OF integers nums2 nums2 AS list OF integers) RETURNS integer
+        FUNCTION nxt(xv xv AS integer yv yv AS integer) RETURNS integer
+            SET tempVal TO (xv BITWISE_AND (1 XOR yv))
+            IF tempVal EQUALS 1 THEN
+                RETURN (xv + 1)
+            ELSE
+                RETURN (xv + 2)
+            END IF
+        END FUNCTION
+
+        SET lenA TO LENGTH OF nums1
+        SET lenB TO LENGTH OF nums2
+        SET dpMatrix TO a list with (lenA + 1) rows each containing (lenB + 1) zeros
+
+        SET idxA TO 1
+        WHILE idxA <= lenA
+            SET valA TO nums1 AT idxA
+            SET prevA TO dpMatrix AT (idxA - 1, 0)
+            SET dpMatrix AT (idxA, 0) TO nxt(prevA, valA)
+            SET idxA TO idxA + 1
+        END WHILE
+
+        SET idxB TO 1
+        WHILE idxB <= lenB
+            SET valB TO nums2 AT idxB
+            SET prevB TO dpMatrix AT (0, idxB - 1)
+            SET dpMatrix AT (0, idxB) TO nxt(prevB, valB)
+            SET idxB TO idxB + 1
+        END WHILE
+
+        SET rowCounter TO 1
+        WHILE rowCounter <= lenA
+            SET currentA TO nums1 AT rowCounter
+            SET colCounter TO 1
+            WHILE colCounter <= lenB
+                SET currentB TO nums2 AT colCounter
+                SET candidate1 TO nxt(dpMatrix AT (rowCounter - 1, colCounter), currentA)
+                SET candidate2 TO nxt(dpMatrix AT (rowCounter, colCounter - 1), currentB)
+                IF candidate1 < candidate2 THEN
+                    SET dpMatrix AT (rowCounter, colCounter) TO candidate1
+                ELSE
+                    SET dpMatrix AT (rowCounter, colCounter) TO candidate2
+                END IF
+                SET colCounter TO colCounter + 1
+            END WHILE
+            SET rowCounter TO rowCounter + 1
+        END WHILE
+
+        RETURN dpMatrix AT (lenA, lenB)
+    END FUNCTION
+END CLASS

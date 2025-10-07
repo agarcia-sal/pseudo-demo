@@ -1,0 +1,64 @@
+CLASS Solution
+    FUNCTION minLength(s inputString, numOps limitOps)
+        FUNCTION longest_uniform_substring(s seq)
+            SET maxSeq TO 0
+            SET countSeq TO 1
+            SET idx TO 1
+            WHILE idx < LENGTH(seq)
+                IF seq[idx] = seq[idx - 1] THEN
+                    countSeq ← countSeq + 1
+                ELSE
+                    IF maxSeq < countSeq THEN
+                        maxSeq ← countSeq
+                    END IF
+                    countSeq ← 1
+                END IF
+                idx ← idx + 1
+            END WHILE
+            IF maxSeq > countSeq THEN
+                RETURN maxSeq
+            ELSE
+                RETURN countSeq
+            END IF
+        END FUNCTION
+
+        SET smallestLength TO LENGTH(inputString)
+        SET upperBound TO 2 ^ LENGTH(inputString)
+        SET iter ← 0
+        WHILE iter < upperBound
+            SET bitCount TO 0
+            SET temp ← iter
+            WHILE temp > 0
+                bitCount ← bitCount + (temp MOD 2)
+                temp ← temp DIV 2
+            END WHILE
+
+            IF bitCount > limitOps THEN
+                iter ← iter + 1
+                CONTINUE
+            END IF
+
+            SET modifiableList ← TO_LIST(inputString)
+
+            SET pos ← 0
+            WHILE pos < LENGTH(inputString)
+                IF (iter BITWISE_AND (1 << pos)) ≠ 0 THEN
+                    IF modifiableList[pos] = '0' THEN
+                        modifiableList[pos] ← '1'
+                    ELSE
+                        modifiableList[pos] ← '0'
+                    END IF
+                END IF
+                pos ← pos + 1
+            END WHILE
+
+            SET candidate ← longest_uniform_substring(modifiableList)
+            IF smallestLength > candidate THEN
+                smallestLength ← candidate
+            END IF
+            iter ← iter + 1
+        END WHILE
+
+        RETURN smallestLength
+    END FUNCTION
+END CLASS

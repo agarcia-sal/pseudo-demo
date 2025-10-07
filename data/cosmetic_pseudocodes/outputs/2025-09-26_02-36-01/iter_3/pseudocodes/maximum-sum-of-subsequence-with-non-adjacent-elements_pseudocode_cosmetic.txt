@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION maximumSumSubsequence(nums, queries)
+        DEFINE modulus AS (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 1
+        LET length_of_nums BE SIZE OF nums
+        CREATE list_take WITH length_of_nums ELEMENTS ALL SET TO 0
+        CREATE list_skip WITH length_of_nums ELEMENTS ALL SET TO 0
+
+        list_take[0] ← IF 0 > nums[0] THEN 0 ELSE nums[0]
+        list_skip[0] ← 0
+
+        SET counter ← 1
+        WHILE counter < length_of_nums
+            LET prev_skip ← list_skip[counter - 1]
+            LET current_num ← nums[counter]
+            LET candidate_take ← prev_skip + current_num
+            IF candidate_take < 0 THEN candidate_take ← 0
+
+            list_take[counter] ← candidate_take
+
+            LET prev_take ← list_take[counter - 1]
+            LET prev_skip_val ← list_skip[counter - 1]
+            IF prev_skip_val > prev_take THEN
+                list_skip[counter] ← prev_skip_val
+            ELSE
+                list_skip[counter] ← prev_take
+            END IF
+
+            counter ← counter + 1
+        END WHILE
+
+        LET accumulator ← 0
+
+        SET idx ← 0
+        WHILE idx < SIZE OF queries
+            DESTRUCTURE queries[idx] AS (pos, val)
+
+            nums[pos] ← val
+
+            IF pos = 0 THEN
+                list_take[0] ← IF 0 > nums[0] THEN 0 ELSE nums[0]
+                list_skip[0] ← 0
+            ELSE
+                LET left_skip ← list_skip[pos - 1]
+                LET val_at_pos ← nums[pos]
+                LET calc_take ← left_skip + val_at_pos
+                IF calc_take < 0 THEN calc_take ← 0
+                list_take[pos] ← calc_take
+
+                LET left_skip_val ← list_skip[pos - 1]
+                LET left_take_val ← list_take[pos - 1]
+                IF left_skip_val > left_take_val THEN
+                    list_skip[pos] ← left_skip_val
+                ELSE
+                    list_skip[pos] ← left_take_val
+                END IF
+            END IF
+
+            LET j ← pos + 1
+            WHILE j < length_of_nums
+                LET prev_skip_j ← list_skip[j - 1]
+                LET num_j ← nums[j]
+                LET temp_take ← prev_skip_j + num_j
+                IF temp_take < 0 THEN temp_take ← 0
+                list_take[j] ← temp_take
+
+                LET prev_skip_j_val ← list_skip[j - 1]
+                LET prev_take_j_val ← list_take[j - 1]
+                IF prev_skip_j_val > prev_take_j_val THEN
+                    list_skip[j] ← prev_skip_j_val
+                ELSE
+                    list_skip[j] ← prev_take_j_val
+                END IF
+                j ← j + 1
+            END WHILE
+
+            LET last_take ← list_take[length_of_nums - 1]
+            LET last_skip ← list_skip[length_of_nums - 1]
+            LET max_last ← IF last_take > last_skip THEN last_take ELSE last_skip
+            accumulator ← ((accumulator + max_last) + modulus) MOD modulus
+
+            idx ← idx + 1
+        END WHILE
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

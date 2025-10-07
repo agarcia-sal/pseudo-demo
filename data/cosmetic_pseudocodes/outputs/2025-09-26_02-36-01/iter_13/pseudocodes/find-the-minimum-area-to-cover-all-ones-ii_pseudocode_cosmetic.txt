@@ -1,0 +1,114 @@
+CLASS Solution
+	FUNCTION minimumSum(grid)
+		DEF collectOnes(rowIndex, colIndex, acc)
+			IF rowIndex >= LENGTH(grid) THEN
+				RETURN acc
+			END IF
+			DEF innerCollect(ci, acc2)
+				IF ci >= LENGTH(grid[rowIndex]) THEN
+					RETURN acc2
+				END IF
+				IF (grid[rowIndex][ci] == 1) AND (grid[rowIndex] == 1) THEN
+					RETURN innerCollect(ci + 1, acc2 + [(rowIndex, ci)])
+				ELSE
+					RETURN innerCollect(ci + 1, acc2)
+				END IF
+			END DEF
+			RETURN collectOnes(rowIndex + 1, 0, innerCollect(0, acc))
+		END DEF
+
+		SET H9W3 TO collectOnes(0, 0, [])
+
+		DEF computeRectangleArea(points)
+			IF LENGTH(points) == 0 THEN RETURN 0 END IF
+			DEF foldMinI(arr, idx, acc)
+				IF idx >= LENGTH(arr) THEN RETURN acc END IF
+				RETURN foldMinI(arr, idx + 1, MIN(acc, arr[idx][0]))
+			END DEF
+			DEF foldMaxI(arr, idx, acc)
+				IF idx >= LENGTH(arr) THEN RETURN acc END IF
+				RETURN foldMaxI(arr, idx + 1, MAX(acc, arr[idx][0]))
+			END DEF
+			DEF foldMinJ(arr, idx, acc)
+				IF idx >= LENGTH(arr) THEN RETURN acc END IF
+				RETURN foldMinJ(arr, idx + 1, MIN(acc, arr[idx][1]))
+			END DEF
+			DEF foldMaxJ(arr, idx, acc)
+				IF idx >= LENGTH(arr) THEN RETURN acc END IF
+				RETURN foldMaxJ(arr, idx + 1, MAX(acc, arr[idx][1]))
+			END DEF
+
+			SET minI TO foldMinI(points, 0, points[0][0])
+			SET maxI TO foldMaxI(points, 0, points[0][0])
+			SET minJ TO foldMinJ(points, 0, points[0][1])
+			SET maxJ TO foldMaxJ(points, 0, points[0][1])
+			SET width TO (maxI - minI) + 1
+			SET height TO (maxJ - minJ) + 1
+			RETURN width * height
+		END DEF
+
+		SET resultSoFar TO +∞
+		SET totalPoints TO LENGTH(H9W3)
+
+		DEF subloops(a, b, c)
+			IF a > totalPoints THEN RETURN END IF
+			IF b > totalPoints THEN subloops(a + 1, a + 2, a + 3); RETURN END IF
+			IF c > totalPoints THEN subloops(a, b + 1, b + 2); RETURN END IF
+
+			DEF combinations(collection, r)
+				DEF combEnum(idx, start, curr, res)
+					IF LENGTH(curr) == r THEN RETURN res + [curr] END IF
+					IF start >= LENGTH(collection) THEN RETURN res END IF
+					RETURN combEnum(idx + 1, start + 1, curr + [collection[start]], res) + combEnum(idx + 1, start + 1, curr, res)
+				END DEF
+				RETURN combEnum(0, 0, [], [])
+			END DEF
+
+			DEF toSet(lst)
+				DEF toSetRec(i, s)
+					IF i >= LENGTH(lst) THEN RETURN s END IF
+					RETURN toSetRec(i + 1, s + {lst[i]})
+				END DEF
+				RETURN toSetRec(0, {})
+			END DEF
+
+			DEF setDifference(s1, s2)
+				DEF diffRec(iter, res)
+					IF iter >= LENGTH(s1) THEN RETURN res END IF
+					IF s1[iter] NOTIN s2 THEN
+						RETURN diffRec(iter + 1, res + [s1[iter]])
+					ELSE
+						RETURN diffRec(iter + 1, res)
+					END IF
+				END DEF
+				RETURN diffRec(0, [])
+			END DEF
+
+			SET allCombiA TO combinations(H9W3, a)
+			FOR each combA IN allCombiA DO
+				SET setA TO toSet(combA)
+				SET remainderA TO setDifference(H9W3, combA)
+				SET allCombiB TO combinations(remainderA, b - a)
+				FOR each combB IN allCombiB DO
+					SET setB TO toSet(combB)
+					SET combC TO setDifference(remainderA, combB)
+					SET areaA TO computeRectangleArea(combA)
+					SET areaB TO computeRectangleArea(combB)
+					SET areaC TO computeRectangleArea(combC)
+					IF (areaA > 0) AND (areaB > 0) AND (areaC > 0) THEN
+						SET currentSum TO areaA + areaB + areaC
+						IF currentSum < resultSoFar THEN
+							SET resultSoFar TO currentSum
+						END IF
+					END IF
+				END FOR
+			END FOR
+
+			subloops(a, b, c + 1)
+		END DEF
+
+		subloops(1, 2, 3)
+
+		RETURN resultSoFar
+	END FUNCTION
+END CLASS

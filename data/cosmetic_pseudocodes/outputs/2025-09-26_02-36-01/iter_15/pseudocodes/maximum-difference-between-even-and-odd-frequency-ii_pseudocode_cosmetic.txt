@@ -1,0 +1,64 @@
+```pseudocode
+CLASS Solution
+    FUNCTION maxDifference WITH PARAMETERS s k
+        SET output TO - (1 SHL 31)
+        SET pairs TO []
+        SET base TO ["zero", "one", "two", "three", "four"]
+        FOR i FROM 0 TO LENGTH(base) - 1
+            FOR j FROM 0 TO LENGTH(base) - 1
+                IF i != j THEN
+                    APPEND (base[i], base[j]) TO pairs
+                END IF
+            END FOR
+        END FOR
+
+        FOR EACH (x, y) IN pairs
+            SET dictMin TO DICTIONARY WITH DEFAULT VALUE (1 SHL 31)
+            SET prefX TO [0]
+            SET prefY TO [0]
+            SET idxL TO 0
+
+            SET idxR TO 0
+            WHILE idxR < LENGTH(s)
+                SET charCurrent TO s[idxR]
+
+                SET lastPrefX TO prefX[LENGTH(prefX) - 1]
+                IF charCurrent EQUALS x THEN
+                    APPEND lastPrefX + 1 TO prefX
+                ELSE
+                    APPEND 0 TO prefX
+                END IF
+
+                SET lastPrefY TO prefY[LENGTH(prefY) - 1]
+                IF charCurrent EQUALS y THEN
+                    APPEND lastPrefY + 1 TO prefY
+                ELSE
+                    APPEND 0 TO prefY
+                END IF
+
+                WHILE idxR - idxL + 1 >= k AND prefX[idxL] < prefX[LENGTH(prefX) - 1] AND prefY[idxL] < prefY[LENGTH(prefY) - 1]
+                    SET keyX TO prefX[idxL] MOD 2
+                    SET keyY TO prefY[idxL] MOD 2
+                    SET tKey TO (keyX, keyY)
+                    SET candidate TO prefX[idxL] - prefY[idxL]
+                    IF dictMin[tKey] > candidate THEN
+                        SET dictMin[tKey] TO candidate
+                    END IF
+                    SET idxL TO idxL + 1
+                END WHILE
+
+                SET curX TO prefX[LENGTH(prefX) - 1]
+                SET curY TO prefY[LENGTH(prefY) - 1]
+                SET key1 TO ((1 - (curX MOD 2)), (curY MOD 2))
+                SET valCheck TO curX - curY - dictMin[key1]
+                IF valCheck > output THEN
+                    SET output TO valCheck
+                END IF
+                SET idxR TO idxR + 1
+            END WHILE
+        END FOR
+
+        RETURN output
+    END FUNCTION
+END CLASS
+```

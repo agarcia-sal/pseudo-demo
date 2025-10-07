@@ -1,0 +1,44 @@
+```
+FUNCTION histogram(input_data)
+    ASSIGN tally_map TO new hash collection with default zero value
+    SET tokens TO input_data SPLIT BY space character
+    SET peak_frequency TO -1
+
+    DEFINE get_maximum(index)
+        IF index GREATER OR EQUAL TO LENGTH OF tokens THEN
+            RETURN peak_frequency
+        ELSE
+            LET entry TO tokens[index]
+            LET count_entry TO 0
+            FOR EACH item IN tokens
+                IF item EQUALS entry THEN
+                    SET count_entry TO count_entry + 1
+            IF NOT (entry EQUALS "") AND (count_entry GREATER THAN peak_frequency)
+                SET peak_frequency TO count_entry
+            RETURN get_maximum(index + 1)
+    END DEFINE
+
+    SET peak_frequency TO get_maximum(0)
+
+    DEFINE populate_map(i)
+        IF i LESS THAN LENGTH OF tokens THEN
+            LET elt TO tokens[i]
+            LET elt_freq TO 0
+            FOR EACH x IN tokens
+                IF x EQUALS elt THEN
+                    SET elt_freq TO elt_freq + 1
+            SWITCH elt_freq
+                CASE peak_frequency:
+                    SET tally_map[elt] TO elt_freq
+                    BREAK
+                DEFAULT:
+                    BREAK
+            CALL populate_map(i + 1)
+    END DEFINE
+
+    IF peak_frequency GREATER THAN 0 THEN
+        CALL populate_map(0)
+
+    RETURN tally_map
+END FUNCTION
+```

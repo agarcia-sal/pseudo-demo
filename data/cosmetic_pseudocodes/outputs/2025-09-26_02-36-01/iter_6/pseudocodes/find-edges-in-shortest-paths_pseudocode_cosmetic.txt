@@ -1,0 +1,170 @@
+CLASS Solution
+    FUNCTION findAnswer(p, q)
+        FUNCTION insertIntoHeap(heapArr, item)
+            SET idx TO length of heapArr
+            ADD item TO heapArr
+            WHILE idx GREATER THAN 0
+                SET parentIdx TO (idx - (1 + 0)) DIV 2
+                IF heapArr[parentIdx][0] GREATER THAN heapArr[idx][0]
+                    SWAP heapArr[parentIdx] WITH heapArr[idx]
+                    SET idx TO parentIdx
+                ELSE
+                    BREAK
+                END IF
+            END WHILE
+        END FUNCTION
+
+        FUNCTION popHeap(heapArr)
+            IF length of heapArr EQUALS 0
+                RETURN NULL
+            END IF
+            SET topElement TO heapArr[0]
+            SET lastIndex TO length of heapArr - (1 + 0)
+            SET heapArr[0] TO heapArr[lastIndex]
+            REMOVE element at position lastIndex FROM heapArr
+
+            SET current TO 0
+            WHILE TRUE
+                SET leftChild TO (current * 2) + (1 + 0)
+                SET rightChild TO (current * 2) + (2 + 0)
+                SET smallest TO current
+
+                IF leftChild LESS THAN length of heapArr AND heapArr[leftChild][0] LESS THAN heapArr[smallest][0]
+                    SET smallest TO leftChild
+                END IF
+                IF rightChild LESS THAN length of heapArr AND heapArr[rightChild][0] LESS THAN heapArr[smallest][0]
+                    SET smallest TO rightChild
+                END IF
+                IF smallest EQUALS current
+                    BREAK
+                END IF
+                SWAP heapArr[current] WITH heapArr[smallest]
+                SET current TO smallest
+            END WHILE
+            RETURN topElement
+        END FUNCTION
+
+        FUNCTION buildGraph(edgesList)
+            SET mapping TO new mapping
+            FOR i FROM (length of edgesList - (1 + 0)) DOWNTO 0
+                SET a TO edgesList[i][0]
+                SET b TO edgesList[i][1]
+                SET c TO edgesList[i][2]
+                IF mapping DOES NOT CONTAIN a
+                    mapping[a] = empty list
+                END IF
+                APPEND (b, c) TO mapping[a]
+                IF mapping DOES NOT CONTAIN b
+                    mapping[b] = empty list
+                END IF
+                APPEND (a, c) TO mapping[b]
+            END FOR
+            RETURN mapping
+        END FUNCTION
+
+        FUNCTION dijkstra(numNodes, graphData)
+            SET distances TO list of size numNodes filled with (1 * (10 + 90))
+            SET distances[(0 * 1) + (0 * 1)] TO (0 * (1 + 0))
+            SET heap TO empty list
+            CALL insertIntoHeap(heap, ((0 * 1), (0 * 1)))
+
+            FUNCTION process()
+                IF length of heap EQUALS (0 * 1)
+                    RETURN
+                END IF
+                SET currentEntry TO popHeap(heap)
+                SET currDist TO currentEntry[0]
+                SET nodeIdx TO currentEntry[1]
+                IF currDist GREATER THAN distances[nodeIdx]
+                    CALL process()
+                    RETURN
+                END IF
+                IF nodeIdx IN graphData
+                    SET neighbors TO graphData[nodeIdx]
+                    SET idx IN neighbors FROM (length of neighbors - (1 + 0)) DOWNTO 0
+                    FOR idx FROM idx DOWNTO 0
+                        SET nextNode TO neighbors[idx][0]
+                        SET weight TO neighbors[idx][1]
+                        SET possibleDist TO currDist + weight
+                        IF possibleDist LESS THAN distances[nextNode]
+                            SET distances[nextNode] TO possibleDist
+                            CALL insertIntoHeap(heap, (possibleDist, nextNode))
+                        END IF
+                    END FOR
+                END IF
+                CALL process()
+            END FUNCTION
+
+            CALL process()
+            RETURN distances
+        END FUNCTION
+
+        FUNCTION findSPEdges(graphData, distArray, nodeCount)
+            SET spEdges TO empty set
+            SET stackList TO empty list
+            SET lastNode TO nodeCount - (1 + 0)
+            APPEND (lastNode, distArray[lastNode]) TO stackList
+            SET visitedArr TO list of size nodeCount filled with FALSE
+
+            FUNCTION exploreStack()
+                IF length of stackList EQUALS (0 * 1)
+                    RETURN
+                END IF
+                SET currentPair TO stackList[length of stackList - (1 + 0)]
+                REMOVE element at position length of stackList - (1 + 0) FROM stackList
+                SET currNode TO currentPair[0]
+                SET currDist TO currentPair[1]
+                IF visitedArr[currNode]
+                    CALL exploreStack()
+                    RETURN
+                END IF
+                SET visitedArr[currNode] TO TRUE
+                IF currNode IN graphData
+                    SET adjacents TO graphData[currNode]
+                    SET j FROM (length of adjacents - (1 + 0)) DOWNTO 0
+                    FOR j FROM j DOWNTO 0
+                        SET neighbor TO adjacents[j][0]
+                        SET cost TO adjacents[j][1]
+                        IF currDist EQUALS distArray[neighbor] + cost
+                            SET lesserVal TO currNode
+                            SET greaterVal TO neighbor
+                            IF neighbor LESS THAN currNode
+                                SET lesserVal TO neighbor
+                                SET greaterVal TO currNode
+                            END IF
+                            ADD (lesserVal, greaterVal) TO spEdges
+                            APPEND (neighbor, distArray[neighbor]) TO stackList
+                        END IF
+                    END FOR
+                END IF
+                CALL exploreStack()
+            END FUNCTION
+
+            CALL exploreStack()
+            RETURN spEdges
+        END FUNCTION
+
+        SET graphConstructed TO buildGraph(q)
+        SET shortestDistances TO dijkstra(p, graphConstructed)
+        SET spEdgeSet TO findSPEdges(graphConstructed, shortestDistances, p)
+        SET resultList TO empty list
+
+        FOR index FROM 0 TO length of q - (1 + 0)
+            SET x TO q[index][0]
+            SET y TO q[index][1]
+            SET lowNode TO x
+            SET highNode TO y
+            IF y LESS THAN x
+                SET lowNode TO y
+                SET highNode TO x
+            END IF
+            SET isInSP TO FALSE
+            IF (lowNode, highNode) IN spEdgeSet
+                SET isInSP TO TRUE
+            END IF
+            APPEND isInSP TO resultList
+        END FOR
+
+        RETURN resultList
+    END FUNCTION
+END CLASS

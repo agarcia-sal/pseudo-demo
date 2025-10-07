@@ -1,0 +1,73 @@
+CLASS Solution
+	FUNCTION maxSubarraySum(nums)
+		FUNCTION kadane(arr)
+			SET curr_max TO arr[0]
+			SET overall_max TO arr[0]
+
+			FUNCTION process(i)
+				IF i EQUALS LENGTH(arr)
+					RETURN overall_max
+				ELSE
+					IF NOT(curr_max + arr[i] GREATER THAN arr[i])
+						SET curr_max TO curr_max + arr[i]
+					ELSE
+						SET curr_max TO arr[i]
+					END IF
+
+					IF overall_max LESS THAN curr_max
+						SET overall_max TO curr_max
+					END IF
+
+					RETURN process(i + 1)
+				END IF
+			END FUNCTION
+
+			RETURN process(1)
+		END FUNCTION
+
+		SET result TO kadane(nums)
+
+		SET uniques TO EMPTY_SET
+		FUNCTION collect_unique(index)
+			IF index EQUALS LENGTH(nums)
+				RETURN
+			ELSE
+				SET uniques TO uniques UNION {nums[index]}
+				CALL collect_unique(index + 1)
+			END IF
+		END FUNCTION
+		CALL collect_unique(0)
+
+		FUNCTION explore_unique(idx, best)
+			IF idx EQUALS LENGTH(uniques)
+				RETURN best
+			ELSE
+				SET excluded TO EMPTY_LIST
+
+				FUNCTION filter_num(j)
+					IF j EQUALS LENGTH(nums)
+						RETURN
+					ELSE
+						IF NOT(nums[j] EQUALS uniques[idx])
+							SET excluded TO excluded + [nums[j]]
+						END IF
+						CALL filter_num(j + 1)
+					END IF
+				END FUNCTION
+				CALL filter_num(0)
+
+				IF LENGTH(excluded) GREATER THAN 0
+					SET curr_max TO kadane(excluded)
+					IF best LESS THAN curr_max
+						SET best TO curr_max
+					END IF
+				END IF
+
+				RETURN explore_unique(idx + 1, best)
+			END IF
+		END FUNCTION
+
+		SET max_result TO explore_unique(0, result)
+		RETURN max_result
+	END FUNCTION
+END CLASS

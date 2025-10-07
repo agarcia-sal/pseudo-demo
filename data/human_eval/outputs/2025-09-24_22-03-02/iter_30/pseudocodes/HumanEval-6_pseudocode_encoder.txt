@@ -1,0 +1,53 @@
+FUNCTION parse_nested_parens WITH PARAMETER paren_string OF TYPE string RETURNS LIST OF INTEGER
+    FUNCTION parse_paren_group WITH PARAMETER s OF TYPE string RETURNS INTEGER
+        SET depth TO 0
+        SET max_depth TO 0
+        SET length TO CALL length ON s
+        SET index TO 0
+        WHILE index LESS THAN length
+            SET c TO s AT INDEX index
+            IF c EQUALS '('
+                SET depth TO depth PLUS 1
+                IF depth GREATER THAN max_depth
+                    SET max_depth TO depth
+                END IF
+            ELSE
+                SET depth TO depth MINUS 1
+            END IF
+            SET index TO index PLUS 1
+        END WHILE
+        RETURN max_depth
+    END FUNCTION
+
+    SET result TO EMPTY LIST
+    SET groups TO EMPTY LIST
+    SET length_string TO CALL length ON paren_string
+    SET current_index TO 0
+    SET current_group TO EMPTY STRING
+    WHILE current_index LESS THAN length_string
+        SET current_char TO paren_string AT INDEX current_index
+        IF current_char EQUALS ' '
+            IF CALL length ON current_group GREATER THAN 0
+                APPEND current_group TO groups
+                SET current_group TO EMPTY STRING
+            END IF
+        ELSE
+            CONCATENATE current_char TO current_group
+        END IF
+        SET current_index TO current_index PLUS 1
+    END WHILE
+    IF CALL length ON current_group GREATER THAN 0
+        APPEND current_group TO groups
+    END IF
+
+    SET groups_length TO CALL length ON groups
+    SET i TO 0
+    WHILE i LESS THAN groups_length
+        SET group TO groups AT INDEX i
+        SET parsed_depth TO CALL parse_paren_group WITH ARGUMENTS group
+        APPEND parsed_depth TO result
+        SET i TO i PLUS 1
+    END WHILE
+
+    RETURN result
+END FUNCTION

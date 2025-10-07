@@ -1,0 +1,74 @@
+CLASS Solution  
+    FUNCTION makeStringGood(s)  
+        SET freq TO an array FILLED with 0, size 26  
+        SET idx TO 0  
+        WHILE idx < LENGTH of s  
+            SET ch TO s[idx]  
+            SET pos TO ASCII(ch) - ASCII('a')  
+            freq[pos] = freq[pos] + 1  
+            idx = idx + 1  
+        END WHILE  
+        SET maxCount TO 0  
+        SET j TO 0  
+        WHILE j < 26  
+            IF freq[j] > maxCount THEN  
+                SET maxCount TO freq[j]  
+            END IF  
+            j = j + 1  
+        END WHILE  
+        SET opsList TO EMPTY LIST  
+        SET tar TO 1  
+        WHILE tar <= maxCount  
+            ADD _getMinOperations(freq, tar) TO opsList  
+            tar = tar + 1  
+        END WHILE  
+        SET result TO opsList[0]  
+        SET k TO 1  
+        WHILE k < LENGTH of opsList  
+            IF opsList[k] < result THEN  
+                SET result TO opsList[k]  
+            END IF  
+            k = k + 1  
+        END WHILE  
+        RETURN result  
+    END FUNCTION  
+  
+    FUNCTION _getMinOperations(count, target)  
+        SET dpArr TO an array FILLED with 0, size 27  
+        SET i TO 25  
+        WHILE i >= 0  
+            SET deleteAll TO count[i]  
+            IF target > count[i] THEN  
+                SET changeOps TO (target - count[i])  
+            ELSE  
+                SET changeOps TO (count[i] - target)  
+            END IF  
+            SET val1 TO deleteAll  
+            SET val2 TO changeOps + dpArr[i + 1]  
+            SET currentMin TO val1  
+            IF val2 < currentMin THEN  
+                SET currentMin TO val2  
+            END IF  
+            IF (i + 1) < 26 AND count[i + 1] < target THEN  
+                SET deficitNext TO target - count[i + 1]  
+                IF count[i] <= target THEN  
+                    SET needChange TO count[i]  
+                ELSE  
+                    SET needChange TO count[i] - target  
+                END IF  
+                IF deficitNext > needChange THEN  
+                    SET changeToTargetVal TO needChange + (deficitNext - needChange)  
+                ELSE  
+                    SET changeToTargetVal TO deficitNext + (needChange - deficitNext)  
+                END IF  
+                SET val3 TO changeToTargetVal + dpArr[i + 2]  
+                IF val3 < currentMin THEN  
+                    SET currentMin TO val3  
+                END IF  
+            END IF  
+            dpArr[i] = currentMin  
+            i = i - 1  
+        END WHILE  
+        RETURN dpArr[0]  
+    END FUNCTION  
+END CLASS

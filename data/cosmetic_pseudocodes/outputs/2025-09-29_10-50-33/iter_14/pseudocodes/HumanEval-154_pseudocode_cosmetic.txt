@@ -1,0 +1,36 @@
+FUNCTION cycpattern_check(string_a, string_b)
+
+  SET total_b_length TO LENGTH(string_b)
+  SET double_pattern TO string_b + string_b
+
+  PROCEDURE search_in_a(pos_x)
+    IF pos_x > (LENGTH(string_a) - total_b_length) THEN
+      EXECUTE BREAK_SEARCH(False)
+    ELSE
+      PROCEDURE iterate_pattern(offset_y)
+        IF offset_y > total_b_length THEN
+          EXECUTE CONTINUE_SEARCH()
+        ELSE
+          IF string_a.SUBSTRING(pos_x, pos_x + total_b_length) = double_pattern.SUBSTRING(offset_y, offset_y + total_b_length) THEN
+            EXECUTE BREAK_SEARCH(True)
+          ELSE
+            EXECUTE iterate_pattern(offset_y + 1)
+          END IF
+        END IF
+      END PROCEDURE
+
+      PROCEDURE CONTINUE_SEARCH()
+        EXECUTE search_in_a(pos_x + 1)
+      END PROCEDURE
+
+      PROCEDURE BREAK_SEARCH(result_flag)
+        EXECUTE RETURN result_flag
+      END PROCEDURE
+
+      EXECUTE iterate_pattern(0)
+    END IF
+  END PROCEDURE
+
+  EXECUTE search_in_a(0)
+
+END FUNCTION

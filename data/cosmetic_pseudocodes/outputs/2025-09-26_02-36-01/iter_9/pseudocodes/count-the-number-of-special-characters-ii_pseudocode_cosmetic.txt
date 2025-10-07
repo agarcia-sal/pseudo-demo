@@ -1,0 +1,96 @@
+CLASS Solution
+    FUNCTION numberOfSpecialChars(originalWord)
+        FUNCTION containsKey(mapping, soughtKey)
+            SET foundFlag TO false
+            SET iteratorIndex TO 0
+            WHILE (not foundFlag) AND (iteratorIndex LESS THAN LENGTH(mapping))
+                IF mapping[iteratorIndex].key EQUALS soughtKey THEN
+                    SET foundFlag TO true
+                END IF
+                SET iteratorIndex TO iteratorIndex + 1
+            END WHILE
+            RETURN foundFlag
+        END FUNCTION
+
+        FUNCTION getValue(mapping, wantedKey)
+            SET returnValue TO null
+            SET positionCounter TO 0
+            REPEAT
+                IF mapping[positionCounter].key EQUALS wantedKey THEN
+                    SET returnValue TO mapping[positionCounter].value
+                END IF
+                SET positionCounter TO positionCounter + 1
+            UNTIL (positionCounter GREATER_OR_EQUAL LENGTH(mapping)) OR (returnValue IS NOT null)
+            RETURN returnValue
+        END FUNCTION
+
+        FUNCTION addOrUpdate(mappingRef, keyItem, valItem)
+            SET updated TO false
+            SET cursor TO 0
+            WHILE (updated IS false) AND (cursor LESS THAN LENGTH(mappingRef))
+                IF mappingRef[cursor].key EQUALS keyItem THEN
+                    SET mappingRef[cursor].value TO valItem
+                    SET updated TO true
+                END IF
+                SET cursor TO cursor + 1
+            END WHILE
+            IF updated IS false THEN
+                APPEND {key: keyItem, value: valItem} TO mappingRef
+            END IF
+        END FUNCTION
+
+        SET startPositions TO empty list
+        SET endPositions TO empty list
+
+        PROCEDURE indexCharacters(posIndex, charItem)
+            IF NOT containsKey(startPositions, charItem) THEN
+                CALL addOrUpdate(startPositions, charItem, posIndex)
+            END IF
+            CALL addOrUpdate(endPositions, charItem, posIndex)
+        END PROCEDURE
+
+        SET positionCounter TO 0
+        WHILE positionCounter LESS THAN LENGTH(originalWord)
+            CALL indexCharacters(positionCounter, originalWord[positionCounter])
+            SET positionCounter TO positionCounter + 1
+        END WHILE
+
+        SET accumulator TO 0
+        FUNCTION zipIterators(seq1, seq2)
+            SET zIdx TO 0
+            SET zippedResult TO empty list
+            WHILE zIdx LESS THAN LENGTH(seq1) AND zIdx LESS THAN LENGTH(seq2)
+                APPEND (seq1[zIdx], seq2[zIdx]) TO zippedResult
+                SET zIdx TO zIdx + 1
+            END WHILE
+            RETURN zippedResult
+        END FUNCTION
+
+        SET lowercaseLetters TO ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+        SET uppercaseLetters TO ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+        SET pairedLetters TO zipIterators(lowercaseLetters, uppercaseLetters)
+
+        FUNCTION isConditionTrue(charLower, charUpper)
+            RETURN (containsKey(endPositions, charLower) AND containsKey(startPositions, charUpper)) AND 
+                   (getValue(endPositions, charLower) LESS_THAN getValue(startPositions, charUpper))
+        END FUNCTION
+
+        FUNCTION accumulateCount(pairs)
+            IF LENGTH(pairs) EQUALS 0 THEN
+                RETURN 0
+            ELSE
+                SET headPair TO pairs[0]
+                SET tailPairs TO pairs[1 to END]
+                IF isConditionTrue(headPair[0], headPair[1]) THEN
+                    RETURN 1 + accumulateCount(tailPairs)
+                ELSE
+                    RETURN accumulateCount(tailPairs)
+                END IF
+            END IF
+        END FUNCTION
+
+        SET accumulator TO accumulateCount(pairedLetters)
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS

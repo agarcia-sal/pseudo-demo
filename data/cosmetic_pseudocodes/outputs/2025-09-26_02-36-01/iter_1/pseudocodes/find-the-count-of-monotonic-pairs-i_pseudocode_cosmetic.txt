@@ -1,0 +1,37 @@
+CLASS Solution  
+    FUNCTION countOfPairs(nums)  
+        DEFINE MODULO_CONST AS 1_000_000_007  
+        LET length := SIZE(nums)  
+        LET maximum := MAX_ELEMENT(nums)  
+        
+        INITIALIZE dp AS ARRAY of size length WHERE each element IS AN ARRAY of size (maximum + 1) WHERE each element IS AN ARRAY of size (maximum + 1) FILLED WITH 0  
+        
+        FOR j_value IN RANGE(0, nums[0] + 1) DO  
+            LET k_value := nums[0] - j_value  
+            dp[0][j_value][k_value] := 1  
+        END FOR  
+        
+        FOR idx FROM 1 TO length - 1 DO  
+            FOR j_curr IN RANGE(0, nums[idx] + 1) DO  
+                LET k_curr := nums[idx] - j_curr  
+                FOR j_prev IN RANGE(0, j_curr + 1) DO  
+                    FOR k_prev IN RANGE(k_curr, maximum + 1) DO  
+                        dp[idx][j_curr][k_curr] += dp[idx - 1][j_prev][k_prev]  
+                        dp[idx][j_curr][k_curr] = dp[idx][j_curr][k_curr] MOD MODULO_CONST  
+                    END FOR  
+                END FOR  
+            END FOR  
+        END FOR  
+        
+        LET total := 0  
+        FOR j_final IN RANGE(0, maximum + 1) DO  
+            FOR k_final IN RANGE(0, maximum + 1) DO  
+                IF (j_final + k_final) = nums[length - 1] THEN  
+                    total = (total + dp[length - 1][j_final][k_final]) MOD MODULO_CONST  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        RETURN total  
+    END FUNCTION  
+END CLASS

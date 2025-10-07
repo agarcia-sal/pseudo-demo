@@ -1,0 +1,92 @@
+CLASS Solution
+    FUNCTION constructGridLayout(n, edges)
+        SET adjacency TO list of n empty lists
+        SET edgeIndex TO 0
+        WHILE edgeIndex LESS THAN length of edges
+            LET nodeA = edges[edgeIndex][0]
+            LET nodeB = edges[edgeIndex][1]
+            adjacency[nodeA] EXTEND [nodeB]
+            adjacency[nodeB] EXTEND [nodeA]
+            INCREMENT edgeIndex BY 1
+        END WHILE
+
+        SET degreePositions TO list of five elements initialized with -1
+        LET idxCounter = 0
+        WHILE idxCounter LESS THAN length of adjacency
+            LET neighborsList = adjacency[idxCounter]
+            LET neighborsCount = length of neighborsList
+            degreePositions[neighborsCount] = idxCounter
+            idxCounter = idxCounter + 1
+        END WHILE
+
+        IF degreePositions[1] IS NOT -1 THEN
+            LET currentRow = [degreePositions[1]]
+        ELSEIF degreePositions[4] IS -1 THEN
+            LET candidate = degreePositions[2]
+            LET neighborIndex = 0
+            WHILE neighborIndex < length of adjacency[candidate]
+                LET neighborNode = adjacency[candidate][neighborIndex]
+                IF length of adjacency[neighborNode] EQUALS 2 THEN
+                    currentRow = [candidate, neighborNode]
+                    BREAK
+                END IF
+                neighborIndex = neighborIndex + 1
+            END WHILE
+        ELSE
+            LET candidate = degreePositions[2]
+            currentRow = [candidate]
+            LET previous = candidate
+            LET tempNode = adjacency[candidate][0]
+            WHILE length of adjacency[tempNode] GREATER THAN 2
+                currentRow APPEND tempNode
+                LET neighborIter = 0
+                WHILE neighborIter LESS THAN length of adjacency[tempNode]
+                    LET neighborCandidate = adjacency[tempNode][neighborIter]
+                    IF neighborCandidate IS NOT previous AND length of adjacency[neighborCandidate] LESS THAN 4 THEN
+                        previous = tempNode
+                        tempNode = neighborCandidate
+                        BREAK
+                    END IF
+                    neighborIter = neighborIter + 1
+                END WHILE
+            END WHILE
+            currentRow APPEND tempNode
+        END IF
+
+        LET layoutRows = [currentRow]
+        LET visitedNodes = list of n elements assigned FALSE
+        LET iterations = (n DIVIDED BY length of currentRow) MINUS 1
+        LET iterationCounter = 0
+        WHILE iterationCounter LESS THAN iterations
+            LET iterator = 0
+            WHILE iterator LESS THAN length of currentRow
+                visitedNodes[currentRow[iterator]] = TRUE
+                iterator = iterator + 1
+            END WHILE
+
+            LET nextRow = []
+            LET currentIndex = 0
+            WHILE currentIndex LESS THAN length of currentRow
+                LET currentNode = currentRow[currentIndex]
+                LET neighborIdx = 0
+                LET connectedFound = FALSE
+                WHILE neighborIdx LESS THAN length of adjacency[currentNode]
+                    LET possibleNext = adjacency[currentNode][neighborIdx]
+                    IF visitedNodes[possibleNext] IS FALSE THEN
+                        nextRow APPEND possibleNext
+                        connectedFound = TRUE
+                        BREAK
+                    END IF
+                    neighborIdx = neighborIdx + 1
+                END WHILE
+                currentIndex = currentIndex + 1
+            END WHILE
+
+            layoutRows APPEND nextRow
+            currentRow = nextRow
+            iterationCounter = iterationCounter + 1
+        END WHILE
+
+        RETURN layoutRows
+    END FUNCTION
+END CLASS

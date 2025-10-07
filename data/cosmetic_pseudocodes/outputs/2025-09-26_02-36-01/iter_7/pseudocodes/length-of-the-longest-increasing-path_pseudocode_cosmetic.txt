@@ -1,0 +1,75 @@
+CLASS Solution  
+	FUNCTION maxPathLength(coordinates, k)  
+		SET pivotX TO coordinates[k][0]  
+		SET pivotY TO coordinates[k][1]  
+		SET lesserPoints TO new list  
+		SET idx TO 0  
+		WHILE idx LESS THAN length of coordinates  
+			SET px TO coordinates[idx][0]  
+			SET py TO coordinates[idx][1]  
+			IF NOT (px GREATER_EQUAL pivotX OR py GREATER_EQUAL pivotY)  
+				ADD (px, py) TO lesserPoints  
+			END IF  
+			SET idx TO idx + 1  
+		END WHILE  
+		SET greaterPoints TO new list  
+		SET j TO 0  
+		WHILE j LESS THAN length of coordinates  
+			SET cx TO coordinates[j][0]  
+			SET cy TO coordinates[j][1]  
+			IF (cx GREATER_THAN pivotX AND cy GREATER_THAN pivotY)  
+				PUSH (cx, cy) INTO greaterPoints  
+			END IF  
+			SET j TO j + 1  
+		END WHILE  
+		RETURN 1 + self._lengthOfLIS(lesserPoints) + self._lengthOfLIS(greaterPoints)  
+	END FUNCTION  
+
+	FUNCTION _lengthOfLIS(coordinates)  
+		PROCEDURE compareFirstAscSecondDesc(a, b)  
+			IF a[0] GREATER_THAN b[0]  
+				RETURN 1  
+			ELSE IF a[0] LESS_THAN b[0]  
+				RETURN -1  
+			ELSE  
+				IF a[1] LESS_THAN b[1]  
+					RETURN 1  
+				ELSE IF a[1] GREATER_THAN b[1]  
+					RETURN -1  
+				ELSE  
+					RETURN 0  
+				END IF  
+			END IF  
+		END PROCEDURE  
+
+		LET coordsCopy TO array copy of coordinates  
+		SORT coordsCopy USING compareFirstAscSecondDesc  
+
+		LET tailsArray TO empty sequence  
+		FUNCTION bisectLeft(array, val)  
+			SET low TO 0  
+			SET high TO length of array  
+			WHILE low LESS_THAN high  
+				SET mid TO (low + high) / 2  
+				IF array[mid] GREATER_EQUAL val  
+					SET high TO mid  
+				ELSE  
+					SET low TO mid + 1  
+				END IF  
+			END WHILE  
+			RETURN low  
+		END FUNCTION  
+
+		FOR EACH pair IN coordsCopy  
+			SET dummy TO pair[0]  
+			SET currentY TO pair[1]  
+			IF length of tailsArray EQUALS 0 OR currentY GREATER_THAN tailsArray[length of tailsArray - 1]  
+				APPEND currentY TO tailsArray  
+			ELSE  
+				SET replacePos TO bisectLeft(tailsArray, currentY)  
+				SET tailsArray[replacePos] TO currentY  
+			END IF  
+		END FOR  
+		RETURN length of tailsArray  
+	END FUNCTION  
+END CLASS

@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION minimumCost(target, words, costs)
+        SET cost_map TO empty dictionary
+        SET idx1 TO 0
+        WHILE idx1 LESS THAN length of words
+            SET w TO words at idx1
+            SET c TO costs at idx1
+            IF w NOT IN cost_map
+                cost_map[w] = c
+            ELSE
+                IF c LESS THAN cost_map[w]
+                    cost_map[w] = c
+                END IF
+            END IF
+            SET idx1 TO idx1 + 1
+        END WHILE
+
+        SET chars TO list of characters in target
+
+        FUNCTION min_cost_to_form_target(pos)
+            IF pos EQUALS length of chars
+                RETURN 0
+            END IF
+
+            SET best_cost TO positive_infinity
+            SET iter_pairs TO list of key-value pairs in cost_map
+            SET i TO 0
+
+            WHILE i LESS THAN length of iter_pairs
+                LET pair BE iter_pairs at i
+                LET word BE pair key
+                LET price BE pair value
+                SET word_len TO length of word
+                IF pos + word_len LESS THAN OR EQUAL TO length of chars
+                    SET slice_chars TO empty list
+                    SET j TO 0
+                    REPEAT
+                        IF j GREATER THAN OR EQUAL TO word_len THEN EXIT REPEAT
+                        slice_chars APPEND chars[pos + j]
+                        SET j TO j + 1
+                    UNTIL false
+
+                    SET match_flag TO true
+                    SET k TO 0
+                    WHILE k LESS THAN word_len AND match_flag
+                        IF slice_chars[k] NOT EQUAL TO character at position k in word
+                            SET match_flag TO false
+                        END IF
+                        SET k TO k + 1
+                    END WHILE
+
+                    IF match_flag
+                        SET candidate_cost TO min_cost_to_form_target(pos + word_len)
+                        IF candidate_cost NOT EQUAL TO positive_infinity
+                            SET total_cost TO candidate_cost + price
+                            IF total_cost LESS THAN best_cost
+                                best_cost = total_cost
+                            END IF
+                        END IF
+                    END IF
+                END IF
+                SET i TO i + 1
+            END WHILE
+
+            IF best_cost NOT EQUAL TO positive_infinity
+                RETURN best_cost
+            ELSE
+                RETURN positive_infinity
+            END IF
+        END FUNCTION
+
+        SET answer TO min_cost_to_form_target(0)
+        IF answer NOT EQUAL TO positive_infinity
+            RETURN answer
+        ELSE
+            RETURN -1
+        END IF
+    END FUNCTION
+END CLASS

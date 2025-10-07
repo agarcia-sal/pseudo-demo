@@ -1,0 +1,41 @@
+FUNCTION check_dict_case WITH PARAMETER dict
+    IF LENGTH OF CALL dict.keys() EQUALS 0 THEN
+        RETURN False
+    ELSE
+        SET state TO "start"
+        SET keys_list TO CALL dict.keys()
+        SET index TO 0
+        SET keys_length TO LENGTH OF keys_list
+        WHILE index LESS THAN keys_length DO
+            SET key TO keys_list AT index
+
+            IF CALL key IS NOT INSTANCE OF string THEN
+                SET state TO "mixed"
+                BREAK
+            END IF
+
+            IF state EQUALS "start" THEN
+                IF CALL key.isupper() EQUALS True THEN
+                    SET state TO "upper"
+                ELSE
+                    IF CALL key.islower() EQUALS True THEN
+                        SET state TO "lower"
+                    ELSE
+                        BREAK
+                    END IF
+                END IF
+            ELSE
+                IF (state EQUALS "upper" AND CALL key.isupper() EQUALS False) OR (state EQUALS "lower" AND CALL key.islower() EQUALS False) THEN
+                    SET state TO "mixed"
+                    BREAK
+                ELSE
+                    BREAK
+                END IF
+            END IF
+
+            INCREMENT index BY 1
+        END WHILE
+
+        RETURN (state EQUALS "upper") OR (state EQUALS "lower")
+    END IF
+END FUNCTION

@@ -1,0 +1,49 @@
+CLASS Solution
+    FUNCTION isArraySpecial(nums, queries)
+        FUNCTION mod_two(x)
+            RETURN x - 2 * (x DIV 2)
+        END FUNCTION
+
+        FUNCTION zero_list(n)
+            IF n = 0 THEN RETURN [] END IF
+            RETURN [0] + zero_list(n - 1)
+        END FUNCTION
+
+        FUNCTION get_parity_list(arr, idx, acc)
+            IF idx = LENGTH(arr) THEN RETURN acc END IF
+            RETURN get_parity_list(arr, idx + 1, acc + [mod_two(arr[idx])])
+        END FUNCTION
+
+        parity = get_parity_list(nums, 0, [])
+
+        prefix_special = zero_list(LENGTH(nums))
+
+        PROCEDURE compute_prefix(lst, idx)
+            IF idx = LENGTH(lst) THEN RETURN END IF
+            diff_cond = (lst[idx] = lst[idx - 1])
+            prefix_special[idx] = prefix_special[idx - 1] + (diff_cond ? 1 : 0)
+            compute_prefix(lst, idx + 1)
+        END PROCEDURE
+
+        IF LENGTH(nums) > 1 THEN
+            compute_prefix(parity, 1)
+        END IF
+
+        FUNCTION check_query(s, e)
+            IF s = e THEN RETURN True END IF
+            left_value = (s > 0) ? prefix_special[s] : 0
+            diff = prefix_special[e] - left_value
+            RETURN diff = 0
+        END FUNCTION
+
+        PROCEDURE recur_queries(query_list, index, acc)
+            IF index = LENGTH(query_list) THEN RETURN acc END IF
+            current = query_list[index]
+            acc = acc + [check_query(current[0], current[1])]
+            RETURN recur_queries(query_list, index + 1, acc)
+        END PROCEDURE
+
+        result = recur_queries(queries, 0, [])
+        RETURN result
+    END FUNCTION
+END CLASS

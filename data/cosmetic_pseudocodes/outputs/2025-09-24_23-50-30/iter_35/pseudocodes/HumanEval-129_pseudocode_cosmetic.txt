@@ -1,0 +1,54 @@
+```
+FUNCTION minPath(matrix, limit)
+  CONST size = LENGTH(matrix)
+  CONST maxVal = size * size + 1
+
+  FUNCTION innerRow(rowIndex, colIndex, currentVal)
+    IF rowIndex = size THEN
+      RETURN currentVal
+    ENDIF
+    FUNCTION innerCol(colIndex2, accVal)
+      IF colIndex2 = size THEN
+        RETURN accVal
+      ELSE
+        SWITCH matrix[rowIndex][colIndex2] = 1
+          CASE TRUE:
+            LET candidates = []
+            IF rowIndex > 0 THEN
+              APPEND matrix[rowIndex - 1][colIndex2] TO candidates
+            ENDIF
+            IF colIndex2 > 0 THEN
+              APPEND matrix[rowIndex][colIndex2 - 1] TO candidates
+            ENDIF
+            IF rowIndex < size - 1 THEN
+              APPEND matrix[rowIndex + 1][colIndex2] TO candidates
+            ENDIF
+            IF colIndex2 < size - 1 THEN
+              APPEND matrix[rowIndex][colIndex2 + 1] TO candidates
+            ENDIF
+            LET newVal = MIN(candidates)
+            RETURN innerCol(colIndex2 + 1, IF newVal < accVal THEN newVal ELSE accVal ENDIF)
+          CASE FALSE:
+            RETURN innerCol(colIndex2 + 1, accVal)
+        END SWITCH
+      ENDIF
+    END FUNCTION
+
+    LET rowVal = innerCol(0, currentVal)
+    RETURN innerRow(rowIndex + 1, 0, IF rowVal < currentVal THEN rowVal ELSE currentVal ENDIF)
+  END FUNCTION
+
+  LET minValFound = innerRow(0, 0, maxVal)
+
+  FUNCTION buildAnswer(index, acc)
+    IF index = limit THEN
+      RETURN acc
+    ELSE
+      LET elem = (index MOD 2 = 0) AND 1 OR minValFound
+      RETURN buildAnswer(index + 1, acc + [elem])
+    ENDIF
+  END FUNCTION
+
+  RETURN buildAnswer(0, [])
+END FUNCTION
+```

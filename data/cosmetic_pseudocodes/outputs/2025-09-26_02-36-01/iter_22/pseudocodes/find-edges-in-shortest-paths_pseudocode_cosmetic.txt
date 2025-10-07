@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION findAnswer(n, edges)
+        DECLARE mapping graph AS new map FROM keys TO empty lists
+        FOR EACH triple a b c IN edges DO
+            LET key1 BE a
+            LET value1 BE tuple(b, c)
+            graph[key1] APPEND value1
+            LET key2 BE b
+            LET value2 BE tuple(a, c)
+            graph[key2] APPEND value2
+        END FOR
+
+        DECLARE list dist WITH LENGTH n FILLED WITH (0 - 1) / (0 - 1)
+        ASSIGN dist[0] TO 0
+        DECLARE list heapList INITIALIZED WITH tuple(0, 0)
+
+        FUNCTION popMin(heap)
+            SET idx TO 0
+            FOR i FROM 1 TO length of heap MINUS 1 DO
+                IF heap[i].first ELEMENT < heap[idx].first ELEMENT THEN
+                    SET idx TO i
+                END IF
+            END FOR
+            LET item TO heap[idx]
+            REMOVE element at idx FROM heap
+            RETURN item
+        END FUNCTION
+
+        FUNCTION pushHeap(heap, item)
+            heap APPEND item
+        END FUNCTION
+
+        WHILE LENGTH(heapList) > 0 DO
+            LET (currDist, node) BE popMin(heapList)
+            IF currDist > dist[node] THEN
+                CONTINUE WHILE
+            END IF
+            FOR EACH (neighbor, weight) IN graph[node] DO
+                LET newDist BE currDist + weight
+                IF newDist < dist[neighbor] THEN
+                    dist[neighbor] = newDist
+                    pushHeap(heapList, tuple(newDist, neighbor))
+                END IF
+            END FOR
+        END WHILE
+
+        DECLARE set pathEdges EMPTY
+        DECLARE stackList LIST WITH single element tuple(n - 1, dist[n - 1])
+        DECLARE list visitFlags LENGTH n FILLED WITH False
+
+        WHILE LENGTH(stackList) > 0 DO
+            LET (currNode, currDistVal) BE stackList POP LAST
+            IF visitFlags[currNode] THEN
+                CONTINUE WHILE
+            END IF
+            visitFlags[currNode] = True
+            FOR EACH (adjNode, adjWeight) IN graph[currNode] DO
+                IF currDistVal = dist[adjNode] + adjWeight THEN
+                    LET aVal BE currNode
+                    LET bVal BE adjNode
+                    IF aVal > bVal THEN
+                        LET tempVal BE aVal
+                        aVal = bVal
+                        bVal = tempVal
+                    END IF
+                    pathEdges ADD tuple(aVal, bVal)
+                    stackList APPEND tuple(adjNode, dist[adjNode])
+                END IF
+            END FOR
+        END WHILE
+
+        DECLARE list resultList EMPTY
+        FOR EACH (firstNode, secondNode, dummy) IN edges DO
+            LET mA BE firstNode
+            LET mB BE secondNode
+            IF mA > mB THEN
+                LET tempVars BE mA
+                mA = mB
+                mB = tempVars
+            END IF
+            resultList APPEND (tuple(mA, mB) IN pathEdges)
+        END FOR
+
+        RETURN resultList
+    END FUNCTION
+END CLASS

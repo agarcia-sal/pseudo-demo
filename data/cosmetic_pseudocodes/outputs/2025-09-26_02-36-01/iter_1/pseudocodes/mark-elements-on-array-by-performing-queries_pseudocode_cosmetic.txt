@@ -1,0 +1,43 @@
+CLASS Solution  
+    FUNCTION unmarkedSumArray(nums FUNCTION PARAMETER, queries FUNCTION PARAMETER) RETURNS list  
+        DECLARE priority_queue AS empty list  
+        FOR idx FROM 0 TO LENGTH(nums) - 1  
+            INSERT [nums[idx], idx] INTO priority_queue  
+        END FOR  
+        HEAPIFY(priority_queue)  
+
+        DECLARE flagged AS empty set  
+        DECLARE running_total AS 0  
+        FOR num IN nums  
+            running_total = running_total + num  
+        END FOR  
+        DECLARE outputs AS empty list  
+
+        FOR each query_index FROM 0 TO LENGTH(queries) - 1  
+            DECLARE current_index AS queries[query_index][0]  
+            DECLARE remove_count AS queries[query_index][1]  
+
+            IF current_index NOT IN flagged THEN  
+                flagged.ADD(current_index)  
+                running_total = running_total - nums[current_index]  
+            END IF  
+
+            DECLARE removed_items AS 0  
+            WHILE removed_items < remove_count AND SIZE(priority_queue) > 0  
+                DECLARE front_item AS HEAPPOP(priority_queue)  
+                DECLARE val AS front_item[0]  
+                DECLARE pos AS front_item[1]  
+
+                IF pos NOT IN flagged THEN  
+                    flagged.ADD(pos)  
+                    running_total = running_total - val  
+                    removed_items = removed_items + 1  
+                END IF  
+            END WHILE  
+
+            APPEND running_total TO outputs  
+        END FOR  
+
+        RETURN outputs  
+    END FUNCTION  
+END CLASS

@@ -1,0 +1,38 @@
+```
+FUNCTION histogram(test_string)
+    DEFINE helper_count_occurrences(target_letter, letters_list) AS
+        SET acc TO 0
+        FOR EACH elem IN letters_list
+            IF elem = target_letter THEN acc ← acc + 1
+        RETURN acc
+    END
+
+    SET freq_map TO {}
+    SET tokens TO SPLIT test_string BY " "
+    SET max_freq TO 0
+
+    DEFINE update_maximum(index)
+        IF index >= LENGTH(tokens) THEN RETURN
+        SET current_token TO tokens[index]
+        SET current_freq TO helper_count_occurrences(current_token, tokens)
+        IF current_freq > max_freq AND current_token ≠ "" THEN
+            max_freq ← current_freq
+        update_maximum(index + 1)
+    END
+
+    CALL update_maximum(0)
+
+    IF max_freq > 0 THEN
+        DEFINE populate_freq_map(position)
+            IF position >= LENGTH(tokens) THEN RETURN
+            SET token_at_pos TO tokens[position]
+            IF helper_count_occurrences(token_at_pos, tokens) = max_freq THEN
+                freq_map[token_at_pos] ← max_freq
+            populate_freq_map(position + 1)
+        END
+        CALL populate_freq_map(0)
+    END
+
+    RETURN freq_map
+END FUNCTION
+```

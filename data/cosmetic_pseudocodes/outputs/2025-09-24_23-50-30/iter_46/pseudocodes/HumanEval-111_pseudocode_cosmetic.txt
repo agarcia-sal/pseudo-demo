@@ -1,0 +1,56 @@
+```
+FUNCTION histogram(input_sequence)
+  SET map_storage TO empty dictionary
+  SET array_items TO SPLIT input_sequence BY " "
+  SET highest_frequency TO 0
+
+  FUNCTION update_maximum(idx)
+    IF idx > LENGTH(array_items) - 1
+      RETURN
+    ELSE
+      SET current_element TO array_items[idx]
+      SET count_element TO COUNT OF current_element IN array_items
+      IF NOT (count_element <= highest_frequency OR current_element == "")
+        SET highest_frequency TO count_element
+      END IF
+      CALL update_maximum(idx + 1)
+    END IF
+  END FUNCTION
+
+  CALL update_maximum(0)
+
+  FUNCTION assign_frequencies(j)
+    SWITCH j > LENGTH(array_items) - 1
+      CASE TRUE:
+        RETURN
+      CASE FALSE:
+        SET elem TO array_items[j]
+        IF count_of(elem, array_items) == highest_frequency
+          SET map_storage[elem] TO highest_frequency
+        END IF
+        CALL assign_frequencies(j + 1)
+    END SWITCH
+  END FUNCTION
+
+  IF 0 < highest_frequency
+    CALL assign_frequencies(0)
+  END IF
+
+  RETURN map_storage
+END FUNCTION
+
+FUNCTION count_of(value, collection)
+  FUNCTION recurse_count(pos, acc)
+    IF pos == LENGTH(collection)
+      RETURN acc
+    ELSE
+      IF collection[pos] == value
+        RETURN recurse_count(pos + 1, acc + 1)
+      ELSE
+        RETURN recurse_count(pos + 1, acc)
+      END IF
+    END IF
+  END FUNCTION
+  RETURN recurse_count(0, 0)
+END FUNCTION
+```

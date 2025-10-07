@@ -1,0 +1,51 @@
+CLASS Solution  
+    FUNCTION countPairsOfConnectableServers(edges, signalSpeed)  
+        INITIALIZE graph AS an empty dictionary with default empty lists  
+        FOR each (u, v, w) IN edges DO  
+            graph[u].ADD((v, w))  
+            graph[v].ADD((u, w))  
+        END FOR  
+
+        LET n BE SIZE OF graph KEYS  
+        DECLARE result AS LIST WITH n ZEROS  
+
+        FUNCTION dfs(currentNode, parentNode, dist, collectedNodes)  
+            IF dist MOD signalSpeed == 0 THEN  
+                collectedNodes.ADD(currentNode)  
+            END IF  
+            DECLARE subtreeCount AS 0  
+            FOR EACH (adjacentNode, edgeWeight) IN graph[currentNode] DO  
+                IF adjacentNode != parentNode THEN  
+                    subtreeCount += dfs(adjacentNode, currentNode, dist + edgeWeight, collectedNodes)  
+                END IF  
+            END FOR  
+            IF dist MOD signalSpeed == 0 THEN  
+                RETURN subtreeCount + 1  
+            ELSE  
+                RETURN subtreeCount  
+            END IF  
+        END FUNCTION  
+
+        FUNCTION count_pairs_through_c(c)  
+            DECLARE pathsList AS EMPTY LIST  
+            FOR EACH (neighbor, weight) IN graph[c] DO  
+                DECLARE collectedPath AS EMPTY LIST  
+                CALL dfs(neighbor, c, weight, collectedPath)  
+                pathsList.ADD(collectedPath)  
+            END FOR  
+            DECLARE totalPairs AS 0  
+            FOR i FROM 0 TO LENGTH(pathsList) - 2 DO  
+                FOR j FROM i + 1 TO LENGTH(pathsList) - 1 DO  
+                    totalPairs += LENGTH(pathsList[i]) * LENGTH(pathsList[j])  
+                END FOR  
+            END FOR  
+            RETURN totalPairs  
+        END FUNCTION  
+
+        FOR nodeIndex FROM 0 TO n - 1 DO  
+            result[nodeIndex] = count_pairs_through_c(nodeIndex)  
+        END FOR  
+
+        RETURN result  
+    END FUNCTION  
+END CLASS

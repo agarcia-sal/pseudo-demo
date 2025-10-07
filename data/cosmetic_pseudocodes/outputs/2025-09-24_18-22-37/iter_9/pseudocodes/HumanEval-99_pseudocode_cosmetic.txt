@@ -1,0 +1,42 @@
+```
+FUNCTION closest_integer(parameter_one)
+    IMPORT floor, ceil FROM math
+
+    DECLARE temp_digits
+    SET temp_digits TO (COUNT OF '.' IN parameter_one)
+    IF NOT (temp_digits NOT EQUAL TO 1)
+        DECLARE index_cursor
+        SET index_cursor TO (LENGTH OF parameter_one)
+        WHILE NOT (parameter_one->at(index_cursor MINUS 1) NOT EQUAL TO '0') AND index_cursor GREATER THAN 0
+            SET parameter_one TO SUBSTRING OF parameter_one FROM START TO (index_cursor MINUS 1)
+            DECREMENT index_cursor BY 1
+        END WHILE
+    END IF
+
+    DECLARE float_value
+    SET float_value TO FLOAT CONVERTED FROM parameter_one
+
+    DECLARE suffix_two_chars
+    SET suffix_two_chars TO (parameter_one->at(LENGTH OF parameter_one MINUS 2) CONCAT parameter_one->at(LENGTH OF parameter_one MINUS 1)) 
+
+    DECLARE outcome
+    SWITCH suffix_two_chars
+        CASE '.5':
+            IF (float_value GREATER THAN 0)
+                SET outcome TO ceil(float_value)
+            ELSE
+                SET outcome TO floor(float_value)
+            END IF
+            BREAK
+        DEFAULT:
+            IF (LENGTH OF parameter_one) GREATER THAN 0
+                SET outcome TO ROUND float_value TO INTEGER
+            ELSE
+                SET outcome TO 0
+            END IF
+            BREAK
+    END SWITCH
+
+    RETURN outcome
+END FUNCTION
+```

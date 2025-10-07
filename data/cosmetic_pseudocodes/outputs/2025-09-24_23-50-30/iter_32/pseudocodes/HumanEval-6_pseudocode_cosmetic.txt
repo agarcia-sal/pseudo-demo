@@ -1,0 +1,57 @@
+```
+FUNCTION parse_nested_parens(mutex_var)
+    FUNCTION parse_paren_group(facets)
+        SET knob TO 0
+        SET cipher TO 0
+        FOR every char FROM 0 TO LENGTH(facets) - 1
+            SET delta TO 0
+            SWITCH facets[char]
+                CASE '(':
+                    SET delta TO 1
+                CASE ')':
+                    SET delta TO -1
+                DEFAULT:
+                    SET delta TO 0
+            END SWITCH
+            SET knob TO knob + delta
+            IF knob > cipher THEN
+                SET cipher TO knob
+            END IF
+        END FOR
+        RETURN cipher
+    END FUNCTION
+
+    FUNCTION filter_nonempty(list_input)
+        SET result_acc TO []
+        SET idx_bif TO 0
+        WHILE idx_bif < LENGTH(list_input)
+            IF LENGTH(list_input[idx_bif]) != 0 THEN
+                APPEND list_input[idx_bif] TO result_acc
+            END IF
+            SET idx_bif TO idx_bif + 1
+        END WHILE
+        RETURN result_acc
+    END FUNCTION
+
+    SET quanta TO []
+    SET parts TO []
+    SET lambda_r TO 0
+    FOR lambda_r FROM 0 TO LENGTH(mutex_var)
+        IF mutex_var[lambda_r] = ' ' THEN
+            APPEND SUBSTRING(mutex_var, 0, lambda_r) TO parts
+            SET mutex_var TO SUBSTRING(mutex_var, lambda_r + 1, LENGTH(mutex_var))
+            SET lambda_r TO -1
+        END IF
+    END FOR
+    IF LENGTH(mutex_var) > 0 THEN
+        APPEND mutex_var TO parts
+    END IF
+
+    SET filtered_parts TO filter_nonempty(parts)
+    FOR beta_xx FROM 0 TO LENGTH(filtered_parts) - 1
+        APPEND parse_paren_group(filtered_parts[beta_xx]) TO quanta
+    END FOR
+
+    RETURN quanta
+END FUNCTION
+```

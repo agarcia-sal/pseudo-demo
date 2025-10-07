@@ -1,0 +1,106 @@
+CLASS Solution
+    FUNCTION minCostGoodCaption(caption)
+        FUNCTION charAfter(x)
+            CONSTANT A_ASCII = 97
+            CONSTANT Z_ASCII = 122
+            FUNCTION toAscii(c)
+                RETURN c AS ASCII CODE
+            END FUNCTION
+            FUNCTION fromAscii(n)
+                RETURN n AS CHARACTER
+            END FUNCTION
+
+            VARIABLE pqr = toAscii(x)
+            IF pqr = A_ASCII THEN
+                RETURN fromAscii(pqr + 1)
+            ELSE IF pqr = Z_ASCII THEN
+                RETURN fromAscii(pqr - 1)
+            ELSE
+                RETURN fromAscii(pqr + 1)
+            END IF
+        END FUNCTION
+
+        VARIABLE abc = LENGTH(caption)
+        IF (abc < 3) THEN
+            RETURN ""
+        END IF
+
+        VARIABLE xyz = TO_LIST(caption)
+
+        FUNCTION eqChar(arr, idx1, idx2)
+            RETURN arr[idx1] = arr[idx2]
+        END FUNCTION
+
+        VARIABLE mno = 0
+        REPEAT
+            IF NOT (mno < abc) THEN BREAK END IF
+
+            VARIABLE rst = mno
+            FUNCTION innerLoop(capt, pos, startPos, lenLimit)
+                IF NOT (pos < lenLimit AND eqChar(capt, pos, startPos)) THEN
+                    RETURN pos
+                END IF
+                RETURN innerLoop(capt, pos + 1, startPos, lenLimit)
+            END FUNCTION
+            VARIABLE uvw = innerLoop(xyz, mno, mno, abc)
+            mno = uvw
+            VARIABLE lenSegment = mno - rst
+
+            IF lenSegment < 3 THEN
+                IF rst > 0 AND eqChar(xyz, rst - 1, rst) THEN
+                    xyz[rst - 1] = xyz[rst]
+                    rst = rst - 1
+                    lenSegment = lenSegment + 1
+                END IF
+
+                IF mno < abc AND eqChar(xyz, mno - 1, mno) THEN
+                    xyz[mno] = xyz[mno - 1]
+                    mno = mno + 1
+                    lenSegment = lenSegment + 1
+                END IF
+
+                IF lenSegment < 3 THEN
+                    VARIABLE klm
+                    IF rst > 0 THEN
+                        klm = xyz[rst - 1]
+                    ELSE
+                        klm = xyz[mno]
+                    END IF
+
+                    VARIABLE mno_char
+                    IF klm = 'a' THEN
+                        mno_char = 'b'
+                    ELSE IF klm = 'z' THEN
+                        mno_char = 'y'
+                    ELSE
+                        mno_char = charAfter(klm)
+                    END IF
+
+                    FUNCTION fillRange(arr, startIdx, count, ch)
+                        VARIABLE cnt = 0
+                        WHILE cnt < count
+                            arr[startIdx + cnt] = ch
+                            cnt = cnt + 1
+                        END WHILE
+                    END FUNCTION
+
+                    fillRange(xyz, rst, lenSegment, mno_char)
+                    mno = rst + lenSegment
+                END IF
+            END IF
+        UNTIL FALSE
+
+        FUNCTION joinChars(arr)
+            VARIABLE result = ""
+            VARIABLE idx = 0
+            VARIABLE limit = LENGTH(arr)
+            WHILE idx < limit
+                result = result + arr[idx]
+                idx = idx + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        RETURN joinChars(xyz)
+    END FUNCTION
+END CLASS

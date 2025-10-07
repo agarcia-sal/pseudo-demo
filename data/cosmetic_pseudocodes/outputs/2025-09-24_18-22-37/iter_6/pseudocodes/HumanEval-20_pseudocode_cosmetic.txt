@@ -1,0 +1,53 @@
+FUNCTION find_closest_elements(sequence_of_values)
+  SET best_match TO None
+  SET smallest_gap TO None
+  SET outer_cursor TO 0
+
+  WHILE outer_cursor < LENGTH(sequence_of_values)
+    SET outer_val TO sequence_of_values[outer_cursor]
+    SET inner_cursor TO 0
+
+    WHILE inner_cursor < LENGTH(sequence_of_values)
+      SET inner_val TO sequence_of_values[inner_cursor]
+
+      IF outer_cursor = inner_cursor THEN
+        SET inner_cursor TO inner_cursor + 1
+        CONTINUE
+      ELSE
+        IF smallest_gap IS NOT None THEN
+          SET difference_abs TO outer_val - inner_val
+          IF difference_abs < 0 THEN
+            SET difference_abs TO 0 - difference_abs
+          END IF
+
+          IF difference_abs < smallest_gap THEN
+            SET smallest_gap TO difference_abs
+            IF outer_val < inner_val THEN
+              SET best_match TO (outer_val, inner_val)
+            ELSE
+              SET best_match TO (inner_val, outer_val)
+            END IF
+          END IF
+        ELSE
+          SET difference_abs TO outer_val - inner_val
+          IF difference_abs < 0 THEN
+            SET difference_abs TO 0 - difference_abs
+          END IF
+          SET smallest_gap TO difference_abs
+
+          IF outer_val < inner_val THEN
+            SET best_match TO (outer_val, inner_val)
+          ELSE
+            SET best_match TO (inner_val, outer_val)
+          END IF
+        END IF
+      END IF
+
+      SET inner_cursor TO inner_cursor + 1
+    END WHILE
+
+    SET outer_cursor TO outer_cursor + 1
+  END WHILE
+
+  RETURN best_match
+END FUNCTION

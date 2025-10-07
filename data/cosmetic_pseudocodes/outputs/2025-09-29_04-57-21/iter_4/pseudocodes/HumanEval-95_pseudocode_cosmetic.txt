@@ -1,0 +1,43 @@
+```
+FUNCTION check_dict_case(mapping)
+    IF SIZE(mapping.KEYS) == 0 THEN
+        RETURN False
+    END IF
+
+    state_label <- "start"
+    key_iterator <- mapping.KEYS.ITERATOR()
+    WHILE key_iterator.HAS_NEXT()
+        current_key <- key_iterator.NEXT()
+
+        IF NOT current_key INSTANCEOF STRING THEN
+            state_label <- "mixed"
+            BREAK
+        END IF
+
+        IF state_label == "start" THEN
+            IF current_key == current_key.TO_UPPERCASE() THEN
+                state_label <- "upper"
+            ELSE
+                IF NOT (current_key != current_key.TO_LOWERCASE()) THEN
+                    state_label <- "lower"
+                ELSE
+                    BREAK
+                END IF
+            END IF
+
+        ELSE
+            is_upper_differs <- (state_label == "upper") AND (current_key != current_key.TO_UPPERCASE())
+            is_lower_differs <- (state_label == "lower") AND (current_key != current_key.TO_LOWERCASE())
+
+            IF is_upper_differs OR is_lower_differs THEN
+                state_label <- "mixed"
+                BREAK
+            ELSE
+                BREAK
+            END IF
+        END IF
+    END WHILE
+
+    RETURN (state_label == "upper") OR (state_label == "lower")
+END FUNCTION
+```

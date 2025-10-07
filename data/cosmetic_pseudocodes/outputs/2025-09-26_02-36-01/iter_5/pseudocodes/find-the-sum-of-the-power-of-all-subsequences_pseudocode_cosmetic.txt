@@ -1,0 +1,51 @@
+CLASS Solution
+    FUNCTION sumOfPower(nums paramA, k paramB)
+        SET constMod TO (1000000000 + 7)
+        SET lengthN TO LENGTH(nums)
+        SET tableDP TO ARRAY OF ARRAYS WITH DIMENSIONS (lengthN + 1) x (paramB + 1) FILLED WITH 0
+        SET tableDP[0][0] TO 1
+
+        SET idxOuter TO 1
+        WHILE idxOuter <= lengthN
+            SET idxInner TO 0
+            WHILE idxInner <= paramB
+                SET tableDP[idxOuter][idxInner] TO tableDP[idxOuter - 1][idxInner]
+                IF idxInner >= nums[idxOuter - 1]
+                    SET tempVal TO tableDP[idxOuter - 1][idxInner - nums[idxOuter - 1]]
+                    SET tableDP[idxOuter][idxInner] TO tableDP[idxOuter][idxInner] + tempVal
+                END IF
+                SET tableDP[idxOuter][idxInner] TO tableDP[idxOuter][idxInner] MOD constMod
+                SET idxInner TO idxInner + 1
+            END WHILE
+            SET idxOuter TO idxOuter + 1
+        END WHILE
+
+        SET resultPower TO 0
+        SET limitNum TO (2 ^ lengthN) - 1
+
+        FUNCTION bitSetCountAndSum(val, pos, accSum, accCount)
+            IF pos == lengthN
+                RETURN [accSum, accCount]
+            END IF
+            IF (val >> pos) & 1 == 1
+                RETURN bitSetCountAndSum(val, pos + 1, accSum + nums[pos], accCount + 1)
+            ELSE
+                RETURN bitSetCountAndSum(val, pos + 1, accSum, accCount)
+            END IF
+        END FUNCTION
+
+        SET currVal TO 1
+        WHILE currVal <= limitNum
+            SET pairSumCount TO bitSetCountAndSum(currVal, 0, 0, 0)
+            SET sumSubset TO pairSumCount[0]
+            SET countSubset TO pairSumCount[1]
+            IF sumSubset == paramB
+                SET addVal TO 2 ^ (lengthN - countSubset)
+                SET resultPower TO (resultPower + addVal) MOD constMod
+            END IF
+            SET currVal TO currVal + 1
+        END WHILE
+
+        RETURN resultPower
+    END FUNCTION
+END CLASS

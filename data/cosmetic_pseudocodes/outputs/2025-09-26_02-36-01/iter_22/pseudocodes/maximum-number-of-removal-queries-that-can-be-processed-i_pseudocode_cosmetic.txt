@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION maximumProcessableQueries(nums parameters as list of integers queries parameters as list of integers) RETURNS integer
+        FUNCTION process_queries(subseq parameters as list of integers queries parameters as list of integers) RETURNS integer
+            DEFINE counter AS integer ASSIGN 0
+            DEFINE iterator AS integer ASSIGN 0
+            WHILE iterator < LENGTH(subseq)
+                IF NOT (counter < LENGTH(queries)) THEN
+                    LEAVE
+                ENDIF
+                IF subseq[iterator] >= queries[counter] THEN
+                    SET counter TO counter + 1
+                ENDIF
+                SET iterator TO iterator + 1
+            ENDWHILE
+            RETURN counter
+        END FUNCTION
+
+        LET length_nums BE LENGTH(nums)
+        LET length_queries BE LENGTH(queries)
+        LET processed_maximum BE process_queries(nums, queries)
+        FOR index FROM 0 TO length_nums - 1
+            LET segment_start BE SUBSEQ(nums, 0, index)
+            LET segment_end BE SUBSEQ(nums, index, length_nums)
+            LET reversed_end BE EMPTY LIST
+            DEFINE pos AS integer ASSIGN LENGTH(segment_end) - 1
+            REPEAT WHILE pos >= 0
+                APPEND segment_end[pos] TO reversed_end
+                SET pos TO pos - 1
+            ENDREPEAT
+            LET concatenated_subseq BE CONCATENATE(segment_start, reversed_end)
+            DEFINE sorted_subsequence AS list of integers ASSIGN concatenated_subseq
+            PROCEDURE sort_ascending(L as list of integers)
+                DEFINE swapped AS boolean ASSIGN TRUE
+                WHILE swapped
+                    SET swapped TO FALSE
+                    FOR idx FROM 0 TO LENGTH(L) - 2
+                        IF L[idx] > L[idx + 1]
+                            SET temp TO L[idx]
+                            SET L[idx] TO L[idx + 1]
+                            SET L[idx + 1] TO temp
+                            SET swapped TO TRUE
+                        ENDIF
+                    ENDFOR
+                ENDWHILE
+            END PROCEDURE
+            CALL sort_ascending(sorted_subsequence)
+
+            DEFINE current_processed AS integer ASSIGN process_queries(sorted_subsequence, queries)
+            IF current_processed > processed_maximum THEN
+                SET processed_maximum TO current_processed
+            ENDIF
+        ENDFOR
+        RETURN processed_maximum
+    END FUNCTION
+END CLASS

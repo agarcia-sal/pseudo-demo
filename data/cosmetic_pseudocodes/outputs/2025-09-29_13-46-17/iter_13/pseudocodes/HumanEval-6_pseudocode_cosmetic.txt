@@ -1,0 +1,67 @@
+FUNCTION parse_nested_parens(parentheses_string)
+	DEFINE parse_paren_group(group_string)
+		DEFINE aux_layer(acc_depth, acc_max, chars_list)
+			IF chars_list IS EMPTY THEN
+				RETURN acc_max
+			ELSE
+				LET front_char BE chars_list[0]
+				LET rest_chars BE chars_list[1..]
+				IF NOT (front_char != '(') THEN
+					LET new_depth BE acc_depth + 1
+					LET new_max BE (new_depth > acc_max) ? new_depth : acc_max
+					RETURN aux_layer(new_depth, new_max, rest_chars)
+				ELSE
+					LET new_depth BE acc_depth - 1
+					RETURN aux_layer(new_depth, acc_max, rest_chars)
+				END IF
+			END IF
+		END DEFINE
+		RETURN aux_layer(0, 0, list_of_chars(group_string))
+	END DEFINE
+
+	DEFINE split_chars(s)
+		LET acc, temp, idx BE [], "", 0
+		DEFINE split_helper()
+			IF idx >= length_of(s) THEN
+				IF temp != "" THEN
+					acc = acc + [temp]
+				END IF
+				RETURN acc
+			ELSE IF s[idx] = ' ' THEN
+				LET new_acc BE acc + ([temp] IF temp != "" ELSE [])
+				LET new_temp BE ""
+				LET new_idx BE idx + 1
+				acc = new_acc
+				temp = new_temp
+				idx = new_idx
+				RETURN split_helper()
+			ELSE
+				temp = temp + s[idx]
+				idx = idx + 1
+				RETURN split_helper()
+			END IF
+		END DEFINE
+		RETURN split_helper()
+	END DEFINE
+
+	DEFINE filter_nonempty(lst)
+		IF lst IS EMPTY THEN
+			RETURN []
+		ELSE IF lst[0] != "" THEN
+			RETURN [lst[0]] + filter_nonempty(lst[1..])
+		ELSE
+			RETURN filter_nonempty(lst[1..])
+		END IF
+	END DEFINE
+
+	DEFINE apply_map(func, lst)
+		IF lst IS EMPTY THEN
+			RETURN []
+		ELSE
+			RETURN [func(lst[0])] + apply_map(func, lst[1..])
+		END IF
+	END DEFINE
+
+	LET chunks BE filter_nonempty(split_chars(parentheses_string))
+	RETURN apply_map(parse_paren_group, chunks)
+END FUNCTION

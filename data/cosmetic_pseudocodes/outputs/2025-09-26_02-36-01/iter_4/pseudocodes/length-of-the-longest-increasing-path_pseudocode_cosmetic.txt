@@ -1,0 +1,49 @@
+CLASS Solution  
+    FUNCTION maxPathLength(coordinates, k)  
+        LET pivotX BE coordinates[k][0]  
+        LET pivotY BE coordinates[k][1]  
+        
+        DECLARE leftCoords AS empty list  
+        DECLARE idx AS zero  
+        WHILE idx LESS THAN LENGTH OF coordinates  
+            LET currentX BE coordinates[idx][0]  
+            LET currentY BE coordinates[idx][1]  
+            IF NOT (currentX GREATER THAN OR EQUAL TO pivotX OR currentY GREATER THAN OR EQUAL TO pivotY)  
+                APPEND (currentX, currentY) TO leftCoords  
+            END IF  
+            SET idx TO idx PLUS one  
+        END WHILE  
+        
+        DECLARE rightCoords AS empty list  
+        SET idx TO zero  
+        WHILE idx LESS THAN LENGTH OF coordinates  
+            LET currX BE coordinates[idx][0]  
+            LET currY BE coordinates[idx][1]  
+            IF NOT (currX LESS THAN OR EQUAL TO pivotX OR currY LESS THAN OR EQUAL TO pivotY)  
+                APPEND (currX, currY) TO rightCoords  
+            END IF  
+            SET idx TO idx PLUS one  
+        END WHILE  
+        
+        RETURN 1 PLUS self._lengthOfLIS(leftCoords) PLUS self._lengthOfLIS(rightCoords)  
+    END FUNCTION  
+
+    FUNCTION _lengthOfLIS(coordinates)  
+        SORT coordinates BY first element ASCENDING, THEN second element DESCENDING  
+
+        DECLARE tails AS empty list  
+        DECLARE iterIdx AS zero  
+        WHILE iterIdx LESS THAN LENGTH OF coordinates  
+            LET currentY BE coordinates[iterIdx][1]  
+            IF LENGTH OF tails EQUALS zero OR currentY GREATER THAN tails[LENGTH OF tails MINUS one]  
+                APPEND currentY TO tails  
+            ELSE  
+                DECLARE insertionIndex AS result of bisect_left(tails, currentY)  
+                SET tails[insertionIndex] TO currentY  
+            END IF  
+            SET iterIdx TO iterIdx PLUS one  
+        END WHILE  
+
+        RETURN LENGTH OF tails  
+    END FUNCTION  
+END CLASS

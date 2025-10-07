@@ -1,0 +1,41 @@
+```
+FUNCTION check_dict_case(mapping)
+    IF COUNT(mapping KEYS) = 0 THEN
+        RETURN False
+    END IF
+
+    state_marker <- "start"
+    idx <- 0
+    total_keys <- COUNT(mapping KEYS)
+    
+    WHILE idx < total_keys DO
+        current_key <- mapping KEYS[idx]
+        
+        IF NOT (current_key TYPEOF STRING) THEN
+            state_marker <- "mixed"
+            BREAK
+        END IF
+        
+        IF state_marker = "start" THEN
+            IF current_key = UPPERCASE(current_key) THEN
+                state_marker <- "upper"
+            ELSEIF current_key = LOWERCASE(current_key) THEN
+                state_marker <- "lower"
+            ELSE
+                BREAK
+            END IF
+        
+        ELSEIF (state_marker = "upper" AND current_key <> UPPERCASE(current_key)) OR
+               (state_marker = "lower" AND current_key <> LOWERCASE(current_key)) THEN
+            state_marker <- "mixed"
+            BREAK
+        ELSE
+            BREAK
+        END IF
+        
+        idx <- idx + 1
+    END WHILE
+
+    RETURN (state_marker = "upper") OR (state_marker = "lower")
+END FUNCTION
+```

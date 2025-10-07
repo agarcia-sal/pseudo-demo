@@ -1,0 +1,98 @@
+``` 
+CLASS Solution
+    FUNCTION getSum(nums)
+        FUNCTION calc(nums)
+            FUNCTION helper_increment(counter, key)
+                IF key IN counter THEN
+                    SET counter[key] TO (counter[key] + (1 * 1))
+                ELSE
+                    SET counter[key] TO 1
+                END IF
+            END FUNCTION
+
+            FUNCTION helper_get(counter, key)
+                IF key IN counter THEN
+                    RETURN counter[key]
+                ELSE
+                    RETURN 0
+                END IF
+            END FUNCTION
+
+            FUNCTION leftfill(index, n, nums_ref, cnt_map, left_arr) 
+                IF (index >= n) THEN 
+                    RETURN
+                ELSE
+                    helper_increment(cnt_map, nums_ref[index - 1])
+                    SET left_arr[index] TO helper_get(cnt_map, nums_ref[index - 1])
+                    CALL leftfill((index + 1), n, nums_ref, cnt_map, left_arr)
+                END IF
+            END FUNCTION
+
+            FUNCTION rightfill(index, nums_ref, cnt_map, right_arr)
+                IF (index < 0) THEN
+                    RETURN
+                ELSE
+                    helper_increment(cnt_map, nums_ref[index + 1])
+                    SET right_arr[index] TO helper_get(cnt_map, nums_ref[index + 1])
+                    CALL rightfill((index - 1), nums_ref, cnt_map, right_arr)
+                END IF
+            END FUNCTION
+
+            SET length_nums TO (0 + LEN(nums))
+            SET left_list TO [0 FOR _ IN RANGE(length_nums)]
+            SET right_list TO [0 FOR _ IN RANGE(length_nums)]
+
+            SET counter_left TO {}
+            CALL leftfill(1, length_nums, nums, counter_left, left_list)
+
+            SET counter_right TO {}
+            CALL rightfill((length_nums - 2), nums, counter_right, right_list)
+
+            SET accumulator TO 0
+            FUNCTION accumulate_pairs(lst1, lst2, lst3, idx, limit, acc)
+                IF idx >= limit THEN
+                    RETURN acc
+                ELSE
+                    SET L_val TO (lst1[idx] + 0)
+                    SET R_val TO (lst2[idx] + 0)
+                    SET X_val TO lst3[idx]
+                    SET tmp_sum TO ((L_val + R_val + (L_val * R_val)) * X_val)
+                    RETURN accumulate_pairs(lst1, lst2, lst3, (idx + 1), limit, (acc + tmp_sum))
+                END IF
+            END FUNCTION
+
+            SET total_sum TO accumulate_pairs(left_list, right_list, nums, 0, length_nums, 0)
+            RETURN (total_sum - ((total_sum // 1000000007)*1000000007))
+        END FUNCTION
+
+        SET modulus TO ((10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7)
+        SET val_x TO calc(nums)
+
+        FUNCTION inplace_reverse(arr, start_idx, end_idx)
+            IF start_idx >= end_idx THEN
+                RETURN
+            ELSE
+                SET temp_val TO arr[start_idx]
+                SET arr[start_idx] TO arr[end_idx]
+                SET arr[end_idx] TO temp_val
+                CALL inplace_reverse(arr, (start_idx + 1), (end_idx - 1))
+            END IF
+        END FUNCTION
+
+        CALL inplace_reverse(nums, 0, (LEN(nums) - 1))
+
+        SET val_y TO calc(nums)
+
+        FUNCTION sum_all_elements(arr, pos, lim, acc_sum)
+            IF pos >= lim THEN
+                RETURN acc_sum
+            ELSE
+                RETURN sum_all_elements(arr, (pos + 1), lim, (acc_sum + arr[pos]))
+            END IF
+        END FUNCTION
+
+        SET total_array_sum TO sum_all_elements(nums, 0, LEN(nums), 0)
+        RETURN ((val_x + val_y + total_array_sum) MOD modulus)
+    END FUNCTION
+END CLASS
+```

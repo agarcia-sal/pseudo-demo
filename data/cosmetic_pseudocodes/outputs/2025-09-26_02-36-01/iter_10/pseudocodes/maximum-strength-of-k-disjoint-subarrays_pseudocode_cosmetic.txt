@@ -1,0 +1,80 @@
+CLASS Solution
+    FUNCTION maximumStrength(nums, k)
+        FUNCTION neg_inf()
+            RETURN (-1) * (2 ^ 31)  // A sufficiently small value representing negative infinity
+        END FUNCTION
+
+        FUNCTION max_val(a, b)
+            IF (a >= b) THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        FUNCTION mod_val(x, y)
+            RETURN x - (y * FLOOR(x / y))
+        END FUNCTION
+
+        VAR length_nums := LENGTH OF nums
+
+        // Initialize dp as a 2D list filled with neg_inf()
+        VAR matrix_dp := []
+        PROCEDURE fill_dp(idx)
+            IF idx > length_nums THEN RETURN
+            VAR row := []
+            PROCEDURE fill_row(jdx)
+                IF jdx > k THEN RETURN
+                APPEND neg_inf() TO row
+                fill_row(jdx + 1)
+            END PROCEDURE
+            fill_row(0)
+            APPEND row TO matrix_dp
+            fill_dp(idx + 1)
+        END PROCEDURE
+        fill_dp(0)
+
+        // set dp[0][0] = 0
+        // Since dp is zero-indexed, position zero and zero equals: matrix_dp[0][0]
+        matrix_dp[0][0] := 0
+
+        FUNCTION recursive_i(i_val)
+            IF i_val > length_nums THEN RETURN
+            FUNCTION recursive_j(j_val)
+                IF j_val > k THEN RETURN
+
+                VAR acc_sum := 0
+
+                FUNCTION recursive_end(e_val)
+                    IF e_val < 1 THEN RETURN
+                    acc_sum := acc_sum + nums[e_val - 1]
+
+                    VAR sign_calc := 0
+                    IF mod_val(j_val, 2) = 1 THEN
+                        sign_calc := (k - j_val - 1) + 1
+                    ELSE
+                        sign_calc := - ((k - j_val - 1) + 1)
+                    END IF
+
+                    VAR val1 := matrix_dp[i_val][j_val]
+                    VAR val2 := matrix_dp[e_val - 1][j_val - 1] + (sign_calc * acc_sum)
+                    matrix_dp[i_val][j_val] := max_val(val1, val2)
+
+                    recursive_end(e_val - 1)
+                END FUNCTION
+                recursive_end(i_val)
+
+                VAR val3 := matrix_dp[i_val][j_val]
+                VAR val4 := matrix_dp[i_val - 1][j_val]
+                matrix_dp[i_val][j_val] := max_val(val3, val4)
+
+                recursive_j(j_val + 1)
+            END FUNCTION
+            recursive_j(1)
+            recursive_i(i_val + 1)
+        END FUNCTION
+        recursive_i(1)
+
+        RETURN matrix_dp[length_nums][k]
+    END FUNCTION
+END CLASS

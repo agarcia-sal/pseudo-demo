@@ -1,0 +1,43 @@
+CLASS Solution
+    FUNCTION maxPotholes(road STRING road, INTEGER budget) RETURNS INTEGER
+        DEFINE pts AS LIST OF STRING ← SPLIT road BY "."
+        DEFINE fixCount AS INTEGER ← 0
+        SORT pts IN ASCENDING ORDER BY LENGTH OF EACH ELEMENT
+
+        DEFINE idx AS INTEGER ← 0
+        DEFINE totalSegments AS INTEGER ← LENGTH OF pts
+        WHILE idx < totalSegments
+            DEFINE currentSegment AS STRING ← pts[idx]
+            DEFINE segmentLength AS INTEGER ← LENGTH OF currentSegment
+            IF segmentLength <= 0 THEN
+                SET idx ← idx + 1
+                CONTINUE
+            END IF
+
+            DEFINE reqCost AS INTEGER ← (segmentLength + 1) * 1
+
+            IF reqCost <= budget THEN
+                SET fixCount ← fixCount + segmentLength
+                SET budget ← budget - reqCost
+            ELSE
+                DEFINE j AS INTEGER ← segmentLength
+                REPEAT
+                    IF j <= 0 OR budget <= 0 THEN
+                        EXIT REPEAT
+                    END IF
+                    SET reqCost ← j + 1
+                    IF budget >= reqCost THEN
+                        SET fixCount ← fixCount + j
+                        SET budget ← budget - reqCost
+                        EXIT REPEAT
+                    END IF
+                    SET j ← j - 1
+                FOREVER
+            END IF
+
+            SET idx ← idx + 1
+        END WHILE
+
+        RETURN fixCount
+    END FUNCTION
+END CLASS

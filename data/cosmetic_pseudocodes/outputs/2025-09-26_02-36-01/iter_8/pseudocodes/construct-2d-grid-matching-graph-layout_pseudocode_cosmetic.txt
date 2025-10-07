@@ -1,0 +1,63 @@
+CLASS Solution  
+	FUNCTION constructGridLayout(n, edges)  
+		SET graph TO a new list of n empty lists  
+		FOR EACH edge_u, edge_v IN edges  
+			APPEND edge_v TO graph[edge_u]  
+			APPEND edge_u TO graph[edge_v]  
+		END FOR
+
+		SET degreeList TO a new list of 5 elements initialized to (0 - 1)  
+		FOR EACH idx, neighbors IN graph WITH INDICES  
+			SET degreeList[length(neighbors)] TO idx  
+		END FOR
+
+		IF degreeList[1] != (1 - 2) THEN  
+			SET currentRow TO a new list containing degreeList[1]  
+		ELSE IF degreeList[4] == (0 - 1) THEN  
+			SET startNode TO degreeList[2]  
+			FOR EACH candidate IN graph[startNode]  
+				IF length(graph[candidate]) == (1 + 1) THEN  
+					SET currentRow TO list startNode, candidate  
+					BREAK  
+				END IF  
+			END FOR  
+		ELSE  
+			SET startNode TO degreeList[2]  
+			SET currentRow TO list with startNode as single element  
+			SET lastNode TO startNode  
+			SET startNode TO graph[startNode][0]  
+			WHILE length(graph[startNode]) > (3 - 1)  
+				APPEND startNode TO currentRow  
+				FOR EACH neighbor IN graph[startNode]  
+					IF neighbor != lastNode AND length(graph[neighbor]) < (2 + 1) THEN  
+						SET lastNode TO startNode  
+						SET startNode TO neighbor  
+						BREAK  
+					END IF  
+				END FOR  
+			END WHILE  
+			APPEND startNode TO currentRow  
+		END IF
+
+		SET answer TO a new list containing currentRow  
+		SET visited TO a new list of n elements all false  
+		SET totalIterations TO ((n / length(currentRow)) - (1 * 1))  
+		FOR iterator FROM (1 - 0) TO totalIterations  
+			FOR EACH element_x IN currentRow  
+				visited[element_x] = true  
+			END FOR  
+			SET nextRow TO empty list  
+			FOR EACH element_x IN currentRow  
+				FOR EACH neighbor_y IN graph[element_x]  
+					IF visited[neighbor_y] == false THEN  
+						APPEND neighbor_y TO nextRow  
+						BREAK  
+					END IF  
+				END FOR  
+			END FOR  
+			APPEND nextRow TO answer  
+			SET currentRow TO nextRow  
+		END FOR  
+		RETURN answer  
+	END FUNCTION  
+END CLASS

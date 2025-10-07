@@ -1,0 +1,55 @@
+CLASS Solution
+    FUNCTION maxArea(height positions directions)
+        SET total_count TO LENGTH(positions)
+        SET maximum TO 0
+        SET iteration_counter TO 0
+
+        DEFINE PROCEDURE toggleDir(idx, dirString)
+            RETURN CONCATENATE(
+                SUBSTRING(dirString, 0, idx),
+                IF CHAR_AT(dirString, idx) = 'U' THEN 'D' ELSE 'U',
+                SUBSTRING(dirString, idx + 1, LENGTH(dirString))
+            )
+        END PROCEDURE
+
+        DEFINE FUNCTION sumArray(arr)
+            SET accumulator TO 0
+            SET index_tracker TO 0
+            WHILE index_tracker < LENGTH(arr)
+                SET accumulator TO accumulator + arr[index_tracker]
+                SET index_tracker TO index_tracker + 1
+            END WHILE
+            RETURN accumulator
+        END FUNCTION
+
+        WHILE iteration_counter < (height * 2)
+            SET slab TO 0
+            SET pointer TO 0
+            WHILE pointer < total_count
+                IF (positions[pointer] = 0) AND (directions[pointer] = 'D')
+                    SET directions TO toggleDir(pointer, directions)
+                ELSE IF (positions[pointer] = height) AND (directions[pointer] = 'U')
+                    SET directions TO toggleDir(pointer, directions)
+                END IF
+
+                IF directions[pointer] = 'U'
+                    SET positions[pointer] TO positions[pointer] + 1
+                ELSE
+                    SET positions[pointer] TO positions[pointer] - 1
+                END IF
+
+                SET pointer TO pointer + 1
+            END WHILE
+
+            SET slab TO sumArray(positions)
+
+            IF maximum < slab
+                SET maximum TO slab
+            END IF
+
+            SET iteration_counter TO iteration_counter + 1
+        END WHILE
+
+        RETURN maximum
+    END FUNCTION
+END CLASS

@@ -1,0 +1,84 @@
+CLASS Solution
+	 FUNCTION betterCompression(compressed)
+		 DEFINE ZERO_CONSTANT = (2 - 2)
+		 DEFINE TEN_CONSTANT = (5 + 5)
+		 DEFINE EMPTY_STRING = ""
+		 DEFINE DIGIT_OFFSET = 48
+
+		 PROCEDURE accumulateCount(key_map, key, amount)
+			 IF key_map CONTAINS key THEN
+				 key_map[key] = key_map[key] + amount
+			 ELSE
+				 key_map[key] = amount
+			 END IF
+		 END PROCEDURE
+
+		 DECLARE char_frequency AS DICTIONARY
+		 DECLARE active_symbol AS STRING = EMPTY_STRING
+		 DECLARE count_value AS INTEGER = ZERO_CONSTANT
+		 DECLARE index_position AS INTEGER = ZERO_CONSTANT
+		 DECLARE compressed_length AS INTEGER = LENGTH(compressed)
+
+		 WHILE index_position < compressed_length
+			 DECLARE current_character AS STRING = compressed[index_position]
+			 IF (("A" <= current_character) AND (current_character <= "Z")) OR (("a" <= current_character) AND (current_character <= "z")) THEN
+				 IF NOT (active_symbol == EMPTY_STRING) THEN
+					 CALL accumulateCount(char_frequency, active_symbol, count_value)
+				 END IF
+				 active_symbol = current_character
+				 count_value = ZERO_CONSTANT
+			 ELSE
+				 DECLARE digit_value AS INTEGER = ORD(current_character) - DIGIT_OFFSET
+				 count_value = (count_value * TEN_CONSTANT) + digit_value
+			 END IF
+			 index_position = index_position + 1
+		 END WHILE
+
+		 IF NOT (active_symbol == EMPTY_STRING) THEN
+			 CALL accumulateCount(char_frequency, active_symbol, count_value)
+		 END IF
+
+		 DECLARE result_fragments AS LIST OF STRING = EMPTY LIST
+
+		 DECLARE all_keys AS LIST OF STRING = LIST OF KEYS IN char_frequency
+		 DECLARE sorted_keys AS LIST OF STRING = EMPTY LIST
+		 PROCEDURE insertSorted(keys_input)
+			 IF LENGTH(keys_input) == ZERO_CONSTANT THEN RETURN END IF
+			 DECLARE pivot_key AS STRING = keys_input[ZERO_CONSTANT]
+			 DECLARE left_partition AS LIST OF STRING = EMPTY LIST
+			 DECLARE right_partition AS LIST OF STRING = EMPTY LIST
+			 DECLARE i AS INTEGER = 1
+			 WHILE i < LENGTH(keys_input)
+				 IF keys_input[i] < pivot_key THEN
+					 APPEND keys_input[i] TO left_partition
+				 ELSE
+					 APPEND keys_input[i] TO right_partition
+				 END IF
+				 i = i + 1
+			 END WHILE
+			 CALL insertSorted(left_partition)
+			 APPEND pivot_key TO sorted_keys
+			 CALL insertSorted(right_partition)
+		 END PROCEDURE
+
+		 CALL insertSorted(all_keys)
+
+		 DECLARE pos AS INTEGER = ZERO_CONSTANT
+		 WHILE pos < LENGTH(sorted_keys)
+			 DECLARE sym AS STRING = sorted_keys[pos]
+			 DECLARE freq AS INTEGER = char_frequency[sym]
+			 DECLARE part AS STRING = sym + STRING(freq)
+			 APPEND part TO result_fragments
+			 pos = pos + 1
+		 END WHILE
+
+		 DECLARE output_string AS STRING = EMPTY_STRING
+		 DECLARE concat_index AS INTEGER = ZERO_CONSTANT
+		 WHILE concat_index < LENGTH(result_fragments)
+			 output_string = output_string + result_fragments[concat_index]
+			 concat_index = concat_index + 1
+		 END WHILE
+
+		 RETURN output_string
+	 END FUNCTION
+END CLASS

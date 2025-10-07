@@ -1,0 +1,55 @@
+```pseudocode
+CLASS Solution
+    FUNCTION validSubstringCount(word1, word2)
+        DECLARE FUNCTION customCounter(sequence)
+            DECLARE resultMap AS empty map
+            DECLARE idx1 AS zero
+            WHILE idx1 < LENGTH(sequence)
+                DECLARE elem1 AS sequence[idx1]
+                IF elem1 NOT IN resultMap THEN
+                    SET resultMap[elem1] TO zero
+                END IF
+                SET resultMap[elem1] TO resultMap[elem1] + 1
+                SET idx1 TO idx1 + 1
+            END WHILE
+            RETURN resultMap
+        END FUNCTION
+
+        DECLARE mapWord2Counts AS customCounter(word2)
+        DECLARE mapWindowCounts AS empty map
+        DECLARE uniqCharsNeeded AS LENGTH(mapWord2Counts)
+        DECLARE cntValidChars AS zero
+        DECLARE pointerLeft AS zero
+        DECLARE totalValidSubs AS zero
+        DECLARE pointerRight AS zero
+
+        WHILE pointerRight < LENGTH(word1)
+            DECLARE charCurrent AS word1[pointerRight]
+            IF charCurrent NOT IN mapWindowCounts THEN
+                SET mapWindowCounts[charCurrent] TO 0
+            END IF
+            SET mapWindowCounts[charCurrent] TO mapWindowCounts[charCurrent] + 1
+
+            IF charCurrent IN mapWord2Counts AND mapWindowCounts[charCurrent] = mapWord2Counts[charCurrent] THEN
+                SET cntValidChars TO cntValidChars + 1
+            END IF
+
+            WHILE (cntValidChars = uniqCharsNeeded) AND ((pointerRight + 1) - pointerLeft >= LENGTH(word2))
+                SET totalValidSubs TO totalValidSubs + (LENGTH(word1) - pointerRight)
+                DECLARE charLeftmost AS word1[pointerLeft]
+                SET mapWindowCounts[charLeftmost] TO mapWindowCounts[charLeftmost] - 1
+
+                IF charLeftmost IN mapWord2Counts AND mapWindowCounts[charLeftmost] < mapWord2Counts[charLeftmost] THEN
+                    SET cntValidChars TO cntValidChars - 1
+                END IF
+
+                SET pointerLeft TO pointerLeft + 1
+            END WHILE
+
+            SET pointerRight TO pointerRight + 1
+        END WHILE
+
+        RETURN totalValidSubs
+    END FUNCTION
+END CLASS
+```

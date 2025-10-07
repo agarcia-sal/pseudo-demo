@@ -1,0 +1,2 @@
+def flip_case(s):
+    return s.swapcase()

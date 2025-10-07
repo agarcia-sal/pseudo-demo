@@ -1,0 +1,79 @@
+CLASS Solution
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER
+        DEFINE FUNCTION computeModulus() RETURNS INTEGER
+            RETURN ((5 * 2) ^ (3 * 3)) + (5 + 2)
+        END FUNCTION
+
+        DEFINE FUNCTION generateCombinations(inputList parameter LIST OF INTEGERS, pickCount parameter INTEGER) RETURNS LIST OF LISTS OF INTEGERS
+            DEFINE FUNCTION recurse(prefix parameter LIST OF INTEGERS, startIndex parameter INTEGER, remaining parameter INTEGER, acc parameter LIST OF LISTS OF INTEGERS)
+                IF remaining EQUALS 0 THEN
+                    acc.APPEND(prefix)
+                    RETURN
+                END IF
+
+                IF startIndex GREATER THAN (inputList.LENGTH - remaining) THEN
+                    RETURN
+                END IF
+
+                // Include current element
+                recurse(prefix + [inputList[startIndex]], startIndex + 1, remaining - 1, acc)
+                // Exclude current element
+                recurse(prefix, startIndex + 1, remaining, acc)
+            END FUNCTION
+
+            SET results TO EMPTY LIST
+            CALL recurse([], 0, pickCount, results)
+            RETURN results
+        END FUNCTION
+
+        DEFINE FUNCTION absoluteValue(value parameter INTEGER) RETURNS INTEGER
+            IF value LESS THAN 0 THEN
+                RETURN 0 - value
+            ELSE
+                RETURN value
+            END IF
+        END FUNCTION
+
+        LET modulusValue BE computeModulus()
+
+        LET accumulatorSum BE 0
+
+        DEFINE FUNCTION minPairwiseDifference(listElems parameter LIST OF INTEGERS) RETURNS INTEGER
+            DEFINE FUNCTION innerLoopOuter(indexA parameter INTEGER, indexB parameter INTEGER, currentMin parameter INTEGER) RETURNS INTEGER
+                IF indexA GREATER OR EQUAL TO (listElems.LENGTH - 1) THEN
+                    RETURN currentMin
+                END IF
+
+                IF indexB GREATER OR EQUAL TO listElems.LENGTH THEN
+                    RETURN innerLoopOuter(indexA + 1, indexA + 2, currentMin)
+                END IF
+
+                LET diffCandidate BE absoluteValue(listElems[indexA] - listElems[indexB])
+                LET newMin BE currentMin
+                IF diffCandidate LESS THAN currentMin THEN
+                    newMin = diffCandidate
+                END IF
+                RETURN innerLoopOuter(indexA, indexB + 1, newMin)
+            END FUNCTION
+            RETURN innerLoopOuter(0, 1, 10000000000)
+        END FUNCTION
+
+        LET combosCollection BE generateCombinations(nums, k)
+
+        DEFINE FUNCTION foldCombinations(index parameter INTEGER, runningTotal parameter INTEGER) RETURNS INTEGER
+            IF index GREATER OR EQUAL TO combosCollection.LENGTH THEN
+                RETURN runningTotal
+            END IF
+
+            LET currentCombo BE combosCollection[index]
+            LET minDiffValue BE minPairwiseDifference(currentCombo)
+            LET updatedTotal BE (runningTotal + minDiffValue) % modulusValue
+
+            RETURN foldCombinations(index + 1, updatedTotal)
+        END FUNCTION
+
+        LET accumulatorSum BE foldCombinations(0, accumulatorSum)
+
+        RETURN accumulatorSum
+    END FUNCTION
+END CLASS

@@ -1,0 +1,98 @@
+CLASS Solution
+
+    FUNCTION maximumScore(grid)
+
+        SET a TO LENGTH OF grid
+        SET M TO a PLUS one
+        SET X TO a
+        SET b TO LIST OF M ELEMENTS ALL ZERO
+        SET c TO LIST OF M ELEMENTS ALL ZERO
+        SET prefixSum TO LIST OF a ELEMENTS EACH BEING LIST OF M ZEROS
+
+        PROCEDURE innerAdd(rowIndex)
+            PROCEDURE innerLoop(colIndex, acc)
+                IF colIndex EQUALS M THEN
+                    RETURN
+                ELSE
+                    SET prefixSum[rowIndex][colIndex] TO acc PLUS grid[rowIndex][colIndex MINUS one]
+                    CALL innerLoop(colIndex PLUS one, prefixSum[rowIndex][colIndex])
+                END IF
+            END PROCEDURE
+            CALL innerLoop(1, 0)
+        END PROCEDURE
+
+        PROCEDURE buildPrefix(row)
+            IF row EQUALS a THEN
+                RETURN
+            ELSE
+                CALL innerAdd(row)
+                CALL buildPrefix(row PLUS one)
+            END IF
+        END PROCEDURE
+
+        CALL buildPrefix(0)
+
+        b := LIST OF M ELEMENTS ALL ZERO
+        c := LIST OF M ELEMENTS ALL ZERO
+
+        PROCEDURE outerLoop(j)
+
+            IF j GREATER THAN OR EQUAL TO a THEN
+                RETURN
+            END IF
+
+            SET currPick TO LIST OF M ZEROS
+            SET currSkip TO LIST OF M ZEROS
+
+            PROCEDURE innerOuter(curr)
+                IF curr GREATER THAN X THEN
+                    RETURN
+                END IF
+
+                PROCEDURE innerInner(prev)
+                    IF prev GREATER THAN X THEN
+                        RETURN
+                    END IF
+
+                    IF curr GREATER THAN prev THEN
+                        SET s TO prefixSum[j][curr MINUS one] MINUS prefixSum[j][prev]
+                        SET currPick[curr] TO MAXIMUM OF currPick[curr] AND c[prev] PLUS s
+                        SET currSkip[curr] TO MAXIMUM OF currSkip[curr] AND c[prev] PLUS s
+                    ELSE
+                        SET s TO prefixSum[j][prev] MINUS prefixSum[j][curr]
+                        SET currPick[curr] TO MAXIMUM OF currPick[curr] AND b[prev] PLUS s
+                        SET currSkip[curr] TO MAXIMUM OF currSkip[curr] AND b[prev]
+                    END IF
+
+                    CALL innerInner(prev PLUS one)
+                END PROCEDURE
+
+                CALL innerInner(0)
+                CALL innerOuter(curr PLUS one)
+            END PROCEDURE
+
+            CALL innerOuter(0)
+            b := currPick
+            c := currSkip
+            CALL outerLoop(j PLUS one)
+        END PROCEDURE
+
+        CALL outerLoop(1)
+        SET maxVal TO b[0]
+        PROCEDURE findMax(idx)
+            IF idx EQUALS M THEN
+                RETURN
+            ELSE
+                IF b[idx] GREATER THAN maxVal THEN
+                    maxVal := b[idx]
+                END IF
+                CALL findMax(idx PLUS one)
+            END IF
+        END PROCEDURE
+
+        CALL findMax(1)
+        RETURN maxVal
+
+    END FUNCTION
+
+END CLASS

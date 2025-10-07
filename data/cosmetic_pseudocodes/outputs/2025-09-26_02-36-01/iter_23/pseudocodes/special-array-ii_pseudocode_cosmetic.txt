@@ -1,0 +1,73 @@
+```pseudocode
+CLASS Solution
+    FUNCTION isArraySpecial(nums, queries)
+        FUNCTION compute_parity(index, parity_accum)
+            IF index GREATER OR EQUAL TO LENGTH(nums) THEN
+                RETURN parity_accum
+            ELSE
+                SET remainder_aux TO (nums[index] - 2 * (nums[index] DIV 2))
+                CALL compute_parity(index + 1, parity_accum + [remainder_aux])
+            END IF
+        END FUNCTION
+
+        FUNCTION form_prefix_special(current_idx, prefix_list)
+            IF current_idx GREATER OR EQUAL TO LENGTH(nums) THEN
+                RETURN prefix_list
+            ELSE
+                SET prev_parity TO parity[current_idx - 1]
+                SET curr_parity TO parity[current_idx]
+                SET prev_prefix TO prefix_list[current_idx - 1]
+
+                IF NOT (curr_parity NOT EQUAL TO prev_parity) THEN
+                    SET prefix_elem TO prev_prefix + 1
+                ELSE
+                    SET prefix_elem TO prev_prefix * 1
+                END IF
+
+                SET updated_prefix TO prefix_list[0:current_idx] + [prefix_elem] + prefix_list[(current_idx + 1):LENGTH(prefix_list)]
+
+                CALL form_prefix_special(current_idx + 1, updated_prefix)
+            END IF
+        END FUNCTION
+
+        FUNCTION process_queries(q_idx, res_accum)
+            IF q_idx GREATER OR EQUAL TO LENGTH(queries) THEN
+                RETURN res_accum
+            ELSE
+                SET run TO queries[q_idx]
+                SET start_idx TO run[0]
+                SET end_idx TO run[1]
+
+                IF start_idx EQUALS end_idx THEN
+                    SET append_val TO TRUE * 1
+                ELSE
+                    SET left_cond TO 0
+                    IF start_idx GREATER THAN 0 THEN
+                        SET left_cond TO prefix_special[start_idx]
+                    END IF
+                    SET diff_val TO (prefix_special[end_idx]) - left_cond
+
+                    IF diff_val EQUALS 0 THEN
+                        SET append_val TO TRUE
+                    ELSE
+                        SET append_val TO FALSE
+                    END IF
+                END IF
+
+                CALL process_queries(q_idx + 1, res_accum + [append_val])
+            END IF
+        END FUNCTION
+
+
+        SET parity TO CALL compute_parity(0, [])
+
+        SET prefix_special TO [0 FOR temp_var IN RANGE(0, LENGTH(nums))]
+
+        SET prefix_special TO CALL form_prefix_special(1, prefix_special)
+
+        SET result TO CALL process_queries(0, [])
+
+        RETURN result
+    END FUNCTION
+END CLASS
+```

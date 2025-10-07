@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION maximumTotalCost(array)
+        SET length TO 0
+        PROCEDURE determineLength(seq)
+            IF seq[length] EXISTS
+                SET length TO length + 1
+                CALL determineLength(seq)
+            END IF
+        END PROCEDURE
+        CALL determineLength(array)
+
+        IF length IS 1
+            SET soleVal TO array[0]
+            RETURN soleVal
+        END IF
+
+        PROCEDURE zeroList(size)
+            SET resultList TO []
+            PROCEDURE buildZeros(index)
+                IF index < size
+                    APPEND 0 TO resultList
+                    CALL buildZeros(index + 1)
+                END IF
+            END PROCEDURE
+            CALL buildZeros(0)
+            RETURN resultList
+        END PROCEDURE
+
+        SET dpList TO zeroList(length)
+        SET dpList[length - 1] TO array[length - 1]
+
+        FUNCTION powNegOne(exp)
+            IF exp MOD 2 IS 0
+                RETURN 1
+            ELSE
+                RETURN -1
+            END IF
+        END FUNCTION
+
+        FUNCTION maxVal(a, b)
+            IF a > b THEN RETURN a ELSE RETURN b END IF
+        END FUNCTION
+
+        PROCEDURE outerLoop(index)
+            IF index < 0 THEN RETURN END IF
+
+            SET currVal TO array[index]
+            IF currVal > dpList[index + 1]
+                SET dpList[index] TO currVal
+            ELSE
+                SET dpList[index] TO dpList[index + 1] + currVal
+            END IF
+
+            PROCEDURE innerLoop(innerIdx, valSoFar)
+                IF innerIdx >= length THEN RETURN END IF
+
+                SET signMultiplier TO powNegOne(innerIdx - index)
+                SET updatedVal TO valSoFar + (array[innerIdx] * signMultiplier)
+
+                IF innerIdx + 1 < length THEN
+                    IF dpList[index] < updatedVal + dpList[innerIdx + 1]
+                        SET dpList[index] TO updatedVal + dpList[innerIdx + 1]
+                    END IF
+                ELSE
+                    IF dpList[index] < updatedVal
+                        SET dpList[index] TO updatedVal
+                    END IF
+                END IF
+
+                CALL innerLoop(innerIdx + 1, updatedVal)
+            END PROCEDURE
+
+            CALL innerLoop(index + 1, currVal)
+            CALL outerLoop(index - 1)
+        END PROCEDURE
+
+        CALL outerLoop(length - 2)
+
+        SET result TO dpList[0]
+        RETURN result
+    END FUNCTION
+END CLASS

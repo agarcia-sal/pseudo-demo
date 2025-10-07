@@ -1,0 +1,63 @@
+CLASS Solution  
+    FUNCTION minimumSum(grid)  
+        INITIALIZE ones AS an empty array  
+        FOR i FROM 0 TO (LENGTH(grid) - 1) DO  
+            FOR j FROM 0 TO (LENGTH(grid[i]) - 1) DO  
+                IF grid[i][j] == 1 THEN  
+                    ADD (i, j) TO ones  
+                END IF  
+            END FOR  
+        END FOR  
+        
+        FUNCTION rect_area(points)  
+            IF points IS EMPTY THEN  
+                RETURN 0  
+            END IF  
+            LET rows = EXTRACT first elements FROM each point IN points  
+            LET cols = EXTRACT second elements FROM each point IN points  
+            LET min_row = MINIMUM(rows)  
+            LET max_row = MAXIMUM(rows)  
+            LET min_col = MINIMUM(cols)  
+            LET max_col = MAXIMUM(cols)  
+            LET width = max_row - min_row + 1  
+            LET height = max_col - min_col + 1  
+            RETURN width * height  
+        END FUNCTION  
+        
+        LET min_sum = INFINITY  
+        LET total_ones = LENGTH(ones)  
+        
+        FOR idx1 FROM 1 TO total_ones - 1 DO  
+            FOR idx2 FROM idx1 + 1 TO total_ones - 1 DO  
+                FOR idx3 FROM idx2 + 1 TO total_ones DO  
+                    LET all_combs_1 = ALL_COMBINATIONS(ones, idx1)  
+                    FOR subset_1 IN all_combs_1 DO  
+                        LET set_ones = SET(ones)  
+                        LET set_subset_1 = SET(subset_1)  
+                        LET remaining_after_1 = set_ones MINUS set_subset_1  
+                        
+                        LET len_subset_2 = idx2 - idx1  
+                        LET all_combs_2 = ALL_COMBINATIONS(remaining_after_1, len_subset_2)  
+                        FOR subset_2 IN all_combs_2 DO  
+                            LET set_subset_2 = SET(subset_2)  
+                            LET subset_3 = remaining_after_1 MINUS set_subset_2  
+                            
+                            LET area_1 = rect_area(subset_1)  
+                            LET area_2 = rect_area(subset_2)  
+                            LET area_3 = rect_area(subset_3)  
+                            
+                            IF area_1 > 0 AND area_2 > 0 AND area_3 > 0 THEN  
+                                LET total_area = area_1 + area_2 + area_3  
+                                IF total_area < min_sum THEN  
+                                    min_sum = total_area  
+                                END IF  
+                            END IF  
+                        END FOR  
+                    END FOR  
+                END FOR  
+            END FOR  
+        END FOR  
+        
+        RETURN min_sum  
+    END FUNCTION  
+END CLASS

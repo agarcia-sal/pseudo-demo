@@ -1,0 +1,57 @@
+CLass Solution
+    FUNCTION minChanges(nums, k)
+        FUNCTION accumulate(list)
+            FUNCTION helper(index, total, acc)
+                IF index >= LENGTH(list) THEN RETURN acc
+                acc := acc + list[index]
+                RETURN helper(index + 1, total, acc)
+            ENDIF
+            RETURN helper(0, 0, 0)
+        END FUNCTION
+
+        SET deltaList TO ARRAY FILLED WITH 0 OF SIZE (k + 2)
+        SET lengthNums TO LENGTH(nums)
+        SET position TO 0
+
+        WHILE position < (lengthNums // 2)
+            SET firstVal TO nums[position]
+            SET secondVal TO nums[lengthNums - position - 1]
+
+            IF NOT (firstVal <= secondVal)
+                SET tempVal TO firstVal
+                SET firstVal TO secondVal
+                SET secondVal TO tempVal
+            ENDIF
+
+            deltaList[0] := deltaList[0] + 1
+            deltaList[secondVal - firstVal] := deltaList[secondVal - firstVal] - 1
+            deltaList[secondVal - firstVal + 1] := deltaList[secondVal - firstVal + 1] + 1
+
+            SET maxVal TO secondVal
+            IF (k - firstVal + 1) > maxVal THEN maxVal := k - firstVal + 1 ENDIF
+
+            deltaList[maxVal] := deltaList[maxVal] - 1
+            deltaList[maxVal + 1] := deltaList[maxVal + 1] + 1
+
+            position := position + 1
+        ENDWHILE
+
+        SET prefixSums TO ARRAY FILLED WITH 0 OF SIZE LENGTH(deltaList)
+        prefixSums[0] := deltaList[0]
+
+        FOR idx FROM 1 TO (LENGTH(deltaList) - 1)
+            prefixSums[idx] := prefixSums[idx - 1] + deltaList[idx]
+        ENDFOR
+
+        SET minimumValue TO prefixSums[0]
+        SET checker TO 1
+        REPEAT
+            IF prefixSums[checker] < minimumValue
+                minimumValue := prefixSums[checker]
+            ENDIF
+            checker := checker + 1
+        UNTIL checker == LENGTH(prefixSums)
+
+        RETURN minimumValue
+    END FUNCTION
+END CLASS

@@ -1,0 +1,102 @@
+CLASS Solution
+    FUNCTION maximumSetSize(nums1 PARAMETER List OF integers nums2 PARAMETER List OF integers) RETURNS integer
+        FUNCTION sizeOfCollection(collection PARAMETER List OF integers) RETURNS integer
+            SET counter TO 0
+            SET index TO 0
+            WHILE index < LENGTH OF collection DO
+                SET counter TO counter + 1
+                SET index TO index + 1
+            END WHILE
+            RETURN counter
+        END FUNCTION
+
+        FUNCTION smallest(a PARAMETER integer b PARAMETER integer) RETURNS integer
+            IF a < b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        FUNCTION largest(a PARAMETER integer b PARAMETER integer) RETURNS integer
+            IF a > b THEN
+                RETURN a
+            ELSE
+                RETURN b
+            END IF
+        END FUNCTION
+
+        FUNCTION uniqueElements(inputList PARAMETER List OF integers) RETURNS List OF integers
+            SET seen TO empty List
+            SET iterator TO 0
+            WHILE iterator < LENGTH OF inputList DO
+                SET element TO inputList[iterator]
+                IF NOT contains(seen, element) THEN
+                    APPEND element TO seen
+                END IF
+                SET iterator TO iterator + 1
+            END WHILE
+            RETURN seen
+        END FUNCTION
+
+        FUNCTION contains(collection PARAMETER List OF integers item PARAMETER integer) RETURNS boolean
+            SET idx TO 0
+            WHILE idx < LENGTH OF collection DO
+                IF collection[idx] = item THEN
+                    RETURN true
+                END IF
+                SET idx TO idx + 1
+            END WHILE
+            RETURN false
+        END FUNCTION
+
+        FUNCTION intersection(collection1 PARAMETER List OF integers collection2 PARAMETER List OF integers) RETURNS List OF integers
+            SET result TO empty List
+            SET pos TO 0
+            WHILE pos < LENGTH OF collection1 DO
+                SET elem TO collection1[pos]
+                IF contains(collection2, elem) AND NOT contains(result, elem) THEN
+                    APPEND elem TO result
+                END IF
+                SET pos TO pos + 1
+            END WHILE
+            RETURN result
+        END FUNCTION
+
+        FUNCTION difference(setA PARAMETER List OF integers setB PARAMETER List OF integers) RETURNS List OF integers
+            SET resultSet TO empty List
+            SET counter TO 0
+            WHILE counter < LENGTH OF setA DO
+                SET item TO setA[counter]
+                IF NOT contains(setB, item) THEN
+                    APPEND item TO resultSet
+                END IF
+                SET counter TO counter + 1
+            END WHILE
+            RETURN resultSet
+        END FUNCTION
+
+        SET sizeNums1 TO sizeOfCollection(nums1)
+        SET halfSize TO sizeNums1 DIVIDED BY 2
+
+        SET distinctNums1 TO uniqueElements(nums1)
+        SET distinctNums2 TO uniqueElements(nums2)
+
+        SET intersectNums TO intersection(distinctNums1, distinctNums2)
+
+        SET diffNums1 TO difference(distinctNums1, intersectNums)
+        SET diffNums2 TO difference(distinctNums2, intersectNums)
+
+        SET countDiff1 TO smallest(halfSize, sizeOfCollection(diffNums1))
+        SET countDiff2 TO smallest(halfSize, sizeOfCollection(diffNums2))
+
+        SET remaining1 TO largest(0, halfSize - countDiff1)
+        SET remaining2 TO largest(0, halfSize - countDiff2)
+
+        SET extraFromCommon TO remaining1 + remaining2
+
+        SET totalChosen TO countDiff1 + countDiff2 + smallest(extraFromCommon, sizeOfCollection(intersectNums))
+
+        RETURN totalChosen
+    END FUNCTION
+END CLASS

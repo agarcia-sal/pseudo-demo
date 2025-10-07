@@ -1,0 +1,44 @@
+```
+FUNCTION fizz_buzz(integer_n)
+  DEFINE FUNCTION gather_multiples(current_index, collected_map)
+    IF current_index = integer_n THEN
+      RETURN collected_map
+    ELSE
+      SET divisible_by_11 TO (current_index MOD 11) = 0
+      SET divisible_by_13 TO (current_index MOD 13) = 0
+      RETURN gather_multiples(
+        current_index + 1,
+        (divisible_by_11 OR divisible_by_13) ?
+          (collected_map UNION {current_index -> TRUE}) :
+          collected_map
+      )
+    END IF
+  END FUNCTION
+
+  DEFINE FUNCTION build_string(keys_map, acc_str)
+    IF keys_map IS EMPTY THEN
+      RETURN acc_str
+    ELSE
+      SET (head_key, _) TO REMOVE_ONE(keys_map)
+      RETURN build_string(keys_map, acc_str + TO_STRING(head_key))
+    END IF
+  END FUNCTION
+
+  DEFINE FUNCTION count_character(string_to_search, char_target, idx, count_accum)
+    IF idx >= LENGTH(string_to_search) THEN
+      RETURN count_accum
+    ELSE
+      RETURN count_character(
+        string_to_search,
+        char_target,
+        idx + 1,
+        count_accum + (string_to_search[idx] = char_target ? 1 : 0)
+      )
+    END IF
+  END FUNCTION
+
+  SET multiples_map TO gather_multiples(0, MAP_EMPTY)
+  SET composite_string TO build_string(multiples_map, "")
+  RETURN count_character(composite_string, '7', 0, 0)
+END FUNCTION
+```

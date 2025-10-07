@@ -1,0 +1,125 @@
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION check_peak(pos INTEGER) RETURNS BOOLEAN
+            SET left_neighbor TO nums AT (pos MINUS 1)
+            SET current_val TO nums AT pos
+            SET right_neighbor TO nums AT (pos PLUS 1)
+            IF (current_val GREATER THAN left_neighbor) AND (current_val GREATER THAN right_neighbor) THEN
+                RETURN true
+            ELSE
+                RETURN false
+            END IF
+        END FUNCTION
+
+        SET peak_positions TO empty list
+
+        PROCEDURE build_peaks()
+            SET idx TO 1
+            WHILE idx LESS THAN LENGTH OF nums MINUS 1 DO
+                IF check_peak(idx) THEN
+                    APPEND idx TO peak_positions
+                END IF
+                SET idx TO idx PLUS 1
+            END WHILE
+        END PROCEDURE
+
+        CALL build_peaks()
+
+        FUNCTION position_left(val INTEGER) RETURNS INTEGER
+            SET low TO 0
+            SET high TO LENGTH OF peak_positions
+            WHILE low LESS THAN high DO
+                SET mid TO (low PLUS high) DIVIDED BY 2
+                IF peak_positions AT mid LESS THAN val THEN
+                    SET low TO mid PLUS 1
+                ELSE
+                    SET high TO mid
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        FUNCTION position_right(val INTEGER) RETURNS INTEGER
+            SET low TO 0
+            SET high TO LENGTH OF peak_positions
+            WHILE low LESS THAN high DO
+                SET mid TO (low PLUS high) DIVIDED BY 2
+                IF peak_positions AT mid GREATER THAN val THEN
+                    SET high TO mid
+                ELSE
+                    SET low TO mid PLUS 1
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+
+        PROCEDURE add_peak(newpos INTEGER)
+            SET insert_at TO position_left(newpos)
+            SET contains TO false
+            IF insert_at LESS THAN LENGTH OF peak_positions THEN
+                IF peak_positions AT insert_at EQUALS newpos THEN
+                    SET contains TO true
+                END IF
+            END IF
+            IF NOT contains THEN
+                INSERT newpos INTO peak_positions AT insert_at
+            END IF
+        END PROCEDURE
+
+        PROCEDURE delete_peak(delpos INTEGER)
+            SET loc TO position_left(delpos)
+            IF loc LESS THAN LENGTH OF peak_positions THEN
+                IF peak_positions AT loc EQUALS delpos THEN
+                    REMOVE peak_positions AT loc
+                END IF
+            END IF
+        END PROCEDURE
+
+        SET answers TO empty list
+
+        SET qindex TO 0
+        WHILE qindex LESS THAN LENGTH OF queries DO
+            SET qry TO queries AT qindex
+            SET op TO qry AT 0
+            IF op EQUALS 1 THEN
+                SET l_bound TO qry AT 1
+                SET r_bound TO qry AT 2
+                SET left_pos TO position_right(l_bound MINUS 1)
+                SET right_pos TO position_left(r_bound PLUS 1) MINUS 1
+                IF right_pos LESS THAN left_pos THEN
+                    APPEND 0 TO answers
+                ELSE
+                    APPEND (right_pos MINUS left_pos PLUS 1) TO answers
+                END IF
+            ELSE
+                SET idx_to_update TO qry AT 1
+                SET new_val TO qry AT 2
+                IF nums AT idx_to_update EQUALS new_val THEN
+                    SET qindex TO qindex PLUS 1
+                    CONTINUE
+                END IF
+                SET nums AT idx_to_update TO new_val
+                SET start_idx TO idx_to_update MINUS 1
+                IF start_idx LESS THAN 1 THEN
+                    SET start_idx TO 1
+                END IF
+                SET end_idx TO idx_to_update PLUS 1
+                IF end_idx GREATER THAN LENGTH OF nums MINUS 2 THEN
+                    SET end_idx TO LENGTH OF nums MINUS 2
+                END IF
+                SET i TO start_idx
+                WHILE i LESS THAN OR EQUAL TO end_idx DO
+                    IF check_peak(i) THEN
+                        CALL add_peak(i)
+                    ELSE
+                        CALL delete_peak(i)
+                    END IF
+                    SET i TO i PLUS 1
+                END WHILE
+            END IF
+            SET qindex TO qindex PLUS 1
+        END WHILE
+
+        RETURN answers
+    END FUNCTION
+END CLASS

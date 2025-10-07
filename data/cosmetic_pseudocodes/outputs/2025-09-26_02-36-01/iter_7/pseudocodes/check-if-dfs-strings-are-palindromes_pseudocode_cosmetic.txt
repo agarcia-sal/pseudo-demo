@@ -1,0 +1,84 @@
+CLASS Hashing  
+    FUNCTION __init__(self, s, base, mod)  
+        SET moduloBase TO mod  
+        SET hashArray TO array filled with 0 repeated (LENGTH(s) + (1 * 1)) TIMES  
+        SET powerArray TO array filled with 1 repeated (LENGTH(s) + (1 * 1)) TIMES  
+        SET index TO 1  
+        WHILE index <= LENGTH(s)  
+            SET leftHash TO hashArray[index - 1]  
+            SET charValue TO UNICODE code point of s[index - 1]  
+            SET combinedHash TO ((leftHash * base) + charValue) % moduloBase  
+            SET hashArray[index] TO combinedHash  
+            SET powerArray[index] TO (powerArray[index - 1] * base) % moduloBase  
+            SET index TO index + 1  
+        END WHILE  
+        SET self.mod TO moduloBase  
+        SET self.h TO hashArray  
+        SET self.p TO powerArray  
+    END FUNCTION  
+
+    FUNCTION query(self, l, r)  
+        SET modVal TO self.mod  
+        SET hashR TO self.h[r]  
+        SET hashLMinusOne TO self.h[l - 1]  
+        SET powerLen TO self.p[r - l + 1]  
+        SET result TO (hashR - (hashLMinusOne * powerLen) % modVal + modVal) % modVal  
+        RETURN result  
+    END FUNCTION  
+END CLASS  
+
+CLASS Solution  
+    FUNCTION findAnswer(self, parent, s)  
+        SET lengthStr TO LENGTH(s)  
+        SET graph TO array of empty arrays repeated lengthStr TIMES  
+        SET idxLoop TO 1  
+        WHILE idxLoop < lengthStr  
+            SET pVal TO parent[idxLoop]  
+            APPEND idxLoop TO graph[pVal]  
+            SET idxLoop TO idxLoop + 1  
+        END WHILE  
+
+        SET dfsStr TO empty array  
+        SET pos TO empty dictionary  
+
+        FUNCTION dfs(i)  
+            SET leftBound TO LENGTH(dfsStr) + 1  
+            FOR EACH childElement IN graph[i]  
+                CALL dfs(childElement)  
+            END FOR  
+            APPEND s[i] TO dfsStr  
+            SET rightBound TO LENGTH(dfsStr)  
+            SET pos[i] TO (leftBound, rightBound)  
+        END FUNCTION  
+
+        CALL dfs(0)  
+
+        SET BASE_CONST TO 30000 + 3331  
+        SET MOD_CONST TO 998000000 + 244353  
+        SET hShash TO NEW Hashing(dfsStr, BASE_CONST, MOD_CONST)  
+        SET hRhash TO NEW Hashing(REVERSE(dfsStr), BASE_CONST, MOD_CONST)  
+
+        SET resultList TO empty array  
+        SET iterator TO 0  
+        WHILE iterator < lengthStr  
+            SET (leftLimit, rightLimit) TO pos[iterator]  
+            SET rangeLen TO rightLimit - leftLimit + 1  
+            IF ((rangeLen % 2) == 0) THEN  
+                SET halfLen TO rangeLen / 2  
+                SET firstVal TO hShash.query(leftLimit, leftLimit + halfLen - 1)  
+                SET secondVal TO hRhash.query(lengthStr - rightLimit + 1, lengthStr - rightLimit + 1 + halfLen - 1)  
+            ELSE  
+                SET halfLen TO (rangeLen // 2) + 0  
+                SET firstVal TO hShash.query(leftLimit, leftLimit + (rangeLen // 2) - 1 + 1)  
+                SET secondVal TO hRhash.query(lengthStr - rightLimit + 1, lengthStr - rightLimit + 1 + (rangeLen // 2) - 1 + 1)  
+                IF secondVal IS NULL THEN  
+                    SET secondVal TO 0  
+                END IF  
+            END IF  
+            SET isEqual TO (firstVal == secondVal)  
+            APPEND isEqual TO resultList  
+            SET iterator TO iterator + 1  
+        END WHILE  
+        RETURN resultList  
+    END FUNCTION  
+END CLASS

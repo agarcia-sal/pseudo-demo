@@ -1,0 +1,67 @@
+```
+FUNCTION get_row(two_dimensional_list, target_integer)
+    DECLARE position_stack AS EMPTY LIST
+    DECLARE x_counter AS INTEGER = 0
+    DECLARE y_counter AS INTEGER = 0
+
+    WHILE x_counter LESS THAN LENGTH(two_dimensional_list)
+        y_counter = 0
+        WHILE y_counter LESS THAN LENGTH(two_dimensional_list[x_counter])
+            IF (NOT (two_dimensional_list[x_counter][y_counter] NOT EQUAL target_integer))
+                DECLARE temp_pair AS TUPLE(x_counter, y_counter)
+                APPEND temp_pair TO position_stack
+            END IF
+            y_counter = y_counter + 1
+        END WHILE
+        x_counter = x_counter + 1
+    END WHILE
+
+    FUNCTION sort_by_second_desc_then_first_asc(input_list)
+        // Stable sort by first element ascending after sorting by second element descending
+        DECLARE intermediate AS LIST = input_list
+        DECLARE desc_sorted AS LIST = []
+        DECLARE asc_sorted AS LIST = []
+
+        // Descending sort by second element
+        DECLARE idx AS INTEGER = 0
+        DECLARE max_val AS INTEGER
+        DECLARE max_pos AS INTEGER
+        DECLARE temp_list AS LIST = COPY intermediate
+
+        WHILE LENGTH(temp_list) GREATER THAN 0
+            max_val = -INFINITY
+            max_pos = 0
+            FOR idx FROM 0 TO LENGTH(temp_list)-1
+                IF temp_list[idx][1] GREATER THAN max_val
+                    max_val = temp_list[idx][1]
+                    max_pos = idx
+                END IF
+            END FOR
+            APPEND temp_list[max_pos] TO desc_sorted
+            REMOVE temp_list[max_pos] FROM temp_list
+        END WHILE
+
+        // Ascending sort by first element on desc_sorted
+        temp_list = COPY desc_sorted
+        WHILE LENGTH(temp_list) GREATER THAN 0
+            DECLARE min_val AS INTEGER = INFINITY
+            DECLARE min_pos AS INTEGER = 0
+
+            FOR idx FROM 0 TO LENGTH(temp_list)-1
+                IF temp_list[idx][0] LESS THAN min_val
+                    min_val = temp_list[idx][0]
+                    min_pos = idx
+                END IF
+            END FOR
+
+            APPEND temp_list[min_pos] TO asc_sorted
+            REMOVE temp_list[min_pos] FROM temp_list
+        END WHILE
+
+        RETURN asc_sorted
+    END FUNCTION
+
+    position_stack = sort_by_second_desc_then_first_asc(position_stack)
+    RETURN position_stack
+END FUNCTION
+```

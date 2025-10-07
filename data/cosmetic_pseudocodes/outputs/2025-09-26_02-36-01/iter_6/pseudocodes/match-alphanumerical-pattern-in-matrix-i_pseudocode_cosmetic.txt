@@ -1,0 +1,66 @@
+CLASS Solution   
+    FUNCTION findPattern(board, pattern)  
+        SET total_rows TO LENGTH(board)  
+        SET total_cols TO LENGTH(board[0])  
+        SET pattern_rows TO LENGTH(pattern)  
+        SET pattern_cols TO LENGTH(pattern[0])  
+        
+        FUNCTION matches(row_idx, col_idx)  
+            SET map_char_to_digit TO dictionary with zero pairs  
+            SET map_digit_to_char TO dictionary with zero pairs  
+            
+            DECLARE recursive_traverse(i, j)  
+                IF i > pattern_rows - 1 THEN  
+                    RETURN TRUE  
+                END IF  
+                
+                IF j > pattern_cols - 1 THEN  
+                    RETURN recursive_traverse(i + 1, 0)  
+                END IF  
+                
+                SET pattern_char TO pattern[i][j]  
+                SET board_digit TO board[row_idx + i][col_idx + j]  
+                
+                IF pattern_char >= '0' AND pattern_char <= '9' THEN  
+                    IF INTEGER(pattern_char) <> board_digit THEN  
+                        RETURN FALSE  
+                    ELSE  
+                        RETURN recursive_traverse(i, j + 1)  
+                    END IF  
+                ELSE  
+                    IF pattern_char IN map_char_to_digit THEN  
+                        IF map_char_to_digit[pattern_char] <> board_digit THEN  
+                            RETURN FALSE  
+                        ELSE  
+                            RETURN recursive_traverse(i, j + 1)  
+                        END IF  
+                    ELSE  
+                        IF board_digit IN map_digit_to_char THEN  
+                            RETURN FALSE  
+                        ELSE  
+                            map_char_to_digit[pattern_char] := board_digit  
+                            map_digit_to_char[board_digit] := pattern_char  
+                            RETURN recursive_traverse(i, j + 1)  
+                        END IF  
+                    END IF  
+                END IF  
+            END DECLARE  
+            
+            RETURN recursive_traverse(0, 0)  
+        END FUNCTION  
+        
+        SET row_cursor TO 0  
+        WHILE row_cursor <= total_rows - pattern_rows DO  
+            SET col_cursor TO 0  
+            WHILE col_cursor <= total_cols - pattern_cols DO  
+                IF matches(row_cursor, col_cursor) THEN  
+                    RETURN [row_cursor, col_cursor]  
+                END IF  
+                col_cursor := col_cursor + (1 * 1)  
+            END WHILE  
+            row_cursor := row_cursor + (1)  
+        END WHILE  
+        
+        RETURN [(0 - 1), (0 - 1)]  
+    END FUNCTION  
+END CLASS

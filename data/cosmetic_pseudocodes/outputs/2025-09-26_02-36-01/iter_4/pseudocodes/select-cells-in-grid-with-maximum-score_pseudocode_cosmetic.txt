@@ -1,0 +1,72 @@
+CLASS Solution
+    FUNCTION maxScore(grid)
+        DECLARE max_sum AS negative infinity
+        DECLARE LENGTH_grid AS the LENGTH OF grid
+        
+        FUNCTION backtrack(current_row, used_values_set, total_score)
+            IF current_row NOT LESS THAN LENGTH_grid THEN
+                IF total_score GREATER THAN max_sum THEN
+                    SET max_sum TO total_score
+                END IF
+                RETURN
+            END IF
+            
+            CALL backtrack WITH (current_row PLUS one), used_values_set, total_score
+            
+            DECLARE current_row_values AS grid AT INDEX current_row
+            DECLARE index AS zero
+            DECLARE count_values AS the LENGTH OF current_row_values
+            
+            WHILE index LESS THAN count_values DO
+                DECLARE candidate AS current_row_values AT INDEX index
+                IF candidate NOT IN used_values_set THEN
+                    ADD candidate TO used_values_set
+                    CALL backtrack WITH (current_row PLUS one), used_values_set, (total_score PLUS candidate)
+                    REMOVE candidate FROM used_values_set
+                END IF
+                INCREMENT index BY one
+            END WHILE
+        END FUNCTION
+        
+        DECLARE row_index AS zero
+        DECLARE total_rows AS the LENGTH OF grid
+        
+        WHILE row_index LESS THAN total_rows DO
+            DECLARE row_list AS grid AT INDEX row_index
+            DECLARE sorted_list AS empty list
+            DECLARE temp_index AS zero
+            
+            WHILE temp_index LESS THAN the LENGTH OF row_list DO
+                ADD row_list AT INDEX temp_index TO sorted_list
+                INCREMENT temp_index BY one
+            END WHILE
+            
+            DEFINE a FUNCTION sort_descending(list_to_sort)
+                DECLARE n AS the LENGTH OF list_to_sort
+                DECLARE pass_num AS zero
+                WHILE pass_num LESS THAN n MINUS one DO
+                    DECLARE i AS zero
+                    WHILE i LESS THAN n MINUS pass_num MINUS one DO
+                        IF list_to_sort[i] LESS THAN list_to_sort[i PLUS one] THEN
+                            DECLARE temp_swap AS list_to_sort[i]
+                            SET list_to_sort[i] TO list_to_sort[i PLUS one]
+                            SET list_to_sort[i PLUS one] TO temp_swap
+                        END IF
+                        INCREMENT i BY one
+                    END WHILE
+                    INCREMENT pass_num BY one
+                END WHILE
+            END FUNCTION
+
+            CALL sort_descending(sorted_list)
+            
+            SET grid AT INDEX row_index TO sorted_list
+            INCREMENT row_index BY one
+        END WHILE
+        
+        SET max_sum TO 0
+        CALL backtrack WITH 0, empty set, 0
+        
+        RETURN max_sum
+    END FUNCTION
+END CLASS

@@ -1,0 +1,75 @@
+CLASS Solution
+	FUNCTION maxHammingDistances(originalList LIST OF INTEGER length_m INTEGER) RETURNS LIST OF INTEGER
+		DEFINE FUNCTION toBinaryWithPadding(value INTEGER, width INTEGER) RETURNS STRING
+			DEFINE FUNCTION intToBinary(val INTEGER) RETURNS STRING
+				IF val EQUALS 0 THEN RETURN "0" END IF
+				VAR binStr STRING := ""
+				VAR currVal INTEGER := val
+				WHILE currVal GREATER THAN 0 DO
+					VAR bit_char STRING := (IF ((currVal MOD 2) EQUALS 0) THEN "0" ELSE "1" END IF)
+					binStr := bit_char + binStr
+					currVal := currVal DIV 2
+				END WHILE
+				RETURN binStr
+			END FUNCTION
+			
+			VAR baseBinary STRING := intToBinary(value)
+			VAR paddingLen INTEGER := width - LENGTH(baseBinary)
+			VAR zeros STRING := ""
+			VAR count_p INTEGER := 0
+			WHILE count_p LESS THAN paddingLen DO
+				zeros := zeros + "0"
+				count_p := count_p + 1
+			END WHILE
+			RETURN zeros + baseBinary
+		END FUNCTION
+
+		VAR encodedNums LIST OF STRING := []
+		VAR idx_a INTEGER := 0
+		WHILE idx_a LESS THAN LENGTH(originalList) DO
+			VAR val_a INTEGER := originalList[idx_a]
+			encodedNums := encodedNums + [ toBinaryWithPadding(val_a, length_m) ]
+			idx_a := idx_a + 1
+		END WHILE
+
+		VAR resultList LIST OF INTEGER := []
+
+		DEFINE FUNCTION computeHammingDistance(textA STRING, textB STRING) RETURNS INTEGER
+			VAR distCount INTEGER := 0
+			VAR pos INTEGER := 0
+			WHILE pos LESS THAN LENGTH(textA) DO
+				IF NOT (textA[pos] EQUALS textB[pos]) THEN
+					distCount := distCount + 1
+				END IF
+				pos := pos + 1
+			END WHILE
+			RETURN distCount
+		END FUNCTION
+
+		VAR outer INTEGER := 0
+		REPEAT
+			IF outer GREATER OR EQUAL LENGTH(encodedNums) THEN
+				EXIT
+			END IF
+			VAR currentMax INTEGER := 0
+			VAR inner INTEGER := 0
+			REPEAT
+				IF inner GREATER OR EQUAL LENGTH(encodedNums) THEN
+					EXIT
+				END IF
+
+				IF NOT (outer EQUALS inner) THEN
+					VAR distComp INTEGER := computeHammingDistance(encodedNums[outer], encodedNums[inner])
+					IF distComp GREATER THAN currentMax THEN
+						currentMax := distComp
+					END IF
+				END IF
+				inner := inner + 1
+			UNTIL FALSE
+			resultList := resultList + [currentMax]
+			outer := outer + 1
+		UNTIL FALSE
+
+		RETURN resultList
+	END FUNCTION
+END CLASS

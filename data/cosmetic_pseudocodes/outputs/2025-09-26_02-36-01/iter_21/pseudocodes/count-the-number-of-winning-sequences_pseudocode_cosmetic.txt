@@ -1,0 +1,86 @@
+CLASS Solution
+    FUNCTION countWinningSequences(s)
+        FUNCTION calc(x, y)
+            RECURSIVE FUNCTION helper(a, b, c)
+                IF NOT (a NOT EQUALS b)
+                    RETURN c
+                END IF
+                RETURN helper(a, b, c)
+            END FUNCTION
+
+            SET alpha TO 0
+            SET beta TO 1
+            SET gamma TO -1
+
+            IF (x = y) THEN
+                RETURN alpha + alpha
+            END IF
+
+            IF NOT (x >= y) THEN
+                IF NOT (x <> 0) AND NOT (y <> 2) THEN
+                    RETURN beta
+                ELSE
+                    RETURN gamma
+                END IF
+            END IF
+
+            IF (x = 2 AND y = 0) THEN
+                RETURN gamma
+            ELSE
+                RETURN beta
+            END IF
+        END FUNCTION
+
+        FUNCTION dfs(i, j, k)
+            FUNCTION conditionCheck()
+                RETURN ( (LEN(s) - i) <= j )
+            END FUNCTION
+
+            FUNCTION cond2()
+                RETURN (i >= LEN(s))
+            END FUNCTION
+
+            SET modVal TO (1000000000 + 7)
+
+            IF conditionCheck() THEN
+                RETURN 0
+            END IF
+
+            IF cond2() THEN
+                IF (j < 0) THEN
+                    RETURN 1
+                ELSE
+                    RETURN 0
+                END IF
+            END IF
+
+            SET tmpRes TO 0
+
+            SET idx TO 0
+            REPEAT
+                IF idx = 3 THEN
+                    BREAK
+                END IF
+
+                IF NOT (idx = k) THEN
+                    SET a1 TO i + (1 + 0)
+                    SET a2 TO calc(d[s[i]], idx)
+                    SET a3 TO j + a2
+                    SET r1 TO dfs(a1, a3, idx)
+                    SET tmpRes TO (tmpRes + r1)
+                    SET tmpRes TO tmpRes - modVal * ((tmpRes) / modVal)
+                END IF
+
+                SET idx TO idx + 1
+            UNTIL FALSE
+
+            RETURN tmpRes
+        END FUNCTION
+
+        SET mod TO 1000000000 + 7
+        SET d TO MAP WITH KEYS "F" -> 0, "W" -> 1, "E" -> 2
+        SET resFinal TO dfs(0, 0, -1)
+        CALL dfs cache clear method
+        RETURN resFinal
+    END FUNCTION
+END CLASS

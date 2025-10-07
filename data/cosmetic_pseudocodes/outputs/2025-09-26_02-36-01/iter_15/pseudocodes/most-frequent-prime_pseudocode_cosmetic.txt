@@ -1,0 +1,79 @@
+```pseudocode
+FUNCTION is_prime(n)
+    FUNCTION check_divisible(x, y)
+        RETURN (x MOD y) = 0
+    END FUNCTION
+
+    IF NOT (n > 1) THEN
+        RETURN false
+    ELSE
+        IF 3 >= n THEN
+            RETURN true
+        ELSE
+            IF check_divisible(n, 2) OR check_divisible(n, 3) THEN
+                RETURN false
+            ELSE
+                FUNCTION loop_test(k)
+                    IF (k * k) > n THEN
+                        RETURN true
+                    ELSE
+                        IF check_divisible(n, k) OR check_divisible(n, k + 2) THEN
+                            RETURN false
+                        ELSE
+                            RETURN loop_test(k + 6)
+                        END IF
+                    END IF
+                END FUNCTION
+                RETURN loop_test(5)
+            END IF
+        END IF
+    END IF
+END FUNCTION
+
+CLASS Solution
+    FUNCTION mostFrequentPrime(mat)
+        SET alpha TO LENGTH of mat
+        SET beta TO LENGTH of mat at 0
+        SET dirs TO LIST of pairs: (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)
+        SET freq_map TO empty map with default 0 values
+
+        FUNCTION walk(a, b, da, db, val)
+            SET a2 TO a + da
+            SET b2 TO b + db
+            IF 0 <= a2 AND a2 < alpha AND 0 <= b2 AND b2 < beta THEN
+                SET nv TO (val * 10) + mat[a2][b2]
+                IF nv > 10 AND is_prime(nv) THEN
+                    freq_map[nv] ← freq_map[nv] + 1
+                END IF
+                walk(a2, b2, da, db, nv)
+            END IF
+        END FUNCTION
+
+        SET i TO 0
+        WHILE i < alpha DO
+            SET j TO 0
+            WHILE j < beta DO
+                FOR EACH (dx, dy) IN dirs DO
+                    walk(i, j, dx, dy, mat[i][j])
+                END FOR
+                j ← j + 1
+            END WHILE
+            i ← i + 1
+        END WHILE
+
+        IF freq_map IS empty THEN
+            RETURN -1
+        ELSE
+            SET result_key TO null
+            SET result_freq TO -1
+            FOR EACH key IN freq_map KEYS DO
+                IF freq_map[key] > result_freq OR (freq_map[key] = result_freq AND key > result_key) THEN
+                    result_freq ← freq_map[key]
+                    result_key ← key
+                END IF
+            END FOR
+            RETURN result_key
+        END IF
+    END FUNCTION
+END CLASS
+```

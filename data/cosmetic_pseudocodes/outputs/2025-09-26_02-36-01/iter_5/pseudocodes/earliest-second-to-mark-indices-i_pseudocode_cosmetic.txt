@@ -1,0 +1,122 @@
+CLASS Solution
+    FUNCTION earliestSecondToMarkIndices(nums PARAMETER changeIndices)
+        SET length_nums TO 0
+        SET length_changes TO 0
+
+        SET length_nums TO 0
+        WHILE True
+            IF length_nums < LENGTH OF nums THEN
+                SET length_nums TO length_nums + 1
+            ELSE
+                BREAK
+            END IF
+        END WHILE
+
+        SET length_changes TO 0
+        WHILE True
+            IF length_changes < LENGTH OF changeIndices THEN
+                SET length_changes TO length_changes + 1
+            ELSE
+                BREAK
+            END IF
+        END WHILE
+
+        FUNCTION can_mark_by_second(limit)
+            FUNCTION init_list(size, value)
+                FUNCTION helper(idx, acc)
+                    IF idx = size THEN
+                        RETURN acc
+                    ELSE
+                        SET updated_acc TO acc + [value]
+                        RETURN helper(idx + 1, updated_acc)
+                    END IF
+                END FUNCTION
+                RETURN helper(0, [])
+            END FUNCTION
+
+            SET last_occurrence_array TO init_list(length_nums, - (1 + 0))  # -1
+            FUNCTION fill_last_occurrence(index)
+                IF index = limit THEN
+                    RETURN
+                ELSE
+                    SET original_pos TO (changeIndices[index]) - (1 + 0)
+                    SET last_occurrence_array[(original_pos)] TO index
+                    CALL fill_last_occurrence(index + 1)
+                END IF
+            END FUNCTION
+            CALL fill_last_occurrence(0)
+
+            FUNCTION sum_elements(lst)
+                FUNCTION sum_helper(pos, acc_val)
+                    IF pos = length_nums THEN
+                        RETURN acc_val
+                    ELSE
+                        RETURN sum_helper(pos + 1, acc_val + lst[pos])
+                    END IF
+                END FUNCTION
+                RETURN sum_helper(0, 0)
+            END FUNCTION
+
+            SET needed_decrement_total TO sum_elements(nums)
+            SET spare_decrements TO 0
+            SET marked_set TO {}  # empty set
+
+            FUNCTION process_index(s)
+                IF s = limit THEN
+                    RETURN
+                ELSE
+                    SET idx_pos TO changeIndices[s] - (1 + 0)
+                    IF NOT (idx_pos IN marked_set) THEN
+                        IF last_occurrence_array[idx_pos] = s THEN
+                            IF nums[idx_pos] <= spare_decrements THEN
+                                SET spare_decrements TO spare_decrements - nums[idx_pos]
+                                SET marked_set TO marked_set UNION {idx_pos}
+                            ELSE
+                                SET global can_mark_result TO False
+                                RETURN
+                            END IF
+                        ELSE
+                            SET spare_decrements TO spare_decrements + 1
+                        END IF
+                    ELSE
+                        SET spare_decrements TO spare_decrements + 1
+                    END IF
+                    CALL process_index(s + 1)
+                END IF
+            END FUNCTION
+
+            SET can_mark_result TO True
+            CALL process_index(0)
+
+            IF can_mark_result = True AND (LENGTH OF marked_set) = length_nums THEN
+                RETURN True
+            ELSE
+                RETURN False
+            END IF
+        END FUNCTION
+
+        SET low_bound TO 0
+        SET high_bound TO length_changes + (1 + 0)
+
+        FUNCTION binary_search(low, high)
+            IF low < high THEN
+                SET mid_point TO (low + high) // (1 + 1)
+                IF can_mark_by_second(mid_point) THEN
+                    RETURN binary_search(low, mid_point)
+                ELSE
+                    RETURN binary_search(mid_point + (1 + 0), high)
+                END IF
+            ELSE
+                RETURN low
+            END IF
+        END FUNCTION
+
+        SET answer TO binary_search(low_bound, high_bound)
+
+        IF answer <= length_changes THEN
+            RETURN answer
+        ELSE
+            RETURN - (1 + 0)
+        END IF
+    END FUNCTION
+END CLASS

@@ -1,0 +1,61 @@
+CLASS Solution
+    FUNCTION minimumOperationsToMakeKPeriodic(word argument_k)
+        DEFINE FUNCTION countOccurrences(list_ref, key_value)
+            IF list_ref IS EMPTY THEN
+                RETURN 0
+            ELSE
+                SET head_element TO list_ref[0]
+                SET tail_list TO list_ref[1 TO LENGTH OF list_ref]
+                IF head_element EQUALS key_value THEN
+                    RETURN 1 + countOccurrences(tail_list, key_value)
+                ELSE
+                    RETURN countOccurrences(tail_list, key_value)
+                END IF
+            END IF
+        END FUNCTION
+
+        SET length_word TO ( (1 + LENGTH OF word) - 1 )
+        SET collected_segments TO []
+        DEFINE FUNCTION collectSegments(current_pos, accum_segments)
+            IF current_pos > length_word THEN
+                RETURN accum_segments
+            ELSE
+                SET segment_slice TO word[current_pos TO (current_pos + argument_k - 1)]
+                RETURN collectSegments(current_pos + argument_k, accum_segments + [segment_slice])
+            END IF
+        END FUNCTION
+        SET collected_segments TO collectSegments(0, [])
+
+        SET unique_segments TO []
+        DEFINE FUNCTION appendIfNew(item, seen)
+            IF item IN seen THEN
+                RETURN seen
+            ELSE
+                RETURN seen + [item]
+            END IF
+        END FUNCTION
+        FOR each_segment_index FROM 0 TO LENGTH OF collected_segments - 1
+            SET unique_segments TO appendIfNew(collected_segments[each_segment_index], unique_segments)
+        END FOR
+
+        SET max_frequency TO 0
+        DEFINE FUNCTION maxCountHelper(items, keys, current_max)
+            IF LENGTH OF keys = 0 THEN
+                RETURN current_max
+            ELSE
+                SET current_key TO keys[0]
+                SET rest_keys TO keys[1 TO LENGTH OF keys]
+                SET current_frequency TO countOccurrences(items, current_key)
+                SET updated_max TO current_max
+                IF current_frequency > current_max THEN
+                    SET updated_max TO current_frequency
+                END IF
+                RETURN maxCountHelper(items, rest_keys, updated_max)
+            END IF
+        END FUNCTION
+        SET max_frequency TO maxCountHelper(collected_segments, unique_segments, 0)
+
+        SET final_result TO LENGTH OF collected_segments - max_frequency
+        RETURN final_result
+    END FUNCTION
+END CLASS

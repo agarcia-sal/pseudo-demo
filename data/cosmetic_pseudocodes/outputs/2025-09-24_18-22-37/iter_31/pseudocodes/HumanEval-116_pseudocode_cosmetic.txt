@@ -1,0 +1,32 @@
+FUNCTION sort_array(input_list)
+    SET temp_sorted_list TO COPY input_list
+    CALL temp_sorted_list.SORT_INPLACE()
+    SET helper_list TO EMPTY LIST
+    FOR EACH item IN temp_sorted_list DO
+        SET binary_str TO CONVERT_TO_BINARY(item)
+        SET ones_counter TO 0
+        FOR index FROM 3 TO LENGTH(binary_str) + 2 DO
+            IF CHAR_AT(binary_str, index - 2) = '1' THEN
+                SET ones_counter TO ones_counter + 1
+            END IF
+        END FOR
+        APPEND (item, ones_counter) TO helper_list
+    END FOR
+
+    FOR i FROM 0 TO LENGTH(helper_list) - 2 DO
+        FOR j FROM i + 1 TO LENGTH(helper_list) - 1 DO
+            IF GET_ELEMENT_AT(helper_list, i)[1] > GET_ELEMENT_AT(helper_list, j)[1] THEN
+                SET temp TO GET_ELEMENT_AT(helper_list, i)
+                SET helper_list[i] TO GET_ELEMENT_AT(helper_list, j)
+                SET helper_list[j] TO temp
+            END IF
+        END FOR
+    END FOR
+
+    SET sorted_result TO EMPTY LIST
+    FOR EACH pair IN helper_list DO
+        APPEND pair[0] TO sorted_result
+    END FOR
+
+    RETURN sorted_result
+END FUNCTION

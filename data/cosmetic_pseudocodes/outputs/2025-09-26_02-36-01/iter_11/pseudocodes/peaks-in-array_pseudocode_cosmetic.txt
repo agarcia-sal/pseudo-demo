@@ -1,0 +1,122 @@
+CLASS Solution
+    FUNCTION countOfPeaks(nums LIST OF INTEGER, queries LIST OF LIST OF INTEGER) RETURNS LIST OF INTEGER
+        FUNCTION check_peak(pos INTEGER) RETURNS BOOLEAN
+            RETURN (nums[pos] > nums[pos - 1]) AND (nums[pos] > nums[pos + 1])
+        END FUNCTION
+        
+        SET memo TO EMPTY LIST
+        SET cursor TO 1
+        WHILE cursor <= LENGTH(nums) - 2
+            IF check_peak(cursor)
+                APPEND cursor TO memo
+            END IF
+            SET cursor TO cursor + 1
+        END WHILE
+        
+        SET outcome TO EMPTY LIST
+        
+        FUNCTION locate_left(value INTEGER) RETURNS INTEGER
+            SET low, high TO 0, LENGTH(memo)
+            WHILE low < high
+                SET mid TO (low + high) \ 2
+                IF memo[mid] >= value
+                    SET high TO mid
+                ELSE
+                    SET low TO mid + 1
+                END IF
+            END WHILE
+            RETURN low
+        END FUNCTION
+        
+        FUNCTION locate_right(value INTEGER) RETURNS INTEGER
+            SET start, end_ TO 0, LENGTH(memo)
+            WHILE start < end_
+                SET mid TO (start + end_) \ 2
+                IF memo[mid] > value
+                    SET end_ TO mid
+                ELSE
+                    SET start TO mid + 1
+                END IF
+            END WHILE
+            RETURN start
+        END FUNCTION
+        
+        SET idx TO 0
+        WHILE idx < LENGTH(queries)
+            SET qry TO queries[idx]
+            IF qry[0] = 1
+                SET begin_val TO qry[1]
+                SET finish_val TO qry[2]
+                SET lpos TO locate_left(begin_val + 1)
+                SET rpos TO locate_right(finish_val - 1) - 1
+                
+                SET diff_val TO 0
+                IF (lpos <= rpos) AND (lpos >= 0) AND (rpos < LENGTH(memo))
+                    SET diff_val TO rpos - lpos + 1
+                END IF
+                APPEND diff_val TO outcome
+            ELSE
+                SET ind TO qry[1]
+                SET newval TO qry[2]
+                
+                IF nums[ind] = newval
+                    SET idx TO idx + 1
+                    CONTINUE
+                END IF
+                
+                SET nums[ind] TO newval
+                
+                FUNCTION insert_sorted(list_ref LIST OF INTEGER, val INTEGER)
+                    SET low, high TO 0, LENGTH(list_ref)
+                    WHILE low < high
+                        SET mid TO (low + high) \ 2
+                        IF list_ref[mid] < val
+                            SET low TO mid + 1
+                        ELSE
+                            SET high TO mid
+                        END IF
+                    END WHILE
+                    INSERT val INTO list_ref AT low
+                END FUNCTION
+                
+                FUNCTION contains(list_ref LIST OF INTEGER, val INTEGER) RETURNS BOOLEAN
+                    SET low, high TO 0, LENGTH(list_ref) - 1
+                    WHILE low <= high
+                        SET mid TO (low + high) \ 2
+                        IF list_ref[mid] = val
+                            RETURN TRUE
+                        ELSE IF list_ref[mid] < val
+                            SET low TO mid + 1
+                        ELSE
+                            SET high TO mid - 1
+                        END IF
+                    END WHILE
+                    RETURN FALSE
+                END FUNCTION
+                
+                SET start_check TO MAX(1, ind - 1)
+                SET end_check TO MIN(LENGTH(nums) - 2, ind + 1)
+                SET w TO start_check
+                REPEAT
+                    IF check_peak(w)
+                        IF NOT contains(memo, w)
+                            insert_sorted(memo, w)
+                        END IF
+                    ELSE
+                        IF contains(memo, w)
+                            SET pos TO locate_left(w)
+                            IF (pos < LENGTH(memo)) AND (memo[pos] = w)
+                                REMOVE memo AT pos
+                            END IF
+                        END IF
+                    END IF
+                    SET w TO w + 1
+                UNTIL w > end_check
+                
+            END IF
+            SET idx TO idx + 1
+        END WHILE
+        
+        RETURN outcome
+    END FUNCTION
+END CLASS

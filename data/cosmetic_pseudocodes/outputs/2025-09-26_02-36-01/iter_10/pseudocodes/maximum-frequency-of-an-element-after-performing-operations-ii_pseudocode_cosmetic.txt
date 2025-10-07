@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION maxFrequency(nums, k, numOperations)
+        DEFINE FUNCTION addKeyToMap(MAP_A, key, valueToAdd)
+            IF key NOT IN MAP_A THEN
+                MAP_A[key] <- 0
+            ENDIF
+            MAP_A[key] <- MAP_A[key] + valueToAdd
+        END FUNCTION
+
+        SET mapAlpha TO new default dictionary integer
+        SET mapBeta TO new default dictionary integer
+
+        DEFINE FUNCTION processIndex(indexItr)
+            IF indexItr EQUALS LENGTH(nums) THEN
+                RETURN
+            ENDIF
+            LET curNum = nums[indexItr]
+
+            addKeyToMap(mapAlpha, curNum, 1)
+            addKeyToMap(mapBeta, curNum, 0)
+            addKeyToMap(mapBeta, curNum - k, 1)
+            addKeyToMap(mapBeta, (k + 1) + curNum, -1)
+
+            CALL processIndex(indexItr + 1)
+        END FUNCTION
+
+        CALL processIndex(0)
+
+        LET accumulatorA <- 0
+        LET maximumAnswer <- 0
+
+        LET sortedPairs <- []
+        FOR keyValKey IN mapBeta KEYS
+            APPEND (keyValKey, mapBeta[keyValKey]) TO sortedPairs
+        END FOR
+
+        FUNCTION compareByKey(pair1, pair2)
+            RETURN pair1[0] < pair2[0]
+        END FUNCTION
+
+        // Sorting with helper comparator
+        CALL sort(sortedPairs, compareByKey)
+
+        FUNCTION iteratePairs(indexIter)
+            IF indexIter EQUALS LENGTH(sortedPairs) THEN
+                RETURN
+            ENDIF
+
+            LET currentKeyValuePair = sortedPairs[indexIter]
+            LET curKey = currentKeyValuePair[0]
+            LET curValue = currentKeyValuePair[1]
+
+            accumulatorA <- accumulatorA + curValue
+
+            LET tempMin <- IF accumulatorA < (mapAlpha[curKey] + numOperations) THEN accumulatorA ELSE (mapAlpha[curKey] + numOperations)
+            LET tempMaxCandidate <- IF maximumAnswer > tempMin THEN maximumAnswer ELSE tempMin
+
+            maximumAnswer <- tempMaxCandidate
+
+            CALL iteratePairs(indexIter + 1)
+        END FUNCTION
+
+        CALL iteratePairs(0)
+
+        RETURN maximumAnswer
+    END FUNCTION
+END CLASS

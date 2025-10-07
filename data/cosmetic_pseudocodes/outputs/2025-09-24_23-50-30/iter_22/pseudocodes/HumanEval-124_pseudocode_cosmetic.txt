@@ -1,0 +1,36 @@
+```
+FUNCTION valid_date(alpha)
+    BEGIN
+        DEFINE trim AS (s) => FILTER c IN s WHERE c NOT IN [" ", "\t", "\n"];
+        DECLARE parts AS SET BY SPLIT trim(alpha) USING '-'
+        IF SIZE(parts) NOT EQUAL TO 3 THEN RETURN False END IF
+
+        DECLARE ordinals AS ARRAY OF INTEGERS = []
+        FOR EACH element IN parts DO
+            TRY
+                APPEND TO ordinals INTEGER(element)
+            EXCEPT
+                RETURN False
+            END TRY
+        END FOR
+
+        DECLARE m AS ordinals[0]
+        DECLARE d AS ordinals[1]
+        DECLARE y AS ordinals[2]
+
+        IF m < 1 OR m > 12 THEN RETURN False END IF
+
+        IF (m = 2) THEN 
+            IF (d < 1 OR d > 29) THEN RETURN False END IF
+        ELSE
+          IF (m = 4 OR m = 6 OR m = 9 OR m = 11) THEN
+              IF d < 1 OR d > 30 THEN RETURN False END IF
+          ELSE
+              IF d < 1 OR d > 31 THEN RETURN False END IF
+          END IF
+        END IF
+
+        RETURN True
+    END
+END FUNCTION
+```

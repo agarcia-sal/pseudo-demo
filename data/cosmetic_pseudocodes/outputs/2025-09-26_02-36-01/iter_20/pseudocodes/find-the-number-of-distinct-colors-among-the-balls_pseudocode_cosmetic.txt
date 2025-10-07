@@ -1,0 +1,64 @@
+CLASS Solution
+  FUNCTION queryResults(limit parameter, queries parameter)
+    DEFINE FUNCTION contains(setData, val)
+      INDEX currentIndex := 0
+      LOOP
+        IF currentIndex >= length(setData) THEN
+          RETURN false
+        END IF
+        IF setData[currentIndex] = val THEN
+          RETURN true
+        END IF
+        currentIndex := currentIndex + 1
+      END LOOP
+    END FUNCTION
+
+    DEFINE FUNCTION removeItem(setData, val)
+      INDEX idx := 0
+      REPEAT
+        IF idx >= length(setData) THEN
+          EXIT REPEAT
+        END IF
+        IF setData[idx] = val THEN
+          FOR INDEX j := idx TO length(setData) - 2
+            setData[j] := setData[j+1]
+          END FOR
+          setData := setData[0:length(setData)-1]
+          EXIT REPEAT
+        END IF
+        idx := idx + 1
+      UNTIL false
+      RETURN setData
+    END FUNCTION
+
+    DEFINE ball_colors := empty dictionary
+    DEFINE unique_colors := empty list
+    DEFINE result := empty list
+
+    INDEX outer_loop_var := 0
+    WHILE outer_loop_var < length(queries parameter) DO
+      LET currPair := queries parameter[outer_loop_var]
+      LET internal_x := currPair[0]
+      LET internal_y := currPair[1]
+
+      IF ball_colors CONTAINS KEY internal_x THEN
+        LET old_col := ball_colors[internal_x]
+        IF contains(unique_colors, old_col) THEN
+          unique_colors := removeItem(unique_colors, old_col)
+        END IF
+      END IF
+
+      ball_colors[internal_x] := internal_y
+
+      IF NOT contains(unique_colors, internal_y) THEN
+        unique_colors := unique_colors + [internal_y]
+      END IF
+
+      result := result + [length(unique_colors)]
+
+      outer_loop_var := outer_loop_var + 1
+    END WHILE
+
+    RETURN result
+  END FUNCTION
+END CLASS

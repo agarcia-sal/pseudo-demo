@@ -1,0 +1,68 @@
+CLASS UnionFind  
+  FUNCTION __init__(self, size)  
+    DECLARE parents AS array with elements i WHERE i FROM 0 TO size - 1  
+    DECLARE ranks AS array filled with 0, repeated size times  
+    SET self.parent = parents  
+    SET self.rank = ranks  
+  END FUNCTION  
+  
+  FUNCTION find(self, u)  
+    WHILE self.parent[u] ≠ u DO  
+      SET self.parent[u] = self.parent[self.parent[u]]  
+      SET u = self.parent[u]  
+    END WHILE  
+    RETURN u  
+  END FUNCTION  
+  
+  FUNCTION union(self, u, v)  
+    DECLARE rootU = self.find(u)  
+    DECLARE rootV = self.find(v)  
+    IF rootU ≠ rootV THEN  
+      IF self.rank[rootU] > self.rank[rootV] THEN  
+        SET self.parent[rootV] = rootU  
+      ELSE  
+        IF self.rank[rootU] < self.rank[rootV] THEN  
+          SET self.parent[rootU] = rootV  
+        ELSE  
+          SET self.parent[rootV] = rootU  
+          SET self.rank[rootU] = self.rank[rootU] + 1  
+        END IF  
+      END IF  
+    END IF  
+  END FUNCTION  
+END CLASS  
+  
+CLASS Solution  
+  FUNCTION maximizeSumOfWeights(self, edges, k)  
+    DECLARE countNodes = LENGTH(edges) + 1  
+    DECLARE deg = ARRAY OF 0's WITH LENGTH countNodes  
+    DECLARE uf = UnionFind(countNodes)  
+  
+    ASSIGN edges = SORT edges BY lambda edge: -edge[2]  
+  
+    SET totalWeight = 0  
+  
+    DECLARE idx = 0  
+    WHILE idx < LENGTH(edges) DO  
+      DECLARE e = edges[idx]  
+      SET n1 = e[0]  
+      SET n2 = e[1]  
+      SET weight = e[2]  
+  
+      IF deg[n1] < k THEN  
+        IF deg[n2] < k THEN  
+          IF uf.find(n1) ≠ uf.find(n2) THEN  
+            CALL uf.union(n1, n2)  
+            SET deg[n1] = deg[n1] + 1  
+            SET deg[n2] = deg[n2] + 1  
+            SET totalWeight = totalWeight + weight  
+          END IF  
+        END IF  
+      END IF  
+  
+      SET idx = idx + 1  
+    END WHILE  
+  
+    RETURN totalWeight  
+  END FUNCTION  
+END CLASS

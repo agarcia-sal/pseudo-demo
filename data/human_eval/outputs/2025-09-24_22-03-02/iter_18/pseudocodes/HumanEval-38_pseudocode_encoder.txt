@@ -1,0 +1,38 @@
+FUNCTION encode_cyclic WITH PARAMETER s AS str
+    SET groups TO LIST WITH ELEMENTS EMPTY
+    SET length_s TO CALL len WITH ARGUMENTS s
+    SET num_groups TO CALL INTEGER DIVISION WITH ARGUMENTS length_s PLUS 2 BY 3
+    FOR i FROM 0 TO num_groups MINUS 1
+        SET start_index TO 3 MULTIPLY i
+        SET end_index TO start_index PLUS 3
+        IF end_index GREATER THAN length_s THEN
+            SET end_index TO length_s
+        ENDIF
+        SET group TO CALL SLICE STRING s FROM start_index TO end_index
+        APPEND group TO groups
+    ENDFOR
+    SET new_groups TO LIST WITH ELEMENTS EMPTY
+    FOR j FROM 0 TO CALL len WITH ARGUMENTS groups MINUS 1
+        SET group TO groups AT INDEX j
+        SET length_group TO CALL len WITH ARGUMENTS group
+        IF length_group EQUALS 3 THEN
+            SET first_char TO group AT INDEX 0
+            SET rest_chars TO CALL SLICE STRING group FROM 1 TO 3
+            SET cycled_group TO CONCATENATE rest_chars AND first_char
+            APPEND cycled_group TO new_groups
+        ELSE
+            APPEND group TO new_groups
+        ENDIF
+    ENDFOR
+    SET result TO EMPTY STRING
+    FOR k FROM 0 TO CALL len WITH ARGUMENTS new_groups MINUS 1
+        SET result TO CONCATENATE result AND new_groups AT INDEX k
+    ENDFOR
+    RETURN result
+END FUNCTION
+
+FUNCTION decode_cyclic WITH PARAMETER s AS str
+    SET first_encode TO CALL encode_cyclic WITH ARGUMENTS s
+    SET second_encode TO CALL encode_cyclic WITH ARGUMENTS first_encode
+    RETURN second_encode
+END FUNCTION

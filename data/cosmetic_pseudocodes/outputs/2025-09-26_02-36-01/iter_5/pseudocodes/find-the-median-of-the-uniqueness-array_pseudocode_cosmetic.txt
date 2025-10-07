@@ -1,0 +1,60 @@
+CLASS Solution
+
+    FUNCTION medianOfUniquenessArray(nums)
+        FUNCTION countLessOrEqual(thresh)
+            FUNCTION decrement_count(idx, counts_map, unique_c)
+                counts_map[nums[idx]] = counts_map[nums[idx]] - 1
+                IF counts_map[nums[idx]] = 0 THEN
+                    unique_c = unique_c - 1
+                END IF
+                RETURN unique_c
+            END FUNCTION
+
+            local_count = 0
+            window_start = 0
+            occurrences = new empty map
+            unique_elements = 0
+
+            FUNCTION process_index(r)
+                IF r >= LENGTH(nums) THEN
+                    RETURN local_count
+                END IF
+
+                IF NOT EXISTS occurrences[nums[r]] OR occurrences[nums[r]] = 0 THEN
+                    unique_elements = unique_elements + 1
+                END IF
+                occurrences[nums[r]] = IF EXISTS occurrences[nums[r]] THEN occurrences[nums[r]] + 1 ELSE 1
+
+                WHILE unique_elements > thresh DO
+                    unique_elements = decrement_count(window_start, occurrences, unique_elements)
+                    window_start = window_start + 1
+                END WHILE
+
+                current_len = r - window_start + 1
+                local_count = local_count + current_len
+
+                RETURN process_index(r + 1)
+            END FUNCTION
+
+            RETURN process_index(0)
+        END FUNCTION
+
+        total_subs = LENGTH(nums) * (LENGTH(nums) + 1) / 2
+        median_idx = (total_subs + 1) / 2
+
+        low_bound = 1
+        high_bound = LENGTH(nums)
+
+        WHILE low_bound < high_bound DO
+            mid_val = (low_bound + high_bound) / 2
+            IF countLessOrEqual(mid_val) < median_idx THEN
+                low_bound = mid_val + 1
+            ELSE
+                high_bound = mid_val
+            END IF
+        END WHILE
+
+        result_val = low_bound
+        RETURN result_val
+    END FUNCTION
+END CLASS

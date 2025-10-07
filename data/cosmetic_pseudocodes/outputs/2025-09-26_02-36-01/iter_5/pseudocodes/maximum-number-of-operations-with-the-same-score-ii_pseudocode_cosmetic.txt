@@ -1,0 +1,63 @@
+CLASS Solution
+    FUNCTION maxOperations(nums)
+        FUNCTION explore(leftIndex, rightIndex, targetSum, cache)
+            IF NOT (leftIndex LESS THAN rightIndex)
+                SET outcome TO 0
+                RETURN outcome
+            END IF
+
+            SET keyTuple TO (leftIndex, rightIndex, targetSum)
+            IF cache CONTAINS keyTuple
+                RETURN cache AT keyTuple
+            END IF
+
+            SET resultCount TO 0
+
+            SET firstPairSum TO nums[leftIndex] + nums[leftIndex + 1]
+            IF firstPairSum EQUALS targetSum
+                SET candidateResult TO 1 + explore(leftIndex + 2, rightIndex, targetSum, cache)
+                IF candidateResult GREATER THAN resultCount
+                    SET resultCount TO candidateResult
+                END IF
+            END IF
+
+            SET secondPairSum TO nums[rightIndex] + nums[rightIndex - 1]
+            IF secondPairSum EQUALS targetSum
+                SET candidateResult TO 1 + explore(leftIndex, rightIndex - 2, targetSum, cache)
+                IF candidateResult GREATER THAN resultCount
+                    SET resultCount TO candidateResult
+                END IF
+            END IF
+
+            SET crossPairSum TO nums[leftIndex] + nums[rightIndex]
+            IF crossPairSum EQUALS targetSum
+                SET candidateResult TO 1 + explore(leftIndex + 1, rightIndex - 1, targetSum, cache)
+                IF candidateResult GREATER THAN resultCount
+                    SET resultCount TO candidateResult
+                END IF
+            END IF
+
+            SET cache[keyTuple] TO resultCount
+            RETURN resultCount
+        END FUNCTION
+
+        SET lengthVal TO LENGTH(nums)
+        SET firstTarget TO nums[0] + nums[1]
+        SET secondTarget TO nums[lengthVal - 2] + nums[lengthVal - 1]
+        SET thirdTarget TO nums[0] + nums[lengthVal - 1]
+
+        SET resultA TO 1 + explore(2, lengthVal - 1, firstTarget, {})
+        SET resultB TO 1 + explore(0, lengthVal - 3, secondTarget, {})
+        SET resultC TO 1 + explore(1, lengthVal - 2, thirdTarget, {})
+
+        SET finalResult TO resultA
+        IF resultB GREATER THAN finalResult
+            SET finalResult TO resultB
+        END IF
+        IF resultC GREATER THAN finalResult
+            SET finalResult TO resultC
+        END IF
+
+        RETURN finalResult
+    END FUNCTION
+END CLASS

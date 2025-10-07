@@ -1,0 +1,52 @@
+CLASS Solution
+	FUNCTION maxArea(height positions directions)
+	   PROCEDURE AdvanceDirectionAtEdge(index, posList, dirList, limHeight)
+	      IF posList[index] = 0 AND dirList[index] = 'D' THEN
+	         dirList ← Substring(dirList, 0, index - 1) + 'U' + Substring(dirList, index + 1, Length(dirList) - 1)
+	      ELSE IF posList[index] = limHeight AND dirList[index] = 'U' THEN
+	         dirList ← Substring(dirList, 0, index - 1) + 'D' + Substring(dirList, index + 1, Length(dirList) - 1)
+	      END IF
+	   END PROCEDURE
+
+	   PROCEDURE ModifyPositionsByDirection(posList, dirList, idx)
+	      IF dirList[idx] = 'U' THEN
+	         posList[idx] ← posList[idx] + 1
+	      ELSE
+	         posList[idx] ← posList[idx] - 1
+	      END IF
+	   END PROCEDURE
+
+	   FUNCTION SumList(elements)
+	      VARIABLE total ← 0
+	      VARIABLE count ← Length(elements)
+	      VARIABLE counter ← 0
+	      WHILE counter < count
+	         total ← total + elements[counter]
+	         counter ← counter + 1
+	      END WHILE
+	      RETURN total
+	   END FUNCTION
+
+	   VARIABLE lengthPositions ← Length(positions)
+	   VARIABLE cumulativeMax ← SumList(positions)
+	   VARIABLE stepCounter ← 1
+	   VARIABLE totalSteps ← height * 2
+
+	   WHILE stepCounter ≤ totalSteps
+	      VARIABLE elementIndex ← 0
+	      WHILE elementIndex < lengthPositions
+	         AdvanceDirectionAtEdge(elementIndex, positions, directions, height)
+	         ModifyPositionsByDirection(positions, directions, elementIndex)
+	         elementIndex ← elementIndex + 1
+	      END WHILE
+
+	      VARIABLE newlyComputedArea ← SumList(positions)
+	      IF cumulativeMax < newlyComputedArea THEN
+	         cumulativeMax ← newlyComputedArea
+	      END IF
+	      stepCounter ← stepCounter + 1
+	   END WHILE
+
+	   RETURN cumulativeMax
+	END FUNCTION
+END CLASS

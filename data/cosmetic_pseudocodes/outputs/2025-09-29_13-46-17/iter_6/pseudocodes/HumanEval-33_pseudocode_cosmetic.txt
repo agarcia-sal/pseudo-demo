@@ -1,0 +1,107 @@
+```
+FUNCTION sort_third(list_input)
+	list_copy = NEW LIST
+	INDEX_MAP = NEW DICTIONARY
+	CUR_INDEX = 0
+	FINAL_LIST = NEW LIST
+
+	PROC duplicate_elements(curr_src, accum_copy, curr_idx) IS
+		IF curr_idx = LENGTH(curr_src) THEN
+			RETURN accum_copy
+		ELSE
+			accum_copy = APPEND(accum_copy, curr_src[curr_idx])
+			RETURN duplicate_elements(curr_src, accum_copy, curr_idx + 1)
+		ENDIF
+	ENDPROC
+
+	list_copy = duplicate_elements(list_input, list_copy, 0)
+
+	PROC gather_div3_elements(src_list, start_idx, acc_map, pos)
+		IF start_idx = LENGTH(src_list) THEN
+			RETURN acc_map
+		ELSE
+			new_map = acc_map
+			IF (start_idx MOD 3) = 0 THEN
+				new_map[pos] = src_list[start_idx]
+				POS_NEXT = pos + 1
+			ELSE
+				POS_NEXT = pos
+			ENDIF
+			RETURN gather_div3_elements(src_list, start_idx + 1, new_map, POS_NEXT)
+		ENDIF
+	ENDPROC
+
+	INDEX_MAP = gather_div3_elements(list_copy, 0, INDEX_MAP, 0)
+
+	PROC extract_values(mapping)
+		KEYS_LIST = KEYS(mapping)
+		SIZE_KEYS = LENGTH(KEYS_LIST)
+		VAL_ACCUM = NEW LIST
+
+		PROC inner_extract(i, acc)
+			IF i = SIZE_KEYS THEN
+				RETURN acc
+			ELSE
+				k = KEYS_LIST[i]
+				acc = APPEND(acc, mapping[k])
+				RETURN inner_extract(i + 1, acc)
+			ENDIF
+		ENDPROC
+
+		RETURN inner_extract(0, VAL_ACCUM)
+	ENDPROC
+
+	VALUES_LIST = extract_values(INDEX_MAP)
+
+	PROC sort_list(lst)
+		IF LENGTH(lst) < 2 THEN
+			RETURN lst
+		ELSE
+			PIVOT = lst[0]
+			LT = NEW LIST
+			GEQ = NEW LIST
+
+			PROC partition_elements(a_list, pivot_val, l_accum, g_accum, idx)
+				IF idx = LENGTH(a_list) THEN
+					RETURN [l_accum, g_accum]
+				ELSE
+					curr_val = a_list[idx]
+					IF curr_val < pivot_val THEN
+						l_accum = APPEND(l_accum, curr_val)
+					ELSE
+						g_accum = APPEND(g_accum, curr_val)
+					ENDIF
+					RETURN partition_elements(a_list, pivot_val, l_accum, g_accum, idx + 1)
+				ENDIF
+			ENDPROC
+
+			[less_than, greater_equal] = partition_elements(SUBLIST(lst, 1, LENGTH(lst)), PIVOT, LT, GEQ, 0)
+
+			sorted_lt = sort_list(less_than)
+			sorted_geq = sort_list(greater_equal)
+
+			RETURN CONCAT(sorted_lt, [PIVOT], sorted_geq)
+		ENDIF
+	ENDPROC
+
+	SORTED_VALUES = sort_list(VALUES_LIST)
+
+	PROC replace_div3_targets(src_list, sorted_vals_map, curr_idx, sorted_idx)
+		IF curr_idx = LENGTH(src_list) THEN
+			RETURN src_list
+		ELSE
+			OUT_LIST = src_list
+			IF (curr_idx MOD 3) = 0 THEN
+				OUT_LIST[curr_idx] = sorted_vals_map[sorted_idx]
+				RETURN replace_div3_targets(OUT_LIST, sorted_vals_map, curr_idx + 1, sorted_idx + 1)
+			ELSE
+				RETURN replace_div3_targets(OUT_LIST, sorted_vals_map, curr_idx + 1, sorted_idx)
+			ENDIF
+		ENDIF
+	ENDPROC
+
+	list_input = replace_div3_targets(list_copy, SORTED_VALUES, 0, 0)
+
+	RETURN list_input
+END FUNCTION
+```

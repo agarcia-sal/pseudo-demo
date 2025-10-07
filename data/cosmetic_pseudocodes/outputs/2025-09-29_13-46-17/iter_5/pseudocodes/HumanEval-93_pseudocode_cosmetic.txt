@@ -1,0 +1,52 @@
+```
+FUNCTION encode(sTrInG)
+    DECLARE transform_map AS MAP
+    DECLARE vOwElS AS STRING
+    SET vOwElS = "AEIOUaeiou"
+    PROCEDURE build_map(idx,accum)
+        IF idx >= LENGTH(vOwElS) THEN
+            RETURN accum
+        ELSE
+            DECLARE k AS CHAR = vOwElS[idx]
+            DECLARE v AS CHAR = CHAR(ASCII(k) + 2)
+            RETURN build_map(idx + 1, accum + {k: v})
+        END IF
+    END PROCEDURE
+
+    SET transform_map = build_map(0, {})
+
+    FUNCTION toggle_case(input_str, pos, result_acc)
+        IF pos = LENGTH(input_str) THEN
+            RETURN result_acc
+        ELSE
+            DECLARE curr_char AS CHAR = input_str[pos]
+            DECLARE toggled_char AS CHAR
+            IF curr_char >= 'a' AND curr_char <= 'z' THEN
+                toggled_char = CHAR(ASCII(curr_char) - 32)
+            ELSE IF curr_char >= 'A' AND curr_char <= 'Z' THEN
+                toggled_char = CHAR(ASCII(curr_char) + 32)
+            ELSE
+                toggled_char = curr_char
+            END IF
+            RETURN toggle_case(input_str, pos + 1, result_acc + toggled_char)
+        END IF
+    END FUNCTION
+
+    DECLARE toggled_message AS STRING = toggle_case(sTrInG, 0, "")
+
+    FUNCTION replace_chars(str_in, curr_pos, acc_str)
+        IF curr_pos = LENGTH(str_in) THEN
+            RETURN acc_str
+        ELSE
+            DECLARE this_char = str_in[curr_pos]
+            IF (NOT (this_char NOT IN transform_map)) THEN
+                RETURN replace_chars(str_in, curr_pos + 1, acc_str + transform_map[this_char])
+            ELSE
+                RETURN replace_chars(str_in, curr_pos + 1, acc_str + this_char)
+            END IF
+        END IF
+    END FUNCTION
+
+    RETURN replace_chars(toggled_message, 0, "")
+END FUNCTION
+```

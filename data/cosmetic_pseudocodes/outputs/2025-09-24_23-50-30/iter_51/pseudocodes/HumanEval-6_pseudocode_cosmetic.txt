@@ -1,0 +1,45 @@
+```
+FUNCTION parse_nested_parens(parentheses_string)
+    FUNCTION parse_paren_group(substring)
+        FUNCTION iter_chars(index, depth_curr, depth_max)
+            IF index > LENGTH(substring) THEN 
+                RETURN depth_max
+            ELSE 
+                SWITCH substring[index]
+                    CASE '(':
+                        RETURN iter_chars(index + 1, depth_curr + 1, (depth_curr + 1) > depth_max ? (depth_curr + 1) : depth_max)
+                    DEFAULT:
+                        RETURN iter_chars(index + 1, depth_curr - 1, depth_max)
+                END SWITCH
+            END IF
+        END FUNCTION
+        
+        RETURN iter_chars(1, 0, 0)
+    END FUNCTION
+
+    SET token_list TO []
+    SET pos TO 1
+    SET len_str TO LENGTH(parentheses_string)
+    
+    FUNCTION collect_tokens()
+        IF pos > len_str THEN 
+            RETURN 
+        ELSE
+            SET start_idx TO pos
+            WHILE pos <= len_str AND parentheses_string[pos] != ' ' DO
+                SET pos TO pos + 1
+            END WHILE
+            IF start_idx < pos THEN
+                APPEND SUBSTRING(parentheses_string, start_idx, pos - 1) TO token_list
+            END IF
+            WHILE pos <= len_str AND parentheses_string[pos] = ' ' DO
+                SET pos TO pos + 1
+            END WHILE
+            collect_tokens()
+        END IF
+    END FUNCTION
+    
+    collect_tokens()
+    RETURN [parse_paren_group(g) FOR EACH g IN token_list IF LENGTH(g) > 0]
+END FUNCTION
+```

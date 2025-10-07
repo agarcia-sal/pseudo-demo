@@ -1,0 +1,79 @@
+CLASS Solution  
+    FUNCTION lastMarkedNodes(edges)  
+        FUNCTION dfs(k, p, d)  
+            SET m TO LENGTH OF g[k]  
+            SET index TO 0  
+            WHILE index < m  
+                SET nxt TO g[k][index]  
+                IF NOT (nxt = p) THEN  
+                    d[nxt] = d[k] + 1  
+                    CALL dfs(nxt, k, d)  
+                END IF  
+                SET index TO index + 1  
+            END WHILE  
+        END FUNCTION  
+
+        SET num TO LENGTH OF edges + 1  
+        SET g TO LIST OF num EMPTY LISTS  
+        SET pos TO 0  
+        REPEAT  
+            IF pos >= LENGTH OF edges THEN BREAK  
+            SET pair TO edges[pos]  
+            SET u0 TO pair[0]  
+            SET v0 TO pair[1]  
+            APPEND v0 TO g[u0]  
+            APPEND u0 TO g[v0]  
+            SET pos TO pos + 1  
+        UNTIL FALSE  
+
+        SET d1 TO LIST OF num ELEMENTS ALL EQUAL TO (0 - 1)  
+        d1[0] = 0  
+        CALL dfs(0, 0 - 1, d1)  
+
+        SET maxPos1 TO 0  
+        SET maxVal1 TO d1[0]  
+        SET counter1 TO 1  
+        WHILE counter1 < num  
+            IF d1[counter1] > maxVal1 THEN  
+                SET maxVal1 TO d1[counter1]  
+                SET maxPos1 TO counter1  
+            END IF  
+            SET counter1 TO counter1 + 1  
+        END WHILE  
+
+        SET d2 TO LIST OF num ELEMENTS ALL EQUAL TO -1  
+        d2[maxPos1] = 0  
+        CALL dfs(maxPos1, -1, d2)  
+
+        SET maxPos2 TO 0  
+        SET maxVal2 TO d2[0]  
+        SET counter2 TO 1  
+        WHILE counter2 < num  
+            IF d2[counter2] > maxVal2 THEN  
+                SET maxVal2 TO d2[counter2]  
+                SET maxPos2 TO counter2  
+            END IF  
+            SET counter2 TO counter2 + 1  
+        END WHILE  
+
+        SET d3 TO LIST OF num ELEMENTS ALL EQUAL TO -1  
+        d3[maxPos2] = 0  
+        CALL dfs(maxPos2, -1, d3)  
+
+        SET output TO EMPTY LIST  
+        SET index1 TO 0  
+        REPEAT  
+            IF index1 >= num THEN BREAK  
+            SET val1 TO d2[index1]  
+            SET val2 TO d3[index1]  
+            IF val1 > val2 THEN  
+                APPEND maxPos1 TO output  
+            ELSE  
+                APPEND maxPos2 TO output  
+            END IF  
+            SET index1 TO index1 + 1  
+        UNTIL FALSE  
+
+        RETURN output  
+    END FUNCTION  
+END CLASS

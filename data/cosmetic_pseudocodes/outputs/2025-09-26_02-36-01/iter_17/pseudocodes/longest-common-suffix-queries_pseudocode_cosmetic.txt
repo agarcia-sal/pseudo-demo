@@ -1,0 +1,67 @@
+CLASS Solution
+    FUNCTION stringIndices(wordsContainer wordsContainer TO LIST OF STRING, wordsQuery wordsQuery TO LIST OF STRING) RETURNS LIST OF INTEGER
+        DECLARE suffixMap DICTIONARY OF STRING TO INTEGER INIT EMPTY
+        DECLARE outerCounter INTEGER INIT 0
+
+        WHILE outerCounter < LENGTH(wordsContainer) DO
+            DECLARE currentWord STRING ASSIGN wordsContainer[outerCounter]
+            DECLARE innerCounter INTEGER ASSIGN 0
+            REPEAT
+                DECLARE currentSuffix STRING ASSIGN SUBSTRING(currentWord, innerCounter, LENGTH(currentWord) - innerCounter)
+                IF NOT CONTAINS_KEY(suffixMap, currentSuffix) THEN
+                    suffixMap[currentSuffix] = outerCounter
+                ELSE
+                    DECLARE mappedIndex INTEGER ASSIGN suffixMap[currentSuffix]
+                    DECLARE mappedWord STRING ASSIGN wordsContainer[mappedIndex]
+                    DECLARE cond1 BOOLEAN ASSIGN LENGTH(currentWord) < LENGTH(mappedWord)
+                    DECLARE cond2 BOOLEAN ASSIGN (LENGTH(currentWord) = LENGTH(mappedWord)) AND (outerCounter < mappedIndex)
+                    IF (cond1 OR cond2) THEN
+                        suffixMap[currentSuffix] = outerCounter
+                    END IF
+                END IF
+                innerCounter = innerCounter + 1
+            UNTIL innerCounter >= LENGTH(currentWord)
+            outerCounter = outerCounter + 1
+        END WHILE
+
+        FUNCTION get_best_match(query query TO STRING) RETURNS INTEGER
+            DECLARE position INTEGER INIT 0
+            DECLARE foundIndex INTEGER INIT -1
+            WHILE foundIndex = -1 AND position < LENGTH(query) DO
+                DECLARE sub STRING ASSIGN SUBSTRING(query, position, LENGTH(query) - position)
+                IF CONTAINS_KEY(suffixMap, sub) THEN
+                    foundIndex = suffixMap[sub]
+                ELSE
+                    position = position + 1
+                END IF
+            END WHILE
+
+            IF foundIndex <> -1 THEN
+                RETURN foundIndex
+            ELSE
+                DECLARE bestIndex INTEGER INIT 0
+                DECLARE bestLength INTEGER ASSIGN LENGTH(wordsContainer[0])
+                DECLARE idx INTEGER ASSIGN 1
+                WHILE idx < LENGTH(wordsContainer) DO
+                    DECLARE currentLength INTEGER ASSIGN LENGTH(wordsContainer[idx])
+                    IF (currentLength < bestLength) OR (currentLength = bestLength AND idx < bestIndex) THEN
+                        bestIndex = idx
+                        bestLength = currentLength
+                    END IF
+                    idx = idx + 1
+                END WHILE
+                RETURN bestIndex
+            END IF
+        END FUNCTION
+
+        DECLARE outputList LIST OF INTEGER INIT EMPTY
+        DECLARE queryIter INTEGER INIT 0
+        WHILE queryIter < LENGTH(wordsQuery) DO
+            DECLARE currentQuery STRING ASSIGN wordsQuery[queryIter]
+            DECLARE matchIndex INTEGER ASSIGN get_best_match(currentQuery)
+            outputList = outputList + [matchIndex]
+            queryIter = queryIter + 1
+        END WHILE
+        RETURN outputList
+    END FUNCTION
+END CLASS

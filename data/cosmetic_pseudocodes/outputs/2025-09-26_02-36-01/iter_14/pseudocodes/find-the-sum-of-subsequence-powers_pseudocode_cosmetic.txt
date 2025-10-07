@@ -1,0 +1,52 @@
+```
+CLASS Solution
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER
+        CONSTANT MAXLIMIT := (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7
+        VARIABLE accumulator := 0
+        PROCEDURE calculateAllCombinations(collection, size, callback)
+            PROCEDURE backtrack(current, start)
+                IF LENGTH(current) = size THEN
+                    CALL callback(current)
+                    RETURN
+                END IF
+                VARIABLE pos := start
+                WHILE pos < LENGTH(collection) DO
+                    CALL backtrack(current + [collection[pos]], pos + 1)
+                    INCREMENT pos BY 1
+                END WHILE
+            END PROCEDURE
+            CALL backtrack([], 0)
+        END PROCEDURE
+
+        PROCEDURE processCombination(arr)
+            VARIABLE minDiff := 10000000000
+            VARIABLE outerIdx := 0
+            REPEAT
+                IF outerIdx >= k THEN
+                    BREAK
+                END IF
+                VARIABLE innerIdx := outerIdx + 1
+                WHILE innerIdx < k DO
+                    VARIABLE diff := arr[outerIdx]
+                    IF diff < arr[innerIdx] THEN
+                        diff := arr[innerIdx] - diff
+                    ELSE
+                        diff := diff - arr[innerIdx]
+                    END IF
+
+                    IF NOT (diff >= minDiff) THEN
+                        minDiff := diff
+                    END IF
+                    innerIdx := innerIdx + 1
+                END WHILE
+                outerIdx := outerIdx + 1
+            UNTIL FALSE
+            accumulator := (accumulator + minDiff) % MAXLIMIT
+        END PROCEDURE
+
+        CALL calculateAllCombinations(nums, k, processCombination)
+
+        RETURN accumulator
+    END FUNCTION
+END CLASS
+```

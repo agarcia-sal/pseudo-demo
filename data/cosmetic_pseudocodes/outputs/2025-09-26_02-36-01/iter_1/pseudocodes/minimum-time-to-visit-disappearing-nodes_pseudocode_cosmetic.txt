@@ -1,0 +1,45 @@
+CLASS Solution  
+    FUNCTION minimumTime(n, edges, disappear)  
+        INITIALIZE graph AS a mapping with keys defaulting to empty lists  
+        FOR EACH edge IN edges DO  
+            DESTRUCTURE edge INTO source, target, length  
+            APPEND (target, length) INTO graph[source]  
+            APPEND (source, length) INTO graph[target]  
+        END FOR  
+          
+        CREATE distances ARRAY of size n FILLED with infinity  
+        ASSIGN distances[0] TO 0  
+          
+        CREATE a priority_queue AND ADD (0, 0) TO IT  
+          
+        WHILE priority_queue IS NOT EMPTY DO  
+            POP (current_cost, node) WITH LOWEST current_cost FROM priority_queue  
+              
+            IF current_cost >= disappear[node] THEN  
+                CONTINUE  
+            END IF  
+              
+            IF current_cost > distances[node] THEN  
+                CONTINUE  
+            END IF  
+              
+            FOR EACH (adjacent, length) IN graph[node] DO  
+                CALCULATE new_cost = current_cost + length  
+                  
+                IF new_cost < distances[adjacent] AND new_cost < disappear[adjacent] THEN  
+                    UPDATE distances[adjacent] TO new_cost  
+                    PUSH (new_cost, adjacent) INTO priority_queue  
+                END IF  
+            END FOR  
+        END WHILE  
+          
+        CREATE answer ARRAY of size n FILLED with -1  
+        FOR index FROM 0 TO n - 1 DO  
+            IF distances[index] < disappear[index] THEN  
+                SET answer[index] TO distances[index]  
+            END IF  
+        END FOR  
+          
+        RETURN answer  
+    END FUNCTION  
+END CLASS

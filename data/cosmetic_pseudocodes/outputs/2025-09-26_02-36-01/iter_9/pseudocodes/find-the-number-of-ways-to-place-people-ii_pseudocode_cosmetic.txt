@@ -1,0 +1,65 @@
+CLASS Solution
+    FUNCTION numberOfPairs(tuples)
+        PROCEDURE orderList(arr)
+            FOR idx1 FROM 0 TO LENGTH(arr) - 2
+                FOR idx2 FROM idx1 + 1 TO LENGTH(arr) - 1
+                    SET condPrimary TO (arr[idx1].x > arr[idx2].x)
+                    SET condSecondary TO (arr[idx1].x = arr[idx2].x) AND (arr[idx1].y < arr[idx2].y)
+                    IF condPrimary OR condSecondary
+                        SET tempElem TO arr[idx1]
+                        SET arr[idx1] TO arr[idx2]
+                        SET arr[idx2] TO tempElem
+                    END IF
+                END FOR
+            END FOR
+        END PROCEDURE
+
+        SET pCount TO 0
+        SET limit TO LENGTH(tuples)
+        CALL orderList(tuples)
+
+        FUNCTION checkRange(startPos, endPos, baseX, baseY, boundX, boundY)
+            FUNCTION verify(index)
+                SET curX TO tuples[index].x
+                SET curY TO tuples[index].y
+                RETURN NOT (baseX <= curX AND curX <= boundX AND boundY <= curY AND curY <= baseY)
+            END FUNCTION
+
+            PROCEDURE recurse(curr)
+                IF curr >= endPos
+                    RETURN True
+                ELSE
+                    IF verify(curr)
+                        RETURN recurse(curr + 1)
+                    ELSE
+                        RETURN False
+                    END IF
+                END IF
+            END PROCEDURE
+
+            RETURN recurse(startPos + 1)
+        END FUNCTION
+
+        PROCEDURE traverse(first, last)
+            IF first < last
+                SET xFirst TO tuples[first].x
+                SET yFirst TO tuples[first].y
+                SET xLast TO tuples[last].x
+                SET yLast TO tuples[last].y
+                IF (xFirst <= xLast) AND (yFirst >= yLast)
+                    IF checkRange(first, last, xFirst, yFirst, xLast, yLast)
+                        SET pCount TO pCount + 1
+                    END IF
+                END IF
+                CALL traverse(first, last - 1)
+            END IF
+        END PROCEDURE
+
+        FOR startIndex FROM 0 TO limit - 2
+            CALL traverse(startIndex, limit - 1)
+        END FOR
+
+        RETURN pCount
+
+    END FUNCTION
+END CLASS

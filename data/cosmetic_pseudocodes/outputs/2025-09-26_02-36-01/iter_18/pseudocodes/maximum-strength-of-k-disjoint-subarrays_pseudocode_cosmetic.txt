@@ -1,0 +1,43 @@
+```pseudocode
+CLASS Solution
+	Function maximumStrength(nums k)
+		DECLARE total AS INTEGER ← LENGTH(nums)
+		DEFINE dp AS ARRAY[0 TO total][0 TO k] OF FLOAT
+		FOR x FROM 0 TO total
+			FOR y FROM 0 TO k
+				dp[x][y] ← NEGATIVE_INFINITY
+			END FOR
+		END FOR
+		dp[0][0] ← 0.0
+
+		DEFINE helper(accum INT, idx INT, limit INT, count INT, best FLOAT) RETURNS FLOAT
+			IF idx < limit THEN
+				RETURN best
+			END IF
+			LET accum ← accum + nums[idx - 1]
+			IF (count MOD 2) = 1 THEN
+				LET coefficient ← (k - count - 1) + 1
+			ELSE
+				LET coefficient ← -((k - count - 1) + 1)
+			END IF
+			LET candidate ← dp[idx][count]
+			LET potential ← dp[idx - 1][count - 1] + coefficient * accum
+			LET newBest ← MAX(candidate, MAX(best, potential))
+			RETURN helper(accum, idx - 1, limit, count, newBest)
+		END FUNCTION
+
+		DECLARE idx1 AS INTEGER ← 1
+		WHILE idx1 <= total
+			DECLARE idx2 AS INTEGER ← 1
+			WHILE idx2 <= k
+				dp[idx1][idx2] ← MAX(dp[idx1][idx2], dp[idx1 - 1][idx2])
+				dp[idx1][idx2] ← MAX(dp[idx1][idx2], helper(0, idx1, 1, idx2, NEGATIVE_INFINITY))
+				idx2 ← idx2 + 1
+			END WHILE
+			idx1 ← idx1 + 1
+		END WHILE
+
+		RETURN dp[total][k]
+	END FUNCTION
+END CLASS
+```

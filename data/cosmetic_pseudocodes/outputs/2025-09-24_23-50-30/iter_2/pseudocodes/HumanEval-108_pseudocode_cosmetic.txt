@@ -1,0 +1,49 @@
+```
+FUNCTION count_nums(array_of_integers)
+    FUNCTION digits_sum(integer_value)
+        IF integer_value >= 0 THEN
+            SET sign_multiplier TO 1
+        ELSE
+            SET sign_multiplier TO -1
+            SET integer_value TO -integer_value
+        END IF
+        
+        FUNCTION helper(index, digits_list)
+            IF index = LENGTH OF digits_list THEN
+                RETURN 0
+            END IF
+            RETURN (digits_list[index] * (sign_multiplier WHEN index = 0 ELSE 1)) + helper(index + 1, digits_list)
+        END FUNCTION
+        
+        SET digits_str TO STRING(integer_value)
+        SET digits_list TO []
+        FOR idx FROM 0 TO LENGTH OF digits_str - 1
+            APPEND INTEGER(digits_str[idx]) TO digits_list
+        END FOR
+        
+        RETURN helper(0, digits_list)
+    END FUNCTION
+
+    FUNCTION map_digits_sum(arr, idx, acc)
+        IF idx = LENGTH OF arr THEN
+            RETURN acc
+        END IF
+        RETURN map_digits_sum(arr, idx + 1, acc + [digits_sum(arr[idx])])
+    END FUNCTION
+
+    SET all_sums TO map_digits_sum(array_of_integers, 0, [])
+    
+    FUNCTION count_positive(vals, position, count)
+        IF position = LENGTH OF vals THEN
+            RETURN count
+        END IF
+        IF vals[position] <= 0 THEN
+            RETURN count_positive(vals, position + 1, count)
+        ELSE
+            RETURN count_positive(vals, position + 1, count + 1)
+        END IF
+    END FUNCTION
+
+    RETURN count_positive(all_sums, 0, 0)
+END FUNCTION
+```

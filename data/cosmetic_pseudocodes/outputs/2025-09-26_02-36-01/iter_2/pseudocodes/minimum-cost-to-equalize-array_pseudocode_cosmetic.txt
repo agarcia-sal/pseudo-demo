@@ -1,0 +1,51 @@
+CLASS Solution  
+    FUNCTION minCostToEqualizeArray(inputArray rateA rateB)  
+        CONSTANT MODULUS ASSIGN 1_000_000_007  
+        INTEGER length ASSIGN SIZE OF inputArray  
+        INTEGER minimumValue ASSIGN inputArray[0]  
+        INTEGER maximumValue ASSIGN inputArray[0]  
+        INTEGER totalSum ASSIGN 0  
+
+        INTEGER index ASSIGN 0  
+        WHILE index < length DO  
+            totalSum PRE_INCREMENT BY inputArray[index]  
+            IF inputArray[index] < minimumValue THEN  
+                minimumValue SET TO inputArray[index]  
+            END IF  
+            IF inputArray[index] > maximumValue THEN  
+                maximumValue ASSIGN inputArray[index]  
+            END IF  
+            index ADD 1  
+        END WHILE  
+
+        IF (rateA * 2 <= rateB) OR (length < 3) THEN  
+            INTEGER gapTotal ASSIGN (maximumValue * length) - totalSum  
+            RETURN (gapTotal * rateA) MOD MODULUS  
+        END IF  
+
+        FUNCTION getMinCost(target)  
+            INTEGER maxGapValue ASSIGN target - minimumValue  
+            INTEGER totalGap ASSIGN (target * length) - totalSum  
+            INTEGER minPairs ASSIGN totalGap // 2  
+            IF minPairs > totalGap - maxGapValue THEN  
+                minPairs ASSIGN totalGap - maxGapValue  
+            END IF  
+            INTEGER costCalculation ASSIGN (totalGap * rateA) - (2 * minPairs * rateA) + (minPairs * rateB)  
+            RETURN costCalculation  
+        END FUNCTION  
+
+        INTEGER bestCost ASSIGN getMinCost(maximumValue)  
+        INTEGER candidate ASSIGN maximumValue + 1  
+        INTEGER upperBound ASSIGN 2 * maximumValue  
+
+        WHILE candidate < upperBound DO  
+            INTEGER currentCost ASSIGN getMinCost(candidate)  
+            IF currentCost < bestCost THEN  
+                bestCost ASSIGN currentCost  
+            END IF  
+            candidate ADD 1  
+        END WHILE  
+
+        RETURN bestCost MOD MODULUS  
+    END FUNCTION  
+END CLASS

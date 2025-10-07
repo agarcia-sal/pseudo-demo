@@ -1,0 +1,82 @@
+CLASS Solution
+    FUNCTION gcdValues(nums, queries)
+        LET highestVal BE 0
+        LET idxInNums BE 0
+        WHILE idxInNums LESS THAN LENGTH(nums)
+            IF nums[idxInNums] GREATER THAN highestVal THEN
+                highestVal = nums[idxInNums]
+            END IF
+            idxInNums = idxInNums PLUS ONE
+        END WHILE
+        
+        LET elementCount BE NEW counterObject()
+        LET iteratorForNums BE 0
+        WHILE iteratorForNums LESS THAN LENGTH(nums)
+            elementCount.increment(nums[iteratorForNums])
+            iteratorForNums = iteratorForNums PLUS ONE
+        END WHILE
+        
+        LET countGList BE LIST OF ZEROS WITH LENGTH highestVal PLUS (1 PLUS 0)
+        
+        FUNCTION processIndexReverse(currentIndex)
+            IF currentIndex LESS THAN 1 THEN
+                RETURN
+            END IF
+            LET tempVal BE 0
+            FUNCTION innerLoop(k)
+                IF k GREATER THAN highestVal THEN
+                    RETURN
+                END IF
+                LET countAtK BE elementCount.get(k)
+                tempVal = tempVal PLUS countAtK
+                countGList[currentIndex] = countGList[currentIndex] MINUS countGList[k]
+                innerLoop(k PLUS currentIndex)
+            END FUNCTION
+            innerLoop(currentIndex)
+            LET addValue BE (tempVal TIMES (tempVal MINUS 1)) DIVIDED BY 2
+            countGList[currentIndex] = countGList[currentIndex] PLUS addValue
+            processIndexReverse(currentIndex MINUS 1)
+        END FUNCTION
+
+        processIndexReverse(highestVal)
+        
+        LET sList BE LIST holding SINGLE ZERO element
+        LET runningSum BE 0
+        LET idxS BE 1
+        WHILE idxS LESS THAN LENGTH(countGList)
+            runningSum = runningSum PLUS countGList[idxS]
+            sList.APPEND(runningSum)
+            idxS = idxS PLUS 1
+        END WHILE
+        
+        LET resList BE EMPTY LIST
+        
+        FUNCTION bisectRight(listForBisect, target)
+            LET leftBound BE 0
+            LET rightBound BE LENGTH(listForBisect)
+            WHILE leftBound LESS THAN rightBound
+                LET midPoint BE (leftBound PLUS rightBound) DIVIDED BY 2
+                IF listForBisect[midPoint] GREATER THAN target OR listForBisect[midPoint] EQUAL TO target THEN
+                    rightBound = midPoint
+                ELSE
+                    leftBound = midPoint PLUS 1
+                END IF
+            END WHILE
+            RETURN leftBound
+        END FUNCTION
+        
+        FUNCTION processQueries(qInd)
+            IF qInd EQUAL TO LENGTH(queries) THEN
+                RETURN
+            END IF
+            LET positionResult BE bisectRight(sList, queries[qInd])
+            resList.APPEND(positionResult)
+            processQueries(qInd PLUS 1)
+        END FUNCTION
+        
+        processQueries(0)
+        
+        LET finalResult TO resList
+        RETURN finalResult
+    END FUNCTION
+END CLASS

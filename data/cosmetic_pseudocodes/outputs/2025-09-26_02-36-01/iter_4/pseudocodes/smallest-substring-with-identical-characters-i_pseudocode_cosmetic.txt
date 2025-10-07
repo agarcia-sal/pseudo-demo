@@ -1,0 +1,63 @@
+CLASS Solution  
+    FUNCTION minLength(s parameter, numOps parameter)  
+        FUNCTION longest_uniform_substring(s parameter)  
+            SET peak_length AS 0  
+            SET streak AS 1  
+            DECLARE idx AS 1  
+            WHILE idx < LENGTH(s)  
+                IF s[idx] == s[idx - 1] THEN  
+                    SET streak TO streak + 1  
+                ELSE  
+                    IF streak > peak_length THEN  
+                        SET peak_length TO streak  
+                    END IF  
+                    SET streak TO 1  
+                END IF  
+                SET idx TO idx + 1  
+            END WHILE  
+            IF peak_length >= streak THEN  
+                RETURN peak_length  
+            ELSE  
+                RETURN streak  
+            END IF  
+        END FUNCTION  
+        
+        DECLARE minimal_length TO LENGTH(s)  
+        SET boundary TO 1 << LENGTH(s)  
+        DECLARE counter AS 0  
+        WHILE counter < boundary  
+            SET bitcount TO 0  
+            DECLARE temp AS counter  
+            WHILE temp > 0  
+                SET bitcount TO bitcount + (temp AND 1)  
+                SET temp TO temp >> 1  
+            END WHILE  
+            IF bitcount > numOps THEN  
+                SET counter TO counter + 1  
+                SKIP TO next iteration  
+            END IF  
+            DECLARE altered AS LIST()  
+            FOR each_char IN s DO  
+                ADD each_char TO altered  
+            END FOR  
+            DECLARE pos AS 0  
+            WHILE pos < LENGTH(s)  
+                IF (counter & (1 << pos)) != 0 THEN  
+                    IF altered[pos] == '0' THEN  
+                        SET altered[pos] TO '1'  
+                    ELSE  
+                        SET altered[pos] TO '0'  
+                    END IF  
+                END IF  
+                SET pos TO pos + 1  
+            END WHILE  
+            SET current_length TO longest_uniform_substring(altered)  
+            IF minimal_length > current_length THEN  
+                SET minimal_length TO current_length  
+            END IF  
+            SET counter TO counter + 1  
+        END WHILE  
+        
+        RETURN minimal_length  
+    END FUNCTION  
+END CLASS

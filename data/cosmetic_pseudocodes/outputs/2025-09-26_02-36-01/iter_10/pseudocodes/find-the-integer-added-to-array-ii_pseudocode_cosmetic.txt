@@ -1,0 +1,81 @@
+CLASS Solution
+    FUNCTION minimumAddedInteger(nums1 RETURNS List OF integer, nums2 RETURNS List OF integer) RETURNS integer
+        DEFINE PROCEDURE bubbleList(LIST)
+            SET flag TO TRUE
+            WHILE flag
+                SET flag TO FALSE
+                SET idx TO 1
+                WHILE idx < LENGTH(LIST)
+                    IF LIST[idx - 1] > LIST[idx]
+                        SET tempVal TO LIST[idx - 1]
+                        LIST[idx - 1] = LIST[idx]
+                        LIST[idx] = tempVal
+                        SET flag TO TRUE
+                    END IF
+                    SET idx TO idx + 1
+                END WHILE
+            END WHILE
+        END PROCEDURE
+
+        CALL bubbleList(nums1)
+        CALL bubbleList(nums2)
+
+        DEFINE FUNCTION matchCondition(ARR_A RETURNS List OF integer, ARR_B RETURNS List OF integer, DELTA RETURNS integer) RETURNS boolean
+            DEFINE FUNCTION checkElements(POS RETURNS integer) RETURNS boolean
+                IF POS >= LENGTH(ARR_B)
+                    RETURN TRUE
+                ELSE IF ARR_A[POS] + DELTA != ARR_B[POS]
+                    RETURN FALSE
+                ELSE
+                    RETURN checkElements(POS + 1)
+                END IF
+            END FUNCTION
+            RETURN checkElements(0)
+        END FUNCTION
+
+        DEFINE FUNCTION formFilteredList(SRC RETURNS List OF integer, LEFT_IDX RETURNS integer, RIGHT_IDX RETURNS integer) RETURNS List OF integer
+            DEFINE FUNCTION gatherParts(POS RETURNS integer, ACC RETURNS List OF integer) RETURNS List OF integer
+                IF POS >= LENGTH(SRC)
+                    RETURN ACC
+                ELSE IF POS = LEFT_IDX OR POS = RIGHT_IDX
+                    RETURN gatherParts(POS + 1, ACC)
+                ELSE
+                    RETURN gatherParts(POS + 1, ACC + [SRC[POS]])
+                END IF
+            END FUNCTION
+            RETURN gatherParts(0, [])
+        END FUNCTION
+
+        SET outerPos TO 0
+        DEFINE FUNCTION outerLoop()
+            IF outerPos >= LENGTH(nums1)
+                RETURN None
+            ELSE
+                SET innerPos TO outerPos + 1
+
+                DEFINE FUNCTION innerLoop()
+                    IF innerPos >= LENGTH(nums1)
+                        SET outerPosCopy TO outerPos + 1
+                        SET outerPos TO outerPosCopy
+                        RETURN outerLoop()
+                    ELSE
+                        SET filteredList TO formFilteredList(nums1, outerPos, innerPos)
+                        SET candidateX TO nums2[0] - filteredList[0]
+
+                        IF matchCondition(filteredList, nums2, candidateX)
+                            RETURN candidateX
+                        ELSE
+                            SET innerPosCopy TO innerPos + 1
+                            SET innerPos TO innerPosCopy
+                            RETURN innerLoop()
+                        END IF
+                    END IF
+                END FUNCTION
+
+                RETURN innerLoop()
+            END IF
+        END FUNCTION
+
+        RETURN outerLoop()
+    END FUNCTION
+END CLASS

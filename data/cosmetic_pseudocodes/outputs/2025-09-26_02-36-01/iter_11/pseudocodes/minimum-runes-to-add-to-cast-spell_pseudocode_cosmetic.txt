@@ -1,0 +1,130 @@
+CLASS Solution
+    FUNCTION minRunesToAdd(n flowFrom flowTo crystals)
+        SET mappingAlpha TO new mapping integer → list integer
+        SET mappingBeta TO new mapping integer → list integer
+
+        FUNCTION helperBuild()
+            SET p TO 0
+            LOOP p < LENGTH(flowFrom)
+                SET keyX TO flowFrom[p]
+                SET keyY TO flowTo[p]
+                APPEND keyY TO mappingAlpha[keyX]
+                APPEND keyX TO mappingBeta[keyY]
+                SET p TO p + 1
+            END LOOP
+        END FUNCTION
+
+        CALL helperBuild()
+
+        SET identifiers TO array of size n FILLED WITH -1
+        SET lowMarks TO array of size n FILLED WITH 0
+        SET activeFlags TO array of size n FILLED WITH False
+        SET dataStack TO new empty list
+        SET nextIndex TO 0
+        SET components TO empty list
+
+        FUNCTION nestedTarjan(currentNode)
+            SET identifiers[currentNode] TO nextIndex
+            SET lowMarks[currentNode] TO nextIndex
+            SET nextIndex TO nextIndex + 1
+            APPEND currentNode TO dataStack
+            SET activeFlags[currentNode] TO True
+
+            FUNCTION loopAdjacents(pos)
+                IF pos >= LENGTH(mappingAlpha[currentNode])
+                    RETURN
+                END IF
+                SET neighborNode TO mappingAlpha[currentNode][pos]
+                IF identifiers[neighborNode] = -1 THEN
+                    CALL nestedTarjan(neighborNode)
+                    SET lowMarks[currentNode] TO MIN(lowMarks[currentNode], lowMarks[neighborNode])
+                ELSE IF activeFlags[neighborNode] EQUALS True THEN
+                    SET lowMarks[currentNode] TO MIN(lowMarks[currentNode], identifiers[neighborNode])
+                END IF
+                CALL loopAdjacents(pos + 1)
+            END FUNCTION
+
+            CALL loopAdjacents(0)
+
+            IF lowMarks[currentNode] = identifiers[currentNode]
+                SET componentList TO empty list
+                FUNCTION popStack()
+                    SET val TO dataStack[LENGTH(dataStack) - 1]
+                    REMOVE last element FROM dataStack
+                    SET activeFlags[val] TO False
+                    APPEND val TO componentList
+                    IF val = currentNode THEN RETURN
+                    ELSE popStack()
+                    END IF
+                END FUNCTION
+                CALL popStack()
+                APPEND componentList TO components
+            END IF
+        END FUNCTION
+
+        FUNCTION iterIndices(i)
+            IF i >= n THEN RETURN
+            IF identifiers[i] = -1 THEN CALL nestedTarjan(i)
+            CALL iterIndices(i + 1)
+        END FUNCTION
+
+        CALL iterIndices(0)
+
+        SET condensedGraph TO new mapping integer → list integer
+        SET assignSCC TO array of size n FILLED WITH -1
+        SET haveCrystal TO array of size LENGTH(components) FILLED WITH False
+        SET sccCounter TO 0
+
+        FUNCTION assignLoop(idx)
+            IF idx >= LENGTH(components) THEN RETURN
+            FOR EACH nodeElement IN components[idx]
+                SET assignSCC[nodeElement] TO sccCounter
+                IF crystals CONTAINS nodeElement THEN
+                    SET haveCrystal[idx] TO True
+                END IF
+            END FOR
+            SET sccCounter TO sccCounter + 1
+            CALL assignLoop(idx + 1)
+        END FUNCTION
+
+        CALL assignLoop(0)
+
+        FUNCTION sccEdgesIterator(pos)
+            IF pos >= LENGTH(flowFrom) THEN RETURN
+            SET sourceSCC TO assignSCC[flowFrom[pos]]
+            SET targetSCC TO assignSCC[flowTo[pos]]
+            IF sourceSCC ≠ targetSCC THEN
+                APPEND targetSCC TO condensedGraph[sourceSCC]
+            END IF
+            CALL sccEdgesIterator(pos + 1)
+        END FUNCTION
+
+        CALL sccEdgesIterator(0)
+
+        SET inboundCount TO array LENGTH(components) FILLED WITH 0
+
+        FUNCTION countInbounds(i)
+            IF i >= LENGTH(components) THEN RETURN
+            FOR EACH neighborNode IN condensedGraph[i]
+                SET inboundCount[neighborNode] TO inboundCount[neighborNode] + 1
+            END FOR
+            CALL countInbounds(i + 1)
+        END FUNCTION
+
+        CALL countInbounds(0)
+
+        SET resultValue TO 0
+
+        FUNCTION checkNoInbound(j)
+            IF j >= LENGTH(components) THEN RETURN
+            IF inboundCount[j] = 0 AND haveCrystal[j] = False THEN
+                SET resultValue TO resultValue + 1
+            END IF
+            CALL checkNoInbound(j + 1)
+        END FUNCTION
+
+        CALL checkNoInbound(0)
+
+        RETURN resultValue
+    END FUNCTION
+END CLASS

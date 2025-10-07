@@ -1,0 +1,80 @@
+CLASS Solution
+	fUNCTION numberOfSubarrays(nums)
+		DEFINE FUNCTION replicateDict():
+			LET dictStorage BE an empty collection mapping keys to lists
+			DEFINE FUNCTION getOrInit(key):
+				IF key NOT IN dictStorage THEN
+					dictStorage[key] <- empty list
+				END IF
+				RETURN dictStorage[key]
+			END FUNCTION
+			RETURN (dictStorage, getOrInit)
+		END FUNCTION
+
+		(localMap, obtainList) = replicateDict()
+
+		LET cIndex, elementVal BE 0, 0
+		LET iterEnum BE 0
+		WHILE iterEnum < LENGTH(nums)
+			cIndex = iterEnum
+			elementVal = nums[iterEnum]
+			obtainList(elementVal) APPEND cIndex
+			iterEnum <- iterEnum + 1
+		END WHILE
+
+		LET aggregateCount BE 0
+
+		LET keysValues ARRAY BE []
+		FOR each k IN localMap KEYS DO
+			keysValues APPEND localMap[k]
+		END FOR
+
+		LET outerCounter BE 0
+		WHILE outerCounter < LENGTH(keysValues)
+			LET currIndices BE keysValues[outerCounter]
+			LET lenIndices BE 0
+			FOR _ IN currIndices DO
+				lenIndices <- lenIndices + 1
+			END FOR
+
+			DEFINE FUNC recursive_i_j(iVal, hardLimit):
+				IF iVal > hardLimit THEN RETURN () END IF
+				DEFINE FUNC recursive_j(jVal):
+					IF jVal > hardLimit THEN RETURN () END IF
+					LET startPos BE currIndices[iVal]
+					LET endPos BE currIndices[jVal]
+					LET sliceLen BE (endPos - startPos) + 1
+					LET currentSlice BE []
+					LET xPos BE 0
+					WHILE xPos < sliceLen
+						currentSlice APPEND nums[startPos + xPos]
+						xPos <- xPos + 1
+					END WHILE
+
+					LET maxVal BE currentSlice[0]
+					LET yPos BE 0
+					WHILE yPos < LENGTH(currentSlice)
+						IF maxVal < currentSlice[yPos] THEN
+							maxVal <- currentSlice[yPos]
+						END IF
+						yPos <- yPos + 1
+					END WHILE
+
+					IF NOT (maxVal != nums[startPos]) THEN
+						aggregateCount <- aggregateCount + 1
+					END IF
+
+					recursive_j(jVal + 1)
+				END FUNC
+
+				recursive_j(iVal)
+				recursive_i_j(iVal + 1, hardLimit)
+			END FUNC
+
+			recursive_i_j(0,lenIndices - 1)
+			outerCounter <- outerCounter + 1
+		END WHILE
+
+		RETURN aggregateCount
+	END FUNCTION
+END CLASS

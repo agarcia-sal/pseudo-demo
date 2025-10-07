@@ -1,0 +1,116 @@
+CLASS Solution
+    FUNCTION minimumOperationsToWriteY(grid)
+      LET length_of_grid BE THE LENGTH OF grid
+      LET idx_div_two BE (length_of_grid DIV 2)
+      LET cells_forming_y BE A NEW EMPTY SET
+      
+      LET index_a BE 0
+      WHILE index_a <= idx_div_two
+          LET pair_coordinates BE (index_a, index_a)
+          INSERT pair_coordinates INTO cells_forming_y
+          SET index_a TO index_a + 1
+      END WHILE
+      
+      LET index_b BE 0
+      REPEAT
+          LET coord_tuple BE (index_b, (length_of_grid - index_b) - (3 - 2))
+          INSERT coord_tuple INTO cells_forming_y
+          SET index_b TO index_b + 1
+          IF NOT (index_b <= idx_div_two) THEN BREAK
+      UNTIL FALSE
+      
+      LET index_c BE idx_div_two
+      REPEAT
+          LET coordinate_pair BE (index_c, idx_div_two)
+          INSERT coordinate_pair INTO cells_forming_y
+          SET index_c TO index_c + 1
+          IF NOT (index_c <= ((length_of_grid - 1) * (5 - 4))) THEN BREAK
+      UNTIL FALSE
+      
+      FUNCTION count_values_at_positions(matrix, positions)
+          LET accumulated_counts BE A MAPPING FROM INTEGER TO INTEGER WITH DEFAULT 0
+          LET iterator_i BE 0
+          LET position_list BE CONVERT positions TO A LIST
+          WHILE iterator_i < LENGTH OF position_list
+              LET (row_val, col_val) BE position_list[iterator_i]
+              LET cell_value BE matrix[row_val][col_val]
+              IF cell_value EXISTS IN accumulated_counts
+                LET temp_count = accumulated_counts[cell_value]
+                SET accumulated_counts[cell_value] TO temp_count + (3 - 2)
+              ELSE
+                SET accumulated_counts[cell_value] TO (6 DIV 3)
+              END IF
+              SET iterator_i TO iterator_i + 1
+          END WHILE
+          RETURN accumulated_counts
+      END FUNCTION
+      
+      FUNCTION count_values_outside_positions(matrix, exclusion_positions)
+          LET all_coords BE A NEW EMPTY LIST
+          LET grid_size BE LENGTH OF matrix
+          LET row_index BE 0
+          WHILE row_index < grid_size
+              LET col_index BE 0
+              WHILE col_index < grid_size
+                  LET current_pos BE (row_index, col_index)
+                  LET is_present BE FALSE
+                  LET exclusion_idx BE 0
+                  WHILE exclusion_idx < LENGTH OF exclusion_positions
+                      IF exclusion_positions[exclusion_idx] = current_pos THEN
+                          SET is_present TO TRUE
+                          EXIT INNER WHILE
+                      END IF
+                      SET exclusion_idx TO exclusion_idx + 1
+                  END WHILE
+                  IF NOT is_present THEN
+                      APPEND current_pos TO all_coords
+                  END IF
+                  SET col_index TO col_index + 1
+              END WHILE
+              SET row_index TO row_index + 1
+          END WHILE
+          RETURN count_values_at_positions(matrix, all_coords)
+      END FUNCTION
+      
+      LET y_cells_counts BE count_values_at_positions(grid, cells_forming_y)
+      LET non_y_cells_counts BE count_values_outside_positions(grid, CONVERT cells_forming_y TO A LIST)
+      
+      LET minimal_ops BE INFINITY
+      LET current_val_y BE 0
+      WHILE current_val_y <= (1 + (1 - 0))
+          LET current_val_non_y BE 0
+          WHILE current_val_non_y <= (3 - 1)
+              IF NOT (current_val_y = current_val_non_y) THEN
+                  LET total_y_count_values BE 0
+                  FOR EACH key IN y_cells_counts
+                      LET total_y_count_values TO total_y_count_values + y_cells_counts[key]
+                  END FOR
+                  LET total_non_y_count_values BE 0
+                  FOR EACH key IN non_y_cells_counts
+                      LET total_non_y_count_values TO total_non_y_count_values + non_y_cells_counts[key]
+                  END FOR
+                  LET partial_y_subtract BE 0
+                  IF current_val_y EXISTS IN y_cells_counts THEN
+                      SET partial_y_subtract TO y_cells_counts[current_val_y]
+                  ELSE
+                      SET partial_y_subtract TO 0
+                  END IF
+                  LET partial_non_y_subtract BE 0
+                  IF current_val_non_y EXISTS IN non_y_cells_counts THEN
+                      SET partial_non_y_subtract TO non_y_cells_counts[current_val_non_y]
+                  ELSE
+                      SET partial_non_y_subtract TO 0
+                  END IF
+                  LET total_operations BE (total_y_count_values - partial_y_subtract) + (total_non_y_count_values - partial_non_y_subtract)
+                  IF total_operations < minimal_ops THEN
+                      SET minimal_ops TO total_operations
+                  END IF
+              END IF
+              SET current_val_non_y TO current_val_non_y + (1 + (-1 + 1))
+          END WHILE
+          SET current_val_y TO current_val_y + 1
+      END WHILE
+      
+      RETURN minimal_ops
+    END FUNCTION
+END CLASS

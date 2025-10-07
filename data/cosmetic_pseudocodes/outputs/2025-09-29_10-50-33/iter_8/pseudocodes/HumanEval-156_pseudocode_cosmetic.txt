@@ -1,0 +1,24 @@
+FUNCTION int_to_mini_roman(value)
+  DECLARE base_values AS [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
+  DECLARE roman_symbols AS ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
+  DECLARE index_tracker AS 0
+  DECLARE accumulated_result AS ""
+
+  REPEAT
+    IF 0 >= value THEN EXIT
+
+    DECLARE counts AS value DIV base_values[index_tracker]
+    SET value TO value MOD base_values[index_tracker]
+
+    FUNCTION attach_symbols(times_remaining)
+      IF times_remaining = 0 THEN EXIT FUNCTION
+      accumulated_result <- accumulated_result + roman_symbols[index_tracker]
+      INVOKE attach_symbols(times_remaining - 1)
+    END FUNCTION
+
+    EXECUTE attach_symbols(counts)
+    SET index_tracker TO index_tracker + 1
+  UNTIL index_tracker >= LENGTH(base_values)
+
+  BREAK accumulated_result TO LOWERCASE
+END FUNCTION

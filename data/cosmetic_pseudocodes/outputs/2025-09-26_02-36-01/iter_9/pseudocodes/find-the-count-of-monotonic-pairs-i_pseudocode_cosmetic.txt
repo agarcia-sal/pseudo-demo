@@ -1,0 +1,87 @@
+CLASS Solution
+	FUNCTION countOfPairs(tarsun)
+		
+		DEFINE ONE_BILLION_PLUS_SEVEN AS (1000000000 + 7)
+		
+		DEFINE lenTsun AS LENGTH OF tarsun
+		
+		DEFINE maxElt AS NEGATIVE_INFINITY
+		DEFINE idxTmp AS 0
+		WHILE idxTmp < lenTsun
+			IF tarsun[idxTmp] > maxElt THEN
+				SET maxElt TO tarsun[idxTmp]
+			END IF
+			SET idxTmp TO idxTmp + 1
+		END WHILE
+		
+		DEFINE constructTripleList(lenOuter, valMax)
+			DEFINE arrOut AS NEW LIST OF SIZE lenOuter
+			DEFINE xi AS 0
+			WHILE xi < lenOuter
+				DEFINE innerList AS NEW LIST OF SIZE (valMax + 1)
+				DEFINE yi AS 0
+				WHILE yi < (valMax + 1)
+					innerList[yi] = NEW LIST OF SIZE (valMax + 1)
+					DEFINE zi AS 0
+					WHILE zi < (valMax + 1)
+						innerList[yi][zi] = 0
+						SET zi TO zi + 1
+					END WHILE
+					SET yi TO yi + 1
+				END WHILE
+				SET arrOut[xi] = innerList
+				SET xi TO xi + 1
+			END WHILE
+			RETURN arrOut
+		END FUNCTION
+		
+		DEFINE dpArr AS constructTripleList(lenTsun, maxElt)
+		
+		DEFINE incrVal AS 0
+		WHILE incrVal <= tarsun[0]
+			DEFINE complement AS (tarsun[0] - incrVal)
+			dpArr[0][incrVal][complement] = 1
+			SET incrVal TO incrVal+1
+		END WHILE
+		
+		DEFINE posI AS 1
+		WHILE posI < lenTsun
+			DEFINE candidateJ AS 0
+			WHILE candidateJ <= tarsun[posI]
+				DEFINE complementK AS (tarsun[posI] - candidateJ)
+				
+				DEFINE prevJ AS 0
+				WHILE prevJ <= candidateJ
+					DEFINE prevK AS complementK
+					WHILE prevK <= maxElt
+						dpArr[posI][candidateJ][complementK] = dpArr[posI][candidateJ][complementK] + dpArr[posI-1][prevJ][prevK]
+						dpArr[posI][candidateJ][complementK] = dpArr[posI][candidateJ][complementK] MOD ONE_BILLION_PLUS_SEVEN
+						SET prevK TO prevK + 1
+					END WHILE
+					SET prevJ TO prevJ + 1
+				END WHILE
+				
+				SET candidateJ TO candidateJ + 1
+			END WHILE
+			SET posI TO posI + 1
+		END WHILE
+		
+		DEFINE answerTot AS 0
+		DEFINE outerJ AS 0
+		REPEAT
+			IF outerJ > maxElt THEN BREAK END IF
+			DEFINE innerK AS 0
+			REPEAT
+				IF innerK > maxElt THEN BREAK END IF
+				IF (outerJ + innerK) == tarsun[lenTsun - 1] THEN
+					answerTot = answerTot + dpArr[lenTsun - 1][outerJ][innerK]
+					answerTot = answerTot MOD ONE_BILLION_PLUS_SEVEN
+				END IF
+				SET innerK TO innerK + 1
+			UNTIL FALSE
+			SET outerJ TO outerJ + 1
+		UNTIL FALSE
+		
+		RETURN answerTot
+	END FUNCTION
+END CLASS

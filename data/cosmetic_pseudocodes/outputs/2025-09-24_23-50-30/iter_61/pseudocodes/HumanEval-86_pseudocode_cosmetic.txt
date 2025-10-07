@@ -1,0 +1,109 @@
+```
+FUNCTION anti_shuffle(alphanumeric_sequence)
+	TYPE CharArray IS ARRAY OF CHARACTER
+	VAR word_collection : CharArray LIST
+	VAR index_tracker : INTEGER := 0
+	VAR collected_sorted_words : CharArray LIST := EMPTY LIST
+	VAR assembled_result : STRING
+	
+	FUNCTION sort_characters_recursively(arr : CharArray, left_bound : INTEGER, right_bound : INTEGER) : CharArray
+		IF left_bound >= right_bound THEN
+			RETURN arr
+		END IF
+		VAR pivot : CHARACTER := arr[right_bound]
+		VAR marker : INTEGER := left_bound - 1
+		
+		FUNCTION partition_loop(position : INTEGER, pivot_char : CHARACTER, boundary : INTEGER, marker_val : INTEGER) : INTEGER
+			IF position > boundary - 1 THEN
+				RETURN marker_val
+			END IF
+			IF NOT (arr[position] > pivot_char) THEN
+				marker_val := marker_val + 1
+				// Swap arr[marker_val] and arr[position]
+				VAR temp : CHARACTER := arr[marker_val]
+				arr[marker_val] := arr[position]
+				arr[position] := temp
+			END IF
+			RETURN partition_loop(position + 1, pivot_char, boundary, marker_val)
+		END FUNCTION
+		
+		marker := partition_loop(left_bound, pivot, right_bound, marker)
+		// Swap arr[marker + 1] and arr[right_bound]
+		VAR temp2 : CHARACTER := arr[marker + 1]
+		arr[marker + 1] := arr[right_bound]
+		arr[right_bound] := temp2
+		
+		arr := sort_characters_recursively(arr, left_bound, marker)
+		arr := sort_characters_recursively(arr, marker + 2, right_bound)
+		RETURN arr
+	END FUNCTION
+	
+	FUNCTION process_words(position : INTEGER, words_list : STRING LIST, results : STRING LIST) : STRING LIST
+		IF position >= LENGTH(words_list) THEN
+			RETURN results
+		END IF
+		VAR current_word : STRING := words_list[position]
+		VAR chars_of_word : CharArray := []
+		
+		FUNCTION string_to_char_array(str : STRING, pos : INTEGER, arr : CharArray) : CharArray
+			IF pos >= LENGTH(str) THEN
+				RETURN arr
+			END IF
+			APPEND str[pos] TO arr
+			RETURN string_to_char_array(str, pos + 1, arr)
+		END FUNCTION
+		
+		chars_of_word := string_to_char_array(current_word, 0, [])
+		chars_of_word := sort_characters_recursively(chars_of_word, 0, LENGTH(chars_of_word) - 1)
+		
+		FUNCTION char_array_to_string(arr : CharArray, pos : INTEGER, accum : STRING) : STRING
+			IF pos >= LENGTH(arr) THEN
+				RETURN accum
+			END IF
+			RETURN char_array_to_string(arr, pos + 1, accum + arr[pos])
+		END FUNCTION
+		
+		VAR sorted_word : STRING := char_array_to_string(chars_of_word, 0, "")
+		APPEND sorted_word TO results
+		RETURN process_words(position + 1, words_list, results)
+	END FUNCTION
+	
+	FUNCTION split_string_to_list(s : STRING, current_pos : INTEGER, res_list : STRING LIST, word_accum : STRING) : STRING LIST
+		IF current_pos >= LENGTH(s) THEN
+			IF LENGTH(word_accum) > 0 THEN
+				APPEND word_accum TO res_list
+			END IF
+			RETURN res_list
+		END IF
+		VAR current_char : CHARACTER := s[current_pos]
+		IF current_char = ' ' THEN
+			IF LENGTH(word_accum) > 0 THEN
+				APPEND word_accum TO res_list
+				word_accum := ""
+			END IF
+		ELSE
+			word_accum := word_accum + current_char
+		END IF
+		RETURN split_string_to_list(s, current_pos + 1, res_list, word_accum)
+	END FUNCTION
+	
+	word_collection := split_string_to_list(alphanumeric_sequence, 0, [], "")
+	collected_sorted_words := process_words(0, word_collection, [])
+	
+	FUNCTION join_list_with_space(lst : STRING LIST, pos : INTEGER, acc_string : STRING) : STRING
+		IF pos >= LENGTH(lst) THEN
+			RETURN acc_string
+		END IF
+		VAR updated_string : STRING
+		IF pos = 0 THEN
+			updated_string := lst[pos]
+		ELSE
+			updated_string := acc_string + " " + lst[pos]
+		END IF
+		RETURN join_list_with_space(lst, pos + 1, updated_string)
+	END FUNCTION
+	
+	assembled_result := join_list_with_space(collected_sorted_words, 0, "")
+	RETURN assembled_result
+END FUNCTION
+```

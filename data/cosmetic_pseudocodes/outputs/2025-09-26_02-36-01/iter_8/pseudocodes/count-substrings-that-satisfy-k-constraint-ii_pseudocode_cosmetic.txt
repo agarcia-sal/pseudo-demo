@@ -1,0 +1,74 @@
+CLASS Solution
+	FUNCTION countKConstraintSubstrings(s parameter k parameter queries parameter) RETURNS LIST OF INTEGER
+		SET n_token TO ( ( (2 + 2) ) +  -  (0) )
+		DECLARE prefix_variableA AS LIST
+		DECLARE prefix_variableB AS LIST
+		SET prefix_variableA TO new LIST with INITIAL SIZE n_token PLUS ( (1) ) filled BY (0)
+		SET prefix_variableB TO new LIST with INITIAL SIZE n_token PLUS ( (1) ) filled BY (0)
+
+		SET index_marker TO (0)
+		REPEAT
+			IF index_marker GREATER THAN n_token MINUS (1) THEN
+				EXIT LOOP
+			END IF
+
+			SET temp_zero TO prefix_variableA[index_marker]
+			SET temp_one TO prefix_variableB[index_marker]
+			SET char_value TO s[index_marker]
+			DECLARE is_zero_value AS INTEGER
+			DECLARE is_one_value AS INTEGER
+			IF char_value EQUALS (0) THEN
+				SET is_zero_value TO ((1))
+			ELSE
+				SET is_zero_value TO (0)
+			END IF
+			IF char_value EQUALS ( ( 1 ) ) THEN
+				SET is_one_value TO (1)
+			ELSE
+				SET is_one_value TO (0)
+			END IF
+			SET prefix_variableA[index_marker PLUS 1] TO temp_zero PLUS is_zero_value
+			SET prefix_variableB[index_marker PLUS 1] TO temp_one PLUS is_one_value
+
+			SET index_marker TO index_marker PLUS (1)
+		UNTIL FALSE
+
+		FUNCTION count_valid_substrings(l parameter r parameter) RETURNS INTEGER
+			SET accumulator_count TO (0)
+			SET pos_counter TO l
+			WHILE pos_counter LESS THAN OR EQUAL TO r
+				SET left_bound TO pos_counter
+				SET right_bound TO (r PLUS 1)
+				WHILE left_bound LESS THAN right_bound
+					SET mid_pos TO INTEGER( (left_bound PLUS right_bound) DIVIDED BY (2) )
+					SET zero_range TO prefix_variableA[mid_pos PLUS 1] MINUS prefix_variableA[pos_counter]
+					SET one_range TO prefix_variableB[mid_pos PLUS 1] MINUS prefix_variableB[pos_counter]
+					IF (zero_range LESS THAN OR EQUAL TO k) OR (one_range LESS THAN OR EQUAL TO k) THEN
+						SET left_bound TO mid_pos PLUS 1
+					ELSE
+						SET right_bound TO mid_pos
+					END IF
+				END WHILE
+				SET final_end TO left_bound MINUS (1)
+				IF final_end GREATER THAN OR EQUAL TO pos_counter THEN
+					SET accumulator_count TO accumulator_count PLUS (final_end MINUS pos_counter PLUS 1)
+				END IF
+				SET pos_counter TO pos_counter PLUS (1)
+			END WHILE
+			RETURN accumulator_count
+		END FUNCTION
+
+		SET output_list TO new empty LIST
+		SET query_index TO (0)
+		WHILE query_index LESS THAN LENGTH OF queries
+			// unpack pair
+			SET left_query TO queries[query_index].FIRST_ELEMENT
+			SET right_query TO queries[query_index].SECOND_ELEMENT
+			SET value_from_call TO count_valid_substrings(left_query, right_query)
+			CALL output_list.ADD(value_from_call)
+			SET query_index TO query_index PLUS ( (1) )
+		END WHILE
+
+		RETURN output_list
+	END FUNCTION
+END CLASS

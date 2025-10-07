@@ -1,0 +1,46 @@
+CLASS Solution  
+    FUNCTION sumOfPowers(nums parameter LIST OF INTEGERS k parameter INTEGER) RETURNS INTEGER  
+        CONSTANT MOD_CONST IS (10 * 10 * 10 * 10 * 10 * 10 * 10 * 10 * 10) + 7  
+        VARIABLE aggregate_result INITIALIZED TO 0  
+        
+        DEFINE FUNCTION computeMinDiff(sequence parameter LIST OF INTEGERS, length parameter INTEGER, pos1 parameter INTEGER) RETURNS INTEGER  
+            IF pos1 EQUALS length MINUS 1 THEN  
+                RETURN 1000000000000  // Large sentinel value  
+            ELSE  
+                VARIABLE innerMinDiff INITIALIZED TO computeMinDiff(sequence, length, pos1 + 1)  
+                
+                DEFINE FUNCTION innerLoop(pos2 parameter INTEGER, currentMin parameter INTEGER) RETURNS INTEGER  
+                    IF pos2 EQUALS length THEN  
+                        RETURN currentMin  
+                    ELSE  
+                        VARIABLE diffVal INITIALIZED TO sequence[pos1] - sequence[pos2]  
+                        IF diffVal < 0 THEN diffVal = -diffVal  
+                        VARIABLE updatedMin INITIALIZED TO currentMin  
+                        IF diffVal < currentMin THEN  
+                            updatedMin = diffVal  
+                        END IF  
+                        RETURN innerLoop(pos2 + 1, updatedMin)  
+                    END IF  
+                END FUNCTION  
+                
+                VARIABLE nestedMinDiff INITIALIZED TO innerLoop(pos1 + 1, innerMinDiff)  
+                RETURN nestedMinDiff  
+            END IF  
+        END FUNCTION  
+        
+        DEFINE FUNCTION processCombos(combos parameter LIST OF LIST OF INTEGERS, index parameter INTEGER, length parameter INTEGER, acc parameter INTEGER) RETURNS INTEGER  
+            IF index EQUALS length THEN  
+                RETURN acc  
+            ELSE  
+                VARIABLE currentCombo INITIALIZED TO combos[index]  
+                VARIABLE minDiffVal INITIALIZED TO computeMinDiff(currentCombo, k, 0)  
+                VARIABLE newAcc INITIALIZED TO (acc + minDiffVal) MOD MOD_CONST  
+                RETURN processCombos(combos, index + 1, length, newAcc)  
+            END IF  
+        END FUNCTION  
+        
+        VARIABLE combosList INITIALIZED TO all_combinations(nums, k)  
+        VARIABLE result FINALIZED TO processCombos(combosList, 0, length_of(combosList), aggregate_result)  
+        RETURN result  
+    END FUNCTION  
+END CLASS
