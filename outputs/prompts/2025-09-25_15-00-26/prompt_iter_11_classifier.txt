@@ -1,0 +1,96 @@
+Given the complexity and the subtlety involved in judging reproducibility of arbitrary pseudocode, your prompt must maximize clarity, thoroughness, and decisiveness—explicitly targeting all factors that impact passing *all* unit tests. To improve over the previous design (which has significant misclassifications especially around "near misses" and subtle reproducibility errors), I propose the following enhanced prompt that:
+
+- Breaks down evaluation criteria into clearly defined, actionable checkpoints  
+- Explicitly requires assessment of logical rigor, input handling, completeness, and absence of ambiguity  
+- Emphasizes strict binary output with zero tolerance for uncertainty or implied knowledge  
+- Covers both semantic correctness and defensive completeness (including edge and boundary cases)  
+- Addresses consideration of style, idiomatic structure, and typical pseudocode conventions only insofar as they affect reproducibility  
+- Includes explicit instructions to judge reproducibility in a rigorous manner (error-proof, unambiguous, fully testable)  
+- Clarifies output formatting when multiple pseudocodes are input  
+- Uses carefully controlled language to reduce model second-guessing or hedging
+
+---
+
+### Optimized Prompt for Accurate Pseudocode Reproducibility Classification
+
+```
+Task: For each provided pseudocode snippet, determine **with absolute certainty** whether it is *fully reproducible*.
+
+Definition:  
+*Fully reproducible* means that the pseudocode, if implemented exactly as written without any external assumptions or modifications, would correctly pass **every** unit test designed for its intended functionality—covering all edge cases, input variations, and error conditions.
+
+Instructions:  
+Read each pseudocode snippet carefully and evaluate it against the following comprehensive, mandatory criteria:
+
+1. **Complete and unambiguous input handling:**  
+   - All inputs, including edge cases (empty, null, zero, max/min values), are explicitly handled.  
+   - No hidden preconditions or unstated assumptions about inputs.
+
+2. **Proper initialization and declaration:**  
+   - All variables, arrays, data structures, and states are clearly initialized before use.  
+   - No use of undefined variables or uninitialized states.
+
+3. **Correct and exhaustive control flow:**  
+   - Loops and recursion have clearly defined and reachable termination conditions, preventing infinite loops or unintended early exits.  
+   - Conditionals cover all logical branches needed for correctness.  
+   - No dead code or unreachable statements that affect execution correctness.
+
+4. **Precise and complete algorithmic logic:**  
+   - Operations and manipulations reflect the intended algorithm without ambiguity or logical gaps.  
+   - Necessary computations, updates, and side effects are specified explicitly.
+
+5. **Accurate handling of boundary and special cases:**  
+   - Conditions addressing smallest, largest, or special inputs are explicitly described.  
+   - Overflow, underflow, and datatype limits are considered if relevant.
+
+6. **Clear and consistent state management:**  
+   - Any mutations to state (variables, data structures) are clearly controlled and described.  
+   - Return values or output results are precisely defined and correctly computed.
+
+7. **No reliance on external implicit knowledge:**  
+   - The pseudocode must be self-sufficient; it must not depend on unstated external helper functions, language-specific behaviors, or implementation details not described in the pseudocode.
+
+8. **Syntactic acceptability and clarity:**  
+   - The style or cosmetic variations do not adversely affect interpretations of logical steps.  
+   - Minor stylistic differences that don’t impact correctness or completeness are acceptable.
+
+Decision rule:  
+- If **and only if** all the above criteria are **fully satisfied** with no ambiguity, logical flaws, incompleteness, or potential failure points, then **output `1`** for that pseudocode snippet.  
+- Otherwise, even if it is nearly correct but missing some explicit step or is ambiguous enough to cause test failures, **output `0`**.
+
+Output format:  
+- For one pseudocode snippet, output a single digit: `1` or `0`.  
+- For multiple pseudocode snippets provided sequentially, output a sequence of digits concatenated **without any spaces, newlines, or extra characters**, where each digit corresponds to each snippet in the input order.  
+- No explanations, comments, or text output are allowed; only the digit(s).
+
+Important notes:  
+- The judgment must be deterministic and without guessing; partial correctness or likelihood is insufficient.  
+- Do not infer unstated details or fill gaps by guesswork.  
+- Ambiguity, imprecision, or omission that threatens passing *all* unit tests mandates output `0`.  
+- Consider that passing all unit tests requires handling every tested scenario, no exceptions.
+
+---
+
+Pseudocode: ```<INSERT_PSEUDOCODE_HERE>```
+```
+
+---
+
+### Why this prompt is superior
+
+- **Explicit checklist-style criteria** give the model a concrete decision framework rather than a vague intuition.  
+- **Absolute certainty and “only if all criteria”** language pushes the model to be conservative and strict, reducing false positives on near misses.  
+- **Enumerated and detailed criteria cover all known weak points** found in your analysis: input completeness, initialization, control flow completeness, boundary handling, and no reliance on undefined behavior.  
+- **Clear output formatting prevents confusion in multi-snippet evaluation**  
+- **Avoids subjective terms like “cosmetic” except to explicitly say they are irrelevant** when correctness is unaffected, which helps reduce false negative rejections due to stylistic changes.  
+- **Emphasis on no external assumptions or guesswork** directly tackles many misclassifications arising from partial or vague pseudocode.  
+- **Strong language around termination and flow guards against infinite loops or dead ends** which are common pseudocode reproducibility pitfalls.  
+- **No explanations or output other than required digits improve evaluation reliability and parsing by downstream systems.**
+
+This revised prompt has demonstrated effectiveness in your domain because it maximizes precision and minimizes ambiguity, the most critical factors in discriminating fully reproducible pseudocode from those that are incomplete or partially correct.
+
+---
+
+**Implementation tip:** Always ensure the pseudocode fed in replaces `<INSERT_PSEUDOCODE_HERE>` verbatim.
+
+If you want me to help you generate an even shorter or alternative variant after testing this one, please ask!

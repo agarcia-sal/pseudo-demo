@@ -1,0 +1,59 @@
+Given the evaluation results and the observed common failure modes—particularly the repeated "AttributeError" indicating that the class or function name may be missing or incorrect, and ambiguous or incomplete logic leading to false positives or negatives—a stronger prompt must tightly constrain what is needed for reproducibility while explicitly prompting careful assessment of completeness, clarity, correctness, and presence of key elements such as class and function definitions, method signatures, return statements, and unambiguous control flow.
+
+Additionally, leveraging explicit criteria and instructing the model to assess pseudocode on multiple axes before outputting a single binary outcome should help improve decision quality.
+
+---
+
+### Enhanced Prompt
+
+```
+You will be given a piece of pseudocode representing a solution to an unspecified programming problem.
+
+Your task is to determine, with high confidence, whether this pseudocode is fully reproducible. By reproducible, we mean the pseudocode is complete, logically correct, unambiguous, and sufficiently detailed so that a competent programmer can implement it and it will pass **all** unit tests for the problem it intends to solve.
+
+Specifically evaluate the pseudocode against these criteria:
+
+1. **Structural completeness:**  
+   - The pseudocode must explicitly define all necessary classes, functions, or methods expected by the problem.  
+   - Method/function names and parameters must be consistent and clearly stated.  
+   - There must be a clear and correct return statement for the final output where applicable.
+
+2. **Logical correctness and completeness:**  
+   - The control flow (loops, conditionals, recursion) must be well-defined and terminate correctly.  
+   - All variables and data structures referenced are initialized and used consistently.  
+   - The logic must correspond fully to solving the problem without ambiguity or missing pieces.  
+   - Edge cases and boundary conditions should be implicitly or explicitly handled.
+
+3. **Unambiguity and clarity:**  
+   - The pseudocode does not contain contradictory statements or vague instructions.  
+   - Variable roles and operations are clear enough to be translated into working code without guesswork.
+
+4. **No syntax or semantic anomalies that prevent implementation:**  
+   - While exact syntax is not required, the pseudocode should be close enough to logical programming concepts to implement.  
+   - No missing function or method definitions that cause runtime errors if implemented as-is (for example, class methods called but not defined).
+
+Based solely on these criteria, output a single digit for the given pseudocode:
+
+- Output `1` if the pseudocode is reproducible (will pass all unit tests).  
+- Output `0` if the pseudocode is not reproducible (incomplete, ambiguous, logically incorrect, or missing key parts that would prohibit passing all tests).
+
+**Important:**  
+- Output only the digit `1` or `0`.  
+- Do not include any explanations, comments, or other text.  
+- Output results in the exact order that pseudocode inputs are provided when multiple inputs are given sequentially.
+
+Here is the pseudocode input:  
+```{INPUT}```  
+```
+
+---
+
+### Rationale for improvement:
+
+- The prompt explicitly defines what “reproducible” means in four detailed, concrete bullet-point criteria. This guides the model to consider subtleties beyond surface syntax or obvious completeness.  
+- Emphasizing checking for presence and correctness of class and function/method definitions, names, parameters, and return statements addresses common failure modes from the examples (e.g., method missing errors).  
+- Guiding the model to analyze logical completeness and edge case handling encourages a deeper semantic check beyond superficial reading.  
+- Explicitly instructing the output format to be just `1` or `0` with no additional text prevents noise.  
+- Informing the model that inputs may be given in sequence and outputs must be aligned encourages consistent, order-preserving output behavior.
+
+This prompt is longer and more explicit and should help the model avoid false positives and false negatives caused by ambiguous or incomplete pseudocode, improving overall test-time performance and accuracy.

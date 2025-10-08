@@ -1,0 +1,64 @@
+Given the prior prompt and empirical evaluation insights, key shortcomings appear to stem from ambiguities and insufficient rigor in assessing pseudocode completeness, clarity, and executable structure—leading to misclassification, especially around pseudocode lacking explicit method signatures, class definitions, or proper scoping, and borderline cases near full reproducibility.
+
+To substantially improve performance, the new prompt will:
+
+- Enforce rigorous checks for explicit definitions of all required components (class, function signatures with correct parameters matching expected usage).
+- Demand clarity about control flow, data structures, and operations that guarantee unambiguous translation to executable code.
+- Incorporate evaluation of whether pseudocode could be implemented without assumptions or guesswork, including handling input/output, initialization, loop and branching completeness.
+- Explicitly instruct to treat nearly complete but ambiguous or incomplete pseudocode as non-reproducible ("0"), ensuring stronger precision.
+- Provide a systematic analytic framework to evaluate reproducibility (structural completeness, operational clarity, input/output coverage).
+- Emphasize adherence to passing *all* unit tests, ruling out partial correctness or near-miss coverage.
+- Retain strict output requirements: output exactly "1" or "0" with no extra text.
+
+
+---
+
+### Improved prompt:
+
+```
+You are given a pseudocode implementation purported to solve a programming problem. Your task is to determine if this pseudocode is *fully reproducible* — meaning that it is written with sufficient explicitness, clarity, and completeness such that an experienced developer could implement it directly and have the resulting program pass *every* relevant unit test for that problem without needing any assumptions or additional information.
+
+Consider the following criteria when making your judgement:
+
+1. **Structural completeness:**  
+   - The pseudocode must explicitly define all necessary components, including classes, functions/methods with correct parameter names and count matching typical usage.  
+   - All control structures (loops, conditionals, recursion) must be clearly and unambiguously delineated.  
+   - Data structures and their initializations should be clearly specified.
+
+2. **Operational clarity:**  
+   - Each step must have a precise and unambiguous description of the operations to be performed (e.g., index handling, arithmetic, logical operations, assignments).  
+   - The flow of data and control must be explicit, with no gaps or vague statements that could cause differing implementations.
+
+3. **Input/output coverage:**  
+   - The pseudocode must specify how inputs are received (including variable names as used in function signatures).  
+   - The output or return value must be clearly stated and depend only on the defined inputs and intermediate computations.
+
+4. **No assumptions or missing details:**  
+   - The pseudocode should not omit critical steps or leave implementation details implicit, including edge cases, initialization details, and final return values.  
+   - It should not rely on unstated language features, syntactic sugar, or assumed knowledge beyond the pseudocode itself.
+
+5. **Correctness for all test cases:**  
+   - Assume the pseudocode is meant to cover all relevant edge cases and satisfy all unit tests for the given problem domain.  
+   - Partial implementations or near-complete solutions that would fail some tests must be considered *not* reproducible.
+
+After careful deliberation, output a single integer **1** if the pseudocode meets *all* the above criteria and can be considered fully reproducible as defined. Otherwise, output **0**.
+
+**Output strictly: 1 or 0. Nothing else.**  
+The outputs should be produced in the same order as the pseudocode inputs are fed.
+
+---
+
+Pseudocode:
+
+```
+<<INSERT PSEUDOCODE HERE>>
+```
+```
+
+---
+
+This prompt's innovations lie in explicit, criterion-based evaluation rather than mere intuition or vague "clarity," which addresses borderline and near-miss cases more robustly.
+
+By requiring precise matching of function signatures, input/output definitions, explicit control flow, and forbidding assumptions, it will reduce false positives on incomplete or ambiguous pseudocode and improve the distinction between reproducible and non-reproducible inputs.
+
+The formal, enumerated checklist also encourages thorough analysis leading to more consistent and justifiable outputs, which should enhance test-time performance significantly.
