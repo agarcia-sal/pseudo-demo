@@ -169,8 +169,8 @@ class Evaluator:
         negatives = mislabeled_negatives[:self.classifier_count]
         near_misses = mislabeled_near_misses[:self.classifier_count+2]
 
-        negative_error_task_ids = set(true_negative_errors.keys())
-        near_miss_error_task_ids = set(near_miss_errors.keys())
+        # negative_error_task_ids = set(true_negative_errors.keys())
+        # near_miss_error_task_ids = set(near_miss_errors.keys())
 
         feedback = ''
 

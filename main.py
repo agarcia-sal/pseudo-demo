@@ -68,9 +68,9 @@ def main(cfg):
     
     # Main algorithm
     # problems_dir_name = 'human_eval'
-    problems_dir_name = 'leet_code'
+    # problems_dir_name = 'leet_code'
     # problems_dir_name = 'cosmetic_pseudocodes'
-    # problems_dir_name = 'classifier_pseudocodes'
+    problems_dir_name = 'classifier_pseudocodes'
     if problems_dir_name == 'leet_code':
         # version = 'v0.1.0'
         version = 'v0.3.0-hard'
@@ -83,19 +83,20 @@ def main(cfg):
     elif problems_dir_name == "cosmetic_pseudocodes":
         # previous_timestamp = '2025-09-18_21-00-18'
         # previous_timestamp = '2025-09-18_04-55-13'
-        # previous_timestamp = '2025-09-24_15-05-02'
-        previous_timestamp = '2025-09-25_22-10-58'
+        previous_timestamp = '2025-09-24_15-05-02'
+        # previous_timestamp = '2025-09-25_22-10-58'
+        # previous_timestamp = '2025-09-29_10-32-52'
         # problems_filename = f"positive_labels_{previous_timestamp}.jsonl"
         problems_filename = f"pseudocode_labels_{previous_timestamp}.jsonl"
         data = get_data(problems_dir_name, problems_filename, src_dir=f'{ROOT_DIR}/data')
     elif problems_dir_name == "classifier_pseudocodes":
-        version = 3
+        version = 2
         problems_filename = f"LeetCode-pseudo-v0.{version}.0-train.jsonl"
         # train_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-train.jsonl" )
         # dev_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl")
         data = get_data(problems_dir_name, problems_filename, src_dir=f'{ROOT_DIR}/data')
     else:
-        split = "train"
+        split = "test"
         problems_filename = f'HumanEval-{split}.jsonl'
         data = get_data(problems_dir_name, problems_filename, src_dir=f'{ROOT_DIR}/data')
 
@@ -104,8 +105,8 @@ def main(cfg):
     print(problems_filename)
 
     starting_iteration = 1
-    iterations = 1# [TO DO]: CO-Bench paper uses 64
-    rounds = 1# [TO DO]: this is a hyperparameter i need to tune; am using 10 for now
+    iterations = 32# [TO DO]: CO-Bench paper uses 64
+    rounds = 2# [TO DO]: this is a hyperparameter i need to tune; am using 10 for now
     timestamp = hydra.core.hydra_config.HydraConfig.get().run.dir.split("/")[-1] # this should syncronize with hydra's timestamp
     
 
@@ -113,7 +114,7 @@ def main(cfg):
     if load_previous:
         timestamp = '2025-09-13_12-15-28'
     
-    evolving_encoding = True # depends on whether we are continuing in the encoding or decoding
+    evolving_encoding = False # depends on whether we are continuing in the encoding or decoding
     evolving_decoding = False # This should start off as False always
     evolving_cosmetic = False
     evolving_classifier = False
@@ -187,9 +188,9 @@ def main(cfg):
     prev_decoder_prompt = file_to_string(f"{ROOT_DIR}/prompts/common/trivial_decoder_prompt.txt")
     prev_encoder_prompt = file_to_string(f"{ROOT_DIR}/prompts/common/trivial_encoder_prompt.txt")
 
-    previous_timestamp = '2025-09-18_21-00-18'
+    # previous_timestamp = '2025-09-18_21-00-18'
     # # previous_timestamp = '2025-09-18_04-55-13'
-    # previous_timestamp = '2025-09-24_15-05-02'
+    previous_timestamp = '2025-09-24_15-05-02'
     final_iter = 34
     prev_decoder_prompt = file_to_string(f"{ROOT_DIR}/outputs/prompts/{previous_timestamp}/prompt_iter_{final_iter}_decoder.txt")
 
@@ -204,9 +205,9 @@ def main(cfg):
                 # run_results(best_prompt_overall, best_prompt_path_overall, stage, problems_dir_name, timestamp, round)
                 # for round in range(rounds):
                 print('right before calling agent.step()')
-                # final_iter = 33
-                # prompt = file_to_string(f"{ROOT_DIR}/outputs/prompts/{previous_timestamp}/prompt_iter_{final_iter}_encoder.txt")
-                prompt = file_to_string(f"{ROOT_DIR}/prompts/common/trivial_encoder_prompt.txt")
+                final_iter = 33
+                prompt = file_to_string(f"{ROOT_DIR}/outputs/prompts/{previous_timestamp}/prompt_iter_{final_iter}_encoder.txt")
+                # prompt = file_to_string(f"{ROOT_DIR}/prompts/common/trivial_encoder_prompt.txt")
                 # prompt = encoding_agent.step()
                 
                 if prompt is None:  # agent decides to terminate
@@ -219,11 +220,13 @@ def main(cfg):
                 save_prompt(str(generated_prompts_path), prompt, it, stage)
                 
                 
+                # UNCOMMENT BELOW:
                 # encoding_agent.feedback(feedback.dev_score, feedback.dev_feedback, it)  # Use dev set score as feedback
                 # previous_best_path = os.path.join(ROOT_DIR, "data", problems_dir_name, "outputs", timestamp, f"iter_{it}", "previous_best", "previous_best.json")
                 # previous_best_prompt, previous_best_score, previous_best_feedback, previous_best_iter = encoding_agent.get_previous_best()
                 # record_previous_best_solution(previous_best_path, previous_best_prompt, previous_best_score, previous_best_feedback, previous_best_iter)
                 
+                # UNCOMMENT BELOW:
                 # Get the final solution
                 # if it % rounds == 0: # about to switch over to the next stage
                 #     best_prompt_so_far = encoding_agent.finalize()
@@ -336,15 +339,17 @@ def main(cfg):
         # first_timestamp = '2025-09-18_04-55-13'
         # first_timestamp = '2025-09-18_21-00-18'
         # first_timestamp = '2025-09-24_15-05-02'
-        first_timestamp = '2025-09-25_22-10-58'
-        first_dir_name = 'leet_code'
+        # first_timestamp = '2025-09-25_22-10-58'
+        first_timestamp = '2025-09-29_10-32-52'
+        first_dir_name = 'human_eval'
         first_pipeline_json_path_name = f"{ROOT_DIR}/data/{first_dir_name}/metrics/{first_timestamp}_metrics.json"
         # second_timestamp =  '2025-09-18_21-00-18' # <- just readability: avg_word_length - avg_words_per_line
         # second_timestamp =  '2025-09-19_11-38-47'
         # second_timestamp =  '2025-09-20_00-16-56'
         # second_timestamp =  '2025-09-24_18-22-37'
-        second_timestamp =  '2025-09-24_23-50-30'
+        # second_timestamp =  '2025-09-24_23-50-30'
         # second_timestamp =  '2025-09-20_19-13-22'
+        second_timestamp =  '2025-09-29_04-57-21'
         second_dir_name = 'cosmetic_pseudocodes'
         # second_dir_name = 'leet_code'
         second_pipeline_json_path_name = f"{ROOT_DIR}/data/{second_dir_name}/metrics/{second_timestamp}_metrics.json"
@@ -352,11 +357,12 @@ def main(cfg):
         # problems_filename = f'LeetCodeDataset-v0.3.0tiny-train.jsonl'
         # problems_filename = f'LeetCodeDataset-v0.3.0-hard-train.jsonl'
         # problems_dir = f"{ROOT_DIR}/data/{first_dir_name}"
-        first_problems_filename = f'LeetCodeDataset-v0.3.0-hard-test.jsonl'
-        # first_problems_filename = f'HumanEval-train.jsonl'
+        # first_problems_filename = f'LeetCodeDataset-v0.3.0-hard-test.jsonl'
+        first_problems_filename = f'HumanEval-test.jsonl'
         first_dir = f"{ROOT_DIR}/data/{first_dir_name}"
         second_dir = f"{ROOT_DIR}/data/{second_dir_name}"
-        second_problems_filename = f"positive_labels_{first_timestamp}.jsonl"
+        # second_problems_filename = f"positive_labels_{first_timestamp}.jsonl"
+        second_problems_filename = f"pseudocode_labels_{first_timestamp}.jsonl"
         # second_problems_filename = f'LeetCodeDataset-v0.3.0-hard-train.jsonl'
         # positive_labels_path_name = os.path.join(ROOT_DIR, "outputs", "pseudocodes", f"positive_labels_{timestamp}")
         # GET POSITIVE EXAMPLES:
@@ -368,7 +374,10 @@ def main(cfg):
         # positive_examples = get_positive_labels(first_pipeline_json_path_name, problems_dir, problems_filename, first_timestamp, iterations)
 
         # GET PSEUDOCODES FROM THE AUTOENCODER PIPELINE
-        first_timestamp = '2025-09-25_22-10-58'
+        # first_timestamp = '2025-09-25_22-10-58'
+        # first_timestamp = '2025-09-24_15-05-02'
+        first_timestamp = '2025-09-29_10-32-52'
+
         new_file_name = os.path.join(ROOT_DIR, "data", "cosmetic_pseudocodes", f"pseudocode_labels_{first_timestamp}.jsonl")
         # pseudocode_examples = get_pseudocode_labels(first_pipeline_json_path_name, first_dir, first_problems_filename, new_file_name, first_timestamp)
         
@@ -377,17 +386,22 @@ def main(cfg):
         # problem_results, dev_set_results = get_pseudocode_dataset(first_pipeline_json_path_name, second_pipeline_json_path_name, first_dir, second_dir, first_problems_filename, second_problems_filename, first_timestamp, second_timestamp, iterations, limit)
 
         # GET PSEUDOCODE TEST DATASET FOR THE CLASSIFIER
-        first_timestamp = '2025-09-25_22-10-58'
+        # first_timestamp = '2025-09-25_22-10-58'
+        first_timestamp = '2025-09-24_15-05-02'
+        # first_timestamp = '2025-09-29_10-32-52'
         first_dir_name = 'cosmetic_pseudocodes'
         first_dir = f"{ROOT_DIR}/data/{first_dir_name}"
-        second_timestamp = '2025-09-26_02-36-01'
+        # second_timestamp = '2025-09-26_02-36-01'
+        # second_timestamp = '2025-09-29_10-50-33'
+        second_timestamp = '2025-09-29_13-46-17'
         second_pipeline_json_path_name = f"{ROOT_DIR}/data/{first_dir_name}/metrics/{second_timestamp}_metrics.json"
         first_problems_filename = os.path.join(ROOT_DIR, "data", "cosmetic_pseudocodes", f"pseudocode_labels_{first_timestamp}.jsonl")
         limit = 150
-        # problem_results = get_pseudocode_dataset_test(second_pipeline_json_path_name, first_dir, first_problems_filename, second_timestamp, limit)
-        # version = 3
+        problem_results = get_pseudocode_dataset_test(second_pipeline_json_path_name, first_dir, first_problems_filename, second_timestamp, limit)
+        version = 2
         # test_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-test.jsonl" )
-        # write_dataset_to_file(problem_results, test_set_filename)
+        test_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"HumanEval-pseudo-v0.{version}.0-train.jsonl" )
+        write_dataset_to_file(problem_results, test_set_filename)
         # print('problem_results: ')
         # print(problem_results)
         # print('dev_set_results:')
@@ -431,7 +445,7 @@ def main(cfg):
         stage='cosmetic'
     )
     # evolving_cosmetic = True
-    cosmetic_iterations = 32
+    cosmetic_iterations = 16
 
     if load_previous and evolving_cosmetic:
         prev_iter = 0
@@ -443,11 +457,11 @@ def main(cfg):
     
     # previous_timestamp = '2025-09-18_21-00-18'
     # previous_timestamp = '2025-09-18_04-55-13'
-    # previous_timestamp = '2025-09-24_15-05-02'
-    previous_timestamp = '2025-09-25_22-10-58'
+    previous_timestamp = '2025-09-24_15-05-02'
+    # previous_timestamp = '2025-09-25_22-10-58'
     positive_examples_file_name = f"positive_labels_{previous_timestamp}.jsonl"
     final_iter = 34
-    previous_timestamp = '2025-09-18_21-00-18'
+    # previous_timestamp = '2025-09-18_21-00-18'
     decoder_prompt = file_to_string(f"{ROOT_DIR}/outputs/prompts/{previous_timestamp}/prompt_iter_{final_iter}_decoder.txt")
 
     #[TO DO]: set up dataset and metrics path and everything else.
@@ -489,10 +503,14 @@ def main(cfg):
     generated_prompts_path = Path(f"{ROOT_DIR}/outputs/prompts/{timestamp}")
     generated_prompts_path.mkdir(parents=True, exist_ok=True)
 
-    version = 3
-    train_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-train.jsonl" )
-    dev_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl")
+    # version = 3
+    # train_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-train.jsonl" )
+    # dev_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl")
+    version = 2
+    train_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"HumanEval-pseudo-v0.{version}.0-train.jsonl" )
+    test_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"HumanEval-pseudo-v0.{version}.0-test.jsonl" )
     classifier_dataset_name = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes")
+    
     classifier_agent = ga(
         client=client,
         src_dir=ROOT_DIR,
@@ -503,9 +521,12 @@ def main(cfg):
     # evolving_classifier = False
     classifier_iterations = 32
     # rounds = 1
-    previous_timestamp = '2025-09-18_21-00-18'
-    final_iter = 34
-    decoder_prompt = file_to_string(f"{ROOT_DIR}/outputs/prompts/{previous_timestamp}/prompt_iter_{final_iter}_decoder.txt")
+    # UNCOMMENT:
+
+    # previous_timestamp = '2025-09-18_21-00-18'
+    # final_iter = 34
+    # decoder_prompt = file_to_string(f"{ROOT_DIR}/outputs/prompts/{previous_timestamp}/prompt_iter_{final_iter}_decoder.txt")
+    # decoder_prompt = file_to_string(f"{ROOT_DIR}/prompts/greedy_refine/trivial_decoder_prompt.txt")
 
     evaluator_classifier = Evaluator(data, timeout=5)
 
@@ -517,49 +538,39 @@ def main(cfg):
                 # reevo = ga(cfg, ROOT_DIR, stage, round, timestamp, client) # maybe i should have different clients for generating and for reflecting
                 # best_prompt_overall, best_prompt_path_overall = reevo.evolve()
                 # run_results(best_prompt_overall, best_prompt_path_overall, stage, problems_dir_name, timestamp, round)
-                # print('right before calling agent.step()')
+                
+                # UNCOMMENT:
+                # prompt = classifier_agent.step_direct_answer()
                 prompt = classifier_agent.step()
-                # print('step:', 0)
-                # print('right after calling agent.step()')
-                # print('prompt from agent.step() looks like: ', prompt)
+
+                # prompt = file_to_string(f"{ROOT_DIR}/prompts/greedy_refine/trivial_classifier.txt")
+                
                 if prompt is None:  # agent decides to terminate
                     # print('prompt is none')
                     break
                 save_prompt(str(generated_prompts_path), prompt, it, stage)
                 # print('right before calling evaluate() within the round')
                 # feedback = evaluator_classifier.evaluate_classifier(prompt, decoder_prompt, stage, timestamp, it, client)
-                mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, it)
+                mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client)
                 # mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, it)
                 # print('step:', 1)
                 feedback = evaluator_classifier.get_feedback_classifier(mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
                 # feedback = evaluator_classifier.get_feedback_classifier(mislabeled_problems, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
                 # print('step:', 2)
                 score = feedback.dev_score
-                # save_metrics(avg_metrics, metrics_path, timestamp, stage, it, round, rounds)
                 # save_classifier_score(score, metrics_path, timestamp, stage, it)
-                # print('step:', 3)
-                
-                # print('step:', 4)
-                # print('feedback: ', feedback)
-                # print('right before calling feedback() within the round')
+         
+                # UNCOMMENT:
                 classifier_agent.feedback(feedback.dev_score, feedback.dev_feedback, it)  # Use dev set score as feedback
+
                 avg_metrics = feedback.avg_metrics
                 save_metrics(avg_metrics, metrics_path, timestamp, stage, it)
 
+                # UNCOMMENT:
                 previous_best_path = os.path.join(ROOT_DIR, "data", problems_dir_name, "outputs", timestamp, f"iter_{it}", "previous_best", "previous_best.json")
                 previous_best_prompt, previous_best_score, previous_best_feedback, previous_best_iter = classifier_agent.get_previous_best()
                 record_previous_best_solution(previous_best_path, previous_best_prompt, previous_best_score, previous_best_feedback, previous_best_iter)
 
-                # print('step:', 5)
-                # print('right after calling feedback() within the round')
-                # Get the final solution
-                # print('right before calling finalize()')
-                # print('right after calling save_metrics()')
-                # print(feedback.test_feedback)  # Test set score < this is maybe where i can get the metrics: [TO DO]!
-                # if feedback.dev_score == 1.0:
-                #     print('prompt: ')
-                #     print(prompt)
-                #     break
             except Exception as e:
                 print(f"Error in iteration {it} for stage {stage}: {e}")
                 continue  # Skip to the next round
@@ -569,7 +580,9 @@ def main(cfg):
     
     if evolving_classifier:
         # test final classifier prompt with dev_set and test_set
+        # UNCOMMENT PROMPT BELOW:
         prompt = classifier_agent.finalize()
+
         # previous_timestamp = '2025-09-25_14-14-02'
         # timestamp = '2025-09-25_13-37-25'
         # timestamp = '2025-09-25_15-00-26'
@@ -584,28 +597,31 @@ def main(cfg):
         # prompt = "```\nYou will be provided one or more pseudocode snippets, each claiming to fully describe a complete solution to some computational problem.\n\nYour task: For each snippet, independently determine whether it is **REPRODUCIBLE** \u2014 that is, if implemented exactly as given, without any external information, guesses, or assumptions, it will pass **all** relevant unit tests without fail.\n\nOutput a single digit for each snippet in the input order:  \n- `1` if it meets **all** criteria of reproducibility  \n- `0` otherwise  \n\nOutput only these digits, one per line, with no extra text or formatting.\n\n---\n\nTo rigorously assess **REPRODUCIBILITY**, apply the following detailed criteria:\n\n1. **Complete and Explicit Specification**  \n   - All variables, data structures, inputs, and outputs are fully declared or unambiguously implied.  \n   - Every step needed to implement the solution is clearly and explicitly described (including initializations, iterations, conditionals, and returns).  \n   - Edge cases and special conditions are explicitly handled.  \n   - No aspect of the logic or control flow may be left incomplete, vague, or ambiguous.  \n   - Do NOT fill in or infer unstated details beyond what is presented.\n\n2. **Soundness and Correctness of Logic**  \n   - The algorithmic reasoning correctly handles *every* valid input case, including edge cases.  \n   - There are no logical errors, contradictions, infinite loops, or unreachable code segments.  \n   - Mentally simulate the pseudocode with typical and boundary inputs to check correctness.\n\n3. **Unambiguous Interpretability**  \n   - Every operation and instruction is stated with clarity such that only one precise implementation is possible.  \n   - Ambiguous terms, unclear variable scopes, or unspecified behaviors invalidate reproducibility.\n\n4. **Self-Containment and Independence**  \n   - The snippet must be fully self-sufficient, requiring no additional code snippets, helper functions, libraries, or external context.  \n   - If any auxiliary procedures or standard functions are referenced, their definitions or clear invocation context must be included.\n\n5. **Structural and Semantic Integrity**  \n   - Control structures (loops, recursion, conditionals) and data manipulations must be syntactically consistent and semantically coherent within the pseudocode\u2019s style.  \n   - Variables and data must be properly defined before use, and the flow must guarantee proper termination and result delivery.\n\n6. **Deterministic and Complete Output Definition**  \n   - The final output(s) are clearly specified, including data type and format.  \n   - Return or output statements must be unambiguous.  \n   - No partial or conditional returns that might cause uncertainty regarding final results.\n\n---\n\n**Important:**  \n- If any doubt, ambiguity, missing element, or structural flaw exists, output `0`.  \n- Only output `1` when every item above is *unquestionably* fulfilled.\n\nProceed immediately and produce only the requested output digits for the given pseudocode snippets.\n```"
         # prompt = "Given the pseudocode below, your task is to determine, **without executing or simulating**, whether the pseudocode is fully and unambiguously specified such that **any correct translation of it according to its specification will pass all unit tests exactly**.\n\nOutput **1** if and only if the pseudocode guarantees perfect reproducibility\u2014that is, a faithful implementation passing every unit test without exception\u2014and **0** otherwise.\n\nTo decide, rigorously verify that **all** of the following conditions hold strictly and completely:\n\n---\n\n### 1. **Complete Structural and Interface Definition**  \n- All functions, procedures, methods, or classes are explicitly and uniquely named.  \n- Every declared function\u2019s input parameters (names, types, counts) and return values (types, meanings) are fully specified, precise, and match exactly the expected testing framework interface. No implicit assumptions on parameter naming, ordering, optionality, default values, or return semantics allowed.  \n- All variables, constants, and data structures are explicitly declared or introduced with clear initialization or guaranteed valid initial states before use. Uninitialized or vaguely initialized entities cause failure.  \n- The pseudocode\u2019s overall structure (e.g., classes, function signatures, entry points) aligns perfectly with what the testing environment requires, including expected parameter names and data types.\n\n### 2. **Algorithmic Determinism and Exhaustiveness**  \n- Every control flow construct (loops, recursions, conditionals) is detailed with **explicit and unambiguous conditions**, exact loop bounds, and guaranteed termination proofs or provided exit conditions **covering all valid inputs**. No possibility of infinite loops or undefined iteration scenarios.  \n- Each step in the computational process is fully described: operations, state transitions, side effects, and intermediate variables\u2014all specified without dependence on external or unstated mechanics, language-specific quirks, or hidden state.  \n- The algorithm completely addresses the problem scope it implies or states, with **no implicit gaps, missing steps, or undefined behaviors** anywhere.  \n- All critical assumptions, invariants, preconditions, and postconditions affecting correctness must be **explicitly stated or unambiguously derivable** strictly from pseudocode content; nothing may be inferred beyond what is explicitly written.  \n- If any instruction or condition admits multiple plausible interpretations or allows ambiguity, the reproducibility cannot be guaranteed and you must output `0`.\n\n### 3. **Comprehensive Edge Case and Boundary Coverage**  \n- The pseudocode must explicitly handle all problem-relevant edge cases (e.g., empty inputs, zero values, minimal/maximal sizes, invalid or special inputs), or clearly and unambiguously imply their correct handling without contradiction or omission.  \n- Accesses to elements by index or position must have exact bounds and offsets defined, preventing any out-of-bound possibility or undefined memory/data access.  \n- Exceptional and corner cases must be either explicitly addressed or explicitly stated as omitted with due rationale; silent or implicit handling that risks inconsistent or undefined behavior mandates output `0`.\n\n### 4. **Implementation Independence and Full Determinism**  \n- The pseudocode is fully self-contained, with no reliance on external/global variables, hidden state, or environment beyond the declared inputs and explicit outputs.  \n- No use of randomness, non-deterministic operations, platform-dependent functionality, or unspecified ordering of operations is permitted.  \n- The output for any fixed valid input is uniquely defined and reproducible strictly from the pseudocode steps given.\n\n### 5. **Direct Implementability and Consistency with Test Harness**  \n- The pseudocode is immediately translatable into a fully functional, standalone implementation without requiring any external scaffolding, undeclared helper functions, or supplemental libraries.  \n- The interface format (function/class signatures, parameter names/types, and returns) maps exactly onto the standardized test harness expectations without adding or omitting any element.  \n- The pseudocode does not omit any critical implementation detail that would force guesswork or require environment-specific fixes.\n\n---\n\n### Additional Evaluation Details & Decision Rules  \n- Any **uncertainty** about variable initialization, function interface correctness, loop termination, or edge case handling requires output `0`.  \n- Do *not* perform guessing or \"common sense\" in filling unspecified details. Judge strictly by explicit specifications only.  \n- Contradictions, inconsistent logic, or ambiguous statements anywhere force output `0`.  \n- If structural interface details contradict expected test interfaces (e.g., different parameter names or missing return values), output `0`.  \n- Recursive or iterative flows without exact, provable termination conditions mandate output `0`.  \n- Confirm all variables, operations, and data transformations are fully traceable and precise, including intermediate or auxiliary data.\n\n---\n\n**Output instructions:**  \n- For each pseudocode input, output exactly one digit (`1` or `0`) on a separate line, in the order the pseudocodes are provided, **with no extra text, formatting, or explanation**.  \n- `1` means completely reproducible, guarantees passing all unit tests.  \n- `0` means not reproducible due to any ambiguity, incompleteness, inconsistency, or unspecified behavior.\n\n---\n\nThis prompt enforces a strict, all-encompassing reproducibility checklist emphasizing **explicitness, completeness, deterministic correctness, and exact interface alignment**\u2014maximizing accuracy in distinguishing pseudocode that truly guarantees passing unit tests from those that do not."
         # prompt = "Given one or more pseudocode snippets, each purporting to fully solve a problem, your sole task is to output a single digit (`1` or `0`) per snippet, concatenated into a single string reflecting the input order, with no spaces, punctuation, or any other characters.\n\n**Output a `1` if and only if the snippet is strictly reproducible \u2014 meaning it will deterministically pass _all possible valid unit tests_ for the stated problem, with no exceptions, failures, or undefined behavior under _any_ valid input scenario. Otherwise, output `0`.**\n\n---\n\n### Core evaluation principles (apply independently to each snippet):\n\n#### A. **Complete, Terminating, and Exhaustive Logic**  \n- The snippet fully specifies behavior covering all inputs, including edge and corner cases (empty, minimal, maximal, boundary).  \n- All control flows (loops, recursion, conditionals) conclusively terminate or produce defined results without infinite loops, deadlocks, or partial evaluations.  \n- No input branch or case is left unspecified, ambiguous, or partially handled.\n\n#### B. **Unambiguous, Self-contained Semantics**  \n- All variables, data structures, and operations used are explicitly declared, initialized, and updated within the snippet\u2014there are no hidden external dependencies, implicit states, or assumptions about a runtime environment.  \n- Data transformations and outputs are deterministic and consistent on identical inputs \u2014 no randomness, concurrency issues, or nondeterminism.  \n- No vagueness or underspecification in how computations proceed.\n\n#### C. **Algorithmic Correctness and Completeness**  \n- The snippet fully embodies a valid end-to-end algorithm that logically aligns with the problem requirements or can be soundly inferred as correct for the intended task.  \n- Partial outlines, incomplete heuristics, or mere sketches that omit critical steps or helper procedures cause failure.  \n- All auxiliary functions and procedures invoked are fully defined in the snippet or validly included in-context.  \n- Recognizable standard algorithms must be logically and structurally correct in core details (correct initialization, updates, and state transitions).\n\n#### D. **Robustness and Fault Handling**  \n- The snippet explicitly accounts for invalid inputs, exceptional/fault conditions, boundary values, numeric overflows/underflows, empty structures, and other corner cases.  \n- It either handles or explicitly excludes error conditions to avoid runtime failures, crashes, or undefined results.\n\n#### E. **Consistent Control Flow and Data Integrity**  \n- State changes occur in a logically consistent manner; there are no contradictory updates, unreachable code segments, or silent logical errors.  \n- Data dependencies and side effects are accounted for clearly within the snippet.\n\n---\n\n### Strict rules for assessment:\n\n- **Limit your analysis purely to the snippet itself, ignoring comments, formatting, variable naming, or any external context not explicitly given.**  \n- **Do not assess style, syntax variants, or superficial issues.**  \n- **If any single principle is violated, output `0` for that snippet.**  \n- **Only output `1` if the snippet meets _all_ the criteria beyond reasonable doubt.**\n\n---\n\n### Output format reminder:\n\n- Output exactly one `1` or `0` digit per snippet in input order, no spaces, no newlines, no extra text.\n\n---\n\n### Performance considerations:\n\n- Your judgment must be logically sound yet efficient enough to complete within 5 seconds per all snippets combined.  \n- Prioritize decisive, semantically precise evaluation over guesswork or partial heuristics.\n\n---\n\n**Summary**: Your role is a meticulous semantic verifier of reproducibility\u2014that is, if given these pseudocode snippets, can they be confidently regarded as fully correct, self-contained, terminating, error-free solutions guaranteed to pass _every_ valid unit test. Your output string encodes thus, per snippet, `1` for reproducible, `0` for otherwise, no more, no less."
+        # prompt = file_to_string(f"{ROOT_DIR}/prompts/greedy_refine/trivial_classifier.txt")
 
         generated_prompts_path = Path(f"{ROOT_DIR}/outputs/prompts/{timestamp}")
         generated_prompts_path.mkdir(parents=True, exist_ok=True)
         save_prompt(str(generated_prompts_path), prompt, classifier_iterations+1, 'classifier')
         save_prompt(str(generated_prompts_path), prompt, classifier_iterations+2, 'classifier')
         # train score:
-        mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, classifier_iterations+1)
+        mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(train_set_filename, prompt, client)
         feedback = evaluator_classifier.get_feedback_classifier(mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
         avg_metrics = feedback.avg_metrics
         save_metrics(avg_metrics, metrics_path, timestamp, "classifier", classifier_iterations+1)
         # dev score:
-        dev_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl" )
-        mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(dev_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, classifier_iterations+2)
-        dev_feedback = evaluator_classifier.get_feedback_classifier(mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
-        avg_metrics = dev_feedback.avg_metrics
-        save_metrics(avg_metrics, metrics_path, timestamp, "classifier", classifier_iterations+2)
+        # dev_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-dev.jsonl" )
+        # mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics = evaluate_classifier_prompt(dev_set_filename, prompt, client, decoder_prompt, classifier_dataset_name, timestamp, classifier_iterations+2)
+        # dev_feedback = evaluator_classifier.get_feedback_classifier(mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
+        # avg_metrics = dev_feedback.avg_metrics
+        # save_metrics(avg_metrics, metrics_path, timestamp, "classifier", classifier_iterations+2)
         # test score:
-        test_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-test.jsonl" )
+        # test_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-test.jsonl" )
+        version = 2
+        test_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"HumanEval-pseudo-v0.{version}.0-test.jsonl" )
         avg_metrics = evaluate_classifier_prompt_test(test_set_filename, prompt, client)
         # dev_feedback = evaluator_classifier.get_feedback_classifier(mislabeled_positives, mislabeled_cosmetic, mislabeled_negatives, mislabeled_near_misses, true_negative_errors, near_miss_errors, final_score, metrics)  # Run evaluation
         # avg_metrics = dev_feedback.avg_metrics
-        save_metrics(avg_metrics, metrics_path, timestamp, "classifier", classifier_iterations+3)
+        save_metrics(avg_metrics, metrics_path, timestamp, "classifier", classifier_iterations+2)
 
         # test_set_filename = os.path.join(ROOT_DIR, "data", "classifier_pseudocodes", f"LeetCode-pseudo-v0.{version}.0-test.jsonl" )
         # test_score = evaluate_classifier_prompt(test_set_filename, prompt, client)
@@ -653,105 +669,128 @@ def main(cfg):
     # timestamp = '2025-06-16_14-15-27'
     # timestamp = '2025-06-19_17-37-11'
 
-    timestamp = '2025-09-15_01-29-56' # readability: "avg_syllables_per_word", "line_count"]
-    timestamp = '2025-09-18_21-00-18'
-    timestamp = '2025-09-24_15-05-02'
+    # timestamp = '2025-09-15_01-29-56' # readability: "avg_syllables_per_word", "line_count"]
+    # timestamp = '2025-09-18_21-00-18'
+    # timestamp = '2025-09-24_15-05-02'
     # timestamp = '2025-09-25_13-37-25'
-    timestamp = '2025-09-25_14-14-02'
-    timestamp = '2025-09-25_15-00-26'
-    timestamp = '2025-09-25_15-41-49'
-    timestamp = '2025-09-25_17-46-20'
-    timestamp = '2025-09-25_18-36-13'
-    timestamp = '2025-09-26_15-07-49'
+    # timestamp = '2025-09-25_14-14-02'
+    # timestamp = '2025-09-25_15-00-26'
+    # timestamp = '2025-09-25_15-41-49'
+    # timestamp = '2025-09-25_17-46-20'
+    # timestamp = '2025-09-25_18-36-13'
+    # timestamp = '2025-09-26_15-07-49'
     # problems_dir_name = 'leet_code'
-    problem_metrics_file = f"{ROOT_DIR}/data/{problems_dir_name}/metrics/{timestamp}_metrics.json"
-    with open(problem_metrics_file, "r") as f:
-        data = json.load(f)
-    df_enc_2 = pd.DataFrame(data)
 
-    # metrics = ["passing_rate", "avg_word_length", "avg_words_per_line"]
-    # metrics = ["passing_rate", "avg_syllables_per_word", "avg_words_per_line"]
-    # metrics = ["passing_rate"]
-    metrics = ["accuracy_score", "true_positive", "true_negative", "near_miss", "cosmetic"]
-    # metrics = ["passing_rate", "avg_word_length"]
-    # metrics = ["avg_score"]
-    # title="Metrics Over Time - Autoencoder - HumanEval"
-    # plt.figure(2)  # Use a different figure number
+    ######################################### classifier graphs
+    # problem_metrics_file = f"{ROOT_DIR}/data/{problems_dir_name}/metrics/{timestamp}_metrics.json"
+    # with open(problem_metrics_file, "r") as f:
+    #     data = json.load(f)
+    # df_enc_2 = pd.DataFrame(data)
 
-    # Exclude the last row to not put the test score ther as well
-    df_filtered = df_enc_2.iloc[:-1]
-    ax2 = df_filtered.plot(
-        x="iter",              # X-axis
-        y=metrics,                         # Y-columns (as a list)
-        figsize=(10, 5),                   # Figure size
-        title="Classifier Scores - LeetCode",  # Plot title
-        grid=True,                         # Show grid
-        marker="o"                         # Marker style
-    )
+    # # metrics = ["passing_rate", "avg_word_length", "avg_words_per_line"]
+    # # metrics = ["passing_rate", "avg_syllables_per_word", "avg_words_per_line"]
+    # # metrics = ["passing_rate"]
+    # metrics = ["accuracy_score", "true_positive", "true_negative", "near_miss", "cosmetic"]
+    # # metrics = ["passing_rate", "avg_word_length"]
+    # # metrics = ["avg_score"]
+    # # title="Metrics Over Time - Autoencoder - HumanEval"
+    # # plt.figure(2)  # Use a different figure number
 
-    plt.tight_layout()
-    plt.savefig(f"{ROOT_DIR}/outputs/thesis_draft/classifier_{timestamp}.png", bbox_inches='tight', dpi=300)
-    plt.show()
+    # # Exclude the last row to not put the test score ther as well
+
+    # df_filtered = df_enc_2.iloc[:-2]
+    # ax2 = df_filtered.plot(
+    #     x="iter",              # X-axis
+    #     y=metrics,                         # Y-columns (as a list)
+    #     figsize=(10, 5),                   # Figure size
+    #     title="Classifier Scores - LeetCode",  # Plot title
+    #     grid=True,                         # Show grid
+    #     marker="o"                         # Marker style
+    # )
+
+    # plt.tight_layout()
+    # plt.savefig(f"{ROOT_DIR}/outputs/thesis_draft/classifier_no7_{timestamp}.png", bbox_inches='tight', dpi=300)
+    # plt.show()
     ###########################################
 
-    # categories = ['Datasets', 'Agent Frameworks']
-    # categories = ['GreedyRefine', 'DirectAnswer']
+    categories = ['Datasets', 'Agent Frameworks']
+    categories = ['GreedyRefine', 'DirectAnswer']
 
     # This is the dataset figure
     # Data for the visualization
-    # datasets = ['GreedyRefine', 'DirectAnswer']
-    # metrics = ['avg_score', 'avg_passing_rate', 'avg_word_length', 
-    #         'classifier_accuracy_rate_validation', 'classifier_accuracy_rate_test']
+    datasets = ['GreedyRefine', 'DirectAnswer']
+    metrics = ['avg_score', 'avg_passing_rate', 'avg_syllables_per_word', 
+            'classifier_score_train', 'classifier_score_val', 'classifier_score_test']
+    # metrics = ['avg_score', 'avg_passing_rate', 'avg_word_length']
 
     # leetcode_data = {
-    #     'avg_score': 0.75,
-    #     'avg_passing_rate': 0.68,
-    #     'avg_word_length': 42.5,
-    #     'classifier_accuracy_rate_validation': 0.82,
-    #     'classifier_accuracy_rate_test': 0.79
+    #     'avg_score': 1.949,
+    #     'avg_passing_rate': 0.885,
+    #     'avg_syllables_per_word': 0.266,
+    #     'classifier_score_train': 0.677,
+    #     'classifier_score_test': 0.59
     # }
 
     # humaneval_data = {
-    #     'avg_score': 0.63,
-    #     'avg_passing_rate': 0.57,
-    #     'avg_word_length': 38.2,
-    #     'classifier_accuracy_rate_validation': 0.76,
-    #     'classifier_accuracy_rate_test': 0.72
+    #     'avg_score': 2.012,
+    #     'avg_passing_rate': 0.895,
+    #     'avg_syllables_per_word': 0.279,
+    #     'classifier_score_train': 0.435,
+    #     'classifier_score_test': 0.52
     # }
+    leetcode_data = {
+        'avg_score': 1.949,
+        'avg_passing_rate': 0.885,
+        'avg_syllables_per_word': 0.266,
+        'classifier_score_train': 0.677,
+        'classifier_score_val': 0.729,
+        'classifier_score_test': 0.59
+    }
+
+    humaneval_data = {
+        'avg_score': 1.778,
+        'avg_passing_rate': 0.888,
+        'avg_syllables_per_word': 0.223,
+        'classifier_score_train': 0.500,
+        'classifier_score_val': 0.543,
+        'classifier_score_test': 0.547
+    }
 
     
-    # leetcode_values = [leetcode_data[metric] for metric in metrics] # Convert to arrays for easier plotting
-    # humaneval_values = [humaneval_data[metric] for metric in metrics]
+    leetcode_values = [leetcode_data[metric] for metric in metrics] # Convert to arrays for easier plotting
+    humaneval_values = [humaneval_data[metric] for metric in metrics]
 
-    # fig, ax2 = plt.subplots(figsize=(16, 8))
+    fig, ax2 = plt.subplots(figsize=(16, 8))
     # fig.suptitle('Performance Comparison: LeetCode vs HumanEval', fontsize=16, fontweight='bold')
+    fig.suptitle('Performance Comparison: GreedyRefine vs DirectAnswer for avg_word_length', fontsize=16, fontweight='bold')
 
     # Second subplot: Grouped bar chart for detailed comparison
-    # x = np.arange(len(metrics))
-    # width = 0.35
+    x = np.arange(len(metrics))
+    width = 0.35
 
-    # bars1 = ax2.bar(x - width/2, leetcode_values, width, label='LeetCode', color='#1f77b4', alpha=0.8)
-    # bars2 = ax2.bar(x + width/2, humaneval_values, width, label='HumanEval', color='#ff7f0e', alpha=0.8)
+    bars1 = ax2.bar(x - width/2, leetcode_values, width, label='GreedyRefine', color='#1f77b4', alpha=0.8)
+    bars2 = ax2.bar(x + width/2, humaneval_values, width, label='DirectAnswer', color='#ff7f0e', alpha=0.8)
 
-    # ax2.set_xlabel('Metrics')
-    # ax2.set_ylabel('Values')
-    # # ax2.set_title('Detailed Metric Comparison')
-    # ax2.set_xticks(x)
-    # ax2.set_xticklabels(metrics, rotation=45, ha='right')
-    # ax2.legend()
+    ax2.set_xlabel('Metrics')
+    ax2.set_ylabel('Values')
+    # ax2.set_title('Detailed Metric Comparison')
+    ax2.set_xticks(x)
+    ax2.set_xticklabels(metrics, rotation=45, ha='right')
+    ax2.legend()
 
-    # # Add value labels on bars
-    # def add_value_labels(bars, ax):
-    #     for bar in bars:
-    #         height = bar.get_height()
-    #         ax.text(bar.get_x() + bar.get_width()/2., height + 0.01,
-    #                 f'{height:.2f}', ha='center', va='bottom', fontsize=9)
+    # Add value labels on bars
+    def add_value_labels(bars, ax):
+        for bar in bars:
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height + 0.01,
+                    f'{height:.2f}', ha='center', va='bottom', fontsize=9)
 
-    # add_value_labels(bars1, ax2)
-    # add_value_labels(bars2, ax2)
+    add_value_labels(bars1, ax2)
+    add_value_labels(bars2, ax2)
 
-    # plt.tight_layout()
-    # plt.show()
+    plt.tight_layout()
+    plt.savefig(f"{ROOT_DIR}/outputs/thesis_draft/agent_frameworks_avg_syllables_per_word.png", bbox_inches='tight', dpi=300)
+    plt.show()
 
     # Additional visualization: Side-by-side metrics table
     # fig, ax = plt.subplots(figsize=(12, 4))

@@ -1567,10 +1567,17 @@ def get_pseudocode_labels(metrics_json_path_name, problems_dir, problems_filenam
 
     pseudocode_examples = []
 
+    positive_problems = set()
+    negative_problems = set()
+
     with open(metrics_json_path_name, 'r') as file:
         pipeline_data = json.load(file)
 
-    for i in range(len(pipeline_data)-1, -1, -1): # how to iterate? i suppose starting from the back to get the best ones? with the most iterations?
+    # print('pipeline data:')
+    # print(pipeline_data)
+
+    for i in range(len(pipeline_data)-1, len(pipeline_data)-2, -1 ): # how to iterate? i suppose starting from the back to get the best ones? with the most iterations?
+        # print('in for loop')
         entry = pipeline_data[i]
         for problem in read_jsonl(problems_file_name):
             task_id = problem["task_id"]
@@ -1580,11 +1587,15 @@ def get_pseudocode_labels(metrics_json_path_name, problems_dir, problems_filenam
                 test_cases = problem["input_output"]
             elif "human_eval" in problems_dir:
                 test_cases = problem["test"]
+            # else:
+            #     test_cases = problem["test"]
 
             if "leet_code" in problems_dir:
                 original_code = problem["prompt"] + problem["response"]
             elif "human_eval" in problems_dir:
                 original_code = problem["prompt"] + problem["canonical_solution"]
+            # else:
+            #     original_code = problem["prompt"] + problem["canonical_solution"]
 
             score = entry[f"{task_id}_passing_rate"]
 
@@ -1604,7 +1615,11 @@ def get_pseudocode_labels(metrics_json_path_name, problems_dir, problems_filenam
                 pseudocode_examples.append({"task_id":task_id, "score": score, "pseudocode": pseudocode, "prompt": prompt, "entry_point": entry_point, "input_output": test_cases, "original_code": original_code, "error": error})
             elif "human_eval" in problems_dir:
                 pseudocode_examples.append({"task_id":task_id, "score": score, "pseudocode": pseudocode, "prompt": prompt, "entry_point": entry_point, "test": test_cases, "original_code": original_code, "error": error})
-
+            # else:
+            #     pseudocode_examples.append({"task_id":task_id, "score": score, "pseudocode": pseudocode, "prompt": prompt, "entry_point": entry_point, "test": test_cases, "original_code": original_code, "error": error})
+ 
+    # print("pseudocode examples:")
+    # print(pseudocode_examples)
     write_jsonl(new_file_name, pseudocode_examples)
     
 def get_positive_labels(metrics_json_path_name, problems_dir, problems_filename, new_file_name, first_timestamp):
@@ -1708,8 +1723,12 @@ def get_pseudocode_dataset_test(first_pipeline_json_path_name, first_problems_di
     with open(first_pipeline_json_path_name, 'r') as file:
         first_pipeline_data = json.load(file)
 
-    for i in range(len(first_pipeline_data)-1, -1, -1): # how to iterate? i suppose starting from the back to get the best ones? with the most iterations?
+    # for i in range(len(first_pipeline_data)-1, -1, -1): # how to iterate? i suppose starting from the back to get the best ones? with the most iterations?
+    for i in range(0, 6, 1):    
         entry = first_pipeline_data[i]
+        current_iter = entry["iter"]
+        print('current iter:')
+        print(current_iter)
         for problem in problems:
             if entry[f"{problem}_passing_rate"] == 1.0: # per set I only want one problem
                 true_positive_examples[problem].append({"score": 1.0, "iter": entry["iter"], "stage": entry["stage"]})
@@ -1744,10 +1763,13 @@ def get_pseudocode_dataset_test(first_pipeline_json_path_name, first_problems_di
 
             prompt = entry["prompt"]
             entry_point = entry["entry_point"]
-            if "leet_code" in first_problems_dir or ('pseudocode_labels' in first_problems_filename):
+            if "leet_code" in first_problems_dir:
                 test_cases = entry["input_output"]
                 test_cases_key = 'input_output'
             elif "human_eval" in first_problems_dir:
+                test_cases = entry["test"]
+                test_cases_key = 'test'
+            else:
                 test_cases = entry["test"]
                 test_cases_key = 'test'
             train_set = []
@@ -2539,7 +2561,7 @@ def evaluate_classifier_prompt_test(test_set_filename, prompt, client):
     return mislabeled_positives, mislabeled_negatives, true_negative_errors, final_score, metrics
 
 
-def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_prompt, dataset_name, timestamp, it ):
+def evaluate_classifier_prompt(train_set_filename, prompt, client):
     # Decide whcih problems to feed to the prompt, first half of the positive examples and first half of the negative examples
     # train_pseudocodes_dataset = positive_examples[:len(positive_examples)//2] + negative_examples[:len(negative_examples)//2]
     true_positives = []
@@ -2571,7 +2593,8 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
                 entry["true_positive"] = true_positive_pseudocode
                 true_negatives.append(entry)
 
-                error_string = entry["error_string"]
+                # error_string = entry["error_string"]
+                error_string = entry["error"]
                 true_negative_errors[task_id] = error_string
             elif entry["label"] == "near_miss":
                 entry["task_id"] = task_id
@@ -2585,7 +2608,7 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
                 entry["true_positive"] = true_positive_pseudocode
                 cosmetic.append(entry)
 
-    train_pseudocodes_dataset = true_positives + cosmetic + true_negatives + near_misses
+    train_pseudocodes_dataset = true_positives + true_negatives + cosmetic + near_misses
     # print('train_pseudocodes_dataset:', train_pseudocodes_dataset)
 
     # print('len of train_pseudocodes_dataset: ', len(train_pseudocodes_dataset))
@@ -2615,12 +2638,16 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
     # let's say num problems = 3
     output_list = gen_classifier_outputs(pseudocodes, prompt, client)
     positives_outputs = output_list[:num_problems] # [:3] [0, 1, 2]
-    cosmetic_outputs = output_list[num_problems:2*num_problems] #[3:6] = [3,4,5]
-    negatives_outputs = output_list[2*num_problems:3*num_problems] #[6,9] = [6, 7, 8]
-    near_miss_outputs = output_list[3*num_problems:] #[9:] = [9, 10, 11]
+    negatives_outputs = output_list[num_problems:2*num_problems] #[3:6] = [3,4,5]
+    if 'HumanEval' in train_set_filename:
+        cosmetic_outputs = []
+        near_miss_outputs = []
+    else:
+        cosmetic_outputs = output_list[2*num_problems:3*num_problems] #[6,9] = [6, 7, 8]
+        near_miss_outputs = output_list[3*num_problems:] #[9:] = [9, 10, 11]
 
-    print("near_miss_outputs:")
-    print(near_miss_outputs)
+        print("near_miss_outputs:")
+        print(near_miss_outputs)
 
 
 
@@ -2717,43 +2744,47 @@ def evaluate_classifier_prompt(train_set_filename, prompt, client, decoder_promp
     #     else:
     #         mislabeled_near_misses.append(entry)
     for task_id in metrics:
-        metrics[task_id]["accuracy_score"] /= 4
+        if 'HumanEval' in train_set_filename:
+            metrics[task_id]["accuracy_score"] /= 2
+        else:
+            metrics[task_id]["accuracy_score"] /= 4
 
     # final_metrics = {task : {"accuracy_score" : metrics[task]["accuracy_score"] / 4 } for task in task_ids}
-    mislabeled_intersection = mislabeled_positives_task_ids.intersection(mislabeled_cosmetic_task_ids, mislabeled_negatives_task_ids, mislabeled_near_misses_task_ids)
-    mislabeled_problems = {problem: [] for problem in mislabeled_intersection}
-    print('len of mislabeled intersection: ', len(mislabeled_intersection))
+    # mislabeled_intersection = mislabeled_positives_task_ids.intersection(mislabeled_cosmetic_task_ids, mislabeled_negatives_task_ids, mislabeled_near_misses_task_ids)
+    # mislabeled_problems = {problem: [] for problem in mislabeled_intersection}
+    # print('len of mislabeled intersection: ', len(mislabeled_intersection))
 
-    for i in range(len(true_positives)):
-        entry = true_positives[i]
-        task_id = entry["task_id"]        
+    # for i in range(len(true_positives)):
+    #     entry = true_positives[i]
+    #     task_id = entry["task_id"]        
 
-        if task_id in mislabeled_intersection:
-            mislabeled_problems[task_id].append(entry)
-            # mislabeled_positives.append(entry)
+    #     if task_id in mislabeled_intersection:
+    #         mislabeled_problems[task_id].append(entry)
 
-    for i in range(len(cosmetic)):
-        entry = cosmetic[i]
-        task_id = entry["task_id"]
+    # for i in range(len(cosmetic)):
+    #     entry = cosmetic[i]
+    #     task_id = entry["task_id"]
 
-        if task_id in mislabeled_intersection:
-            mislabeled_problems[task_id].append(entry)
+    #     if task_id in mislabeled_intersection:
+    #         mislabeled_problems[task_id].append(entry)
 
-    for i in range(len(true_negatives)):
-        entry = true_negatives[i]
-        task_id = entry["task_id"]
+    # for i in range(len(true_negatives)):
+    #     entry = true_negatives[i]
+    #     task_id = entry["task_id"]
 
-        if task_id in mislabeled_intersection:
-            mislabeled_problems[task_id].append(entry)
+    #     if task_id in mislabeled_intersection:
+    #         mislabeled_problems[task_id].append(entry)
 
-    for i in range(len(near_misses)):
-        entry = near_misses[i]
-        task_id = entry["task_id"]
+    # for i in range(len(near_misses)):
+    #     entry = near_misses[i]
+    #     task_id = entry["task_id"]
 
-        if task_id in mislabeled_intersection:
-            mislabeled_problems[task_id].append(entry)
-
-    final_score = score / (len(train_pseudocodes_dataset)/2) if train_pseudocodes_dataset else 0
+    #     if task_id in mislabeled_intersection:
+    #         mislabeled_problems[task_id].append(entry)
+    if 'HumanEval' in train_set_filename:
+        final_score = score / (len(train_pseudocodes_dataset)) if train_pseudocodes_dataset else 0
+    else: 
+        final_score = score / (len(train_pseudocodes_dataset)/2) if train_pseudocodes_dataset else 0
 
     print("final score: ", final_score)
     # print('final_metrics:')
